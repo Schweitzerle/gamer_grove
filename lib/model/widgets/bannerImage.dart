@@ -37,8 +37,7 @@ class BannerImageWidget extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Color.fromRGBO(0, 0, 0, 1),
-                  ],
+                    Theme.of(context).colorScheme.background,],
                   stops: [0.1, 1.0],
                 ).createShader(bounds);
               },
@@ -58,8 +57,7 @@ class BannerImageWidget extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Color.fromRGBO(0, 0, 0, 1),
-                  ],
+                    Theme.of(context).colorScheme.background,],
                   stops: [0.1, 1.0],
                 ).createShader(bounds);
               },

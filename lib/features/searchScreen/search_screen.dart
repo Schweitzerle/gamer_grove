@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
-import 'package:gamer_grove/model/views/gameGridView.dart';
+import 'package:gamer_grove/model/views/gameGridPaginationView.dart';
 import 'package:material_floating_search_bar_2/material_floating_search_bar_2.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 
@@ -88,8 +88,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     return Scaffold(
       body: Stack(children: [
         //TODO: Padding so dass ergebnisse beim anfang gut angezeigt werden aber danach bis nach ganz oben durchscrollen
-        GameGridView(
-          searchQuery: 'Search Results: ${_searchController.text}',
+        GameGridPaginationView(
           pagingController: _pagingController, scrollController: _scrollController,
         ),
         FloatingSearchBar(

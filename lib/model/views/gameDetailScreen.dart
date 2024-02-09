@@ -10,6 +10,7 @@ import 'package:gamer_grove/model/widgets/age_rating_view.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
 import 'package:gamer_grove/model/widgets/collection_view.dart';
 import 'package:gamer_grove/model/widgets/countUpRow.dart';
+import 'package:gamer_grove/model/widgets/franchise_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/genres.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
@@ -26,16 +27,16 @@ import 'dart:developer';
 import 'gameListPreview.dart';
 
 class GameDetailScreen extends StatefulWidget {
-  static Route route(Game game) {
-    print('GameDetailScreen.route called with game: $game');
+  static Route route(Game game, BuildContext context) {
     return MaterialPageRoute(
-      builder: (context) => GameDetailScreen(game: game),
+      builder: (context) => GameDetailScreen(game: game, context: context,),
     );
   }
 
   final Game game;
+  final BuildContext context;
 
-  GameDetailScreen({required this.game});
+  GameDetailScreen({required this.game, required this.context});
 
   @override
   _GameDetailScreenState createState() => _GameDetailScreenState();
@@ -68,6 +69,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> initialize() async {
+    setState(() {
+      colorPalette =
+          Theme.of(widget.context).colorScheme.inversePrimary;
+      lightColor =
+          Theme.of(widget.context).colorScheme.primary;
+      darkColor =
+          Theme.of(widget.context).colorScheme.background;
+
+    });
     await Future.wait([getColorPalette(), getIGDBData()]);
   }
 
@@ -75,7 +85,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final apiService = IGDBApiService();
     try {
       final body3 =
-          'fields name, cover.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, bundles.cover.*, category, collection.*, collection.games.*, collection.games.cover.*, collections.*, dlcs.*, dlcs.cover.*, expanded_games.*, expanded_games.cover.*, expansions.*, expansions.cover.*, external_games.*, first_release_date, follows, forks.*, forks.cover.*, franchise.*, franchises.*, game_engines.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, keywords.*, language_supports.*, multiplayer_modes.*, parent_game.*, parent_game.cover.*, platforms.*, player_perspectives.*, ports.*, ports.cover.*, rating, rating_count, release_dates.*, remakes.*, remakes.cover.*, remasters.*, remasters.cover.*, screenshots.*, similar_games.*, similar_games.cover.*, slug, standalone_expansions.*, standalone_expansions.cover.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_parent.cover.*, version_title, videos.*, websites.*; w id = ${widget
+          'fields name, cover.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, bundles.cover.*, category, collection.*, collection.games.*, collection.games.cover.*, collections.*, dlcs.*, dlcs.cover.*, expanded_games.*, expanded_games.cover.*, expansions.*, expansions.cover.*, external_games.*, first_release_date, follows, forks.*, forks.cover.*, franchise.*, franchises.*, franchises.games.*, franchises.games.cover.*, game_engines.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, keywords.*, language_supports.*, multiplayer_modes.*, parent_game.*, parent_game.cover.*, platforms.*, player_perspectives.*, ports.*, ports.cover.*, rating, rating_count, release_dates.*, remakes.*, remakes.cover.*, remasters.*, remasters.cover.*, screenshots.*, similar_games.*, similar_games.cover.*, slug, standalone_expansions.*, standalone_expansions.cover.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_parent.cover.*, version_title, videos.*, websites.*; w id = ${widget
           .game.id};';
 
       debugPrint('Body: ${widget.game.id}');
@@ -106,10 +116,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         maximumColorCount: 10, // Adjust the maximum color count as needed
       );
       setState(() {
-        colorPalette =
-            paletteGenerator.dominantColor?.color ?? Singleton.thirdTabColor;
-        lightColor = paletteGenerator.lightVibrantColor?.color ?? colorPalette;
-        darkColor = paletteGenerator.darkVibrantColor?.color ?? colorPalette;
+        colorPalette = paletteGenerator.dominantColor?.color ?? Theme.of(widget.context).colorScheme.inversePrimary;
+        lightColor = paletteGenerator.lightVibrantColor?.color ?? Theme.of(widget.context).colorScheme.primary;
+        darkColor = paletteGenerator.darkVibrantColor?.color ?? Theme.of(widget.context).colorScheme.background;
         isColorLoaded = true;
       });
     }
@@ -170,7 +179,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           height: coverScaleHeight,
                           child: GamePreviewView(
                             game: widget.game,
-                            isCover: true,
+                            isCover: true, buildContext: context,
                           ),
                         ),
                         SizedBox(
@@ -384,7 +393,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                               .of(context)
                               .colorScheme
                               .onPrimaryContainer,
-                          title: Text(
+                          title: const Text(
                             'Storyline',
                             style: TextStyle(
                               color: Colors.white,
@@ -442,7 +451,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           width: mediaQueryWidth * .4,
                           child: GamePreviewView(
                             game: gamesResponse[0].parentGame!,
-                            isCover: false,
+                            isCover: false, buildContext: context,
                           ),
                         ),
                       ],
@@ -454,56 +463,167 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       ? AgeRatingListUI(
                       ageRatings: gamesResponse[0].ageRatings!)
                       : Container(),
-                  StaggeredGrid.count(
+                  Padding(padding: EdgeInsets.all(8),
+                    child: StaggeredGrid.count(
                     crossAxisCount: 4,
                     mainAxisSpacing: 4,
                     crossAxisSpacing: 4,
                     children: [
-
                       StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 4,
+                        crossAxisCellCount: 3,
+                        mainAxisCellCount: 2,
                         child: gamesResponse.isNotEmpty &&
-                            gamesResponse[0].collection != null &&
-                            gamesResponse[0].collection!.games != null
-                            ? CollectionView(
-                            games: gamesResponse[0].collection!.games!) : Center(
-                          child: ClayContainer(
-                            color: Theme.of(context).colorScheme.inversePrimary,
-                            borderRadius: 12,
-                            depth: 60,
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
+                            gamesResponse[0].franchises != null &&
+                            gamesResponse[0].franchises![0].games != null
+                            ? FranchiseView(
+                          franchise: gamesResponse[0].franchises![0]!, colorPalette: darkColor,) : ClayContainer(
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                          spread: 2,
+                          depth: 60,
+                          borderRadius: 14,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Center(
                               child: Text(
-                                'No collections available',
-                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onInverseSurface),
+                                'No Franchise available',
+                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.surface),
                               ),
                             ),
                           ),
                         ),
                       ),
                       StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
+                        crossAxisCellCount: 1,
                         mainAxisCellCount: 1,
-                        child: Container(),
+                        child: ClayContainer(
+                          depth: 60,
+                          spread: 2,
+                          customBorderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'Coming...',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context)
+                                          .cardTheme
+                                          .surfaceTintColor),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 1,
                         mainAxisCellCount: 1,
-                        child: Container(),
+                        child: ClayContainer(
+                          depth: 60,
+                          spread: 2,
+                          customBorderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'Coming...',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context)
+                                          .cardTheme
+                                          .surfaceTintColor),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 1,
                         mainAxisCellCount: 1,
-                        child: Container(),
+                        child: ClayContainer(
+                          depth: 60,
+                          spread: 2,
+                          customBorderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'Coming...',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context)
+                                          .cardTheme
+                                          .surfaceTintColor),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
+                        crossAxisCellCount: 3,
                         mainAxisCellCount: 2,
-                        child: Container(),
+                        child: gamesResponse.isNotEmpty &&
+                            gamesResponse[0].collection != null &&
+                            gamesResponse[0].collection!.games != null
+                            ? CollectionView(
+                          collection: gamesResponse[0].collection!, colorPalette: darkColor,) : ClayContainer(
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                          spread: 2,
+                          depth: 60,
+                          borderRadius: 14,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Center(
+                              child: Text(
+                                'No collections available',
+                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.surface),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
+                      StaggeredGridTile.count(
+                        crossAxisCellCount: 1,
+                        mainAxisCellCount: 1,
+                        child: ClayContainer(
+                          depth: 60,
+                          spread: 2,
+                          customBorderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'Coming...',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context)
+                                          .cardTheme
+                                          .surfaceTintColor),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
                     ],
                   ),
+                    ),
+
                   widget.game.totalRatingCount != null
                       ? CountUpRow.buildCountupRow(
                       Icons.star,
@@ -518,65 +638,65 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   gamesResponse.isNotEmpty && gamesResponse[0].bundles != null
                       ? GameListView(
                     headline: 'Bundles',
-                    games: gamesResponse[0].bundles!,
+                    games: gamesResponse[0].bundles!, isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].dlcs != null
                       ? GameListView(
                     headline: 'DLCs',
-                    games: gamesResponse[0].dlcs!,
+                    games: gamesResponse[0].dlcs!,isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty &&
                       gamesResponse[0].expandedGames != null
                       ? GameListView(
                     headline: 'Expanded Games',
-                    games: gamesResponse[0].expandedGames!,
+                    games: gamesResponse[0].expandedGames!,isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty &&
                       gamesResponse[0].expansions != null
                       ? GameListView(
                     headline: 'Expansions',
-                    games: gamesResponse[0].expansions!,
+                    games: gamesResponse[0].expansions!,isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].forks != null
                       ? GameListView(
                     headline: 'Forks',
-                    games: gamesResponse[0].forks!,
+                    games: gamesResponse[0].forks!,isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].ports != null
                       ? GameListView(
                     headline: 'Ports',
-                    games: gamesResponse[0].ports!,
+                    games: gamesResponse[0].ports!,isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].remakes != null
                       ? GameListView(
                     headline: 'Remakes',
-                    games: gamesResponse[0].remakes!,
+                    games: gamesResponse[0].remakes!, isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].remasters != null
                       ? GameListView(
                     headline: 'Remasters',
-                    games: gamesResponse[0].remasters!,
+                    games: gamesResponse[0].remasters!, isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty &&
                       gamesResponse[0].similarGames != null
                       ? GameListView(
                     headline: 'Similar Games',
-                    games: gamesResponse[0].similarGames!,
+                    games: gamesResponse[0].similarGames!, isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty &&
                       gamesResponse[0].standaloneExpansions != null
                       ? GameListView(
                     headline: 'Standalone Expansions',
-                    games: gamesResponse[0].standaloneExpansions!,
+                    games: gamesResponse[0].standaloneExpansions!, isPagination: false, body: '',
                   )
                       : Container(),
                   gamesResponse.isNotEmpty && gamesResponse[0].artworks != null

@@ -22,7 +22,7 @@ class ThemeButton extends StatelessWidget {
       spread: 2,
       depth: 60,
       customBorderRadius: BorderRadius.circular(12),
-      color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+      color: Theme.of(context).colorScheme.inversePrimary,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(

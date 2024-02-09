@@ -12,10 +12,12 @@ import '../views/gameDetailScreen.dart';
 class GamePreviewView extends StatefulWidget {
   final Game game;
   final bool isCover;
+  final BuildContext buildContext;
 
   GamePreviewView({
     required this.game,
     required this.isCover,
+    required this.buildContext,
   });
 
   @override
@@ -23,9 +25,9 @@ class GamePreviewView extends StatefulWidget {
 }
 
 class _GamePreviewViewState extends State<GamePreviewView> {
-  Color colorpalette = Singleton.thirdTabColor;
-  Color lightColor = Singleton.secondTabColor;
-  Color darkColor = Singleton.fourthTabColor;
+  late Color colorpalette;
+  late Color lightColor;
+  late Color darkColor;
   bool isColorLoaded = false;
 
   @override
@@ -35,6 +37,11 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   }
 
   Future<void> initialize() async {
+    setState(() {
+      colorpalette = Theme.of(widget.buildContext).colorScheme.inversePrimary;
+      lightColor = Theme.of(widget.buildContext).colorScheme.primary;
+      darkColor = Theme.of(widget.buildContext).colorScheme.background;
+    });
     await Future.wait([getColorPalette()]);
   }
 
@@ -48,15 +55,12 @@ class _GamePreviewViewState extends State<GamePreviewView> {
 
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          GameDetailScreen.route(widget.game),
-        );
+        Navigator.of(context).push(GameDetailScreen.route(widget.game, context));
       },
       child: ClayContainer(
         height: coverScaleHeight,
         width: coverScaleWidth,
-        color: darkColor ,
+        color: darkColor,
         spread: 2,
         depth: 60,
         borderRadius: 14,
@@ -148,15 +152,18 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   Future<void> getColorPalette() async {
     if (widget.game.cover!.url != null) {
       final PaletteGenerator paletteGenerator =
-      await PaletteGenerator.fromImageProvider(
+          await PaletteGenerator.fromImageProvider(
         NetworkImage('${widget.game.cover!.url}'),
         size: Size(100, 150),
         maximumColorCount: 10,
       );
       setState(() {
-        colorpalette = paletteGenerator.dominantColor?.color ?? Singleton.thirdTabColor;
-        lightColor = paletteGenerator.lightVibrantColor?.color ?? colorpalette;
-        darkColor = paletteGenerator.darkVibrantColor?.color ?? colorpalette;
+        colorpalette = paletteGenerator.dominantColor?.color ??
+            Theme.of(widget.buildContext).colorScheme.inversePrimary;
+        lightColor = paletteGenerator.lightVibrantColor?.color ??
+            Theme.of(widget.buildContext).colorScheme.primary;
+        darkColor = paletteGenerator.darkVibrantColor?.color ??
+            Theme.of(widget.buildContext).colorScheme.background;
         isColorLoaded = true;
       });
     }

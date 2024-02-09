@@ -1,24 +1,24 @@
-import 'dart:math';
-
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/features/home/home_screen.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
+import 'package:gamer_grove/model/igdb_models/franchise.dart';
 import 'package:gamer_grove/model/views/allGamesGridView.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 
 import '../igdb_models/game.dart';
 
-class CollectionView extends StatelessWidget {
-  final Collection collection;
+class FranchiseView extends StatelessWidget {
+  final Franchise franchise;
   final Color colorPalette;
-  const CollectionView({Key? key, required this.collection, required this.colorPalette}) : super(key: key);
+  const FranchiseView({Key? key, required this.franchise, required this.colorPalette}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final mediaHeight = MediaQuery.of(context).size.height;
 
-    final List<Game> randGames = collection.games!.toList()..shuffle();
+    final List<Game> randGames = franchise.games!.toList()..shuffle();
     final List<Game> selectedGames = randGames.take(5).toList();
 
     return ClayContainer(
@@ -32,7 +32,7 @@ class CollectionView extends StatelessWidget {
           children: [
             // Game previews
             ...List.generate(
-              selectedGames.length,
+              franchise.games!.length > 5 ? 5 : franchise.games!.length,
                   (index) {
                 final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
                 final rightOffset = index == 0 ? 0.0 : (mediaWidth * .14) * index;
@@ -60,19 +60,19 @@ class CollectionView extends StatelessWidget {
               right: 8, // Adjust the right position to align with the right of the container
               child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(AllGamesGridScreen.route(collection.games!, context, collection.name!));
+                  Navigator.of(context).push(AllGamesGridScreen.route(franchise.games!, context, franchise.name!));
                 },
                 child: ClayContainer(
                   spread: 2,
                   depth: 60,
                   borderRadius: 14,
                   color: colorPalette,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Padding(
+                    padding: const EdgeInsets.all( 6),
                     child: Row(
                       children: [
                         Text(
-                          'Collection',
+                          'Franchise',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
