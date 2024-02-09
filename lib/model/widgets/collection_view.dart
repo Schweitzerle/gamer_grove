@@ -27,7 +27,7 @@ class CollectionView extends StatelessWidget {
                 child: GamePreviewView(
                   game: games[index],
                   isCover: true,
-                ),
+                )
               ),
             );
           },
