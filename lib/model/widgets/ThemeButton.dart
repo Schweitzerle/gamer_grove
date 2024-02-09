@@ -20,6 +20,7 @@ class ThemeButton extends StatelessWidget {
     ColorScheme schemeTheme = FlexThemeData.light(scheme: scheme).colorScheme;
     return ClayContainer(
       spread: 2,
+      depth: 60,
       customBorderRadius: BorderRadius.circular(12),
       color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
       child: Padding(

@@ -89,6 +89,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: ClayContainer(
                   spread: 2,
+                  depth: 60,
                   height: MediaQuery.of(context).size.height * .18,
                   customBorderRadius: BorderRadius.circular(12),
                   color: Theme.of(context).cardColor,
@@ -106,6 +107,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 flex: 3,
                                 child: ClayContainer(
                                   spread: 2,
+                                  depth: 60,
                                   customBorderRadius: BorderRadius.circular(12),
                                   color: Theme.of(context).cardColor,
                                   child: Padding(
@@ -155,8 +157,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 } else {
                                   final scheme = snapshot.data!;
                                   return ThemeButton(
-                                    scheme: scheme,
-                                    themeName: scheme.toString().split('.').last,
+                                      scheme: scheme,
+                                      themeName: scheme.toString().split('.').last,
                                   );
                                 }
                               }

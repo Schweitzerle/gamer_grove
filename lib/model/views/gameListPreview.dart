@@ -36,6 +36,7 @@ class GameListViewState extends State<GameListView> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: ClayContainer(
+                depth: 60,
                 spread: 2,
                 customBorderRadius: BorderRadius.circular(12),
                 color: Theme.of(context).cardColor,

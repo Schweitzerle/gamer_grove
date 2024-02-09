@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/features/searchScreen/search_screen.dart';
 import 'package:gamer_grove/model/views/imageGridView.dart';
 import 'package:gamer_grove/model/widgets/photo_view.dart';
@@ -36,6 +38,7 @@ class ImagePreview extends StatelessWidget {
           children: [
             ClayContainer(
               spread: 2,
+              depth: 60,
               customBorderRadius: BorderRadius.circular(12),
               color: Theme.of(context).cardColor,
               child: Padding(
@@ -53,42 +56,50 @@ class ImagePreview extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.01,
             ),
             // Display the first artwork covering the whole width
-            if (numArtworksToShow > 0)
-              AspectRatio(
-                aspectRatio: 16 / 9, // Aspect ratio for the first artwork
-                child: InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PhotoView(
-                        game: game,
-                        index: 0,
-                        isArtwork: isArtwork,
+            StaggeredGrid.count(
+              crossAxisCount: 4,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+              children: [
+                if (numArtworksToShow > 0)
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 4,
+                    mainAxisCellCount: 2,
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9, // Aspect ratio for the first artwork
+                      child: InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PhotoView(
+                              game: game,
+                              index: 0,
+                              isArtwork: isArtwork,
+                            ),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: CachedNetworkImage(
+                            imageUrl: isArtwork
+                                ? game.artworks![0].url!
+                                : game.screenshots![0]
+                                    .url!, // Replace with your image URL
+                            placeholder: (context, url) => Container(
+                              color: Theme.of(context).colorScheme.tertiaryContainer,  // Placeholder color
+                            ),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: CachedNetworkImage(
-                      imageUrl: isArtwork
-                          ? game.artworks![0].url!
-                          : game.screenshots![0]
-                              .url!, // Replace with your image URL
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300], // Placeholder color
-                      ),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            SizedBox(height: 10), // Adjust spacing as needed
-            // Display the next four artworks in a 2 by 2 arrangement
-            if (numArtworksToShow > 1)
-              Row(
-                children: [
-                  Expanded(
+                if (numArtworksToShow > 1)
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 2,
+                    mainAxisCellCount: 2,
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       // Aspect ratio for the second artwork
@@ -111,7 +122,7 @@ class ImagePreview extends StatelessWidget {
                                 : game.screenshots![1].url!,
                             // Replace with your image URL
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[300], // Placeholder color
+                              color: Theme.of(context).colorScheme.tertiaryContainer,
                             ),
                             errorWidget: (context, url, error) =>
                                 Icon(Icons.error),
@@ -121,8 +132,10 @@ class ImagePreview extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10), // Adjust spacing as needed
-                  Expanded(
+                if (numArtworksToShow > 2)
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 2,
+                    mainAxisCellCount: 1,
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       // Aspect ratio for the second artwork
@@ -145,7 +158,7 @@ class ImagePreview extends StatelessWidget {
                                 : game.screenshots![2].url!,
                             // Replace with your image URL
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[300], // Placeholder color
+                              color:Theme.of(context).colorScheme.tertiaryContainer,  // Placeholder color
                             ),
                             errorWidget: (context, url, error) =>
                                 Icon(Icons.error),
@@ -155,13 +168,10 @@ class ImagePreview extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
-            SizedBox(height: 10), // Adjust spacing as needed
-            if (numArtworksToShow > 3)
-              Row(
-                children: [
-                  Expanded(
+                if (numArtworksToShow > 3)
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 1,
+                    mainAxisCellCount: 1,
                     child: AspectRatio(
                       aspectRatio: 16 / 9, // Aspect ratio for the fifth artwork
                       child: InkWell(
@@ -183,7 +193,7 @@ class ImagePreview extends StatelessWidget {
                                 : game.screenshots![3].url!,
                             // Replace with your image URL
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[300], // Placeholder color
+                              color: Theme.of(context).colorScheme.tertiaryContainer, // Placeholder color
                             ),
                             errorWidget: (context, url, error) =>
                                 Icon(Icons.error),
@@ -193,9 +203,10 @@ class ImagePreview extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10), // Adjust spacing as needed
-
-                  Expanded(
+                if (numArtworksToShow > 4)
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 1,
+                    mainAxisCellCount: 1,
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       // Aspect ratio for the fourth artwork
@@ -225,7 +236,7 @@ class ImagePreview extends StatelessWidget {
                                     : game.screenshots![4].url!,
                                 // Replace with your image URL
                                 placeholder: (context, url) => Container(
-                                  color: Colors.grey[300], // Placeholder color
+                                  color: Theme.of(context).colorScheme.tertiaryContainer, // Placeholder color
                                 ),
                                 errorWidget: (context, url, error) =>
                                     Icon(Icons.error),
@@ -240,13 +251,18 @@ class ImagePreview extends StatelessWidget {
                                   decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(0.5),
                                       borderRadius: BorderRadius.circular(8)),
-                                  child: Center(
-                                    child: Text(
-                                      'All Artworks',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                  child: const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: FittedBox(
+                                        child: Text(
+                                          'All Artworks',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -257,18 +273,17 @@ class ImagePreview extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
+            ),
           ],
         ),
       );
     } else {
       // Handle case when artworks list is null
       return Container(
-        child: Text(
+        child: const Text(
           'No artworks available for preview.',
           style: TextStyle(
-            color: Colors.grey[600],
             fontSize: 16,
           ),
         ),

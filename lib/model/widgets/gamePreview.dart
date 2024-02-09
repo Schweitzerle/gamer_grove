@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:marquee/marquee.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:clay_containers/clay_containers.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:marquee/marquee.dart';
 
 import '../igdb_models/game.dart';
 import '../singleton/sinlgleton.dart';
 import '../views/gameDetailScreen.dart';
 
 class GamePreviewView extends StatefulWidget {
-
   final Game game;
   final bool isCover;
 
   GamePreviewView({
-    required this.game, required this.isCover,
+    required this.game,
+    required this.isCover,
   });
 
   @override
@@ -29,37 +30,12 @@ class _GamePreviewViewState extends State<GamePreviewView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initialize();
   }
 
   Future<void> initialize() async {
     await Future.wait([getColorPalette()]);
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  Future<void> getColorPalette() async {
-    if (widget.game.cover!.url != null) {
-      final PaletteGenerator paletteGenerator =
-      await PaletteGenerator.fromImageProvider(
-        NetworkImage('${widget.game.cover!.url}'),
-        size: Size(100, 150), // Adjust the image size as needed
-        maximumColorCount: 10, // Adjust the maximum color count as needed
-      );
-      setState(() {
-        colorpalette =
-            paletteGenerator.dominantColor?.color ?? Singleton.thirdTabColor;
-        lightColor = paletteGenerator.lightVibrantColor?.color ?? colorpalette;
-        darkColor = paletteGenerator.darkVibrantColor?.color ?? colorpalette;
-        isColorLoaded = true;
-      });
-    }
   }
 
   @override
@@ -76,48 +52,36 @@ class _GamePreviewViewState extends State<GamePreviewView> {
           context,
           GameDetailScreen.route(widget.game),
         );
-
       },
-      child: Stack(
-        children: [
-          Container(
-            height: coverScaleHeight,
-            width: coverScaleWidth,
-            decoration: widget.game.cover?.url != null
-                ? BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: widget.isCover ? lightColor : Colors.transparent,
-                    offset: Offset(4.0, 4.0),
-                    blurRadius: 15.0,
-                    spreadRadius: 1.0),
-                BoxShadow(
-                    color: widget.isCover ? lightColor : Colors.transparent,
-                    offset: Offset(-4.0, -4.0),
-                    blurRadius: 15.0,
-                    spreadRadius: 1.0),
-              ],
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                image: NetworkImage(
-                  '${widget.game.cover?.url}',
+      child: ClayContainer(
+        height: coverScaleHeight,
+        width: coverScaleWidth,
+        color: darkColor ,
+        spread: 2,
+        depth: 60,
+        borderRadius: 14,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14.0),
+              child: CachedNetworkImage(
+                imageUrl: '${widget.game.cover?.url}',
+                placeholder: (context, url) => Container(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
                 ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
                 fit: BoxFit.cover,
               ),
-            )
-                : BoxDecoration(
-              color: Singleton.thirdTabColor,
-              borderRadius: BorderRadius.circular(20),
             ),
-            child: Container(
-              width: double.infinity,
+            Container(
               padding: const EdgeInsets.only(
                 left: 8,
                 right: 8,
                 bottom: 8,
               ),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
@@ -125,9 +89,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                     Colors.black,
                   ],
                 ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20),
-                ),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -177,10 +139,26 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  Future<void> getColorPalette() async {
+    if (widget.game.cover!.url != null) {
+      final PaletteGenerator paletteGenerator =
+      await PaletteGenerator.fromImageProvider(
+        NetworkImage('${widget.game.cover!.url}'),
+        size: Size(100, 150),
+        maximumColorCount: 10,
+      );
+      setState(() {
+        colorpalette = paletteGenerator.dominantColor?.color ?? Singleton.thirdTabColor;
+        lightColor = paletteGenerator.lightVibrantColor?.color ?? colorpalette;
+        darkColor = paletteGenerator.darkVibrantColor?.color ?? colorpalette;
+        isColorLoaded = true;
+      });
+    }
+  }
 }

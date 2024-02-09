@@ -55,7 +55,7 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomBarBubble(
-        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor!,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary!,
         color: Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
         selectedIndex: currentIndex,
         items: [

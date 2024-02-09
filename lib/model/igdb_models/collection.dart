@@ -1,10 +1,12 @@
+import 'game.dart';
+
 class Collection {
   int id;
   final List<int>? asChildRelations;
   final List<int>? asParentRelations;
   final String? checksum;
   final DateTime? createdAt;
-  final List<int>? games;
+  final List<Game>? games;
   final String? name;
   final String? slug;
   final int? type;
@@ -38,7 +40,15 @@ class Collection {
           ? DateTime.fromMillisecondsSinceEpoch(json['created_at'] * 1000)
           : null,
       games: json['games'] != null
-          ? List<int>.from(json['games'])
+          ? List<Game>.from(
+        json['games'].map((dlc) {
+          if (dlc is int) {
+            return Game(id: dlc);
+          } else {
+            return Game.fromJson(dlc);
+          }
+        }),
+      )
           : null,
       name: json['name'],
       slug: json['slug'],
