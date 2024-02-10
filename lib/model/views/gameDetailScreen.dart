@@ -1,13 +1,17 @@
 import 'dart:math';
 
+import 'package:accordion/accordion.dart';
+import 'package:accordion/controllers.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:gamer_grove/model/widgets/RatingWidget.dart';
 import 'package:gamer_grove/model/widgets/age_rating_view.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
+import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:gamer_grove/model/widgets/collection_view.dart';
 import 'package:gamer_grove/model/widgets/countUpRow.dart';
 import 'package:gamer_grove/model/widgets/franchise_view.dart';
@@ -15,8 +19,10 @@ import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/genres.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:motion/motion.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 import '../../repository/igdb/IGDBApiService.dart';
@@ -175,11 +181,23 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                     child: Row(
                       children: [
                         // Cover image
-                        Container(
-                          height: coverScaleHeight,
-                          child: GamePreviewView(
-                            game: widget.game,
-                            isCover: true, buildContext: context,
+                        Motion(
+                          glare: GlareConfiguration(
+                            color: lightColor,
+                            minOpacity: 0,
+                          ),
+                          shadow: ShadowConfiguration(
+                            color: darkColor,
+                            blurRadius: 2,
+                            opacity: .05
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          child: SizedBox(
+                            height: coverScaleHeight,
+                            child: GamePreviewView(
+                              game: widget.game,
+                              isCover: true, buildContext: context,
+                            ),
                           ),
                         ),
                         SizedBox(
@@ -198,10 +216,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       DateTime.fromMillisecondsSinceEpoch(
                                           widget.game.firstReleaseDate! *
                                               1000)),
-                                  Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .surfaceVariant,
+                                  darkColor,
                                   Color(0xffc9f7f9),
                                   false,
                                   context)
@@ -240,9 +255,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                   widget.game.hypes,
                                   Color(0xfffe9c8f),
                                   '',
-                                  darkColor,
+                                  lightColor,
                                   context,
-                                  'Hypes: Number of follows a game gets before release')
+                                  'Hypes: Number of follows a game gets before release',darkColor)
                                   : Container(),
                               widget.game.follows != null
                                   ? CountUpRow.buildCountupRow(
@@ -251,9 +266,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                   widget.game.follows,
                                   Color(0xfffec8c1),
                                   '',
-                                  darkColor,
+                                  lightColor,
                                   context,
-                                  'Follow: Number of people following a game')
+                                  'Follow: Number of people following a game',darkColor)
                                   : Container(),
                               widget.game.totalRatingCount != null
                                   ? CountUpRow.buildCountupRow(
@@ -262,9 +277,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                   widget.game.totalRatingCount,
                                   Color(0xfff9f6c3),
                                   '',
-                                  darkColor,
+                                  lightColor,
                                   context,
-                                  'Total Ratings Count: Total number of user and external critic scores')
+                                  'Total Ratings Count: Total number of user and external critic scores', darkColor)
                                   : Container()
                             ],
                           ),
@@ -309,106 +324,57 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: [
-                        ExpansionTile(
-                          shape: const ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                          collapsedShape: const ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                          collapsedBackgroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .inversePrimary
-                              .withOpacity(0.95),
-                          backgroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .surfaceVariant
-                              .withOpacity(0.95),
-                          childrenPadding: EdgeInsets.all(20),
-                          iconColor:
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .onTertiaryContainer,
-                          collapsedIconColor:
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .onPrimaryContainer,
-                          title: Text(
-                            'Zusammenfassung',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        Accordion(
+                          headerBorderColor: lightColor,
+                          headerBorderWidth: 4,
+                          headerBackgroundColor: darkColor,
+                          headerBorderColorOpened: Colors.transparent,
+                          headerBackgroundColorOpened: lightColor,
+                          contentBackgroundColor: Theme.of(context).colorScheme.background,
+                          contentBorderColor: lightColor,
+                          contentBorderWidth: 4,
+                          contentHorizontalPadding: 20,
+                          scaleWhenAnimating: true,
+                          openAndCloseAnimation: true,
+                          headerPadding:
+                          const EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                          sectionOpeningHapticFeedback: SectionHapticFeedback.heavy,
+                          sectionClosingHapticFeedback: SectionHapticFeedback.light,
                           children: [
-                            SizedBox(height: 10),
-                            Text(
-                              '${widget.game.summary}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
+                            AccordionSection(
+                              isOpen: false,
+                              contentVerticalPadding: 20,
+                              leftIcon:
+                              const Icon(Icons.list_alt_rounded,),
+                              header: const Text('Summary',),
+                              content: Text('${widget.game.summary}'),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10),
-                        ExpansionTile(
-                          shape: const ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                          collapsedShape: const ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                          collapsedBackgroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .inversePrimary
-                              .withOpacity(0.95),
-                          backgroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .surfaceVariant
-                              .withOpacity(0.95),
-                          childrenPadding: EdgeInsets.all(20),
-                          iconColor:
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .onTertiaryContainer,
-                          collapsedIconColor:
-                          Theme
-                              .of(context)
-                              .colorScheme
-                              .onPrimaryContainer,
-                          title: const Text(
-                            'Storyline',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        Accordion(
+                          headerBorderColor: lightColor,
+                          headerBorderWidth: 4,
+                          headerBackgroundColor: darkColor,
+                          headerBorderColorOpened: Colors.transparent,
+                          headerBackgroundColorOpened: lightColor,
+                          contentBackgroundColor: Theme.of(context).colorScheme.background,
+                          contentBorderColor: lightColor,
+                          contentBorderWidth: 4,
+                          contentHorizontalPadding: 20,
+                          scaleWhenAnimating: true,
+                          openAndCloseAnimation: true,
+                          headerPadding:
+                          const EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                          sectionOpeningHapticFeedback: SectionHapticFeedback.heavy,
+                          sectionClosingHapticFeedback: SectionHapticFeedback.light,
                           children: [
-                            SizedBox(height: 10),
-                            Text(
-                              '${widget.game.storyline}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
+                            AccordionSection(
+                              isOpen: false,
+                              contentVerticalPadding: 20,
+                              leftIcon:
+                              const Icon(Icons.menu_book_rounded,),
+                              header: const Text('Storyline',),
+                              content: Text( '${widget.game.storyline}'),
                             ),
                           ],
                         ),
@@ -476,21 +442,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                             gamesResponse[0].franchises != null &&
                             gamesResponse[0].franchises![0].games != null
                             ? FranchiseView(
-                          franchise: gamesResponse[0].franchises![0]!, colorPalette: darkColor,) : ClayContainer(
-                          color: Theme.of(context).colorScheme.inversePrimary,
-                          spread: 2,
-                          depth: 60,
-                          borderRadius: 14,
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Center(
-                              child: Text(
-                                'No Franchise available',
-                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.surface),
-                              ),
-                            ),
-                          ),
-                        ),
+                          franchise: gamesResponse[0].franchises![0]!, colorPalette: darkColor,) : Container(),
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 1,
@@ -577,21 +529,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                             gamesResponse[0].collection != null &&
                             gamesResponse[0].collection!.games != null
                             ? CollectionView(
-                          collection: gamesResponse[0].collection!, colorPalette: darkColor,) : ClayContainer(
-                          color: Theme.of(context).colorScheme.inversePrimary,
-                          spread: 2,
-                          depth: 60,
-                          borderRadius: 14,
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Center(
-                              child: Text(
-                                'No collections available',
-                                style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.surface),
-                              ),
-                            ),
-                          ),
-                        ),
+                          collection: gamesResponse[0].collection!, colorPalette: darkColor,) :Container()
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 1,
@@ -624,17 +562,14 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   ),
                     ),
 
-                  widget.game.totalRatingCount != null
-                      ? CountUpRow.buildCountupRow(
-                      Icons.star,
-                      '',
-                      widget.game.aggregatedRating,
-                      Color(0xfff9f6c3),
-                      '(${widget.game.aggregatedRatingCount})',
-                      darkColor,
-                      context,
-                      'Aggregated Rating : Rating based on external critic scores and the Number of external critic scores')
+
+                  widget.game.aggregatedRating != null && widget.game.aggregatedRatingCount != null
+                      ? RatingWigdet(rating: widget.game.aggregatedRating!,
+                      description: 'Aggregated Rating based on ${widget.game.aggregatedRatingCount} external critic scores')
                       : Container(),
+                  if(widget.game.rating != null && widget.game.ratingCount != null)
+                    RatingWigdet(rating: widget.game.rating!,
+                        description: 'Average IGDB user rating based on ${widget.game.ratingCount} IGDB user ratings'),
                   gamesResponse.isNotEmpty && gamesResponse[0].bundles != null
                       ? GameListView(
                     headline: 'Bundles',

@@ -14,10 +14,9 @@ class InfoRow {
                   padding: const EdgeInsets.all(2.0),
                   child: ClayContainer(
                     borderRadius: 10,
-                    spread: 2,
+                    spread: 1,
                     depth: 60,
-                    surfaceColor: Theme.of(context).colorScheme.inversePrimary,
-                    parentColor: Theme.of(context).highlightColor,
+                    surfaceColor: color,
                     child: Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Row(

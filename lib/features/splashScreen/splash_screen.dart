@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:gamer_grove/main.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
+import 'package:vitality/vitality.dart';
 
 import '../landingScreen/bottom_nav_bar.dart';
 import '../loginRegistration/login/bloc/login_bloc.dart';
@@ -104,56 +105,80 @@ class _SplashScreenState extends State<SplashScreen> {
     double _w = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor:  Theme.of(context).colorScheme.background,
-      body: Center(
-        child: Column(
-          children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: _d ? 900 : 2500),
-              curve: _d ? Curves.fastLinearToSlowEaseIn : Curves.elasticOut,
-              height: _d ? 0 : _a ? _h / 2 : 40,
-              width: 40,
-            ),
-            AnimatedContainer(
-              duration: Duration(
-                  seconds: _d ? 1 : _c ? 2 : 0),
-              curve: Curves.fastLinearToSlowEaseIn,
-              height: _d ? _h : _c ? 80 : 20,
-              width: _d ? _w : _c ? 200 : 20,
-              decoration: BoxDecoration(
-                  color: _b ?  Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
-                  borderRadius: _d ? BorderRadius.only() : BorderRadius.circular(30)
-              ),
-              child: Center(
-                child: _e
-                    ? Container(
-                  width: _w * 0.6,  // Adjust the width as needed
-                  height: _h * 0.3, // Adjust the height as needed
-                  child: FittedBox(
-                    child: Padding(
-                      padding: EdgeInsets.all(5),
-                      child: AnimatedTextKit(
-                        totalRepeatCount: 1,
-                        animatedTexts: [
-                          FadeAnimatedText(
-                            'GamerGrove',
-                            duration: Duration(milliseconds: 1700),
-                            textStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              fontSize: 40,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                    : SizedBox(),
-              ),
-            ),
+      body:Stack(
+        children: [
+          Vitality.randomly(
+          background: Theme.of(context).colorScheme.background,
+          maxOpacity: 0.8,
+          minOpacity: 0.3,
+          itemsCount: 80,
+          enableXMovements: false,
+          whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+          maxSpeed: 1.5,
+          maxSize: 30,
+          minSpeed: 0.5,
+          randomItemsColors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary, Theme.of(context).colorScheme.tertiary, Theme.of(context).colorScheme.onPrimary],
+          randomItemsBehaviours: [
+            ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset_outlined),
+            ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
+            ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
+            ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+            ItemBehaviour(shape: ShapeType.StrokeCircle),
           ],
         ),
-      ),
+          Center(
+            child: Column(
+              children: [
+                AnimatedContainer(
+                  duration: Duration(milliseconds: _d ? 900 : 2500),
+                  curve: _d ? Curves.fastLinearToSlowEaseIn : Curves.elasticOut,
+                  height: _d ? 0 : _a ? _h / 2 : 40,
+                  width: 40,
+                ),
+                AnimatedContainer(
+                  duration: Duration(
+                      seconds: _d ? 1 : _c ? 2 : 0),
+                  curve: Curves.fastLinearToSlowEaseIn,
+                  height: _d ? _h : _c ? 80 : 20,
+                  width: _d ? _w : _c ? 200 : 20,
+                  decoration: BoxDecoration(
+                      color: _b ?  Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
+                      borderRadius: _d ? BorderRadius.only() : BorderRadius.circular(30)
+                  ),
+                  child: Center(
+                    child: _e
+                        ? Container(
+                      width: _w * 0.6,  // Adjust the width as needed
+                      height: _h * 0.3, // Adjust the height as needed
+                      child: FittedBox(
+                        child: Padding(
+                          padding: EdgeInsets.all(5),
+                          child: AnimatedTextKit(
+                            totalRepeatCount: 1,
+                            animatedTexts: [
+                              FadeAnimatedText(
+                                'GamerGrove',
+                                duration: Duration(milliseconds: 1700),
+                                textStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                        : SizedBox(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      )
+
     );
   }
 }

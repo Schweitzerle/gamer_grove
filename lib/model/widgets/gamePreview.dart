@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/clay_containers.dart';
+import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:marquee/marquee.dart';
@@ -98,33 +99,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  CircularPercentIndicator(
-                    radius: mediaQueryWidth * 0.07,
-                    lineWidth: 8.0,
-                    animation: true,
-                    animationDuration: 1000,
-                    percent: widget.game.totalRating != null
-                        ? Singleton.parseDouble(widget.game.totalRating!) / 100
-                        : 0,
-                    center: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${widget.game.totalRating != null ? widget.game.totalRating!.toStringAsFixed(0) : 0}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    circularStrokeCap: CircularStrokeCap.round,
-                    backgroundColor: Colors.transparent,
-                    progressColor: Singleton.getCircleColor(
-                      Singleton.parseDouble(widget.game.totalRating),
-                    ),
-                  ),
+                  CircularRatingWidget(ratingValue: widget.game.totalRating),
                   SizedBox(width: 8),
                   Expanded(
                     child: Marquee(

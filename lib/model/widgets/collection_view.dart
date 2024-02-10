@@ -34,16 +34,16 @@ class CollectionView extends StatelessWidget {
             ...List.generate(
               selectedGames.length,
                   (index) {
-                final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
-                final rightOffset = index == 0 ? 0.0 : (mediaWidth * .14) * index;
-                return Positioned(
-                  top: topOffset,
-                  left: rightOffset,
-                  child: Transform.scale(
-                    alignment: Alignment.topLeft,
-                    scale: .4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
+                    final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
+                    final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
+                    return Positioned(
+                      top: topOffset,
+                      left: rightOffset,
+                      child: SizedBox(
+                        width: mediaWidth * .28,
+                        height: mediaHeight * .2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
                       child: GamePreviewView(
                         game: selectedGames[index],
                         isCover: true,

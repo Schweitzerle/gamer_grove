@@ -6,10 +6,10 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 
 class CountUpRow{
   static Widget buildCountupRow(IconData iconData, String? prefix, num? value,
-      Color color, String? suffix, Color lightColor, BuildContext context, String description) {
+      Color color, String? suffix, Color lightColor, BuildContext context, String description, Color darkColor) {
     return value != null ?
     JustTheTooltip(
-      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+      backgroundColor: lightColor,
       content: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
@@ -27,9 +27,8 @@ class CountUpRow{
         child: ClayContainer(
         borderRadius: 10,
           depth: 60,
-          spread: 2,
-          surfaceColor: Theme.of(context).colorScheme.inversePrimary,
-          parentColor: Theme.of(context).highlightColor,
+          spread: 1,
+          surfaceColor: darkColor,
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: Row(

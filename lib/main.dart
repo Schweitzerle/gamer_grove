@@ -15,6 +15,7 @@ import 'package:gamer_grove/model/singleton/sinlgleton.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:gamer_grove/utils/ThemManager.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:motion/motion.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/home/home_screen.dart';
@@ -29,6 +30,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   AppTokenService.getAppToken();
+
+  await Motion.instance.initialize();
+  Motion.instance.setUpdateInterval(60.fps);
+
   runApp(
     GetMaterialApp(
       title: 'CouchCinema',

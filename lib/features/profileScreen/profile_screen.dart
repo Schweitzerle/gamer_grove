@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
 import 'package:profile_view/profile_view.dart';
+import 'package:widget_circular_animator/widget_circular_animator.dart';
 
 import '../../model/views/theme_screen.dart';
 import '../../model/widgets/ThemeButton.dart';
@@ -51,6 +52,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<FlexScheme> _loadAndSetTheme() async {
     final storedScheme = await ThemeManager().loadThemeFromPrefs();
     return storedScheme;
+  }
+
+  Future<void> _navigateAndDisplaySelection(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ThemeScreen()),
+    );
+    setState(() {
+      _storedSchemeFuture = _loadAndSetTheme();
+    });
   }
 
   @override
@@ -128,13 +139,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 20),
-                const ProfileView(
-                  height: 100,
-                  width: 100,
-                  circle: false,
-                  borderRadius: 14,
-                  image: NetworkImage(
-                      "https://preview.keenthemes.com/metronic-v4/theme/assets/pages/media/profile/profile_user.jpg"),
+                WidgetCircularAnimator(
+                  outerColor: Theme.of(context).colorScheme.primary,
+                  innerColor: Theme.of(context).colorScheme.secondary,
+                  outerAnimation: Curves.linear,
+                  child: const ProfileView(
+                    height: 100,
+                    width: 100,
+                    circle: false,
+                    borderRadius: 90,
+                    image: NetworkImage(
+                        "https://preview.keenthemes.com/metronic-v4/theme/assets/pages/media/profile/profile_user.jpg"),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -238,13 +254,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       flex: 4,
                                       child: Center(
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ThemeScreen()),
-                                            );
+                                          onPressed: () async {
+                                            _navigateAndDisplaySelection(context);
                                           },
                                           child: Text('View All Themes'),
                                         ),

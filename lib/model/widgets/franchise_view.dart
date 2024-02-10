@@ -35,15 +35,15 @@ class FranchiseView extends StatelessWidget {
               franchise.games!.length > 5 ? 5 : franchise.games!.length,
                   (index) {
                 final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
-                final rightOffset = index == 0 ? 0.0 : (mediaWidth * .14) * index;
+                final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
                 return Positioned(
                   top: topOffset,
                   left: rightOffset,
-                  child: Transform.scale(
-                    alignment: Alignment.topLeft,
-                    scale: .4,
+                  child: SizedBox(
+                    width: mediaWidth * .28,
+                    height: mediaHeight * .2,
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(10),
                       child: GamePreviewView(
                         game: selectedGames[index],
                         isCover: true,

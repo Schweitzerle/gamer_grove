@@ -2,6 +2,7 @@ import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 
@@ -32,14 +33,28 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               childAspectRatio: .7,
               crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8
             ),
             pagingController: widget.pagingController,
             builderDelegate: PagedChildBuilderDelegate<Game>(
+              firstPageProgressIndicatorBuilder:(_) => const Padding(
+                padding: EdgeInsets.all(78.0),
+                child: Center(
+                  child: LoadingIndicator(
+                      indicatorType: Indicator.pacman, /// Required, The loading type of the widget
+                  ),
+                ),
+              ),
+              newPageProgressIndicatorBuilder: (_) => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(18.0),
+                  child: LoadingIndicator(
+                    indicatorType: Indicator.pacman, /// Required, The loading type of the widget
+                  ),
+                ),
+              ),
               itemBuilder: (context, game, index) {
                 return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
+                    padding: const EdgeInsets.all(8.0),
                   child: Center(
                     child: GamePreviewView(
                       game: game,

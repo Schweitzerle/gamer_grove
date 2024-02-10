@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.16"
+  accordion:
+    dependency: "direct main"
+    description:
+      name: accordion
+      sha256: "0eca3d1c619c6df63d6e384010fd2ef1164e7385d7102f88a6b56f658f160cd0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
   adaptive_theme:
     dependency: "direct main"
     description:
@@ -604,6 +612,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
+  loading_indicator:
+    dependency: "direct main"
+    description:
+      name: loading_indicator
+      sha256: a101ffb2aa3e646137d7810bfa90b50525dd3f72c01235b6df7491cf6af6f284
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.1"
   marquee:
     dependency: "direct main"
     description:
@@ -660,6 +676,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  motion:
+    dependency: "direct main"
+    description:
+      name: motion
+      sha256: e7afdcd0f98fc3c3b9692ed771703bc283cf5e82e2f44169c066b9ae50c92768
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.1"
+  motion_platform_interface:
+    dependency: transitive
+    description:
+      name: motion_platform_interface
+      sha256: "0b29234fef24d18cd7c3d3f1a2a2f67998aed1c2fb8f5d484900cc9b012328de"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
+  motion_web:
+    dependency: transitive
+    description:
+      name: motion_web
+      sha256: "223699d57c7f3dff7d0ffbfb9b3c8b083b9ef3dc0d260040c367c899fd38a4a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   nested:
     dependency: transitive
     description:
@@ -844,6 +884,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.2"
+  scroll_to_index:
+    dependency: transitive
+    description:
+      name: scroll_to_index
+      sha256: b707546e7500d9f070d63e5acf74fd437ec7eeeb68d3412ef7b0afada0b4f176
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1121,6 +1169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  vitality:
+    dependency: "direct main"
+    description:
+      name: vitality
+      sha256: "55415d333c92a7739358a2991f8b2058d8963569126a664446415288e66b4680"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   vm_service:
     dependency: transitive
     description:
@@ -1137,6 +1193,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
+  widget_circular_animator:
+    dependency: "direct main"
+    description:
+      name: widget_circular_animator
+      sha256: "3be8c05cfe32eceda237c7b68339e60940a84011df80c63bd4e71bd0daa7a770"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   win32:
     dependency: transitive
     description:
