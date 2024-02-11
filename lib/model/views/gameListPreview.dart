@@ -97,9 +97,7 @@ class GameListViewState extends State<GameListView> {
                       if (index >= widget.games!.length) {
                         return null; // or a placeholder widget
                       }
-
                       Game game = widget.games![index];
-
                       return Container(
                         width: mediaQueryWidth * .41,
                         child: Padding(

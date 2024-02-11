@@ -71,7 +71,8 @@ class _AllGamesGridPaginationScreenState
     final response = await apiService.getIGDBData(
         IGDBAPIEndpointsEnum.games, '${widget.body} o $offset;');
 
-    return response;
+      final games = apiService.parseResponseToGame(response);
+      return games;
   }
 
   @override

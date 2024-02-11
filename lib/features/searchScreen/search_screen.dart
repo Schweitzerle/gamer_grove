@@ -79,7 +79,8 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final response =
         await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, body);
 
-    return response;
+      final games = apiService.parseResponseToGame(response);
+      return games;
   }
 
   @override

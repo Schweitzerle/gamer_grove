@@ -20,13 +20,17 @@ class PlatformLogo {
   });
 
   factory PlatformLogo.fromJson(Map<String, dynamic> json) {
+    String? logoUrl = json["url"];
+    if (logoUrl != null) {
+      logoUrl = logoUrl.replaceFirst("t_thumb", "t_720p");
+    }
     return PlatformLogo(
       alphaChannel: json['alpha_channel'],
       animated: json['animated'],
       checksum: json['checksum'],
       height: json['height'],
       imageId: json['image_id'],
-      url: json['url'],
+      url: 'https:$logoUrl',
       width: json['width'], id: json['id'],
     );
   }

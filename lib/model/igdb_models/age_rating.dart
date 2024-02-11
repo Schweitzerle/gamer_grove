@@ -220,6 +220,14 @@ extension AgeRatingRatingExtension on AgeRatingRating {
       return 'PEGI';
     case AgeRatingCategory.USK:
       return 'USK';
+    case AgeRatingCategory.ACB:
+      return 'ACB';
+    case AgeRatingCategory.CLASS_IND:
+      return 'CLASS IND';
+    case AgeRatingCategory.GRAC:
+      return 'GRAC';
+    case AgeRatingCategory.CERO:
+      return 'CERO';
     default:
       return 'N/A';
   }
@@ -279,7 +287,7 @@ String _ratingToString(AgeRatingRating? rating) {
     case AgeRatingRating.GRAC_Fifteen:
       return 'Fifteen';
     case AgeRatingRating.GRAC_Eighteen:
-      return 'ighteen';
+      return 'Eighteen';
     case AgeRatingRating.GRAC_TESTING:
       return 'TESTING';
     case AgeRatingRating.CLASS_IND_L:

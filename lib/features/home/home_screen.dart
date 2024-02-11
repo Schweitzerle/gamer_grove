@@ -70,7 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
           IGDBAPIEndpointsEnum.games, getBodyStringMostFollowedGames());
 
       setState(() {
-        gamesResponse3 = response3;
+          gamesResponse3 = apiService.parseResponseToGame(response3);
+
       });
     } catch (e, stackTrace) {
       print('Error: $e');
@@ -84,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBodyCritcsRatingDesc());
 
       setState(() {
-        gamesResponse4 = response4;
+          gamesResponse4 = apiService.parseResponseToGame(response4);
       });
     } catch (e, stackTrace) {
       print('Error: $e');
@@ -98,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBodyTopRatedGames());
 
       setState(() {
-        gamesResponse1 = response1;
+          gamesResponse1 = apiService.parseResponseToGame(response1);
       });
     } catch (e, stackTrace) {
       print('Error: $e');
@@ -112,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBodyNewestGames());
 
       setState(() {
-        gamesResponse2 = response2;
+          gamesResponse2 = apiService.parseResponseToGame(response2);
       });
     } catch (e, stackTrace) {
       print('Error: $e');

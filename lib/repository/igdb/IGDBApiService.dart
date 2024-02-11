@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:http/http.dart' as http;
@@ -27,14 +28,25 @@ class IGDBApiService {
 
   //TODO: External Games und andere enums haben verschiedene int values und könenen somit nicht über den index ausgelesen werden, bsp. facebook 7 aber im enum index 3
   //TODO: External entfernen aus body dann kommt fehlermedlung
-  Future<List<Game>> getIGDBData(IGDBAPIEndpointsEnum igdbapiEndpointsEnum, String postBody) async {
-    final response = await _postRequest(igdbapiEndpointsEnum.name, postBody);
+  Future<List<dynamic>> getIGDBData(IGDBAPIEndpointsEnum igdbapiEndpointsEnum, String postBody) async {
+    return await _postRequest(igdbapiEndpointsEnum.name, postBody);
+  }
 
+  List<Game> parseResponseToGame(List<dynamic> response) {
     if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
       // Check if the response is not empty and is a list of maps
       return response.map<Game>((json) => Game.fromJson(json)).toList();
     } else {
       return <Game>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<Character> parseResponseToCharacter(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<Character>((json) => Character.fromJson(json)).toList();
+    } else {
+      return <Character>[]; // Return an empty list if there's no valid response
     }
   }
 
@@ -77,6 +89,7 @@ enum IGDBAPIEndpointsEnum {
   game_localizations,
   language_support_types,
   multiplayer_modes,
+  multiquery,
   language_supports,
   network_types,
   platform_families,
