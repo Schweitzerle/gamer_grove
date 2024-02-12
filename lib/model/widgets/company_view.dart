@@ -1,22 +1,64 @@
-import 'package:flutter/material.dart';
-import 'package:clay_containers/clay_containers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:gamer_grove/model/igdb_models/game_engine.dart';
+import 'package:flutter/material.dart';
+import 'package:gamer_grove/model/igdb_models/company.dart';
 
-class GameEngineView extends StatelessWidget {
-  final List<GameEngine> gameEngines;
+import '../igdb_models/involved_companies.dart';
 
-  const GameEngineView({Key? key, required this.gameEngines}) : super(key: key);
+class InvolvedCompaniesList extends StatelessWidget {
+  final List<InvolvedCompany> involvedCompanies;
+
+  InvolvedCompaniesList({required this.involvedCompanies});
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildCategory("Publisher"),
+          buildCategory("Developer"),
+          buildCategory("Porting"),
+          buildCategory("Supporting"),
+        ],
+      ),
+    );
+  }
+
+  Widget buildCategory(String category) {
+    List<InvolvedCompany> companies = [];
+    String title = "";
+
+    switch (category) {
+      case "Publisher":
+        title = "Publisher";
+        companies = involvedCompanies.where((company) => company.publisher == true).toList();
+        break;
+      case "Developer":
+        title = "Developer";
+        companies = involvedCompanies.where((company) => company.developer == true).toList();
+        break;
+      case "Porting":
+        title = "Porting";
+        companies = involvedCompanies.where((company) => company.porting == true).toList();
+        break;
+      case "Supporting":
+        title = "Supporting";
+        companies = involvedCompanies.where((company) => company.supporting == true).toList();
+        break;
+    }
+
+    if (companies.isEmpty) {
+      return SizedBox(); // Wenn die Liste leer ist, wird nichts angezeigt
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
-            'Game Engines',
+            title,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -27,8 +69,8 @@ class GameEngineView extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: gameEngines.map((engine) {
-              return EngineCard(engine: engine);
+            children: companies.map((company) {
+              return CompanyCard(company: company.company);
             }).toList(),
           ),
         ),
@@ -37,10 +79,10 @@ class GameEngineView extends StatelessWidget {
   }
 }
 
-class EngineCard extends StatelessWidget {
-  final GameEngine? engine;
+class CompanyCard extends StatelessWidget {
+  final Company? company;
 
-  EngineCard({required this.engine});
+  CompanyCard({required this.company});
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +91,13 @@ class EngineCard extends StatelessWidget {
       child: Container(
         width: 80,
         height: 80,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), color: Colors.black,),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14),color: Colors.black,),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
               // Bild des Unternehmens mit ShaderMask
-              if (engine?.logo != null)
+              if (company?.logo != null)
                 ShaderMask(
                   shaderCallback: (Rect bounds) {
                     return LinearGradient(
@@ -69,7 +111,7 @@ class EngineCard extends StatelessWidget {
                   },
                   blendMode: BlendMode.darken,
                   child: CachedNetworkImage(
-                    imageUrl: engine!.logo!.url!,
+                    imageUrl: company!.logo!.url!,
                     width: 80,
                     height: 80,
                     fit: BoxFit.contain, // Bildgröße anpassen
@@ -84,7 +126,7 @@ class EngineCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
                   child: FittedBox(
                     child: Text(
-                      engine?.name ?? "",
+                      company?.name ?? "",
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white,
@@ -104,3 +146,6 @@ class EngineCard extends StatelessWidget {
     );
   }
 }
+
+
+

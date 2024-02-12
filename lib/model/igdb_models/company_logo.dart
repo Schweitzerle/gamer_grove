@@ -20,13 +20,17 @@ class CompanyLogo {
   });
 
   factory CompanyLogo.fromJson(Map<String, dynamic> json) {
+    String? logoURL = json["url"];
+    if (logoURL != null) {
+      logoURL = logoURL.replaceFirst("t_thumb", "t_720p");
+    }
     return CompanyLogo(
       alphaChannel: json['alpha_channel'],
       animated: json['animated'],
       checksum: json['checksum'],
       height: json['height'],
       imageId: json['image_id'],
-      url: json['url'],
+      url: 'https:$logoURL',
       width: json['width'], id: json['id'],
     );
   }

@@ -5,11 +5,11 @@ import 'package:gamer_grove/model/igdb_models/website.dart';
 
 class Company {
   int id;
-  final String? changeDate;
+  final int? changeDate;
   final ChangeDateCategoryEnum? changeDateCategory;
   final Company? changedCompanyId;
   final String? checksum;
-  final String? country;
+  final int? country;
   final int? createdAt;
   final String? description;
   final List<Game>? developed;
@@ -18,7 +18,7 @@ class Company {
   final Company? parent;
   final List<Game>? published;
   final String? slug;
-  final String? startDate;
+  final int? startDate;
   final StartDateCategoryEnum? startDateCategory;
   final int? updatedAt;
   final String? url;
@@ -72,7 +72,11 @@ class Company {
         }),
       )
           : null,
-      logo: json['logo'],
+      logo: json['logo'] != null
+          ? (json['logo'] is int
+          ? CompanyLogo(id: json['logo'])
+          : CompanyLogo.fromJson(json['logo']))
+          : null,
       name: json['name'],
       parent: json['parent'] != null
           ? (json['parent'] is int
