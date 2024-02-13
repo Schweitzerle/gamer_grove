@@ -156,28 +156,48 @@ class _LanguageSupportTableState extends State<LanguageSupportTable> {
 
 class LanguageDataSource extends DataGridSource {
   LanguageDataSource({required List<LanguageSupport> languageSupports}) {
-    _dataGridRows = languageSupports.map<DataGridRow>((support) {
-      return DataGridRow(
+    _dataGridRows = [];
+
+    // Map zur Verfolgung der unterstützten Typen für jedes Land
+    Map<String, Map<String, bool>> supportMap = {};
+
+    // Durchlaufen der LanguageSupport-Liste und Hinzufügen der unterstützten Typen zu der Map
+    for (var support in languageSupports) {
+      String languageName = support.language?.name ?? '';
+      String supportTypeName = support.languageSupportType?.name ?? '';
+
+      if (!supportMap.containsKey(languageName)) {
+        supportMap[languageName] = {
+          'Interface': false,
+          'Audio': false,
+          'Subtitles': false,
+        };
+      }
+
+      // Markieren des unterstützten Typs für das aktuelle Land
+      supportMap[languageName]![supportTypeName] = true;
+    }
+
+    // Generieren von DataGridRows für jedes Land basierend auf der Map
+    supportMap.forEach((languageName, supportTypes) {
+      _dataGridRows.add(DataGridRow(
         cells: [
-          DataGridCell<String>(
-            columnName: 'language',
-            value: support.language?.name ?? '',
-          ),
+          DataGridCell<String>(columnName: 'language', value: languageName),
           DataGridCell<String>(
             columnName: 'interface',
-            value: support.languageSupportType?.name == 'Interface' ? '✔️' : '',
+            value: supportTypes['Interface'] == true ? '✔️' : '',
           ),
           DataGridCell<String>(
             columnName: 'audio',
-            value: support.languageSupportType?.name == 'Audio' ? '✔️' : '',
+            value: supportTypes['Audio'] == true ? '✔️' : '',
           ),
           DataGridCell<String>(
             columnName: 'subtitles',
-            value: support.languageSupportType?.name == 'Subtitles' ? '✔️' : '',
+            value: supportTypes['Subtitles'] == true ? '✔️' : '',
           ),
         ],
-      );
-    }).toList();
+      ));
+    });
   }
 
   late List<DataGridRow> _dataGridRows;
@@ -198,3 +218,4 @@ class LanguageDataSource extends DataGridSource {
     );
   }
 }
+

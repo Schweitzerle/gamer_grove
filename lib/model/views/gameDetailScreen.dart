@@ -26,6 +26,7 @@ import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/pill_button_list.dart';
 import 'package:gamer_grove/model/widgets/pill_list.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/website_List.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
@@ -87,6 +88,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> initialize() async {
+    print(widget.game.id);
     setState(() {
       colorPalette = Theme.of(widget.context).colorScheme.inversePrimary;
       lightColor = Theme.of(widget.context).colorScheme.primary;
@@ -645,13 +647,13 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       ],
                     ),
                   ),
+                  if (games.isNotEmpty && games[0].websites != null)
+                    WebsiteList(websites: games[0].websites!),
 
                   if (games.isNotEmpty && games[0].languageSupports != null)
                     LanguageSupportTable(
                     languageSupports: games[0].languageSupports!, color: lightColor,
                   ),
-
-
                   if (games.isNotEmpty && games[0].gameEngines != null)
                     GameEngineView(gameEngines: games[0].gameEngines!),
                   if (games.isNotEmpty && games[0].involvedCompanies != null)
@@ -659,7 +661,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         involvedCompanies: games[0].involvedCompanies!),
                   if (games.isNotEmpty) CharacterView(character: characters),
                   if (games.isNotEmpty && games[0].platforms != null)
-                    PlatformView(platforms: games[0].platforms!),
+                    PlatformView(game: games[0],color: lightColor),
                   widget.game.aggregatedRating != null &&
                           widget.game.aggregatedRatingCount != null
                       ? RatingWigdet(

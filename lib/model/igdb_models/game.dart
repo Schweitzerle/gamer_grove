@@ -528,7 +528,7 @@ class Game {
         }),
       )
           : null,
-      websites: json['videwebsitesos'] != null
+      websites: json['websites'] != null
           ? List<Website>.from(
         json['websites'].map((collection) {
           if (collection is int) {
