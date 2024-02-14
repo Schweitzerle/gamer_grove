@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:gamer_grove/model/igdb_models/character.dart';
+import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +48,15 @@ class IGDBApiService {
       return response.map<Character>((json) => Character.fromJson(json)).toList();
     } else {
       return <Character>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<Event> parseResponseToEvent(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<Event>((json) => Event.fromJson(json)).toList();
+    } else {
+      return <Event>[]; // Return an empty list if there's no valid response
     }
   }
 

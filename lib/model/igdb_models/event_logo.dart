@@ -26,6 +26,10 @@ class EventLogo {
   });
 
   factory EventLogo.fromJson(Map<String, dynamic> json) {
+    String? logoURL = json["url"];
+    if (logoURL != null) {
+      logoURL = logoURL.replaceFirst("t_thumb", "t_720p");
+    }
     return EventLogo(
       alphaChannel: json['alpha_channel'],
       animated: json['animated'],
@@ -35,7 +39,7 @@ class EventLogo {
       height: json['height'],
       imageId: json['image_id'],
       updatedAt: json['updated_at'],
-      url: json['url'],
+      url: 'https:$logoURL',
       width: json['width'], id: json['id'],
     );
   }

@@ -1,49 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/model/igdb_models/event.dart';
+import 'package:gamer_grove/model/widgets/event_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 
-class GameGridView extends StatelessWidget {
-  final List<Game> collectionGames;
+class EventGridView extends StatelessWidget {
+  final List<Event> events;
 
-  GameGridView({
-    required this.collectionGames,
+  EventGridView({
+    required this.events,
   });
 
   @override
   Widget build(BuildContext context) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: .7,
-          crossAxisCount: 2,
+          childAspectRatio: 16/9,
+          crossAxisCount: 1,
       ),
       delegate: SliverChildBuilderDelegate(
             (context, index) {
-          final game = collectionGames[index];
+          final event = events[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Center(child: GamePreviewView(game: game, isCover: true, buildContext: context)),
+            child: Center(child: EventUI(event: event, buildContext: context)),
           );
         },
-        childCount: collectionGames.length,
+        childCount: events.length,
       ),
     );
   }
 }
 
-class AllGamesGridScreen extends StatelessWidget {
-  static Route route(List<Game> game, BuildContext context, String appBarText) {
+class AllEventsGridScreen extends StatelessWidget {
+  static Route route(List<Event> events, BuildContext context, String appBarText) {
     return MaterialPageRoute(
-      builder: (context) => AllGamesGridScreen(
-        games: game, appBarText: appBarText,
+      builder: (context) => AllEventsGridScreen(
+        events: events, appBarText: appBarText,
       ),
     );
   }
 
-  final List<Game> games;
+  final List<Event> events;
   final String appBarText;
 
-  AllGamesGridScreen({required this.games, required this.appBarText});
+  AllEventsGridScreen({required this.events, required this.appBarText});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class AllGamesGridScreen extends StatelessWidget {
       body: CustomScrollView(
         physics: BouncingScrollPhysics(),
         slivers: [
-          GameGridView(collectionGames: games,),
+          EventGridView(events: events,),
         ],
       ),
     );

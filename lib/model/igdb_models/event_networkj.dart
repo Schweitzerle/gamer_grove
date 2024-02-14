@@ -26,8 +26,8 @@ class EventNetwork {
       event: json['event'],
       networkType: json['network_type'] != null
           ? (json['network_type'] is int
-          ? NetworkType(id: json['event_logo'])
-          : NetworkType.fromJson(json['event_logo']))
+          ? NetworkType(id: json['network_type'])
+          : NetworkType.fromJson(json['network_type']))
           : null,
 
       updatedAt: json['updated_at'],

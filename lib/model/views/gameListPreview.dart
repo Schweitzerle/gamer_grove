@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gamer_grove/model/views/allGamesGridViewPagination.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:get/get_utils/get_utils.dart';
 import '../igdb_models/game.dart';
-import 'allGamesGridView.dart';
+import 'gameGridPaginationView.dart';
+import 'gameGridView.dart';
 
 class GameListView extends StatefulWidget {
   final String headline;

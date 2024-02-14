@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
-import 'package:gamer_grove/model/views/allGamesGridView.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 
 import '../igdb_models/game.dart';
+import '../views/gameGridView.dart';
 
 class CollectionView extends StatelessWidget {
   final Collection collection;

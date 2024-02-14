@@ -4,7 +4,7 @@ description: "Discover, rate and recommend videogames."
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0-234.0.dev <4.0.0'
+  sdk: '>=3.0.1 <4.0.0'
 
 dependencies:
   flutter:
@@ -52,11 +52,13 @@ dependencies:
   accordion: ^2.6.0
   loading_indicator: ^3.1.1
   vitality: ^3.0.0
-  scroll_snap_list: ^0.9.1
   syncfusion_flutter_datagrid: ^24.2.4
   data_table_2: ^2.5.10
   social_media_buttons: ^1.0.0
   font_awesome_flutter: ^10.7.0
+  youtube_player_flutter: ^8.1.2
+  flutter_inappwebview: ^5.3.2
+  visibility_detector: ^0.2.0
 
   salomon_bottom_bar: ^3.3.2
   bottom_bar_matu: ^1.3.1

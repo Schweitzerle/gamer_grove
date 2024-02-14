@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
+import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/widgets/RatingWidget.dart';
 import 'package:gamer_grove/model/widgets/age_rating_view.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
@@ -17,6 +18,8 @@ import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:gamer_grove/model/widgets/collection_view.dart';
 import 'package:gamer_grove/model/widgets/company_view.dart';
 import 'package:gamer_grove/model/widgets/countUpRow.dart';
+import 'package:gamer_grove/model/widgets/event_list.dart';
+import 'package:gamer_grove/model/widgets/event_view.dart';
 import 'package:gamer_grove/model/widgets/franchise_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/game_engine_view.dart';
@@ -26,6 +29,8 @@ import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/pill_button_list.dart';
 import 'package:gamer_grove/model/widgets/pill_list.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/video_list.dart';
+import 'package:gamer_grove/model/widgets/video_player_view.dart';
 import 'package:gamer_grove/model/widgets/website_List.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -68,6 +73,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
   List<Game> games = [];
   List<Character> characters = [];
+  List<Event> events = [];
 
   List<String> staggeredText = [
     'Bundles',
@@ -108,11 +114,17 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       };
 
       query characters "Game Characters" {
-        fields name, mug_shot.*;
-        where games = ${widget.game.id};
+        fields akas, checksum,country_name, created_at, description, games.*, games.cover.*, gender, mug_shot, name, slug, species, updated_at, url;
+        where games = [${widget.game.id}];
       };
+      
+       query events "Game Events" {
+      fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*;
+      where games = [${widget.game.id}];
+    };
     ''';
 
+      print(widget.game.id);
       final List<dynamic> response =
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.multiquery, body);
 
@@ -132,6 +144,13 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         if (charactersResponse != null) {
           characters =
               apiService.parseResponseToCharacter(charactersResponse['result']);
+        }
+
+        final eventsResponse = response.firstWhere(
+            (item) => item['name'] == 'Game Events',
+            orElse: () => null);
+        if (eventsResponse != null) {
+          events = apiService.parseResponseToEvent(eventsResponse['result']);
         }
       });
     } catch (e, stackTrace) {
@@ -647,13 +666,17 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       ],
                     ),
                   ),
+                  if (events.isNotEmpty)
+                    EventListView(events: events, headline: 'Events',),
+                  if (games.isNotEmpty && games[0].videos != null)
+                    VideoListView(videos: games[0].videos, headline: 'Videos',),
                   if (games.isNotEmpty && games[0].websites != null)
                     WebsiteList(websites: games[0].websites!),
-
                   if (games.isNotEmpty && games[0].languageSupports != null)
                     LanguageSupportTable(
-                    languageSupports: games[0].languageSupports!, color: lightColor,
-                  ),
+                      languageSupports: games[0].languageSupports!,
+                      color: lightColor,
+                    ),
                   if (games.isNotEmpty && games[0].gameEngines != null)
                     GameEngineView(gameEngines: games[0].gameEngines!),
                   if (games.isNotEmpty && games[0].involvedCompanies != null)
@@ -661,7 +684,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         involvedCompanies: games[0].involvedCompanies!),
                   if (games.isNotEmpty) CharacterView(character: characters),
                   if (games.isNotEmpty && games[0].platforms != null)
-                    PlatformView(game: games[0],color: lightColor),
+                    PlatformView(game: games[0], color: lightColor),
                   widget.game.aggregatedRating != null &&
                           widget.game.aggregatedRatingCount != null
                       ? RatingWigdet(

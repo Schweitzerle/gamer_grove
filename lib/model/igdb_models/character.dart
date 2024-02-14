@@ -1,5 +1,7 @@
 import 'package:gamer_grove/model/igdb_models/character_mugshot.dart';
 
+import 'game.dart';
+
 class Character {
   int id;
   List<String>? akas;
@@ -7,7 +9,7 @@ class Character {
   String? countryName;
   int? createdAt;
   String? description;
-  List<int>? gameIDs;
+  List<Game>? gameIDs;
   GenderEnum? gender;
   CharacterMugshot? mugShotID;
   String? name;
@@ -43,7 +45,15 @@ class Character {
       createdAt: json['created_at'],
       description: json['description'],
       gameIDs: json['games'] != null
-          ? List<int>.from(json['games'])
+          ? List<Game>.from(
+        json['games'].map((collection) {
+          if (collection is int) {
+            return Game(id: collection);
+          } else {
+            return Game.fromJson(collection);
+          }
+        }),
+      )
           : null,
       gender: json['gender'] != null
           ? GenderEnumExtension.fromValue(json['gender'])

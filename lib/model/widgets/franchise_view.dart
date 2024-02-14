@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/features/home/home_screen.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
 import 'package:gamer_grove/model/igdb_models/franchise.dart';
-import 'package:gamer_grove/model/views/allGamesGridView.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 
 import '../igdb_models/game.dart';
+import '../views/gameGridView.dart';
 
 class FranchiseView extends StatelessWidget {
   final Franchise franchise;
