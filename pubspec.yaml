@@ -4,7 +4,7 @@ description: "Discover, rate and recommend videogames."
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.1 <4.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -17,7 +17,7 @@ dependencies:
   firebase_auth: ^4.16.0
   firebase_core: ^2.24.2
   flutter_bloc: ^8.0.1
-  http: ^1.2.0
+  http: any
   firebase_database: ^10.4.0
   provider: ^6.1.1
   image_picker: ^1.0.7
@@ -42,7 +42,7 @@ dependencies:
   just_the_tooltip: ^0.0.12
   redacted: ^1.0.11
   profile_view: ^0.0.2
-  country_picker: ^2.0.24
+  country_picker: any
   widget_circular_animator: ^1.0.0
   rnd: ^0.2.0
   intl: any
@@ -59,6 +59,7 @@ dependencies:
   youtube_player_flutter: ^8.1.2
   flutter_inappwebview: ^5.3.2
   visibility_detector: ^0.2.0
+  animated_toggle_switch: ^0.8.1
 
   salomon_bottom_bar: ^3.3.2
   bottom_bar_matu: ^1.3.1
@@ -79,11 +80,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^3.0.0
 
 flutter:
-
   generate: true
   uses-material-design: true
 

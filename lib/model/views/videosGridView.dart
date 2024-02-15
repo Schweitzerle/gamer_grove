@@ -9,9 +9,10 @@ import '../igdb_models/game.dart';
 
 class VideosGridView extends StatelessWidget {
   final List<GameVideo> videos;
+  final Color color;
 
   VideosGridView({
-    required this.videos,
+    required this.videos, required this.color,
   });
 
   @override
@@ -26,7 +27,7 @@ class VideosGridView extends StatelessWidget {
           final video = videos[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Center(child: VideoPlayerItem(gameVideo: video)),
+            child: Center(child: VideoPlayerItem(gameVideo: video, color: color,)),
           );
         },
         childCount: videos.length,
@@ -36,18 +37,18 @@ class VideosGridView extends StatelessWidget {
 }
 
 class AllVideosGridScreen extends StatelessWidget {
-  static Route route(List<GameVideo> videos, BuildContext context, String appBarText) {
+  static Route route(List<GameVideo> videos, BuildContext context, String appBarText, Color color) {
     return MaterialPageRoute(
       builder: (context) => AllVideosGridScreen(
-        videos: videos, appBarText: appBarText,
+        videos: videos, appBarText: appBarText, color: color,
       ),
     );
   }
 
   final List<GameVideo> videos;
   final String appBarText;
-
-  AllVideosGridScreen({required this.videos, required this.appBarText});
+  final Color color;
+  AllVideosGridScreen({required this.videos, required this.appBarText, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class AllVideosGridScreen extends StatelessWidget {
       body: CustomScrollView(
         physics: BouncingScrollPhysics(),
         slivers: [
-          VideosGridView(videos: videos,),
+          VideosGridView(videos: videos, color: color,),
         ],
       ),
     );

@@ -36,25 +36,7 @@ class ImagePreview extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClayContainer(
-              spread: 2,
-              depth: 60,
-              customBorderRadius: BorderRadius.circular(12),
-              color: Theme.of(context).cardColor,
-              child: Padding(
-                padding: EdgeInsets.all(5),
-                child: Text(
-                  isArtwork ? 'Artworks' : 'Screenshots',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Theme.of(context).cardTheme.surfaceTintColor),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.01,
-            ),
+
             // Display the first artwork covering the whole width
             StaggeredGrid.count(
               crossAxisCount: 4,

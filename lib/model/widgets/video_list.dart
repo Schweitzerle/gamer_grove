@@ -16,10 +16,10 @@ import '../igdb_models/game.dart';
 class VideoListView extends StatefulWidget {
   final String headline;
   final List<GameVideo>? videos;
-
+  final Color color;
   VideoListView({
     required this.headline,
-    required this.videos
+    required this.videos, required this.color
   });
 
   @override
@@ -32,7 +32,7 @@ class VideoListViewState extends State<VideoListView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     return widget.videos != null && widget.videos!.isNotEmpty
-        ? AspectRatio(aspectRatio: 16/9,
+        ? Container(height: mediaQueryHeight * .3,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -61,7 +61,7 @@ class VideoListViewState extends State<VideoListView> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).push(AllVideosGridScreen.route(widget.videos!, context, widget.headline));                    },
+                      Navigator.of(context).push(AllVideosGridScreen.route(widget.videos!, context, widget.headline, widget.color));                    },
                     child: Padding(
                       padding: EdgeInsets.all(5),
                       child: Text(
@@ -92,12 +92,10 @@ class VideoListViewState extends State<VideoListView> {
                     return null; // or a placeholder widget
                   }
                   GameVideo video = widget.videos![index];
-                  return AspectRatio(aspectRatio: 16/9,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: VideoPlayerItem(
-                        gameVideo: video
-                      ),
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: VideoPlayerItem(
+                      gameVideo: video, color: widget.color,
                     ),
                   );
                 },

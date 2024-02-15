@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/screenshot.dart';
 import '../igdb_models/game.dart';
@@ -7,9 +8,10 @@ import '../singleton/sinlgleton.dart';
 
 class BannerImageWidget extends StatelessWidget {
   final Game game;
+  final Color color;
 
   BannerImageWidget({
-    required this.game,
+    required this.game, required this.color,
   });
 
   @override
@@ -21,11 +23,10 @@ class BannerImageWidget extends StatelessWidget {
 
     var rng = Random();
 
-    print('Artwork: ${game.artworks![rng.nextInt(game.artworks!.length)].url}');
     return ClipRRect(
       borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(20),
-        bottomRight: Radius.circular(20),
+        bottomLeft: Radius.circular(14),
+        bottomRight: Radius.circular(14),
       ),
       child: Stack(
         children: [
@@ -42,13 +43,19 @@ class BannerImageWidget extends StatelessWidget {
                 ).createShader(bounds);
               },
               blendMode: BlendMode.darken,
-              child: Image.network(
-                '${game.artworks![rng.nextInt(game.artworks!.length)].url}',
-                width: mediaQueryWidth,
+              child:
+              CachedNetworkImage(
                 height: bannerScaleHeight,
+                width:  mediaQueryWidth,
+                imageUrl: '${game.artworks![rng.nextInt(game.artworks!.length)].url}',
+                placeholder: (context, url) =>
+                    Container(
+                      color: color,
+                    ),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
                 fit: BoxFit.cover,
               ),
-            )
+              )
           else
             ShaderMask(
               shaderCallback: (Rect bounds) {

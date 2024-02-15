@@ -1,22 +1,36 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'circular_rating_widget.dart';
 
 class RatingWigdet extends StatelessWidget {
   final double rating;
   final String description;
+  final Color color;
 
   const RatingWigdet(
-      {super.key, required this.rating, required this.description});
+      {super.key, required this.rating, required this.description, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(child: CircularRatingWidget(ratingValue: rating), flex: 1,),
-        Expanded(child: Text(description), flex: 4,),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14), color: color.darken(25)
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(child: CircularRatingWidget(ratingValue: rating), flex: 1,),
+              Expanded(child: Text(description, style: TextStyle(color: Colors.white),), flex: 4,),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

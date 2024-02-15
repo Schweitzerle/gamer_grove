@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
@@ -45,6 +46,7 @@ class _EventUIState extends State<EventUI> {
   }
 
   Future<void> initialize() async {
+    print('Event: ${widget.event.name}');
     setState(() {
       colorpalette = Theme
           .of(widget.buildContext)
@@ -101,7 +103,7 @@ class _EventUIState extends State<EventUI> {
                             .colorScheme
                             .tertiaryContainer,
                       ),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  errorWidget: (context, url, error) => const Icon(FontAwesomeIcons.gamepad),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -208,13 +210,13 @@ class _EventUIState extends State<EventUI> {
         return 'Today';
       }
     } else {
-      return '';
+      return 'N/A';
     }
   }
 
 
   Future<void> getColorPalette() async {
-    if (widget.event.eventLogo!.url != null) {
+    if (widget.event.eventLogo != null && widget.event.eventLogo!.url != null) {
       final PaletteGenerator paletteGenerator =
       await PaletteGenerator.fromImageProvider(
         NetworkImage('${widget.event.eventLogo!.url}'),

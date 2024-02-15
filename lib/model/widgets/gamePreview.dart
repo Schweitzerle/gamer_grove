@@ -125,7 +125,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   }
 
   Future<void> getColorPalette() async {
-    if (widget.game.cover!.url != null) {
+    if (widget.game.cover != null && widget.game.cover!.url != null) {
       final PaletteGenerator paletteGenerator =
           await PaletteGenerator.fromImageProvider(
         NetworkImage('${widget.game.cover!.url}'),
