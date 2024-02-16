@@ -38,19 +38,30 @@ class ImagesContainerSwitchWidget extends StatefulWidget {
 
 class _ImagesContainerSwitchWidgetState
     extends State<ImagesContainerSwitchWidget> {
-  int _selectedIndex = 0; // Index des ausgewählten Abschnitts
+  late int _selectedIndex;
+  final List<int> values = [];
+
+  @override
+  void initState() {
+    init();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    if(widget.game.artworks == null && widget.game.screenshots == null) { return Container();}
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: widget.lightColor.withOpacity(.5),
+        ),
+        child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
             child: SizedBox(
               width: mediaQueryWidth * .4,
               height: mediaQueryHeight * .06,
@@ -58,7 +69,7 @@ class _ImagesContainerSwitchWidgetState
               child: AnimatedToggleSwitch<int>.size(
                 textDirection: TextDirection.ltr,
                 current: _selectedIndex,
-                values: const [0, 1,],
+                values: values,
                 iconOpacity: 0.2,
                 indicatorSize: const Size.fromWidth(100),
                 iconBuilder: iconBuilder,
@@ -82,16 +93,16 @@ class _ImagesContainerSwitchWidgetState
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: mediaQueryHeight * .052),
-          child: SizedBox(
-              child: _selectedIndex == 0
-                  ? ImagePreview(game: widget.game, isArtwork: false)
-                  : ImagePreview(game: widget.game, isArtwork: true)),
-        ),
-      ],
-    );
+          Padding(
+            padding: EdgeInsets.only(top: mediaQueryHeight * .052),
+            child: SizedBox(
+                child: _selectedIndex == 0
+                    ? ImagePreview(game: widget.game, isArtwork: false)
+                    : ImagePreview(game: widget.game, isArtwork: true)),
+          ),
+        ],
+            ),
+      );
   }
 
   Widget iconBuilder(int index) {
@@ -129,5 +140,14 @@ class _ImagesContainerSwitchWidgetState
         ),
       ],
     );
+  }
+
+  void init() {
+    if (widget.game.screenshots != null) values.add(0);
+    if (widget.game.artworks != null) values.add(1);
+    if (values.isNotEmpty) {
+      values.sort();
+      _selectedIndex = values.first;
+    }
   }
 }

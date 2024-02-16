@@ -6,29 +6,58 @@ import '../igdb_models/website.dart'; // Annahme: Die Website-Klasse ist in webs
 
 class WebsiteList extends StatelessWidget {
   final List<Website> websites;
+  final Color lightColor;
 
-  const WebsiteList({Key? key, required this.websites}) : super(key: key);
+  const WebsiteList({Key? key, required this.websites, required this.lightColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: websites.map((website) {
-          return GestureDetector(
-            onTap: () {
-              _launchURL(website.url);
-            },
-            child: Container(
-              margin: EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  _buildWebsiteIcon(website),
-                ],
+    final luminance = lightColor.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: lightColor.withOpacity(.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+            child: Text(
+              'Websites and Links',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: adjustedIconColor
               ),
             ),
-          );
-        }).toList(),
+          ),
+          SizedBox(height: 4),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: websites.map((website) {
+                return GestureDetector(
+                  onTap: () {
+                    _launchURL(website.url);
+                  },
+                  child: Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        _buildWebsiteIcon(website),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

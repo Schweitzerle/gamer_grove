@@ -262,11 +262,17 @@ class ImagePreview extends StatelessWidget {
       );
     } else {
       // Handle case when artworks list is null
-      return Container(
-        child: const Text(
-          'No artworks available for preview.',
-          style: TextStyle(
-            fontSize: 16,
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Text(
+              isArtwork ?
+              'No artworks available for preview.' : 'No screenshots available for preview',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
       );

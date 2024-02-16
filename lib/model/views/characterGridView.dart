@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import '../../repository/igdb/IGDBApiService.dart';
+import '../igdb_models/character.dart';
 import '../igdb_models/game.dart';
+import '../widgets/character_view.dart';
 
-class GameGridView extends StatelessWidget {
-  final List<Game> collectionGames;
+class CharacterGridView extends StatelessWidget {
+  final List<Character> characters;
 
-  GameGridView({
-    required this.collectionGames,
+  CharacterGridView({
+    required this.characters,
   });
 
   @override
@@ -19,31 +21,31 @@ class GameGridView extends StatelessWidget {
       ),
       delegate: SliverChildBuilderDelegate(
             (context, index) {
-          final game = collectionGames[index];
+          final character = characters[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Center(child: GamePreviewView(game: game, isCover: true, buildContext: context)),
+            child: Center(child: CharacterView(character: character, buildContext: context)),
           );
         },
-        childCount: collectionGames.length,
+        childCount: characters.length,
       ),
     );
   }
 }
 
-class AllGamesGridScreen extends StatelessWidget {
-  static Route route(List<Game> game, BuildContext context, String appBarText) {
+class AllCharacterGridScreen extends StatelessWidget {
+  static Route route(List<Character> characters, BuildContext context, String appBarText) {
     return MaterialPageRoute(
-      builder: (context) => AllGamesGridScreen(
-        games: game, appBarText: appBarText,
+      builder: (context) => AllCharacterGridScreen(
+        characters: characters, appBarText: appBarText,
       ),
     );
   }
 
-  final List<Game> games;
+  final List<Character> characters;
   final String appBarText;
 
-  AllGamesGridScreen({required this.games, required this.appBarText});
+  AllCharacterGridScreen({required this.characters, required this.appBarText});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class AllGamesGridScreen extends StatelessWidget {
       body: CustomScrollView(
         physics: BouncingScrollPhysics(),
         slivers: [
-          GameGridView(collectionGames: games,),
+          CharacterGridView(characters: characters,),
         ],
       ),
     );

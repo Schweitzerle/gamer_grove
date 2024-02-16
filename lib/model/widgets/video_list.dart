@@ -17,9 +17,10 @@ class VideoListView extends StatefulWidget {
   final String headline;
   final List<GameVideo>? videos;
   final Color color;
+  final Color lightColor;
   VideoListView({
     required this.headline,
-    required this.videos, required this.color
+    required this.videos, required this.color, required this.lightColor
   });
 
   @override
@@ -32,7 +33,12 @@ class VideoListViewState extends State<VideoListView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     return widget.videos != null && widget.videos!.isNotEmpty
-        ? Container(height: mediaQueryHeight * .3,
+        ? Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: widget.lightColor.withOpacity(.5),
+        ),
+        height: mediaQueryHeight * .3,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -6,18 +6,21 @@ import 'package:flutter/widgets.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:get/get_utils/get_utils.dart';
 import '../igdb_models/game.dart';
-import 'gameGridPaginationView.dart';
-import 'gameGridView.dart';
+import '../views/gameGridPaginationView.dart';
+import '../views/gameGridView.dart';
 
 class GameListView extends StatefulWidget {
   final String headline;
   final List<Game>? games;
   final bool isPagination;
   final String body;
+  final int showLimit;
 
   GameListView({
     required this.headline,
-    required this.games, required this.isPagination, required this.body,
+    required this.games,
+    required this.isPagination,
+    required this.body, required this.showLimit,
   });
 
   @override
@@ -33,6 +36,7 @@ class GameListViewState extends State<GameListView> {
         ? Container(
             margin: EdgeInsets.only(
               top: mediaQueryHeight * 0.02,
+              bottom: 8
             ),
             height: mediaQueryHeight / 3,
             child: Column(
@@ -61,11 +65,16 @@ class GameListViewState extends State<GameListView> {
                           ),
                         ),
                       ),
-                      ElevatedButton(
+                      if (widget.games!.length > widget.showLimit)
+                        ElevatedButton(
                         onPressed: () {
-                          widget.isPagination ?
-                          Navigator.of(context).push(AllGamesGridPaginationScreen.route(widget.headline, widget.body)):
-                          Navigator.of(context).push(AllGamesGridScreen.route(widget.games!, context, widget.headline)) ;
+                          widget.isPagination
+                              ? Navigator.of(context).push(
+                                  AllGamesGridPaginationScreen.route(
+                                      widget.headline, widget.body))
+                              : Navigator.of(context).push(
+                                  AllGamesGridScreen.route(
+                                      widget.games!, context, widget.headline));
                           ;
                         },
                         child: Padding(
@@ -92,7 +101,7 @@ class GameListViewState extends State<GameListView> {
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
-                    itemCount: widget.games!.length,
+                    itemCount: widget.games!.length < widget.showLimit ? widget.games!.length : widget.showLimit,
                     itemBuilder: (context, index) {
                       if (index >= widget.games!.length) {
                         return null; // or a placeholder widget
@@ -114,6 +123,28 @@ class GameListViewState extends State<GameListView> {
                 ),
               ],
             ))
-        : Container();
+        : Padding(
+            padding: EdgeInsets.all(35),
+            child: ClayContainer(
+              depth: 60,
+              spread: 2,
+              customBorderRadius: BorderRadius.circular(14),
+              color: Theme.of(context).cardColor,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: FittedBox(
+                    child: Text(
+                      'No data for ${widget.headline} availale',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Theme.of(context).cardTheme.surfaceTintColor),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
   }
 }

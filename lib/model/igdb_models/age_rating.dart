@@ -4,7 +4,8 @@ import 'package:gamer_grove/model/igdb_models/age_rating_description.dart';
 class AgeRating {
   int id;
   String? category; // Changed to String
-  String? rating;   // Changed to String
+  String? rating; // Changed to String
+  int? ratingID;
   String? checksum;
   List<int>? contentDescriptions;
   String? ratingCoverUrl;
@@ -14,6 +15,7 @@ class AgeRating {
     required this.id,
     this.category,
     this.rating,
+    this.ratingID,
     this.checksum,
     this.contentDescriptions,
     this.ratingCoverUrl,
@@ -24,11 +26,13 @@ class AgeRating {
     return AgeRating(
       id: json['id'],
       category: json['category'] != null
-          ? _categoryToString(AgeRatingCategoryExtension.fromValue(json['category']))
+          ? _categoryToString(
+              AgeRatingCategoryExtension.fromValue(json['category']))
           : null,
       rating: json['rating'] != null
           ? _ratingToString(AgeRatingRatingExtension.fromString(json['rating']))
           : null,
+      ratingID: json['rating'],
       checksum: json['checksum'],
       contentDescriptions: json['content_descriptions'] != null
           ? List<int>.from(json['content_descriptions'])
@@ -50,11 +54,13 @@ enum AgeRatingCategory {
 }
 
 extension AgeRatingCategoryExtension on AgeRatingCategory {
-  String get value { // Changed to String
+  String get value {
+    // Changed to String
     return _categoryToString(this);
   }
 
-  static AgeRatingCategory fromValue(int value) { // Changed to String
+  static AgeRatingCategory fromValue(int value) {
+    // Changed to String
     switch (value) {
       case 1:
         return AgeRatingCategory.ESRB;
@@ -211,7 +217,7 @@ extension AgeRatingRatingExtension on AgeRatingRating {
   }
 }
 
-  String _categoryToString(AgeRatingCategory? category) {
+String _categoryToString(AgeRatingCategory? category) {
   if (category == null) return 'N/A';
   switch (category) {
     case AgeRatingCategory.ESRB:

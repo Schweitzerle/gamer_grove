@@ -6,26 +6,49 @@ import '../igdb_models/involved_companies.dart';
 
 class InvolvedCompaniesList extends StatelessWidget {
   final List<InvolvedCompany> involvedCompanies;
+  final Color lightColor;
 
-  InvolvedCompaniesList({required this.involvedCompanies});
+  InvolvedCompaniesList({required this.involvedCompanies, required this.lightColor});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildCategory("Publisher"),
-          buildCategory("Developer"),
-          buildCategory("Porting"),
-          buildCategory("Supporting"),
-        ],
+    final luminance = lightColor.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
+    return  Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: lightColor.withOpacity(.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+              child: Text(
+                'Involved Companies',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: adjustedIconColor
+                ),
+              ),
+            ),
+            buildCategory("Publisher", adjustedIconColor, lightColor),
+            buildCategory("Developer", adjustedIconColor, lightColor),
+            buildCategory("Porting", adjustedIconColor, lightColor),
+            buildCategory("Supporting", adjustedIconColor, lightColor),
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildCategory(String category) {
+  Widget buildCategory(String category, Color color, Color backgroundColor) {
     List<InvolvedCompany> companies = [];
     String title = "";
 
@@ -52,29 +75,39 @@ class InvolvedCompaniesList extends StatelessWidget {
       return SizedBox(); // Wenn die Liste leer ist, wird nichts angezeigt
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: backgroundColor,
+      ),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
             ),
-          ),
+            SizedBox(height: 4),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: companies.map((company) {
+                  return CompanyCard(company: company.company);
+                }).toList(),
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 4),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: companies.map((company) {
-              return CompanyCard(company: company.company);
-            }).toList(),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

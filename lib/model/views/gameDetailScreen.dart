@@ -12,8 +12,8 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/widgets/RatingWidget.dart';
-import 'package:gamer_grove/model/widgets/age_rating_view.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
+import 'package:gamer_grove/model/widgets/characterListPreview.dart';
 import 'package:gamer_grove/model/widgets/character_view.dart';
 import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:gamer_grove/model/widgets/collection_view.dart';
@@ -27,6 +27,7 @@ import 'package:gamer_grove/model/widgets/game_engine_view.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/toggleSwitchGamesContainer.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchImageContainers.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchSummaryStorylineView.dart';
 import 'package:gamer_grove/model/widgets/video_list.dart';
@@ -44,7 +45,8 @@ import '../singleton/sinlgleton.dart';
 import 'dart:developer';
 
 import '../widgets/language_support_table.dart';
-import 'gameListPreview.dart';
+import '../widgets/gameListPreview.dart';
+import 'gameGridView.dart';
 
 class GameDetailScreen extends StatefulWidget {
   static Route route(Game game, BuildContext context) {
@@ -114,7 +116,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       };
 
       query characters "Game Characters" {
-        fields akas, checksum,country_name, created_at, description, games.*, games.cover.*, gender, mug_shot, name, slug, species, updated_at, url;
+        fields akas, checksum,country_name, created_at, description, games.*, games.cover.*, gender, mug_shot, mug_shot.*, name, slug, species, updated_at, url;
         where games = [${widget.game.id}];
       };
       
@@ -383,337 +385,195 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         game: games[0],
                         darkColor: darkColor,
                         lightColor: lightColor),
-                  SizedBox(height: 10),
-                  games.isNotEmpty && games[0].versionParent != null
-                      ? Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClayContainer(
-                                spread: 2,
-                                depth: 60,
-                                customBorderRadius: BorderRadius.circular(12),
-                                color: Theme.of(context).cardColor,
-                                child: Padding(
-                                  padding: EdgeInsets.all(5),
-                                  child: Text(
-                                    'Version Parent Game',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                height: mediaQueryHeight * .3,
-                                width: mediaQueryWidth * .4,
-                                child: GamePreviewView(
-                                  game: games[0].versionParent!,
-                                  isCover: false,
-                                  buildContext: context,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(),
-                  SizedBox(height: 10),
-                  games.isNotEmpty && games[0].parentGame != null
-                      ? Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClayContainer(
-                                spread: 2,
-                                depth: 60,
-                                customBorderRadius: BorderRadius.circular(12),
-                                color: Theme.of(context).cardColor,
-                                child: Padding(
-                                  padding: EdgeInsets.all(5),
-                                  child: Text(
-                                    'Parent Game',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                height: mediaQueryHeight * .3,
-                                width: mediaQueryWidth * .4,
-                                child: GamePreviewView(
-                                  game: games[0].parentGame!,
-                                  isCover: false,
-                                  buildContext: context,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(),
+                  SizedBox(height: 14 ,),
+                  if (games.isNotEmpty)
+                    GamesContainerSwitchWidget(
+                        game: games[0],
+                        darkColor: darkColor,
+                        lightColor: lightColor),
+                  SizedBox(height: 14 ,),
                   Padding(
                     padding: EdgeInsets.all(8),
                     child: StaggeredGrid.count(
                       crossAxisCount: 4,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 14,
                       children: [
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 3,
-                          mainAxisCellCount: 2,
-                          child: games.isNotEmpty &&
-                                  games[0].franchises != null &&
-                                  games[0].franchises![0].games != null
-                              ? FranchiseView(
-                                  franchise: games[0].franchises![0]!,
-                                  colorPalette: darkColor,
-                                )
-                              : Container(),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClayContainer(
-                            depth: 60,
-                            spread: 2,
-                            customBorderRadius: BorderRadius.circular(12),
-                            color: Theme.of(context).cardColor,
-                            child: Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Center(
-                                child: FittedBox(
-                                  child: Text(
-                                    'Coming...',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClayContainer(
-                            depth: 60,
-                            spread: 2,
-                            customBorderRadius: BorderRadius.circular(12),
-                            color: Theme.of(context).cardColor,
-                            child: Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Center(
-                                child: FittedBox(
-                                  child: Text(
-                                    'Coming...',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClayContainer(
-                            depth: 60,
-                            spread: 2,
-                            customBorderRadius: BorderRadius.circular(12),
-                            color: Theme.of(context).cardColor,
-                            child: Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Center(
-                                child: FittedBox(
-                                  child: Text(
-                                    'Coming...',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        StaggeredGridTile.count(
+                        if (games.isNotEmpty &&
+                            games[0].franchises != null &&
+                            games[0].franchises![0].games != null)
+                          StaggeredGridTile.count(
                             crossAxisCellCount: 3,
                             mainAxisCellCount: 2,
-                            child: games.isNotEmpty &&
-                                    games[0].collection != null &&
-                                    games[0].collection!.games != null
-                                ? CollectionView(
-                                    collection: games[0].collection!,
-                                    colorPalette: darkColor,
-                                  )
-                                : Container()),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClayContainer(
-                            depth: 60,
-                            spread: 2,
-                            customBorderRadius: BorderRadius.circular(12),
-                            color: Theme.of(context).cardColor,
-                            child: Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Center(
-                                child: FittedBox(
-                                  child: Text(
-                                    'Coming...',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Theme.of(context)
-                                            .cardTheme
-                                            .surfaceTintColor),
+                            child: FranchiseView(
+                              franchise: games[0].franchises![0]!,
+                              colorPalette: lightColor,
+                            ),
+                          ),
+                        if (games.isNotEmpty &&
+                            games[0].franchises != null &&
+                            games[0].franchises![0].games != null)
+                          StaggeredGridTile.count(
+                            crossAxisCellCount: 1,
+                            mainAxisCellCount: 1,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                    AllGamesGridScreen.route(
+                                        games[0].franchises![0].games!,
+                                        context,
+                                        games[0].franchises![0].name!));
+                              },
+                              child: ClayContainer(
+                                spread: 2,
+                                depth: 60,
+                                borderRadius: 14,
+                                color: lightColor.withOpacity(.5),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(4),
+                                  child: FittedBox(
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Franchise',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Icon(Icons.navigate_next_rounded)
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        if (games.isNotEmpty &&
+                            games[0].franchises != null &&
+                            games[0].franchises![0].games != null)
+                          StaggeredGridTile.count(
+                              crossAxisCellCount: 1,
+                              mainAxisCellCount: 1,
+                              child: Container()),
+                        if (games.isNotEmpty &&
+                            games[0].collection != null &&
+                            games[0].collection!.games != null)
+                          StaggeredGridTile.count(
+                            crossAxisCellCount: 1,
+                            mainAxisCellCount: 1,
+                            child: ClayContainer(
+                              depth: 60,
+                              spread: 2,
+                              customBorderRadius: BorderRadius.circular(12),
+                              color: Theme.of(context).cardColor,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                      AllGamesGridScreen.route(
+                                          games[0].collection!.games!,
+                                          context,
+                                          games[0].collection!.name!));
+                                },
+                                child: ClayContainer(
+                                  spread: 2,
+                                  depth: 60,
+                                  borderRadius: 14,
+                                  color: lightColor.withOpacity(.5),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: FittedBox(
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Collection',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Icon(Icons.navigate_next_rounded)
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (games.isNotEmpty &&
+                            games[0].collection != null &&
+                            games[0].collection!.games != null)
+                          StaggeredGridTile.count(
+                              crossAxisCellCount: 3,
+                              mainAxisCellCount: 2,
+                              child: games.isNotEmpty &&
+                                      games[0].collection != null &&
+                                      games[0].collection!.games != null
+                                  ? CollectionView(
+                                      collection: games[0].collection!,
+                                      colorPalette: lightColor,
+                                    )
+                                  : Container()),
+                        if (games.isNotEmpty &&
+                            games[0].collection != null &&
+                            games[0].collection!.games != null)
+                          StaggeredGridTile.count(
+                              crossAxisCellCount: 1,
+                              mainAxisCellCount: 1,
+                              child: Container()),
                       ],
                     ),
                   ),
+                  SizedBox(height: 14 ,),
                   if (events.isNotEmpty)
                     EventListView(
                       events: events,
                       headline: 'Events',
                     ),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].videos != null)
                     VideoListView(
                       videos: games[0].videos,
                       headline: 'Videos',
                       color: color.color,
+                      lightColor: lightColor,
                     ),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].websites != null)
-                    WebsiteList(websites: games[0].websites!),
+                    WebsiteList(websites: games[0].websites!, lightColor: lightColor,),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].languageSupports != null)
                     LanguageSupportTable(
                       languageSupports: games[0].languageSupports!,
                       color: lightColor,
                     ),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].gameEngines != null)
-                    GameEngineView(gameEngines: games[0].gameEngines!),
+                    GameEngineView(gameEngines: games[0].gameEngines!, lightColor: lightColor,),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].involvedCompanies != null)
                     InvolvedCompaniesList(
-                        involvedCompanies: games[0].involvedCompanies!),
-                  if (games.isNotEmpty) CharacterView(character: characters),
+                      involvedCompanies: games[0].involvedCompanies!,
+                      lightColor: lightColor,
+                    ),
+                  SizedBox(height: 14 ,),
+                  if (games.isNotEmpty)
+                    CharacterListView(
+                      character: characters,
+                      headline: 'Characters',
+                      showLimit: 5,
+                      color: lightColor,
+                    ),
+                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty && games[0].platforms != null)
                     PlatformView(game: games[0], color: lightColor),
-                  games.isNotEmpty && games[0].ageRatings != null
-                      ? AgeRatingListUI(
-                          ageRatings: games[0].ageRatings!,
-                          color: lightColor,
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].bundles != null
-                      ? GameListView(
-                          headline: 'Bundles',
-                          games: games[0].bundles!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].dlcs != null
-                      ? GameListView(
-                          headline: 'DLCs',
-                          games: games[0].dlcs!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].expandedGames != null
-                      ? GameListView(
-                          headline: 'Expanded Games',
-                          games: games[0].expandedGames!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].expansions != null
-                      ? GameListView(
-                          headline: 'Expansions',
-                          games: games[0].expansions!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].forks != null
-                      ? GameListView(
-                          headline: 'Forks',
-                          games: games[0].forks!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].ports != null
-                      ? GameListView(
-                          headline: 'Ports',
-                          games: games[0].ports!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].remakes != null
-                      ? GameListView(
-                          headline: 'Remakes',
-                          games: games[0].remakes!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].remasters != null
-                      ? GameListView(
-                          headline: 'Remasters',
-                          games: games[0].remasters!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].similarGames != null
-                      ? GameListView(
-                          headline: 'Similar Games',
-                          games: games[0].similarGames!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                  games.isNotEmpty && games[0].standaloneExpansions != null
-                      ? GameListView(
-                          headline: 'Standalone Expansions',
-                          games: games[0].standaloneExpansions!,
-                          isPagination: false,
-                          body: '',
-                        )
-                      : Container(),
-                 if(games.isNotEmpty)
-                 ImagesContainerSwitchWidget(game: games[0], darkColor: darkColor, lightColor: lightColor)
+                  SizedBox(height: 14 ,),
+                  if (games.isNotEmpty)
+                    ImagesContainerSwitchWidget(
+                        game: games[0],
+                        darkColor: darkColor,
+                        lightColor: lightColor)
                 ],
               ),
             ],

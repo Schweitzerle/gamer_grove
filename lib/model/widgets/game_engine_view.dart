@@ -5,34 +5,47 @@ import 'package:gamer_grove/model/igdb_models/game_engine.dart';
 
 class GameEngineView extends StatelessWidget {
   final List<GameEngine> gameEngines;
+  final Color lightColor;
 
-  const GameEngineView({Key? key, required this.gameEngines}) : super(key: key);
+  const GameEngineView({Key? key, required this.gameEngines, required this.lightColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            'Game Engines',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    final luminance = lightColor.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: lightColor.withOpacity(.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+            child: Text(
+              'Game Engines',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: adjustedIconColor
+              ),
             ),
           ),
-        ),
-        SizedBox(height: 4),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: gameEngines.map((engine) {
-              return EngineCard(engine: engine);
-            }).toList(),
+          SizedBox(height: 4),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: gameEngines.map((engine) {
+                return EngineCard(engine: engine);
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

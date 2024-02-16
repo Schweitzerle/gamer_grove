@@ -143,7 +143,7 @@ class _AllGamesGridPaginationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.appBarText),
+        title: FittedBox(child: Text(widget.appBarText)),
       ),
       body: GameGridPaginationView(
         pagingController: _pagingController,

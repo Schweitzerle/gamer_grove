@@ -1,4 +1,5 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:clay_containers/clay_containers.dart';
@@ -19,39 +20,51 @@ class PlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            'Platforms',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    final luminance = color.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: color.withOpacity(.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+            child: Text(
+              'Platforms',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: adjustedIconColor
+              ),
             ),
           ),
-        ),
-        SizedBox(height: 4),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: game.platforms!.map((platform) {
-              return PlatformCard(
-                platform: platform,
-                releaseDates: game.releaseDates
-                        ?.where((date) => date.platform?.id == platform.id)
-                        .toList() ??
-                    [],
-                multiplayerModes: game.multiplayerModes
-                        ?.where((mode) => mode.platform?.id == platform.id)
-                        .toList() ??
-                    [], color: color,
-              );
-            }).toList(),
+          SizedBox(height: 4),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: game.platforms!.map((platform) {
+                return PlatformCard(
+                  platform: platform,
+                  releaseDates: game.releaseDates
+                          ?.where((date) => date.platform?.id == platform.id)
+                          .toList() ??
+                      [],
+                  multiplayerModes: game.multiplayerModes
+                          ?.where((mode) => mode.platform?.id == platform.id)
+                          .toList() ??
+                      [], color: color.darken(10),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -83,6 +96,12 @@ class _PlatformCardState extends State<PlatformCard> {
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
+
+    final luminance = widget.color.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -164,19 +183,19 @@ class _PlatformCardState extends State<PlatformCard> {
                   ),
                   if (widget.releaseDates != null &&
                       widget.releaseDates!.isNotEmpty)
-                    _buildReleaseDates("Release Dates", widget.releaseDates!),
+                    _buildReleaseDates("Release Dates", widget.releaseDates!,adjustedIconColor),
                 ],
               ),
             ),
 
-              _buildDataTable("Multiplayer Modes", widget.multiplayerModes!),
+              _buildDataTable("Multiplayer Modes", widget.multiplayerModes!, adjustedIconColor),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildReleaseDates(String title, List<ReleaseDate> dates) {
+  Widget _buildReleaseDates(String title, List<ReleaseDate> dates, Color color) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -185,7 +204,7 @@ class _PlatformCardState extends State<PlatformCard> {
             title,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: color,
             ),
           ),
           Column(
@@ -193,7 +212,7 @@ class _PlatformCardState extends State<PlatformCard> {
             children: dates.map((date) {
               return Text(
                 "${date.human}",
-                style: TextStyle(),
+                style: TextStyle(color: color),
               );
             }).toList(),
           ),
@@ -202,7 +221,7 @@ class _PlatformCardState extends State<PlatformCard> {
     );
   }
 
-  Widget _buildDataTable(String title, List<MultiplayerMode> data) {
+  Widget _buildDataTable(String title, List<MultiplayerMode> data, Color color) {
     return Expanded(
       flex: 3,
       child: Container(
@@ -214,7 +233,7 @@ class _PlatformCardState extends State<PlatformCard> {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: color,
               ),
             ),
             widget.multiplayerModes != null &&
@@ -232,7 +251,7 @@ class _PlatformCardState extends State<PlatformCard> {
                 ],
                 rows: [
                   DataRow(cells: [
-                    DataCell(Flexible(child: Text('Campaign Coop'))),
+                    DataCell(Flexible(child: Text('Campaign Coop', style: TextStyle(color: color),))),
                     DataCell(data.first.campaignCoop != null
                         ? Icon(data.first.campaignCoop!
                             ? Icons.check
@@ -240,64 +259,64 @@ class _PlatformCardState extends State<PlatformCard> {
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Dropin')),
+                    DataCell(Text('Dropin', style: TextStyle(color: color),)),
                     DataCell(data.first.dropin != null
                         ? Icon(data.first.dropin! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('LAN Coop')),
+                    DataCell(Text('LAN Coop', style: TextStyle(color: color),)),
                     DataCell(data.first.lanCoop != null
                         ? Icon(data.first.lanCoop! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Offline Coop')),
+                    DataCell(Text('Offline Coop', style: TextStyle(color: color),)),
                     DataCell(data.first.offlineCoop != null
                         ? Icon(
                             data.first.offlineCoop! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Offline Coop Max')),
+                    DataCell(Text('Offline Coop Max', style: TextStyle(color: color),)),
                     DataCell(data.first.offlineCoopMax != null
                         ? Text(data.first.offlineCoopMax!.toString())
                         : Text('N/A')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Offline Max')),
+                    DataCell(Text('Offline Max', style: TextStyle(color: color),)),
                     DataCell(data.first.offlineMax != null
                         ? Text(data.first.offlineMax!.toString())
                         : Text('N/A')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Online Coop')),
+                    DataCell(Text('Online Coop', style: TextStyle(color: color),)),
                     DataCell(data.first.onlineCoop != null
                         ? Icon(
                             data.first.onlineCoop! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Online Coop Max')),
+                    DataCell(Text('Online Coop Max', style: TextStyle(color: color),)),
                     DataCell(data.first.onlineCoopMax != null
                         ? Text(data.first.onlineCoopMax!.toString())
                         : Text('N/A')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Online Max')),
+                    DataCell(Text('Online Max', style: TextStyle(color: color),)),
                     DataCell(data.first.onlineMax != null
                         ? Text(data.first.onlineMax!.toString())
                         : Text('N/A')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Split Screen')),
+                    DataCell(Text('Split Screen', style: TextStyle(color: color),)),
                     DataCell(data.first.splitScreen != null
                         ? Icon(
                             data.first.splitScreen! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [
-                    DataCell(Text('Split Screen Online')),
+                    DataCell(Text('Split Screen Online', style: TextStyle(color: color),)),
                     DataCell(data.first.splitScreenOnline != null
                         ? Icon(data.first.splitScreenOnline!
                             ? Icons.check
@@ -308,7 +327,7 @@ class _PlatformCardState extends State<PlatformCard> {
               ),
             ) : Padding(
               padding: const EdgeInsets.all(28.0),
-              child: Center(child: Text('No information available'),),
+              child: Center(child: Text('No information available', style: TextStyle(color: color),),),
             ),
           ],
         ),

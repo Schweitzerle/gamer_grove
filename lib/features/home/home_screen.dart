@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
-import 'package:gamer_grove/model/views/gameListPreview.dart';
+import 'package:gamer_grove/model/widgets/gameListPreview.dart';
 import 'package:gamer_grove/repository/igdb/IGDBApiService.dart';
 import 'package:redacted/redacted.dart';
 
@@ -136,19 +136,19 @@ class _HomeScreenState extends State<HomeScreen> {
               headline: 'Meist Gefolgten Spiele',
               games: gamesResponse3,
               isPagination: true,
-              body: getBodyStringMostFollowedGames(),
+              body: getBodyStringMostFollowedGames(), showLimit: 10,
             ),
             GameListView(
               headline: 'Von der Kritik Gelobte Spiele',
-              games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(),
+              games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10,
             ),
             GameListView(
               headline: 'Top Bewertete Spiele',
-              games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(),
+              games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10,
             ),
             GameListView(
               headline: 'Neuste Spiele',
-              games: gamesResponse2, isPagination: true, body: getBodyNewestGames(),
+              games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10,
             ),
 
             // Padding at the bottom for the desired margin

@@ -3,77 +3,6 @@ import 'package:gamer_grove/model/igdb_models/language_support.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
-/*  @override
-  Widget build(BuildContext context) {
-    // Gruppierung von LanguageSupports nach Sprache
-    Map<int, List<LanguageSupport>> groupedSupports = {};
-    languageSupports.forEach((support) {
-      if (!groupedSupports.containsKey(support.language?.id)) {
-        groupedSupports[support.language?.id ?? 0] = [];
-      }
-      groupedSupports[support.language?.id ?? 0]?.add(support);
-    });
-
-    // Erstellung von Zeilen für jede Sprache
-    List<DataRow> rows = [];
-    groupedSupports.forEach((languageId, supports) {
-      // Erstellung von Sets für jedes Language Support Type
-      Set<String> interfaceSet = {};
-      Set<String> audioSet = {};
-      Set<String> subtitlesSet = {};
-
-      // Durchlaufen der Language Supports und Hinzufügen der Support Typen zu den Sets
-      supports.forEach((support) {
-        switch (support.languageSupportType?.name) {
-          case 'Interface':
-            interfaceSet.add('✔️');
-            break;
-          case 'Audio':
-            audioSet.add('✔️');
-            break;
-          case 'Subtitles':
-            subtitlesSet.add('✔️');
-            break;
-          default:
-            break;
-        }
-      });
-
-      // Debug-Ausgabe
-      print('Subtitles Set for Language ${supports.first.language?.name}: $subtitlesSet');
-
-      // Konvertierung der Sets in Zeichenfolgen
-      String interfaceText = interfaceSet.join(', ');
-      String audioText = audioSet.join(', ');
-      String subtitlesText = subtitlesSet.join(', ');
-
-      // Erstellung von DataRow für jede Sprache mit unterstützten Typen
-      DataRow row = DataRow(cells: [
-        DataCell(Text(supports.first.language?.name ?? '')),
-        DataCell(Text(interfaceText)),
-        DataCell(Text(audioText)),
-        DataCell(Text(subtitlesText)), // Hier fügen wir die Untertitel-Zeichenfolge hinzu
-      ]);
-
-      rows.add(row);
-    });
-
-    return DataTable(
-      columns: [
-        DataColumn(label: Text('Language')),
-        DataColumn(label: Text('Interface')),
-        DataColumn(label: Text('Audio')),
-        DataColumn(label: Text('Subtitles')),
-      ],
-      rows: rows,
-    );
-  }
-}*/
-
-import 'package:flutter/material.dart';
-import 'package:gamer_grove/model/igdb_models/language_support.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-
 class LanguageSupportTable extends StatefulWidget {
   final List<LanguageSupport> languageSupports;
   final Color color;
@@ -96,59 +25,81 @@ class _LanguageSupportTableState extends State<LanguageSupportTable> {
 
   @override
   Widget build(BuildContext context) {
+    final luminance = widget.color.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: widget.color
+        color: widget.color.withOpacity(.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SfDataGridTheme(
-          data: SfDataGridThemeData(
-            headerColor: widget.color, // Color for header
-            gridLineColor: Colors.grey, // Color for grid lines
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+            child: Text(
+              'Supported Languages',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: adjustedIconColor,
+              ),
+            ),
           ),
-          child: SfDataGrid(
-            gridLinesVisibility: GridLinesVisibility.horizontal,
-            verticalScrollPhysics: BouncingScrollPhysics(),
-            source: languageDataSource,
-              columnWidthMode: ColumnWidthMode.fill,
-              columns: <GridColumn>[
-                GridColumn(
-                  columnName: 'language',
-                  label: Container(
-                    padding: EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('Language'),
-                  ),
-                ),
-                GridColumn(
-                  columnName: 'interface',
-                  label: Container(
-                    padding: EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('Interface'),
-                  ),
-                ),
-                GridColumn(
-                  columnName: 'audio',
-                  label: Container(
-                    padding: EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('Audio'),
-                  ),
-                ),
-                GridColumn(
-                  columnName: 'subtitles',
-                  label: Container(
-                    padding: EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('Subtitles'),
-                  ),
-                ),
-              ],
+          SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SfDataGridTheme(
+              data: SfDataGridThemeData(
+                headerColor: widget.color, // Color for header
+                gridLineColor: adjustedIconColor, // Color for grid lines
+              ),
+              child: SfDataGrid(
+                gridLinesVisibility: GridLinesVisibility.horizontal,
+                verticalScrollPhysics: BouncingScrollPhysics(),
+                source: languageDataSource,
+                  columnWidthMode: ColumnWidthMode.fill,
+                  columns: <GridColumn>[
+                    GridColumn(
+                      columnName: 'language',
+                      label: Container(
+                        padding: EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('Language', style: TextStyle(color: adjustedIconColor),),
+                      ),
+                    ),
+                    GridColumn(
+                      columnName: 'interface',
+                      label: Container(
+                        padding: EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('Interface', style: TextStyle(color: adjustedIconColor),),
+                      ),
+                    ),
+                    GridColumn(
+                      columnName: 'audio',
+                      label: Container(
+                        padding: EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('Audio', style: TextStyle(color: adjustedIconColor),),
+                      ),
+                    ),
+                    GridColumn(
+                      columnName: 'subtitles',
+                      label: Container(
+                        padding: EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('Subtitles', style: TextStyle(color: adjustedIconColor),),
+                      ),
+                    ),
+                  ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -212,7 +163,7 @@ class LanguageDataSource extends DataGridSource {
         return Container(
           alignment: Alignment.center,
           padding: EdgeInsets.all(8.0),
-          child: Text(dataGridCell.value.toString()),
+          child: Text(dataGridCell.value.toString(), style: TextStyle(color: Colors.white),),
         );
       }).toList(),
     );

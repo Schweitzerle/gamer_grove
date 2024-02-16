@@ -145,7 +145,6 @@ class GameModeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(text.name!);
     return GestureDetector(
       onTap: () {
         final body = 'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title;s follows desc; w follows != null  & game_modes = [${text.id}]; l 20;';

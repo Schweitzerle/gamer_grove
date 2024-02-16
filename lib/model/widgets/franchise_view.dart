@@ -25,7 +25,7 @@ class FranchiseView extends StatelessWidget {
       spread: 2,
       depth: 60,
       borderRadius: 14,
-      color: Theme.of(context).colorScheme.surface,
+      color: colorPalette.withOpacity(.5),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Stack(
@@ -55,36 +55,6 @@ class FranchiseView extends StatelessWidget {
               },
             ),
             // ClayContainer for the "Collection" text
-            Positioned(
-              top: 8, // Adjust the top position to align with the top of the container
-              right: 8, // Adjust the right position to align with the right of the container
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).push(AllGamesGridScreen.route(franchise.games!, context, franchise.name!));
-                },
-                child: ClayContainer(
-                  spread: 2,
-                  depth: 60,
-                  borderRadius: 14,
-                  color: colorPalette,
-                  child: Padding(
-                    padding: const EdgeInsets.all( 6),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Franchise',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Icon(Icons.navigate_next_rounded)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

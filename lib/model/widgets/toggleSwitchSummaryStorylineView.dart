@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/model/widgets/ageRatingView.dart';
 import 'package:gamer_grove/model/widgets/gameModesView.dart';
 import 'package:gamer_grove/model/widgets/playerPerspectiveView.dart';
 import 'package:gamer_grove/model/widgets/themesView.dart';
@@ -36,26 +37,38 @@ class SummaryAndStorylineWidget extends StatefulWidget {
 }
 
 class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
-  int _selectedIndex = 0; // Index des ausgewählten Abschnitts
+  late int _selectedIndex; // Index des ausgewählten Abschnitts
+  final List<int> values = [];
+
+
+  @override
+  void initState() {
+    init();
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: widget.lightColor.withOpacity(.5),
+      ),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
             child: SizedBox(
               width: mediaQueryWidth * .4,
               height: mediaQueryHeight * .06,
               child: AnimatedToggleSwitch<int>.size(
                 textDirection: TextDirection.ltr,
                 current: _selectedIndex,
-                values: const [0, 1, 2, 3],
+                values: values,
                 iconOpacity: 0.2,
                 indicatorSize: const Size.fromWidth(100),
                 iconBuilder: iconBuilder,
@@ -78,198 +91,233 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: mediaQueryHeight * .04),
-          child: SizedBox(
-              child: _selectedIndex == 0
-                  ? Accordion(
-                      disableScrolling: true,
-                      headerBorderColor: widget.lightColor,
-                      headerBorderWidth: 4,
-                      headerBackgroundColor: widget.darkColor,
-                      headerBorderColorOpened: Colors.transparent,
-                      headerBackgroundColorOpened: widget.lightColor,
-                      contentBackgroundColor:
-                          Theme.of(context).colorScheme.background,
-                      contentBorderColor: widget.lightColor,
-                      contentBorderWidth: 4,
-                      contentHorizontalPadding: 10,
-                      scaleWhenAnimating: true,
-                      openAndCloseAnimation: true,
-                      headerPadding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 15),
-                      sectionOpeningHapticFeedback: SectionHapticFeedback.heavy,
-                      sectionClosingHapticFeedback: SectionHapticFeedback.light,
-                      children: [
-                        AccordionSection(
-                          isOpen: false,
-                          contentVerticalPadding: 10,
-                          leftIcon: const Icon(
-                            Icons.info_rounded,
-                          ),
-                          header: const Text(
-                            'Info',
-                          ),
-                          content: Column(
-                            children: [
-                              if (widget.game.genres != null)
-                                GenresList(
-                                  genres: widget.game.genres!,
-                                  color: widget.lightColor,
-                                  headline: 'Genres',
-                                ),
-                              if (widget.game.gameModes != null)
-                                GameModeList(
-                                  gameModes: widget.game.gameModes!,
-                                  color: widget.lightColor,
-                                  headline: 'Game Modes',
-                                ),
-                              if (widget.game.keywords != null)
-                                PlayerPerspectiveList(
-                                  playerPerspective:
-                                      widget.game.playerPerspectives!,
-                                  color: widget.lightColor,
-                                  headline: 'Player Perspectives',
-                                ),
-                              if (widget.game.keywords != null)
-                                ThemeList(
-                                  themes: widget.game.themes!,
-                                  color: widget.lightColor,
-                                  headline: 'Themes',
-                                ),
-                              if (widget.game.keywords != null)
-                                KeywordsList(
-                                  keywords: widget.game.keywords!,
-                                  color: widget.lightColor,
-                                  headline: 'Keywords',
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                  : _selectedIndex == 1
-                      ? Accordion(
-                          disableScrolling: true,
-                          headerBorderColor: widget.lightColor,
-                          headerBorderWidth: 4,
-                          headerBackgroundColor: widget.darkColor,
-                          headerBorderColorOpened: Colors.transparent,
-                          headerBackgroundColorOpened: widget.lightColor,
-                          contentBackgroundColor:
-                              Theme.of(context).colorScheme.background,
-                          contentBorderColor: widget.lightColor,
-                          contentBorderWidth: 4,
-                          contentHorizontalPadding: 10,
-                          scaleWhenAnimating: true,
-                          openAndCloseAnimation: true,
-                          headerPadding: const EdgeInsets.symmetric(
-                              vertical: 7, horizontal: 15),
-                          sectionOpeningHapticFeedback:
-                              SectionHapticFeedback.heavy,
-                          sectionClosingHapticFeedback:
-                              SectionHapticFeedback.light,
-                          children: [
-                            AccordionSection(
-                              isOpen: true,
-                              contentVerticalPadding: 10,
-                              leftIcon: const Icon(
-                                Icons.list_alt_rounded,
-                              ),
-                              header: const Text(
-                                'Summary',
-                              ),
-                              content: Center(
-                                  child: Text(widget.game.summary != null
-                                      ? '${widget.game.summary}'
-                                      : 'N/A')),
+          Padding(
+            padding: EdgeInsets.only(top: mediaQueryHeight * .04),
+            child: SizedBox(
+                child: _selectedIndex == 0
+                    ? Accordion(
+                        disableScrolling: true,
+                        headerBorderColor: widget.lightColor,
+                        headerBorderWidth: 4,
+                        headerBackgroundColor: widget.darkColor,
+                        headerBorderColorOpened: Colors.transparent,
+                        headerBackgroundColorOpened: widget.lightColor,
+                        contentBackgroundColor:
+                            Theme.of(context).colorScheme.background,
+                        contentBorderColor: widget.lightColor,
+                        contentBorderWidth: 4,
+                        contentHorizontalPadding: 10,
+                        scaleWhenAnimating: true,
+                        openAndCloseAnimation: true,
+                        headerPadding: const EdgeInsets.symmetric(
+                            vertical: 7, horizontal: 15),
+                        sectionOpeningHapticFeedback:
+                            SectionHapticFeedback.heavy,
+                        sectionClosingHapticFeedback:
+                            SectionHapticFeedback.light,
+                        children: [
+                          AccordionSection(
+                            isOpen: false,
+                            contentVerticalPadding: 10,
+                            leftIcon: const Icon(
+                              Icons.info_rounded,
                             ),
-                          ],
-                        )
-                      : _selectedIndex == 2
-                          ? Accordion(
-                              headerBorderColor: widget.lightColor,
-                              headerBorderWidth: 4,
-                              headerBackgroundColor: widget.darkColor,
-                              headerBorderColorOpened: Colors.transparent,
-                              headerBackgroundColorOpened: widget.lightColor,
-                              contentBackgroundColor:
-                                  Theme.of(context).colorScheme.background,
-                              contentBorderColor: widget.lightColor,
-                              contentBorderWidth: 4,
-                              contentHorizontalPadding: 10,
-                              scaleWhenAnimating: true,
-                              openAndCloseAnimation: true,
-                              headerPadding: const EdgeInsets.symmetric(
-                                  vertical: 7, horizontal: 15),
-                              sectionOpeningHapticFeedback:
-                                  SectionHapticFeedback.heavy,
-                              sectionClosingHapticFeedback:
-                                  SectionHapticFeedback.light,
+                            header: const Text(
+                              'Info',
+                            ),
+                            content: Column(
                               children: [
-                                  AccordionSection(
-                                    isOpen: true,
-                                    contentVerticalPadding: 10,
-                                    leftIcon: const Icon(
-                                      Icons.menu_book_rounded,
-                                    ),
-                                    header: const Text(
-                                      'Storyline',
-                                    ),
-                                    content: Center(
-                                        child: Text(
-                                            widget.game.storyline != null
-                                                ? '${widget.game.storyline}'
-                                                : 'N/A')),
+                                if (widget.game.genres != null)
+                                  GenresList(
+                                    genres: widget.game.genres!,
+                                    color: widget.lightColor,
+                                    headline: 'Genres',
                                   ),
-                                ])
-                          : Accordion(
-                              headerBorderColor: widget.lightColor,
-                              headerBorderWidth: 4,
-                              headerBackgroundColor: widget.darkColor,
-                              headerBorderColorOpened: Colors.transparent,
-                              headerBackgroundColorOpened: widget.lightColor,
-                              contentBackgroundColor:
-                                  Theme.of(context).colorScheme.background,
-                              contentBorderColor: widget.lightColor,
-                              contentBorderWidth: 4,
-                              contentHorizontalPadding: 10,
-                              scaleWhenAnimating: true,
-                              openAndCloseAnimation: true,
-                              headerPadding: const EdgeInsets.symmetric(
-                                  vertical: 7, horizontal: 15),
-                              sectionOpeningHapticFeedback:
-                                  SectionHapticFeedback.heavy,
-                              sectionClosingHapticFeedback:
-                                  SectionHapticFeedback.light,
-                              children: [
-                                  AccordionSection(
-                                    isOpen: true,
-                                    contentVerticalPadding: 10,
-                                    leftIcon: const Icon(
-                                      Icons.menu_book_rounded,
-                                    ),
-                                    header: const Text(
-                                      'Other Ratings',
-                                    ),
-                                    content: Center(
-                                        child: Column(
-                                      children: [
-                                        RatingWigdet(
-                                            rating: widget.game.aggregatedRating!,
-                                            description:
-                                                'Aggregated Rating based on ${widget.game.aggregatedRatingCount} external critic scores', color: widget.lightColor,),
-                                        RatingWigdet(
-                                            rating: widget.game.rating!,
-                                            description:
-                                                'Average IGDB user rating based on ${widget.game.ratingCount} users', color: widget.lightColor,),
-                                      ],
-                                    )),
+                                if (widget.game.gameModes != null)
+                                  GameModeList(
+                                    gameModes: widget.game.gameModes!,
+                                    color: widget.lightColor,
+                                    headline: 'Game Modes',
                                   ),
-                                ])),
-        ),
-      ],
+                                if (widget.game.playerPerspectives != null)
+                                  PlayerPerspectiveList(
+                                    playerPerspective:
+                                        widget.game.playerPerspectives!,
+                                    color: widget.lightColor,
+                                    headline: 'Player Perspectives',
+                                  ),
+                                if (widget.game.themes != null)
+                                  ThemeList(
+                                    themes: widget.game.themes!,
+                                    color: widget.lightColor,
+                                    headline: 'Themes',
+                                  ),
+                                if (widget.game.keywords != null)
+                                  KeywordsList(
+                                    keywords: widget.game.keywords!,
+                                    color: widget.lightColor,
+                                    headline: 'Keywords',
+                                  ),
+                                if (widget.game.keywords != null)
+                                  AgeRatingList(
+                                    ageRating: widget.game.ageRatings!,
+                                    color: widget.lightColor,
+                                    headline: 'Age Ratings',
+                                  )
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : _selectedIndex == 1
+                        ? Accordion(
+                            disableScrolling: true,
+                            headerBorderColor: widget.lightColor,
+                            headerBorderWidth: 4,
+                            headerBackgroundColor: widget.darkColor,
+                            headerBorderColorOpened: Colors.transparent,
+                            headerBackgroundColorOpened: widget.lightColor,
+                            contentBackgroundColor:
+                                Theme.of(context).colorScheme.background,
+                            contentBorderColor: widget.lightColor,
+                            contentBorderWidth: 4,
+                            contentHorizontalPadding: 10,
+                            scaleWhenAnimating: true,
+                            openAndCloseAnimation: true,
+                            headerPadding: const EdgeInsets.symmetric(
+                                vertical: 7, horizontal: 15),
+                            sectionOpeningHapticFeedback:
+                                SectionHapticFeedback.heavy,
+                            sectionClosingHapticFeedback:
+                                SectionHapticFeedback.light,
+                            children: [
+                              AccordionSection(
+                                isOpen: true,
+                                contentVerticalPadding: 10,
+                                leftIcon: const Icon(
+                                  Icons.list_alt_rounded,
+                                ),
+                                header: const Text(
+                                  'Summary',
+                                ),
+                                content: Center(
+                                    child: Text(widget.game.summary != null
+                                        ? '${widget.game.summary}'
+                                        : 'N/A')),
+                              ),
+                            ],
+                          )
+                        : _selectedIndex == 2
+                            ? Accordion(
+                                headerBorderColor: widget.lightColor,
+                                headerBorderWidth: 4,
+                                headerBackgroundColor: widget.darkColor,
+                                headerBorderColorOpened: Colors.transparent,
+                                headerBackgroundColorOpened: widget.lightColor,
+                                contentBackgroundColor:
+                                    Theme.of(context).colorScheme.background,
+                                contentBorderColor: widget.lightColor,
+                                contentBorderWidth: 4,
+                                contentHorizontalPadding: 10,
+                                scaleWhenAnimating: true,
+                                openAndCloseAnimation: true,
+                                headerPadding: const EdgeInsets.symmetric(
+                                    vertical: 7, horizontal: 15),
+                                sectionOpeningHapticFeedback:
+                                    SectionHapticFeedback.heavy,
+                                sectionClosingHapticFeedback:
+                                    SectionHapticFeedback.light,
+                                children: [
+                                    AccordionSection(
+                                      isOpen: true,
+                                      contentVerticalPadding: 10,
+                                      leftIcon: const Icon(
+                                        Icons.menu_book_rounded,
+                                      ),
+                                      header: const Text(
+                                        'Storyline',
+                                      ),
+                                      content: Center(
+                                          child: Text(
+                                              widget.game.storyline != null
+                                                  ? '${widget.game.storyline}'
+                                                  : 'N/A')),
+                                    ),
+                                  ])
+                            : Accordion(
+                                headerBorderColor: widget.lightColor,
+                                headerBorderWidth: 4,
+                                headerBackgroundColor: widget.darkColor,
+                                headerBorderColorOpened: Colors.transparent,
+                                headerBackgroundColorOpened: widget.lightColor,
+                                contentBackgroundColor:
+                                    Theme.of(context).colorScheme.background,
+                                contentBorderColor: widget.lightColor,
+                                contentBorderWidth: 4,
+                                contentHorizontalPadding: 10,
+                                scaleWhenAnimating: true,
+                                openAndCloseAnimation: true,
+                                headerPadding: const EdgeInsets.symmetric(
+                                    vertical: 7, horizontal: 15),
+                                sectionOpeningHapticFeedback:
+                                    SectionHapticFeedback.heavy,
+                                sectionClosingHapticFeedback:
+                                    SectionHapticFeedback.light,
+                                children: [
+                                    AccordionSection(
+                                      isOpen: true,
+                                      contentVerticalPadding: 10,
+                                      leftIcon: const Icon(
+                                        Icons.menu_book_rounded,
+                                      ),
+                                      header: const Text(
+                                        'Other Ratings',
+                                      ),
+                                      content: Center(
+                                          child: Column(
+                                        children: [
+                                          if (widget.game.aggregatedRating ==
+                                                  null &&
+                                              widget.game
+                                                      .aggregatedRatingCount ==
+                                                  null &&
+                                              widget.game.rating == null &&
+                                              widget.game.ratingCount == null)
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Center(
+                                                child: Text(
+                                                    'No other ratings available'),
+                                              ),
+                                            ),
+                                          if (widget.game.aggregatedRating !=
+                                                  null &&
+                                              widget.game
+                                                      .aggregatedRatingCount !=
+                                                  null)
+                                            RatingWigdet(
+                                              rating:
+                                                  widget.game.aggregatedRating!,
+                                              description:
+                                                  'Aggregated Rating based on ${widget.game.aggregatedRatingCount} external critic scores',
+                                              color: widget.lightColor,
+                                            ),
+                                          if (widget.game.rating != null &&
+                                              widget.game.ratingCount != null)
+                                            RatingWigdet(
+                                              rating: widget.game.rating!,
+                                              description:
+                                                  'Average IGDB user rating based on ${widget.game.ratingCount} users',
+                                              color: widget.lightColor,
+                                            ),
+                                        ],
+                                      )),
+                                    ),
+                                  ])),
+          ),
+        ],
+      ),
     );
   }
 
@@ -305,7 +353,9 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
           ? widget.darkColor
           : value == 1
               ? widget.darkColor.darken(10)
-              : value == 2 ? widget.darkColor.darken(15) : widget.darkColor.darken(20),
+              : value == 2
+                  ? widget.darkColor.darken(15)
+                  : widget.darkColor.darken(20),
       borderColor: Colors.transparent,
       borderRadius: BorderRadius.circular(10.0),
       boxShadow: [
@@ -317,5 +367,24 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
         ),
       ],
     );
+  }
+
+  void init() {
+    if (widget.game.genres != null ||
+        widget.game.gameModes != null ||
+        widget.game.playerPerspectives != null ||
+        widget.game.keywords != null ||
+        widget.game.themes != null) values.add(0);
+    if (widget.game.summary != null) values.add(1);
+    if (widget.game.storyline != null) values.add(2);
+    if (widget.game.aggregatedRatingCount != null ||
+        widget.game.aggregatedRating != null ||
+        widget.game.ratingCount != null ||
+        widget.game.rating != null) values.add(3);
+
+    if (values.isNotEmpty) {
+      values.sort();
+      _selectedIndex = values.first;
+    }
   }
 }
