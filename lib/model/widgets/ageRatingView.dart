@@ -1,4 +1,5 @@
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/age_rating.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
@@ -47,7 +48,7 @@ class AllAgeRatingsGridScreen extends StatelessWidget {
         child: Wrap(
           children: ageRating.map((text) {
             return AgeRatingWidget(
-                text: text, color: color, textColor: textColor);
+                text: text, color: color.lighten(10));
           }).toList(),
         ),
       ),
@@ -74,12 +75,12 @@ class AgeRatingList extends StatelessWidget {
     final adjustedIconColor =
         luminance > targetLuminance ? Colors.black : Colors.white;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.all(4.0),
       child: Container(
         padding: EdgeInsets.all(4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: color.withOpacity(.3),
+          color: color,
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
@@ -92,19 +93,26 @@ class AgeRatingList extends StatelessWidget {
                   depth: 60,
                   spread: 2,
                   customBorderRadius: BorderRadius.circular(12),
-                  color: Theme.of(context).cardColor,
+                  color: color,
                   child: Padding(
                     padding: EdgeInsets.all(5),
                     child: Text(
                       headline,
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                          color: Theme.of(context).cardTheme.surfaceTintColor),
+                          color: adjustedIconColor),
                     ),
                   ),
                 ),
                 if (ageRating.length > 5)
                   ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                              (Set<MaterialState> states) {
+                            return color;
+                          },
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.of(context).push(
                             AllAgeRatingsGridScreen.route(ageRating, context,
@@ -116,7 +124,7 @@ class AgeRatingList extends StatelessWidget {
                           'All',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: color,
+                            color: adjustedIconColor,
                           ),
                         ),
                       )),
@@ -130,7 +138,7 @@ class AgeRatingList extends StatelessWidget {
               runSpacing: 5.0,
               children: ageRating.take(5).map((text) {
                 return AgeRatingWidget(
-                    text: text, color: color, textColor: adjustedIconColor);
+                    text: text, color: color.lighten(10));
               }).toList(),
             ),
           ]),
@@ -143,17 +151,19 @@ class AgeRatingList extends StatelessWidget {
 class AgeRatingWidget extends StatelessWidget {
   final AgeRating text;
   final Color color;
-  final Color textColor;
 
   const AgeRatingWidget({
     required this.text,
     required this.color,
-    required this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    print(text.ratingID);
+    final luminance = color.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
     return JustTheTooltip(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       content: Padding(
@@ -173,7 +183,7 @@ class AgeRatingWidget extends StatelessWidget {
               'AgeRating: ${text.rating}', body));
         },
         child: Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(3.0),
           child: ClayContainer(
             depth: 60,
             spread: 2,
@@ -183,7 +193,7 @@ class AgeRatingWidget extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
               child: Text(
                 '${text.category}: ${text.rating}',
-                style: TextStyle(color: textColor),
+                style: TextStyle(color: adjustedIconColor),
               ),
             ),
           ),

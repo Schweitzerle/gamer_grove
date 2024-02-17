@@ -5,17 +5,20 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/features/home/home_screen.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
 import 'package:gamer_grove/model/igdb_models/franchise.dart';
+import 'package:gamer_grove/model/igdb_models/game_video.dart';
+import 'package:gamer_grove/model/views/videosGridView.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
+import 'package:gamer_grove/model/widgets/video_player_view.dart';
 
 import '../igdb_models/game.dart';
 import '../views/gameGridView.dart';
-class FranchiseStaggeredView extends StatelessWidget{
+class VideoStaggeredView extends StatelessWidget{
   final Game game;
   final Color colorPalette;
   final Color headerBorderColor;
   final Color adjustedTextColor;
 
-  const FranchiseStaggeredView({super.key, required this.game, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
+  const VideoStaggeredView({super.key, required this.game, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
 
 
   @override
@@ -27,28 +30,26 @@ class FranchiseStaggeredView extends StatelessWidget{
           mainAxisSpacing: 4,
           crossAxisSpacing: 8,
           children: [
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (game.videos != null)
               StaggeredGridTile.count(
                 crossAxisCellCount: 3,
                 mainAxisCellCount: 2,
-                child: FranchiseView(
-                  franchise: game.franchises![0],
+                child: VideoItemPreview(
+                  videos: game.videos!,
                   color: colorPalette,
                 ),
               ),
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (game.videos != null)
               StaggeredGridTile.count(
                 crossAxisCellCount: 1,
                 mainAxisCellCount: 1,
                 child: InkWell(
                   onTap: () {
                     Navigator.of(context).push(
-                        AllGamesGridScreen.route(
-                            game.franchises![0].games!,
+                        AllVideosGridScreen.route(
+                            game.videos!,
                             context,
-                            game.franchises![0].name!));
+                            'Videos', colorPalette));
                   },
                   child: ClayContainer(
                     spread: 2,
@@ -62,7 +63,7 @@ class FranchiseStaggeredView extends StatelessWidget{
                         child: Row(
                           children: [
                             Text(
-                              'Franchise',
+                              'Videos',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -77,8 +78,7 @@ class FranchiseStaggeredView extends StatelessWidget{
                   ),
                 ),
               ),
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (game.videos != null)
               StaggeredGridTile.count(
                   crossAxisCellCount: 1,
                   mainAxisCellCount: 1,
@@ -88,22 +88,26 @@ class FranchiseStaggeredView extends StatelessWidget{
   }
 }
 
-class FranchiseView extends StatelessWidget {
-  final Franchise franchise;
+class VideoItemPreview extends StatelessWidget {
+  final List<GameVideo> videos;
   final Color color;
-  const FranchiseView({Key? key, required this.franchise, required this.color}) : super(key: key);
+
+  const VideoItemPreview({
+    Key? key,
+    required this.videos,
+    required this.color,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final mediaWidth = MediaQuery.of(context).size.width;
-    final mediaHeight = MediaQuery.of(context).size.height;
-
-    final List<Game> randGames = franchise.games!.toList()..shuffle();
-    final List<Game> selectedGames = randGames.take(5).toList();
     final containerBackgroundColor = color.darken(20);
     final headerBorderColor = color;
     final contentBackgroundColor = color.darken(10).withOpacity(.8);
 
+    // Shuffle the list of videos
+    final List<GameVideo> shuffledVideos = List.from(videos)..shuffle();
+    // Select the first video from the shuffled list
+    final GameVideo selectedVideo = shuffledVideos.first;
 
     return ClayContainer(
       spread: 2,
@@ -113,36 +117,9 @@ class FranchiseView extends StatelessWidget {
       parentColor: headerBorderColor.lighten(40),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: Stack(
-          children: [
-            // Game previews
-            ...List.generate(
-              franchise.games!.length > 5 ? 5 : franchise.games!.length,
-                  (index) {
-                final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
-                final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
-                return Positioned(
-                  top: topOffset,
-                  left: rightOffset,
-                  child: SizedBox(
-                    width: mediaWidth * .28,
-                    height: mediaHeight * .2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: GamePreviewView(
-                        game: selectedGames[index],
-                        isCover: true,
-                        buildContext: context,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // ClayContainer for the "Collection" text
-          ],
-        ),
+        child: VideoPlayerItem(gameVideo: selectedVideo, color: containerBackgroundColor),
       ),
     );
   }
 }
+

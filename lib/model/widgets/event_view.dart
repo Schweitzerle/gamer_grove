@@ -21,22 +21,8 @@ class EventUI extends StatefulWidget {
 }
 
 
-
-
-
-
-//TODO: wenn url null, dann zeigt es den container gar nicht mehr an
-
-
-
-
-
-
-
 class _EventUIState extends State<EventUI> {
   late Color colorpalette;
-  late Color lightColor;
-  late Color darkColor;
   bool isColorLoaded = false;
 
   @override
@@ -52,14 +38,6 @@ class _EventUIState extends State<EventUI> {
           .of(widget.buildContext)
           .colorScheme
           .inversePrimary;
-      lightColor = Theme
-          .of(widget.buildContext)
-          .colorScheme
-          .primary;
-      darkColor = Theme
-          .of(widget.buildContext)
-          .colorScheme
-          .background;
     });
     await Future.wait([getColorPalette()]);
   }
@@ -85,7 +63,7 @@ class _EventUIState extends State<EventUI> {
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: ClayContainer(
-          color: darkColor,
+          color: colorpalette,
           spread: 2,
           depth: 60,
           borderRadius: 14,
@@ -229,16 +207,6 @@ class _EventUIState extends State<EventUI> {
                 .of(widget.buildContext)
                 .colorScheme
                 .inversePrimary;
-        lightColor = paletteGenerator.lightVibrantColor?.color ??
-            Theme
-                .of(widget.buildContext)
-                .colorScheme
-                .primary;
-        darkColor = paletteGenerator.darkVibrantColor?.color ??
-            Theme
-                .of(widget.buildContext)
-                .colorScheme
-                .background;
         isColorLoaded = true;
       });
     }

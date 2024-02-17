@@ -16,35 +16,37 @@ class GameEngineView extends StatelessWidget {
 
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
-    return Container(
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: lightColor.withOpacity(.5),
+        color: lightColor,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
-            child: Text(
-              'Game Engines',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: adjustedIconColor
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+              child: Text(
+                'Game Engines',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: adjustedIconColor
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 4),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: gameEngines.map((engine) {
-                return EngineCard(engine: engine);
-              }).toList(),
+            SizedBox(height: 4),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: gameEngines.map((engine) {
+                  return EngineCard(engine: engine);
+                }).toList(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -30,76 +30,50 @@ class _LanguageSupportTableState extends State<LanguageSupportTable> {
 
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: widget.color.withOpacity(.5),
+    return SfDataGridTheme(
+      data: SfDataGridThemeData(
+        headerColor: widget.color, // Color for header
+        gridLineColor: adjustedIconColor, // Color for grid lines
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-            child: Text(
-              'Supported Languages',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: adjustedIconColor,
+      child: SfDataGrid(
+        gridLinesVisibility: GridLinesVisibility.horizontal,
+        verticalScrollPhysics: BouncingScrollPhysics(),
+        source: languageDataSource,
+          columnWidthMode: ColumnWidthMode.fill,
+          columns: <GridColumn>[
+            GridColumn(
+              columnName: 'language',
+              label: Container(
+                padding: EdgeInsets.all(8.0),
+                alignment: Alignment.center,
+                child: Text('Language', style: TextStyle(color: adjustedIconColor),),
               ),
             ),
-          ),
-          SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SfDataGridTheme(
-              data: SfDataGridThemeData(
-                headerColor: widget.color, // Color for header
-                gridLineColor: adjustedIconColor, // Color for grid lines
-              ),
-              child: SfDataGrid(
-                gridLinesVisibility: GridLinesVisibility.horizontal,
-                verticalScrollPhysics: BouncingScrollPhysics(),
-                source: languageDataSource,
-                  columnWidthMode: ColumnWidthMode.fill,
-                  columns: <GridColumn>[
-                    GridColumn(
-                      columnName: 'language',
-                      label: Container(
-                        padding: EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        child: Text('Language', style: TextStyle(color: adjustedIconColor),),
-                      ),
-                    ),
-                    GridColumn(
-                      columnName: 'interface',
-                      label: Container(
-                        padding: EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        child: Text('Interface', style: TextStyle(color: adjustedIconColor),),
-                      ),
-                    ),
-                    GridColumn(
-                      columnName: 'audio',
-                      label: Container(
-                        padding: EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        child: Text('Audio', style: TextStyle(color: adjustedIconColor),),
-                      ),
-                    ),
-                    GridColumn(
-                      columnName: 'subtitles',
-                      label: Container(
-                        padding: EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        child: Text('Subtitles', style: TextStyle(color: adjustedIconColor),),
-                      ),
-                    ),
-                  ],
+            GridColumn(
+              columnName: 'interface',
+              label: Container(
+                padding: EdgeInsets.all(8.0),
+                alignment: Alignment.center,
+                child: Text('Interface', style: TextStyle(color: adjustedIconColor),),
               ),
             ),
-          ),
-        ],
+            GridColumn(
+              columnName: 'audio',
+              label: Container(
+                padding: EdgeInsets.all(8.0),
+                alignment: Alignment.center,
+                child: Text('Audio', style: TextStyle(color: adjustedIconColor),),
+              ),
+            ),
+            GridColumn(
+              columnName: 'subtitles',
+              label: Container(
+                padding: EdgeInsets.all(8.0),
+                alignment: Alignment.center,
+                child: Text('Subtitles', style: TextStyle(color: adjustedIconColor),),
+              ),
+            ),
+          ],
       ),
     );
   }

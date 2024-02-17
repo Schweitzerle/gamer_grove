@@ -11,27 +11,32 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
+import 'package:gamer_grove/model/igdb_models/website.dart';
 import 'package:gamer_grove/model/widgets/RatingWidget.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
 import 'package:gamer_grove/model/widgets/characterListPreview.dart';
 import 'package:gamer_grove/model/widgets/character_view.dart';
+import 'package:gamer_grove/model/widgets/characters_view.dart';
 import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:gamer_grove/model/widgets/collection_view.dart';
 import 'package:gamer_grove/model/widgets/company_view.dart';
 import 'package:gamer_grove/model/widgets/countUpRow.dart';
 import 'package:gamer_grove/model/widgets/event_list.dart';
 import 'package:gamer_grove/model/widgets/event_view.dart';
+import 'package:gamer_grove/model/widgets/events_view.dart';
 import 'package:gamer_grove/model/widgets/franchise_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/game_engine_view.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/toggleSwitchCollectionEventsContainers.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchGamesContainer.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchImageContainers.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchSummaryStorylineView.dart';
 import 'package:gamer_grove/model/widgets/video_list.dart';
 import 'package:gamer_grove/model/widgets/video_player_view.dart';
+import 'package:gamer_grove/model/widgets/video_view.dart';
 import 'package:gamer_grove/model/widgets/website_List.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -93,15 +98,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   @override
   void initState() {
     super.initState();
-    initialize();
-  }
-
-  Future<void> initialize() async {
     setState(() {
       colorPalette = Theme.of(widget.context).colorScheme.inversePrimary;
       lightColor = Theme.of(widget.context).colorScheme.primary;
       darkColor = Theme.of(widget.context).colorScheme.background;
     });
+    initialize();
+  }
+
+  Future<void> initialize() async {
     await Future.wait([getColorPalette(), getIGDBData()]);
   }
 
@@ -136,6 +141,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             orElse: () => null);
         if (gameResponse != null) {
           games = apiService.parseResponseToGame(gameResponse['result']);
+          if (games[0].websites != null) {
+            games[0].websites!.add(Website(id: -1, url: games[0].url!));
+          } else {
+            games[0].websites = [Website(id: -1, url: games[0].url!)];
+          }
         }
 
         // Extract data for game characters
@@ -196,6 +206,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
     final coverPaddingScaleHeight = bannerScaleHeight - coverScaleHeight / 2;
+
+    final containerBackgroundColor = colorPalette.darken(20);
+    final headerBorderColor = colorPalette;
+    final contentBackgroundColor = colorPalette.darken(10).withOpacity(.8);
+
+    final luminance = headerBorderColor.computeLuminance();
+    final targetLuminance = 0.5;
+    final adjustedTextColor =
+        luminance > targetLuminance ? Colors.black : Colors.white;
 
     //TODO: Banner nicht scrollable machen
     return Scaffold(
@@ -380,200 +399,30 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    height: 14,
+                  ),
                   if (games.isNotEmpty)
                     SummaryAndStorylineWidget(
-                        game: games[0],
-                        darkColor: darkColor,
-                        lightColor: lightColor),
-                  SizedBox(height: 14 ,),
+                        game: games[0], color: colorPalette),
+                  SizedBox(
+                    height: 14,
+                  ),
                   if (games.isNotEmpty)
                     GamesContainerSwitchWidget(
-                        game: games[0],
-                        darkColor: darkColor,
-                        lightColor: lightColor),
-                  SizedBox(height: 14 ,),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                    child: StaggeredGrid.count(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 14,
-                      children: [
-                        if (games.isNotEmpty &&
-                            games[0].franchises != null &&
-                            games[0].franchises![0].games != null)
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 3,
-                            mainAxisCellCount: 2,
-                            child: FranchiseView(
-                              franchise: games[0].franchises![0]!,
-                              colorPalette: lightColor,
-                            ),
-                          ),
-                        if (games.isNotEmpty &&
-                            games[0].franchises != null &&
-                            games[0].franchises![0].games != null)
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 1,
-                            mainAxisCellCount: 1,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                    AllGamesGridScreen.route(
-                                        games[0].franchises![0].games!,
-                                        context,
-                                        games[0].franchises![0].name!));
-                              },
-                              child: ClayContainer(
-                                spread: 2,
-                                depth: 60,
-                                borderRadius: 14,
-                                color: lightColor.withOpacity(.5),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(4),
-                                  child: FittedBox(
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Franchise',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Icon(Icons.navigate_next_rounded)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (games.isNotEmpty &&
-                            games[0].franchises != null &&
-                            games[0].franchises![0].games != null)
-                          StaggeredGridTile.count(
-                              crossAxisCellCount: 1,
-                              mainAxisCellCount: 1,
-                              child: Container()),
-                        if (games.isNotEmpty &&
-                            games[0].collection != null &&
-                            games[0].collection!.games != null)
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 1,
-                            mainAxisCellCount: 1,
-                            child: ClayContainer(
-                              depth: 60,
-                              spread: 2,
-                              customBorderRadius: BorderRadius.circular(12),
-                              color: Theme.of(context).cardColor,
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                      AllGamesGridScreen.route(
-                                          games[0].collection!.games!,
-                                          context,
-                                          games[0].collection!.name!));
-                                },
-                                child: ClayContainer(
-                                  spread: 2,
-                                  depth: 60,
-                                  borderRadius: 14,
-                                  color: lightColor.withOpacity(.5),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: FittedBox(
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'Collection',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Icon(Icons.navigate_next_rounded)
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (games.isNotEmpty &&
-                            games[0].collection != null &&
-                            games[0].collection!.games != null)
-                          StaggeredGridTile.count(
-                              crossAxisCellCount: 3,
-                              mainAxisCellCount: 2,
-                              child: games.isNotEmpty &&
-                                      games[0].collection != null &&
-                                      games[0].collection!.games != null
-                                  ? CollectionView(
-                                      collection: games[0].collection!,
-                                      colorPalette: lightColor,
-                                    )
-                                  : Container()),
-                        if (games.isNotEmpty &&
-                            games[0].collection != null &&
-                            games[0].collection!.games != null)
-                          StaggeredGridTile.count(
-                              crossAxisCellCount: 1,
-                              mainAxisCellCount: 1,
-                              child: Container()),
-                      ],
-                    ),
+                        game: games[0], color: colorPalette),
+                  SizedBox(
+                    height: 14,
                   ),
-                  SizedBox(height: 14 ,),
-                  if (events.isNotEmpty)
-                    EventListView(
-                      events: events,
-                      headline: 'Events',
-                    ),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].videos != null)
-                    VideoListView(
-                      videos: games[0].videos,
-                      headline: 'Videos',
-                      color: color.color,
-                      lightColor: lightColor,
-                    ),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].websites != null)
-                    WebsiteList(websites: games[0].websites!, lightColor: lightColor,),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].languageSupports != null)
-                    LanguageSupportTable(
-                      languageSupports: games[0].languageSupports!,
-                      color: lightColor,
-                    ),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].gameEngines != null)
-                    GameEngineView(gameEngines: games[0].gameEngines!, lightColor: lightColor,),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].involvedCompanies != null)
-                    InvolvedCompaniesList(
-                      involvedCompanies: games[0].involvedCompanies!,
-                      lightColor: lightColor,
-                    ),
-                  SizedBox(height: 14 ,),
                   if (games.isNotEmpty)
-                    CharacterListView(
-                      character: characters,
-                      headline: 'Characters',
-                      showLimit: 5,
-                      color: lightColor,
-                    ),
-                  SizedBox(height: 14 ,),
-                  if (games.isNotEmpty && games[0].platforms != null)
-                    PlatformView(game: games[0], color: lightColor),
-                  SizedBox(height: 14 ,),
+                    CollectionsEventsContainerSwitchWidget(
+                        game: games[0], color: colorPalette, events: events, characters: characters, adjustedTextColor: adjustedTextColor,),
+                  SizedBox(
+                    height: 14,
+                  ),
                   if (games.isNotEmpty)
                     ImagesContainerSwitchWidget(
-                        game: games[0],
-                        darkColor: darkColor,
-                        lightColor: lightColor)
+                        game: games[0], color: colorPalette)
                 ],
               ),
             ],

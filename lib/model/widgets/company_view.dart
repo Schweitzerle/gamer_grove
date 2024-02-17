@@ -17,33 +17,16 @@ class InvolvedCompaniesList extends StatelessWidget {
 
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
-    return  Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: lightColor.withOpacity(.5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-              child: Text(
-                'Involved Companies',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: adjustedIconColor
-                ),
-              ),
-            ),
-            buildCategory("Publisher", adjustedIconColor, lightColor),
-            buildCategory("Developer", adjustedIconColor, lightColor),
-            buildCategory("Porting", adjustedIconColor, lightColor),
-            buildCategory("Supporting", adjustedIconColor, lightColor),
-          ],
-        ),
+    return  Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildCategory("Publisher", adjustedIconColor, lightColor),
+          buildCategory("Developer", adjustedIconColor, lightColor),
+          buildCategory("Porting", adjustedIconColor, lightColor),
+          buildCategory("Supporting", adjustedIconColor, lightColor),
+        ],
       ),
     );
   }

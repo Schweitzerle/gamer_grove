@@ -25,46 +25,28 @@ class PlatformView extends StatelessWidget {
 
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: color.withOpacity(.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-            child: Text(
-              'Platforms',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: adjustedIconColor
-              ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: game.platforms!.map((platform) {
+              return PlatformCard(
+                platform: platform,
+                releaseDates: game.releaseDates
+                        ?.where((date) => date.platform?.id == platform.id)
+                        .toList() ??
+                    [],
+                multiplayerModes: game.multiplayerModes
+                        ?.where((mode) => mode.platform?.id == platform.id)
+                        .toList() ??
+                    [], color: color,
+              );
+            }).toList(),
           ),
-          SizedBox(height: 4),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: game.platforms!.map((platform) {
-                return PlatformCard(
-                  platform: platform,
-                  releaseDates: game.releaseDates
-                          ?.where((date) => date.platform?.id == platform.id)
-                          .toList() ??
-                      [],
-                  multiplayerModes: game.multiplayerModes
-                          ?.where((mode) => mode.platform?.id == platform.id)
-                          .toList() ??
-                      [], color: color.darken(10),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -18,7 +18,7 @@ class RatingWigdet extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14), color: color.darken(25)
+          borderRadius: BorderRadius.circular(14), color: color
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),

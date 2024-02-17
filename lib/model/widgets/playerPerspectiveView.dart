@@ -1,4 +1,5 @@
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/genre.dart';
@@ -38,7 +39,7 @@ class AllPlayerPerspectiveGridScreen extends StatelessWidget {
         child:
           Wrap(
             children: playerPerspective.map((text) {
-              return PlayerPerspectiveWidget(text: text, color: color, textColor: textColor);
+              return PlayerPerspectiveWidget(text: text, color: color.lighten(10));
             }).toList(),
           ),
 
@@ -66,12 +67,12 @@ class PlayerPerspectiveList extends StatelessWidget {
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.all(4.0),
       child: Container(
         padding: EdgeInsets.all(4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: color.withOpacity(.3),
+          color: color,
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
@@ -84,19 +85,26 @@ class PlayerPerspectiveList extends StatelessWidget {
                   depth: 60,
                   spread: 2,
                   customBorderRadius: BorderRadius.circular(12),
-                  color: Theme.of(context).cardColor,
+                  color: color,
                   child: Padding(
                     padding: EdgeInsets.all(5),
                     child: Text(
                       headline,
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                          color: Theme.of(context).cardTheme.surfaceTintColor),
+                          color: adjustedIconColor),
                     ),
                   ),
                 ),
                 if (playerPerspective.length > 5)
                   ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                              (Set<MaterialState> states) {
+                            return color;
+                          },
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.of(context).push(AllPlayerPerspectiveGridScreen.route(
                             playerPerspective, context, headline, color, adjustedIconColor));
@@ -107,7 +115,7 @@ class PlayerPerspectiveList extends StatelessWidget {
                           'All',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: color,
+                            color: adjustedIconColor,
                           ),
                         ),
                       )),
@@ -120,7 +128,7 @@ class PlayerPerspectiveList extends StatelessWidget {
               spacing: 5.0,
               runSpacing: 5.0,
               children: playerPerspective.take(5).map((text) {
-                return PlayerPerspectiveWidget(text: text, color: color, textColor: adjustedIconColor);
+                return PlayerPerspectiveWidget(text: text, color: color.lighten(10),);
               }).toList(),
             ),
           ]),
@@ -134,23 +142,27 @@ class PlayerPerspectiveList extends StatelessWidget {
 class PlayerPerspectiveWidget extends StatelessWidget {
   final PlayerPerspective text;
   final Color color;
-  final Color textColor;
 
   const PlayerPerspectiveWidget({
     required this.text,
     required this.color,
-    required this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final luminance = color.computeLuminance();
+    final targetLuminance = 0.5;
+
+    final adjustedIconColor =
+    luminance > targetLuminance ? Colors.black : Colors.white;
+
     return GestureDetector(
       onTap: () {
         final body = 'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title;s follows desc; w follows != null  & player_perspectives = [${text.id}]; l 20;';
         Navigator.of(context).push(AllGamesGridPaginationScreen.route('Player Perspective: ${text.name}', body));
       },
       child: Padding(
-        padding: const EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(3.0),
         child: ClayContainer(
           depth: 60,
           spread: 2,
@@ -160,7 +172,7 @@ class PlayerPerspectiveWidget extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
             child: Text(
               text.name!,
-              style: TextStyle(color: textColor),
+              style: TextStyle(color: adjustedIconColor),
             ),
           ),
         ),

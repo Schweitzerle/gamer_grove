@@ -4,20 +4,23 @@ import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
+import 'package:gamer_grove/model/views/characterGridView.dart';
+import 'package:gamer_grove/model/widgets/character_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 
 import '../igdb_models/game.dart';
 import '../views/gameGridView.dart';
 
-class CollectionStaggeredView extends StatelessWidget {
-  final Game game;
+class CharactersStaggeredView extends StatelessWidget {
+  final List<Character> characters;
   final Color colorPalette;
   final Color headerBorderColor;
   final Color adjustedTextColor;
 
-  const CollectionStaggeredView(
-      {super.key, required this.game, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
+  const CharactersStaggeredView(
+      {super.key, required this.characters, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
 
   @override
   Widget build(BuildContext context) {
@@ -27,27 +30,26 @@ class CollectionStaggeredView extends StatelessWidget {
       mainAxisSpacing: 4,
       crossAxisSpacing: 8,
       children: [
-        if (game.collection != null &&
-            game.collection!.games != null)
+        if (characters.isNotEmpty)
           StaggeredGridTile.count(
               crossAxisCellCount: 3,
               mainAxisCellCount: 2,
-              child:  CollectionView(
-                collection: game.collection!,
+              child: CharactersPreviewView(
+                collection: characters,
                 color: colorPalette,
-              )),
-        if (game.collection != null &&
-            game.collection!.games != null)
+              )
+          ),
+        if (characters.isNotEmpty)
           StaggeredGridTile.count(
             crossAxisCellCount: 1,
             mainAxisCellCount: 1,
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                    AllGamesGridScreen.route(
-                        game.collection!.games!,
+                    AllCharacterGridScreen.route(
+                        characters,
                         context,
-                        game.collection!.name!));
+                        'Characters'));
               },
               child: ClayContainer(
                 spread: 2,
@@ -61,7 +63,7 @@ class CollectionStaggeredView extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          'Collection',
+                          'Characters',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -76,8 +78,7 @@ class CollectionStaggeredView extends StatelessWidget {
               ),
             ),
           ),
-        if (game.collection != null &&
-            game.collection!.games != null)
+        if (characters.isNotEmpty)
           StaggeredGridTile.count(
               crossAxisCellCount: 1,
               mainAxisCellCount: 1,
@@ -91,18 +92,18 @@ class CollectionStaggeredView extends StatelessWidget {
 
 
 
-class CollectionView extends StatelessWidget {
-  final Collection collection;
+class CharactersPreviewView extends StatelessWidget {
+  final List<Character> collection;
   final Color color;
-  const CollectionView({Key? key, required this.collection, required this.color}) : super(key: key);
+  const CharactersPreviewView({Key? key, required this.collection, required this.color}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final mediaHeight = MediaQuery.of(context).size.height;
 
-    final List<Game> randGames = collection.games!.toList()..shuffle();
-    final List<Game> selectedGames = randGames.take(5).toList();
+    final List<Character> randCharacters = collection.toList()..shuffle();
+    final List<Character> selectedCharacters = randCharacters.take(5).toList();
     final containerBackgroundColor = color.darken(20);
     final headerBorderColor = color;
     final contentBackgroundColor = color.darken(10).withOpacity(.8);
@@ -120,7 +121,7 @@ class CollectionView extends StatelessWidget {
           children: [
             // Game previews
             ...List.generate(
-              selectedGames.length,
+              selectedCharacters.length,
                   (index) {
                     final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
                     final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
@@ -132,9 +133,8 @@ class CollectionView extends StatelessWidget {
                         height: mediaHeight * .2,
                         child: Padding(
                           padding: const EdgeInsets.all(10),
-                      child: GamePreviewView(
-                        game: selectedGames[index],
-                        isCover: true,
+                      child: CharacterView(
+                        character: selectedCharacters[index],
                         buildContext: context,
                       ),
                     ),

@@ -4,18 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/features/home/home_screen.dart';
 import 'package:gamer_grove/model/igdb_models/collection.dart';
+import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/franchise.dart';
+import 'package:gamer_grove/model/igdb_models/game_video.dart';
+import 'package:gamer_grove/model/views/eventGridView.dart';
+import 'package:gamer_grove/model/views/videosGridView.dart';
+import 'package:gamer_grove/model/widgets/event_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
+import 'package:gamer_grove/model/widgets/video_player_view.dart';
 
 import '../igdb_models/game.dart';
 import '../views/gameGridView.dart';
-class FranchiseStaggeredView extends StatelessWidget{
-  final Game game;
+class EventsStaggeredView extends StatelessWidget{
+  final List<Event> events;
   final Color colorPalette;
   final Color headerBorderColor;
   final Color adjustedTextColor;
 
-  const FranchiseStaggeredView({super.key, required this.game, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
+  const EventsStaggeredView({super.key, required this.events, required this.colorPalette, required this.headerBorderColor, required this.adjustedTextColor});
 
 
   @override
@@ -27,28 +33,26 @@ class FranchiseStaggeredView extends StatelessWidget{
           mainAxisSpacing: 4,
           crossAxisSpacing: 8,
           children: [
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (events.isNotEmpty)
               StaggeredGridTile.count(
                 crossAxisCellCount: 3,
                 mainAxisCellCount: 2,
-                child: FranchiseView(
-                  franchise: game.franchises![0],
+                child: EventItemPreview(
+                  events: events,
                   color: colorPalette,
                 ),
               ),
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (events.isNotEmpty)
               StaggeredGridTile.count(
                 crossAxisCellCount: 1,
                 mainAxisCellCount: 1,
                 child: InkWell(
                   onTap: () {
                     Navigator.of(context).push(
-                        AllGamesGridScreen.route(
-                            game.franchises![0].games!,
+                        AllEventsGridScreen.route(
+                            events,
                             context,
-                            game.franchises![0].name!));
+                            'Videos'));
                   },
                   child: ClayContainer(
                     spread: 2,
@@ -62,7 +66,7 @@ class FranchiseStaggeredView extends StatelessWidget{
                         child: Row(
                           children: [
                             Text(
-                              'Franchise',
+                              'Events',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -77,8 +81,7 @@ class FranchiseStaggeredView extends StatelessWidget{
                   ),
                 ),
               ),
-            if (game.franchises != null &&
-                game.franchises![0].games != null)
+            if (events.isNotEmpty)
               StaggeredGridTile.count(
                   crossAxisCellCount: 1,
                   mainAxisCellCount: 1,
@@ -88,22 +91,32 @@ class FranchiseStaggeredView extends StatelessWidget{
   }
 }
 
-class FranchiseView extends StatelessWidget {
-  final Franchise franchise;
+class EventItemPreview extends StatelessWidget {
+  final List<Event> events;
   final Color color;
-  const FranchiseView({Key? key, required this.franchise, required this.color}) : super(key: key);
+
+  const EventItemPreview({
+    Key? key,
+    required this.events,
+    required this.color,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final mediaWidth = MediaQuery.of(context).size.width;
-    final mediaHeight = MediaQuery.of(context).size.height;
-
-    final List<Game> randGames = franchise.games!.toList()..shuffle();
-    final List<Game> selectedGames = randGames.take(5).toList();
     final containerBackgroundColor = color.darken(20);
     final headerBorderColor = color;
     final contentBackgroundColor = color.darken(10).withOpacity(.8);
 
+    // Sort the list of events based on their start times
+    final sortedEvents = List.from(events)
+      ..sort((a, b) => (a.startTime ?? 0).compareTo(b.startTime ?? 0));
+
+    // Select the nearest upcoming event if available,
+    // otherwise, select the latest event
+    final selectedEvent = sortedEvents.firstWhere(
+          (event) => event.startTime != null && event.startTime! > DateTime.now().millisecondsSinceEpoch,
+      orElse: () => sortedEvents.last,
+    );
 
     return ClayContainer(
       spread: 2,
@@ -113,36 +126,10 @@ class FranchiseView extends StatelessWidget {
       parentColor: headerBorderColor.lighten(40),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: Stack(
-          children: [
-            // Game previews
-            ...List.generate(
-              franchise.games!.length > 5 ? 5 : franchise.games!.length,
-                  (index) {
-                final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
-                final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
-                return Positioned(
-                  top: topOffset,
-                  left: rightOffset,
-                  child: SizedBox(
-                    width: mediaWidth * .28,
-                    height: mediaHeight * .2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: GamePreviewView(
-                        game: selectedGames[index],
-                        isCover: true,
-                        buildContext: context,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // ClayContainer for the "Collection" text
-          ],
-        ),
+        child: EventUI(event: selectedEvent, buildContext: context,),
       ),
     );
   }
 }
+
+
