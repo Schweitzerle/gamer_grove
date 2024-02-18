@@ -22,7 +22,7 @@ class Company {
   final StartDateCategoryEnum? startDateCategory;
   final int? updatedAt;
   final String? url;
-  final List<CompanyWebsite>? websites;
+  List<CompanyWebsite>? websites;
 
   Company({
     this.checksum,
@@ -49,9 +49,8 @@ class Company {
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
       changeDate: json['change_date'],
-      changeDateCategory: ChangeDateCategoryEnumExtension.fromValue(
-        json['change_date_category'],
-      ),
+      changeDateCategory: json['change_date_category'] != null ? ChangeDateCategoryEnumExtension.fromValue(
+        json['change_date_category']) : null,
       changedCompanyId: json['changed_company_id'] != null
           ? (json['changed_company_id'] is int
           ? Company(id: json['changed_company_id'])
@@ -96,9 +95,9 @@ class Company {
           : null,
       slug: json['slug'],
       startDate: json['start_date'],
-      startDateCategory: StartDateCategoryEnumExtension.fromValue(
+      startDateCategory: json['start_date_category'] != null ? StartDateCategoryEnumExtension.fromValue(
         json['start_date_category'],
-      ),
+      ) : null,
       updatedAt: json['updated_at'],
       url: json['url'],
       websites: json['websites'] != null

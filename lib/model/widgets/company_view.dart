@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/company.dart';
+import 'package:gamer_grove/model/views/companyDetailScreen.dart';
 
 import '../igdb_models/involved_companies.dart';
 
@@ -84,7 +85,7 @@ class InvolvedCompaniesList extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: companies.map((company) {
-                  return CompanyCard(company: company.company);
+                  return CompanyCard(company: company.company, size: 80,);
                 }).toList(),
               ),
             ),
@@ -97,65 +98,71 @@ class InvolvedCompaniesList extends StatelessWidget {
 
 class CompanyCard extends StatelessWidget {
   final Company? company;
+  final double size;
 
-  CompanyCard({required this.company});
+  CompanyCard({required this.company, required this.size});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14),color: Colors.black,),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            children: [
-              // Bild des Unternehmens mit ShaderMask
-              if (company?.logo != null)
-                ShaderMask(
-                  shaderCallback: (Rect bounds) {
-                    return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.7), // Dunkelheit des Gradients anpassen
-                      ],
-                    ).createShader(bounds);
-                  },
-                  blendMode: BlendMode.darken,
-                  child: CachedNetworkImage(
-                    imageUrl: company!.logo!.url!,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.contain, // Bildgröße anpassen
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(CompanyDetailScreen.route(company!, context));
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(14),color: Colors.black,),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                // Bild des Unternehmens mit ShaderMask
+                if (company?.logo != null && company!.logo!.url != null)
+                  ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7), // Dunkelheit des Gradients anpassen
+                        ],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.darken,
+                    child: CachedNetworkImage(
+                      imageUrl: company!.logo!.url!,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.contain, // Bildgröße anpassen
+                    ),
                   ),
-                ),
-              // Name des Unternehmens
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-                  child: FittedBox(
-                    child: Text(
-                      company?.name ?? "",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                // Name des Unternehmens
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                    child: FittedBox(
+                      child: Text(
+                        company?.name ?? "",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

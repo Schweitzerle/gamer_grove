@@ -27,38 +27,37 @@ class CountUpRow{
       borderRadius: BorderRadius.circular(14),
       elevation: 4.0,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FittedBox(
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: ClayContainer(
-        borderRadius: 10,
-          depth: 60,
-          spread: 1,
-          surfaceColor: lightColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Row(
-                    children: [
-                      Icon(iconData, color: adjustedIconColor),
-                      SizedBox(width: 8),
-                      Countup(
-                        begin: 0,
-                        end: value.toDouble(),
-                        prefix: prefix!,
-                        suffix: suffix!.isNotEmpty ? suffix : '',
-                        duration: Duration(seconds: 3),
-                        separator: '.',
-                        style: TextStyle(
-                          color: adjustedIconColor,
-                          fontSize: 16,
-                        ),
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: ClayContainer(
+            borderRadius: 10,
+              depth: 60,
+              spread: 1,
+              surfaceColor: lightColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        children: [
+                          Icon(iconData, color: adjustedIconColor),
+                          SizedBox(width: 8),
+                          Countup(
+                            begin: 0,
+                            end: value.toDouble(),
+                            prefix: prefix!,
+                            suffix: suffix!.isNotEmpty ? suffix : '',
+                            duration: Duration(seconds: 3),
+                            separator: '.',
+                            style: TextStyle(
+                              color: adjustedIconColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-      ),
           ),
           SizedBox(height:5)
         ],

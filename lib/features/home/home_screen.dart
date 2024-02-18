@@ -133,21 +133,21 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.only(top: 40),
             ),
             GameListView(
-              headline: 'Meist Gefolgten Spiele',
+              headline: 'Most Followed Games',
               games: gamesResponse3,
               isPagination: true,
               body: getBodyStringMostFollowedGames(), showLimit: 10,
             ),
             GameListView(
-              headline: 'Von der Kritik Gelobte Spiele',
+              headline: 'Critics Choices',
               games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10,
             ),
             GameListView(
-              headline: 'Top Bewertete Spiele',
+              headline: 'Top Rated Games',
               games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10,
             ),
             GameListView(
-              headline: 'Neuste Spiele',
+              headline: 'Newest Games',
               games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10,
             ),
 

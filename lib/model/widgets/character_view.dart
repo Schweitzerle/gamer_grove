@@ -3,6 +3,7 @@ import 'package:clay_containers/clay_containers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/game_engine.dart';
+import 'package:gamer_grove/model/views/characterDetailScreen.dart';
 import 'package:marquee/marquee.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -47,7 +48,7 @@ class _CharacterViewState extends State<CharacterView> {
 
     return InkWell(
       onTap: () {
-        //TODO: Charcterscreen Navigator.of(context).push(GameDetailScreen.route(widget.game, context));
+        Navigator.of(context).push(CharacterDetailScreen.route(widget.character, context));
       },
       child: ClayContainer(
         height: coverScaleHeight,

@@ -7,7 +7,9 @@ class GameEngineView extends StatelessWidget {
   final List<GameEngine> gameEngines;
   final Color lightColor;
 
-  const GameEngineView({Key? key, required this.gameEngines, required this.lightColor}) : super(key: key);
+  const GameEngineView(
+      {Key? key, required this.gameEngines, required this.lightColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +17,14 @@ class GameEngineView extends StatelessWidget {
     final targetLuminance = 0.5;
 
     final adjustedIconColor =
-    luminance > targetLuminance ? Colors.black : Colors.white;
+        luminance > targetLuminance ? Colors.black : Colors.white;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Container(decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: lightColor,
-      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: lightColor,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -30,10 +33,9 @@ class GameEngineView extends StatelessWidget {
               child: Text(
                 'Game Engines',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: adjustedIconColor
-                ),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: adjustedIconColor),
               ),
             ),
             SizedBox(height: 4),
@@ -41,7 +43,10 @@ class GameEngineView extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: gameEngines.map((engine) {
-                  return EngineCard(engine: engine);
+                  return EngineCard(
+                    engine: engine,
+                    size: 80,
+                  );
                 }).toList(),
               ),
             ),
@@ -54,17 +59,21 @@ class GameEngineView extends StatelessWidget {
 
 class EngineCard extends StatelessWidget {
   final GameEngine? engine;
+  final double size;
 
-  EngineCard({required this.engine});
+  EngineCard({required this.engine, required this.size});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), color: Colors.black,),
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.black,
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Stack(
@@ -78,15 +87,16 @@ class EngineCard extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7), // Dunkelheit des Gradients anpassen
+                        Colors.black.withOpacity(0.7),
+                        // Dunkelheit des Gradients anpassen
                       ],
                     ).createShader(bounds);
                   },
                   blendMode: BlendMode.darken,
                   child: CachedNetworkImage(
                     imageUrl: engine!.logo!.url!,
-                    width: 80,
-                    height: 80,
+                    width: size,
+                    height: size,
                     fit: BoxFit.contain, // Bildgröße anpassen
                   ),
                 ),
@@ -96,7 +106,8 @@ class EngineCard extends StatelessWidget {
                 left: 0,
                 right: 0,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 2),
                   child: FittedBox(
                     child: Text(
                       engine?.name ?? "",

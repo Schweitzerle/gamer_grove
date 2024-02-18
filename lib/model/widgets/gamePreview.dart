@@ -51,8 +51,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    final coverScaleWidth = mediaQueryWidth / 2.2;
-    final coverScaleHeight = mediaQueryHeight / 2.3;
+    final coverScaleHeight = mediaQueryHeight / 3.2;
+    final coverScaleWidth = coverScaleHeight * 0.65;
 
     return InkWell(
       onTap: () {

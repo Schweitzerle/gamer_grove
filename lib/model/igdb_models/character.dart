@@ -10,11 +10,11 @@ class Character {
   int? createdAt;
   String? description;
   List<Game>? gameIDs;
-  GenderEnum? gender;
+  String? gender;
   CharacterMugshot? mugShotID;
   String? name;
   String? slug;
-  SpeciesEnum? species;
+  String? species;
   int? updatedAt;
   String? url;
 
@@ -56,7 +56,8 @@ class Character {
       )
           : null,
       gender: json['gender'] != null
-          ? GenderEnumExtension.fromValue(json['gender'])
+          ? _genderToString(
+          GenderEnumExtension.fromValue(json['gender']))
           : null,
       mugShotID: json['mug_shot'] != null
           ? (json['mug_shot'] is int
@@ -67,7 +68,8 @@ class Character {
       name: json['name'],
       slug: json['slug'],
       species: json['species'] != null
-          ? SpeciesEnumExtension.fromValue(json['species'])
+          ? _speciesToString(
+          SpeciesEnumExtension.fromValue(json['species']))
           : null,
       updatedAt: json['updated_at'],
       url: json['url'], id: json['id'],
@@ -91,8 +93,8 @@ enum SpeciesEnum {
 }
 
 extension GenderEnumExtension on GenderEnum {
-  int get value {
-    return this.index;
+  String get value {
+    return _genderToString(this);
   }
 
   static GenderEnum fromValue(int value) {
@@ -100,12 +102,46 @@ extension GenderEnumExtension on GenderEnum {
   }
 }
 
+String _genderToString(GenderEnum? gender) {
+  if (gender == null) return 'N/A';
+  switch (gender) {
+    case GenderEnum.Female:
+      return 'Female';
+    case GenderEnum.Male:
+      return 'Male';
+    case GenderEnum.Other:
+      return 'Other';
+    default:
+      return 'N/A';
+  }
+}
+
+
 extension SpeciesEnumExtension on SpeciesEnum {
-  int get value {
-    return this.index + 1;
+  String get value {
+    return _speciesToString(this);
   }
 
   static SpeciesEnum fromValue(int value) {
     return SpeciesEnum.values[value - 1];
+  }
+}
+
+
+String _speciesToString(SpeciesEnum? gender) {
+  if (gender == null) return 'N/A';
+  switch (gender) {
+    case SpeciesEnum.Alien:
+      return 'Alien';
+    case SpeciesEnum.Android:
+      return 'Android';
+    case SpeciesEnum.Animal:
+      return 'Animal';
+    case SpeciesEnum.Human:
+      return 'Human';
+    case SpeciesEnum.Unknown:
+      return 'Unknown';
+    default:
+      return 'N/A';
   }
 }

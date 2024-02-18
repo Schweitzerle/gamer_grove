@@ -22,6 +22,7 @@ class BannerImageWidget extends StatelessWidget {
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
     var rng = Random();
+    int rngArtwork = rng.nextInt(game.artworks!.length);
 
     return ClipRRect(
       borderRadius: BorderRadius.only(
@@ -38,7 +39,7 @@ class BannerImageWidget extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Theme.of(context).colorScheme.background,],
+                    color,],
                   stops: [0.1, 1.0],
                 ).createShader(bounds);
               },
@@ -47,7 +48,7 @@ class BannerImageWidget extends StatelessWidget {
               CachedNetworkImage(
                 height: bannerScaleHeight,
                 width:  mediaQueryWidth,
-                imageUrl: '${game.artworks![rng.nextInt(game.artworks!.length)].url}',
+                imageUrl: '${game.artworks![rngArtwork].url}',
                 placeholder: (context, url) =>
                     Container(
                       color: color,

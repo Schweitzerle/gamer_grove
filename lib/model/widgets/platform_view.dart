@@ -115,7 +115,7 @@ class _PlatformCardState extends State<PlatformCard> {
                       child: Stack(
                         children: [
                           // Bild des Unternehmens mit ShaderMask
-                          if (widget.platform!.platformLogo != null)
+                          if (widget.platform!.platformLogo != null && widget.platform!.platformLogo!.url != null)
                             ShaderMask(
                               shaderCallback: (Rect bounds) {
                                 return LinearGradient(
