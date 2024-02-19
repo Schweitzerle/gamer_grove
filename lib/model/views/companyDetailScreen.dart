@@ -9,6 +9,7 @@ import 'package:gamer_grove/model/igdb_models/company_website.dart';
 import 'package:gamer_grove/model/widgets/company_view.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchesCompanyDetailScreen.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 
 import 'package:intl/intl.dart';
 import 'package:iso_countries/iso_countries.dart';
@@ -87,12 +88,15 @@ w id = ${widget.company.id};
             (item) => item['name'] == 'Game Details',
             orElse: () => null);
         if (gameResponse != null) {
-          companies =
-              apiService.parseResponseToCompany(gameResponse['result']);
+          companies = apiService.parseResponseToCompany(gameResponse['result']);
           if (companies[0].websites != null) {
-            companies[0].websites!.add(CompanyWebsite(id: -1, url: companies[0].url!));
+            companies[0]
+                .websites!
+                .add(CompanyWebsite(id: -1, url: companies[0].url!));
           } else {
-            companies[0].websites = [CompanyWebsite(id: -1, url: companies[0].url!)];
+            companies[0].websites = [
+              CompanyWebsite(id: -1, url: companies[0].url!)
+            ];
           }
         }
       });
@@ -132,18 +136,10 @@ w id = ${widget.company.id};
     final coverScaleWidth = coverScaleHeight;
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
-    final coverPaddingScaleHeight = bannerScaleHeight - coverScaleHeight / 2;
+    final coverPaddingScaleHeight = mediaQueryHeight * 0.12;
 
     final containerBackgroundColor = colorPalette.darken(10);
-    final headerBorderColor = colorPalette;
-    final contentBackgroundColor = colorPalette.darken(10).withOpacity(.8);
 
-    final luminance = headerBorderColor.computeLuminance();
-    final targetLuminance = 0.5;
-    final adjustedTextColor =
-        luminance > targetLuminance ? Colors.black : Colors.white;
-
-    //TODO: Banner nicht scrollable machen
     return Scaffold(
       body: Container(
         height: mediaQueryHeight,
@@ -201,7 +197,8 @@ w id = ${widget.company.id};
                                       CupertinoIcons.calendar_today,
                                       DateFormat('dd.MM.yyyy').format(
                                           DateTime.fromMillisecondsSinceEpoch(
-                                              widget.company.startDate! * 1000)),
+                                              widget.company.startDate! *
+                                                  1000)),
                                       containerBackgroundColor,
                                       Color(0xff9d94ff),
                                       false,
@@ -218,23 +215,33 @@ w id = ${widget.company.id};
                     padding: EdgeInsets.only(
                         left: 16.0,
                         right: 16.0,
-                        top: coverPaddingScaleHeight / 1.5),
+                        top: coverPaddingScaleHeight / 1.9),
                     child: FittedBox(
-                      child: AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            widget.company.name!.isNotEmpty
-                                ? widget.company.name!
-                                : 'Loading...',
-                            speed: Duration(milliseconds: 150),
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: GlassContainer(
+                        blur: 12,
+                        shadowStrength: 10,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(14),
+                        shadowColor: colorPalette,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: AnimatedTextKit(
+                            animatedTexts: [
+                              TypewriterAnimatedText(
+                                widget.company.name!.isNotEmpty
+                                    ? widget.company.name!
+                                    : 'Loading...',
+                                speed: Duration(milliseconds: 150),
+                                textStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                            isRepeatingAnimation: false,
                           ),
-                        ],
-                        isRepeatingAnimation: false,
+                        ),
                       ),
                     ),
                   ),
@@ -246,19 +253,14 @@ w id = ${widget.company.id};
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 14,
-                  ),
                   if (companies.isNotEmpty)
-                    CompanyInfoWidget(company: companies[0], color: colorPalette),
-                  SizedBox(
-                    height: 14,
-                  ),
+                    CompanyInfoWidget(
+                        company: companies[0], color: colorPalette),
                   if (companies.isNotEmpty)
                     CompanyGamesContainerSwitchWidget(
-                    company: companies[0],
-                    color: colorPalette,
-                  ),
+                      company: companies[0],
+                      color: colorPalette,
+                    ),
                 ],
               ),
             ],

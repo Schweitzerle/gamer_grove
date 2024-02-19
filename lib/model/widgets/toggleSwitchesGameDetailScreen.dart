@@ -80,7 +80,7 @@ class _CollectionsEventsContainerSwitchWidgetState
         widget.events.isNotEmpty ||
         widget.characters.isNotEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
         child: ClayContainer(
           spread: 2,
           depth: 60,
@@ -281,7 +281,7 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
         widget.game.platforms != null ||
         widget.game.websites != null) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
         child: ClayContainer(
           spread: 2,
           depth: 60,
@@ -986,7 +986,7 @@ class _ImagesContainerSwitchWidgetState
 
     if (widget.game.artworks != null || widget.game.screenshots != null) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
         child: ClayContainer(
           spread: 2,
           depth: 60,
@@ -1123,27 +1123,17 @@ class _GamesContainerSwitchWidgetState
     if (widget.game.parentGame != null ||
         widget.game.versionParent != null ||
         widget.game.dlcs != null ||
-        widget.game.dlcs!.isNotEmpty ||
         widget.game.remakes != null ||
-        widget.game.remakes!.isNotEmpty ||
         widget.game.remasters != null ||
-        widget.game.remasters!.isNotEmpty ||
         widget.game.bundles != null ||
-        widget.game.bundles!.isNotEmpty ||
         widget.game.expandedGames != null ||
-        widget.game.expandedGames!.isNotEmpty ||
         widget.game.expansions != null ||
-        widget.game.expansions!.isNotEmpty ||
         widget.game.standaloneExpansions != null ||
-        widget.game.standaloneExpansions!.isNotEmpty ||
         widget.game.forks != null ||
-        widget.game.forks!.isNotEmpty ||
         widget.game.ports != null ||
-        widget.game.ports!.isNotEmpty ||
-        widget.game.similarGames != null ||
-        widget.game.similarGames!.isNotEmpty) {
+        widget.game.similarGames != null) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
         child: ClayContainer(
           spread: 2,
           depth: 60,
@@ -1194,9 +1184,8 @@ class _GamesContainerSwitchWidgetState
                             games: widget.game.parentGame != null
                                 ? [
                                     widget.game.parentGame!
-                                  ] // Das einzelne Game-Objekt in eine Liste platzieren
+                                  ]
                                 : [],
-                            // Eine leere Liste übergeben, wenn parentGame null ist
                             isPagination: false,
                             body: '',
                             showLimit: 5,
@@ -1208,7 +1197,7 @@ class _GamesContainerSwitchWidgetState
                                 games: widget.game.versionParent != null
                                     ? [
                                         widget.game.versionParent!
-                                      ] // Das einzelne Game-Objekt in eine Liste platzieren
+                                      ]
                                     : [],
                                 isPagination: false,
                                 body: '',

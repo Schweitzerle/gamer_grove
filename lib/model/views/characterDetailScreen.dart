@@ -31,12 +31,14 @@ import 'package:gamer_grove/model/widgets/game_engine_view.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/toggleSwitchesCharactersDetailScreen.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchesGameDetailScreen.dart';
 import 'package:gamer_grove/model/widgets/video_list.dart';
 import 'package:gamer_grove/model/widgets/video_player_view.dart';
 import 'package:gamer_grove/model/widgets/video_view.dart';
 import 'package:gamer_grove/model/widgets/website_List.dart';
 import 'package:get/get.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:motion/motion.dart';
@@ -136,11 +138,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     final headerBorderColor = colorPalette;
     final contentBackgroundColor = colorPalette.darken(10).withOpacity(.8);
 
-    final luminance = headerBorderColor.computeLuminance();
-    final targetLuminance = 0.5;
-    final adjustedTextColor =
-        luminance > targetLuminance ? Colors.black : Colors.white;
-
     var rng = Random();
     int rndGame = rng.nextInt(widget.character.gameIDs!.length);
 
@@ -226,19 +223,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                       FontAwesomeIcons.transgender,
                                       widget.character.gender,
                                       containerBackgroundColor,
-                                      Color(0xff59adf6),
+                                      Color(0xffc780e8),
                                       false,
                                       context)
                                   : Container(),
-                              widget.character.url != null
-                                  ? InfoRow.buildInfoRow(
-                                      FontAwesomeIcons.globe,
-                                      widget.character.url,
-                                      containerBackgroundColor,
-                                      Color(0xffc780e8),
-                                      true,
-                                      context)
-                                  : Container()
                             ],
                           ),
                         ),
@@ -250,95 +238,44 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                     padding: EdgeInsets.only(
                         left: 16.0,
                         right: 16.0,
-                        top: coverPaddingScaleHeight / 1.5),
+                        top: coverPaddingScaleHeight / 1.9),
                     child: FittedBox(
-                      child: AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            widget.character.name!.isNotEmpty
-                                ? widget.character.name!
-                                : 'Loading...',
-                            speed: Duration(milliseconds: 150),
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: GlassContainer(
+                        blur: 12,
+                        shadowStrength: 10,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(14),
+                        shadowColor: colorPalette,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: AnimatedTextKit(
+                            animatedTexts: [
+                              TypewriterAnimatedText(
+                                widget.character.name!.isNotEmpty
+                                    ? widget.character.name!
+                                    : 'Loading...',
+                                speed: Duration(milliseconds: 150),
+                                textStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                            isRepeatingAnimation: false,
                           ),
-                        ],
-                        isRepeatingAnimation: false,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 14,
-                    ),
-                    Accordion(
-                      paddingBetweenClosedSections: 0,
-                      paddingBetweenOpenSections: 0,
-                      paddingListBottom: 0,
-                      paddingListHorizontal: 0,
-                      disableScrolling: true,
-                      headerBorderColor: headerBorderColor,
-                      headerBorderWidth: 4,
-                      headerBackgroundColor: contentBackgroundColor,
-                      headerBorderColorOpened: Colors.transparent,
-                      headerBackgroundColorOpened: headerBorderColor,
-                      contentBackgroundColor: contentBackgroundColor,
-                      contentBorderColor: headerBorderColor,
-                      contentBorderWidth: 4,
-                      contentHorizontalPadding: 10,
-                      scaleWhenAnimating: true,
-                      openAndCloseAnimation: true,
-                      headerPadding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 15),
-                      sectionOpeningHapticFeedback: SectionHapticFeedback.heavy,
-                      sectionClosingHapticFeedback: SectionHapticFeedback.light,
-                      children: [
-                        AccordionSection(
-                          isOpen: false,
-                          contentVerticalPadding: 10,
-                          leftIcon: Icon(
-                            Icons.list_alt_rounded,
-                            color: adjustedTextColor,
-                          ),
-                          header: Text(
-                            'Description',
-                            style: TextStyle(color: adjustedTextColor),
-                          ),
-                          content: Center(
-                              child: Text(
-                            widget.character.description != null
-                                ? '${widget.character.description}'
-                                : 'N/A',
-                            style: TextStyle(color: adjustedTextColor),
-                          )),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 14,
-                    ),
-                    if (widget.character.gameIDs != null &&
-                        widget.character.gameIDs!.isNotEmpty)
-                      GameListView(
-                        color: headerBorderColor,
-                        headline: 'Featured Games',
-                        games: widget.character.gameIDs,
-                        isPagination: false,
-                        body: '',
-                        showLimit: 5,
-                      )
-                  ],
-                ),
-              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                CharacterInfoWidget(
+                    character: widget.character, color: colorPalette),
+              ]),
+              CharacterGamesContainerSwitchWidget(
+                  character: widget.character, color: colorPalette),
             ],
           ),
         ),

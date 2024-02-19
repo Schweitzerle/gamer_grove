@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/screenshot.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import '../igdb_models/game.dart';
 import '../singleton/sinlgleton.dart';
 
@@ -22,7 +24,6 @@ class BannerImageWidget extends StatelessWidget {
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
     var rng = Random();
-    int rngArtwork = rng.nextInt(game.artworks!.length);
 
     return ClipRRect(
       borderRadius: BorderRadius.only(
@@ -48,7 +49,7 @@ class BannerImageWidget extends StatelessWidget {
               CachedNetworkImage(
                 height: bannerScaleHeight,
                 width:  mediaQueryWidth,
-                imageUrl: '${game.artworks![rngArtwork].url}',
+                imageUrl: '${game.artworks![rng.nextInt(game.artworks!.length)].url}',
                 placeholder: (context, url) =>
                     Container(
                       color: color,
@@ -70,16 +71,24 @@ class BannerImageWidget extends StatelessWidget {
                 ).createShader(bounds);
               },
               blendMode: BlendMode.darken,
-              child: Container(
-                width: mediaQueryWidth,
+              child: GlassContainer(
                 height: bannerScaleHeight,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(10),
-                    bottomRight: Radius.circular(10),
-                  ),
-                  color: Theme.of(context).cardColor.withOpacity(0.9),
+                width: mediaQueryWidth,
+                blur: 4,
+                color: color,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.lighten(20),
+                    color.darken(30),
+                  ],
                 ),
+                border: Border.fromBorderSide(BorderSide.none),
+                shadowStrength: 5,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(14),
+                shadowColor: color.darken(30),
               ),
             ),
         ],

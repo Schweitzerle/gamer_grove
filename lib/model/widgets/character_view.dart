@@ -1,9 +1,12 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/game_engine.dart';
 import 'package:gamer_grove/model/views/characterDetailScreen.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:marquee/marquee.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -67,7 +70,10 @@ class _CharacterViewState extends State<CharacterView> {
                 placeholder: (context, url) => Container(
                   color: Theme.of(context).colorScheme.tertiaryContainer,
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorWidget: (context, url, error) => GlassContainer(
+                  color: lightColor,
+                  child: Icon(FontAwesomeIcons.personRunning),
+                ),
                 fit: BoxFit.cover,
               ),
             ),

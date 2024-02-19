@@ -79,9 +79,9 @@ class _CompanyInfoWidgetState extends State<CompanyInfoWidget> {
         luminanceContent > targetLuminance ? Colors.black : Colors.white;
 
     if(widget.company.description != null || widget.company.parent != null || widget.company.websites != null || widget.company.url != null
-    )
+    ) {
       return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+        padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
       child: ClayContainer(
         spread: 2,
         depth: 60,
@@ -308,6 +308,7 @@ class _CompanyInfoWidgetState extends State<CompanyInfoWidget> {
         ),
       ),
     );
+    }
     return Container();
   }
 
@@ -394,9 +395,9 @@ class _CompanyGamesContainerSwitchWidgetState
     final headerBorderColor = widget.color;
     final contentBackgroundColor = widget.color.darken(10).withOpacity(.8);
 
-    if(widget.company.developed != null || widget.company.published != null)
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+    if(widget.company.developed != null || widget.company.published != null) {
+      return Padding(
+      padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
       child: ClayContainer(
         spread: 2,
         depth: 60,
@@ -464,6 +465,7 @@ class _CompanyGamesContainerSwitchWidgetState
         ),
       ),
     );
+    }
     return Container();
   }
 

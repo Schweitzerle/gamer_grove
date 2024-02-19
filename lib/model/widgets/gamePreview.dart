@@ -1,7 +1,10 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/clay_containers.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:marquee/marquee.dart';
@@ -51,8 +54,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    final coverScaleHeight = mediaQueryHeight / 3.2;
-    final coverScaleWidth = coverScaleHeight * 0.65;
+    final coverScaleHeight = mediaQueryHeight / 3.4;
+    final coverScaleWidth = coverScaleHeight * 0.67;
 
     return InkWell(
       onTap: () {
@@ -75,8 +78,11 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                 placeholder: (context, url) => Container(
                   color: Theme.of(context).colorScheme.tertiaryContainer,
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => GlassContainer(
+                 color: lightColor,
+                  child: Icon(FontAwesomeIcons.gamepad),
+                ),
+                fit: BoxFit.fill,
               ),
             ),
             Container(

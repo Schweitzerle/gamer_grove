@@ -1,5 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -61,6 +62,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
 
       if (isLastPage) {
         _pagingController.appendLastPage(games);
+        _searchBarController.show();
       } else {
         final nextPageKey = pageKey + 1;
         _pagingController.appendPage(games, nextPageKey);
@@ -93,6 +95,8 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
           pagingController: _pagingController, scrollController: _scrollController,
         ),
         FloatingSearchBar(
+          showAfter: Duration(seconds: 3),
+          showCursor: false,
           backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
           shadowColor: Theme.of(context).shadowColor,
           iconColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
@@ -138,7 +142,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
               showIfClosed: false,
             ),
           ],
-          clearQueryOnClose: false,
+          clearQueryOnClose: true,
           builder: (context, transition) {
             return Container();
           },

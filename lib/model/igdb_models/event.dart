@@ -4,6 +4,7 @@ import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/igdb_models/game_video.dart';
 
 class Event {
+  final int id;
   final String? checksum;
   final int? createdAt;
   final String? description;
@@ -20,6 +21,7 @@ class Event {
   final List<GameVideo>? videos;
 
   Event({
+    required this.id,
     this.checksum,
     this.createdAt,
     this.description,
@@ -38,6 +40,7 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
+      id: json['id'],
       checksum: json['checksum'],
       createdAt: json['created_at'],
       description: json['description'],

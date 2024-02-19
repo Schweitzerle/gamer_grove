@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String getBodyNewestGames() {
     final int unixTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final body2 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s first_release_date desc; w first_release_date != null & first_release_date <= $unixTimestamp;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s first_release_date desc; w first_release_date != null & first_release_date <= $unixTimestamp; l 20;';
     return body2;
   }
 

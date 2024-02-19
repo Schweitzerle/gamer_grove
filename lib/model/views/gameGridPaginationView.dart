@@ -55,11 +55,9 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
               itemBuilder: (context, game, index) {
                 return Padding(
                     padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: GamePreviewView(
-                      game: game,
-                      isCover: false, buildContext: context,
-                    ),
+                  child: GamePreviewView(
+                    game: game,
+                    isCover: false, buildContext: context,
                   ),
                 );
               },

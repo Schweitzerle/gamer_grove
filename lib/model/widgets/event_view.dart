@@ -4,6 +4,8 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
+import 'package:gamer_grove/model/views/eventDetailScreen.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:marquee/marquee.dart';
 import 'package:palette_generator/palette_generator.dart';
 
@@ -58,7 +60,7 @@ class _EventUIState extends State<EventUI> {
 
     return InkWell(
       onTap: () {
-        //TODO: Navigator.of(context).push(GameDetailScreen.route(widget.game, context));
+        Navigator.of(context).push(EventDetailScreen.route(widget.event, context));
       },
       child: AspectRatio(
         aspectRatio: 16 / 9,
@@ -81,7 +83,10 @@ class _EventUIState extends State<EventUI> {
                             .colorScheme
                             .tertiaryContainer,
                       ),
-                  errorWidget: (context, url, error) => const Icon(FontAwesomeIcons.gamepad),
+                  errorWidget: (context, url, error) => GlassContainer(
+                    color: Theme.of(context).colorScheme.primary,
+                    child: Icon(FontAwesomeIcons.calendarDay),
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),

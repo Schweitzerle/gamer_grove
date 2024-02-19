@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
@@ -30,6 +31,7 @@ import 'package:gamer_grove/model/widgets/game_engine_view.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/toggleSwitchesEventsDetailScreen.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchesGameDetailScreen.dart';
 
 import 'package:gamer_grove/model/widgets/video_list.dart';
@@ -52,34 +54,32 @@ import '../widgets/language_support_table.dart';
 import '../widgets/gameListPreview.dart';
 import 'gameGridView.dart';
 
-class GameDetailScreen extends StatefulWidget {
-  static Route route(Game game, BuildContext context) {
+class EventDetailScreen extends StatefulWidget {
+  static Route route(Event event, BuildContext context) {
     return MaterialPageRoute(
-      builder: (context) => GameDetailScreen(
-        game: game,
+      builder: (context) => EventDetailScreen(
+        event: event,
         context: context,
       ),
     );
   }
 
-  final Game game;
+  final Event event;
   final BuildContext context;
 
-  GameDetailScreen({required this.game, required this.context});
+  EventDetailScreen({required this.event, required this.context});
 
   @override
-  _GameDetailScreenState createState() => _GameDetailScreenState();
+  _EventDetailScreenState createState() => _EventDetailScreenState();
 }
 
-class _GameDetailScreenState extends State<GameDetailScreen> {
+class _EventDetailScreenState extends State<EventDetailScreen> {
   late Color colorPalette;
   late Color lightColor;
   late Color darkColor;
   late PaletteColor color;
   bool isColorLoaded = false;
 
-  List<Game> games = [];
-  List<Character> characters = [];
   List<Event> events = [];
 
   @override
@@ -94,6 +94,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> initialize() async {
+    print(widget.event.id);
     await Future.wait([getColorPalette(), getIGDBData()]);
   }
 
@@ -101,20 +102,10 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final apiService = IGDBApiService();
     try {
       final body = '''
-      query games "Game Details" {
-        fields name, cover.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, bundles.cover.*, category, collection.*, collection.games.*, collection.games.cover.*, collections.*, dlcs.*, dlcs.cover.*, expanded_games.*, expanded_games.cover.*, expansions.*, expansions.cover.*, external_games.*, first_release_date, follows, forks.*, forks.cover.*, franchise.*, franchises.*, franchises.games.*, franchises.games.cover.*, game_engines.*, game_engines.logo.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, involved_companies.company.*, involved_companies.company.logo.*, keywords.*, language_supports.*, language_supports.language.*, language_supports.language_support_type.*, multiplayer_modes.*, parent_game.*, parent_game.cover.*, platforms.*, platforms.platform_logo.*, player_perspectives.*, ports.*, ports.cover.*, rating, rating_count, release_dates.*, remakes.*, remakes.cover.*, remasters.*, remasters.cover.*, screenshots.*, similar_games.*, similar_games.cover.*, slug, standalone_expansions.*, standalone_expansions.cover.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_parent.cover.*, version_title, videos.*, websites.*;
-        where id = ${widget.game.id};
-        limit 1;
-      };
-
-      query characters "Game Characters" {
-        fields akas, checksum,country_name, created_at, description, games.*, games.cover.*, games.artworks.*, gender, mug_shot, mug_shot.*, name, slug, species, updated_at, url;
-        where games = [${widget.game.id}];
-      };
-      
-       query events "Game Events" {
+     
+    query events "Game Events" {
       fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*;
-      where games = [${widget.game.id}];
+      where id = ${widget.event.id};
     };
     ''';
 
@@ -122,28 +113,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.multiquery, body);
 
       setState(() {
-        // Extract data for game details
-        final gameResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Details',
-            orElse: () => null);
-        if (gameResponse != null) {
-          games = apiService.parseResponseToGame(gameResponse['result']);
-          if (games[0].websites != null) {
-            games[0].websites!.add(Website(id: -1, url: games[0].url!));
-          } else {
-            games[0].websites = [Website(id: -1, url: games[0].url!)];
-          }
-        }
-
-        // Extract data for game characters
-        final charactersResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Characters',
-            orElse: () => null);
-        if (charactersResponse != null) {
-          characters =
-              apiService.parseResponseToCharacter(charactersResponse['result']);
-        }
-
         final eventsResponse = response.firstWhere(
             (item) => item['name'] == 'Game Events',
             orElse: () => null);
@@ -164,10 +133,10 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> getColorPalette() async {
-    if (widget.game.cover!.url != null) {
+    if (widget.event.eventLogo != null) {
       final PaletteGenerator paletteGenerator =
           await PaletteGenerator.fromImageProvider(
-        NetworkImage('${widget.game.cover!.url}'),
+        NetworkImage('${widget.event.eventLogo!.url}'),
         size: Size(100, 150), // Adjust the image size as needed
         maximumColorCount: 10, // Adjust the maximum color count as needed
       );
@@ -193,7 +162,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final coverScaleWidth = coverScaleHeight * 0.66;
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
-    final coverPaddingScaleHeight = bannerScaleHeight - coverScaleHeight / 2;
+    final coverPaddingScaleHeight = mediaQueryHeight * 0.14;
 
     final containerBackgroundColor = colorPalette.darken(10);
     final headerBorderColor = colorPalette;
@@ -225,19 +194,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               Stack(
                 alignment: Alignment.topLeft,
                 children: [
-                  // Artwork image
-                  if (games.isNotEmpty)
-                    BannerImageWidget(
-                      game: games[0],
-                      color: containerBackgroundColor,
-                    ),
-                  // Cover image
                   Padding(
                     padding: EdgeInsets.only(
-                        left: 16.0, right: 16, top: coverPaddingScaleHeight),
-                    child: Row(
+                        left: 8.0, right: 8, top: coverPaddingScaleHeight),
+                    child: Column(
                       children: [
-                        // Cover image
                         Motion(
                           glare: GlareConfiguration(
                             color: colorPalette.lighten(20),
@@ -246,100 +207,39 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           shadow: const ShadowConfiguration(
                               color: Colors.black, blurRadius: 2, opacity: .2),
                           borderRadius: BorderRadius.circular(14),
-                          child: SizedBox(
-                            height: coverScaleHeight,
-                            width: coverScaleWidth,
-                            child: GamePreviewView(
-                              game: widget.game,
-                              isCover: true,
-                              buildContext: context,
-                            ),
+                          child: EventUI(
+                            event: widget.event,
+                            buildContext: context,
                           ),
                         ),
                         SizedBox(
-                          width: 16,
+                          height: 16,
                         ),
                         // Additional Info Rows
-                        Expanded(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              widget.game.versionTitle != null
+                              widget.event.startTime != null
                                   ? InfoRow.buildInfoRow(
-                                      Icons.confirmation_num_outlined,
-                                      widget.game.versionTitle,
+                                      FontAwesomeIcons.hourglassStart,
+                                      '${DateFormat('dd.MM.yyyy, HH:mm').format(DateTime.fromMillisecondsSinceEpoch(widget.event.startTime! * 1000))} ${widget.event.timeZone}',
                                       containerBackgroundColor,
                                       Color(0xffff6961),
                                       false,
                                       context)
                                   : Container(),
-                              widget.game.firstReleaseDate != null
-                                  ? InfoRow.buildInfoRow(
-                                      CupertinoIcons.calendar_today,
-                                      DateFormat('dd.MM.yyyy').format(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                              widget.game.firstReleaseDate! *
-                                                  1000)),
+                              widget.event.endTime != null
+                                  ?  InfoRow.buildInfoRow(
+                                  FontAwesomeIcons.hourglassEnd,
+                                  '${DateFormat('dd.MM.yyyy, HH:mm').format(DateTime.fromMillisecondsSinceEpoch(widget.event.endTime! * 1000))} ${widget.event.timeZone}',
                                   containerBackgroundColor,
                                       Color(0xffffb480),
                                       false,
                                       context)
                                   : Container(),
-                              widget.game.status != null
-                                  ? InfoRow.buildInfoRow(
-                                      Icons.info_outline_rounded,
-                                      widget.game.status,
-                                  containerBackgroundColor,
-                                      Color(0xfff8f38d),
-                                      false,
-                                      context)
-                                  : Container(),
-                              widget.game.category != null
-                                  ? InfoRow.buildInfoRow(
-                                      Icons.category_outlined,
-                                      widget.game.category,
-                                  containerBackgroundColor,
-                                      Color(0xff42d6a4),
-                                      false,
-                                      context)
-                                  : Container(),
-                              widget.game.hypes != null
-                                  ? CountUpRow.buildCountupRow(
-                                      CupertinoIcons.flame,
-                                      '',
-                                      widget.game.hypes,
-                                      Color(0xff59adf6),
-                                      '',
-                                  containerBackgroundColor,
-                                      context,
-                                      'Hypes: Number of follows a game gets before release',
-                                      lightColor)
-                                  : Container(),
-                              widget.game.follows != null
-                                  ? CountUpRow.buildCountupRow(
-                                      CupertinoIcons.bookmark_fill,
-                                      '',
-                                      widget.game.follows,
-                                      Color(0xff9d94ff),
-                                      '',
-                                  containerBackgroundColor,
-                                      context,
-                                      'Follow: Number of people following a game',
-                                      lightColor)
-                                  : Container(),
-                              widget.game.totalRatingCount != null
-                                  ? CountUpRow.buildCountupRow(
-                                      Icons.star,
-                                      '',
-                                      widget.game.totalRatingCount,
-                                      Color(0xffc780e8),
-                                      '',
-                                  containerBackgroundColor,
-                                      context,
-                                      'Total Ratings Count: Total number of user and external critic scores',
-                                      lightColor)
-                                  : Container()
                             ],
                           ),
                         ),
@@ -349,9 +249,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   // Text above GamePreviewView
                   Padding(
                     padding: EdgeInsets.only(
-                        left: 16.0,
-                        right: 16.0,
-                        top: coverPaddingScaleHeight / 1.9),
+                        left: 8.0,
+                        right: 8.0,
+                        top: coverPaddingScaleHeight / 2),
                     child: FittedBox(
                       child: GlassContainer(
                         blur: 12,
@@ -361,11 +261,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         shadowColor: colorPalette,
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child:AnimatedTextKit(
+                          child: AnimatedTextKit(
                         animatedTexts: [
                           TypewriterAnimatedText(
-                            widget.game.name!.isNotEmpty
-                                ? widget.game.name!
+                            widget.event.name!.isNotEmpty
+                                ? widget.event.name!
                                 : 'Loading...',
                             speed: Duration(milliseconds: 150),
                             textStyle: TextStyle(
@@ -379,8 +279,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       ),
                     ),
                   ),
-                    ),
-                  ),
+                    )
+                  )
                 ],
               ),
               SizedBox(
@@ -389,19 +289,17 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (games.isNotEmpty)
-                    SummaryAndStorylineWidget(
-                        game: games[0], color: colorPalette),
-                  if (games.isNotEmpty)
-                    CollectionsEventsContainerSwitchWidget(
-                      game: games[0], color: colorPalette, events: events, characters: characters, adjustedTextColor: adjustedTextColor,),
-                  if (games.isNotEmpty)
-                    GamesContainerSwitchWidget(
-                        game: games[0], color: colorPalette),
-
-                  if (games.isNotEmpty)
-                    ImagesContainerSwitchWidget(
-                        game: games[0], color: colorPalette)
+                  if (events.isNotEmpty)
+                    EventInfoWidget(
+                        event: events[0], color: colorPalette),
+                  if (events.isNotEmpty)
+                    EventsVideosContainerSwitchWidget(
+                        event: events[0], color: colorPalette, adjustedTextColor: adjustedTextColor,),
+                  if (events.isNotEmpty)
+                    EventGamesContainerSwitchWidget(
+                      event: events[0],
+                      color: colorPalette,
+                    ),
                 ],
               ),
             ],
