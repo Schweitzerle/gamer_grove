@@ -7,7 +7,7 @@ import '../singleton/sinlgleton.dart';
 class CircularRatingWidget extends StatelessWidget{
   final double? ratingValue;
 
-  const CircularRatingWidget({super.key, required this.ratingValue});
+  const CircularRatingWidget({super.key, required this.ratingValue,});
 
   @override
   Widget build(BuildContext context) {

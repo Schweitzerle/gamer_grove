@@ -374,7 +374,7 @@ class _CharacterGamesContainerSwitchWidgetState
                 ),
               ),
               Padding(
-                  padding: EdgeInsets.only(top: mediaQueryHeight * .058),
+                  padding: EdgeInsets.only(top: mediaQueryHeight * .068),
                   child: SizedBox(
                       child: _selectedIndex == 0
                           ? GameListView(
@@ -384,7 +384,7 @@ class _CharacterGamesContainerSwitchWidgetState
                               // Eine leere Liste übergeben, wenn parentGame null ist
                               isPagination: false,
                               body: '',
-                              showLimit: 5,
+                              showLimit: 5, isAggregated: false,
                             )
                           : Container()))
             ],

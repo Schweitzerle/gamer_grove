@@ -5,10 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
+import 'package:gamer_grove/model/widgets/event_list.dart';
 import 'package:gamer_grove/model/widgets/gameListPreview.dart';
 import 'package:gamer_grove/repository/igdb/IGDBApiService.dart';
 import 'package:redacted/redacted.dart';
 
+import '../../model/igdb_models/event.dart';
 import '../../model/widgets/gamePreview.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Game> gamesResponse2 = [];
   List<Game> gamesResponse3 = [];
   List<Game> gamesResponse4 = [];
+  List<Event> latestEventResponse = [];
+  List<Event> upcomingEventResponse = [];
   final apiService = IGDBApiService();
 
   @override
@@ -36,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> initialize() async {
-    await Future.wait([getIGDBDataMostFollowed(), getIGDBDataCriticsRatingDesc(), getIGDBDataTopRated(), getIGDBDataNewestGames()]);
+    await Future.wait([getIGDBDataLatestEvents(), getIGDBDataUpcomingEvents(), getIGDBDataMostFollowed(), getIGDBDataCriticsRatingDesc(), getIGDBDataTopRated(), getIGDBDataNewestGames()]);
   }
 
   String getBodyStringMostFollowedGames() {
@@ -63,6 +67,21 @@ class _HomeScreenState extends State<HomeScreen> {
         'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s first_release_date desc; w first_release_date != null & first_release_date <= $unixTimestamp; l 20;';
     return body2;
   }
+
+  String getBodyLatestEvents() {
+    final int unixTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final body3 =
+        'fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time desc; w start_time != null & start_time <= $unixTimestamp; l 20;';
+    return body3;
+  }
+
+  String getBodyUpcomingEvents() {
+    final int unixTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final body3 =
+        'fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time asc; w start_time != null & start_time >= $unixTimestamp; l 20;';
+    return body3;
+  }
+
 
   Future<void> getIGDBDataMostFollowed() async {
     try {
@@ -121,6 +140,36 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> getIGDBDataLatestEvents() async {
+    try {
+      final response4 =
+      await apiService.getIGDBData(IGDBAPIEndpointsEnum.events, getBodyLatestEvents());
+
+      setState(() {
+        latestEventResponse = apiService.parseResponseToEvent(response4);
+      });
+    } catch (e, stackTrace) {
+      print('Error: $e');
+      print('Stack Trace: $stackTrace');
+    }
+  }
+
+  Future<void> getIGDBDataUpcomingEvents() async {
+    try {
+      final response4 =
+      await apiService.getIGDBData(IGDBAPIEndpointsEnum.events, getBodyUpcomingEvents());
+
+      setState(() {
+        upcomingEventResponse = apiService.parseResponseToEvent(response4);
+      });
+    } catch (e, stackTrace) {
+      print('Error: $e');
+      print('Stack Trace: $stackTrace');
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,23 +181,25 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: EdgeInsets.only(top: 40),
             ),
+            EventListView(headline: 'Latest Events', events: latestEventResponse),
+            EventListView(headline: 'Upcoming Events', events: upcomingEventResponse),
             GameListView(
               headline: 'Most Followed Games',
               games: gamesResponse3,
               isPagination: true,
-              body: getBodyStringMostFollowedGames(), showLimit: 10,
+              body: getBodyStringMostFollowedGames(), showLimit: 10, isAggregated: false,
             ),
             GameListView(
               headline: 'Critics Choices',
-              games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10,
+              games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10, isAggregated: true,
             ),
             GameListView(
               headline: 'Top Rated Games',
-              games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10,
+              games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10, isAggregated: false,
             ),
             GameListView(
               headline: 'Newest Games',
-              games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10,
+              games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10, isAggregated: false,
             ),
 
             // Padding at the bottom for the desired margin

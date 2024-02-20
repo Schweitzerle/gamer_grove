@@ -28,7 +28,7 @@ class GameGridView extends StatelessWidget {
             child: GamePreviewView(
               game: game,
               isCover: true,
-              buildContext: context,
+              buildContext: context, needsRating: true,
             ),
           );
         },
@@ -78,23 +78,33 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
       }
       switch (sortBy) {
         case 'Rating':
-          sortedGames.sort((a, b) => isAscending
-              ? a.totalRating!.compareTo(b.totalRating!)
-              : b.totalRating!.compareTo(a.totalRating!));
+          sortedGames.sort((a, b) {
+            final ratingA = a.totalRating ?? double.negativeInfinity;
+            final ratingB = b.totalRating ?? double.negativeInfinity;
+            return isAscending ? ratingA.compareTo(ratingB) : ratingB.compareTo(ratingA);
+          });
           break;
         case 'Name':
-          sortedGames.sort((a, b) => isAscending
-              ? a.name!.compareTo(b.name!)
-              : b.name!.compareTo(a.name!));
+          sortedGames.sort((a, b) {
+            final nameA = a.name ?? '';
+            final nameB = b.name ?? '';
+            return isAscending ? nameA.compareTo(nameB) : nameB.compareTo(nameA);
+          });
           break;
         case 'Release Date':
-          sortedGames.sort((a, b) => isAscending
-              ? a.firstReleaseDate!.compareTo(b.firstReleaseDate!)
-              : b.firstReleaseDate!.compareTo(a.firstReleaseDate!));
+          sortedGames.sort((a, b) {
+            final releaseDateA = a.firstReleaseDate;
+            final releaseDateB = b.firstReleaseDate;
+            if (releaseDateA == null && releaseDateB == null) return 0;
+            if (releaseDateA == null) return isAscending ? 1 : -1;
+            if (releaseDateB == null) return isAscending ? -1 : 1;
+            return isAscending ? releaseDateA.compareTo(releaseDateB) : releaseDateB.compareTo(releaseDateA);
+          });
           break;
       }
     });
   }
+
 
   Widget buildSortButton(String sortBy, StateSetter setState) {
     return Padding(

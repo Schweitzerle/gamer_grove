@@ -383,7 +383,7 @@ class _EventGamesContainerSwitchWidgetState
                               // Eine leere Liste übergeben, wenn parentGame null ist
                               isPagination: false,
                               body: '',
-                              showLimit: 5,
+                              showLimit: 5, isAggregated: false,
                             )
                           : Container()))
             ],

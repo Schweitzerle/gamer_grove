@@ -17,12 +17,13 @@ class GameListView extends StatefulWidget {
   final String body;
   final int showLimit;
   Color? color;
+  final bool isAggregated;
 
   GameListView({
     required this.headline,
     required this.games,
     required this.isPagination,
-    required this.body, required this.showLimit, this.color,
+    required this.body, required this.showLimit, this.color, required this.isAggregated,
   });
 
   @override
@@ -35,7 +36,7 @@ class GameListViewState extends State<GameListView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    final coverScaleHeight = mediaQueryHeight / 3.2;
+    final coverScaleHeight = mediaQueryHeight / 3.1;
 
     Color? backgroundColor = widget.color ?? Theme.of(context).cardColor;
     final luminance = backgroundColor != null ? backgroundColor.computeLuminance() : 0;
@@ -82,7 +83,7 @@ class GameListViewState extends State<GameListView> {
                       widget.isPagination
                           ? Navigator.of(context).push(
                           AllGamesGridPaginationScreen.route(
-                              widget.headline, widget.body))
+                              widget.headline, widget.body, widget.isAggregated))
                           : Navigator.of(context).push(
                           AllGamesGridScreen.route(
                               widget.games!, context, widget.headline));
@@ -120,7 +121,7 @@ class GameListViewState extends State<GameListView> {
                   child: GamePreviewView(
                     game: game,
                     isCover: false,
-                    buildContext: context,
+                    buildContext: context, needsRating: true,
                   ),
                 );
               },

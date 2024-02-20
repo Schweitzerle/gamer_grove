@@ -74,28 +74,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          ShaderMask(
-            shaderCallback: (Rect bounds) {
-              return LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+          Container(
+            height: mediaQueryHeight * .74,
+            width: mediaQueryWidth,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment(0.0, 1), // Start at the middle left
+                end: Alignment(0.0, 0.1), // End a little above two thirds of the height
                 colors: [
-                  Colors.transparent,
                   Theme.of(context).colorScheme.background,
+                  Theme.of(context).colorScheme.inversePrimary,
                 ],
-                stops: [0.1, 1.0],
-              ).createShader(bounds);
-            },
-            blendMode: BlendMode.darken,
-            child: Container(
-              width: mediaQueryWidth,
-              height: bannerScaleHeight,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                color: Theme.of(context).colorScheme.inversePrimary,
+                stops: [0.67, 1.0], // Stop the gradient at approximately two thirds of the height
               ),
             ),
           ),

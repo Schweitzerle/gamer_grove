@@ -189,8 +189,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    final coverScaleHeight = mediaQueryHeight / 3.2;
-    final coverScaleWidth = coverScaleHeight * 0.66;
+    final coverScaleHeight = mediaQueryHeight / 3.1;
+    final coverScaleWidth = coverScaleHeight * 0.69;
     final bannerScaleHeight = mediaQueryHeight * 0.3;
 
     final coverPaddingScaleHeight = bannerScaleHeight - coverScaleHeight / 2;
@@ -214,200 +214,201 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             begin: Alignment(0.0, 0.9), // Start at the middle left
             end: Alignment(0.0, 0.4), // End a little above the middle
             colors: [
-              colorPalette.darken(20),
               colorPalette.lighten(10),
+              colorPalette.darken(40),
             ],
           ),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.topLeft,
+         child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  // Artwork image
-                  if (games.isNotEmpty)
-                    BannerImageWidget(
-                      game: games[0],
-                      color: containerBackgroundColor,
-                    ),
-                  // Cover image
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 16.0, right: 16, top: coverPaddingScaleHeight),
-                    child: Row(
-                      children: [
-                        // Cover image
-                        Motion(
-                          glare: GlareConfiguration(
-                            color: colorPalette.lighten(20),
-                            minOpacity: 0,
-                          ),
-                          shadow: const ShadowConfiguration(
-                              color: Colors.black, blurRadius: 2, opacity: .2),
-                          borderRadius: BorderRadius.circular(14),
-                          child: SizedBox(
-                            height: coverScaleHeight,
-                            width: coverScaleWidth,
-                            child: GamePreviewView(
-                              game: widget.game,
-                              isCover: true,
-                              buildContext: context,
+                  Stack(
+                    alignment: Alignment.topLeft,
+                    children: [
+                      // Artwork image
+                      if (games.isNotEmpty)
+                        BannerImageWidget(
+                          game: games[0],
+                          color: containerBackgroundColor,
+                        ),
+                      // Cover image
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: 16.0, right: 16, top: coverPaddingScaleHeight),
+                        child: Row(
+                          children: [
+                            // Cover image
+                            Motion(
+                              glare: GlareConfiguration(
+                                color: colorPalette.lighten(20),
+                                minOpacity: 0,
+                              ),
+                              shadow: const ShadowConfiguration(
+                                  color: Colors.black, blurRadius: 2, opacity: .2),
+                              borderRadius: BorderRadius.circular(14),
+                              child: SizedBox(
+                                height: coverScaleHeight,
+                                width: coverScaleWidth,
+                                child: GamePreviewView(
+                                  game: widget.game,
+                                  isCover: true,
+                                  buildContext: context, needsRating: true,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 16,
-                        ),
-                        // Additional Info Rows
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              widget.game.versionTitle != null
-                                  ? InfoRow.buildInfoRow(
+                            SizedBox(
+                              width: 16,
+                            ),
+                            // Additional Info Rows
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  widget.game.versionTitle != null
+                                      ? InfoRow.buildInfoRow(
                                       Icons.confirmation_num_outlined,
                                       widget.game.versionTitle,
                                       containerBackgroundColor,
                                       Color(0xffff6961),
                                       false,
                                       context)
-                                  : Container(),
-                              widget.game.firstReleaseDate != null
-                                  ? InfoRow.buildInfoRow(
+                                      : Container(),
+                                  widget.game.firstReleaseDate != null
+                                      ? InfoRow.buildInfoRow(
                                       CupertinoIcons.calendar_today,
                                       DateFormat('dd.MM.yyyy').format(
                                           DateTime.fromMillisecondsSinceEpoch(
                                               widget.game.firstReleaseDate! *
                                                   1000)),
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       Color(0xffffb480),
                                       false,
                                       context)
-                                  : Container(),
-                              widget.game.status != null
-                                  ? InfoRow.buildInfoRow(
+                                      : Container(),
+                                  widget.game.status != null
+                                      ? InfoRow.buildInfoRow(
                                       Icons.info_outline_rounded,
                                       widget.game.status,
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       Color(0xfff8f38d),
                                       false,
                                       context)
-                                  : Container(),
-                              widget.game.category != null
-                                  ? InfoRow.buildInfoRow(
+                                      : Container(),
+                                  widget.game.category != null
+                                      ? InfoRow.buildInfoRow(
                                       Icons.category_outlined,
                                       widget.game.category,
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       Color(0xff42d6a4),
                                       false,
                                       context)
-                                  : Container(),
-                              widget.game.hypes != null
-                                  ? CountUpRow.buildCountupRow(
+                                      : Container(),
+                                  widget.game.hypes != null
+                                      ? CountUpRow.buildCountupRow(
                                       CupertinoIcons.flame,
                                       '',
                                       widget.game.hypes,
                                       Color(0xff59adf6),
                                       '',
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       context,
                                       'Hypes: Number of follows a game gets before release',
                                       lightColor)
-                                  : Container(),
-                              widget.game.follows != null
-                                  ? CountUpRow.buildCountupRow(
+                                      : Container(),
+                                  widget.game.follows != null
+                                      ? CountUpRow.buildCountupRow(
                                       CupertinoIcons.bookmark_fill,
                                       '',
                                       widget.game.follows,
                                       Color(0xff9d94ff),
                                       '',
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       context,
                                       'Follow: Number of people following a game',
                                       lightColor)
-                                  : Container(),
-                              widget.game.totalRatingCount != null
-                                  ? CountUpRow.buildCountupRow(
+                                      : Container(),
+                                  widget.game.totalRatingCount != null
+                                      ? CountUpRow.buildCountupRow(
                                       Icons.star,
                                       '',
                                       widget.game.totalRatingCount,
                                       Color(0xffc780e8),
                                       '',
-                                  containerBackgroundColor,
+                                      containerBackgroundColor,
                                       context,
                                       'Total Ratings Count: Total number of user and external critic scores',
                                       lightColor)
-                                  : Container()
-                            ],
-                          ),
+                                      : Container()
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  // Text above GamePreviewView
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 16.0,
-                        right: 16.0,
-                        top: coverPaddingScaleHeight / 1.9),
-                    child: FittedBox(
-                      child: GlassContainer(
-                        blur: 12,
-                        shadowStrength: 10,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(14),
-                        shadowColor: colorPalette,
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child:AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            widget.game.name!.isNotEmpty
-                                ? widget.game.name!
-                                : 'Loading...',
-                            speed: Duration(milliseconds: 150),
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                      ),
+                      // Text above GamePreviewView
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: 16.0,
+                            right: 16.0,
+                            top: coverPaddingScaleHeight / 1.9),
+                        child: FittedBox(
+                          child: GlassContainer(
+                            blur: 12,
+                            shadowStrength: 4,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(14),
+                            shadowColor: colorPalette,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child:AnimatedTextKit(
+                                animatedTexts: [
+                                  TypewriterAnimatedText(
+                                    widget.game.name!.isNotEmpty
+                                        ? widget.game.name!
+                                        : 'Loading...',
+                                    speed: Duration(milliseconds: 150),
+                                    textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                                isRepeatingAnimation: false,
+                              ),
                             ),
                           ),
-                        ],
-                        isRepeatingAnimation: false,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                    ),
+                  SizedBox(
+                    height: mediaQueryHeight * .01,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (games.isNotEmpty)
+                        SummaryAndStorylineWidget(
+                            game: games[0], color: colorPalette),
+                      if (games.isNotEmpty)
+                        CollectionsEventsContainerSwitchWidget(
+                          game: games[0], color: colorPalette, events: events, characters: characters, adjustedTextColor: adjustedTextColor,),
+                      if (games.isNotEmpty)
+                        GamesContainerSwitchWidget(
+                            game: games[0], color: colorPalette),
+            
+                      if (games.isNotEmpty)
+                        ImagesContainerSwitchWidget(
+                            game: games[0], color: colorPalette)
+                    ],
                   ),
                 ],
               ),
-              SizedBox(
-                height: mediaQueryHeight * .01,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (games.isNotEmpty)
-                    SummaryAndStorylineWidget(
-                        game: games[0], color: colorPalette),
-                  if (games.isNotEmpty)
-                    CollectionsEventsContainerSwitchWidget(
-                      game: games[0], color: colorPalette, events: events, characters: characters, adjustedTextColor: adjustedTextColor,),
-                  if (games.isNotEmpty)
-                    GamesContainerSwitchWidget(
-                        game: games[0], color: colorPalette),
-
-                  if (games.isNotEmpty)
-                    ImagesContainerSwitchWidget(
-                        game: games[0], color: colorPalette)
-                ],
-              ),
-            ],
-          ),
-        ),
+         ),
       ),
     );
   }
 }
+

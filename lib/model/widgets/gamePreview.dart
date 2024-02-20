@@ -1,4 +1,5 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/clay_containers.dart';
@@ -17,11 +18,12 @@ class GamePreviewView extends StatefulWidget {
   final Game game;
   final bool isCover;
   final BuildContext buildContext;
+  final bool needsRating;
 
   GamePreviewView({
     required this.game,
     required this.isCover,
-    required this.buildContext,
+    required this.buildContext, required this.needsRating,
   });
 
   @override
@@ -54,8 +56,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    final coverScaleHeight = mediaQueryHeight / 3.4;
-    final coverScaleWidth = coverScaleHeight * 0.67;
+    final coverScaleHeight = mediaQueryHeight / 3.1;
+    final coverScaleWidth = coverScaleHeight * 0.69;
 
     return InkWell(
       onTap: () {
@@ -102,28 +104,29 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CircularRatingWidget(ratingValue: widget.game.totalRating),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Marquee(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      fadingEdgeEndFraction: 0.9,
-                      fadingEdgeStartFraction: 0.1,
-                      blankSpace: 200,
-                      pauseAfterRound: Duration(seconds: 4),
-                      text: '${widget.game.name}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if(widget.needsRating)Expanded(child: CircularRatingWidget(ratingValue: widget.game.totalRating,)),
+                    if(widget.needsRating)SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: Marquee(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        fadingEdgeEndFraction: 0.9,
+                        fadingEdgeStartFraction: 0.1,
+                        blankSpace: 200,
+                        pauseAfterRound: Duration(seconds: 4),
+                        text: '${widget.game.name}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

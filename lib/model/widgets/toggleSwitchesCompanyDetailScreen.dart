@@ -439,7 +439,7 @@ class _CompanyGamesContainerSwitchWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: mediaQueryHeight * .058),
+              padding: EdgeInsets.only(top: mediaQueryHeight * .064),
               child: SizedBox(
                   child: _selectedIndex == 0
                       ? GameListView(
@@ -449,7 +449,7 @@ class _CompanyGamesContainerSwitchWidgetState
                           // Eine leere Liste übergeben, wenn parentGame null ist
                           isPagination: false,
                           body: '',
-                          showLimit: 5,
+                          showLimit: 5, isAggregated: false,
                         )
                       : GameListView(
                               color: headerBorderColor,
@@ -457,7 +457,7 @@ class _CompanyGamesContainerSwitchWidgetState
                               games: widget.company.published!,
                               isPagination: false,
                               body: '',
-                              showLimit: 5,
+                              showLimit: 5, isAggregated: false,
                             )
                          ),
             )

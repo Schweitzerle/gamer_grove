@@ -159,7 +159,7 @@ class PlayerPerspectiveWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         final body = 'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title;s follows desc; w follows != null  & player_perspectives = [${text.id}]; l 20;';
-        Navigator.of(context).push(AllGamesGridPaginationScreen.route('Player Perspective: ${text.name}', body));
+        Navigator.of(context).push(AllGamesGridPaginationScreen.route('Player Perspective: ${text.name}', body, false));
       },
       child: Padding(
         padding: const EdgeInsets.all(3.0),

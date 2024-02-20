@@ -135,7 +135,7 @@ class CollectionView extends StatelessWidget {
                       child: GamePreviewView(
                         game: selectedGames[index],
                         isCover: true,
-                        buildContext: context,
+                        buildContext: context, needsRating: false,
                       ),
                     ),
                   ),

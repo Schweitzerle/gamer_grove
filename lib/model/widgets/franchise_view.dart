@@ -104,6 +104,8 @@ class FranchiseView extends StatelessWidget {
     final headerBorderColor = color;
     final contentBackgroundColor = color.darken(10).withOpacity(.8);
 
+    final coverScaleHeight = mediaHeight / 3.1;
+    final coverScaleWidth = coverScaleHeight * 0.69;
 
     return ClayContainer(
       spread: 2,
@@ -125,14 +127,14 @@ class FranchiseView extends StatelessWidget {
                   top: topOffset,
                   left: rightOffset,
                   child: SizedBox(
-                    width: mediaWidth * .28,
-                    height: mediaHeight * .2,
+                    width: coverScaleWidth / 1.8,
+                    height: coverScaleHeight / 1.8,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: GamePreviewView(
                         game: selectedGames[index],
                         isCover: true,
-                        buildContext: context,
+                        buildContext: context, needsRating: false,
                       ),
                     ),
                   ),

@@ -149,8 +149,8 @@ w id = ${widget.company.id};
             begin: Alignment(0.0, 0.9), // Start at the middle left
             end: Alignment(0.0, 0.4), // End a little above the middle
             colors: [
-              colorPalette.darken(20),
               colorPalette.lighten(10),
+              colorPalette.darken(40),
             ],
           ),
         ),
@@ -219,7 +219,7 @@ w id = ${widget.company.id};
                     child: FittedBox(
                       child: GlassContainer(
                         blur: 12,
-                        shadowStrength: 10,
+                        shadowStrength: 4,
                         shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(14),
                         shadowColor: colorPalette,

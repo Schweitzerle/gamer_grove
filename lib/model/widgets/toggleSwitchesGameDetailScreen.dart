@@ -1175,7 +1175,7 @@ class _GamesContainerSwitchWidgetState
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: mediaQueryHeight * .052),
+                padding: EdgeInsets.only(top: mediaQueryHeight * .062),
                 child: SizedBox(
                     child: _selectedIndex == 0
                         ? GameListView(
@@ -1188,7 +1188,7 @@ class _GamesContainerSwitchWidgetState
                                 : [],
                             isPagination: false,
                             body: '',
-                            showLimit: 5,
+                            showLimit: 5, isAggregated: false,
                           )
                         : _selectedIndex == 1
                             ? GameListView(
@@ -1201,7 +1201,7 @@ class _GamesContainerSwitchWidgetState
                                     : [],
                                 isPagination: false,
                                 body: '',
-                                showLimit: 5,
+                                showLimit: 5, isAggregated: false,
                               )
                             : _selectedIndex == 2
                                 ? GameListView(
@@ -1210,7 +1210,7 @@ class _GamesContainerSwitchWidgetState
                                     games: widget.game.dlcs,
                                     isPagination: false,
                                     body: '',
-                                    showLimit: 5,
+                                    showLimit: 5, isAggregated: false,
                                   )
                                 : _selectedIndex == 3
                                     ? GameListView(
@@ -1219,7 +1219,7 @@ class _GamesContainerSwitchWidgetState
                                         games: widget.game.remakes,
                                         isPagination: false,
                                         body: '',
-                                        showLimit: 5,
+                                        showLimit: 5, isAggregated: false,
                                       )
                                     : _selectedIndex == 4
                                         ? GameListView(
@@ -1228,7 +1228,7 @@ class _GamesContainerSwitchWidgetState
                                             games: widget.game.remasters,
                                             isPagination: false,
                                             body: '',
-                                            showLimit: 5,
+                                            showLimit: 5, isAggregated: false,
                                           )
                                         : _selectedIndex == 5
                                             ? GameListView(
@@ -1237,7 +1237,7 @@ class _GamesContainerSwitchWidgetState
                                                 games: widget.game.bundles,
                                                 isPagination: false,
                                                 body: '',
-                                                showLimit: 5,
+                                                showLimit: 5, isAggregated: false,
                                               )
                                             : _selectedIndex == 6
                                                 ? GameListView(
@@ -1247,7 +1247,7 @@ class _GamesContainerSwitchWidgetState
                                                         .game.expandedGames,
                                                     isPagination: false,
                                                     body: '',
-                                                    showLimit: 5,
+                                                    showLimit: 5, isAggregated: false,
                                                   )
                                                 : _selectedIndex == 7
                                                     ? GameListView(
@@ -1258,7 +1258,7 @@ class _GamesContainerSwitchWidgetState
                                                             .game.expansions,
                                                         isPagination: false,
                                                         body: '',
-                                                        showLimit: 5,
+                                                        showLimit: 5, isAggregated: false,
                                                       )
                                                     : _selectedIndex == 8
                                                         ? GameListView(
@@ -1270,7 +1270,7 @@ class _GamesContainerSwitchWidgetState
                                                                 .standaloneExpansions,
                                                             isPagination: false,
                                                             body: '',
-                                                            showLimit: 5,
+                                                            showLimit: 5, isAggregated: false,
                                                           )
                                                         : _selectedIndex == 9
                                                             ? GameListView(
@@ -1283,7 +1283,7 @@ class _GamesContainerSwitchWidgetState
                                                                 isPagination:
                                                                     false,
                                                                 body: '',
-                                                                showLimit: 5,
+                                                                showLimit: 5, isAggregated: false,
                                                               )
                                                             : _selectedIndex ==
                                                                     10
@@ -1299,7 +1299,7 @@ class _GamesContainerSwitchWidgetState
                                                                         false,
                                                                     body: '',
                                                                     showLimit:
-                                                                        5,
+                                                                        5, isAggregated: false,
                                                                   )
                                                                 : GameListView(
                                                                     color:
@@ -1313,7 +1313,7 @@ class _GamesContainerSwitchWidgetState
                                                                         false,
                                                                     body: '',
                                                                     showLimit:
-                                                                        5,
+                                                                        5, isAggregated: false,
                                                                   )),
               )
             ],
