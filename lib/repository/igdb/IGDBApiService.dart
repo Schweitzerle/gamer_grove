@@ -4,6 +4,11 @@ import 'package:gamer_grove/model/igdb_models/company.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/igdb_models/game_engine.dart';
+import 'package:gamer_grove/model/igdb_models/game_mode.dart';
+import 'package:gamer_grove/model/igdb_models/genre.dart';
+import 'package:gamer_grove/model/igdb_models/platform.dart';
+import 'package:gamer_grove/model/igdb_models/player_perspectiverequest_path.dart';
+import 'package:gamer_grove/model/igdb_models/theme.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:http/http.dart' as http;
 
@@ -77,6 +82,51 @@ class IGDBApiService {
       return response.map<Event>((json) => Event.fromJson(json)).toList();
     } else {
       return <Event>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<Genre> parseResponseToGenres(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<Genre>((json) => Genre.fromJson(json)).toList();
+    } else {
+      return <Genre>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<GameMode> parseResponseToGameModes(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<GameMode>((json) => GameMode.fromJson(json)).toList();
+    } else {
+      return <GameMode>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<PlatformIGDB> parseResponseToPlatforms(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<PlatformIGDB>((json) => PlatformIGDB.fromJson(json)).toList();
+    } else {
+      return <PlatformIGDB>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<PlayerPerspective> parseResponseToPlayerPerspectives(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<PlayerPerspective>((json) => PlayerPerspective.fromJson(json)).toList();
+    } else {
+      return <PlayerPerspective>[]; // Return an empty list if there's no valid response
+    }
+  }
+
+  List<ThemeIDGB> parseResponseToThemes(List<dynamic> response) {
+    if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      // Check if the response is not empty and is a list of maps
+      return response.map<ThemeIDGB>((json) => ThemeIDGB.fromJson(json)).toList();
+    } else {
+      return <ThemeIDGB>[]; // Return an empty list if there's no valid response
     }
   }
 

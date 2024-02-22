@@ -82,6 +82,28 @@ extension AgeRatingCategoryExtension on AgeRatingCategory {
   }
 }
 
+String _categoryToString(AgeRatingCategory? category) {
+  if (category == null) return 'N/A';
+  switch (category) {
+    case AgeRatingCategory.ESRB:
+      return 'ESRB';
+    case AgeRatingCategory.PEGI:
+      return 'PEGI';
+    case AgeRatingCategory.USK:
+      return 'USK';
+    case AgeRatingCategory.ACB:
+      return 'ACB';
+    case AgeRatingCategory.CLASS_IND:
+      return 'CLASS IND';
+    case AgeRatingCategory.GRAC:
+      return 'GRAC';
+    case AgeRatingCategory.CERO:
+      return 'CERO';
+    default:
+      return 'N/A';
+  }
+}
+
 enum AgeRatingRating {
   Three,
   Seven,
@@ -128,6 +150,10 @@ extension AgeRatingRatingExtension on AgeRatingRating {
   String get value {
     // Changed to String
     return _ratingToString(this);
+  }
+
+  int get intValue {
+    return this.index + 1;
   }
 
   static AgeRatingRating fromString(int value) {
@@ -217,27 +243,7 @@ extension AgeRatingRatingExtension on AgeRatingRating {
   }
 }
 
-String _categoryToString(AgeRatingCategory? category) {
-  if (category == null) return 'N/A';
-  switch (category) {
-    case AgeRatingCategory.ESRB:
-      return 'ESRB';
-    case AgeRatingCategory.PEGI:
-      return 'PEGI';
-    case AgeRatingCategory.USK:
-      return 'USK';
-    case AgeRatingCategory.ACB:
-      return 'ACB';
-    case AgeRatingCategory.CLASS_IND:
-      return 'CLASS IND';
-    case AgeRatingCategory.GRAC:
-      return 'GRAC';
-    case AgeRatingCategory.CERO:
-      return 'CERO';
-    default:
-      return 'N/A';
-  }
-}
+
 
 String _ratingToString(AgeRatingRating? rating) {
   if (rating == null) return 'N/A';
@@ -267,59 +273,59 @@ String _ratingToString(AgeRatingRating? rating) {
     case AgeRatingRating.AO:
       return 'AO';
     case AgeRatingRating.CERO_A:
-      return 'A';
+      return 'CERO A';
     case AgeRatingRating.CERO_B:
-      return 'B';
+      return 'CERO B';
     case AgeRatingRating.CERO_C:
-      return 'C';
+      return 'CERO C';
     case AgeRatingRating.CERO_D:
-      return 'D';
+      return 'CERO D';
     case AgeRatingRating.CERO_Z:
-      return 'Z';
+      return 'CERO Z';
     case AgeRatingRating.USK_0:
-      return '0';
+      return 'USK 0';
     case AgeRatingRating.USK_6:
-      return '6';
+      return 'USK 6';
     case AgeRatingRating.USK_12:
-      return '12';
+      return 'USK 12';
     case AgeRatingRating.USK_16:
-      return '16';
+      return 'USK 16';
     case AgeRatingRating.USK_18:
-      return '18';
+      return 'USK 18';
     case AgeRatingRating.GRAC_ALL:
-      return 'ALL';
+      return 'GRAC ALL';
     case AgeRatingRating.GRAC_Twelve:
-      return 'Twelve';
+      return 'GRAC Twelve';
     case AgeRatingRating.GRAC_Fifteen:
-      return 'Fifteen';
+      return 'GRAC Fifteen';
     case AgeRatingRating.GRAC_Eighteen:
-      return 'Eighteen';
+      return 'GRAC Eighteen';
     case AgeRatingRating.GRAC_TESTING:
-      return 'TESTING';
+      return 'GRAC TESTING';
     case AgeRatingRating.CLASS_IND_L:
-      return 'L';
+      return 'CLASS IND L';
     case AgeRatingRating.CLASS_IND_Ten:
-      return 'Ten';
+      return 'CLASS IND Ten';
     case AgeRatingRating.CLASS_IND_Twelve:
-      return 'Twelve';
+      return 'CLASS IND Twelve';
     case AgeRatingRating.CLASS_IND_Fourteen:
-      return 'Fourteen';
+      return 'CLASS IND Fourteen';
     case AgeRatingRating.CLASS_IND_Sixteen:
-      return 'Sixteen';
+      return 'CLASS IND Sixteen';
     case AgeRatingRating.CLASS_IND_Eighteen:
-      return 'Eighteen';
+      return 'CLASS IND Eighteen';
     case AgeRatingRating.ACB_G:
-      return 'G';
+      return 'ACB G';
     case AgeRatingRating.ACB_PG:
-      return 'PG';
+      return 'ACB PG';
     case AgeRatingRating.ACB_M:
-      return 'M';
+      return 'ACB M';
     case AgeRatingRating.ACB_MA15:
-      return 'MA15';
+      return 'ACB MA15';
     case AgeRatingRating.ACB_R18:
-      return 'R18';
+      return 'ACB R18';
     case AgeRatingRating.ACB_RC:
-      return 'RC';
+      return 'ACB RC';
     default:
       return 'N/A';
   }

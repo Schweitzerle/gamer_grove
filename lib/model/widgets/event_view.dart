@@ -34,7 +34,6 @@ class _EventUIState extends State<EventUI> {
   }
 
   Future<void> initialize() async {
-    print('Event: ${widget.event.name}');
     setState(() {
       colorpalette = Theme
           .of(widget.buildContext)
@@ -186,7 +185,7 @@ class _EventUIState extends State<EventUI> {
       final daysDifference = difference.inDays;
 
       if (daysDifference > 0) {
-        return 'In {$daysDifference} d';
+        return 'In $daysDifference d';
       } else if (daysDifference < 0) {
         return '${daysDifference.abs()} d ago';
       } else {

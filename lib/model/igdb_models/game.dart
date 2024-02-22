@@ -190,7 +190,7 @@ class Game {
       )
           : null,
       category: json['category'] != null
-          ? CategoryEnumExtension.fromValue(json['category']).stringValue
+          ? GameCategoryEnumExtension.fromValue(json['category']).stringValue
           : null,
       collection: json['collection'] != null
           ? (json['collection'] is int
@@ -487,7 +487,7 @@ class Game {
       )
           : null,
       status: json['status'] != null
-          ? StatusEnumExtension.fromValue(json['status']).stringValue
+          ? GameStatusEnumExtension.fromValue(json['status']).stringValue
           : null,
       storyline: json['storyline'],
       summary: json['summary'],
@@ -588,7 +588,7 @@ extension TagNumbersEnumExtension on TagNumbersEnum {
 
 }
 
-enum CategoryEnum {
+enum GameCategoryEnum {
   MainGame,
   dlcAddon,
   expansion,
@@ -606,7 +606,7 @@ enum CategoryEnum {
   update,
 }
 
-extension CategoryEnumExtension on CategoryEnum {
+extension GameCategoryEnumExtension on GameCategoryEnum {
   int get value {
     return index;
   }
@@ -615,8 +615,8 @@ extension CategoryEnumExtension on CategoryEnum {
     return _formatEnumValue(this.toString());
   }
 
-  static CategoryEnum fromValue(int value) {
-    return CategoryEnum.values[value];
+  static GameCategoryEnum fromValue(int value) {
+    return GameCategoryEnum.values[value];
   }
 
   static String _formatEnumValue(String value) {
@@ -630,7 +630,7 @@ extension CategoryEnumExtension on CategoryEnum {
   }
 }
 
-enum StatusEnum {
+enum GameStatusEnum {
   released,
   alpha,
   beta,
@@ -641,24 +641,24 @@ enum StatusEnum {
   delisted,
 }
 
-extension StatusEnumExtension on StatusEnum {
+extension GameStatusEnumExtension on GameStatusEnum {
   int get value {
     switch (this) {
-      case StatusEnum.released:
+      case GameStatusEnum.released:
         return 0;
-      case StatusEnum.alpha:
+      case GameStatusEnum.alpha:
         return 2;
-      case StatusEnum.beta:
+      case GameStatusEnum.beta:
         return 3;
-      case StatusEnum.earlyAccess:
+      case GameStatusEnum.earlyAccess:
         return 4;
-      case StatusEnum.offline:
+      case GameStatusEnum.offline:
         return 5;
-      case StatusEnum.cancelled:
+      case GameStatusEnum.cancelled:
         return 6;
-      case StatusEnum.rumored:
+      case GameStatusEnum.rumored:
         return 7;
-      case StatusEnum.delisted:
+      case GameStatusEnum.delisted:
         return 8;
     }
   }
@@ -667,24 +667,24 @@ extension StatusEnumExtension on StatusEnum {
     return _formatEnumValue(this.toString());
   }
 
-  static StatusEnum fromValue(int value) {
+  static GameStatusEnum fromValue(int value) {
     switch (value) {
       case 0:
-        return StatusEnum.released;
+        return GameStatusEnum.released;
       case 2:
-        return StatusEnum.alpha;
+        return GameStatusEnum.alpha;
       case 3:
-        return StatusEnum.beta;
+        return GameStatusEnum.beta;
       case 4:
-        return StatusEnum.earlyAccess;
+        return GameStatusEnum.earlyAccess;
       case 5:
-        return StatusEnum.offline;
+        return GameStatusEnum.offline;
       case 6:
-        return StatusEnum.cancelled;
+        return GameStatusEnum.cancelled;
       case 7:
-        return StatusEnum.rumored;
+        return GameStatusEnum.rumored;
       case 8:
-        return StatusEnum.delisted;
+        return GameStatusEnum.delisted;
       default:
         throw ArgumentError('Unknown StatusEnum value: $value');
     }
