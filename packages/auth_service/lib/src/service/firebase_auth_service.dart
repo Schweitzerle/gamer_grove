@@ -2,10 +2,11 @@
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../auth.dart';
 import '../models/models.dart';
 
@@ -15,6 +16,8 @@ class FirebaseAuthService implements AuthService {
   }) : _firebaseAuth = authService;
 
   final auth.FirebaseAuth _firebaseAuth;
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
 
   UserEntity _mapFirebaseUser(auth.User? user) {
     if (user == null) {
@@ -65,21 +68,31 @@ class FirebaseAuthService implements AuthService {
     required String password,
     required String username,
     required String name,
-    File? profilePicture,
+    XFile? profilePicture,
   }) async {
     try {
       final authResult = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       final user = authResult.user;
+      final userID = user!.uid;
+      final ref = firebase_storage.FirebaseStorage.instance
+          .ref('userProfileImages/${userID}')
+          .child(profilePicture!.name);
+      final uploadTask = ref.putFile(File(profilePicture.path));
+
+      await uploadTask.whenComplete(() => null);
+
+      final profileURL = await ref.getDownloadURL();
+
+
       await storeUserDataInDatabase(
-        userId: user!.uid,
+        userId: userID,
         email: email,
         username: username,
         name: name,
-        profilePicture: profilePicture,
+        profilePictureURL: profileURL,
       );
 
       return _mapFirebaseUser(user!);
@@ -88,25 +101,23 @@ class FirebaseAuthService implements AuthService {
     }
   }
 
+
   Future<void> storeUserDataInDatabase({
     required String userId,
     required String email,
     required String username,
     required String name,
-    File? profilePicture,
+    String? profilePictureURL,
   }) async {
     final databaseReference = FirebaseDatabase.instance.reference();
 
-
-    final File imageFile = File(profilePicture!.path);
-    final List<int> imageBytes = await imageFile.readAsBytes();
-    final String base64Image = base64Encode(imageBytes);
+    if (profilePictureURL == null) return;
 
     await databaseReference.child('users').child(userId).set({
       'email': email,
       'username': username,
       'name': name,
-      'profilePicture': base64Image,
+      'profilePicture': profilePictureURL,
     });
   }
 

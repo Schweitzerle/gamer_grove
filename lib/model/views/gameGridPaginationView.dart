@@ -123,6 +123,7 @@ class _AllGamesGridPaginationScreenState
       final isLastPage = games.isEmpty;
 
       if (isLastPage) {
+
         _pagingController.appendLastPage(games);
       } else {
         final nextPageKey = pageKey + 1;

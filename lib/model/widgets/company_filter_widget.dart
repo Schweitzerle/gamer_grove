@@ -1,5 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -112,6 +113,9 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
 
+    Color color = Theme.of(context).colorScheme.tertiaryContainer;
+    Color onColor = Theme.of(context).colorScheme.onTertiaryContainer;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -134,9 +138,14 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                         child: MultiSelectDropDown(
                           borderRadius: 14,
                           borderWidth: 4,
-                          borderColor: Theme.of(context)
-                              .colorScheme
-                              .onTertiaryContainer,
+                          focusedBorderWidth: 2,
+                          focusedBorderColor: color.darken(20),
+                          fieldBackgroundColor: color,
+                          borderColor: color.darken(20),
+                          optionsBackgroundColor: color.lighten(10),
+                          selectedOptionBackgroundColor: color.lighten(15),
+                          dropdownBorderRadius: 14,
+                          hintColor: onColor,
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions
@@ -196,7 +205,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                     ),
                     SizedBox(height: 8), // Add some space between texts and slider
                     SfRangeSlider(
-                      min: DateTime(1970),
+                      min: DateTime(1968),
                       max: DateTime.now().add(Duration(days: 365)),
                       values: widget.filterOptions.values,
                       interval: 10,
@@ -232,6 +241,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                   child: FittedBox(child: Text('Cancel')),
                 ),
               ),
+              SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -243,6 +253,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                   child: FittedBox(child: Text('Reset Company Filter')),
                 ),
               ),
+              SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {

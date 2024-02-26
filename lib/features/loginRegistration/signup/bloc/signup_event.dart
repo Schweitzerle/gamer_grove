@@ -48,7 +48,7 @@ class SignupNameChangedEvent extends SignupEvent {
 }
 
 class SignupProfilePictureChangedEvent extends SignupEvent {
-  final File? profilePicture;
+  final XFile? profilePicture;
 
   SignupProfilePictureChangedEvent({required this.profilePicture});
 

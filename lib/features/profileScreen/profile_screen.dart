@@ -5,11 +5,13 @@ import 'package:auth_service/auth.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
 import 'package:profile_view/profile_view.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
@@ -79,13 +81,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             width: mediaQueryWidth,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment(0.0, 1), // Start at the middle left
-                end: Alignment(0.0, 0.1), // End a little above two thirds of the height
+                begin: Alignment(0.0, 1),
+                // Start at the middle left
+                end: Alignment(0.0, 0.1),
+                // End a little above two thirds of the height
                 colors: [
                   Theme.of(context).colorScheme.background,
                   Theme.of(context).colorScheme.inversePrimary,
                 ],
-                stops: [0.67, 1.0], // Stop the gradient at approximately two thirds of the height
+                stops: [
+                  0.67,
+                  1.0
+                ], // Stop the gradient at approximately two thirds of the height
               ),
             ),
           ),
@@ -129,24 +136,43 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 20),
-                WidgetCircularAnimator(
-                  outerColor: Theme.of(context).colorScheme.primary,
-                  innerColor: Theme.of(context).colorScheme.secondary,
-                  outerAnimation: Curves.linear,
-                  child: const ProfileView(
-                    height: 100,
-                    width: 100,
-                    circle: false,
-                    borderRadius: 90,
-                    image: NetworkImage(
-                        "https://preview.keenthemes.com/metronic-v4/theme/assets/pages/media/profile/profile_user.jpg"),
-                  ),
+                FutureBuilder<FirebaseUserModel>(
+                  future: getProfilePictureUrl(),
+                  // Methode, um die URL des Profilbildes abzurufen
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      final profilePictureUrl = snapshot.data!.profileUrl;
+                      final username = snapshot.data!.username;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          WidgetCircularAnimator(
+                            outerColor: Theme.of(context).colorScheme.primary,
+                            innerColor: Theme.of(context).colorScheme.secondary,
+                            outerAnimation: Curves.linear,
+                            child: ProfileView(
+                              height: 100,
+                              width: 100,
+                              circle: false,
+                              borderRadius: 90,
+                              image: NetworkImage(profilePictureUrl),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            username, // Hier den tatsächlichen Benutzernamen einfügen
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Username', // Hier den tatsächlichen Benutzernamen einfügen
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+
                 const SizedBox(height: 10),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -245,7 +271,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       child: Center(
                                         child: ElevatedButton(
                                           onPressed: () async {
-                                            _navigateAndDisplaySelection(context);
+                                            _navigateAndDisplaySelection(
+                                                context);
                                           },
                                           child: Text('View All Themes'),
                                         ),
@@ -356,7 +383,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                               onSelect: (Country country) {
                                                 setState(() {
                                                   //TODO: in sharedprefs speichern und auch die localization anpassen (Translate)
-                                                  selectedCountry = country.name;
+                                                  selectedCountry =
+                                                      country.name;
                                                 });
                                               },
                                             );
@@ -375,7 +403,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   spread: 2,
                                   depth: 60,
                                   customBorderRadius: BorderRadius.circular(12),
-                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Center(
@@ -407,4 +437,54 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       ),
     );
   }
+
+  Future<FirebaseUserModel> getProfilePictureUrl() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final ref = FirebaseDatabase.instance
+        .ref()
+        .child('users')
+        .child(userId);
+
+    final snapshot = await ref.get();
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+
+      // Extrahiere die erforderlichen Felder aus der Datenmap
+      final uuid = userId ?? '';
+      final name = data['name'] ?? '';
+      final username = data['username'] ?? '';
+      final email = data['email'] ?? '';
+      final games = (data['games'] ?? []).map<GameModel>((gameData) {
+        // Verarbeite die Spieldaten entsprechend und erstelle GameModel-Objekte
+        return GameModel(
+          id: gameData['id'] ?? '',
+          wishlist: gameData['wishlist'] ?? '',
+          recommended: gameData['recommended'] ?? '',
+          rated: gameData['rated'] ?? '',
+          rating: gameData['rating'] ?? '',
+        );
+      }).toList();
+      final profilePictureURL = data['profilePicture'] ?? ''; // Annahme, dass dies die URL des Profilbilds ist
+
+      // Erstelle und gib das FirebaseUserModel-Objekt zurück
+      return FirebaseUserModel(
+        uuid: uuid,
+        name: name,
+        username: username,
+        email: email,
+        games: games,
+        profileUrl: profilePictureURL,
+      );
+    }
+
+    return FirebaseUserModel(
+      uuid: 'uuid',
+      name: 'name',
+      username: 'username',
+      email: 'email',
+      games: [],
+      profileUrl: '',
+    );
+  }
+
 }

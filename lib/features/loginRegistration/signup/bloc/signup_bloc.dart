@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:auth_service/auth.dart';
 import 'package:bloc/bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 part 'signup_event.dart';
@@ -62,21 +63,17 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       Emitter<SignupState> emit,
       ) async {
     try {
-      File? profilePicture = state.profilePicture;
+      XFile? profilePicture = state.profilePicture;
 
-      // Check if profilePicture is not null
-      if (profilePicture != null) {
-
-        print('CreatedUserProfile');
-        await _authService.createUserWithEmailAndPassword(
-          email: state.email,
-          password: state.password,
-          username: state.username,
-          name: state.name,
-          profilePicture: profilePicture,
-        );
-      }
-      emit(state.copyWith(status: SignupStatus.success));
+      print('CreatedUserProfile');
+      await _authService.createUserWithEmailAndPassword(
+        email: state.email,
+        password: state.password,
+        username: state.username,
+        name: state.name,
+        profilePicture: profilePicture,
+      );
+          emit(state.copyWith(status: SignupStatus.success));
       print("Success of signup");
     } catch (e) {
       emit(state.copyWith(message: e.toString(), status: SignupStatus.failure));

@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/features/landingScreen/bottom_nav_bar.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../../../home/home_screen.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import '../bloc/signup_bloc.dart';
 
 class SignUpView extends StatelessWidget {
@@ -45,12 +45,12 @@ class _SignupForm extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _ProfilePicturePicker(),
+            const SizedBox(height: 15.0),
             _CreateAccountName(),
             const SizedBox(height: 15.0),
             _CreateAccountUsername(),
             const SizedBox(height: 15.0),
-            _ProfilePicturePicker(),
-            const SizedBox(height: 30.0),
             _CreateAccountEmail(),
             const SizedBox(height: 15.0),
             _CreateAccountPassword(),
@@ -105,7 +105,7 @@ class _ProfilePicturePicker extends StatefulWidget {
 }
 
 class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
-  File? _pickedImage;
+  File? _photo;
 
   @override
   Widget build(BuildContext context) {
@@ -116,24 +116,41 @@ class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
       child: CircleAvatar(
         radius: 40.0,
         backgroundColor: Colors.blue,
-        backgroundImage: _pickedImage != null ? FileImage(_pickedImage!) : null,
-        child: _pickedImage == null ? Icon(Icons.camera_alt, size: 24.0) : null,
+        backgroundImage: _photo != null ? FileImage(_photo!) : null,
+        child: _photo == null ? Icon(Icons.camera_alt, size: 24.0) : null,
       ),
     );
   }
 
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
-
       setState(() {
-        _pickedImage = File(pickedImage.path);
-        context.read<SignupBloc>().add(SignupProfilePictureChangedEvent(profilePicture: _pickedImage));
+        _photo = File(pickedImage.path);
+        context.read<SignupBloc>().add(SignupProfilePictureChangedEvent(profilePicture: pickedImage));
       });
     }
   }
+
+
+  Future uploadFile() async {
+    if (_photo == null) return;
+    final fileName = 'jdhfskjh';
+    final destination = 'files/$fileName';
+
+    try {
+      final ref = firebase_storage.FirebaseStorage.instance
+          .ref(destination)
+          .child('file/');
+      await ref.putFile(_photo!);
+    } catch (e) {
+      print('error occured');
+    }
+  }
+
+
 }
 
 class _CreateAccountEmail extends StatelessWidget {
@@ -186,7 +203,7 @@ class _SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () => context.read<SignupBloc>().add(
-            SignupButtonPressedEvent(),
+            const SignupButtonPressedEvent(),
           ),
       child: const Text('Create Account'),
     );

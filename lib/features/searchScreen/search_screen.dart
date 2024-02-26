@@ -71,11 +71,11 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
   void initState() {
     super.initState();
     Future.wait([getIGDBFilterData()]);
-    filterOptions = GameFilterOptions(values: SfRangeValues(DateTime(1947), DateTime.now()), selectedSorting: ['total_rating_count desc']);
+    filterOptions = GameFilterOptions(releaseDateValues: SfRangeValues(DateTime(1947), DateTime.now()), selectedSorting: ['total_rating_count desc']);
     eventFilterOptions = EventFilterOptions(
-        values: SfRangeValues(DateTime(2000), DateTime.now().add(Duration(days: 365))), selectedSorting: ['start_time desc']);
+        values: SfRangeValues(DateTime(2017), DateTime.now().add(Duration(days: 365))), selectedSorting: ['start_time desc']);
     companyFilterOptions = CompanyFilterOptions(
-        values: SfRangeValues(DateTime(1970), DateTime.now().add(Duration(days: 365))), selectedSorting: ['start_date desc']);
+        values: SfRangeValues(DateTime(1968), DateTime.now().add(Duration(days: 365))), selectedSorting: ['start_date desc']);
     _searchBarController = FloatingSearchBarController();
     _pagingController = PagingController(firstPageKey: 0);
     _eventPagingController = PagingController(firstPageKey: 0);
@@ -292,7 +292,14 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
 
     String sortString = filterOptions.selectedSorting.isNotEmpty ? 's ${filterOptions.selectedSorting.join(', ')};' : 's total_rating_count desc;';
 
+
     String queryString = 'name ~ *"${query}"*'; // Suchfilter für den Spielnamen
+
+    final int startUnix = dateTimeToUnix(filterOptions.releaseDateValues.start);
+    final int endUnix = dateTimeToUnix(filterOptions.releaseDateValues.end);
+
+    queryString += ' & first_release_date >= ${startUnix} & first_release_date <= ${endUnix}';
+
 
     if (filterOptions.minHypes > 0) {
       queryString += ' & hypes > ${filterOptions.minHypes}';
@@ -309,6 +316,24 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     }
     if (filterOptions.minRatings > 0) {
       queryString += ' & rating_count > ${filterOptions.minRatings}';
+    }
+    if (filterOptions.ratingValues.start > 0 ) {
+      queryString += ' & rating > ${filterOptions.ratingValues.start}';
+    }
+    if (filterOptions.ratingValues.end < 100 ) {
+      queryString += ' & rating < ${filterOptions.ratingValues.end}';
+    }
+    if (filterOptions.aggregatedRatingValues.start > 0 ) {
+      queryString += ' & aggregated_rating > ${filterOptions.aggregatedRatingValues.start}';
+    }
+    if (filterOptions.aggregatedRatingValues.end < 100 ) {
+      queryString += ' & aggregated_rating < ${filterOptions.aggregatedRatingValues.end}';
+    }
+    if (filterOptions.totalRatingValues.start > 0 ) {
+      queryString += ' & total_rating > ${filterOptions.totalRatingValues.start}';
+    }
+    if (filterOptions.totalRatingValues.end < 100 ) {
+      queryString += ' & total_rating < ${filterOptions.totalRatingValues.end.toString().toDouble().toInt()}';
     }
     if (filterOptions.selectedCategory != null &&
         filterOptions.selectedCategory!.isNotEmpty) {
@@ -446,7 +471,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
               showIfClosed: false,
             ),
           ],
-          clearQueryOnClose: true,
+          clearQueryOnClose: false,
           builder: (context, transition) {
             return Padding(
               padding: const EdgeInsets.all(8.0),

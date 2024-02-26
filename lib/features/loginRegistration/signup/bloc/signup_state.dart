@@ -23,14 +23,14 @@ class SignupState extends Equatable {
   final String password;
   final String username; // Add this field
   final String name;     // Add this field
-  final File? profilePicture; // Add this field
+  final XFile? profilePicture; // Add this field
 
   SignupState copyWith({
     String? email,
     String? password,
     String? username, // Add this parameter
     String? name,     // Add this parameter
-    File? profilePicture,
+    XFile? profilePicture,
     SignupStatus? status,
     String? message,
   }) {

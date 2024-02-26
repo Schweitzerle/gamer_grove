@@ -1,5 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -108,6 +109,9 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
 
+    Color color = Theme.of(context).colorScheme.tertiaryContainer;
+    Color onColor = Theme.of(context).colorScheme.onTertiaryContainer;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -130,9 +134,14 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                         child: MultiSelectDropDown(
                           borderRadius: 14,
                           borderWidth: 4,
-                          borderColor: Theme.of(context)
-                              .colorScheme
-                              .onTertiaryContainer,
+                          focusedBorderWidth: 2,
+                          focusedBorderColor: color.darken(20),
+                          fieldBackgroundColor: color,
+                          borderColor: color.darken(20),
+                          optionsBackgroundColor: color.lighten(10),
+                          selectedOptionBackgroundColor: color.lighten(15),
+                          dropdownBorderRadius: 14,
+                          hintColor: onColor,
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions
@@ -190,16 +199,16 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                     SizedBox(height: 8),
                     // Add some space between texts
                     Text(
-                      'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions!.values.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions!.values.end)}',
+                      'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions!.values.end)}',
                       style: TextStyle(fontSize: 14),
                     ),
                     SizedBox(height: 8),
                     // Add some space between texts and slider
                     SfRangeSlider(
-                      min: DateTime(2000),
+                      min: DateTime(2017),
                       max: DateTime.now().add(Duration(days: 365)),
                       values: widget.filterOptions!.values,
-                      interval: 5,
+                      interval: 2,
                       showTicks: true,
                       showLabels: true,
                       minorTicksPerInterval: 1,
@@ -231,6 +240,7 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                   child: FittedBox(child: Text('Cancel')),
                 ),
               ),
+              SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -244,6 +254,7 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                   child: FittedBox(child: Text('Reset Event Filter')),
                 ),
               ),
+              SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {

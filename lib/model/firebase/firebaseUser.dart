@@ -4,7 +4,8 @@ class FirebaseUserModel {
   final String username;
   final String email;
   final List<GameModel> games;
-  final FollowingModel following;
+  final FollowingModel? following;
+  final String profileUrl;
 
   FirebaseUserModel({
     required this.uuid,
@@ -12,7 +13,8 @@ class FirebaseUserModel {
     required this.username,
     required this.email,
     required this.games,
-    required this.following,
+    this.following,
+    required this.profileUrl,
   });
 }
 
