@@ -6,7 +6,10 @@ import 'package:gamer_grove/features/home/home_screen.dart';
 import 'package:gamer_grove/features/profileScreen/profile_screen.dart';
 import 'package:gamer_grove/features/searchScreen/search_screen.dart';
 import 'package:gamer_grove/features/watchListScreen/watchlist_and_rated.dart';
+import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
+import 'package:gamer_grove/repository/firebase/firebase.dart';
+import 'package:get_it/get_it.dart';
 import 'package:liquid_swipe/Helpers/Helpers.dart';
 import 'package:liquid_swipe/PageHelpers/LiquidController.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -27,6 +30,7 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   final initialIndex = 2;
   late int currentIndex;
   late PageController controller;
+  final getIt = GetIt.instance;
 
 
   final List<Widget> pages = [
@@ -42,8 +46,14 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
     super.initState();
     currentIndex = initialIndex;
     controller = PageController(initialPage: initialIndex);
+    Future.wait([getCurrentUserData()]);
   }
 
+  Future<void> getCurrentUserData() async {
+    final currentUser = await FirebaseService().getSingleCurrentUserData();
+    getIt.allowReassignment = true;
+    getIt.registerSingleton<FirebaseUserModel>(currentUser);
+  }
 
   @override
   void dispose() {

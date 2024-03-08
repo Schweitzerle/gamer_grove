@@ -24,7 +24,6 @@ class CustomDialog extends StatelessWidget {
       child: contentBox(context),
     );
   }
-
   contentBox(context) {
     return Stack(
       children: <Widget>[
@@ -32,7 +31,7 @@ class CustomDialog extends StatelessWidget {
           shadowColor: Theme.of(context).colorScheme.tertiary,
           shadowStrength: 8,
           blur: 2,
-          color: Theme.of(context).colorScheme.tertiary.withOpacity(.7),
+          color: Theme.of(context).colorScheme.tertiary.withOpacity(.8),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

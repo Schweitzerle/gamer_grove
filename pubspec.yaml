@@ -20,13 +20,19 @@ dependencies:
   multi_dropdown: ^2.1.4
   multi_select_flutter: ^4.1.3
   syncfusion_flutter_sliders: ^24.2.7
-  firebase_storage: ^11.6.6
-  firebase_core: ^2.25.4
-  firebase_auth: ^4.16.0
+  firebase_storage: ^11.6.9
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
   iso_countries: ^2.2.0
   flutter_bloc: ^8.0.1
+  like_button: ^2.0.5
   http: any
-  firebase_database: ^10.4.0
+  firebase_database: ^10.4.9
+  get_it: ^7.6.7
+  flutter_animated_dialog: ^2.0.1
+  flutter_rating_bar: ^4.0.1
+
+  cloud_firestore: ^4.15.8
   provider: ^6.1.1
   image_picker: ^1.0.7
   flutter_svg: ^2.0.7
@@ -60,13 +66,13 @@ dependencies:
   accordion: ^2.6.0
   loading_indicator: ^3.1.1
   vitality: ^3.0.0
-  syncfusion_flutter_datagrid: ^24.2.4
+  syncfusion_flutter_datagrid: ^24.2.9
   data_table_2: ^2.5.10
   social_media_buttons: ^1.0.0
   font_awesome_flutter: ^10.7.0
-  youtube_player_flutter: ^8.1.2
-  flutter_inappwebview: ^5.3.2
-  visibility_detector: ^0.2.0
+  youtube_player_flutter: ^9.0.0
+  flutter_inappwebview: ^6.0.0
+  visibility_detector: ^0.4.0+2
   animated_toggle_switch: ^0.8.1
 
   salomon_bottom_bar: ^3.3.2

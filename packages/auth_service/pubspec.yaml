@@ -9,13 +9,15 @@ environment:
 
 dependencies:
   equatable: ^2.0.3
-  firebase_auth: ^4.16.0
+  firebase_auth: ^4.17.8
   flutter:
     sdk: flutter
-  firebase_database: ^10.4.0
-  firebase_storage: ^11.6.6
-  firebase_core: ^2.25.4
+  firebase_database: ^10.4.9
+  firebase_storage: ^11.6.9
+  firebase_core: ^2.27.0
   image_picker: ^1.0.7
+  cloud_firestore: ^4.15.8
+  toasty_box: ^1.0.4
 
 dev_dependencies:
   flutter_lints: ^1.0.4

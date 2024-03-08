@@ -8,6 +8,8 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
@@ -30,6 +32,7 @@ import 'package:gamer_grove/model/widgets/game_engine_view.dart';
 import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
 import 'package:gamer_grove/model/widgets/platform_view.dart';
+import 'package:gamer_grove/model/widgets/ratingDialog.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchesGameDetailScreen.dart';
 
 import 'package:gamer_grove/model/widgets/video_list.dart';
@@ -206,6 +209,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
     //TODO: Banner nicht scrollable machen
     return Scaffold(
+      floatingActionButton: FloatingActionButton(onPressed: () {
+       showDialog(
+           context: context,
+           barrierColor: colorPalette.darken(30).withOpacity(.8),
+           builder: (BuildContext context) {
+            return CustomRatingDialog(colorPalette: colorPalette, adjustedTextColor: adjustedTextColor,);
+           }
+       );
+      }),
       body: Container(
         height: mediaQueryHeight,
         width: mediaQueryWidth,
@@ -219,63 +231,64 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             ],
           ),
         ),
-         child: SingleChildScrollView(
-              child: Column(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.topLeft,
                 children: [
-                  Stack(
-                    alignment: Alignment.topLeft,
-                    children: [
-                      // Artwork image
-                      if (games.isNotEmpty)
-                        BannerImageWidget(
-                          game: games[0],
-                          color: containerBackgroundColor,
+                  // Artwork image
+                  if (games.isNotEmpty)
+                    BannerImageWidget(
+                      game: games[0],
+                      color: containerBackgroundColor,
+                    ),
+                  // Cover image
+                  Padding(
+                    padding: EdgeInsets.only(
+                        left: 16.0, right: 16, top: coverPaddingScaleHeight),
+                    child: Row(
+                      children: [
+                        // Cover image
+                        Motion(
+                          glare: GlareConfiguration(
+                            color: colorPalette.lighten(20),
+                            minOpacity: 0,
+                          ),
+                          shadow: const ShadowConfiguration(
+                              color: Colors.black, blurRadius: 2, opacity: .2),
+                          borderRadius: BorderRadius.circular(14),
+                          child: SizedBox(
+                            height: coverScaleHeight,
+                            width: coverScaleWidth,
+                            child: GamePreviewView(
+                              game: widget.game,
+                              isCover: true,
+                              buildContext: context,
+                              needsRating: true,
+                            ),
+                          ),
                         ),
-                      // Cover image
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 16.0, right: 16, top: coverPaddingScaleHeight),
-                        child: Row(
-                          children: [
-                            // Cover image
-                            Motion(
-                              glare: GlareConfiguration(
-                                color: colorPalette.lighten(20),
-                                minOpacity: 0,
-                              ),
-                              shadow: const ShadowConfiguration(
-                                  color: Colors.black, blurRadius: 2, opacity: .2),
-                              borderRadius: BorderRadius.circular(14),
-                              child: SizedBox(
-                                height: coverScaleHeight,
-                                width: coverScaleWidth,
-                                child: GamePreviewView(
-                                  game: widget.game,
-                                  isCover: true,
-                                  buildContext: context, needsRating: true,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 16,
-                            ),
-                            // Additional Info Rows
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  widget.game.versionTitle != null
-                                      ? InfoRow.buildInfoRow(
+                        SizedBox(
+                          width: 16,
+                        ),
+                        // Additional Info Rows
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              widget.game.versionTitle != null
+                                  ? InfoRow.buildInfoRow(
                                       Icons.confirmation_num_outlined,
                                       widget.game.versionTitle,
                                       containerBackgroundColor,
                                       Color(0xffff6961),
                                       false,
                                       context)
-                                      : Container(),
-                                  widget.game.firstReleaseDate != null
-                                      ? InfoRow.buildInfoRow(
+                                  : Container(),
+                              widget.game.firstReleaseDate != null
+                                  ? InfoRow.buildInfoRow(
                                       CupertinoIcons.calendar_today,
                                       DateFormat('dd.MM.yyyy').format(
                                           DateTime.fromMillisecondsSinceEpoch(
@@ -285,27 +298,27 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       Color(0xffffb480),
                                       false,
                                       context)
-                                      : Container(),
-                                  widget.game.status != null
-                                      ? InfoRow.buildInfoRow(
+                                  : Container(),
+                              widget.game.status != null
+                                  ? InfoRow.buildInfoRow(
                                       Icons.info_outline_rounded,
                                       widget.game.status,
                                       containerBackgroundColor,
                                       Color(0xfff8f38d),
                                       false,
                                       context)
-                                      : Container(),
-                                  widget.game.category != null
-                                      ? InfoRow.buildInfoRow(
+                                  : Container(),
+                              widget.game.category != null
+                                  ? InfoRow.buildInfoRow(
                                       Icons.category_outlined,
                                       widget.game.category,
                                       containerBackgroundColor,
                                       Color(0xff42d6a4),
                                       false,
                                       context)
-                                      : Container(),
-                                  widget.game.hypes != null
-                                      ? CountUpRow.buildCountupRow(
+                                  : Container(),
+                              widget.game.hypes != null
+                                  ? CountUpRow.buildCountupRow(
                                       CupertinoIcons.flame,
                                       '',
                                       widget.game.hypes,
@@ -315,9 +328,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       context,
                                       'Hypes: Number of follows a game gets before release',
                                       lightColor)
-                                      : Container(),
-                                  widget.game.follows != null
-                                      ? CountUpRow.buildCountupRow(
+                                  : Container(),
+                              widget.game.follows != null
+                                  ? CountUpRow.buildCountupRow(
                                       CupertinoIcons.bookmark_fill,
                                       '',
                                       widget.game.follows,
@@ -327,9 +340,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       context,
                                       'Follow: Number of people following a game',
                                       lightColor)
-                                      : Container(),
-                                  widget.game.totalRatingCount != null
-                                      ? CountUpRow.buildCountupRow(
+                                  : Container(),
+                              widget.game.totalRatingCount != null
+                                  ? CountUpRow.buildCountupRow(
                                       Icons.star,
                                       '',
                                       widget.game.totalRatingCount,
@@ -339,76 +352,340 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       context,
                                       'Total Ratings Count: Total number of user and external critic scores',
                                       lightColor)
-                                      : Container()
-                                ],
+                                  : Container()
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Text above GamePreviewView
+                  Padding(
+                    padding: EdgeInsets.only(
+                        left: 16.0,
+                        right: 16.0,
+                        top: coverPaddingScaleHeight / 1.9),
+                    child: FittedBox(
+                      child: GlassContainer(
+                        blur: 12,
+                        shadowStrength: 4,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(14),
+                        shadowColor: colorPalette,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: AnimatedTextKit(
+                            animatedTexts: [
+                              TypewriterAnimatedText(
+                                widget.game.name!.isNotEmpty
+                                    ? widget.game.name!
+                                    : 'Loading...',
+                                speed: Duration(milliseconds: 150),
+                                textStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                            isRepeatingAnimation: false,
+                          ),
                         ),
                       ),
-                      // Text above GamePreviewView
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: 16.0,
-                            right: 16.0,
-                            top: coverPaddingScaleHeight / 1.9),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: mediaQueryHeight * .01,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (games.isNotEmpty)
+                    SummaryAndStorylineWidget(
+                        game: games[0], color: colorPalette),
+                  if (games.isNotEmpty)
+                    CollectionsEventsContainerSwitchWidget(
+                      game: games[0],
+                      color: colorPalette,
+                      events: events,
+                      characters: characters,
+                      adjustedTextColor: adjustedTextColor,
+                    ),
+                  if (games.isNotEmpty)
+                    GamesContainerSwitchWidget(
+                        game: games[0], color: colorPalette),
+                  if (games.isNotEmpty)
+                    ImagesContainerSwitchWidget(
+                        game: games[0], color: colorPalette)
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void showRatingDialog(
+    BuildContext context,
+    Color colorPalette,
+  ) {
+    showAnimatedDialog(
+        context: context,
+        barrierDismissible: true,
+        animationType: DialogTransitionType.slideFromBottom,
+        curve: Curves.fastOutSlowIn,
+        duration: Duration(seconds: 1),
+        builder: (BuildContext innerContext) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                shadowColor: colorPalette.lighten(20),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                title: Center(
+                  child: FittedBox(
+                    child: GlassContainer(
+                      blur: 12,
+                      shadowStrength: 4,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(14),
+                      shadowColor: colorPalette,
+                      child: const Padding(
+                        padding: EdgeInsets.all(4.0),
+                        child: Text(
+                          'Rate this Game',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                backgroundColor: colorPalette.darken(20),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: GlassContainer(
+                        blur: 12,
+                        shadowStrength: 4,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(14),
+                        shadowColor: colorPalette,
                         child: FittedBox(
-                          child: GlassContainer(
-                            blur: 12,
-                            shadowStrength: 4,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(14),
-                            shadowColor: colorPalette,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child:AnimatedTextKit(
-                                animatedTexts: [
-                                  TypewriterAnimatedText(
-                                    widget.game.name!.isNotEmpty
-                                        ? widget.game.name!
-                                        : 'Loading...',
-                                    speed: Duration(milliseconds: 150),
-                                    textStyle: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                                isRepeatingAnimation: false,
+                          fit: BoxFit.fitWidth,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: RatingBar.builder(
+                              itemSize: 42,
+                              initialRating: 2,
+                              minRating: 1,
+                              direction: Axis.horizontal,
+                              allowHalfRating: true,
+                              glowColor: colorPalette,
+                              glow: true,
+                              unratedColor: colorPalette.darken(20),
+                              itemCount: 10,
+                              itemPadding: EdgeInsets.symmetric(horizontal: 1.5),
+                              itemBuilder: (context, _) => Icon(
+                                CupertinoIcons.gamecontroller_fill,
+                                color: colorPalette.lighten(20),
                               ),
+                              onRatingUpdate: (updatedRating) {},
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: mediaQueryHeight * .01,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (games.isNotEmpty)
-                        SummaryAndStorylineWidget(
-                            game: games[0], color: colorPalette),
-                      if (games.isNotEmpty)
-                        CollectionsEventsContainerSwitchWidget(
-                          game: games[0], color: colorPalette, events: events, characters: characters, adjustedTextColor: adjustedTextColor,),
-                      if (games.isNotEmpty)
-                        GamesContainerSwitchWidget(
-                            game: games[0], color: colorPalette),
-            
-                      if (games.isNotEmpty)
-                        ImagesContainerSwitchWidget(
-                            game: games[0], color: colorPalette)
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  Column(children: [
+                    StaggeredGrid.count(
+                        crossAxisCount: 12,
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 8,
+                        children: [
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 6,
+                              mainAxisCellCount: 4,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: colorPalette,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.bookmark,
+                                          color: Colors.blue,
+                                          size: 30,
+                                        ),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          'Wishlist',
+                                          style: TextStyle(
+                                              color: Colors.white, fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 6,
+                              mainAxisCellCount: 4,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: colorPalette,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.recommend_outlined,
+                                          color: Singleton.secondTabColor,
+                                          size: 30,
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          'Empfehlung',
+                                          style: TextStyle(
+                                              color: Colors.white, fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                                crossAxisCellCount: 4,
+                                mainAxisCellCount: 4,
+                                child: GlassContainer(
+                                  blur: 12,
+                                  shadowStrength: 4,
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(14),
+                                  shadowColor: colorPalette,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.of(innerContext).pop();
+                                    },
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            CupertinoIcons.arrowshape_turn_up_left,
+                                            color: Singleton.fifthTabColor,
+                                            size: 30,
+                                          ),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            'Abbruch',
+                                            style: TextStyle(
+                                                color: Colors.white, fontSize: 18),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),),
+                          StaggeredGridTile.count(
+                            crossAxisCellCount: 4,
+                            mainAxisCellCount: 4,
+                            child: GlassContainer(
+                              blur: 12,
+                              shadowStrength: 4,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(14),
+                              shadowColor: colorPalette,
+                              child: TextButton(
+                                onPressed: () {
+                                  // Logic to submit the rating
+                                  Navigator.of(innerContext).pop();
+                                },
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.delete_solid,
+                                        color: Singleton.thirdTabColor,
+                                        size: 30,
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        'Löschen',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),),
+                          StaggeredGridTile.count(
+                            crossAxisCellCount: 4,
+                            mainAxisCellCount: 4,
+                            child: GlassContainer(
+                              blur: 12,
+                              shadowStrength: 4,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(14),
+                              shadowColor: colorPalette,
+                              child: TextButton(
+                                onPressed: () {},
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.star_lefthalf_fill,
+                                        color: Singleton.firstTabColor,
+                                        size: 30,
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        'Anwenden',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),),
+                        ]),
+                  ]),
                 ],
-              ),
-         ),
-      ),
-    );
+              );
+            },
+          );
+        });
   }
 }
-

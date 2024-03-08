@@ -13,6 +13,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
+import 'package:gamer_grove/repository/firebase/firebase.dart';
+import 'package:get_it/get_it.dart';
 import 'package:profile_view/profile_view.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
 
@@ -31,6 +33,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   late Future<FlexScheme> _storedSchemeFuture;
   late StreamSubscription<void> _themeChangeSubscription;
   String selectedCountry = 'English';
+  final getIt = GetIt.instance;
 
   @override
   void initState() {
@@ -72,7 +75,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
 
     final bannerScaleHeight = mediaQueryHeight * 0.3;
-
+    final user = getIt<FirebaseUserModel>();
     return Scaffold(
       body: Stack(
         children: [
@@ -136,18 +139,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(height: 20),
-                FutureBuilder<FirebaseUserModel>(
-                  future: getProfilePictureUrl(),
-                  // Methode, um die URL des Profilbildes abzurufen
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      final profilePictureUrl = snapshot.data!.profileUrl;
-                      final username = snapshot.data!.username;
-                      return Column(
+                Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           WidgetCircularAnimator(
@@ -159,66 +151,70 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               width: 100,
                               circle: false,
                               borderRadius: 90,
-                              image: NetworkImage(profilePictureUrl),
+                              image: NetworkImage(
+                                getIt<FirebaseUserModel>().profileUrl,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            username, // Hier den tatsächlichen Benutzernamen einfügen
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            user!.username,
+                            // Hier den tatsächlichen Benutzernamen einfügen
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
                           ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Column(
+                                children: [
+                                  Text(
+                                    'Followers', // Anzahl der Follower einfügen
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    user.followers.length.toString(),
+                                    // Anzahl der Follower einfügen
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 20),
+                              Column(
+                                children: [
+                                  Text(
+                                    'Following',
+                                    // Anzahl der Abonnements einfügen
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    user.following.length.toString(),
+                                    // Anzahl der Abonnements einfügen
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(width: 20),
+                              Column(
+                                children: [
+                                  Text(
+                                    'Games Rated',
+                                    // Anzahl der bewerteten Spiele einfügen
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    user.games.length.toString(),
+                                    // Anzahl der bewerteten Spiele einfügen
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20),
                         ],
-                      );
-                    }
-                  },
-                ),
-
-                const SizedBox(height: 10),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          'Followers', // Anzahl der Follower einfügen
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        Text(
-                          '100', // Anzahl der Follower einfügen
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 20),
-                    Column(
-                      children: [
-                        Text(
-                          'Following', // Anzahl der Abonnements einfügen
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        Text(
-                          '50', // Anzahl der Abonnements einfügen
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 20),
-                    Column(
-                      children: [
-                        Text(
-                          'Games Rated',
-                          // Anzahl der bewerteten Spiele einfügen
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        Text(
-                          '200', // Anzahl der bewerteten Spiele einfügen
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
+                      ),
                 Column(
                   children: [
                     Padding(
@@ -437,54 +433,4 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       ),
     );
   }
-
-  Future<FirebaseUserModel> getProfilePictureUrl() async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    final ref = FirebaseDatabase.instance
-        .ref()
-        .child('users')
-        .child(userId);
-
-    final snapshot = await ref.get();
-    if (snapshot.exists) {
-      final data = snapshot.value as Map<dynamic, dynamic>;
-
-      // Extrahiere die erforderlichen Felder aus der Datenmap
-      final uuid = userId ?? '';
-      final name = data['name'] ?? '';
-      final username = data['username'] ?? '';
-      final email = data['email'] ?? '';
-      final games = (data['games'] ?? []).map<GameModel>((gameData) {
-        // Verarbeite die Spieldaten entsprechend und erstelle GameModel-Objekte
-        return GameModel(
-          id: gameData['id'] ?? '',
-          wishlist: gameData['wishlist'] ?? '',
-          recommended: gameData['recommended'] ?? '',
-          rated: gameData['rated'] ?? '',
-          rating: gameData['rating'] ?? '',
-        );
-      }).toList();
-      final profilePictureURL = data['profilePicture'] ?? ''; // Annahme, dass dies die URL des Profilbilds ist
-
-      // Erstelle und gib das FirebaseUserModel-Objekt zurück
-      return FirebaseUserModel(
-        uuid: uuid,
-        name: name,
-        username: username,
-        email: email,
-        games: games,
-        profileUrl: profilePictureURL,
-      );
-    }
-
-    return FirebaseUserModel(
-      uuid: 'uuid',
-      name: 'name',
-      username: 'username',
-      email: 'email',
-      games: [],
-      profileUrl: '',
-    );
-  }
-
 }

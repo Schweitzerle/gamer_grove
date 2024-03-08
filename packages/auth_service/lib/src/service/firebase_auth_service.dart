@@ -2,10 +2,12 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../auth.dart';
 import '../models/models.dart';
@@ -18,6 +20,7 @@ class FirebaseAuthService implements AuthService {
   final auth.FirebaseAuth _firebaseAuth;
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
+  final db = FirebaseFirestore.instance;
 
   UserEntity _mapFirebaseUser(auth.User? user) {
     if (user == null) {
@@ -109,16 +112,15 @@ class FirebaseAuthService implements AuthService {
     required String name,
     String? profilePictureURL,
   }) async {
-    final databaseReference = FirebaseDatabase.instance.reference();
 
-    if (profilePictureURL == null) return;
+    if (profilePictureURL != null) {
+      await db.collection('Users').doc(userId).set({'id': userId,
+        'email': email,
+        'username': username,
+        'name': name,
+        'profilePicture': profilePictureURL,});
+    }
 
-    await databaseReference.child('users').child(userId).set({
-      'email': email,
-      'username': username,
-      'name': name,
-      'profilePicture': profilePictureURL,
-    });
   }
 
 
