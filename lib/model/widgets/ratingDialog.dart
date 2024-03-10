@@ -1,19 +1,43 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:like_button/like_button.dart';
+import '../firebase/firebaseUser.dart';
 
-import '../singleton/sinlgleton.dart';
-
-class CustomRatingDialog extends StatelessWidget {
+class CustomRatingDialog extends StatefulWidget {
   final Color colorPalette;
   final Color adjustedTextColor;
+  final GameModel gameModel;
 
-  CustomRatingDialog({
-   required this.colorPalette, required this.adjustedTextColor,
+  const CustomRatingDialog({super.key,
+    required this.colorPalette,
+    required this.adjustedTextColor,
+    required this.gameModel,
   });
+
+  @override
+  _CustomRatingDialogState createState() => _CustomRatingDialogState();
+}
+
+class _CustomRatingDialogState extends State<CustomRatingDialog>
+    with TickerProviderStateMixin {
+  final getIt = GetIt.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  bool toggleDummy = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +49,12 @@ class CustomRatingDialog extends StatelessWidget {
       child: contentBox(context),
     );
   }
+
   contentBox(context) {
     return Stack(
       children: <Widget>[
         GlassContainer(
-          shadowColor: colorPalette.lighten(20),
+          shadowColor: widget.colorPalette.lighten(20),
           shadowStrength: 8,
           blur: 2,
           color: Theme.of(context).colorScheme.background,
@@ -46,9 +71,9 @@ class CustomRatingDialog extends StatelessWidget {
                     shadowStrength: 4,
                     shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.circular(14),
-                    shadowColor: colorPalette.darken(20),
+                    shadowColor: widget.colorPalette.darken(20),
                     child: Padding(
-                      padding: EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(4.0),
                       child: Text(
                         'Rate this Game',
                         style: TextStyle(
@@ -61,7 +86,9 @@ class CustomRatingDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 14,),
+                const SizedBox(
+                  height: 14,
+                ),
                 StaggeredGrid.count(
                     crossAxisCount: 12,
                     mainAxisSpacing: 4,
@@ -69,7 +96,7 @@ class CustomRatingDialog extends StatelessWidget {
                     children: [
                       StaggeredGridTile.count(
                         crossAxisCellCount: 6,
-                        mainAxisCellCount: 4,
+                        mainAxisCellCount: 3,
                         child: GlassContainer(
                           blur: 12,
                           shadowStrength: 4,
@@ -77,32 +104,45 @@ class CustomRatingDialog extends StatelessWidget {
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(14),
                           shadowColor: Colors.blue.lighten(20),
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.bookmark,
-                                    color: Colors.blue,
-                                    size: 30,
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    'Wishlist',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
-                                  ),
-                                ],
-                              ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Column(
+                              children: [
+                                LikeButton(
+                                  onTap: (isWishlist) async {
+                                    HapticFeedback.selectionClick();
+                                    await _updateGameWishlistStatusInDatabase();
+                                    return !isWishlist; // Return the updated isLiked value
+                                  },
+                                  isLiked: widget.gameModel.wishlist,
+                                  circleColor: const CircleColor(
+                                      start: Colors.blueAccent,
+                                      end: Colors.lightBlueAccent),
+                                  bubblesColor: const BubblesColor(
+                                      dotPrimaryColor: Colors.blue,
+                                      dotSecondaryColor: Colors.lightBlue),
+                                  likeBuilder: (isRecommended) {
+                                    return Icon(
+                                      FontAwesomeIcons.solidBookmark,
+                                      color: isRecommended
+                                          ? Colors.blueAccent
+                                          : Colors.white,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 5),
+                                const Text(
+                                  'Wishlist',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 6,
-                        mainAxisCellCount: 4,
+                        mainAxisCellCount: 3,
                         child: GlassContainer(
                           blur: 12,
                           shadowStrength: 4,
@@ -110,34 +150,49 @@ class CustomRatingDialog extends StatelessWidget {
                           color: Colors.orange.lighten(20).withOpacity(.8),
                           borderRadius: BorderRadius.circular(14),
                           shadowColor: Colors.orange,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.recommend_outlined,
-                                    color: Colors.orange,
-                                    size: 30,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Column(
+                              children: [
+                                LikeButton(
+                                  onTap: (isRecommended) async {
+                                    HapticFeedback.selectionClick();
+                                    await _updateGameRecommendStatusInDatabase();
+                                    return !isRecommended; // Return the updated isLiked value
+                                  },
+                                  isLiked: widget.gameModel.recommended,
+                                  circleColor: const CircleColor(
+                                      start: Colors.deepOrangeAccent,
+                                      end: Colors.orangeAccent),
+                                  bubblesColor: const BubblesColor(
+                                      dotPrimaryColor: Colors.deepOrange,
+                                      dotSecondaryColor: Colors.orange),
+                                  likeBuilder: (isRecommended) {
+                                    return Icon(
+                                      FontAwesomeIcons.thumbsUp,
+                                      color: isRecommended
+                                          ? Colors.deepOrange
+                                          : Colors.white,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                const Text(
+                                  'Recommend',
+                                  style: TextStyle(
+                                    color: Colors.white,
                                   ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    'Empfehlung',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 4,
-                        mainAxisCellCount: 4,
+                        mainAxisCellCount: 3,
                         child: GlassContainer(
                           blur: 12,
                           shadowStrength: 4,
@@ -147,31 +202,33 @@ class CustomRatingDialog extends StatelessWidget {
                           shadowColor: Colors.black,
                           child: TextButton(
                             onPressed: () {
-                              Navigator.of(context).pop();
+                              HapticFeedback.mediumImpact();
+                            Navigator.of(context).pop();
                             },
                             child: const FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Column(
                                 children: [
                                   Icon(
-                                    CupertinoIcons.arrowshape_turn_up_left,
+                                    CupertinoIcons.arrow_uturn_left,
                                     color: Colors.black,
-                                    size: 30,
                                   ),
-                                  SizedBox(height: 5),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
                                   Text(
-                                    'Abbruch',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
+                                    'Cancel',
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),),
+                        ),
+                      ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 4,
-                        mainAxisCellCount: 4,
+                        mainAxisCellCount: 3,
                         child: GlassContainer(
                           blur: 12,
                           shadowStrength: 4,
@@ -179,36 +236,35 @@ class CustomRatingDialog extends StatelessWidget {
                           color: Colors.red.lighten(20).withOpacity(.8),
                           borderRadius: BorderRadius.circular(14),
                           shadowColor: Colors.red,
-                          child: TextButton(
+                          child:TextButton(
                             onPressed: () {
-                              // Logic to submit the rating
-                              Navigator.of(context).pop();
+                              HapticFeedback.mediumImpact();
+                              _deleteGameStatusInDatabase();
                             },
                             child: const FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Column(
                                 children: [
                                   Icon(
-                                    CupertinoIcons.delete_solid,
+                                    CupertinoIcons.delete,
                                     color: Colors.red,
-                                    size: 30,
                                   ),
                                   SizedBox(
                                     height: 5,
                                   ),
                                   Text(
-                                    'Löschen',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
+                                    'Delete',
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),),
+                        ),
+                      ),
                       StaggeredGridTile.count(
                         crossAxisCellCount: 4,
-                        mainAxisCellCount: 4,
+                        mainAxisCellCount: 3,
                         child: GlassContainer(
                           blur: 12,
                           shadowStrength: 4,
@@ -217,61 +273,71 @@ class CustomRatingDialog extends StatelessWidget {
                           color: Colors.green.lighten(20).withOpacity(.8),
                           shadowColor: Colors.green,
                           child: TextButton(
-                            onPressed: () {},
-                            child: const FittedBox(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              _updateGameStatusInDatabase();
+                              Navigator.of(context).pop();
+                            },
+                            child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Column(
                                 children: [
                                   Icon(
                                     CupertinoIcons.gamecontroller_fill,
-                                    color: Colors.green,
-                                    size: 30,
+                                    color: Colors.green.darken(20),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 5,
                                   ),
-                                  Text(
-                                    'Anwenden',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
+                                  const Text(
+                                    'Save Rating',
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),),
+                        ),
+                      ),
                     ]),
-                SizedBox(height: 14,),
+                const SizedBox(
+                  height: 14,
+                ),
                 Center(
                   child: GlassContainer(
                     blur: 12,
                     shadowStrength: 4,
                     shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.circular(14),
-                    shadowColor: colorPalette.darken(30),
-                    color: adjustedTextColor,
+                    shadowColor: widget.colorPalette.darken(30),
+                    color: widget.adjustedTextColor,
                     child: FittedBox(
                       fit: BoxFit.fitWidth,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: RatingBar.builder(
                           itemSize: 42,
-                          initialRating: 2,
-                          minRating: 1,
+                          initialRating: widget.gameModel.rating.toDouble() == 0 ? .5 : widget.gameModel.rating.toDouble(),
+                          minRating: .5,
                           direction: Axis.horizontal,
                           allowHalfRating: true,
                           glowRadius: 1,
-                          glowColor: colorPalette.lighten(20),
+                          glowColor: widget.colorPalette.lighten(20),
                           glow: true,
-                          unratedColor:adjustedTextColor == Colors.white ? colorPalette.lighten(40) : colorPalette.darken(40),
+                          unratedColor: widget.adjustedTextColor == Colors.white
+                              ? widget.colorPalette.lighten(40)
+                              : widget.colorPalette.darken(40),
                           itemCount: 10,
-                          itemPadding: EdgeInsets.symmetric(horizontal: 1.5),
+                          itemPadding: const EdgeInsets.symmetric(horizontal: 1.5),
                           itemBuilder: (context, _) => Icon(
                             CupertinoIcons.gamecontroller_fill,
-                            color:  adjustedTextColor == Colors.white ? colorPalette.darken(40) : colorPalette.lighten(40),
-
+                            color: widget.adjustedTextColor == Colors.white
+                                ? widget.colorPalette.darken(40)
+                                : widget.colorPalette.lighten(40),
                           ),
-                          onRatingUpdate: (updatedRating) {},
+                          onRatingUpdate: (updatedRating) {
+                            widget.gameModel.rating = updatedRating;
+                          },
                         ),
                       ),
                     ),
@@ -283,5 +349,48 @@ class CustomRatingDialog extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _updateGameStatusInDatabase() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    final userId = _auth.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    await userDoc.update({'games': currentUser.games});
+  }
+
+  Future<void> _deleteGameStatusInDatabase() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    final userId = _auth.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    widget.gameModel.rating = 0;
+    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    await userDoc.update({'games': currentUser.games});
+  }
+
+  Future<void> _updateGameRecommendStatusInDatabase() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    final userId = _auth.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    setState(() {
+      widget.gameModel.recommended = !widget.gameModel.recommended;
+      currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    });
+    await userDoc.update({'games': currentUser.games});
+    setState(() {
+    });
+  }
+
+  Future<void> _updateGameWishlistStatusInDatabase() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    final userId = _auth.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    widget.gameModel.wishlist = !widget.gameModel.wishlist;
+    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    await userDoc.update({'games': currentUser.games});
   }
 }

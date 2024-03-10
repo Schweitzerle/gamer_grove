@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
@@ -56,19 +57,21 @@ import '../widgets/gameListPreview.dart';
 import 'gameGridView.dart';
 
 class GameDetailScreen extends StatefulWidget {
-  static Route route(Game game, BuildContext context) {
+  static Route route(Game game, BuildContext context, GameModel gameModel) {
     return MaterialPageRoute(
       builder: (context) => GameDetailScreen(
         game: game,
         context: context,
+        gameModel: gameModel
       ),
     );
   }
 
   final Game game;
   final BuildContext context;
+  final GameModel gameModel;
 
-  GameDetailScreen({required this.game, required this.context});
+  GameDetailScreen({required this.game, required this.context, required this.gameModel});
 
   @override
   _GameDetailScreenState createState() => _GameDetailScreenState();
@@ -214,7 +217,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
            context: context,
            barrierColor: colorPalette.darken(30).withOpacity(.8),
            builder: (BuildContext context) {
-            return CustomRatingDialog(colorPalette: colorPalette, adjustedTextColor: adjustedTextColor,);
+            return CustomRatingDialog(colorPalette: colorPalette, adjustedTextColor: adjustedTextColor, gameModel: widget.gameModel,);
            }
        );
       }),
@@ -418,7 +421,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         game: games[0], color: colorPalette),
                   if (games.isNotEmpty)
                     ImagesContainerSwitchWidget(
-                        game: games[0], color: colorPalette)
+                        game: games[0], color: colorPalette),
+                  SizedBox(height: 14,)
                 ],
               ),
             ],
@@ -428,264 +432,4 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     );
   }
 
-  static void showRatingDialog(
-    BuildContext context,
-    Color colorPalette,
-  ) {
-    showAnimatedDialog(
-        context: context,
-        barrierDismissible: true,
-        animationType: DialogTransitionType.slideFromBottom,
-        curve: Curves.fastOutSlowIn,
-        duration: Duration(seconds: 1),
-        builder: (BuildContext innerContext) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                shadowColor: colorPalette.lighten(20),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                title: Center(
-                  child: FittedBox(
-                    child: GlassContainer(
-                      blur: 12,
-                      shadowStrength: 4,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(14),
-                      shadowColor: colorPalette,
-                      child: const Padding(
-                        padding: EdgeInsets.all(4.0),
-                        child: Text(
-                          'Rate this Game',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                backgroundColor: colorPalette.darken(20),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: GlassContainer(
-                        blur: 12,
-                        shadowStrength: 4,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(14),
-                        shadowColor: colorPalette,
-                        child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: RatingBar.builder(
-                              itemSize: 42,
-                              initialRating: 2,
-                              minRating: 1,
-                              direction: Axis.horizontal,
-                              allowHalfRating: true,
-                              glowColor: colorPalette,
-                              glow: true,
-                              unratedColor: colorPalette.darken(20),
-                              itemCount: 10,
-                              itemPadding: EdgeInsets.symmetric(horizontal: 1.5),
-                              itemBuilder: (context, _) => Icon(
-                                CupertinoIcons.gamecontroller_fill,
-                                color: colorPalette.lighten(20),
-                              ),
-                              onRatingUpdate: (updatedRating) {},
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                actions: [
-                  Column(children: [
-                    StaggeredGrid.count(
-                        crossAxisCount: 12,
-                        mainAxisSpacing: 4,
-                        crossAxisSpacing: 8,
-                        children: [
-                            StaggeredGridTile.count(
-                              crossAxisCellCount: 6,
-                              mainAxisCellCount: 4,
-                              child: GlassContainer(
-                                blur: 12,
-                                shadowStrength: 4,
-                                shape: BoxShape.rectangle,
-                                borderRadius: BorderRadius.circular(14),
-                                shadowColor: colorPalette,
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: const FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.bookmark,
-                                          color: Colors.blue,
-                                          size: 30,
-                                        ),
-                                        SizedBox(height: 5),
-                                        Text(
-                                          'Wishlist',
-                                          style: TextStyle(
-                                              color: Colors.white, fontSize: 18),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            StaggeredGridTile.count(
-                              crossAxisCellCount: 6,
-                              mainAxisCellCount: 4,
-                              child: GlassContainer(
-                                blur: 12,
-                                shadowStrength: 4,
-                                shape: BoxShape.rectangle,
-                                borderRadius: BorderRadius.circular(14),
-                                shadowColor: colorPalette,
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.recommend_outlined,
-                                          color: Singleton.secondTabColor,
-                                          size: 30,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Text(
-                                          'Empfehlung',
-                                          style: TextStyle(
-                                              color: Colors.white, fontSize: 18),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            StaggeredGridTile.count(
-                                crossAxisCellCount: 4,
-                                mainAxisCellCount: 4,
-                                child: GlassContainer(
-                                  blur: 12,
-                                  shadowStrength: 4,
-                                  shape: BoxShape.rectangle,
-                                  borderRadius: BorderRadius.circular(14),
-                                  shadowColor: colorPalette,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      Navigator.of(innerContext).pop();
-                                    },
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Column(
-                                        children: [
-                                          Icon(
-                                            CupertinoIcons.arrowshape_turn_up_left,
-                                            color: Singleton.fifthTabColor,
-                                            size: 30,
-                                          ),
-                                          SizedBox(height: 5),
-                                          Text(
-                                            'Abbruch',
-                                            style: TextStyle(
-                                                color: Colors.white, fontSize: 18),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 4,
-                            mainAxisCellCount: 4,
-                            child: GlassContainer(
-                              blur: 12,
-                              shadowStrength: 4,
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(14),
-                              shadowColor: colorPalette,
-                              child: TextButton(
-                                onPressed: () {
-                                  // Logic to submit the rating
-                                  Navigator.of(innerContext).pop();
-                                },
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.delete_solid,
-                                        color: Singleton.thirdTabColor,
-                                        size: 30,
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Löschen',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 4,
-                            mainAxisCellCount: 4,
-                            child: GlassContainer(
-                              blur: 12,
-                              shadowStrength: 4,
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(14),
-                              shadowColor: colorPalette,
-                              child: TextButton(
-                                onPressed: () {},
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.star_lefthalf_fill,
-                                        color: Singleton.firstTabColor,
-                                        size: 30,
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Text(
-                                        'Anwenden',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),),
-                        ]),
-                  ]),
-                ],
-              );
-            },
-          );
-        });
-  }
 }

@@ -53,7 +53,6 @@ class FirebaseService {
   }
 
 
-
   Future<List<FirebaseUserModel>> getUsersByQuery(String query) async {
     final userId = _auth.currentUser!.uid;
     final usersRef = await getAllUserData();

@@ -246,7 +246,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      widget.filterOptions.values = SfRangeValues(DateTime(1970), DateTime.now().add(Duration(days: 365)));
+                      widget.filterOptions.values = SfRangeValues(DateTime(1968), DateTime.now().add(Duration(days: 365)));
                     });
                     widget.pagingController.refresh();
                   },

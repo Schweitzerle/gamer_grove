@@ -32,7 +32,7 @@ class GameFilterOptions {
   int minFollows = 0;
   int minHypes = 0;
   SfRangeValues releaseDateValues =
-      SfRangeValues(DateTime(1947), DateTime.now());
+      SfRangeValues(DateTime(1990), DateTime.now());
   SfRangeValues ratingValues = const SfRangeValues(0.0, 100.0);
   SfRangeValues totalRatingValues = const SfRangeValues(0.0, 100.0);
   SfRangeValues aggregatedRatingValues = const SfRangeValues(0.0, 100.0);
@@ -891,12 +891,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       SfRangeSlider(
-                                        min: DateTime(1947),
+                                        min: DateTime(1990),
                                         max: DateTime.now()
                                             .add(Duration(days: 365)),
                                         values: widget
                                             .filterOptions.releaseDateValues,
-                                        interval: 15,
+                                        interval: 10,
                                         showTicks: true,
                                         showLabels: true,
                                         minorTicksPerInterval: 1,
@@ -1024,17 +1024,17 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                   onPressed: () {
                     setState(() {
                       widget.filterOptions.releaseDateValues = SfRangeValues(
-                          DateTime(1947),
+                          DateTime(1990),
                           DateTime.now().add(Duration(days: 365)));
-                      widget.filterOptions.selectedGameModes!.clear();
+                      if(widget.filterOptions.selectedGameModes != null)widget.filterOptions.selectedGameModes!.clear();
+                      if(widget.filterOptions.selectedPlayerPerspectives != null)widget.filterOptions.selectedPlayerPerspectives!.clear();
+                      if(widget.filterOptions.selectedPlatforms != null)widget.filterOptions.selectedPlatforms!.clear();
+                      if(widget.filterOptions.selectedGenres != null)widget.filterOptions.selectedGenres!.clear();
+                      if(widget.filterOptions.selectedThemes != null)widget.filterOptions.selectedThemes!.clear();
+                      if(widget.filterOptions.selectedCategory != null)widget.filterOptions.selectedCategory!.clear();
+                      if(widget.filterOptions.selectedAgeRating != null)widget.filterOptions.selectedAgeRating!.clear();
+                      if(widget.filterOptions.selectedStatus != null)widget.filterOptions.selectedStatus!.clear();
                       widget.filterOptions.selectedSorting.clear();
-                      widget.filterOptions.selectedPlayerPerspectives!.clear();
-                      widget.filterOptions.selectedPlatforms!.clear();
-                      widget.filterOptions.selectedGenres!.clear();
-                      widget.filterOptions.selectedThemes!.clear();
-                      widget.filterOptions.selectedCategory!.clear();
-                      widget.filterOptions.selectedAgeRating!.clear();
-                      widget.filterOptions.selectedStatus!.clear();
                       widget.filterOptions.minRatings = 0;
                       widget.filterOptions.minTotalRatings = 0;
                       widget.filterOptions.minAggregatedRatings = 0;

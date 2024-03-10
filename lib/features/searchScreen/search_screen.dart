@@ -71,7 +71,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
   void initState() {
     super.initState();
     Future.wait([getIGDBFilterData()]);
-    filterOptions = GameFilterOptions(releaseDateValues: SfRangeValues(DateTime(1947), DateTime.now()), selectedSorting: ['total_rating_count desc']);
+    filterOptions = GameFilterOptions(releaseDateValues: SfRangeValues(DateTime(1990), DateTime.now()), selectedSorting: ['total_rating_count desc']);
     eventFilterOptions = EventFilterOptions(
         values: SfRangeValues(DateTime(2017), DateTime.now().add(Duration(days: 365))), selectedSorting: ['start_time desc']);
     companyFilterOptions = CompanyFilterOptions(
@@ -240,14 +240,14 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final apiService = IGDBApiService();
     final offset = pageKey * 20;
 
-    final int startUnix = dateTimeToUnix(companyFilterOptions.values.start);
+    final String startUnix =  '& start_date >= ${dateTimeToUnix(companyFilterOptions.values.start)}';
     final int endUnix = dateTimeToUnix(companyFilterOptions.values.end);
 
     String queryString = 'name ~ *"${query}"*';
-    String sortString = companyFilterOptions.selectedSorting!.isNotEmpty ? 's ${companyFilterOptions.selectedSorting!.join(', ')};' : '';
+    String sortString = companyFilterOptions.selectedSorting.isNotEmpty ? 's ${companyFilterOptions.selectedSorting.join(', ')};' : '';
 
     final body =
-        'fields *, logo.*; $sortString w ${queryString} & start_date != null & start_date >= ${startUnix} & start_date <= ${endUnix}; o $offset; l 20;';
+        'fields *, logo.*; $sortString w ${queryString} & start_date != null ${startUnix} & start_date <= ${endUnix}; o $offset; l 20;';
 
     print(body);
 
@@ -271,7 +271,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final int endUnix = dateTimeToUnix(eventFilterOptions.values.end);
 
     String queryString = 'name ~ *"${query}"*';
-    String sortString = eventFilterOptions.selectedSorting!.isNotEmpty ? 's ${eventFilterOptions.selectedSorting!.join(', ')};' : '';
+    String sortString = eventFilterOptions.selectedSorting.isNotEmpty ? 's ${eventFilterOptions.selectedSorting.join(', ')};' : '';
 
     final body =
         'fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time asc; $sortString w ${queryString} & start_time >= ${startUnix} & start_time <= ${endUnix}; o $offset; l 20;';
@@ -291,13 +291,13 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final offset = pageKey * 20;
 
     String sortString = filterOptions.selectedSorting.isNotEmpty ? 's ${filterOptions.selectedSorting.join(', ')};' : 's total_rating_count desc;';
-
-
     String queryString = 'name ~ *"${query}"*'; // Suchfilter für den Spielnamen
 
-    final int startUnix = dateTimeToUnix(filterOptions.releaseDateValues.start);
+    const dateBorder = 631152000;
+    final int startUnix = dateTimeToUnix(filterOptions.releaseDateValues.start) > dateBorder ? dateTimeToUnix(filterOptions.releaseDateValues.start) : -725849940;
     final int endUnix = dateTimeToUnix(filterOptions.releaseDateValues.end);
 
+    print(startUnix);
     queryString += ' & first_release_date >= ${startUnix} & first_release_date <= ${endUnix}';
 
 

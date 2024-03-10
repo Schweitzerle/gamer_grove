@@ -245,9 +245,7 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      widget.filterOptions.values = SfRangeValues(
-                          DateTime(2000),
-                          DateTime.now().add(Duration(days: 365)));
+                      widget.filterOptions.values = SfRangeValues(DateTime(2017), DateTime.now().add(Duration(days: 365)));
                     });
                     widget.pagingController.refresh();
                   },

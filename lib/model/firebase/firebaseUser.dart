@@ -19,7 +19,7 @@ class FirebaseUserModel {
   final String name;
   final String username;
   final String email;
-  final List<GameModel> games;
+  final Map<String, dynamic> games;
   final Map<dynamic, dynamic> following; // Change type to List<String>
   final Map<dynamic, dynamic> followers; // Change type to List<String>
   final String profileUrl;
@@ -56,7 +56,7 @@ class FirebaseUserModel {
       email: data['email'] ?? '',
       following: data['following'] ?? {},
       followers: data['followers'] ?? {},
-      games: _parseGames(data['games'] ?? []),
+      games: data['games'] ?? {},
       profileUrl: data['profilePicture'] ?? '',
     );
   }
@@ -70,7 +70,7 @@ class FirebaseUserModel {
       email: docData['email'] ?? '',
       following: docData['following'] ?? {},
       followers: docData['followers'] ?? {},
-      games: _parseGames(docData['games'] ?? []),
+      games: docData['games'] ?? {},
       profileUrl: docData['profilePicture'] ?? '',
     );
   }
@@ -80,23 +80,11 @@ class FirebaseUserModel {
     List<GameModel> games = [];
     for (var value in gamesData) {
       games.add(GameModel(
-        id: value['gameID'],
+        id: value['id'],
         wishlist: value['wishlist'] ?? false,
         recommended: value['recommended'] ?? false,
-        rated: value['rated'] ?? false,
         rating: value['rating'] ?? 0.0,
       ));
-    }
-    return games;
-  }
-
-  static Future<List<FirebaseUserModel>> _parseFollowers(
-      Map<dynamic, dynamic> gamesData) async {
-    List<FirebaseUserModel> games = [];
-    for (var value in gamesData.values) {
-      FirebaseUserModel firebaseUserModel =
-          await FirebaseService().getSingleUserData(value);
-      games.add(firebaseUserModel);
     }
     return games;
   }
@@ -104,18 +92,45 @@ class FirebaseUserModel {
 
 class GameModel {
   final String id;
-  final bool wishlist;
-  final bool recommended;
-  final bool rated;
-  final double rating;
+  bool wishlist;
+  bool recommended;
+  num rating;
 
   GameModel({
     required this.id,
     required this.wishlist,
     required this.recommended,
-    required this.rated,
     required this.rating,
   });
+
+  toJson() {
+    return {
+      'id': id,
+      'rating': rating,
+      'recommended': recommended,
+      'wishlist': wishlist,
+    };
+  }
+
+  factory GameModel.fromMap(Map<String, dynamic> data) {
+    return GameModel(
+      id: data['id'],
+      rating: data['rating'] ?? 0.0,
+      recommended: data['recommended'] ?? false,
+      wishlist: data['wishlist'] ?? false,
+    );
+  }
+
+  factory GameModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> data) {
+    final docData = data.data()!;
+    return GameModel(
+      id: docData['id'],
+      rating: docData['rating'] ?? 0.0,
+      recommended: docData['recommended'] ?? false,
+      wishlist: docData['wishlist'] ?? false,
+
+    );
+  }
 }
 
 class UserListItem extends StatefulWidget {

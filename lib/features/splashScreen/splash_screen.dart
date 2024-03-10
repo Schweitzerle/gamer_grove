@@ -1,6 +1,7 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:auth_service/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
@@ -123,6 +124,8 @@ class _SplashScreenState extends State<SplashScreen> {
             ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
             ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
             ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller_fill),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
             ItemBehaviour(shape: ShapeType.StrokeCircle),
           ],
         ),

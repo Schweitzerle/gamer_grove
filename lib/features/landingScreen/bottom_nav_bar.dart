@@ -44,9 +44,10 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   @override
   void initState() {
     super.initState();
+    Future.wait([getCurrentUserData()]);
     currentIndex = initialIndex;
     controller = PageController(initialPage: initialIndex);
-    Future.wait([getCurrentUserData()]);
+
   }
 
   Future<void> getCurrentUserData() async {
