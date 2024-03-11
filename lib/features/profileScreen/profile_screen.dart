@@ -69,6 +69,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
   }
 
+  int getRatedGameKeys(Map<String, dynamic> games) {
+    final recommendedGames = games.entries.where((entry) => entry.value['rating'] > 0);
+    return recommendedGames.map((entry) => entry.key).toList().length;
+  }
+
+  int getRecommendedGameKeys(Map<String, dynamic> games) {
+    final recommendedGames = games.entries.where((entry) => entry.value['recommended'] == true);
+    return recommendedGames.map((entry) => entry.key).toList().length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
@@ -167,48 +177,79 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    'Followers', // Anzahl der Follower einfügen
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    user.followers.length.toString(),
-                                    // Anzahl der Follower einfügen
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    FittedBox(
+                                      child: Text(
+                                        'Followers', // Anzahl der Follower einfügen
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ),
+                                    Text(
+                                      user.followers.length.toString(),
+                                      // Anzahl der Follower einfügen
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SizedBox(width: 20),
-                              Column(
-                                children: [
-                                  Text(
-                                    'Following',
-                                    // Anzahl der Abonnements einfügen
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    user.following.length.toString(),
-                                    // Anzahl der Abonnements einfügen
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    FittedBox(
+                                      child: Text(
+                                        'Following',
+                                        // Anzahl der Abonnements einfügen
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ),
+                                    Text(
+                                      user.following.length.toString(),
+                                      // Anzahl der Abonnements einfügen
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SizedBox(width: 20),
-                              Column(
-                                children: [
-                                  Text(
-                                    'Games Rated',
-                                    // Anzahl der bewerteten Spiele einfügen
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    user.games.length.toString(),
-                                    // Anzahl der bewerteten Spiele einfügen
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    FittedBox(
+                                      child: Text(
+                                        'Games Rated',
+                                        // Anzahl der bewerteten Spiele einfügen
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ),
+                                    Text(
+                                      getRatedGameKeys(user.games).toString(),
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    FittedBox(
+                                      child: Text(
+                                        'Games Recommended',
+                                        // Anzahl der bewerteten Spiele einfügen
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ),
+                                    Text(
+                                      getRecommendedGameKeys(user.games).toString(),
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
