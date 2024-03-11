@@ -93,7 +93,6 @@ class _CollectionsEventsContainerSwitchWidgetState
                 alignment: Alignment.centerRight,
                 child: SizedBox(
                   height: mediaQueryHeight * .06,
-                  //TODO: noch irgwie den ausgewählten text zu dem container anzeigen in einer reihe oder so
                   child: AnimatedToggleSwitch<int>.size(
                     textDirection: TextDirection.ltr,
                     current: _selectedIndex,
@@ -210,7 +209,7 @@ class _CollectionsEventsContainerSwitchWidgetState
   }
 
   void init() {
-    if (widget.game.franchises != null) values.add(0);
+    if (widget.game.franchises != null && widget.game.franchises![0].games != null) values.add(0);
     if (widget.game.collection != null) values.add(1);
     if (widget.game.videos != null) values.add(2);
     if (widget.events.isNotEmpty) values.add(3);
@@ -322,7 +321,7 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top: mediaQueryHeight * .04),
+                padding: EdgeInsets.only(top: mediaQueryHeight * .04, bottom: mediaQueryHeight * .008),
                 child: SizedBox(
                     child: _selectedIndex == 0
                         ? Accordion(

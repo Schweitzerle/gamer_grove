@@ -15,6 +15,7 @@ dependencies:
     path: packages/auth_service
   cupertino_icons: ^1.0.2
   glassmorphism_ui: ^0.3.0
+  textura: ^0.1.0+1
   wave: ^0.2.2
   dropdown_button2: ^2.3.9
   multi_dropdown: ^2.1.4
@@ -27,6 +28,9 @@ dependencies:
   flutter_bloc: ^8.0.1
   like_button: ^2.0.5
   http: any
+  animate_do: ^3.3.4
+  flutter_animate: ^4.5.0
+  animated_emoji: ^3.1.0
   firebase_database: ^10.4.9
   get_it: ^7.6.7
   flutter_animated_dialog: ^2.0.1

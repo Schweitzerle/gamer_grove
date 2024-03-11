@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/model/views/otherUserProfileView.dart';
 import 'package:gamer_grove/repository/firebase/firebase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:like_button/like_button.dart';
@@ -61,7 +62,8 @@ class FirebaseUserModel {
     );
   }
 
-  factory FirebaseUserModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> data) {
+  factory FirebaseUserModel.fromSnapshot(
+      DocumentSnapshot<Map<String, dynamic>> data) {
     final docData = data.data()!;
     return FirebaseUserModel(
       uuid: docData['id'] ?? '',
@@ -74,7 +76,6 @@ class FirebaseUserModel {
       profileUrl: docData['profilePicture'] ?? '',
     );
   }
-
 
   static List<GameModel> _parseGames(List<dynamic> gamesData) {
     List<GameModel> games = [];
@@ -90,7 +91,7 @@ class FirebaseUserModel {
   }
 }
 
-class GameModel extends ChangeNotifier{
+class GameModel extends ChangeNotifier {
   final String id;
   bool wishlist;
   bool recommended;
@@ -128,7 +129,6 @@ class GameModel extends ChangeNotifier{
       rating: docData['rating'] ?? 0.0,
       recommended: docData['recommended'] ?? false,
       wishlist: docData['wishlist'] ?? false,
-
     );
   }
 
@@ -170,7 +170,6 @@ class _UserListItemState extends State<UserListItem> {
   late bool isFollowing = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final getIt = GetIt.instance;
-
 
   @override
   void initState() {
@@ -215,7 +214,7 @@ class _UserListItemState extends State<UserListItem> {
                 depth: 60,
                 color: Theme.of(context).colorScheme.inversePrimary,
                 borderRadius: 14,
-                child: Center(
+                child: const Center(
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: LoadingIndicator(
@@ -231,92 +230,102 @@ class _UserListItemState extends State<UserListItem> {
             throw snapshot.error!;
           } else {
             final colorpalette = snapshot.data!;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClayContainer(
-                width: double.infinity,
-                // Occupy full width
-                height: 80,
-                color: colorpalette,
-                spread: 2,
-                depth: 60,
-                borderRadius: 14,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // Move games count to the right
-                  children: [
-                    // Profile picture
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ProfileView(
-                        image: NetworkImage(widget.user.profileUrl),
+            return GestureDetector(
+              onTap: () {
+                print('object');
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => OtherUserProfileScreen(
+                          userModel: widget.user,
+                        )));
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClayContainer(
+                  width: double.infinity,
+                  // Occupy full width
+                  height: 80,
+                  color: colorpalette,
+                  spread: 2,
+                  depth: 60,
+                  borderRadius: 14,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // Move games count to the right
+                    children: [
+                      // Profile picture
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ProfileView(
+                          image: NetworkImage(widget.user.profileUrl),
+                        ),
                       ),
-                    ),
-                    // User information
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.user.name,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: textColor),
-                          ),
-                          Text(
-                            '@${widget.user.username}',
-                            style: TextStyle(fontSize: 14, color: textColor),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Games count
-                    const SizedBox(width: 16), // Add some right padding
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        // Move games count to the right
-                        children: [
-                          Text(
-                            '${widget.user.games.length} Games',
-                            style: TextStyle(color: textColor, fontSize: 12),
-                          ),
-                          LikeButton(
-                            onTap: (isFollowing) async {
-                              await _updateFollowStatusInDatabase(!isFollowing);
-                              return !isFollowing; // Return the updated isLiked value
-                            },
-                            isLiked: isFollowing,
-                            circleColor: CircleColor(
-                                start: Theme.of(context)
-                                    .colorScheme
-                                    .secondaryContainer,
-                                end: Theme.of(context).colorScheme.secondary),
-                            bubblesColor: BubblesColor(
-                              dotPrimaryColor: Theme.of(context)
-                                  .colorScheme
-                                  .tertiaryContainer,
-                              dotSecondaryColor: Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryContainer,
+                      // User information
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.user.name,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: textColor),
                             ),
-                            likeBuilder: (isFollowing) {
-                              return Icon(
-                                FontAwesomeIcons.solidHeart,
-                                color: isFollowing
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onPrimary,
-                              );
-                            },
-                          ),
-                        ],
+                            Text(
+                              '@${widget.user.username}',
+                              style: TextStyle(fontSize: 14, color: textColor),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      // Games count
+                      const SizedBox(width: 16), // Add some right padding
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Move games count to the right
+                          children: [
+                            Text(
+                              '${widget.user.games.length} Games',
+                              style: TextStyle(color: textColor, fontSize: 12),
+                            ),
+                            LikeButton(
+                              onTap: (isFollowing) async {
+                                await _updateFollowStatusInDatabase(
+                                    !isFollowing);
+                                return !isFollowing; // Return the updated isLiked value
+                              },
+                              isLiked: isFollowing,
+                              circleColor: CircleColor(
+                                  start: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer,
+                                  end: Theme.of(context).colorScheme.secondary),
+                              bubblesColor: BubblesColor(
+                                dotPrimaryColor: Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer,
+                                dotSecondaryColor: Theme.of(context)
+                                    .colorScheme
+                                    .onTertiaryContainer,
+                              ),
+                              likeBuilder: (isFollowing) {
+                                return Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  color: isFollowing
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onPrimary,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
 
-                    const SizedBox(width: 16), // Add some right padding
-                  ],
+                      const SizedBox(width: 16), // Add some right padding
+                    ],
+                  ),
                 ),
               ),
             );
@@ -328,19 +337,31 @@ class _UserListItemState extends State<UserListItem> {
     final currentUser = getIt<FirebaseUserModel>();
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
-    final userFollowsDoc = FirebaseFirestore.instance.collection('Users').doc(widget.user.uuid);
+    final userFollowsDoc =
+        FirebaseFirestore.instance.collection('Users').doc(widget.user.uuid);
 
     if (isFollowing) {
-      currentUser.following[widget.user.uuid] = widget.user.uuid; // Update local following map
-      await userDoc.update({'following': currentUser.following}); // Update following map in user doc
-      widget.user.followers[currentUser.uuid] = currentUser.uuid; // Update local following map
-      await userFollowsDoc.update({'followers': widget.user.followers}); // Update following map in user doc
+      currentUser.following[widget.user.uuid] =
+          widget.user.uuid; // Update local following map
+      await userDoc.update({
+        'following': currentUser.following
+      }); // Update following map in user doc
+      widget.user.followers[currentUser.uuid] =
+          currentUser.uuid; // Update local following map
+      await userFollowsDoc.update({
+        'followers': widget.user.followers
+      }); // Update following map in user doc
     } else {
-      currentUser.following.remove(widget.user.uuid); // Remove from local following map
-      await userDoc.update({'following': currentUser.following}); // Update following map in user doc
-      widget.user.followers.remove(currentUser.uuid); // Update local following map
-      await userFollowsDoc.update({'followers': widget.user.followers}); // Update following map in user doc
+      currentUser.following
+          .remove(widget.user.uuid); // Remove from local following map
+      await userDoc.update({
+        'following': currentUser.following
+      }); // Update following map in user doc
+      widget.user.followers
+          .remove(currentUser.uuid); // Update local following map
+      await userFollowsDoc.update({
+        'followers': widget.user.followers
+      }); // Update following map in user doc
     }
   }
-
 }

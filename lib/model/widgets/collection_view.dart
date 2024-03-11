@@ -21,7 +21,7 @@ class CollectionStaggeredView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: EdgeInsets.all(8), child:
+    return Padding(padding: const EdgeInsets.all(8), child:
     StaggeredGrid.count(
       crossAxisCount: 4,
       mainAxisSpacing: 4,

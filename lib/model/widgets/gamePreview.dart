@@ -114,87 +114,111 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14.0),
-                    child: CachedNetworkImage(
-                      imageUrl: '${widget.game.cover?.url}',
-                      placeholder: (context, url) => Container(
-                        color: Theme.of(context).colorScheme.tertiaryContainer,
+                    child: Hero(
+                      tag: widget.game.id,
+                      child: CachedNetworkImage(
+                        imageUrl: '${widget.game.cover?.url}',
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context).colorScheme.tertiaryContainer,
+                        ),
+                        errorWidget: (context, url, error) => GlassContainer(
+                          color: colorpalette.onColor,
+                          child: Icon(FontAwesomeIcons.gamepad),
+                        ),
+                        fit: BoxFit.fill,
                       ),
-                      errorWidget: (context, url, error) => GlassContainer(
-                        color: lightColor,
-                        child: Icon(FontAwesomeIcons.gamepad),
-                      ),
-                      fit: BoxFit.fill,
                     ),
                   ),
               Consumer<GameModel>(
                   builder: (context, gameModel, child) {
-                    if (gameModel.wishlist || gameModel.recommended || gameModel.rating < 0) {
-                      return Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: colorpalette,
-                          child: Padding(
-                            padding: const EdgeInsets.all(3.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Consumer<GameModel>(
-                                  builder: (context, gameModel, child) {
-                                    if (gameModel.wishlist) {
-                                      return Center(
-                                        child: Icon(
-                                            FontAwesomeIcons.solidBookmark,
-                                            color: Colors.blueAccent),
-
-                                      );
-                                    } else {
-                                      return Container(); // or any placeholder widget
-                                    }
-                                  },
-                                ),
-                                SizedBox(width: 6,),
-                                Consumer<GameModel>(
-                                  builder: (context, gameModel, child) {
-                                    if (gameModel.recommended) {
-                                      return Center(child: Icon(
-                                          FontAwesomeIcons.thumbsUp,
-                                          color: Colors.deepOrange),
-                                      );
-                                    } else {
-                                      return Container(); // or any placeholder widget
-                                    }
-                                  },
-                                ),
-                                SizedBox(width: 6,),
-                                Consumer<GameModel>(
-                                  builder: (context, gameModel, child) {
-                                    if (gameModel.rating > 0) {
-                                      return Center(
-                                        child: CircularRatingWidget(
-                                          ratingValue:
-                                          gameModel.rating.toDouble() * 10,
-                                          radiusMultiplicator: .045,
-                                          fontSize: 10,
-                                          lineWidth: 4,
-                                        ),
-                                      );
-                                    } else {
-                                      return Container(); // or any placeholder widget
-                                    }
-                                  },
-                                ),
-                              ],
+                    if (widget.needsRating) {
+                      if (gameModel.wishlist || gameModel.recommended || gameModel.rating > 0) {
+                        return Positioned(
+                          top: 0,
+                          right: 0,
+                          child: GlassContainer(
+                            blur: 12,
+                            shadowStrength: 4,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(14),
+                            shadowColor: colorpalette,
+                            color: colorpalette.onColor.withOpacity(.1),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Consumer<GameModel>(
+                                    builder: (context, gameModel, child) {
+                                      if (gameModel.wishlist) {
+                                        return const Row(
+                                          children: [
+                                            SizedBox(width: 2,),
+                                            Center(
+                                              child: Icon(
+                                                  FontAwesomeIcons.solidBookmark,
+                                                  color: Colors.blueAccent),
+                                            ),
+                                            SizedBox(width: 2,),
+                                          ],
+                                        );
+                                      } else {
+                                        return Container(); // or any placeholder widget
+                                      }
+                                    },
+                                  ),
+                                  Consumer<GameModel>(
+                                    builder: (context, gameModel, child) {
+                                      if (gameModel.recommended) {
+                                        return const Row(
+                                          children: [
+                                            SizedBox(width: 2,),
+                                            Center(child: Icon(
+                                                FontAwesomeIcons.thumbsUp,
+                                                color: Colors.deepOrange),
+                                            ),
+                                            SizedBox(width: 2,),
+                                          ],
+                                        );
+                                      } else {
+                                        return Container(); // or any placeholder widget
+                                      }
+                                    },
+                                  ),
+                                  Consumer<GameModel>(
+                                    builder: (context, gameModel, child) {
+                                      if (gameModel.rating > 0) {
+                                        return Row(
+                                          children: [
+                                            const SizedBox(width: 2,),
+                                            Center(
+                                              child: CircularRatingWidget(
+                                                ratingValue:
+                                                gameModel.rating.toDouble() * 10,
+                                                radiusMultiplicator: .045,
+                                                fontSize: 10,
+                                                lineWidth: 4,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 2,),
+                                          ],
+                                        );
+                                      } else {
+                                        return Container(); // or any placeholder widget
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                  } else {
+                        );
+                      } else {
+                        return Container();
+                      }
+                    } else {
                       return Container();
                     }
                   }

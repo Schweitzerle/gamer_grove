@@ -1,10 +1,12 @@
 import 'package:clay_containers/widgets/clay_container.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:get/get_utils/get_utils.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import '../igdb_models/game.dart';
 import '../views/gameGridPaginationView.dart';
@@ -62,13 +64,13 @@ class GameListViewState extends State<GameListView> {
                   child: Padding(
                     padding: EdgeInsets.all(6),
                     child: FittedBox(
-                      child: Text(
-                        widget.headline,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(color: adjustedIconColor),
+                        child: Text(
+                          widget.headline,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(color: adjustedIconColor),
+                        ),
                       ),
                     ),
-                  ),
                 ),
                 if (widget.games!.length > widget.showLimit)
                   ElevatedButton(
@@ -102,7 +104,7 @@ class GameListViewState extends State<GameListView> {
               ],
             ),
           ),
-          Container(
+          SizedBox(
             height: coverScaleHeight,
             child: ListView.builder(
               shrinkWrap: true,
