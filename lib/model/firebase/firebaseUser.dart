@@ -90,7 +90,7 @@ class FirebaseUserModel {
   }
 }
 
-class GameModel {
+class GameModel extends ChangeNotifier{
   final String id;
   bool wishlist;
   bool recommended;
@@ -130,6 +130,26 @@ class GameModel {
       wishlist: docData['wishlist'] ?? false,
 
     );
+  }
+
+  void updateRecommended() {
+    recommended = !recommended;
+    notifyListeners();
+  }
+
+  void updateWishlist() {
+    wishlist = !wishlist;
+    notifyListeners();
+  }
+
+  void updateRating() {
+    rating = rating;
+    notifyListeners();
+  }
+
+  void deleteRating() {
+    rating = 0;
+    notifyListeners();
   }
 }
 

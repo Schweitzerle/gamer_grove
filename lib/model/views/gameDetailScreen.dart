@@ -62,7 +62,7 @@ class GameDetailScreen extends StatefulWidget {
       builder: (context) => GameDetailScreen(
         game: game,
         context: context,
-        gameModel: gameModel
+        gameModel: gameModel,
       ),
     );
   }
@@ -71,7 +71,7 @@ class GameDetailScreen extends StatefulWidget {
   final BuildContext context;
   final GameModel gameModel;
 
-  GameDetailScreen({required this.game, required this.context, required this.gameModel});
+  GameDetailScreen({required this.game, required this.context, required this.gameModel,});
 
   @override
   _GameDetailScreenState createState() => _GameDetailScreenState();
@@ -269,6 +269,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                               isCover: true,
                               buildContext: context,
                               needsRating: true,
+                              gameModel: widget.gameModel,
                             ),
                           ),
                         ),
@@ -362,7 +363,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       ],
                     ),
                   ),
-                  // Text above GamePreviewView
                   Padding(
                     padding: EdgeInsets.only(
                         left: 16.0,

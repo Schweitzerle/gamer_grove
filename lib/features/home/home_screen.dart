@@ -174,11 +174,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 40),
             ),
             EventListView(headline: 'Latest Events', events: latestEventResponse),
@@ -202,10 +203,6 @@ class _HomeScreenState extends State<HomeScreen> {
               games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10, isAggregated: false,
             ),
 
-            // Padding at the bottom for the desired margin
-            Padding(
-              padding: EdgeInsets.only(bottom: 80),
-            ),
           ],
         ),
       ),

@@ -51,311 +51,333 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
   }
 
   contentBox(context) {
-    return Stack(
-      children: <Widget>[
-        GlassContainer(
-          shadowColor: widget.colorPalette.lighten(20),
-          shadowStrength: 8,
-          blur: 2,
-          color: Theme.of(context).colorScheme.background,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Center(
-                  child: GlassContainer(
-                    width: double.infinity,
-                    blur: 12,
-                    color: Theme.of(context).colorScheme.background,
-                    shadowStrength: 4,
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.circular(14),
-                    shadowColor: widget.colorPalette.darken(20),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Text(
-                        'Rate this Game',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onBackground,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+    return StatefulBuilder(
+        builder: (context, setState) {
+          return Stack(
+            children: <Widget>[
+              GlassContainer(
+                shadowColor: widget.colorPalette.lighten(20),
+                shadowStrength: 8,
+                blur: 2,
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .background,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Center(
+                        child: GlassContainer(
+                          width: double.infinity,
+                          blur: 12,
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .background,
+                          shadowStrength: 4,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(14),
+                          shadowColor: widget.colorPalette.darken(20),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Text(
+                              'Rate this Game',
+                              style: TextStyle(
+                                color: Theme
+                                    .of(context)
+                                    .colorScheme
+                                    .onBackground,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      StaggeredGrid.count(
+                          crossAxisCount: 12,
+                          mainAxisSpacing: 4,
+                          crossAxisSpacing: 8,
+                          children: [
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 6,
+                              mainAxisCellCount: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                color: Colors.blue.lighten(20).withOpacity(.8),
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: Colors.blue.lighten(20),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    children: [
+                                      LikeButton(
+                                        onTap: (isWishlist) async {
+                                          HapticFeedback.selectionClick();
+                                          await _updateGameWishlistStatusInDatabase();
+                                          return !isWishlist; // Return the updated isLiked value
+                                        },
+                                        isLiked: widget.gameModel.wishlist,
+                                        circleColor: const CircleColor(
+                                            start: Colors.blueAccent,
+                                            end: Colors.lightBlueAccent),
+                                        bubblesColor: const BubblesColor(
+                                            dotPrimaryColor: Colors.blue,
+                                            dotSecondaryColor: Colors
+                                                .lightBlue),
+                                        likeBuilder: (isRecommended) {
+                                          return Icon(
+                                            FontAwesomeIcons.solidBookmark,
+                                            color: isRecommended
+                                                ? Colors.blueAccent
+                                                : Colors.white,
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 5),
+                                      const Text(
+                                        'Wishlist',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 6,
+                              mainAxisCellCount: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                color: Colors.orange.lighten(20).withOpacity(
+                                    .8),
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: Colors.orange,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Column(
+                                    children: [
+                                      LikeButton(
+                                        onTap: (isRecommended) async {
+                                          HapticFeedback.selectionClick();
+                                          await _updateGameRecommendStatusInDatabase();
+                                          return !isRecommended; // Return the updated isLiked value
+                                        },
+                                        isLiked: widget.gameModel.recommended,
+                                        circleColor: const CircleColor(
+                                            start: Colors.deepOrangeAccent,
+                                            end: Colors.orangeAccent),
+                                        bubblesColor: const BubblesColor(
+                                            dotPrimaryColor: Colors.deepOrange,
+                                            dotSecondaryColor: Colors.orange),
+                                        likeBuilder: (isRecommended) {
+                                          return Icon(
+                                            FontAwesomeIcons.thumbsUp,
+                                            color: isRecommended
+                                                ? Colors.deepOrange
+                                                : Colors.white,
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      const Text(
+                                        'Recommend',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 4,
+                              mainAxisCellCount: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                color: Colors.black.lighten(20).withOpacity(.8),
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: Colors.black,
+                                child: TextButton(
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.arrow_uturn_left,
+                                          color: Colors.black,
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          'Cancel',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 4,
+                              mainAxisCellCount: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                color: Colors.red.lighten(20).withOpacity(.8),
+                                borderRadius: BorderRadius.circular(14),
+                                shadowColor: Colors.red,
+                                child: TextButton(
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    _deleteGameStatusInDatabase();
+                                  },
+                                  child: const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          'Delete Rating',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            StaggeredGridTile.count(
+                              crossAxisCellCount: 4,
+                              mainAxisCellCount: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                shadowStrength: 4,
+                                shape: BoxShape.rectangle,
+                                borderRadius: BorderRadius.circular(14),
+                                color: Colors.green.lighten(20).withOpacity(.8),
+                                shadowColor: Colors.green,
+                                child: TextButton(
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    _updateRatingInDatabase();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.gamecontroller_fill,
+                                          color: Colors.green.darken(20),
+                                        ),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        const Text(
+                                          'Save Rating',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ]),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Center(
+                        child: GlassContainer(
+                          blur: 12,
+                          shadowStrength: 4,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(14),
+                          shadowColor: widget.colorPalette.darken(30),
+                          color: widget.adjustedTextColor,
+                          child: FittedBox(
+                            fit: BoxFit.fitWidth,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: RatingBar.builder(
+                                itemSize: 42,
+                                initialRating: widget.gameModel.rating
+                                    .toDouble() == 0 ? .5 : widget.gameModel
+                                    .rating.toDouble(),
+                                minRating: .5,
+                                direction: Axis.horizontal,
+                                allowHalfRating: true,
+                                glowRadius: 1,
+                                glowColor: widget.colorPalette.lighten(20),
+                                glow: true,
+                                unratedColor: widget.adjustedTextColor ==
+                                    Colors.white
+                                    ? widget.colorPalette.lighten(40)
+                                    : widget.colorPalette.darken(40),
+                                itemCount: 10,
+                                itemPadding: const EdgeInsets.symmetric(
+                                    horizontal: 1.5),
+                                itemBuilder: (context, _) =>
+                                    Icon(
+                                      CupertinoIcons.gamecontroller_fill,
+                                      color: widget.adjustedTextColor ==
+                                          Colors.white
+                                          ? widget.colorPalette.darken(40)
+                                          : widget.colorPalette.lighten(40),
+                                    ),
+                                onRatingUpdate: (updatedRating) {
+                                  widget.gameModel.rating = updatedRating;
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 14,
-                ),
-                StaggeredGrid.count(
-                    crossAxisCount: 12,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 8,
-                    children: [
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 6,
-                        mainAxisCellCount: 3,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          color: Colors.blue.lighten(20).withOpacity(.8),
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: Colors.blue.lighten(20),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Column(
-                              children: [
-                                LikeButton(
-                                  onTap: (isWishlist) async {
-                                    HapticFeedback.selectionClick();
-                                    await _updateGameWishlistStatusInDatabase();
-                                    return !isWishlist; // Return the updated isLiked value
-                                  },
-                                  isLiked: widget.gameModel.wishlist,
-                                  circleColor: const CircleColor(
-                                      start: Colors.blueAccent,
-                                      end: Colors.lightBlueAccent),
-                                  bubblesColor: const BubblesColor(
-                                      dotPrimaryColor: Colors.blue,
-                                      dotSecondaryColor: Colors.lightBlue),
-                                  likeBuilder: (isRecommended) {
-                                    return Icon(
-                                      FontAwesomeIcons.solidBookmark,
-                                      color: isRecommended
-                                          ? Colors.blueAccent
-                                          : Colors.white,
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 5),
-                                const Text(
-                                  'Wishlist',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 6,
-                        mainAxisCellCount: 3,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          color: Colors.orange.lighten(20).withOpacity(.8),
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: Colors.orange,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Column(
-                              children: [
-                                LikeButton(
-                                  onTap: (isRecommended) async {
-                                    HapticFeedback.selectionClick();
-                                    await _updateGameRecommendStatusInDatabase();
-                                    return !isRecommended; // Return the updated isLiked value
-                                  },
-                                  isLiked: widget.gameModel.recommended,
-                                  circleColor: const CircleColor(
-                                      start: Colors.deepOrangeAccent,
-                                      end: Colors.orangeAccent),
-                                  bubblesColor: const BubblesColor(
-                                      dotPrimaryColor: Colors.deepOrange,
-                                      dotSecondaryColor: Colors.orange),
-                                  likeBuilder: (isRecommended) {
-                                    return Icon(
-                                      FontAwesomeIcons.thumbsUp,
-                                      color: isRecommended
-                                          ? Colors.deepOrange
-                                          : Colors.white,
-                                    );
-                                  },
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                const Text(
-                                  'Recommend',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 4,
-                        mainAxisCellCount: 3,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          color: Colors.black.lighten(20).withOpacity(.8),
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: Colors.black,
-                          child: TextButton(
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                            Navigator.of(context).pop();
-                            },
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.arrow_uturn_left,
-                                    color: Colors.black,
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    'Cancel',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 4,
-                        mainAxisCellCount: 3,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          color: Colors.red.lighten(20).withOpacity(.8),
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: Colors.red,
-                          child:TextButton(
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                              _deleteGameStatusInDatabase();
-                            },
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    'Delete',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 4,
-                        mainAxisCellCount: 3,
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          color: Colors.green.lighten(20).withOpacity(.8),
-                          shadowColor: Colors.green,
-                          child: TextButton(
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                              _updateGameStatusInDatabase();
-                              Navigator.of(context).pop();
-                            },
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.gamecontroller_fill,
-                                    color: Colors.green.darken(20),
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  const Text(
-                                    'Save Rating',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ]),
-                const SizedBox(
-                  height: 14,
-                ),
-                Center(
-                  child: GlassContainer(
-                    blur: 12,
-                    shadowStrength: 4,
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.circular(14),
-                    shadowColor: widget.colorPalette.darken(30),
-                    color: widget.adjustedTextColor,
-                    child: FittedBox(
-                      fit: BoxFit.fitWidth,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: RatingBar.builder(
-                          itemSize: 42,
-                          initialRating: widget.gameModel.rating.toDouble() == 0 ? .5 : widget.gameModel.rating.toDouble(),
-                          minRating: .5,
-                          direction: Axis.horizontal,
-                          allowHalfRating: true,
-                          glowRadius: 1,
-                          glowColor: widget.colorPalette.lighten(20),
-                          glow: true,
-                          unratedColor: widget.adjustedTextColor == Colors.white
-                              ? widget.colorPalette.lighten(40)
-                              : widget.colorPalette.darken(40),
-                          itemCount: 10,
-                          itemPadding: const EdgeInsets.symmetric(horizontal: 1.5),
-                          itemBuilder: (context, _) => Icon(
-                            CupertinoIcons.gamecontroller_fill,
-                            color: widget.adjustedTextColor == Colors.white
-                                ? widget.colorPalette.darken(40)
-                                : widget.colorPalette.lighten(40),
-                          ),
-                          onRatingUpdate: (updatedRating) {
-                            widget.gameModel.rating = updatedRating;
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+              ),
+            ],
+          );
+        }
     );
   }
 
-  Future<void> _updateGameStatusInDatabase() async {
+  Future<void> _updateRatingInDatabase() async {
     final currentUser = getIt<FirebaseUserModel>();
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
+    widget.gameModel.updateRating();
     currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
     await userDoc.update({'games': currentUser.games});
   }
@@ -365,7 +387,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-    widget.gameModel.rating = 0;
+    widget.gameModel.deleteRating();
     currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
     await userDoc.update({'games': currentUser.games});
   }
@@ -375,13 +397,9 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-    setState(() {
-      widget.gameModel.recommended = !widget.gameModel.recommended;
-      currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
-    });
+    widget.gameModel.updateRecommended();
+    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
     await userDoc.update({'games': currentUser.games});
-    setState(() {
-    });
   }
 
   Future<void> _updateGameWishlistStatusInDatabase() async {
@@ -389,8 +407,10 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-    widget.gameModel.wishlist = !widget.gameModel.wishlist;
+
+    widget.gameModel.updateWishlist();
     currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
     await userDoc.update({'games': currentUser.games});
+
   }
 }

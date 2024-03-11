@@ -16,12 +16,14 @@ import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:gamer_grove/utils/ThemManager.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:motion/motion.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/home/home_screen.dart';
 import 'features/loginRegistration/login/bloc/login_bloc.dart';
 import 'features/splashScreen/splash_screen.dart';
 import 'firebase_options.dart';
+import 'model/firebase/firebaseUser.dart';
 
 void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive, overlays: []);
@@ -35,11 +37,11 @@ void main() async {
   Motion.instance.setUpdateInterval(60.fps);
 
   runApp(
-    GetMaterialApp(
-      title: 'CouchCinema',
-      debugShowCheckedModeBanner: false,
-      home: GamerGroveApp(),
-    ),
+      GetMaterialApp(
+        title: 'CouchCinema',
+        debugShowCheckedModeBanner: false,
+        home: GamerGroveApp(),
+      ),
   );
 }
 

@@ -25,7 +25,7 @@ class RatingWigdet extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: CircularRatingWidget(ratingValue: rating,), flex: 1,),
+              Expanded(child: CircularRatingWidget(ratingValue: rating, radiusMultiplicator: .07, fontSize: 18, lineWidth: 6,), flex: 1,),
               Expanded(child: Text(description, style: TextStyle(color: Colors.white),), flex: 4,),
             ],
           ),
