@@ -59,7 +59,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
                     padding: const EdgeInsets.all(8.0),
                   child: GamePreviewView(
                     game: game,
-                    isCover: false, buildContext: context, needsRating: true,
+                    isCover: false, buildContext: context, needsRating: true, isClickable: true,
                   ),
                 );
               },

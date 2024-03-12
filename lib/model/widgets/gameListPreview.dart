@@ -123,7 +123,7 @@ class GameListViewState extends State<GameListView> {
                   child: GamePreviewView(
                     game: game,
                     isCover: false,
-                    buildContext: context, needsRating: true,
+                    buildContext: context, needsRating: true, isClickable: true,
                   ),
                 );
               },

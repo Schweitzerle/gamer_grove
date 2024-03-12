@@ -2,9 +2,13 @@ import 'package:animated_emoji/emoji.dart';
 import 'package:animated_emoji/emojis.g.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:textura/textura.dart';
+import 'package:vitality/vitality.dart';
 
 import '../../model/firebase/firebaseUser.dart';
 import '../../model/igdb_models/game.dart';
@@ -52,7 +56,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -88,7 +92,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -124,7 +128,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -153,64 +157,145 @@ class _WatchlistScreenState extends State<WatchlistScreen>
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = getIt<FirebaseUserModel>();
     return Scaffold(
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xff563232),
-                borderRadius: BorderRadius.only(bottomRight: Radius.circular(14), bottomLeft: Radius.circular(14))
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Library',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        )),
-                    AnimatedEmoji(
-                      AnimatedEmojis.nerdFace,
-                      animate: true,
-                      repeat: false,
-                      size: 64,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            GameListView(
-              headline: 'Recommended Games',
-              games: recommendedResponse,
-              isPagination: false,
-              body: '',
-              showLimit: 10,
-              isAggregated: false,
-            ),
-            GameListView(
-              headline: 'Wishlist Games',
-              games: wishlistResponse,
-              isPagination: true,
-              body: '',
-              showLimit: 10,
-              isAggregated: false,
-            ),
-            GameListView(
-              headline: 'Rated Games',
-              games: ratedResponse,
-              isPagination: false,
-              body: '',
-              showLimit: 10,
-              isAggregated: false,
-            ),
-          ],
-        ),
+      body: Container(
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(14),
+                bottomLeft: Radius.circular(14))),
+        child: Stack(children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background,
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0,
+            maxSize: 30,
+            minSpeed: 0,
+            randomItemsColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.videogame_asset_outlined),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: CupertinoIcons.gamecontroller_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
+            ],
+          ),
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Stack(children: [
+              ChangeNotifierProvider.value(
+                value: currentUser,
+                child: Consumer<FirebaseUserModel>(
+                    builder: (context, firebaseUserModel, child) {
+                  return Column(
+                    children: [
+                      const SizedBox(
+                        height: 42,
+                      ),
+                      Center(
+                        child: GlassContainer(
+                          blur: 12,
+                          shadowStrength: 4,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(14),
+                          shadowColor: Theme.of(context).primaryColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              '${currentUser.name}`s Library',
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      Consumer<FirebaseUserModel>(
+                          builder: (context, firebaseUserModel, child) {
+                        if (getRecommendedGameKeys(firebaseUserModel.games)
+                            .isNotEmpty) {
+                          if (recommendedResponse.length != getRecommendedGameKeys(firebaseUserModel.games).length) {
+                            Future.wait([getRecommendedIGDBData()]);
+                            }
+                          return GameListView(
+                            headline: 'Recommended Games',
+                            games: recommendedResponse,
+                            isPagination: false,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                          );
+                        } else {
+                          return Container();
+                        }
+                      }),
+                      Consumer<FirebaseUserModel>(
+                          builder: (context, firebaseUserModel, child) {
+                        if (getWishlistGameKeys(firebaseUserModel.games)
+                            .isNotEmpty) {
+                          if (wishlistResponse.length != getWishlistGameKeys(firebaseUserModel.games).length) {
+                            Future.wait([getWishlistIGDBData()]);
+                          }
+                          return GameListView(
+                            headline: 'Wishlist Games',
+                            games: wishlistResponse,
+                            isPagination: true,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                          );
+                        } else {
+                          return Container();
+                        }
+                      }),
+                      Consumer<FirebaseUserModel>(
+                          builder: (context, firebaseUserModel, child) {
+                        if (getRatedGameKeys(firebaseUserModel.games)
+                            .isNotEmpty) {
+                          if(ratedResponse.length != getRatedGameKeys(firebaseUserModel.games).length) {
+                            Future.wait([getRatedIGDBData()]);
+                          }
+                          return GameListView(
+                            headline: 'Rated Games',
+                            games: ratedResponse,
+                            isPagination: false,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                          );
+                        } else {
+                          return Container();
+                        }
+                      }),
+                    ],
+                  );
+                }),
+              )
+            ]),
+          ),
+        ]),
       ),
     );
   }

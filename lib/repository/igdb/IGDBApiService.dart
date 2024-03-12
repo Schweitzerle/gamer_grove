@@ -34,8 +34,6 @@ class IGDBApiService {
   }
 
 
-  //TODO: External Games und andere enums haben verschiedene int values und könenen somit nicht über den index ausgelesen werden, bsp. facebook 7 aber im enum index 3
-  //TODO: External entfernen aus body dann kommt fehlermedlung
   Future<List<dynamic>> getIGDBData(IGDBAPIEndpointsEnum igdbapiEndpointsEnum, String postBody) async {
     return await _postRequest(igdbapiEndpointsEnum.name, postBody);
   }

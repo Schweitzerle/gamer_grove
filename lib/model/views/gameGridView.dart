@@ -28,7 +28,7 @@ class GameGridView extends StatelessWidget {
             child: GamePreviewView(
               game: game,
               isCover: true,
-              buildContext: context, needsRating: true,
+              buildContext: context, needsRating: true, isClickable: true,
             ),
           );
         },

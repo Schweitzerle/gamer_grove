@@ -6,6 +6,7 @@ import 'package:animated_emoji/emojis.g.dart';
 import 'package:auth_service/auth.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:countup/countup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -32,8 +33,10 @@ import '../widgets/gameListPreview.dart';
 
 class OtherUserProfileScreen extends StatefulWidget {
   final FirebaseUserModel userModel;
+  final Color colorPalette;
 
-  const OtherUserProfileScreen({super.key, required this.userModel});
+  const OtherUserProfileScreen(
+      {super.key, required this.userModel, required this.colorPalette});
 
   @override
   _OtherUserProfileScreenState createState() => _OtherUserProfileScreenState();
@@ -64,7 +67,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -97,7 +100,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -130,7 +133,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
     return body1;
   }
 
@@ -177,7 +180,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   // End a little above two thirds of the height
                   colors: [
                     Theme.of(context).colorScheme.background,
-                    Theme.of(context).colorScheme.inversePrimary,
+                    widget.colorPalette,
                   ],
                   stops: [
                     0.67,
@@ -191,14 +194,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 20),
                   WidgetCircularAnimator(
-                    outerColor: Theme.of(context).colorScheme.primary,
-                    innerColor: Theme.of(context).colorScheme.secondary,
+                    outerColor: widget.colorPalette.onColor,
+                    innerColor: widget.colorPalette.lighten(20),
                     outerAnimation: Curves.linear,
                     child: ProfileView(
-                      height: 100,
-                      width: 100,
                       circle: false,
                       borderRadius: 90,
                       image: NetworkImage(
@@ -206,16 +206,17 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Text(
                     widget.userModel.username,
-                    // Hier den tatsächlichen Benutzernamen einfügen
                     style: TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: widget.colorPalette.onColor),
                   ),
                   const SizedBox(height: 10),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -225,18 +226,22 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                               FittedBox(
                                 child: Text(
                                   'Followers', // Anzahl der Follower einfügen
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                      color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
                                 ),
                               ),
-                              Text(
-                                widget.userModel.followers.length.toString(),
-                                // Anzahl der Follower einfügen
-                                style: TextStyle(fontSize: 16),
+                              Countup(
+                                begin: 0,
+                                end:  widget.userModel.followers.length.toDouble(),
+                                duration: Duration(seconds: 3),
+                                separator: '.',
+                                style:  TextStyle(
+                                    color: widget.colorPalette.onColor),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             children: [
@@ -244,13 +249,17 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 child: Text(
                                   'Following',
                                   // Anzahl der Abonnements einfügen
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                      color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
                                 ),
                               ),
-                              Text(
-                                widget.userModel.following.length.toString(),
-                                // Anzahl der Abonnements einfügen
-                                style: TextStyle(fontSize: 16),
+                              Countup(
+                                begin: 0,
+                                end:  widget.userModel.following.length.toDouble(),
+                                duration: Duration(seconds: 3),
+                                separator: '.',
+                                style:  TextStyle(
+                                    color: widget.colorPalette.onColor),
                               ),
                             ],
                           ),
@@ -263,15 +272,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 child: Text(
                                   'Rated',
                                   // Anzahl der bewerteten Spiele einfügen
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                      color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
                                 ),
                               ),
-                              Text(
-                                getRatedGameKeys(widget.userModel.games)
-                                    .length
-                                    .toString(),
-                                // Anzahl der bewerteten Spiele einfügen
-                                style: TextStyle(fontSize: 16),
+                              Countup(
+                                begin: 0,
+                                end: getRatedGameKeys(widget.userModel.games)
+                                    .length.toDouble(),
+                                duration: Duration(seconds: 3),
+                                separator: '.',
+                                style:  TextStyle(
+                                    color: widget.colorPalette.onColor),
                               ),
                             ],
                           ),
@@ -284,15 +296,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 child: Text(
                                   'Recommended',
                                   // Anzahl der bewerteten Spiele einfügen
-                                  style: TextStyle(fontSize: 18),
+                                  style: TextStyle(
+                                      color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
                                 ),
                               ),
-                              Text(
-                                getRecommendedGameKeys(widget.userModel.games)
-                                    .length
-                                    .toString(),
-                                // Anzahl der bewerteten Spiele einfügen
-                                style: TextStyle(fontSize: 16),
+                              Countup(
+                                begin: 0,
+                                end: getRecommendedGameKeys(widget.userModel.games)
+                                    .length.toDouble(),
+                                duration: Duration(seconds: 3),
+                                separator: '.',
+                                style:  TextStyle(
+                                    color: widget.colorPalette.onColor),
                               ),
                             ],
                           ),
@@ -304,11 +319,12 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                     children: [
                       SizedBox(height: 28),
                       if (getRecommendedGameKeys(widget.userModel.games)
-                          .isEmpty &&
+                              .isEmpty &&
                           getWishlistGameKeys(widget.userModel.games).isEmpty &&
                           getRatedGameKeys(widget.userModel.games).isEmpty)
                         const Padding(
-                          padding: EdgeInsets.only(top: 140, left: 20, right: 20),
+                          padding:
+                              EdgeInsets.only(top: 140, left: 20, right: 20),
                           child: Center(
                             child: GlassContainer(
                               child: Column(
@@ -320,7 +336,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                     AnimatedEmojis.sleep,
                                     size: 64,
                                   ),
-                                  FittedBox(child: Text('Nothing to see here yet...', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)))
+                                  FittedBox(
+                                      child: Text('Nothing to see here yet...',
+                                          style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold)))
                                 ],
                               ),
                             ),
@@ -353,7 +373,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                       SizedBox(height: 14),
                     ],
                   )
-
                 ],
               ),
             ),

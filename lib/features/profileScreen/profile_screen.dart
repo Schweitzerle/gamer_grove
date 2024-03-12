@@ -4,6 +4,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auth_service/auth.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:countup/countup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -70,12 +71,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   int getRatedGameKeys(Map<String, dynamic> games) {
-    final recommendedGames = games.entries.where((entry) => entry.value['rating'] > 0);
+    final recommendedGames =
+        games.entries.where((entry) => entry.value['rating'] > 0);
     return recommendedGames.map((entry) => entry.key).toList().length;
   }
 
   int getRecommendedGameKeys(Map<String, dynamic> games) {
-    final recommendedGames = games.entries.where((entry) => entry.value['recommended'] == true);
+    final recommendedGames =
+        games.entries.where((entry) => entry.value['recommended'] == true);
     return recommendedGames.map((entry) => entry.key).toList().length;
   }
 
@@ -101,7 +104,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   // End a little above two thirds of the height
                   colors: [
                     Theme.of(context).colorScheme.background,
-                    Theme.of(context).colorScheme.inversePrimary,
+                    Theme.of(context).colorScheme.primaryContainer,
                   ],
                   stops: [
                     0.67,
@@ -130,7 +133,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             ),
                             RepositoryProvider<LoginBloc>(
                               create: (context) => LoginBloc(
-                                authService: context.read<FirebaseAuthService>(),
+                                authService:
+                                    context.read<FirebaseAuthService>(),
                               ),
                             ),
                           ],
@@ -149,208 +153,247 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 20),
                   Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            WidgetCircularAnimator(
-                              outerColor: Theme.of(context).colorScheme.primary,
-                              innerColor: Theme.of(context).colorScheme.secondary,
-                              outerAnimation: Curves.linear,
-                              child: ProfileView(
-                                height: 100,
-                                width: 100,
-                                circle: false,
-                                borderRadius: 90,
-                                image: NetworkImage(
-                                  user.profileUrl,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              user!.username,
-                              // Hier den tatsächlichen Benutzernamen einfügen
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      FittedBox(
-                                        child: Text(
-                                          'Followers', // Anzahl der Follower einfügen
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      Text(
-                                        user.followers.length.toString(),
-                                        // Anzahl der Follower einfügen
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      FittedBox(
-                                        child: Text(
-                                          'Following',
-                                          // Anzahl der Abonnements einfügen
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      Text(
-                                        user.following.length.toString(),
-                                        // Anzahl der Abonnements einfügen
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      FittedBox(
-                                        child: Text(
-                                          'Rated',
-                                          // Anzahl der bewerteten Spiele einfügen
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      Text(
-                                        getRatedGameKeys(user.games).toString(),
-                                        // Anzahl der bewerteten Spiele einfügen
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      FittedBox(
-                                        child: Text(
-                                          'Recommended',
-                                          // Anzahl der bewerteten Spiele einfügen
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      Text(
-                                        getRecommendedGameKeys(user.games).toString(),
-                                        // Anzahl der bewerteten Spiele einfügen
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                          ],
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      WidgetCircularAnimator(
+                        outerColor: Theme.of(context).colorScheme.primary,
+                        innerColor: Theme.of(context).colorScheme.secondary,
+                        outerAnimation: Curves.linear,
+                        child: ProfileView(
+                          height: 100,
+                          width: 100,
+                          circle: false,
+                          borderRadius: 90,
+                          image: NetworkImage(
+                            user.profileUrl,
+                          ),
                         ),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ClayContainer(
-                      spread: 2,
-                      depth: 60,
-                      height: MediaQuery.of(context).size.height * .18,
-                      customBorderRadius: BorderRadius.circular(12),
-                      color: Theme.of(context).cardColor,
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        user.username,
+                        // Hier den tatsächlichen Benutzernamen einfügen
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Expanded(
-                              flex: 2,
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
                                 children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: ClayContainer(
-                                      spread: 2,
-                                      depth: 60,
-                                      customBorderRadius:
-                                          BorderRadius.circular(12),
-                                      color: Theme.of(context).cardColor,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Center(
-                                          child: Text(
-                                            'Current Theme',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Theme.of(context)
-                                                  .cardTheme
-                                                  .surfaceTintColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                  FittedBox(
+                                    child: Text(
+                                      'Followers',
+                                      // Anzahl der Follower einfügen
+                                      style: TextStyle(
+                                        color:  Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer, fontWeight: FontWeight.bold,),
                                     ),
                                   ),
-                                  SizedBox(height: 10),
-                                  Expanded(
-                                    flex: 4,
-                                    child: Center(
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          _navigateAndDisplaySelection(
-                                              context);
-                                        },
-                                        child: Text('View All Themes'),
-                                      ),
-                                    ),
+                                  Countup(
+                                    begin: 0,
+                                    end: user.followers.length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
                                   ),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Expanded(
-                              flex: 1,
-                              child: FutureBuilder<FlexScheme>(
-                                future: _storedSchemeFuture,
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                        child: CircularProgressIndicator());
-                                  } else {
-                                    if (snapshot.hasError) {
-                                      return Text('Error: ${snapshot.error}');
-                                    } else {
-                                      final scheme = snapshot.data!;
-                                      return ThemeButton(
-                                        scheme: scheme,
-                                        themeName:
-                                            scheme.toString().split('.').last,
-                                      );
-                                    }
-                                  }
-                                },
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Following',
+                                      style: TextStyle(
+                                        color:  Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer, fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end: user.following.length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Rated',
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(
+                                        color:  Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer, fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end:
+                                        getRatedGameKeys(user.games).toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Recommended',
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(
+                                        color:  Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer, fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end: getRecommendedGameKeys(user.games)
+                                        .toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                ],
-              ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ClayContainer(
+                          spread: 2,
+                          depth: 60,
+                          height: MediaQuery.of(context).size.height * .18,
+                          customBorderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: ClayContainer(
+                                          spread: 2,
+                                          depth: 60,
+                                          customBorderRadius:
+                                              BorderRadius.circular(12),
+                                          color: Theme.of(context).cardColor,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Center(
+                                              child: Text(
+                                                'Current Theme',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Theme.of(context)
+                                                      .cardTheme
+                                                      .surfaceTintColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Expanded(
+                                        flex: 4,
+                                        child: Center(
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              _navigateAndDisplaySelection(
+                                                  context);
+                                            },
+                                            child: Text('View All Themes'),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  flex: 1,
+                                  child: FutureBuilder<FlexScheme>(
+                                    future: _storedSchemeFuture,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                            child: CircularProgressIndicator());
+                                      } else {
+                                        if (snapshot.hasError) {
+                                          return Text(
+                                              'Error: ${snapshot.error}');
+                                        } else {
+                                          final scheme = snapshot.data!;
+                                          return ThemeButton(
+                                            scheme: scheme,
+                                            themeName: scheme
+                                                .toString()
+                                                .split('.')
+                                                .last,
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   Column(
                     children: [
                       Padding(
@@ -408,14 +451,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                                 countryListTheme:
                                                     CountryListThemeData(
                                                         bottomSheetHeight:
-                                                            mediaQueryHeight * .7,
+                                                            mediaQueryHeight *
+                                                                .7,
                                                         borderRadius:
-                                                            BorderRadius.circular(
-                                                                14),
-                                                        backgroundColor:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .inversePrimary),
+                                                            BorderRadius
+                                                                .circular(14),
+                                                        backgroundColor: Theme
+                                                                .of(context)
+                                                            .colorScheme
+                                                            .inversePrimary),
                                                 showPhoneCode: false,
                                                 // optional. Shows phone code before the country name.
                                                 onSelect: (Country country) {
@@ -440,7 +484,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   child: ClayContainer(
                                     spread: 2,
                                     depth: 60,
-                                    customBorderRadius: BorderRadius.circular(12),
+                                    customBorderRadius:
+                                        BorderRadius.circular(12),
                                     color: Theme.of(context)
                                         .colorScheme
                                         .inversePrimary,

@@ -378,7 +378,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.gameModel.updateRating();
-    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    currentUser.update(widget.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -388,7 +388,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.gameModel.deleteRating();
-    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    currentUser.update(widget.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -398,7 +398,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.gameModel.updateRecommended();
-    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    currentUser.update(widget.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -407,9 +407,8 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-
     widget.gameModel.updateWishlist();
-    currentUser.games[widget.gameModel.id] = widget.gameModel.toJson();
+    currentUser.update(widget.gameModel);
     await userDoc.update({'games': currentUser.games});
 
   }

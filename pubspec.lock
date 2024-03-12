@@ -708,6 +708,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  image:
+    dependency: transitive
+    description:
+      name: image
+      sha256: "8e9d133755c3e84c73288363e6343157c383a0c6c56fc51afcc5d4d7180306d6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   image_fade:
     dependency: "direct main"
     description:
@@ -1265,6 +1273,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.12"
+  snappable_thanos:
+    dependency: "direct main"
+    description:
+      name: snappable_thanos
+      sha256: "63ca852f7439f928713af147e3d6a126c415c0e3490b0b4eb4e2d33486c424d7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   social_media_buttons:
     dependency: "direct main"
     description:

@@ -3,6 +3,7 @@ import 'package:clay_containers/clay_containers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -15,7 +16,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:profile_view/profile_view.dart';
 
-class FirebaseUserModel {
+class FirebaseUserModel extends ChangeNotifier{
   final String uuid;
   final String name;
   final String username;
@@ -89,6 +90,33 @@ class FirebaseUserModel {
     }
     return games;
   }
+
+  void update(GameModel model) {
+    games[model.id] = model.toJson();
+    notifyListeners();
+  }
+
+  void updateFollowing(FirebaseUserModel model) {
+    following[model.uuid] = model.uuid;
+    notifyListeners();
+  }
+
+  void updateFollowers(FirebaseUserModel model) {
+    followers[model.uuid] = model.uuid;
+    notifyListeners();
+  }
+
+  void deleteFollowing(FirebaseUserModel model) {
+    following.remove(model.uuid);
+    notifyListeners();
+  }
+
+  void deleteFollowers(FirebaseUserModel model) {
+    followers.remove(model.uuid);
+    notifyListeners();
+  }
+
+
 }
 
 class GameModel extends ChangeNotifier {
@@ -229,13 +257,12 @@ class _UserListItemState extends State<UserListItem> {
           } else if (snapshot.hasError) {
             throw snapshot.error!;
           } else {
-            final colorpalette = snapshot.data!;
+            final colorpalette = snapshot.data!.darken(10);
             return GestureDetector(
               onTap: () {
-                print('object');
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => OtherUserProfileScreen(
-                          userModel: widget.user,
+                          userModel: widget.user, colorPalette: colorpalette,
                         )));
               },
               child: Padding(
@@ -341,27 +368,23 @@ class _UserListItemState extends State<UserListItem> {
         FirebaseFirestore.instance.collection('Users').doc(widget.user.uuid);
 
     if (isFollowing) {
-      currentUser.following[widget.user.uuid] =
-          widget.user.uuid; // Update local following map
+      currentUser.updateFollowing(widget.user);
       await userDoc.update({
         'following': currentUser.following
-      }); // Update following map in user doc
-      widget.user.followers[currentUser.uuid] =
-          currentUser.uuid; // Update local following map
+      });
+      widget.user.updateFollowers(currentUser);
       await userFollowsDoc.update({
         'followers': widget.user.followers
-      }); // Update following map in user doc
+      });
     } else {
-      currentUser.following
-          .remove(widget.user.uuid); // Remove from local following map
+      currentUser.deleteFollowing(widget.user);
       await userDoc.update({
         'following': currentUser.following
-      }); // Update following map in user doc
-      widget.user.followers
-          .remove(currentUser.uuid); // Update local following map
+      });
+      widget.user.deleteFollowers(currentUser);
       await userFollowsDoc.update({
         'followers': widget.user.followers
-      }); // Update following map in user doc
+      });
     }
   }
 }

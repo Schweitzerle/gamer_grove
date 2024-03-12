@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clay_containers/clay_containers.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
 import 'package:gamer_grove/model/widgets/ratingDialog.dart';
@@ -13,6 +14,7 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:marquee/marquee.dart';
 import 'package:provider/provider.dart';
+import 'package:snappable_thanos/snappable_thanos.dart';
 
 import '../../repository/firebase/firebase.dart';
 import '../firebase/firebaseUser.dart';
@@ -26,13 +28,14 @@ class GamePreviewView extends StatefulWidget {
   final BuildContext buildContext;
   final bool needsRating;
   GameModel? gameModel;
+  final bool isClickable;
 
   GamePreviewView(
       {required this.game,
       required this.isCover,
       required this.buildContext,
       required this.needsRating,
-      this.gameModel});
+      this.gameModel, required this.isClickable});
 
   @override
   _GamePreviewViewState createState() => _GamePreviewViewState();
@@ -45,6 +48,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   late GameModel gameModel;
   final getIt = GetIt.instance;
   bool isColorLoaded = false;
+  final GlobalKey<SnappableState> _snappableKey = GlobalKey<SnappableState>();
 
   @override
   void initState() {
@@ -70,7 +74,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       // Register GameModel provider locally
-     value: widget.gameModel ?? gameModel,
+      value: widget.gameModel ?? gameModel,
       child: Consumer<GameModel>(
         // Access the local GameModel instance
         builder: (context, gameModel, child) {
@@ -87,20 +91,24 @@ class _GamePreviewViewState extends State<GamePreviewView> {
 
           return InkWell(
             onTap: () {
-              Navigator.of(context).push(
-                  GameDetailScreen.route(widget.game, context, gameModel));
+              if(widget.isClickable) {
+                Navigator.of(context).push(
+                    GameDetailScreen.route(widget.game, context, gameModel));
+              }
             },
             onLongPress: () {
-              showDialog(
-                  context: context,
-                  barrierColor: colorpalette.withOpacity(.8),
-                  builder: (BuildContext context) {
-                    return CustomRatingDialog(
-                      colorPalette: colorpalette,
-                      adjustedTextColor: adjustedTextColor,
-                      gameModel: gameModel,
-                    );
-                  });
+              if (widget.isClickable) {
+                showDialog(
+                    context: context,
+                    barrierColor: colorpalette.withOpacity(.8),
+                    builder: (BuildContext context) {
+                      return CustomRatingDialog(
+                        colorPalette: colorpalette,
+                        adjustedTextColor: adjustedTextColor,
+                        gameModel: gameModel,
+                      );
+                    });
+              }
             },
             child: ClayContainer(
               height: coverScaleHeight,
@@ -119,7 +127,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                       child: CachedNetworkImage(
                         imageUrl: '${widget.game.cover?.url}',
                         placeholder: (context, url) => Container(
-                          color: Theme.of(context).colorScheme.tertiaryContainer,
+                          color:
+                              Theme.of(context).colorScheme.tertiaryContainer,
                         ),
                         errorWidget: (context, url, error) => GlassContainer(
                           color: colorpalette.onColor,
@@ -129,10 +138,11 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                       ),
                     ),
                   ),
-              Consumer<GameModel>(
-                  builder: (context, gameModel, child) {
+                  Consumer<GameModel>(builder: (context, gameModel, child) {
                     if (widget.needsRating) {
-                      if (gameModel.wishlist || gameModel.recommended || gameModel.rating > 0) {
+                      if (gameModel.wishlist ||
+                          gameModel.recommended ||
+                          gameModel.rating > 0) {
                         return Positioned(
                           top: 0,
                           right: 0,
@@ -144,24 +154,41 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                             shadowColor: colorpalette,
                             color: colorpalette.onColor.withOpacity(.1),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 2.0, vertical: 4),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Consumer<GameModel>(
                                     builder: (context, gameModel, child) {
                                       if (gameModel.wishlist) {
-                                        return const Row(
+                                        return Row(
                                           children: [
-                                            SizedBox(width: 2,),
-                                            Center(
-                                              child: Icon(
-                                                  FontAwesomeIcons.solidBookmark,
-                                                  color: Colors.blueAccent),
+                                            const SizedBox(
+                                              width: 2,
                                             ),
-                                            SizedBox(width: 2,),
+                                            Animate(
+                                              autoPlay: true,
+                                              delay: Duration(seconds: 1),
+                                              effects: [
+                                                FadeEffect(),
+                                                ScaleEffect(),
+                                                SlideEffect(),
+                                                MoveEffect(begin: Offset(80, 0))
+                                              ],
+                                              child: const Center(
+                                                child: Icon(
+                                                    FontAwesomeIcons
+                                                        .solidBookmark,
+                                                    color: Colors.blueAccent),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 2,
+                                            ),
                                           ],
                                         );
                                       } else {
@@ -172,18 +199,39 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                   Consumer<GameModel>(
                                     builder: (context, gameModel, child) {
                                       if (gameModel.recommended) {
-                                        return const Row(
+                                        return Row(
                                           children: [
-                                            SizedBox(width: 2,),
-                                            Center(child: Icon(
-                                                FontAwesomeIcons.thumbsUp,
-                                                color: Colors.deepOrange),
+                                            SizedBox(
+                                              width: 2,
                                             ),
-                                            SizedBox(width: 2,),
+                                            Animate(
+                                              autoPlay: true,
+                                              delay: Duration(seconds: 1),
+                                              effects: [
+                                                FadeEffect(),
+                                                ScaleEffect(),
+                                                SlideEffect(),
+                                                MoveEffect(begin: Offset(40, 0))
+                                              ],
+                                              child: Snappable(
+                                                key: _snappableKey,
+                                                onSnapped: () {  },
+                                                snapOnTap: true,
+                                                child: const Center(
+                                                  child: Icon(
+                                                      FontAwesomeIcons.thumbsUp,
+                                                      color: Colors.deepOrange),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 2,
+                                            ),
                                           ],
                                         );
                                       } else {
-                                        return Container(); // or any placeholder widget
+                                        return Container(
+                                        ); // or any placeholder widget
                                       }
                                     },
                                   ),
@@ -192,17 +240,32 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                       if (gameModel.rating > 0) {
                                         return Row(
                                           children: [
-                                            const SizedBox(width: 2,),
-                                            Center(
-                                              child: CircularRatingWidget(
-                                                ratingValue:
-                                                gameModel.rating.toDouble() * 10,
-                                                radiusMultiplicator: .045,
-                                                fontSize: 10,
-                                                lineWidth: 4,
+                                            const SizedBox(
+                                              width: 2,
+                                            ),
+                                            Animate(
+                                              autoPlay: true,
+                                              delay: Duration(seconds: 1),
+                                              effects: [
+                                                FadeEffect(),
+                                                ScaleEffect(),
+                                                SlideEffect(),
+                                                MoveEffect(begin: Offset(40, 0))
+                                              ],
+                                              child: Center(
+                                                child: CircularRatingWidget(
+                                                  ratingValue: gameModel.rating
+                                                          .toDouble() *
+                                                      10,
+                                                  radiusMultiplicator: .045,
+                                                  fontSize: 10,
+                                                  lineWidth: 4,
+                                                ),
                                               ),
                                             ),
-                                            const SizedBox(width: 2,),
+                                            const SizedBox(
+                                              width: 2,
+                                            ),
                                           ],
                                         );
                                       } else {
@@ -221,8 +284,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                     } else {
                       return Container();
                     }
-                  }
-                  ),
+                  }),
                   Container(
                     padding: const EdgeInsets.only(
                       left: 8,
@@ -247,7 +309,9 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                           Expanded(
                               child: CircularRatingWidget(
                             ratingValue: widget.game.totalRating,
-                            radiusMultiplicator: .07, fontSize: 18, lineWidth: 6,
+                            radiusMultiplicator: .07,
+                            fontSize: 18,
+                            lineWidth: 6,
                           )),
                         if (widget.needsRating) SizedBox(width: 8),
                         Expanded(

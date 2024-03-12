@@ -266,7 +266,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                 isCover: true,
                                 buildContext: context,
                                 needsRating: true,
-                                gameModel: widget.gameModel,
+                                gameModel: widget.gameModel, isClickable: false,
                               ),
                             ),
                           ),
