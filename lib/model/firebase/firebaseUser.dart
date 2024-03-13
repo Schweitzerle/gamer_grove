@@ -193,7 +193,7 @@ class UserListItem extends StatefulWidget {
 }
 
 class _UserListItemState extends State<UserListItem> {
-  late Future<Color> colorpaletteFuture;
+  late Color colorpaletteFuture;
   late Color textColor;
   late bool isFollowing = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -202,7 +202,11 @@ class _UserListItemState extends State<UserListItem> {
   @override
   void initState() {
     super.initState();
-    colorpaletteFuture = getColorPalette();
+    setState(() {
+      colorpaletteFuture = Theme.of(widget.buildContext).colorScheme.inversePrimary;
+      textColor = Theme.of(widget.buildContext).colorScheme.onBackground;
+    });
+    Future.wait([getColorPalette()]);
   }
 
   Future<bool> isFollowingUser() async {
@@ -210,7 +214,7 @@ class _UserListItemState extends State<UserListItem> {
     return currentUser.following.containsValue(widget.user.uuid);
   }
 
-  Future<Color> getColorPalette() async {
+  Future<void> getColorPalette() async {
     final PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImageProvider(
       NetworkImage(widget.user.profileUrl),
@@ -223,46 +227,18 @@ class _UserListItemState extends State<UserListItem> {
     final targetLuminance = 0.5;
     textColor = luminance > targetLuminance ? Colors.black : Colors.white;
     isFollowing = await isFollowingUser();
-    return color;
+    setState(() {
+      colorpaletteFuture = color;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Color>(
-        future: colorpaletteFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClayContainer(
-                width: double.infinity,
-                // Occupy full width
-                height: 80,
-                spread: 2,
-                depth: 60,
-                color: Theme.of(context).colorScheme.inversePrimary,
-                borderRadius: 14,
-                child: const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: LoadingIndicator(
-                      indicatorType: Indicator.pacman,
-
-                      /// Required, The loading type of the widget
-                    ),
-                  ),
-                ),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            throw snapshot.error!;
-          } else {
-            final colorpalette = snapshot.data!.darken(10);
-            return GestureDetector(
+    return  GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => OtherUserProfileScreen(
-                          userModel: widget.user, colorPalette: colorpalette,
+                          userModel: widget.user, colorPalette: colorpaletteFuture.darken(10),
                         )));
               },
               child: Padding(
@@ -271,7 +247,7 @@ class _UserListItemState extends State<UserListItem> {
                   width: double.infinity,
                   // Occupy full width
                   height: 80,
-                  color: colorpalette,
+                  color: colorpaletteFuture.darken(10),
                   spread: 2,
                   depth: 60,
                   borderRadius: 14,
@@ -356,8 +332,7 @@ class _UserListItemState extends State<UserListItem> {
                 ),
               ),
             );
-          }
-        });
+
   }
 
   Future<void> _updateFollowStatusInDatabase(bool isFollowing) async {

@@ -48,7 +48,7 @@ class FranchiseStaggeredView extends StatelessWidget{
                         AllGamesGridScreen.route(
                             game.franchises![0].games!,
                             context,
-                            game.franchises![0].name!));
+                            game.franchises![0].name!, null));
                   },
                   child: ClayContainer(
                     spread: 2,

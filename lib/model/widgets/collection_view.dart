@@ -47,7 +47,7 @@ class CollectionStaggeredView extends StatelessWidget {
                     AllGamesGridScreen.route(
                         game.collection!.games!,
                         context,
-                        game.collection!.name!));
+                        game.collection!.name!, null));
               },
               child: ClayContainer(
                 spread: 2,

@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
 import '../igdb_models/game.dart';
 import '../widgets/customDialog.dart';
 
 class GameGridView extends StatelessWidget {
   final List<Game> collectionGames;
+  FirebaseUserModel? otherUserModel;
 
   GameGridView({
-    required this.collectionGames,
+    required this.collectionGames, this.otherUserModel,
   });
 
   @override
@@ -28,7 +30,7 @@ class GameGridView extends StatelessWidget {
             child: GamePreviewView(
               game: game,
               isCover: true,
-              buildContext: context, needsRating: true, isClickable: true,
+              buildContext: context, needsRating: true, isClickable: true, otherUserModel: otherUserModel,
             ),
           );
         },
@@ -39,19 +41,21 @@ class GameGridView extends StatelessWidget {
 }
 
 class AllGamesGridScreen extends StatefulWidget {
-  static Route route(List<Game> game, BuildContext context, String appBarText) {
+  static Route route(List<Game> game, BuildContext context, String appBarText, FirebaseUserModel? otherUser) {
     return MaterialPageRoute(
       builder: (context) => AllGamesGridScreen(
         games: game,
         appBarText: appBarText,
+        otherUserModel: otherUser,
       ),
     );
   }
 
   final List<Game> games;
   final String appBarText;
+  FirebaseUserModel? otherUserModel;
 
-  AllGamesGridScreen({required this.games, required this.appBarText});
+  AllGamesGridScreen({required this.games, required this.appBarText, this.otherUserModel});
 
   @override
   _AllGamesGridScreenState createState() => _AllGamesGridScreenState();
@@ -207,7 +211,7 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
         physics: BouncingScrollPhysics(),
         slivers: [
           GameGridView(
-            collectionGames: sortedGames,
+            collectionGames: sortedGames, otherUserModel: widget.otherUserModel,
           ),
         ],
       ),

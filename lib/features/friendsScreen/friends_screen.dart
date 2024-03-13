@@ -9,6 +9,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:material_floating_search_bar_2/material_floating_search_bar_2.dart';
 import 'package:profile_view/profile_view.dart';
 import 'package:provider/provider.dart';
+import 'package:vitality/vitality.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
 
 import '../../model/firebase/firebaseUser.dart';
@@ -69,7 +70,7 @@ class _FriendsScreenState extends State<FriendsScreen>
     List<FirebaseUserModel> followers = [];
     for (var value in currentUser.following.values) {
       FirebaseUserModel firebaseUserModel =
-          await FirebaseService().getSingleUserData(value);
+      await FirebaseService().getSingleUserData(value);
       followers.add(firebaseUserModel);
     }
     if (followers.isEmpty || followers.length < 10) {
@@ -90,37 +91,66 @@ class _FriendsScreenState extends State<FriendsScreen>
 
     return Scaffold(
       body: Stack(children: [
+        Vitality.randomly(
+          background: Theme.of(context).colorScheme.background,
+          maxOpacity: 0.8,
+          minOpacity: 0.3,
+          itemsCount: 80,
+          enableXMovements: false,
+          whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+          maxSpeed: 0.1,
+          maxSize: 30,
+          minSpeed: 0.1,
+          randomItemsColors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.secondary,
+            Theme.of(context).colorScheme.tertiary,
+            Theme.of(context).colorScheme.onPrimary
+          ],
+          randomItemsBehaviours: [
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: CupertinoIcons.person_add),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.person_add_solid),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.rectangle_stack_person_crop_fill),
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: CupertinoIcons.rectangle_stack_person_crop),
+            ItemBehaviour(
+                shape: ShapeType.Icon,
+                icon: CupertinoIcons.group_solid),
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: CupertinoIcons.group),
+            ItemBehaviour(shape: ShapeType.StrokeCircle),
+          ],
+        ),
         ChangeNotifierProvider.value(
           value: currentUser,
           child: Consumer<FirebaseUserModel>(
               builder: (context, firebaseUserModel, child) {
-            return  Consumer<FirebaseUserModel>(
-                builder: (context, firebaseUserModel, child) {
-                  if (firebaseUserModel.following.isNotEmpty) {
-                    if (userFollowing.length != firebaseUserModel.following.length) {
-                      Future.wait([_parseFollowers()]);
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 60.0),
-                      child: ListView.builder(
-                          itemCount: userFollowing.length,
-                          itemBuilder: (context, index) {
-                            final user = userFollowing[index];
-                            return UserListItem(
-                              user: user,
-                              buildContext: context,
-                            );
-                          }),
-                    );
-                  } else {
-                    return Container();
-                  }
-                });
-          }),
+                return  Consumer<FirebaseUserModel>(
+                    builder: (context, firebaseUserModel, child) {
+                      if (firebaseUserModel.following.isNotEmpty) {
+                        if (userFollowing.length != firebaseUserModel.following.length) {
+                          Future.wait([_parseFollowers()]);
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 60.0),
+                          child: ListView.builder(
+                              itemCount: userFollowing.length,
+                              itemBuilder: (context, index) {
+                                final user = userFollowing[index];
+                                return UserListItem(
+                                  user: user,
+                                  buildContext: context,
+                                );
+                              }),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    });
+              }),
         ),
-
         FloatingSearchBar(
-          showAfter: Duration(seconds: 3),
           showCursor: true,
           elevation: 20,
           borderRadius: BorderRadius.circular(14),
@@ -128,11 +158,11 @@ class _FriendsScreenState extends State<FriendsScreen>
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           shadowColor: Theme.of(context).shadowColor,
           iconColor:
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+          Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
           accentColor:
-              Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+          Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
           backdropColor:
-              Theme.of(context).colorScheme.background.withOpacity(.7),
+          Theme.of(context).colorScheme.background.withOpacity(.7),
           controller: _searchBarController,
           hint: 'Search for Users',
           onSubmitted: (value) {

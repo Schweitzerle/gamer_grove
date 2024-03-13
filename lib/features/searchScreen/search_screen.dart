@@ -29,6 +29,7 @@ import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
+import 'package:vitality/vitality.dart';
 import '../../model/widgets/gameListPreview.dart';
 import '../../model/widgets/game_filter_widget.dart';
 import '../../repository/igdb/IGDBApiService.dart';
@@ -396,6 +397,37 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
 
     return Scaffold(
       body: Stack(children: [
+        Vitality.randomly(
+          background: Theme.of(context).colorScheme.background,
+          maxOpacity: 0.8,
+          minOpacity: 0.3,
+          itemsCount: 80,
+          enableXMovements: false,
+          whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+          maxSpeed: 0.1,
+          maxSize: 30,
+          minSpeed: 0.1,
+          randomItemsColors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.secondary,
+            Theme.of(context).colorScheme.tertiary,
+            Theme.of(context).colorScheme.onPrimary
+          ],
+          randomItemsBehaviours: [
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: CupertinoIcons.search_circle),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.search_circle_fill),
+            ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.square_list),
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller_fill),
+            ItemBehaviour(
+                shape: ShapeType.Icon,
+                icon: CupertinoIcons.calendar_today),
+            ItemBehaviour(
+                shape: ShapeType.Icon, icon: FontAwesomeIcons.industry),
+            ItemBehaviour(shape: ShapeType.StrokeCircle),
+          ],
+        ),
         _selectedIndex == 0
             ? GameGridPaginationView(
                 pagingController: _pagingController,

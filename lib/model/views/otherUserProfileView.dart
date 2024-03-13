@@ -20,6 +20,7 @@ import 'package:gamer_grove/repository/firebase/firebase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:profile_view/profile_view.dart';
+import 'package:vitality/vitality.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
 
 import '../../features/loginRegistration/login/bloc/login_bloc.dart';
@@ -166,218 +167,256 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
 
     final bannerScaleHeight = mediaQueryHeight * 0.3;
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Container(
-              height: mediaQueryHeight * .74,
-              width: mediaQueryWidth,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.0, 1),
-                  // Start at the middle left
-                  end: Alignment(0.0, 0.1),
-                  // End a little above two thirds of the height
-                  colors: [
-                    Theme.of(context).colorScheme.background,
-                    widget.colorPalette,
-                  ],
-                  stops: [
-                    0.67,
-                    1.0
-                  ], // Stop the gradient at approximately two thirds of the height
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 38.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  WidgetCircularAnimator(
-                    outerColor: widget.colorPalette.onColor,
-                    innerColor: widget.colorPalette.lighten(20),
-                    outerAnimation: Curves.linear,
-                    child: ProfileView(
-                      circle: false,
-                      borderRadius: 90,
-                      image: NetworkImage(
-                        widget.userModel.profileUrl,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    widget.userModel.username,
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: widget.colorPalette.onColor),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  'Followers', // Anzahl der Follower einfügen
-                                  style: TextStyle(
-                                      color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
-                                ),
-                              ),
-                              Countup(
-                                begin: 0,
-                                end:  widget.userModel.followers.length.toDouble(),
-                                duration: Duration(seconds: 3),
-                                separator: '.',
-                                style:  TextStyle(
-                                    color: widget.colorPalette.onColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  'Following',
-                                  // Anzahl der Abonnements einfügen
-                                  style: TextStyle(
-                                      color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
-                                ),
-                              ),
-                              Countup(
-                                begin: 0,
-                                end:  widget.userModel.following.length.toDouble(),
-                                duration: Duration(seconds: 3),
-                                separator: '.',
-                                style:  TextStyle(
-                                    color: widget.colorPalette.onColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  'Rated',
-                                  // Anzahl der bewerteten Spiele einfügen
-                                  style: TextStyle(
-                                      color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
-                                ),
-                              ),
-                              Countup(
-                                begin: 0,
-                                end: getRatedGameKeys(widget.userModel.games)
-                                    .length.toDouble(),
-                                duration: Duration(seconds: 3),
-                                separator: '.',
-                                style:  TextStyle(
-                                    color: widget.colorPalette.onColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  'Recommended',
-                                  // Anzahl der bewerteten Spiele einfügen
-                                  style: TextStyle(
-                                      color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
-                                ),
-                              ),
-                              Countup(
-                                begin: 0,
-                                end: getRecommendedGameKeys(widget.userModel.games)
-                                    .length.toDouble(),
-                                duration: Duration(seconds: 3),
-                                separator: '.',
-                                style:  TextStyle(
-                                    color: widget.colorPalette.onColor),
-                              ),
-                            ],
-                          ),
-                        ),
+      body: Stack(
+        children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background,
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0.1,
+            maxSize: 30,
+            minSpeed: 0.1,
+            randomItemsColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller_fill),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.person_2_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.person_2),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: Icons.gamepad),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
+            ],
+          ),
+          SingleChildScrollView(
+            child: Stack(
+              children: [
+                Container(
+                  height: mediaQueryHeight * .74,
+                  width: mediaQueryWidth,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(0.0, 1),
+                      // Start at the middle left
+                      end: Alignment(0.0, 0.1),
+                      // End a little above two thirds of the height
+                      colors: [
+                        Theme.of(context).colorScheme.background,
+                        widget.colorPalette,
                       ],
+                      stops: [
+                        0.67,
+                        1.0
+                      ], // Stop the gradient at approximately two thirds of the height
                     ),
                   ),
-                  Column(
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 38.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 28),
-                      if (getRecommendedGameKeys(widget.userModel.games)
-                              .isEmpty &&
-                          getWishlistGameKeys(widget.userModel.games).isEmpty &&
-                          getRatedGameKeys(widget.userModel.games).isEmpty)
-                        const Padding(
-                          padding:
-                              EdgeInsets.only(top: 140, left: 20, right: 20),
-                          child: Center(
-                            child: GlassContainer(
+                      WidgetCircularAnimator(
+                        outerColor: widget.colorPalette.onColor,
+                        innerColor: widget.colorPalette.lighten(20),
+                        outerAnimation: Curves.linear,
+                        child: ProfileView(
+                          circle: false,
+                          borderRadius: 90,
+                          image: NetworkImage(
+                            widget.userModel.profileUrl,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.userModel.username,
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: widget.colorPalette.onColor),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
                               child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  AnimatedEmoji(
-                                    AnimatedEmojis.sleep,
-                                    size: 64,
-                                  ),
                                   FittedBox(
-                                      child: Text('Nothing to see here yet...',
-                                          style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold)))
+                                    child: Text(
+                                      'Followers', // Anzahl der Follower einfügen
+                                      style: TextStyle(
+                                          color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end:  widget.userModel.followers.length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style:  TextStyle(
+                                        color: widget.colorPalette.onColor),
+                                  ),
                                 ],
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Following',
+                                      // Anzahl der Abonnements einfügen
+                                      style: TextStyle(
+                                          color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end:  widget.userModel.following.length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style:  TextStyle(
+                                        color: widget.colorPalette.onColor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Rated',
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(
+                                          color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end: getRatedGameKeys(widget.userModel.games)
+                                        .length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style:  TextStyle(
+                                        color: widget.colorPalette.onColor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      'Recommended',
+                                      // Anzahl der bewerteten Spiele einfügen
+                                      style: TextStyle(
+                                          color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
+                                    ),
+                                  ),
+                                  Countup(
+                                    begin: 0,
+                                    end: getRecommendedGameKeys(widget.userModel.games)
+                                        .length.toDouble(),
+                                    duration: Duration(seconds: 3),
+                                    separator: '.',
+                                    style:  TextStyle(
+                                        color: widget.colorPalette.onColor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      GameListView(
-                        headline: 'Recommended Games',
-                        games: recommendedResponse,
-                        isPagination: false,
-                        body: '',
-                        showLimit: 10,
-                        isAggregated: false,
                       ),
-                      GameListView(
-                        headline: 'Wishlist Games',
-                        games: wishlistResponse,
-                        isPagination: true,
-                        body: '',
-                        showLimit: 10,
-                        isAggregated: false,
-                      ),
-                      GameListView(
-                        headline: 'Rated Games',
-                        games: ratedResponse,
-                        isPagination: false,
-                        body: '',
-                        showLimit: 10,
-                        isAggregated: false,
-                      ),
-                      SizedBox(height: 14),
+                      Column(
+                        children: [
+                          SizedBox(height: 28),
+                          if (getRecommendedGameKeys(widget.userModel.games)
+                                  .isEmpty &&
+                              getWishlistGameKeys(widget.userModel.games).isEmpty &&
+                              getRatedGameKeys(widget.userModel.games).isEmpty)
+                            const Padding(
+                              padding:
+                                  EdgeInsets.only(top: 140, left: 20, right: 20),
+                              child: Center(
+                                child: GlassContainer(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AnimatedEmoji(
+                                        AnimatedEmojis.sleep,
+                                        size: 64,
+                                      ),
+                                      FittedBox(
+                                          child: Text('Nothing to see here yet...',
+                                              style: TextStyle(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold)))
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          GameListView(
+                            headline: 'Recommended Games',
+                            games: recommendedResponse,
+                            isPagination: false,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                            otherUserModel: widget.userModel,
+                          ),
+                          GameListView(
+                            headline: 'Wishlist Games',
+                            games: wishlistResponse,
+                            isPagination: true,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                            otherUserModel: widget.userModel,
+                          ),
+                          GameListView(
+                            headline: 'Rated Games',
+                            games: ratedResponse,
+                            isPagination: false,
+                            body: '',
+                            showLimit: 10,
+                            isAggregated: false,
+                            otherUserModel: widget.userModel,
+                          ),
+                          SizedBox(height: 14),
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:gamer_grove/model/widgets/event_list.dart';
 import 'package:gamer_grove/model/widgets/gameListPreview.dart';
 import 'package:gamer_grove/repository/igdb/IGDBApiService.dart';
 import 'package:redacted/redacted.dart';
+import 'package:vitality/vitality.dart';
 
 import '../../model/igdb_models/event.dart';
 import '../../model/widgets/gamePreview.dart';
@@ -173,38 +175,73 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 40),
-            ),
-            EventListView(headline: 'Latest Events', events: latestEventResponse),
-            EventListView(headline: 'Upcoming Events', events: upcomingEventResponse),
-            GameListView(
-              headline: 'Most Followed Games',
-              games: gamesResponse3,
-              isPagination: true,
-              body: getBodyStringMostFollowedGames(), showLimit: 10, isAggregated: false,
-            ),
-            GameListView(
-              headline: 'Critics Choices',
-              games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10, isAggregated: true,
-            ),
-            GameListView(
-              headline: 'Top Rated Games',
-              games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10, isAggregated: false,
-            ),
-            GameListView(
-              headline: 'Newest Games',
-              games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10, isAggregated: false,
-            ),
+      body: Stack(
+        children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background,
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0.1,
+            maxSize: 30,
+            minSpeed: 0.1,
+            randomItemsColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.videogame_asset_outlined),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: CupertinoIcons.gamecontroller_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
+            ],
+          ),
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 40),
+                ),
+                EventListView(headline: 'Latest Events', events: latestEventResponse),
+                EventListView(headline: 'Upcoming Events', events: upcomingEventResponse),
+                GameListView(
+                  headline: 'Most Followed Games',
+                  games: gamesResponse3,
+                  isPagination: true,
+                  body: getBodyStringMostFollowedGames(), showLimit: 10, isAggregated: false,
+                ),
+                GameListView(
+                  headline: 'Critics Choices',
+                  games: gamesResponse4, isPagination: true, body: getBodyCritcsRatingDesc(), showLimit: 10, isAggregated: true,
+                ),
+                GameListView(
+                  headline: 'Top Rated Games',
+                  games: gamesResponse1, isPagination: true, body: getBodyTopRatedGames(), showLimit: 10, isAggregated: false,
+                ),
+                GameListView(
+                  headline: 'Newest Games',
+                  games: gamesResponse2, isPagination: true, body: getBodyNewestGames(), showLimit: 10, isAggregated: false,
+                ),
 
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

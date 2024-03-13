@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
 
   Future<void> initialize() async {
     await Future.wait(
-        [getRecommendedIGDBData(), getWishlistIGDBData(), getRatedIGDBData()]);
+        [getRecommendedIGDBData(), getRatedIGDBData(), getWishlistIGDBData()]);
   }
 
   String getRecommendedBody() {
@@ -127,9 +128,14 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     final gamesJoin = gameIds.join("|");
     String gamesString = 'w $gamesJoin;';
 
-    String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
-    return body1;
+    if (getRatedGameKeys(currentUser.games).isNotEmpty) {
+      String body1 =
+          'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
+      return body1;
+    }
+    else {
+      return '';
+    }
   }
 
   List<String> getRatedGameKeys(Map<String, dynamic> games) {
@@ -155,6 +161,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final currentUser = getIt<FirebaseUserModel>();
@@ -172,9 +179,9 @@ class _WatchlistScreenState extends State<WatchlistScreen>
             itemsCount: 80,
             enableXMovements: false,
             whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
-            maxSpeed: 0,
+            maxSpeed: 0.1,
             maxSize: 30,
-            minSpeed: 0,
+            minSpeed: 0.1,
             randomItemsColors: [
               Theme.of(context).colorScheme.primary,
               Theme.of(context).colorScheme.secondary,
@@ -183,16 +190,16 @@ class _WatchlistScreenState extends State<WatchlistScreen>
             ],
             randomItemsBehaviours: [
               ItemBehaviour(
-                  shape: ShapeType.Icon, icon: Icons.videogame_asset_outlined),
-              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
-              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
+                  shape: ShapeType.Icon, icon: CupertinoIcons.bookmark),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.bookmark_fill),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.hand_thumbsup),
               ItemBehaviour(
-                  shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+                  shape: ShapeType.Icon, icon: CupertinoIcons.hand_thumbsup_fill),
               ItemBehaviour(
                   shape: ShapeType.Icon,
-                  icon: CupertinoIcons.gamecontroller_fill),
+                  icon: Icons.score_outlined),
               ItemBehaviour(
-                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+                  shape: ShapeType.Icon, icon: Icons.score_rounded),
               ItemBehaviour(shape: ShapeType.StrokeCircle),
             ],
           ),
@@ -209,21 +216,25 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                         height: 42,
                       ),
                       Center(
-                        child: GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: Theme.of(context).primaryColor,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              '${currentUser.name}`s Library',
-                              style: TextStyle(
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                        child: Padding(
+                          padding: const EdgeInsets.all(14.0),
+                          child: GlassContainer(
+                            blur: 12,
+                            shadowStrength: 4,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(14),
+                            shadowColor: Theme.of(context).primaryColor,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                '${currentUser.name}`s Library',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -236,9 +247,11 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                           builder: (context, firebaseUserModel, child) {
                         if (getRecommendedGameKeys(firebaseUserModel.games)
                             .isNotEmpty) {
-                          if (recommendedResponse.length != getRecommendedGameKeys(firebaseUserModel.games).length) {
+                          if (recommendedResponse.length !=
+                              getRecommendedGameKeys(firebaseUserModel.games)
+                                  .length) {
                             Future.wait([getRecommendedIGDBData()]);
-                            }
+                          }
                           return GameListView(
                             headline: 'Recommended Games',
                             games: recommendedResponse,
@@ -255,7 +268,9 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                           builder: (context, firebaseUserModel, child) {
                         if (getWishlistGameKeys(firebaseUserModel.games)
                             .isNotEmpty) {
-                          if (wishlistResponse.length != getWishlistGameKeys(firebaseUserModel.games).length) {
+                          if (wishlistResponse.length !=
+                              getWishlistGameKeys(firebaseUserModel.games)
+                                  .length) {
                             Future.wait([getWishlistIGDBData()]);
                           }
                           return GameListView(
@@ -274,7 +289,9 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                           builder: (context, firebaseUserModel, child) {
                         if (getRatedGameKeys(firebaseUserModel.games)
                             .isNotEmpty) {
-                          if(ratedResponse.length != getRatedGameKeys(firebaseUserModel.games).length) {
+                          if (ratedResponse.length !=
+                              getRatedGameKeys(firebaseUserModel.games)
+                                  .length) {
                             Future.wait([getRatedIGDBData()]);
                           }
                           return GameListView(

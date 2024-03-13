@@ -8,6 +8,7 @@ import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import '../firebase/firebaseUser.dart';
 import '../igdb_models/game.dart';
 import '../views/gameGridPaginationView.dart';
 import '../views/gameGridView.dart';
@@ -20,12 +21,13 @@ class GameListView extends StatefulWidget {
   final int showLimit;
   Color? color;
   final bool isAggregated;
+  FirebaseUserModel? otherUserModel;
 
   GameListView({
     required this.headline,
     required this.games,
     required this.isPagination,
-    required this.body, required this.showLimit, this.color, required this.isAggregated,
+    required this.body, required this.showLimit, this.color, required this.isAggregated, this.otherUserModel
   });
 
   @override
@@ -41,8 +43,8 @@ class GameListViewState extends State<GameListView> {
     final coverScaleHeight = mediaQueryHeight / 3.1;
 
     Color? backgroundColor = widget.color ?? Theme.of(context).cardColor;
-    final luminance = backgroundColor != null ? backgroundColor.computeLuminance() : 0;
-    final targetLuminance = 0.5;
+    final luminance = backgroundColor.computeLuminance();
+    const targetLuminance = 0.5;
     final adjustedIconColor = luminance > targetLuminance ? Colors.black : Colors.white;
 
     return widget.games != null && widget.games!.isNotEmpty
@@ -88,7 +90,7 @@ class GameListViewState extends State<GameListView> {
                               widget.headline, widget.body, widget.isAggregated))
                           : Navigator.of(context).push(
                           AllGamesGridScreen.route(
-                              widget.games!, context, widget.headline));
+                              widget.games!, context, widget.headline, widget.otherUserModel));
                     },
                     child: Padding(
                       padding: EdgeInsets.all(5),
@@ -123,7 +125,7 @@ class GameListViewState extends State<GameListView> {
                   child: GamePreviewView(
                     game: game,
                     isCover: false,
-                    buildContext: context, needsRating: true, isClickable: true,
+                    buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherUserModel,
                   ),
                 );
               },
