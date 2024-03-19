@@ -256,7 +256,7 @@ class GameFilterScreen extends StatefulWidget {
   final PagingController pagingController;
   final GameFilterOptions filterOptions;
 
-  GameFilterScreen(
+  const GameFilterScreen(
       {super.key,
       required this.genres,
       required this.gameModes,
@@ -411,8 +411,10 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                         focusedBorderColor: color.darken(20),
                                         fieldBackgroundColor: color,
                                         borderColor: color.darken(20),
-                                        optionsBackgroundColor: color.lighten(10),
-                                        selectedOptionBackgroundColor: color.lighten(15),
+                                        optionsBackgroundColor:
+                                            color.lighten(10),
+                                        selectedOptionBackgroundColor:
+                                            color.lighten(15),
                                         dropdownBorderRadius: 14,
                                         hintColor: onColor,
                                         hint: 'Age Ratings',
@@ -460,8 +462,10 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                         focusedBorderColor: color.darken(20),
                                         fieldBackgroundColor: color,
                                         borderColor: color.darken(20),
-                                        optionsBackgroundColor: color.lighten(10),
-                                        selectedOptionBackgroundColor: color.lighten(15),
+                                        optionsBackgroundColor:
+                                            color.lighten(10),
+                                        selectedOptionBackgroundColor:
+                                            color.lighten(15),
                                         dropdownBorderRadius: 14,
                                         hintColor: onColor,
                                         hint: 'Category',
@@ -510,8 +514,10 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                         focusedBorderColor: color.darken(20),
                                         fieldBackgroundColor: color,
                                         borderColor: color.darken(20),
-                                        optionsBackgroundColor: color.lighten(10),
-                                        selectedOptionBackgroundColor: color.lighten(15),
+                                        optionsBackgroundColor:
+                                            color.lighten(10),
+                                        selectedOptionBackgroundColor:
+                                            color.lighten(15),
                                         dropdownBorderRadius: 14,
                                         hintColor: onColor,
                                         hint: 'Status',
@@ -558,7 +564,18 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                               child:
                                                   MultiSelectBottomSheetField<
                                                       int?>(
-                                                    itemsTextStyle: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                                    title:
+                                                    Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                                    buttonText:
+                                                    Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                                    backgroundColor: Theme.of(context)
+                                                        .colorScheme.secondaryContainer,
+                                                    itemsTextStyle: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme.onSecondaryContainer),
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -570,8 +587,6 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 selectedColor: color.darken(20),
                                                 initialChildSize: 0.7,
                                                 maxChildSize: 0.95,
-                                                title: Text("Themes"),
-                                                buttonText: Text("Themes"),
                                                 items:
                                                     widget.themes.map((rating) {
                                                   return MultiSelectItem(
@@ -587,10 +602,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 },
                                                 chipDisplay:
                                                     MultiSelectChipDisplay(
-                                                      scrollBar: HorizontalScrollBar(),
-                                                      scroll: true,
-                                                      chipColor: color.darken(10),
-                                                      textStyle: TextStyle(color: onColor),
+                                                  scrollBar:
+                                                      HorizontalScrollBar(),
+                                                  scroll: true,
+                                                  chipColor: color.darken(10),
+                                                  textStyle:
+                                                      TextStyle(color: onColor),
                                                   onTap: (item) {
                                                     setState(() {
                                                       widget.filterOptions
@@ -609,6 +626,18 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                               child:
                                                   MultiSelectBottomSheetField<
                                                       int?>(
+                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                                    title:
+                                                    Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                                    buttonText:
+                                                    Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                                    backgroundColor: Theme.of(context)
+                                                        .colorScheme.secondaryContainer,
+                                                    itemsTextStyle: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme.onSecondaryContainer),
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -620,8 +649,6 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 selectedColor: color.darken(20),
                                                 initialChildSize: 0.7,
                                                 maxChildSize: 0.95,
-                                                title: Text("Genres"),
-                                                buttonText: Text("Genres"),
                                                 items:
                                                     widget.genres.map((rating) {
                                                   return MultiSelectItem(
@@ -637,10 +664,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 },
                                                 chipDisplay:
                                                     MultiSelectChipDisplay(
-                                                      scrollBar: HorizontalScrollBar(),
-                                                      scroll: true,
-                                                      chipColor: color.darken(10),
-                                                      textStyle: TextStyle(color: onColor),
+                                                  scrollBar:
+                                                      HorizontalScrollBar(),
+                                                  scroll: true,
+                                                  chipColor: color.darken(10),
+                                                  textStyle:
+                                                      TextStyle(color: onColor),
                                                   onTap: (item) {
                                                     setState(() {
                                                       widget.filterOptions
@@ -659,6 +688,18 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                               child:
                                                   MultiSelectBottomSheetField<
                                                       int?>(
+                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                                    title:
+                                                    Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                                    buttonText:
+                                                    Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                                    backgroundColor: Theme.of(context)
+                                                        .colorScheme.secondaryContainer,
+                                                    itemsTextStyle: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme.onSecondaryContainer),
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -670,8 +711,6 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 selectedColor: color.darken(20),
                                                 initialChildSize: 0.7,
                                                 maxChildSize: 0.95,
-                                                title: Text("PLatforms"),
-                                                buttonText: Text("Platforms"),
                                                 items: widget.platforms
                                                     .map((rating) {
                                                   return MultiSelectItem(
@@ -687,10 +726,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 },
                                                 chipDisplay:
                                                     MultiSelectChipDisplay(
-                                                      scrollBar: HorizontalScrollBar(),
-                                                      scroll: true,
-                                                      chipColor: color.darken(10),
-                                                      textStyle: TextStyle(color: onColor),
+                                                  scrollBar:
+                                                      HorizontalScrollBar(),
+                                                  scroll: true,
+                                                  chipColor: color.darken(10),
+                                                  textStyle:
+                                                      TextStyle(color: onColor),
                                                   onTap: (item) {
                                                     setState(() {
                                                       widget.filterOptions
@@ -709,6 +750,18 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                               child:
                                                   MultiSelectBottomSheetField<
                                                       int?>(
+                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                                    title:
+                                                    Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                                    buttonText:
+                                                    Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                                    backgroundColor: Theme.of(context)
+                                                        .colorScheme.secondaryContainer,
+                                                    itemsTextStyle: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme.onSecondaryContainer),
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -720,8 +773,6 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 selectedColor: color.darken(20),
                                                 initialChildSize: 0.7,
                                                 maxChildSize: 0.95,
-                                                title: Text("Game Modes"),
-                                                buttonText: Text("Game Modes"),
                                                 items: widget.gameModes
                                                     .map((rating) {
                                                   return MultiSelectItem(
@@ -737,10 +788,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 },
                                                 chipDisplay:
                                                     MultiSelectChipDisplay(
-                                                      scrollBar: HorizontalScrollBar(),
-                                                      scroll: true,
-                                                      chipColor: color.darken(10),
-                                                      textStyle: TextStyle(color: onColor),
+                                                  scrollBar:
+                                                      HorizontalScrollBar(),
+                                                  scroll: true,
+                                                  chipColor: color.darken(10),
+                                                  textStyle:
+                                                      TextStyle(color: onColor),
                                                   onTap: (item) {
                                                     setState(() {
                                                       widget.filterOptions
@@ -759,6 +812,18 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                               child:
                                                   MultiSelectBottomSheetField<
                                                       int?>(
+                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                                    title:
+                                                    Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                                    buttonText:
+                                                    Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                                    backgroundColor: Theme.of(context)
+                                                        .colorScheme.secondaryContainer,
+                                                    itemsTextStyle: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .colorScheme.onSecondaryContainer),
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -770,10 +835,6 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 selectedColor: color.darken(20),
                                                 initialChildSize: 0.7,
                                                 maxChildSize: 0.95,
-                                                title:
-                                                    Text("Player Perspective"),
-                                                buttonText:
-                                                    Text("Player Perspective"),
                                                 items: widget.playerPerspectives
                                                     .map((rating) {
                                                   return MultiSelectItem(
@@ -789,10 +850,12 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                 },
                                                 chipDisplay:
                                                     MultiSelectChipDisplay(
-                                                      scrollBar: HorizontalScrollBar(),
-                                                      scroll: true,
-                                                      chipColor: color.darken(10),
-                                                      textStyle: TextStyle(color: onColor),
+                                                  scrollBar:
+                                                      HorizontalScrollBar(),
+                                                  scroll: true,
+                                                  chipColor: color.darken(10),
+                                                  textStyle:
+                                                      TextStyle(color: onColor),
                                                   onTap: (item) {
                                                     setState(() {
                                                       widget.filterOptions
@@ -1018,7 +1081,9 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                   child: FittedBox(child: Text('Cancel')),
                 ),
               ),
-              const SizedBox(width: 8,),
+              const SizedBox(
+                width: 8,
+              ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -1026,30 +1091,45 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                       widget.filterOptions.releaseDateValues = SfRangeValues(
                           DateTime(1990),
                           DateTime.now().add(Duration(days: 365)));
-                      if(widget.filterOptions.selectedGameModes != null)widget.filterOptions.selectedGameModes!.clear();
-                      if(widget.filterOptions.selectedPlayerPerspectives != null)widget.filterOptions.selectedPlayerPerspectives!.clear();
-                      if(widget.filterOptions.selectedPlatforms != null)widget.filterOptions.selectedPlatforms!.clear();
-                      if(widget.filterOptions.selectedGenres != null)widget.filterOptions.selectedGenres!.clear();
-                      if(widget.filterOptions.selectedThemes != null)widget.filterOptions.selectedThemes!.clear();
-                      if(widget.filterOptions.selectedCategory != null)widget.filterOptions.selectedCategory!.clear();
-                      if(widget.filterOptions.selectedAgeRating != null)widget.filterOptions.selectedAgeRating!.clear();
-                      if(widget.filterOptions.selectedStatus != null)widget.filterOptions.selectedStatus!.clear();
+                      if (widget.filterOptions.selectedGameModes != null)
+                        widget.filterOptions.selectedGameModes!.clear();
+                      if (widget.filterOptions.selectedPlayerPerspectives !=
+                          null)
+                        widget.filterOptions.selectedPlayerPerspectives!
+                            .clear();
+                      if (widget.filterOptions.selectedPlatforms != null)
+                        widget.filterOptions.selectedPlatforms!.clear();
+                      if (widget.filterOptions.selectedGenres != null)
+                        widget.filterOptions.selectedGenres!.clear();
+                      if (widget.filterOptions.selectedThemes != null)
+                        widget.filterOptions.selectedThemes!.clear();
+                      if (widget.filterOptions.selectedCategory != null)
+                        widget.filterOptions.selectedCategory!.clear();
+                      if (widget.filterOptions.selectedAgeRating != null)
+                        widget.filterOptions.selectedAgeRating!.clear();
+                      if (widget.filterOptions.selectedStatus != null)
+                        widget.filterOptions.selectedStatus!.clear();
                       widget.filterOptions.selectedSorting.clear();
                       widget.filterOptions.minRatings = 0;
                       widget.filterOptions.minTotalRatings = 0;
                       widget.filterOptions.minAggregatedRatings = 0;
                       widget.filterOptions.minFollows = 0;
                       widget.filterOptions.minHypes = 0;
-                      widget.filterOptions.ratingValues = const SfRangeValues(0.0, 100.0);
-                      widget.filterOptions.aggregatedRatingValues = const SfRangeValues(0.0, 100.0);
-                      widget.filterOptions.totalRatingValues = const SfRangeValues(0.0, 100.0);
+                      widget.filterOptions.ratingValues =
+                          const SfRangeValues(0.0, 100.0);
+                      widget.filterOptions.aggregatedRatingValues =
+                          const SfRangeValues(0.0, 100.0);
+                      widget.filterOptions.totalRatingValues =
+                          const SfRangeValues(0.0, 100.0);
                     });
                     widget.pagingController.refresh();
                   },
                   child: FittedBox(child: Text('Reset Game Filter')),
                 ),
               ),
-              const SizedBox(width: 8,),
+              const SizedBox(
+                width: 8,
+              ),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {

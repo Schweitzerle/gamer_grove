@@ -71,7 +71,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 500;';
     return body1;
   }
 

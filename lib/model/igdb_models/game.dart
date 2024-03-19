@@ -386,7 +386,7 @@ class Game {
       parentGame: json['parent_game'] != null
           ? (json['parent_game'] is int
               ? Game(id: json['parent_game'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
-              : Game.fromJson(json['parent_game'],  IGDBApiService.getGameModel(json['parent_game'])))
+              : Game.fromJson(json['parent_game'],  IGDBApiService.getGameModel(json['parent_game']['id'])))
           : null,
       platforms: json['platforms'] != null
           ? List<PlatformIGDB>.from(
@@ -519,7 +519,7 @@ class Game {
       versionParent: json['version_parent'] != null
           ? (json['version_parent'] is int
               ? Game(id: json['version_parent'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
-              : Game.fromJson(json['version_parent'], IGDBApiService.getGameModel(json['version_parent'])))
+              : Game.fromJson(json['version_parent'], IGDBApiService.getGameModel(json['version_parent']['id'])))
           : null,
       versionTitle: json['version_title'],
       videos: json['videos'] != null

@@ -27,7 +27,7 @@ class _RatingCountSliderState extends State<RatingCountSlider> {
         children: [
           Text(
             widget.title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold), //TODO: coloring auf onColor von gamefilter widget
           ),
           SfSlider(
             min: 0.0,

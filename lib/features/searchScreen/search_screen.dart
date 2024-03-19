@@ -198,6 +198,8 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
       }
     } catch (error) {
       _pagingController.error = error;
+      _searchBarController.show();
+      rethrow;
     }
   }
 
@@ -292,13 +294,12 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final offset = pageKey * 20;
 
     String sortString = filterOptions.selectedSorting.isNotEmpty ? 's ${filterOptions.selectedSorting.join(', ')};' : 's total_rating_count desc;';
-    String queryString = 'name ~ *"${query}"*'; // Suchfilter für den Spielnamen
+    String queryString = 'name ~ *"${query}"*';
 
     const dateBorder = 631152000;
     final int startUnix = dateTimeToUnix(filterOptions.releaseDateValues.start) > dateBorder ? dateTimeToUnix(filterOptions.releaseDateValues.start) : -725849940;
     final int endUnix = dateTimeToUnix(filterOptions.releaseDateValues.end);
 
-    print(startUnix);
     queryString += ' & first_release_date >= ${startUnix} & first_release_date <= ${endUnix}';
 
 
@@ -373,7 +374,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
       queryString +=
           ' & age_ratings.rating = ${filterOptions.selectedAgeRating!.join(', ')}';
     }
-    // Aufbau des Query-Strings
+
     final body =
         'fields name, cover.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, category, checksum, collection.*, collections.*, created_at, dlcs.*, expanded_games.*, expansions.*, external_games.*, first_release_date, follows, forks.*, franchise.*, franchises.*, game_engines.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, keywords.*, language_supports.*, multiplayer_modes.*, name, parent_game.*, platforms.*, player_perspectives.*, ports, rating, rating_count, release_dates.*, remakes.*, remasters.*, screenshots.*, similar_games, slug, standalone_expansions.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_title, videos.*, websites.*; $sortString where ${queryString}; o $offset; l 20;';
 
@@ -522,7 +523,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
                         child: AnimatedToggleSwitch<int>.size(
                           textDirection: TextDirection.ltr,
                           current: _selectedIndex,
-                          values: [0, 1, 2],
+                          values: const [0, 1, 2],
                           iconOpacity: 0.2,
                           indicatorSize: const Size.fromWidth(100),
                           iconBuilder: iconBuilder,
@@ -537,7 +538,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
                                 color: color,
                                 spreadRadius: 0,
                                 blurRadius: 0,
-                                offset: Offset(0, 0),
+                                offset: const Offset(0, 0),
                               ),
                             ],
                           ),

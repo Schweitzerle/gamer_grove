@@ -129,7 +129,7 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Container(
+                      child: SizedBox(
                         width: MediaQuery.of(context).size.width,
                         child: MultiSelectDropDown(
                           borderRadius: 14,
