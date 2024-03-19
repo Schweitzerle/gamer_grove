@@ -12,9 +12,11 @@ import 'package:gamer_grove/features/loginRegistration/login_registration_page.d
 import 'package:gamer_grove/features/loginRegistration/login/view/login_page.dart';
 import 'package:gamer_grove/features/loginRegistration/signup/view/signup_page.dart';
 import 'package:gamer_grove/model/singleton/sinlgleton.dart';
+import 'package:gamer_grove/repository/firebase/firebase.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
 import 'package:gamer_grove/utils/ThemManager.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get_it/get_it.dart';
 import 'package:motion/motion.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,7 +37,7 @@ void main() async {
 
   await Motion.instance.initialize();
   Motion.instance.setUpdateInterval(60.fps);
-
+  Future.wait([registerCurrentUserData()]);
   runApp(
       GetMaterialApp(
         title: 'CouchCinema',
@@ -44,6 +46,14 @@ void main() async {
       ),
   );
 }
+
+Future<void> registerCurrentUserData() async {
+  final currentUser = await FirebaseService().getSingleCurrentUserData();
+  final getIt = GetIt.instance;
+  getIt.allowReassignment = true;
+  getIt.registerSingletonAsync<FirebaseUserModel>(
+        () => Future.value(currentUser),
+  );  }
 
 class GamerGroveApp extends StatefulWidget {
   GamerGroveApp({Key? key}) : super(key: key);

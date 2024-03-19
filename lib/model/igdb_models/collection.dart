@@ -1,3 +1,6 @@
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 import 'game.dart';
 
 class Collection {
@@ -43,9 +46,9 @@ class Collection {
           ? List<Game>.from(
         json['games'].map((dlc) {
           if (dlc is int) {
-            return Game(id: dlc);
+            return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
           } else {
-            return Game.fromJson(dlc);
+            return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
           }
         }),
       )

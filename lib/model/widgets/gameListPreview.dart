@@ -87,7 +87,7 @@ class GameListViewState extends State<GameListView> {
                       widget.isPagination
                           ? Navigator.of(context).push(
                           AllGamesGridPaginationScreen.route(
-                              widget.headline, widget.body, widget.isAggregated))
+                              widget.headline, widget.body, widget.isAggregated, widget.otherUserModel))
                           : Navigator.of(context).push(
                           AllGamesGridScreen.route(
                               widget.games!, context, widget.headline, widget.otherUserModel));

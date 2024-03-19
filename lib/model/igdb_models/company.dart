@@ -3,6 +3,10 @@ import 'package:gamer_grove/model/igdb_models/company_website.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
 
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
+
 class Company {
   int id;
   final int? changeDate;
@@ -62,11 +66,11 @@ class Company {
       description: json['description'],
       developed: json['developed'] != null
           ? List<Game>.from(
-        json['developed'].map((developed) {
-          if (developed is int) {
-            return Game(id: developed);
+        json['developed'].map((dlc) {
+          if (dlc is int) {
+            return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
           } else {
-            return Game.fromJson(developed);
+            return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
           }
         }),
       )
@@ -84,11 +88,11 @@ class Company {
           : null,
       published: json['published'] != null
           ? List<Game>.from(
-        json['published'].map((published) {
-          if (published is int) {
-            return Game(id: published);
+        json['published'].map((dlc) {
+          if (dlc is int) {
+            return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
           } else {
-            return Game.fromJson(published);
+            return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
           }
         }),
       )

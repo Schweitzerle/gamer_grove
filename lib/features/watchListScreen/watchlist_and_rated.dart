@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:textura/textura.dart';
 import 'package:vitality/vitality.dart';
@@ -40,18 +41,31 @@ class _WatchlistScreenState extends State<WatchlistScreen>
   @override
   void initState() {
     super.initState();
-    initialize();
   }
 
-  Future<void> initialize() async {
-    await Future.wait(
-        [getRecommendedIGDBData(), getRatedIGDBData(), getWishlistIGDBData()]);
+  Future<List<Game>> getIGDBData() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    if (getGameKeys(currentUser.games).isNotEmpty) {
+      try {
+        print(getBody());
+        final response3 =
+            await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBody());
+
+        return apiService.parseResponseToGame(response3);
+      } catch (e, stackTrace) {
+        print('Error: $e');
+        print('Stack Trace: $stackTrace');
+        return []; // Return empty list on error
+      }
+    } else {
+      return []; // Return empty list if no games in wishlist
+    }
   }
 
-  String getRecommendedBody() {
+  String getBody() {
     final currentUser = getIt<FirebaseUserModel>();
 
-    final recommendedGameKeys = getRecommendedGameKeys(currentUser.games);
+    final recommendedGameKeys = getGameKeys(currentUser.games);
     final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
     final gamesJoin = gameIds.join("|");
     String gamesString = 'w $gamesJoin;';
@@ -61,106 +75,9 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     return body1;
   }
 
-  List<String> getRecommendedGameKeys(Map<String, dynamic> games) {
-    final recommendedGames =
-        games.entries.where((entry) => entry.value['recommended'] == true);
-    return recommendedGames.map((entry) => entry.key).toList();
+  List<String> getGameKeys(Map<String, dynamic> games) {
+    return games.keys.toList();
   }
-
-  Future<void> getRecommendedIGDBData() async {
-    final currentUser = getIt<FirebaseUserModel>();
-    if (getRecommendedGameKeys(currentUser.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getRecommendedBody());
-
-        setState(() {
-          recommendedResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
-
-  String getWishlistBody() {
-    final currentUser = getIt<FirebaseUserModel>();
-
-    final recommendedGameKeys = getWishlistGameKeys(currentUser.games);
-    final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
-    final gamesJoin = gameIds.join("|");
-    String gamesString = 'w $gamesJoin;';
-
-    String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
-    return body1;
-  }
-
-  List<String> getWishlistGameKeys(Map<String, dynamic> games) {
-    final recommendedGames =
-        games.entries.where((entry) => entry.value['wishlist'] == true);
-    return recommendedGames.map((entry) => entry.key).toList();
-  }
-
-  Future<void> getWishlistIGDBData() async {
-    final currentUser = getIt<FirebaseUserModel>();
-    if (getWishlistGameKeys(currentUser.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getWishlistBody());
-
-        setState(() {
-          wishlistResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
-
-  String getRatedBody() {
-    final currentUser = getIt<FirebaseUserModel>();
-
-    final recommendedGameKeys = getRatedGameKeys(currentUser.games);
-    final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
-    final gamesJoin = gameIds.join("|");
-    String gamesString = 'w $gamesJoin;';
-
-    if (getRatedGameKeys(currentUser.games).isNotEmpty) {
-      String body1 =
-          'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
-      return body1;
-    }
-    else {
-      return '';
-    }
-  }
-
-  List<String> getRatedGameKeys(Map<String, dynamic> games) {
-    final recommendedGames =
-        games.entries.where((entry) => entry.value['rating'] > 0);
-    return recommendedGames.map((entry) => entry.key).toList();
-  }
-
-  Future<void> getRatedIGDBData() async {
-    final currentUser = getIt<FirebaseUserModel>();
-    if (getRatedGameKeys(currentUser.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getRatedBody());
-
-        setState(() {
-          ratedResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -191,15 +108,15 @@ class _WatchlistScreenState extends State<WatchlistScreen>
             randomItemsBehaviours: [
               ItemBehaviour(
                   shape: ShapeType.Icon, icon: CupertinoIcons.bookmark),
-              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.bookmark_fill),
-              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.hand_thumbsup),
               ItemBehaviour(
-                  shape: ShapeType.Icon, icon: CupertinoIcons.hand_thumbsup_fill),
+                  shape: ShapeType.Icon, icon: CupertinoIcons.bookmark_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.hand_thumbsup),
               ItemBehaviour(
                   shape: ShapeType.Icon,
-                  icon: Icons.score_outlined),
-              ItemBehaviour(
-                  shape: ShapeType.Icon, icon: Icons.score_rounded),
+                  icon: CupertinoIcons.hand_thumbsup_fill),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.score_outlined),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.score_rounded),
               ItemBehaviour(shape: ShapeType.StrokeCircle),
             ],
           ),
@@ -243,69 +160,68 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                       const SizedBox(
                         height: 14,
                       ),
-                      Consumer<FirebaseUserModel>(
-                          builder: (context, firebaseUserModel, child) {
-                        if (getRecommendedGameKeys(firebaseUserModel.games)
-                            .isNotEmpty) {
-                          if (recommendedResponse.length !=
-                              getRecommendedGameKeys(firebaseUserModel.games)
-                                  .length) {
-                            Future.wait([getRecommendedIGDBData()]);
-                          }
-                          return GameListView(
-                            headline: 'Recommended Games',
-                            games: recommendedResponse,
-                            isPagination: false,
-                            body: '',
-                            showLimit: 10,
-                            isAggregated: false,
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
-                      Consumer<FirebaseUserModel>(
-                          builder: (context, firebaseUserModel, child) {
-                        if (getWishlistGameKeys(firebaseUserModel.games)
-                            .isNotEmpty) {
-                          if (wishlistResponse.length !=
-                              getWishlistGameKeys(firebaseUserModel.games)
-                                  .length) {
-                            Future.wait([getWishlistIGDBData()]);
-                          }
-                          return GameListView(
-                            headline: 'Wishlist Games',
-                            games: wishlistResponse,
-                            isPagination: true,
-                            body: '',
-                            showLimit: 10,
-                            isAggregated: false,
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
-                      Consumer<FirebaseUserModel>(
-                          builder: (context, firebaseUserModel, child) {
-                        if (getRatedGameKeys(firebaseUserModel.games)
-                            .isNotEmpty) {
-                          if (ratedResponse.length !=
-                              getRatedGameKeys(firebaseUserModel.games)
-                                  .length) {
-                            Future.wait([getRatedIGDBData()]);
-                          }
-                          return GameListView(
-                            headline: 'Rated Games',
-                            games: ratedResponse,
-                            isPagination: false,
-                            body: '',
-                            showLimit: 10,
-                            isAggregated: false,
-                          );
-                        } else {
-                          return Container();
-                        }
-                      }),
+                      FutureBuilder<List<Game>>(
+                          future: getIGDBData(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              List<Game> recommendedData = [];
+                              List<Game> wishlistData = [];
+                              List<Game> ratedData = [];
+                              for (var game in snapshot.data!){
+                                if (game.gameModel.recommended == true) {
+                                  recommendedData.add(game);
+                                }
+                                if (game.gameModel.wishlist == true) {
+                                  wishlistData.add(game);
+                                }
+                                if (game.gameModel.rating > 0) {
+                                  ratedData.add(game);
+                                }
+                              }
+                              return Column(
+                                children: [
+                                  if (recommendedData.isNotEmpty)
+                                    GameListView(
+                                      headline: 'Recommended Games',
+                                      games: recommendedData,
+                                      isPagination: false,
+                                      body: '',
+                                      showLimit: 10,
+                                      isAggregated: false,
+                                    ),
+                                  if (wishlistData.isNotEmpty)
+                                    GameListView(
+                                      headline: 'Wishlist Games',
+                                      games: wishlistData,
+                                      isPagination: true,
+                                      body: '',
+                                      showLimit: 10,
+                                      isAggregated: false,
+                                    ),
+                                  if (ratedData.isNotEmpty)
+                                    GameListView(
+                                      headline: 'Rated Games',
+                                      games: ratedData,
+                                      isPagination: false,
+                                      body: '',
+                                      showLimit: 10,
+                                      isAggregated: false,
+                                    ),
+                                ],
+                              );
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            }
+                            // Display a loading indicator while fetching data
+                            return const Center(
+                              child: Padding(
+                            padding: EdgeInsets.all(80.0),
+                                  child: LoadingIndicator(indicatorType: Indicator.pacman)),
+                            );
+                          }),
+
                     ],
                   );
                 }),

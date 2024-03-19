@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bottom_bar_matu/utils/app_utils.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/company.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
@@ -10,7 +11,11 @@ import 'package:gamer_grove/model/igdb_models/platform.dart';
 import 'package:gamer_grove/model/igdb_models/player_perspectiverequest_path.dart';
 import 'package:gamer_grove/model/igdb_models/theme.dart';
 import 'package:gamer_grove/repository/igdb/AppTokenService.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+
+import '../../model/firebase/firebaseUser.dart';
+import '../../model/firebase/gameModel.dart';
 
 class IGDBApiService {
   final String clientId = 'lbesf37nfwly4czho4wp8vqbzhexu8';
@@ -41,11 +46,22 @@ class IGDBApiService {
   List<Game> parseResponseToGame(List<dynamic> response) {
     if (response.isNotEmpty && response[0] is Map<String, dynamic>) {
       // Check if the response is not empty and is a list of maps
-      return response.map<Game>((json) => Game.fromJson(json)).toList();
+      return response.map<Game>((json) => Game.fromJson(json, getGameModel(json['id']))).toList();
     } else {
       return <Game>[]; // Return an empty list if there's no valid response
     }
   }
+
+  static GameModel getGameModel(int id) {
+    final getIt = GetIt.instance;
+    final currentUser = getIt<FirebaseUserModel>();
+    Map<String, dynamic> games =
+        currentUser.games.values.firstWhereOrNull((game) => game['id'] == id.toString()) ??
+            GameModel(id: id.toString(), wishlist: false, recommended: false, rating: 0.0)
+                .toJson();
+    return GameModel.fromMap(games);
+  }
+
 
   List<Company> parseResponseToCompany(List<dynamic> response) {
     if (response.isNotEmpty && response[0] is Map<String, dynamic>) {

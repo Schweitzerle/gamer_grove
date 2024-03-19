@@ -14,7 +14,6 @@ import 'package:liquid_swipe/Helpers/Helpers.dart';
 import 'package:liquid_swipe/PageHelpers/LiquidController.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-
 class LiquidTabBar extends StatefulWidget {
   static Route route() {
     return MaterialPageRoute(
@@ -32,7 +31,6 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   late PageController controller;
   final getIt = GetIt.instance;
 
-
   final List<Widget> pages = [
     WatchlistScreen(),
     FriendsScreen(),
@@ -44,17 +42,17 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   @override
   void initState() {
     super.initState();
-    Future.wait([getCurrentUserData()]);
+    registerCurrentUserData();
     currentIndex = initialIndex;
     controller = PageController(initialPage: initialIndex);
-
   }
 
-  Future<void> getCurrentUserData() async {
+  Future<void> registerCurrentUserData() async {
     final currentUser = await FirebaseService().getSingleCurrentUserData();
     getIt.allowReassignment = true;
-    getIt.registerSingleton<FirebaseUserModel>(currentUser);
-  }
+    getIt.registerSingletonAsync<FirebaseUserModel>(
+          () => Future.value(currentUser),
+    );  }
 
   @override
   void dispose() {
@@ -100,14 +98,13 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
         },
       ),
       body: PageView(
-        controller: controller,
-        onPageChanged: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        children: pages
-      ),
+          controller: controller,
+          onPageChanged: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+          children: pages),
     );
   }
 }

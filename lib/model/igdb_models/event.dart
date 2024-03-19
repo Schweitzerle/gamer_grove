@@ -3,6 +3,10 @@ import 'package:gamer_grove/model/igdb_models/event_networkj.dart';
 import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/igdb_models/game_video.dart';
 
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
+
 class Event {
   final int id;
   final String? checksum;
@@ -64,11 +68,11 @@ class Event {
           : null,
       games: json['games'] != null
           ? List<Game>.from(
-        json['games'].map((game) {
-          if (game is int) {
-            return Game(id: game);
+        json['games'].map((dlc) {
+          if (dlc is int) {
+            return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
           } else {
-            return Game.fromJson(game);
+            return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
           }
         }),
       )

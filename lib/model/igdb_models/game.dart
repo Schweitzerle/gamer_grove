@@ -1,4 +1,4 @@
-
+import 'package:bottom_bar_matu/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/age_rating.dart';
 import 'package:gamer_grove/model/igdb_models/alternative_name.dart';
@@ -22,9 +22,15 @@ import 'package:gamer_grove/model/igdb_models/release_date.dart';
 import 'package:gamer_grove/model/igdb_models/screenshot.dart';
 import 'package:gamer_grove/model/igdb_models/theme.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
+import 'package:gamer_grove/repository/igdb/IGDBApiService.dart';
+import 'package:get_it/get_it.dart';
+
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 
 class Game {
   int id;
+  GameModel gameModel;
   List<AgeRating>? ageRatings;
   double? aggregatedRating;
   int? aggregatedRatingCount;
@@ -83,6 +89,7 @@ class Game {
 
   Game({
     required this.id,
+    required this.gameModel,
     this.ageRatings,
     this.aggregatedRating,
     this.aggregatedRatingCount,
@@ -140,351 +147,348 @@ class Game {
     this.websites,
   });
 
-  factory Game.fromJson(Map<String, dynamic> json) {
+  factory Game.fromJson(Map<String, dynamic> json, GameModel gameModel) {
     return Game(
       id: json['id'],
       ageRatings: json['age_ratings'] != null
           ? List<AgeRating>.from(
-        json['age_ratings'].map((ageRating) {
-          if (ageRating is int) {
-            return AgeRating(id: ageRating);
-          } else {
-            return AgeRating.fromJson(ageRating);
-          }
-        }),
-      )
+              json['age_ratings'].map((ageRating) {
+                if (ageRating is int) {
+                  return AgeRating(id: ageRating);
+                } else {
+                  return AgeRating.fromJson(ageRating);
+                }
+              }),
+            )
           : null,
       aggregatedRating: json['aggregated_rating']?.toDouble(),
       aggregatedRatingCount: json['aggregated_rating_count'],
       alternativeNames: json['alternative_names'] != null
           ? List<AlternativeName>.from(
-        json['alternative_names'].map((alternativeName) {
-          if (alternativeName is int) {
-            return AlternativeName(id: alternativeName);
-          } else {
-            return AlternativeName.fromJson(alternativeName);
-          }
-        }),
-      )
+              json['alternative_names'].map((alternativeName) {
+                if (alternativeName is int) {
+                  return AlternativeName(id: alternativeName);
+                } else {
+                  return AlternativeName.fromJson(alternativeName);
+                }
+              }),
+            )
           : null,
       artworks: json['artworks'] != null
           ? List<Artwork>.from(
-        json['artworks'].map((artwork) {
-          if (artwork is int) {
-            return Artwork(id: artwork);
-          } else {
-            return Artwork.fromJson(artwork);
-          }
-        }),
-      )
+              json['artworks'].map((artwork) {
+                if (artwork is int) {
+                  return Artwork(id: artwork);
+                } else {
+                  return Artwork.fromJson(artwork);
+                }
+              }),
+            )
           : null,
       bundles: json['bundles'] != null
           ? List<Game>.from(
-        json['bundles'].map((dlc) {
-          if (dlc is int) {
-            return Game(id: dlc);
-          } else {
-            return Game.fromJson(dlc);
-          }
-        }),
-      )
+              json['bundles'].map((dlc) {
+                if (dlc is int) {
+                  return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
+                }
+              }),
+            )
           : null,
       category: json['category'] != null
           ? GameCategoryEnumExtension.fromValue(json['category']).stringValue
           : null,
       collection: json['collection'] != null
           ? (json['collection'] is int
-          ? Collection(id: json['collection'])
-          : Collection.fromJson(json['collection']))
+              ? Collection(id: json['collection'])
+              : Collection.fromJson(json['collection']))
           : null,
       collections: json['collections'] != null
           ? List<Collection>.from(
-        json['collections'].map((collection) {
-          if (collection is int) {
-            return Collection(id: collection);
-          } else {
-            return Collection.fromJson(collection);
-          }
-        }),
-      )
+              json['collections'].map((collection) {
+                if (collection is int) {
+                  return Collection(id: collection);
+                } else {
+                  return Collection.fromJson(collection);
+                }
+              }),
+            )
           : null,
       cover: json['cover'] != null
           ? (json['cover'] is int
-          ? Cover(id: json['cover'])
-          : Cover.fromJson(json['cover']))
+              ? Cover(id: json['cover'])
+              : Cover.fromJson(json['cover']))
           : null,
       dlcs: json['dlcs'] != null
           ? List<Game>.from(
-        json['dlcs'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['dlcs'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection,  IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       expandedGames: json['expanded_games'] != null
           ? List<Game>.from(
-        json['expanded_games'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['expanded_games'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection,  IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       expansions: json['expansions'] != null
           ? List<Game>.from(
-        json['expansions'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['expansions'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       externalGames: json['external_games'] != null
           ? List<ExternalGame>.from(
-        json['external_games'].map((collection) {
-          if (collection is int) {
-            return ExternalGame(id: collection);
-          } else {
-            return ExternalGame.fromJson(collection);
-          }
-        }),
-      )
+              json['external_games'].map((collection) {
+                if (collection is int) {
+                  return ExternalGame(id: collection);
+                } else {
+                  return ExternalGame.fromJson(collection);
+                }
+              }),
+            )
           : null,
       firstReleaseDate: json['first_release_date'],
       follows: json['follows'],
       forks: json['forks'] != null
           ? List<Game>.from(
-        json['forks'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['forks'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       franchise: json['franchise'] != null
           ? (json['franchise'] is int
-          ? Franchise(id: json['franchise'])
-          : Franchise.fromJson(json['franchise']))
+              ? Franchise(id: json['franchise'])
+              : Franchise.fromJson(json['franchise']))
           : null,
       franchises: json['franchises'] != null
           ? List<Franchise>.from(
-        json['franchises'].map((collection) {
-          if (collection is int) {
-            return Franchise(id: collection);
-          } else {
-            return Franchise.fromJson(collection);
-          }
-        }),
-      )
+              json['franchises'].map((collection) {
+                if (collection is int) {
+                  return Franchise(id: collection);
+                } else {
+                  return Franchise.fromJson(collection);
+                }
+              }),
+            )
           : null,
       gameEngines: json['game_engines'] != null
           ? List<GameEngine>.from(
-        json['game_engines'].map((collection) {
-          if (collection is int) {
-            return GameEngine(id: collection);
-          } else {
-            return GameEngine.fromJson(collection);
-          }
-        }),
-      )
+              json['game_engines'].map((collection) {
+                if (collection is int) {
+                  return GameEngine(id: collection);
+                } else {
+                  return GameEngine.fromJson(collection);
+                }
+              }),
+            )
           : null,
       gameLocalizations: json['game_localizations'] != null
           ? List<GameLocalization>.from(
-        json['game_localizations'].map((collection) {
-          if (collection is int) {
-            return GameLocalization(id: collection);
-          } else {
-            return GameLocalization.fromJson(collection);
-          }
-        }),
-      )
+              json['game_localizations'].map((collection) {
+                if (collection is int) {
+                  return GameLocalization(id: collection);
+                } else {
+                  return GameLocalization.fromJson(collection);
+                }
+              }),
+            )
           : null,
       gameModes: json['game_modes'] != null
           ? List<GameMode>.from(
-        json['game_modes'].map((collection) {
-          if (collection is int) {
-            return GameMode(id: collection);
-          } else {
-            return GameMode.fromJson(collection);
-          }
-        }),
-      )
+              json['game_modes'].map((collection) {
+                if (collection is int) {
+                  return GameMode(id: collection);
+                } else {
+                  return GameMode.fromJson(collection);
+                }
+              }),
+            )
           : null,
-
       genres: json['genres'] != null
           ? List<Genre>.from(
-        json['genres'].map((collection) {
-          if (collection is int) {
-            return Genre(id: collection);
-          } else {
-            return Genre.fromJson(collection);
-          }
-        }),
-      )
+              json['genres'].map((collection) {
+                if (collection is int) {
+                  return Genre(id: collection);
+                } else {
+                  return Genre.fromJson(collection);
+                }
+              }),
+            )
           : null,
-
       hypes: json['hypes'],
       involvedCompanies: json['involved_companies'] != null
           ? List<InvolvedCompany>.from(
-        json['involved_companies'].map((collection) {
-          if (collection is int) {
-            return InvolvedCompany(id: collection);
-          } else {
-            return InvolvedCompany.fromJson(collection);
-          }
-        }),
-      )
+              json['involved_companies'].map((collection) {
+                if (collection is int) {
+                  return InvolvedCompany(id: collection);
+                } else {
+                  return InvolvedCompany.fromJson(collection);
+                }
+              }),
+            )
           : null,
       keywords: json['keywords'] != null
           ? List<Keyword>.from(
-        json['keywords'].map((collection) {
-          if (collection is int) {
-            return Keyword(id: collection);
-          } else {
-            return Keyword.fromJson(collection);
-          }
-        }),
-      )
+              json['keywords'].map((collection) {
+                if (collection is int) {
+                  return Keyword(id: collection);
+                } else {
+                  return Keyword.fromJson(collection);
+                }
+              }),
+            )
           : null,
       languageSupports: json['language_supports'] != null
           ? List<LanguageSupport>.from(
-        json['language_supports'].map((collection) {
-          if (collection is int) {
-            return LanguageSupport(id: collection);
-          } else {
-            return LanguageSupport.fromJson(collection);
-          }
-        }),
-      )
+              json['language_supports'].map((collection) {
+                if (collection is int) {
+                  return LanguageSupport(id: collection);
+                } else {
+                  return LanguageSupport.fromJson(collection);
+                }
+              }),
+            )
           : null,
       multiplayerModes: json['multiplayer_modes'] != null
           ? List<MultiplayerMode>.from(
-        json['multiplayer_modes'].map((collection) {
-          if (collection is int) {
-            return MultiplayerMode(id: collection);
-          } else {
-            return MultiplayerMode.fromJson(collection);
-          }
-        }),
-      )
+              json['multiplayer_modes'].map((collection) {
+                if (collection is int) {
+                  return MultiplayerMode(id: collection);
+                } else {
+                  return MultiplayerMode.fromJson(collection);
+                }
+              }),
+            )
           : null,
       name: json['name'],
       parentGame: json['parent_game'] != null
           ? (json['parent_game'] is int
-          ? Game(id: json['parent_game'])
-          : Game.fromJson(json['parent_game']))
+              ? Game(id: json['parent_game'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
+              : Game.fromJson(json['parent_game'],  IGDBApiService.getGameModel(json['parent_game'])))
           : null,
       platforms: json['platforms'] != null
           ? List<PlatformIGDB>.from(
-        json['platforms'].map((collection) {
-          if (collection is int) {
-            return PlatformIGDB(id: collection);
-          } else {
-            return PlatformIGDB.fromJson(collection);
-          }
-        }),
-      )
+              json['platforms'].map((collection) {
+                if (collection is int) {
+                  return PlatformIGDB(id: collection);
+                } else {
+                  return PlatformIGDB.fromJson(collection);
+                }
+              }),
+            )
           : null,
       playerPerspectives: json['player_perspectives'] != null
           ? List<PlayerPerspective>.from(
-        json['player_perspectives'].map((collection) {
-          if (collection is int) {
-            return PlayerPerspective(id: collection);
-          } else {
-            return PlayerPerspective.fromJson(collection);
-          }
-        }),
-      )
+              json['player_perspectives'].map((collection) {
+                if (collection is int) {
+                  return PlayerPerspective(id: collection);
+                } else {
+                  return PlayerPerspective.fromJson(collection);
+                }
+              }),
+            )
           : null,
       ports: json['ports'] != null
           ? List<Game>.from(
-        json['ports'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['ports'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       rating: json['rating']?.toDouble(),
       ratingCount: json['rating_count'],
       releaseDates: json['release_dates'] != null
           ? List<ReleaseDate>.from(
-        json['release_dates'].map((collection) {
-          if (collection is int) {
-            return ReleaseDate(id: collection);
-          } else {
-            return ReleaseDate.fromJson(collection);
-          }
-        }),
-      )
+              json['release_dates'].map((collection) {
+                if (collection is int) {
+                  return ReleaseDate(id: collection);
+                } else {
+                  return ReleaseDate.fromJson(collection);
+                }
+              }),
+            )
           : null,
-
       remakes: json['remakes'] != null
           ? List<Game>.from(
-        json['remakes'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['remakes'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection,  IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       remasters: json['remasters'] != null
           ? List<Game>.from(
-        json['remasters'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['remasters'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       screenshots: json['screenshots'] != null
-        ? List<Screenshot>.from(
-      json['screenshots'].map((collection) {
-        if (collection is int) {
-          return Screenshot(id: collection);
-        } else {
-          return Screenshot.fromJson(collection);
-        }
-      }),
-    )
-        : null,
+          ? List<Screenshot>.from(
+              json['screenshots'].map((collection) {
+                if (collection is int) {
+                  return Screenshot(id: collection);
+                } else {
+                  return Screenshot.fromJson(collection);
+                }
+              }),
+            )
+          : null,
       similarGames: json['similar_games'] != null
           ? List<Game>.from(
-        json['similar_games'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['similar_games'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       slug: json['slug'],
       standaloneExpansions: json['standalone_expansions'] != null
           ? List<Game>.from(
-        json['standalone_expansions'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
-          } else {
-            return Game.fromJson(collection);
-          }
-        }),
-      )
+              json['standalone_expansions'].map((collection) {
+                if (collection is int) {
+                  return Game(id: collection, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
+                } else {
+                  return Game.fromJson(collection, IGDBApiService.getGameModel(collection['id']));
+                }
+              }),
+            )
           : null,
       status: json['status'] != null
           ? GameStatusEnumExtension.fromValue(json['status']).stringValue
@@ -493,19 +497,20 @@ class Game {
       summary: json['summary'],
       tags: json['tags'] != null
           ? List<String>.from(
-        json['tags'].map((tag) => TagNumbersEnumExtension.fromValue(tag).stringValue),
-      )
+              json['tags'].map(
+                  (tag) => TagNumbersEnumExtension.fromValue(tag).stringValue),
+            )
           : null,
       themes: json['themes'] != null
           ? List<ThemeIDGB>.from(
-        json['themes'].map((collection) {
-          if (collection is int) {
-            return ThemeIDGB(id: collection);
-          } else {
-            return ThemeIDGB.fromJson(collection);
-          }
-        }),
-      )
+              json['themes'].map((collection) {
+                if (collection is int) {
+                  return ThemeIDGB(id: collection);
+                } else {
+                  return ThemeIDGB.fromJson(collection);
+                }
+              }),
+            )
           : null,
       totalRating: json['total_rating']?.toDouble(),
       totalRatingCount: json['total_rating_count'],
@@ -513,34 +518,37 @@ class Game {
       url: json['url'],
       versionParent: json['version_parent'] != null
           ? (json['version_parent'] is int
-          ? Game(id: json['version_parent'])
-          : Game.fromJson(json['version_parent']))
+              ? Game(id: json['version_parent'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
+              : Game.fromJson(json['version_parent'], IGDBApiService.getGameModel(json['version_parent'])))
           : null,
       versionTitle: json['version_title'],
       videos: json['videos'] != null
           ? List<GameVideo>.from(
-        json['videos'].map((collection) {
-          if (collection is int) {
-            return GameVideo(id: collection);
-          } else {
-            return GameVideo.fromJson(collection);
-          }
-        }),
-      )
+              json['videos'].map((collection) {
+                if (collection is int) {
+                  return GameVideo(id: collection);
+                } else {
+                  return GameVideo.fromJson(collection);
+                }
+              }),
+            )
           : null,
       websites: json['websites'] != null
           ? List<Website>.from(
-        json['websites'].map((collection) {
-          if (collection is int) {
-            return Website(id: collection);
-          } else {
-            return Website.fromJson(collection);
-          }
-        }),
-      )
+              json['websites'].map((collection) {
+                if (collection is int) {
+                  return Website(id: collection);
+                } else {
+                  return Website.fromJson(collection);
+                }
+              }),
+            )
           : null,
+      gameModel: gameModel,
     );
   }
+
+
 }
 
 enum TagNumbersEnum {
@@ -576,6 +584,7 @@ extension TagNumbersEnumExtension on TagNumbersEnum {
 
     return TagNumbersEnum.values[index];
   }
+
   static String _formatEnumValue(String value) {
     // Convert "mainGame" to "Main Game"
     String formattedValue = value.replaceAllMapped(RegExp(r'[A-Z]'), (match) {
@@ -585,7 +594,6 @@ extension TagNumbersEnumExtension on TagNumbersEnum {
     // Remove the enum type prefix
     return formattedValue.split('.').last.trim();
   }
-
 }
 
 enum GameCategoryEnum {
@@ -700,4 +708,3 @@ extension GameStatusEnumExtension on GameStatusEnum {
     return formattedValue.split('.').last.trim();
   }
 }
-

@@ -2,6 +2,10 @@ import 'package:gamer_grove/model/igdb_models/game.dart';
 import 'package:gamer_grove/model/igdb_models/language.dart';
 import 'package:gamer_grove/model/igdb_models/language_support_type.dart';
 
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
+
 class LanguageSupport {
   int id;
   final String? checksum;
@@ -27,8 +31,8 @@ class LanguageSupport {
       createdAt: json['created_at'],
       game: json['game'] != null
           ? (json['game'] is int
-          ? Game(id: json['game'])
-          : Game.fromJson(json['game']))
+          ? Game(id: json['game'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
+          : Game.fromJson(json['game'], IGDBApiService.getGameModel(json['game']['id'])))
           : null,
       language: json['language'] != null
           ? (json['language'] is int

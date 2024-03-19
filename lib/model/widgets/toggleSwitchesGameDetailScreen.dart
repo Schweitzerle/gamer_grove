@@ -26,6 +26,7 @@ import 'characters_view.dart';
 import 'collection_view.dart';
 import 'company_view.dart';
 import 'events_view.dart';
+import 'followingGameRatings.dart';
 import 'franchise_view.dart';
 import 'gameListPreview.dart';
 import 'game_engine_view.dart';
@@ -553,9 +554,9 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
                                                           null &&
                                                       widget.game.ratingCount ==
                                                           null)
-                                                    Padding(
+                                                    const Padding(
                                                       padding:
-                                                          const EdgeInsets.all(
+                                                          EdgeInsets.all(
                                                               8.0),
                                                       child: Center(
                                                         child: Text(
@@ -586,6 +587,7 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
                                                           'Average IGDB user rating based on ${widget.game.ratingCount} users',
                                                       color: widget.color,
                                                     ),
+                                                  FollowingGameRatings(game: widget.game, color: headerBorderColor,),
                                                 ],
                                               )),
                                             ),
@@ -935,10 +937,7 @@ class _SummaryAndStorylineWidgetState extends State<SummaryAndStorylineWidget> {
         widget.game.themes != null) values.add(0);
     if (widget.game.summary != null) values.add(1);
     if (widget.game.storyline != null) values.add(2);
-    if (widget.game.aggregatedRatingCount != null ||
-        widget.game.aggregatedRating != null ||
-        widget.game.ratingCount != null ||
-        widget.game.rating != null) values.add(3);
+        values.add(3);
     if (widget.game.involvedCompanies != null) values.add(4);
     if (widget.game.languageSupports != null) values.add(5);
     if (widget.game.platforms != null) values.add(6);

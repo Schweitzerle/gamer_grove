@@ -29,6 +29,7 @@ import 'package:gamer_grove/model/widgets/countUpRow.dart';
 import 'package:gamer_grove/model/widgets/event_list.dart';
 import 'package:gamer_grove/model/widgets/event_view.dart';
 import 'package:gamer_grove/model/widgets/events_view.dart';
+import 'package:gamer_grove/model/widgets/followingGameRatings.dart';
 import 'package:gamer_grove/model/widgets/franchise_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/game_engine_view.dart';
@@ -59,24 +60,22 @@ import '../widgets/gameListPreview.dart';
 import 'gameGridView.dart';
 
 class GameDetailScreen extends StatefulWidget {
-  static Route route(Game game, BuildContext context, GameModel gameModel) {
+  static Route route(Game game, BuildContext context) {
     return MaterialPageRoute(
       builder: (context) => GameDetailScreen(
         game: game,
         context: context,
-        gameModel: gameModel,
+
       ),
     );
   }
 
   final Game game;
   final BuildContext context;
-  final GameModel gameModel;
 
   GameDetailScreen({
     required this.game,
     required this.context,
-    required this.gameModel,
   });
 
   @override
@@ -225,7 +224,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment(0.0, 0.9), // Start at the middle left
-              end: Alignment(0.0, 0.4), // End a little above the middle
+              end: Alignment(0.0, 0.7), // End a little above the middle
               colors: [
                 colorPalette.lighten(10),
                 colorPalette.darken(40),
@@ -266,7 +265,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                 isCover: true,
                                 buildContext: context,
                                 needsRating: true,
-                                gameModel: widget.gameModel, isClickable: false,
+                                isClickable: false,
                               ),
                             ),
                           ),
@@ -444,7 +443,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         return CustomRatingDialog(
                           colorPalette: colorPalette,
                           adjustedTextColor: adjustedTextColor,
-                          gameModel: widget.gameModel,
+                          gameModel: widget.game.gameModel,
                         );
                       });
                 },

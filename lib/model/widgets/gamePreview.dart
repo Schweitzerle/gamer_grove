@@ -18,6 +18,7 @@ import 'package:snappable_thanos/snappable_thanos.dart';
 
 import '../../repository/firebase/firebase.dart';
 import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 import '../igdb_models/game.dart';
 import '../singleton/sinlgleton.dart';
 import '../views/gameDetailScreen.dart';
@@ -27,7 +28,6 @@ class GamePreviewView extends StatefulWidget {
   final bool isCover;
   final BuildContext buildContext;
   final bool needsRating;
-  GameModel? gameModel;
   final bool isClickable;
   FirebaseUserModel? otherUserModel;
 
@@ -36,7 +36,6 @@ class GamePreviewView extends StatefulWidget {
       required this.isCover,
       required this.buildContext,
       required this.needsRating,
-      this.gameModel,
       required this.isClickable,
       this.otherUserModel});
 
@@ -48,7 +47,6 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   late Color colorpalette;
   late Color lightColor;
   late Color darkColor;
-  late GameModel gameModel;
   late GameModel otherModel;
   final getIt = GetIt.instance;
   bool isColorLoaded = false;
@@ -72,154 +70,94 @@ class _GamePreviewViewState extends State<GamePreviewView> {
       darkColor = Theme.of(widget.buildContext).colorScheme.background;
     });
     await Future.wait(
-        [getColorPalette(), getGameModel(), getGameModelOtherUser()]);
+        [getColorPalette(), getGameModelOtherUser()]);
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
-      // Register GameModel provider locally
-      value: widget.gameModel ?? gameModel,
+      value: widget.game.gameModel,
       child: Consumer<GameModel>(
-        // Access the local GameModel instance
         builder: (context, gameModel, child) {
           final mediaQueryHeight = MediaQuery.of(context).size.height;
           final mediaQueryWidth = MediaQuery.of(context).size.width;
-
           final coverScaleHeight = mediaQueryHeight / 3.1;
           final coverScaleWidth = coverScaleHeight * 0.69;
-
           final luminance = colorpalette.computeLuminance();
           final targetLuminance = 0.5;
           final adjustedTextColor =
               luminance > targetLuminance ? Colors.black : Colors.white;
 
-          return InkWell(
-            onTap: () {
-              if (widget.isClickable) {
-                Navigator.of(context).push(
-                    GameDetailScreen.route(widget.game, context, gameModel));
-              }
-            },
-            onLongPress: () {
-              if (widget.isClickable) {
-                showDialog(
-                    context: context,
-                    barrierColor: colorpalette.withOpacity(.8),
-                    builder: (BuildContext context) {
-                      return CustomRatingDialog(
-                        colorPalette: colorpalette,
-                        adjustedTextColor: adjustedTextColor,
-                        gameModel: gameModel,
-                      );
-                    });
-              }
-            },
-            child: ClayContainer(
-              height: coverScaleHeight,
-              width: coverScaleWidth,
-              color: darkColor,
-              spread: 2,
-              depth: 60,
-              borderRadius: 14,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14.0),
-                    child: Hero(
-                      tag: widget.game.id,
-                      child: CachedNetworkImage(
-                        imageUrl: '${widget.game.cover?.url}',
-                        placeholder: (context, url) => Container(
-                          color:
-                              Theme.of(context).colorScheme.tertiaryContainer,
+          return Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: InkWell(
+              onTap: () {
+                if (widget.isClickable) {
+                  Navigator.of(context).push(
+                      GameDetailScreen.route(widget.game, context));
+                }
+              },
+              onLongPress: () {
+                if (widget.isClickable) {
+                  showDialog(
+                      context: context,
+                      barrierColor: colorpalette.withOpacity(.8),
+                      builder: (BuildContext context) {
+                        return CustomRatingDialog(
+                          colorPalette: colorpalette,
+                          adjustedTextColor: adjustedTextColor,
+                          gameModel: gameModel,
+                        );
+                      });
+                }
+              },
+              child: ClayContainer(
+                height: coverScaleHeight,
+                width: coverScaleWidth,
+                color: darkColor,
+                spread: 2,
+                depth: 60,
+                borderRadius: 14,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14.0),
+                      child: Hero(
+                        tag: widget.game.id,
+                        child: CachedNetworkImage(
+                          imageUrl: '${widget.game.cover?.url}',
+                          placeholder: (context, url) => Container(
+                            color:
+                                Theme.of(context).colorScheme.tertiaryContainer,
+                          ),
+                          errorWidget: (context, url, error) => GlassContainer(
+                            color: colorpalette.onColor,
+                            child: Icon(FontAwesomeIcons.gamepad),
+                          ),
+                          fit: BoxFit.fill,
                         ),
-                        errorWidget: (context, url, error) => GlassContainer(
-                          color: colorpalette.onColor,
-                          child: Icon(FontAwesomeIcons.gamepad),
-                        ),
-                        fit: BoxFit.fill,
                       ),
                     ),
-                  ),
-                  if (widget.otherUserModel != null)
-                    Positioned(
-                        left: 0,
-                        top: 0,
-                        child:  GlassContainer(
-                          blur: 12,
-                          shadowStrength: 4,
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(14),
-                          shadowColor: colorpalette,
-                          color: colorpalette.onColor.withOpacity(.1),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 2.0, vertical: 4),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                    Animate(
-                                      autoPlay: true,
-                                      delay: const Duration(seconds: 1),
-                                      effects: const [
-                                        FadeEffect(),
-                                        ScaleEffect(),
-                                        SlideEffect(),
-                                        MoveEffect(begin: Offset(40, 0))
-                                      ],
-                                      child: Center(
-                                        child: CircleAvatar(
-                                          radius: 12,
-                                          foregroundImage: NetworkImage(
-                                            widget.otherUserModel!.profileUrl,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                    Animate(
-                                      autoPlay: true,
-                                      delay: const Duration(seconds: 1),
-                                      effects: const [
-                                        FadeEffect(),
-                                        ScaleEffect(),
-                                        SlideEffect(),
-                                        MoveEffect(begin: Offset(40, 0))
-                                      ],
-                                      child: Center(
-                                        child: CircularRatingWidget(
-                                          ratingValue:
-                                          otherModel.rating.toDouble() * 10,
-                                          radiusMultiplicator: .03,
-                                          fontSize: 8,
-                                          lineWidth: 2,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                  ],
-                                ),
-                                if (otherModel.recommended)
+                    if (widget.otherUserModel != null)
+                      Positioned(
+                          left: 0,
+                          top: 0,
+                          child:  GlassContainer(
+                            blur: 12,
+                            shadowStrength: 4,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(14),
+                            shadowColor: colorpalette,
+                            color: colorpalette.onColor.withOpacity(.1),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 2.0, vertical: 4),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
                                   Row(
                                     children: [
                                       const SizedBox(
@@ -234,9 +172,13 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                           SlideEffect(),
                                           MoveEffect(begin: Offset(40, 0))
                                         ],
-                                        child: const Center(
-                                          child: Icon(FontAwesomeIcons.thumbsUp,
-                                            color: Colors.deepOrange, size: 18,),
+                                        child: Center(
+                                          child: CircleAvatar(
+                                            radius: 12,
+                                            foregroundImage: NetworkImage(
+                                              widget.otherUserModel!.profileUrl,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(
@@ -244,7 +186,6 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                       ),
                                     ],
                                   ),
-                                if (otherModel.wishlist)
                                   Row(
                                     children: [
                                       const SizedBox(
@@ -257,12 +198,16 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                           FadeEffect(),
                                           ScaleEffect(),
                                           SlideEffect(),
-                                          MoveEffect(begin: Offset(80, 0))
+                                          MoveEffect(begin: Offset(40, 0))
                                         ],
-                                        child: const Center(
-                                          child: Icon(
-                                            FontAwesomeIcons.solidBookmark,
-                                            color: Colors.blueAccent, size: 18,),
+                                        child: Center(
+                                          child: CircularRatingWidget(
+                                            ratingValue:
+                                            otherModel.rating.toDouble() * 10,
+                                            radiusMultiplicator: .03,
+                                            fontSize: 8,
+                                            lineWidth: 2,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(
@@ -270,200 +215,252 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                       ),
                                     ],
                                   ),
-                              ],
-                            ),
-                          ),
-                        )),
-                  Consumer<GameModel>(builder: (context, gameModel, child) {
-                    if (widget.needsRating) {
-                      if (gameModel.wishlist ||
-                          gameModel.recommended ||
-                          gameModel.rating > 0) {
-                        return Positioned(
-                          top: 0,
-                          right: 0,
-                          child: GlassContainer(
-                            blur: 12,
-                            shadowStrength: 4,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(14),
-                            shadowColor: colorpalette,
-                            color: colorpalette.onColor.withOpacity(.1),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 4.0, vertical: 2),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Consumer<GameModel>(
-                                    builder: (context, gameModel, child) {
-                                      if (gameModel.rating > 0) {
-                                        return Column(
-                                          children: [
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
-                                            Animate(
-                                              autoPlay: true,
-                                              delay: const Duration(seconds: 1),
-                                              effects: const [
-                                                FadeEffect(),
-                                                ScaleEffect(),
-                                                SlideEffect(),
-                                                MoveEffect(begin: Offset(40, 0))
-                                              ],
-                                              child: Center(
-                                                child: CircularRatingWidget(
-                                                  ratingValue: gameModel.rating
-                                                      .toDouble() *
-                                                      10,
-                                                  radiusMultiplicator: .04,
-                                                  fontSize: 10,
-                                                  lineWidth: 4,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
+                                  if (otherModel.recommended)
+                                    Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 2,
+                                        ),
+                                        Animate(
+                                          autoPlay: true,
+                                          delay: const Duration(seconds: 1),
+                                          effects: const [
+                                            FadeEffect(),
+                                            ScaleEffect(),
+                                            SlideEffect(),
+                                            MoveEffect(begin: Offset(40, 0))
                                           ],
-                                        );
-                                      } else {
-                                        return Container(); // or any placeholder widget
-                                      }
-                                    },
-                                  ),
-                                  Consumer<GameModel>(
-                                    builder: (context, gameModel, child) {
-                                      if (gameModel.wishlist) {
-                                        return Column(
-                                          children: [
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
-                                            Animate(
-                                              autoPlay: true,
-                                              delay: const Duration(seconds: 1),
-                                              effects: const [
-                                                FadeEffect(),
-                                                ScaleEffect(),
-                                                SlideEffect(),
-                                                MoveEffect(begin: Offset(80, 0))
-                                              ],
-                                              child: const Center(
-                                                child: Icon(
-                                                    FontAwesomeIcons
-                                                        .solidBookmark,
-                                                    color: Colors.blueAccent, size: 22,),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
+                                          child: const Center(
+                                            child: Icon(FontAwesomeIcons.thumbsUp,
+                                              color: Colors.deepOrange, size: 18,),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  if (otherModel.wishlist)
+                                    Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 2,
+                                        ),
+                                        Animate(
+                                          autoPlay: true,
+                                          delay: const Duration(seconds: 1),
+                                          effects: const [
+                                            FadeEffect(),
+                                            ScaleEffect(),
+                                            SlideEffect(),
+                                            MoveEffect(begin: Offset(80, 0))
                                           ],
-                                        );
-                                      } else {
-                                        return Container(); // or any placeholder widget
-                                      }
-                                    },
-                                  ),
-                                  Consumer<GameModel>(
-                                    builder: (context, gameModel, child) {
-                                      if (gameModel.recommended) {
-                                        return Column(
-                                          children: [
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
-                                            Animate(
-                                              autoPlay: true,
-                                              delay: const Duration(seconds: 1),
-                                              effects: const [
-                                                FadeEffect(),
-                                                ScaleEffect(),
-                                                SlideEffect(),
-                                                MoveEffect(begin: Offset(40, 0))
-                                              ],
-                                              child: const Center(
-                                                child: Icon(
-                                                    FontAwesomeIcons.thumbsUp,
-                                                    color: Colors.deepOrange, size: 22,),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
-                                          ],
-                                        );
-                                      } else {
-                                        return Container(); // or any placeholder widget
-                                      }
-                                    },
-                                  ),
-
+                                          child: const Center(
+                                            child: Icon(
+                                              FontAwesomeIcons.solidBookmark,
+                                              color: Colors.blueAccent, size: 18,),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 2,
+                                        ),
+                                      ],
+                                    ),
                                 ],
                               ),
                             ),
-                          ),
-                        );
+                          )),
+                    Consumer<GameModel>(builder: (context, gameModel, child) {
+                      if (widget.needsRating) {
+                        if (gameModel.wishlist ||
+                            gameModel.recommended ||
+                            gameModel.rating > 0) {
+                          return Positioned(
+                            top: 0,
+                            right: 0,
+                            child: GlassContainer(
+                              blur: 12,
+                              shadowStrength: 4,
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(14),
+                              shadowColor: colorpalette,
+                              color: colorpalette.onColor.withOpacity(.1),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 2),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Consumer<GameModel>(
+                                      builder: (context, gameModel, child) {
+                                        if (gameModel.rating > 0) {
+                                          return Column(
+                                            children: [
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                              Animate(
+                                                autoPlay: true,
+                                                delay: const Duration(seconds: 1),
+                                                effects: const [
+                                                  FadeEffect(),
+                                                  ScaleEffect(),
+                                                  SlideEffect(),
+                                                  MoveEffect(begin: Offset(40, 0))
+                                                ],
+                                                child: Center(
+                                                  child: CircularRatingWidget(
+                                                    ratingValue: gameModel.rating
+                                                        .toDouble() *
+                                                        10,
+                                                    radiusMultiplicator: .04,
+                                                    fontSize: 10,
+                                                    lineWidth: 4,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return Container(); // or any placeholder widget
+                                        }
+                                      },
+                                    ),
+                                    Consumer<GameModel>(
+                                      builder: (context, gameModel, child) {
+                                        if (gameModel.wishlist) {
+                                          return Column(
+                                            children: [
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                              Animate(
+                                                autoPlay: true,
+                                                delay: const Duration(seconds: 1),
+                                                effects: const [
+                                                  FadeEffect(),
+                                                  ScaleEffect(),
+                                                  SlideEffect(),
+                                                  MoveEffect(begin: Offset(80, 0))
+                                                ],
+                                                child: const Center(
+                                                  child: Icon(
+                                                      FontAwesomeIcons
+                                                          .solidBookmark,
+                                                      color: Colors.blueAccent, size: 22,),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return Container(); // or any placeholder widget
+                                        }
+                                      },
+                                    ),
+                                    Consumer<GameModel>(
+                                      builder: (context, gameModel, child) {
+                                        if (gameModel.recommended) {
+                                          return Column(
+                                            children: [
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                              Animate(
+                                                autoPlay: true,
+                                                delay: const Duration(seconds: 1),
+                                                effects: const [
+                                                  FadeEffect(),
+                                                  ScaleEffect(),
+                                                  SlideEffect(),
+                                                  MoveEffect(begin: Offset(40, 0))
+                                                ],
+                                                child: const Center(
+                                                  child: Icon(
+                                                      FontAwesomeIcons.thumbsUp,
+                                                      color: Colors.deepOrange, size: 22,),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 2,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return Container(); // or any placeholder widget
+                                        }
+                                      },
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Container();
+                        }
                       } else {
                         return Container();
                       }
-                    } else {
-                      return Container();
-                    }
-                  }),
-                  Container(
-                    padding: const EdgeInsets.only(
-                      left: 8,
-                      right: 8,
-                      bottom: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black,
-                        ],
+                    }),
+                    Container(
+                      padding: const EdgeInsets.only(
+                        left: 8,
+                        right: 8,
+                        bottom: 8,
                       ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (widget.needsRating)
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (widget.needsRating)
+                            Expanded(
+                                child: CircularRatingWidget(
+                              ratingValue: widget.game.totalRating ?? 0,
+                              radiusMultiplicator: .07,
+                              fontSize: 18,
+                              lineWidth: 6,
+                            )),
+                          if (widget.needsRating) SizedBox(width: 8),
                           Expanded(
-                              child: CircularRatingWidget(
-                            ratingValue: widget.game.totalRating ?? 0,
-                            radiusMultiplicator: .07,
-                            fontSize: 18,
-                            lineWidth: 6,
-                          )),
-                        if (widget.needsRating) SizedBox(width: 8),
-                        Expanded(
-                          flex: 2,
-                          child: Marquee(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            fadingEdgeEndFraction: 0.9,
-                            fadingEdgeStartFraction: 0.1,
-                            blankSpace: 200,
-                            pauseAfterRound: Duration(seconds: 4),
-                            text: '${widget.game.name}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
+                            flex: 2,
+                            child: Marquee(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              fadingEdgeEndFraction: 0.9,
+                              fadingEdgeStartFraction: 0.1,
+                              blankSpace: 200,
+                              pauseAfterRound: Duration(seconds: 4),
+                              text: '${widget.game.name}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -492,27 +489,6 @@ class _GamePreviewViewState extends State<GamePreviewView> {
     }
   }
 
-  Future<void> getGameModel() async {
-    if (widget.gameModel != null) {
-      setState(() {
-        gameModel = widget.gameModel!;
-      });
-    } else {
-      final currentUser = getIt<FirebaseUserModel>();
-      Map<String, dynamic> games = currentUser.games.values.firstWhereOrNull(
-              (game) => game['id'] == widget.game.id.toString()) ??
-          GameModel(
-                  id: widget.game.id.toString(),
-                  wishlist: false,
-                  recommended: false,
-                  rating: 0.0)
-              .toJson();
-      GameModel game = GameModel.fromMap(games);
-      setState(() {
-        gameModel = game;
-      });
-    }
-  }
 
   Future<void> getGameModelOtherUser() async {
     if (widget.otherUserModel != null) {

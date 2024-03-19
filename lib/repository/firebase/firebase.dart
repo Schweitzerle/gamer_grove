@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:material_floating_search_bar_2/material_floating_search_bar_2.dart';
 
 import '../../model/firebase/firebaseUser.dart';
+import '../../model/igdb_models/game.dart';
 
 class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -68,6 +69,7 @@ class FirebaseService {
 
     return matchingUsers;
   }
+
 
   Future<List<FirebaseUserModel>> getFollowers() async {
     final userId = _auth.currentUser!.uid;

@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/company.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
@@ -22,6 +23,7 @@ import 'package:gamer_grove/model/widgets/video_view.dart';
 import 'package:gamer_grove/model/widgets/website_List.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../firebase/gameModel.dart';
 import '../igdb_models/game.dart';
 import 'RatingWidget.dart';
 import 'ageRatingView.dart';
@@ -518,7 +520,7 @@ class _EventsVideosContainerSwitchWidgetState
                 child: SizedBox(
                   child: _selectedIndex == 0
                       ? VideoStaggeredView(
-                      game: Game(id: 0, videos: widget.event.videos),
+                      game: Game(id: 0, videos: widget.event.videos, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0)),
                       colorPalette: widget.color,
                       headerBorderColor: headerBorderColor,
                       adjustedTextColor: widget.adjustedTextColor)

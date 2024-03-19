@@ -1,5 +1,6 @@
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -11,9 +12,10 @@ import '../widgets/customDialog.dart';
 class GameGridPaginationView extends StatefulWidget {
   final PagingController<int, Game> pagingController;
   final ScrollController scrollController;
+  final FirebaseUserModel? otherModel;
 
   GameGridPaginationView({
-    required this.pagingController, required this.scrollController,
+    required this.pagingController, required this.scrollController, this.otherModel,
   });
 
   @override
@@ -59,7 +61,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
                     padding: const EdgeInsets.all(8.0),
                   child: GamePreviewView(
                     game: game,
-                    isCover: false, buildContext: context, needsRating: true, isClickable: true,
+                    isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherModel,
                   ),
                 );
               },
@@ -72,18 +74,19 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
 }
 
 class AllGamesGridPaginationScreen extends StatefulWidget {
-  static Route route(String appBarText, String body, bool isAggregated) {
+  static Route route(String appBarText, String body, bool isAggregated, FirebaseUserModel? otherModel) {
     return MaterialPageRoute(
       builder: (context) =>
-          AllGamesGridPaginationScreen(appBarText: appBarText, body: body, isAggregated: isAggregated,),
+          AllGamesGridPaginationScreen(appBarText: appBarText, body: body, isAggregated: isAggregated, otherModel: otherModel,),
     );
   }
 
   final String appBarText;
   final String body;
   final bool isAggregated;
+  final FirebaseUserModel? otherModel;
 
-  AllGamesGridPaginationScreen({required this.appBarText, required this.body, required this.isAggregated});
+  AllGamesGridPaginationScreen({required this.appBarText, required this.body, required this.isAggregated, this.otherModel});
 
   @override
   _AllGamesGridPaginationScreenState createState() =>
@@ -256,7 +259,7 @@ class _AllGamesGridPaginationScreenState
       ),
       body: GameGridPaginationView(
         pagingController: _pagingController,
-        scrollController: _scrollController,
+        scrollController: _scrollController, otherModel: widget.otherModel
       ),
     );
   }

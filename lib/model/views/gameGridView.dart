@@ -88,6 +88,13 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
             return isAscending ? ratingA.compareTo(ratingB) : ratingB.compareTo(ratingA);
           });
           break;
+        case 'My Rating':
+          sortedGames.sort((a, b) {
+            final ratingA = a.gameModel.rating;
+            final ratingB = b.gameModel.rating;
+            return isAscending ? ratingA.compareTo(ratingB) : ratingB.compareTo(ratingA);
+          });
+          break;
         case 'Name':
           sortedGames.sort((a, b) {
             final nameA = a.name ?? '';
@@ -168,6 +175,7 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   buildSortButton('Rating', setState),
+                  buildSortButton('My Rating', setState),
                   buildSortButton('Name', setState),
                   buildSortButton('Release Date', setState),
                 ],

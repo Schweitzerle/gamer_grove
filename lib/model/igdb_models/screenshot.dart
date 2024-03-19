@@ -1,5 +1,8 @@
 import 'package:gamer_grove/model/igdb_models/game_video.dart';
 
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 import 'game.dart';
 
 class Screenshot {
@@ -36,8 +39,8 @@ class Screenshot {
       checksum: json['checksum'],
       game: json['game'] != null
           ? (json['game'] is int
-          ? Game(id: json['game'])
-          : Game.fromJson(json['game']))
+          ? Game(id: json['game'], gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0))
+          : Game.fromJson(json['game'], IGDBApiService.getGameModel(json['game']['id'])))
           : null,
       height: json['height'],
       imageId: json['image_id'],

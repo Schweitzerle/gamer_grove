@@ -1,5 +1,8 @@
 import 'package:gamer_grove/model/igdb_models/character_mugshot.dart';
 
+import '../../repository/igdb/IGDBApiService.dart';
+import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 import 'game.dart';
 
 class Character {
@@ -46,11 +49,11 @@ class Character {
       description: json['description'],
       gameIDs: json['games'] != null
           ? List<Game>.from(
-        json['games'].map((collection) {
-          if (collection is int) {
-            return Game(id: collection);
+        json['games'].map((dlc) {
+          if (dlc is int) {
+            return Game(id: dlc, gameModel: GameModel(id: '0', wishlist: false, recommended: false, rating: 0));
           } else {
-            return Game.fromJson(collection);
+            return Game.fromJson(dlc, IGDBApiService.getGameModel(dlc['id']));
           }
         }),
       )

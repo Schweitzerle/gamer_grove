@@ -180,7 +180,7 @@ class AgeRatingWidget extends StatelessWidget {
           final body =
               'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title;s follows desc; w follows != null  & age_ratings.rating = ${text.ratingID}; l 20;';
           Navigator.of(context).push(AllGamesGridPaginationScreen.route(
-              'AgeRating: ${text.rating}', body, false));
+              'AgeRating: ${text.rating}', body, false, null));
         },
         child: Padding(
           padding: const EdgeInsets.all(3.0),

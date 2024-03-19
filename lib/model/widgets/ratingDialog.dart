@@ -11,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:like_button/like_button.dart';
 import '../firebase/firebaseUser.dart';
+import '../firebase/gameModel.dart';
 
 class CustomRatingDialog extends StatefulWidget {
   final Color colorPalette;
