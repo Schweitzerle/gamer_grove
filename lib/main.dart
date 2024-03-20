@@ -51,8 +51,7 @@ Future<void> registerCurrentUserData() async {
   final currentUser = await FirebaseService().getSingleCurrentUserData();
   final getIt = GetIt.instance;
   getIt.allowReassignment = true;
-  getIt.registerSingletonAsync<FirebaseUserModel>(
-        () => Future.value(currentUser),
+  getIt.registerSingletonAsync<FirebaseUserModel>(() => Future.value(currentUser),
   );  }
 
 class GamerGroveApp extends StatefulWidget {

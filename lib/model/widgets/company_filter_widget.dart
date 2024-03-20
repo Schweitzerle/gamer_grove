@@ -24,10 +24,10 @@ class CompanyFilterOptions {
 }
 
 enum SortByCompany {
-  startDateAsc,
-  startDateDesc,
   nameAsc,
   nameDesc,
+  startDateAsc,
+  startDateDesc,
 }
 extension SortByCompanyExtension on SortByCompany {
   String get value {
@@ -64,9 +64,9 @@ String _ratingToString(SortByCompany? rating) {
   if (rating == null) return 'N/A';
   switch (rating) {
     case SortByCompany.startDateAsc:
-      return 'Event Date Asc';
+      return 'Founding Date ⬆️';
     case SortByCompany.startDateDesc:
-      return 'Event Date Desc';
+      return 'Founding Date ⬇️';
     case SortByCompany.nameAsc:
       return 'Name A-Z';
     case SortByCompany.nameDesc:
@@ -146,6 +146,17 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                           selectedOptionBackgroundColor: color.lighten(15),
                           dropdownBorderRadius: 14,
                           hintColor: onColor,
+                          hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          optionBuilder: (context, valueItem, isSelected) {
+                            return ListTile(
+                              title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                              trailing: isSelected
+                                  ? Icon(Icons.check_circle, color: color.darken(40),)
+                                  : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                            );
+                          },
+                          dropdownBackgroundColor: color.darken(20),
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions
@@ -172,11 +183,6 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                           selectionType: SelectionType.single,
                           chipConfig: const ChipConfig(
                               wrapType: WrapType.wrap),
-                          dropdownHeight: 300,
-                          optionTextStyle:
-                          const TextStyle(fontSize: 16),
-                          selectedOptionIcon:
-                          const Icon(Icons.check_circle),
                         ),
                       ),
                     ),
@@ -185,7 +191,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
               ),
             ),
           ),
-          SizedBox(height: 14,),
+          const SizedBox(height: 14,),
           ClayContainer(
             spread: 2,
             depth: 60,
@@ -197,16 +203,16 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Text('Company Founding Date', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8), // Add some space between texts
+                    Text('Company Founding Date', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onColor)),
+                    const SizedBox(height: 8), // Add some space between texts
                     Text(
                       'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.end)}',
-                      style: TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: onColor),
                     ),
-                    SizedBox(height: 8), // Add some space between texts and slider
+                    const SizedBox(height: 8), // Add some space between texts and slider
                     SfRangeSlider(
                       min: DateTime(1968),
-                      max: DateTime.now().add(Duration(days: 365)),
+                      max: DateTime.now().add(const Duration(days: 365)),
                       values: widget.filterOptions.values,
                       interval: 10,
                       showTicks: true,

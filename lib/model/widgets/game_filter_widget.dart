@@ -67,10 +67,14 @@ class GameFilterOptions {
 }
 
 enum SortByGame {
-  firstReleaseDateAsc,
-  firstReleaseDateDesc,
   nameAsc,
   nameDesc,
+  firstReleaseDateAsc,
+  firstReleaseDateDesc,
+  totalRatingsAsc,
+  totalRatingsDesc,
+  totalRatingCountAsc,
+  totalRatingCountDesc,
   aggregatedRatingsAsc,
   aggregatedRatingsDesc,
   aggregatedRatingCountAsc,
@@ -79,10 +83,6 @@ enum SortByGame {
   ratingsDesc,
   ratingCountAsc,
   ratingCountDesc,
-  totalRatingsAsc,
-  totalRatingsDesc,
-  totalRatingCountAsc,
-  totalRatingCountDesc,
   followsAsc,
   followsDesc,
   hypesAsc,
@@ -154,45 +154,45 @@ String _ratingToString(SortByGame? rating) {
   if (rating == null) return 'N/A';
   switch (rating) {
     case SortByGame.firstReleaseDateAsc:
-      return 'First Release Date Asc';
+      return 'First Release Date ⬆️';
     case SortByGame.firstReleaseDateDesc:
-      return 'First Release Date Desc';
+      return 'First Release Date ⬇️';
     case SortByGame.nameAsc:
       return 'Name A-Z';
     case SortByGame.nameDesc:
       return 'Name Z-A';
     case SortByGame.aggregatedRatingsAsc:
-      return 'Aggregated Ratings Asc';
+      return 'Aggregated Ratings ⬆️';
     case SortByGame.aggregatedRatingsDesc:
-      return 'Aggregated Ratings Desc';
+      return 'Aggregated Ratings ⬇️';
     case SortByGame.aggregatedRatingCountAsc:
-      return 'Aggregated Rating Count Asc';
+      return 'Aggregated Rating Count ⬆️';
     case SortByGame.aggregatedRatingCountDesc:
-      return 'Aggregated Rating Count Desc';
+      return 'Aggregated Rating Count ⬇️';
     case SortByGame.ratingsAsc:
-      return 'Ratings Asc';
+      return 'Ratings ⬆️';
     case SortByGame.ratingsDesc:
-      return 'Ratings Desc';
+      return 'Ratings ⬇️';
     case SortByGame.ratingCountAsc:
-      return 'Rating Count Asc';
+      return 'Rating Count ⬆️';
     case SortByGame.ratingCountDesc:
-      return 'Rating Count Desc';
+      return 'Rating Count ⬇️';
     case SortByGame.totalRatingsAsc:
-      return 'Total Ratings Asc';
+      return 'Total Ratings ⬆️';
     case SortByGame.totalRatingsDesc:
-      return 'Total Ratings Desc';
+      return 'Total Ratings ⬇️';
     case SortByGame.totalRatingCountAsc:
-      return 'Total Rating Count Asc';
+      return 'Total Rating Count ⬆️';
     case SortByGame.totalRatingCountDesc:
-      return 'Total Rating Count Desc';
+      return 'Total Rating Count ⬇️';
     case SortByGame.followsAsc:
-      return 'Follows Asc';
+      return 'Follows ⬆️';
     case SortByGame.followsDesc:
-      return 'Follows Desc';
+      return 'Follows ⬇️';
     case SortByGame.hypesAsc:
-      return 'Hypes Asc';
+      return 'Hypes ⬆️';
     case SortByGame.hypesDesc:
-      return 'Hypes Desc';
+      return 'Hypes ⬇️';
     default:
       return 'N/A';
   }
@@ -306,7 +306,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Container(
+                      child: SizedBox(
                         width: MediaQuery.of(context).size.width,
                         child: MultiSelectDropDown(
                           borderRadius: 14,
@@ -319,6 +319,17 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                           selectedOptionBackgroundColor: color.lighten(15),
                           dropdownBorderRadius: 14,
                           hintColor: onColor,
+                          hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          optionBuilder: (context, valueItem, isSelected) {
+                            return ListTile(
+                              title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                              trailing: isSelected
+                                  ? Icon(Icons.check_circle, color: color.darken(40),)
+                                  : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                            );
+                          },
+                          dropdownBackgroundColor: color.darken(20),
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions.selectedSorting =
@@ -338,10 +349,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                           }).toList(),
                           maxItems: SortByGame.values.length,
                           selectionType: SelectionType.single,
-                          chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                          dropdownHeight: 300,
-                          optionTextStyle: const TextStyle(fontSize: 16),
-                          selectedOptionIcon: const Icon(Icons.check_circle),
+                          chipConfig: const ChipConfig(wrapType: WrapType.wrap,),
                         ),
                       ),
                     ),
@@ -367,7 +375,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                     height: mediaQueryHeight * .06,
                     child: AnimatedToggleSwitch<int>.size(
                       current: _selectedIndexDropdown,
-                      values: [0, 1],
+                      values: const [0, 1],
                       iconOpacity: 0.2,
                       indicatorSize: const Size.fromWidth(100),
                       iconBuilder: iconBuilderDropdown,
@@ -382,7 +390,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                             color: color,
                             spreadRadius: 0,
                             blurRadius: 0,
-                            offset: Offset(0, 0),
+                            offset: const Offset(0, 0),
                           ),
                         ],
                       ),
@@ -397,479 +405,506 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                   child: SizedBox(
                       child: _selectedIndexDropdown == 0
                           ? Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: MultiSelectDropDown(
-                                        borderRadius: 14,
-                                        borderWidth: 4,
-                                        focusedBorderWidth: 2,
-                                        focusedBorderColor: color.darken(20),
-                                        fieldBackgroundColor: color,
-                                        borderColor: color.darken(20),
-                                        optionsBackgroundColor:
-                                            color.lighten(10),
-                                        selectedOptionBackgroundColor:
-                                            color.lighten(15),
-                                        dropdownBorderRadius: 14,
-                                        hintColor: onColor,
-                                        hint: 'Age Ratings',
-                                        onOptionSelected: (options) {
-                                          widget.filterOptions
-                                                  .selectedAgeRating =
-                                              options
-                                                  .map((item) => item.value)
-                                                  .toList();
-                                        },
-                                        onOptionRemoved: (index, item) {
-                                          setState(() {
-                                            widget.filterOptions
-                                                .selectedAgeRating!
-                                                .remove(item.value);
-                                          });
-                                        },
-                                        options: AgeRatingRating.values
-                                            .map((rating) {
-                                          return ValueItem(
-                                            label: rating.value,
-                                            value: rating.intValue,
-                                          );
-                                        }).toList(),
-                                        maxItems: AgeRatingRating.values.length,
-                                        selectionType: SelectionType.single,
-                                        chipConfig: const ChipConfig(
-                                            wrapType: WrapType.wrap),
-                                        dropdownHeight: 300,
-                                        optionTextStyle:
-                                            const TextStyle(fontSize: 16),
-                                        selectedOptionIcon:
-                                            const Icon(Icons.check_circle),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: MultiSelectDropDown(
-                                        borderRadius: 14,
-                                        borderWidth: 4,
-                                        focusedBorderWidth: 2,
-                                        focusedBorderColor: color.darken(20),
-                                        fieldBackgroundColor: color,
-                                        borderColor: color.darken(20),
-                                        optionsBackgroundColor:
-                                            color.lighten(10),
-                                        selectedOptionBackgroundColor:
-                                            color.lighten(15),
-                                        dropdownBorderRadius: 14,
-                                        hintColor: onColor,
-                                        hint: 'Category',
-                                        onOptionSelected: (options) {
-                                          widget.filterOptions
-                                                  .selectedCategory =
-                                              options
-                                                  .map((item) => item.value)
-                                                  .toList();
-                                        },
-                                        onOptionRemoved: (index, item) {
-                                          setState(() {
-                                            widget
-                                                .filterOptions.selectedCategory!
-                                                .remove(item.value);
-                                          });
-                                        },
-                                        options: GameCategoryEnum.values
-                                            .map((rating) {
-                                          return ValueItem(
-                                            label: rating.stringValue,
-                                            value: rating.value,
-                                          );
-                                        }).toList(),
-                                        maxItems:
-                                            GameCategoryEnum.values.length,
-                                        selectionType: SelectionType.single,
-                                        chipConfig: const ChipConfig(
-                                            wrapType: WrapType.wrap),
-                                        dropdownHeight: 300,
-                                        optionTextStyle:
-                                            const TextStyle(fontSize: 16),
-                                        selectedOptionIcon:
-                                            const Icon(Icons.check_circle),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: MultiSelectDropDown(
-                                        borderRadius: 14,
-                                        borderWidth: 4,
-                                        focusedBorderWidth: 2,
-                                        focusedBorderColor: color.darken(20),
-                                        fieldBackgroundColor: color,
-                                        borderColor: color.darken(20),
-                                        optionsBackgroundColor:
-                                            color.lighten(10),
-                                        selectedOptionBackgroundColor:
-                                            color.lighten(15),
-                                        dropdownBorderRadius: 14,
-                                        hintColor: onColor,
-                                        hint: 'Status',
-                                        onOptionSelected: (options) {
-                                          widget.filterOptions.selectedStatus =
-                                              options
-                                                  .map((item) => item.value)
-                                                  .toList();
-                                        },
-                                        onOptionRemoved: (index, item) {
-                                          setState(() {
-                                            widget.filterOptions.selectedStatus!
-                                                .remove(item.value);
-                                          });
-                                        },
-                                        options:
-                                            GameStatusEnum.values.map((rating) {
-                                          return ValueItem(
-                                            label: rating.stringValue,
-                                            value: rating.value,
-                                          );
-                                        }).toList(),
-                                        maxItems: GameStatusEnum.values.length,
-                                        selectionType: SelectionType.single,
-                                        chipConfig: const ChipConfig(
-                                            wrapType: WrapType.wrap),
-                                        selectedOptionIcon:
-                                            const Icon(Icons.check_circle),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            widget.themes.isNotEmpty
+                                ? Padding(
+                              padding:
+                              const EdgeInsets.all(4.0),
+                              child:
+                              MultiSelectBottomSheetField<
+                                  int?>(
+                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                title:
+                                Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                buttonText:
+                                Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme.secondaryContainer,
+                                itemsTextStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme.onSecondaryContainer),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14),
+                                    border: Border.all(
+                                        width: 4,
+                                        color:
+                                        color.darken(10))),
+                                selectedColor: color.darken(20),
+                                initialChildSize: 0.7,
+                                maxChildSize: 0.95,
+                                items:
+                                widget.themes.map((rating) {
+                                  return MultiSelectItem(
+                                      rating.id, rating.name!);
+                                }).toList(),
+                                searchable: true,
+                                onConfirm: (values) {
+                                  setState(() {
+                                    widget.filterOptions
+                                        .selectedThemes =
+                                        values;
+                                  });
+                                },
+                                chipDisplay:
+                                MultiSelectChipDisplay(
+                                  scrollBar:
+                                  HorizontalScrollBar(),
+                                  scroll: true,
+                                  chipColor: color.darken(10),
+                                  textStyle:
+                                  TextStyle(color: onColor),
+                                  onTap: (item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedThemes!
+                                          .remove(item);
+                                    });
+                                  },
+                                ),
                               ),
                             )
+                                : Container(),
+                            widget.genres.isNotEmpty
+                                ? Padding(
+                              padding:
+                              const EdgeInsets.all(4.0),
+                              child:
+                              MultiSelectBottomSheetField<
+                                  int?>(
+                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                title:
+                                Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                buttonText:
+                                Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme.secondaryContainer,
+                                itemsTextStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme.onSecondaryContainer),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14),
+                                    border: Border.all(
+                                        width: 4,
+                                        color:
+                                        color.darken(10))),
+                                selectedColor: color.darken(20),
+                                initialChildSize: 0.7,
+                                maxChildSize: 0.95,
+                                items:
+                                widget.genres.map((rating) {
+                                  return MultiSelectItem(
+                                      rating.id, rating.name!);
+                                }).toList(),
+                                searchable: true,
+                                onConfirm: (values) {
+                                  setState(() {
+                                    widget.filterOptions
+                                        .selectedGenres =
+                                        values;
+                                  });
+                                },
+                                chipDisplay:
+                                MultiSelectChipDisplay(
+                                  scrollBar:
+                                  HorizontalScrollBar(),
+                                  scroll: true,
+                                  chipColor: color.darken(10),
+                                  textStyle:
+                                  TextStyle(color: onColor),
+                                  onTap: (item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedGenres!
+                                          .remove(item);
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                                : Container(),
+                            widget.platforms.isNotEmpty
+                                ? Padding(
+                              padding:
+                              const EdgeInsets.all(4.0),
+                              child:
+                              MultiSelectBottomSheetField<
+                                  int?>(
+                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                title:
+                                Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                buttonText:
+                                Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme.secondaryContainer,
+                                itemsTextStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme.onSecondaryContainer),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14),
+                                    border: Border.all(
+                                        width: 4,
+                                        color:
+                                        color.darken(10))),
+                                selectedColor: color.darken(20),
+                                initialChildSize: 0.7,
+                                maxChildSize: 0.95,
+                                items: widget.platforms
+                                    .map((rating) {
+                                  return MultiSelectItem(
+                                      rating.id, rating.name!);
+                                }).toList(),
+                                searchable: true,
+                                onConfirm: (values) {
+                                  setState(() {
+                                    widget.filterOptions
+                                        .selectedPlatforms =
+                                        values;
+                                  });
+                                },
+                                chipDisplay:
+                                MultiSelectChipDisplay(
+                                  scrollBar:
+                                  HorizontalScrollBar(),
+                                  scroll: true,
+                                  chipColor: color.darken(10),
+                                  textStyle:
+                                  TextStyle(color: onColor),
+                                  onTap: (item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedPlatforms!
+                                          .remove(item);
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                                : Container(),
+                            widget.gameModes.isNotEmpty
+                                ? Padding(
+                              padding:
+                              const EdgeInsets.all(4.0),
+                              child:
+                              MultiSelectBottomSheetField<
+                                  int?>(
+                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                title:
+                                Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                buttonText:
+                                Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme.secondaryContainer,
+                                itemsTextStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme.onSecondaryContainer),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14),
+                                    border: Border.all(
+                                        width: 4,
+                                        color:
+                                        color.darken(10))),
+                                selectedColor: color.darken(20),
+                                initialChildSize: 0.7,
+                                maxChildSize: 0.95,
+                                items: widget.gameModes
+                                    .map((rating) {
+                                  return MultiSelectItem(
+                                      rating.id, rating.name!);
+                                }).toList(),
+                                searchable: true,
+                                onConfirm: (values) {
+                                  setState(() {
+                                    widget.filterOptions
+                                        .selectedGameModes =
+                                        values;
+                                  });
+                                },
+                                chipDisplay:
+                                MultiSelectChipDisplay(
+                                  scrollBar:
+                                  HorizontalScrollBar(),
+                                  scroll: true,
+                                  chipColor: color.darken(10),
+                                  textStyle:
+                                  TextStyle(color: onColor),
+                                  onTap: (item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedGameModes!
+                                          .remove(item);
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                                : Container(),
+                            widget.playerPerspectives.isNotEmpty
+                                ? Padding(
+                              padding:
+                              const EdgeInsets.all(4.0),
+                              child:
+                              MultiSelectBottomSheetField<
+                                  int?>(
+                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                title:
+                                Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                buttonText:
+                                Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme.secondaryContainer,
+                                itemsTextStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme.onSecondaryContainer),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(
+                                        14),
+                                    border: Border.all(
+                                        width: 4,
+                                        color:
+                                        color.darken(10))),
+                                selectedColor: color.darken(20),
+                                initialChildSize: 0.7,
+                                maxChildSize: 0.95,
+                                items: widget.playerPerspectives
+                                    .map((rating) {
+                                  return MultiSelectItem(
+                                      rating.id, rating.name!);
+                                }).toList(),
+                                searchable: true,
+                                onConfirm: (values) {
+                                  setState(() {
+                                    widget.filterOptions
+                                        .selectedPlayerPerspectives =
+                                        values;
+                                  });
+                                },
+                                chipDisplay:
+                                MultiSelectChipDisplay(
+                                  scrollBar:
+                                  HorizontalScrollBar(),
+                                  scroll: true,
+                                  chipColor: color.darken(10),
+                                  textStyle:
+                                  TextStyle(color: onColor),
+                                  onTap: (item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedPlayerPerspectives!
+                                          .remove(item);
+                                    });
+                                  },
+                                ),
+                              ),
+                            )
+                                : Container(),
+                          ],
+                        ),
+                      )
                           : _selectedIndexDropdown == 1
                               ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      widget.themes.isNotEmpty
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child:
-                                                  MultiSelectBottomSheetField<
-                                                      int?>(
-                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
-                                                    title:
-                                                    Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                                                    buttonText:
-                                                    Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                                    backgroundColor: Theme.of(context)
-                                                        .colorScheme.secondaryContainer,
-                                                    itemsTextStyle: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.onSecondaryContainer),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            14),
-                                                    border: Border.all(
-                                                        width: 4,
-                                                        color:
-                                                            color.darken(10))),
-                                                selectedColor: color.darken(20),
-                                                initialChildSize: 0.7,
-                                                maxChildSize: 0.95,
-                                                items:
-                                                    widget.themes.map((rating) {
-                                                  return MultiSelectItem(
-                                                      rating.id, rating.name!);
-                                                }).toList(),
-                                                searchable: true,
-                                                onConfirm: (values) {
-                                                  setState(() {
-                                                    widget.filterOptions
-                                                            .selectedThemes =
-                                                        values;
-                                                  });
-                                                },
-                                                chipDisplay:
-                                                    MultiSelectChipDisplay(
-                                                  scrollBar:
-                                                      HorizontalScrollBar(),
-                                                  scroll: true,
-                                                  chipColor: color.darken(10),
-                                                  textStyle:
-                                                      TextStyle(color: onColor),
-                                                  onTap: (item) {
-                                                    setState(() {
-                                                      widget.filterOptions
-                                                          .selectedThemes!
-                                                          .remove(item);
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          : Container(),
-                                      widget.genres.isNotEmpty
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child:
-                                                  MultiSelectBottomSheetField<
-                                                      int?>(
-                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
-                                                    title:
-                                                    Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                                                    buttonText:
-                                                    Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                                    backgroundColor: Theme.of(context)
-                                                        .colorScheme.secondaryContainer,
-                                                    itemsTextStyle: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.onSecondaryContainer),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            14),
-                                                    border: Border.all(
-                                                        width: 4,
-                                                        color:
-                                                            color.darken(10))),
-                                                selectedColor: color.darken(20),
-                                                initialChildSize: 0.7,
-                                                maxChildSize: 0.95,
-                                                items:
-                                                    widget.genres.map((rating) {
-                                                  return MultiSelectItem(
-                                                      rating.id, rating.name!);
-                                                }).toList(),
-                                                searchable: true,
-                                                onConfirm: (values) {
-                                                  setState(() {
-                                                    widget.filterOptions
-                                                            .selectedGenres =
-                                                        values;
-                                                  });
-                                                },
-                                                chipDisplay:
-                                                    MultiSelectChipDisplay(
-                                                  scrollBar:
-                                                      HorizontalScrollBar(),
-                                                  scroll: true,
-                                                  chipColor: color.darken(10),
-                                                  textStyle:
-                                                      TextStyle(color: onColor),
-                                                  onTap: (item) {
-                                                    setState(() {
-                                                      widget.filterOptions
-                                                          .selectedGenres!
-                                                          .remove(item);
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          : Container(),
-                                      widget.platforms.isNotEmpty
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child:
-                                                  MultiSelectBottomSheetField<
-                                                      int?>(
-                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
-                                                    title:
-                                                    Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                                                    buttonText:
-                                                    Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                                    backgroundColor: Theme.of(context)
-                                                        .colorScheme.secondaryContainer,
-                                                    itemsTextStyle: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.onSecondaryContainer),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            14),
-                                                    border: Border.all(
-                                                        width: 4,
-                                                        color:
-                                                            color.darken(10))),
-                                                selectedColor: color.darken(20),
-                                                initialChildSize: 0.7,
-                                                maxChildSize: 0.95,
-                                                items: widget.platforms
-                                                    .map((rating) {
-                                                  return MultiSelectItem(
-                                                      rating.id, rating.name!);
-                                                }).toList(),
-                                                searchable: true,
-                                                onConfirm: (values) {
-                                                  setState(() {
-                                                    widget.filterOptions
-                                                            .selectedPlatforms =
-                                                        values;
-                                                  });
-                                                },
-                                                chipDisplay:
-                                                    MultiSelectChipDisplay(
-                                                  scrollBar:
-                                                      HorizontalScrollBar(),
-                                                  scroll: true,
-                                                  chipColor: color.darken(10),
-                                                  textStyle:
-                                                      TextStyle(color: onColor),
-                                                  onTap: (item) {
-                                                    setState(() {
-                                                      widget.filterOptions
-                                                          .selectedPlatforms!
-                                                          .remove(item);
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          : Container(),
-                                      widget.gameModes.isNotEmpty
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child:
-                                                  MultiSelectBottomSheetField<
-                                                      int?>(
-                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
-                                                    title:
-                                                    Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                                                    buttonText:
-                                                    Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                                    backgroundColor: Theme.of(context)
-                                                        .colorScheme.secondaryContainer,
-                                                    itemsTextStyle: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.onSecondaryContainer),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            14),
-                                                    border: Border.all(
-                                                        width: 4,
-                                                        color:
-                                                            color.darken(10))),
-                                                selectedColor: color.darken(20),
-                                                initialChildSize: 0.7,
-                                                maxChildSize: 0.95,
-                                                items: widget.gameModes
-                                                    .map((rating) {
-                                                  return MultiSelectItem(
-                                                      rating.id, rating.name!);
-                                                }).toList(),
-                                                searchable: true,
-                                                onConfirm: (values) {
-                                                  setState(() {
-                                                    widget.filterOptions
-                                                            .selectedGameModes =
-                                                        values;
-                                                  });
-                                                },
-                                                chipDisplay:
-                                                    MultiSelectChipDisplay(
-                                                  scrollBar:
-                                                      HorizontalScrollBar(),
-                                                  scroll: true,
-                                                  chipColor: color.darken(10),
-                                                  textStyle:
-                                                      TextStyle(color: onColor),
-                                                  onTap: (item) {
-                                                    setState(() {
-                                                      widget.filterOptions
-                                                          .selectedGameModes!
-                                                          .remove(item);
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          : Container(),
-                                      widget.playerPerspectives.isNotEmpty
-                                          ? Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child:
-                                                  MultiSelectBottomSheetField<
-                                                      int?>(
-                                                    confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                                    searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
-                                                    title:
-                                                    Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
-                                                    buttonText:
-                                                    Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                                    backgroundColor: Theme.of(context)
-                                                        .colorScheme.secondaryContainer,
-                                                    itemsTextStyle: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.onSecondaryContainer),
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            14),
-                                                    border: Border.all(
-                                                        width: 4,
-                                                        color:
-                                                            color.darken(10))),
-                                                selectedColor: color.darken(20),
-                                                initialChildSize: 0.7,
-                                                maxChildSize: 0.95,
-                                                items: widget.playerPerspectives
-                                                    .map((rating) {
-                                                  return MultiSelectItem(
-                                                      rating.id, rating.name!);
-                                                }).toList(),
-                                                searchable: true,
-                                                onConfirm: (values) {
-                                                  setState(() {
-                                                    widget.filterOptions
-                                                            .selectedPlayerPerspectives =
-                                                        values;
-                                                  });
-                                                },
-                                                chipDisplay:
-                                                    MultiSelectChipDisplay(
-                                                  scrollBar:
-                                                      HorizontalScrollBar(),
-                                                  scroll: true,
-                                                  chipColor: color.darken(10),
-                                                  textStyle:
-                                                      TextStyle(color: onColor),
-                                                  onTap: (item) {
-                                                    setState(() {
-                                                      widget.filterOptions
-                                                          .selectedPlayerPerspectives!
-                                                          .remove(item);
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          : Container(),
-                                    ],
-                                  ),
-                                )
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: MultiSelectDropDown(
+                                  borderRadius: 14,
+                                  borderWidth: 4,
+                                  focusedBorderWidth: 2,
+                                  focusedBorderColor: color.darken(20),
+                                  fieldBackgroundColor: color,
+                                  borderColor: color.darken(20),
+                                  optionsBackgroundColor: color.lighten(10),
+                                  selectedOptionBackgroundColor: color.lighten(15),
+                                  dropdownBorderRadius: 14,
+                                  hintColor: onColor,
+                                  hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  optionBuilder: (context, valueItem, isSelected) {
+                                    return ListTile(
+                                      title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                                      trailing: isSelected
+                                          ? Icon(Icons.check_circle, color: color.darken(40),)
+                                          : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                                    );
+                                  },
+                                  dropdownBackgroundColor: color.darken(20),
+                                  hint: 'Age Rating',
+                                  onOptionSelected: (options) {
+                                    widget.filterOptions
+                                        .selectedAgeRating =
+                                        options
+                                            .map((item) => item.value)
+                                            .toList();
+                                  },
+                                  onOptionRemoved: (index, item) {
+                                    setState(() {
+                                      widget.filterOptions
+                                          .selectedAgeRating!
+                                          .remove(item.value);
+                                    });
+                                  },
+                                  options: AgeRatingRating.values
+                                      .map((rating) {
+                                    return ValueItem(
+                                      label: rating.value,
+                                      value: rating.intValue,
+                                    );
+                                  }).toList(),
+                                  maxItems: AgeRatingRating.values.length,
+                                  selectionType: SelectionType.single,
+                                  chipConfig: const ChipConfig(
+                                      wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle:
+                                  const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: MultiSelectDropDown(
+                                  borderRadius: 14,
+                                  borderWidth: 4,
+                                  focusedBorderWidth: 2,
+                                  focusedBorderColor: color.darken(20),
+                                  fieldBackgroundColor: color,
+                                  borderColor: color.darken(20),
+                                  optionsBackgroundColor: color.lighten(10),
+                                  selectedOptionBackgroundColor: color.lighten(15),
+                                  dropdownBorderRadius: 14,
+                                  hintColor: onColor,
+                                  hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  optionBuilder: (context, valueItem, isSelected) {
+                                    return ListTile(
+                                      title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                                      trailing: isSelected
+                                          ? Icon(Icons.check_circle, color: color.darken(40),)
+                                          : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                                    );
+                                  },
+                                  dropdownBackgroundColor: color.darken(20),
+                                  hint: 'Category',
+                                  onOptionSelected: (options) {
+                                    widget.filterOptions
+                                        .selectedCategory =
+                                        options
+                                            .map((item) => item.value)
+                                            .toList();
+                                  },
+                                  onOptionRemoved: (index, item) {
+                                    setState(() {
+                                      widget
+                                          .filterOptions.selectedCategory!
+                                          .remove(item.value);
+                                    });
+                                  },
+                                  options: GameCategoryEnum.values
+                                      .map((rating) {
+                                    return ValueItem(
+                                      label: rating.stringValue,
+                                      value: rating.value,
+                                    );
+                                  }).toList(),
+                                  maxItems:
+                                  GameCategoryEnum.values.length,
+                                  selectionType: SelectionType.single,
+                                  chipConfig: const ChipConfig(
+                                      wrapType: WrapType.wrap),
+                                  dropdownHeight: 300,
+                                  optionTextStyle:
+                                  const TextStyle(fontSize: 16),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: MultiSelectDropDown(
+                                  borderRadius: 14,
+                                  borderWidth: 4,
+                                  focusedBorderWidth: 2,
+                                  focusedBorderColor: color.darken(20),
+                                  fieldBackgroundColor: color,
+                                  borderColor: color.darken(20),
+                                  optionsBackgroundColor: color.lighten(10),
+                                  selectedOptionBackgroundColor: color.lighten(15),
+                                  dropdownBorderRadius: 14,
+                                  hintColor: onColor,
+                                  hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                                  optionBuilder: (context, valueItem, isSelected) {
+                                    return ListTile(
+                                      title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                                      trailing: isSelected
+                                          ? Icon(Icons.check_circle, color: color.darken(40),)
+                                          : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                                    );
+                                  },
+                                  dropdownBackgroundColor: color.darken(20),
+                                  hint: 'Status',
+                                  onOptionSelected: (options) {
+                                    widget.filterOptions.selectedStatus =
+                                        options
+                                            .map((item) => item.value)
+                                            .toList();
+                                  },
+                                  onOptionRemoved: (index, item) {
+                                    setState(() {
+                                      widget.filterOptions.selectedStatus!
+                                          .remove(item.value);
+                                    });
+                                  },
+                                  options:
+                                  GameStatusEnum.values.map((rating) {
+                                    return ValueItem(
+                                      label: rating.stringValue,
+                                      value: rating.value,
+                                    );
+                                  }).toList(),
+                                  maxItems: GameStatusEnum.values.length,
+                                  selectionType: SelectionType.single,
+                                  chipConfig: const ChipConfig(
+                                      wrapType: WrapType.wrap),
+                                  selectedOptionIcon:
+                                  const Icon(Icons.check_circle),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                               : Container()),
                 )
               ],
@@ -892,7 +927,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                     height: mediaQueryHeight * .06,
                     child: AnimatedToggleSwitch<int>.size(
                       current: _selectedIndex,
-                      values: [0, 1, 2],
+                      values: const [0, 1, 2],
                       iconOpacity: 0.2,
                       indicatorSize: const Size.fromWidth(100),
                       iconBuilder: iconBuilder,
@@ -907,7 +942,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                             color: color,
                             spreadRadius: 0,
                             blurRadius: 0,
-                            offset: Offset(0, 0),
+                            offset: const Offset(0, 0),
                           ),
                         ],
                       ),
@@ -932,7 +967,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                       setState(() {
                                         widget.filterOptions.minFollows = value;
                                       });
-                                    },
+                                    }, color: color,
                                   ),
                                   RatingCountSlider(
                                     title: 'Minimum Hypes',
@@ -942,7 +977,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                       setState(() {
                                         widget.filterOptions.minHypes = value;
                                       });
-                                    },
+                                    }, color: color,
                                   ),
                                   Column(
                                     crossAxisAlignment:
@@ -950,13 +985,13 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                     children: [
                                       Text(
                                         'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.releaseDateValues.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.releaseDateValues.end)}',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold, color: onColor),
                                       ),
                                       SfRangeSlider(
                                         min: DateTime(1990),
                                         max: DateTime.now()
-                                            .add(Duration(days: 365)),
+                                            .add(const Duration(days: 365)),
                                         values: widget
                                             .filterOptions.releaseDateValues,
                                         interval: 10,
@@ -992,7 +1027,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions.ratingValues =
                                                 values;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                       RatingRangeSlider(
                                         title: 'Critics Rating Range',
@@ -1004,7 +1039,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                     .aggregatedRatingValues =
                                                 values;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                       RatingRangeSlider(
                                         title: 'Total Rating Range',
@@ -1015,7 +1050,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions
                                                 .totalRatingValues = values;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                     ],
                                   ),
@@ -1033,7 +1068,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions.minRatings =
                                                 value;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                       RatingCountSlider(
                                         title: 'Minimum Critics Rating Count',
@@ -1045,7 +1080,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions
                                                 .minAggregatedRatings = value;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                       RatingCountSlider(
                                         title: 'Minimum Total Rating Count',
@@ -1057,7 +1092,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions
                                                 .minTotalRatings = value;
                                           });
-                                        },
+                                        }, color: color,
                                       ),
                                     ],
                                   ),
@@ -1217,7 +1252,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
       borderColor: Colors.transparent,
       borderRadius: BorderRadius.circular(14.0),
       boxShadow: [
-        BoxShadow(
+        const BoxShadow(
           color: Colors.black26,
           spreadRadius: 1,
           blurRadius: 2,

@@ -35,7 +35,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
             scrollController: widget.scrollController,
             physics: const BouncingScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: .7,
+              childAspectRatio: .72,
               crossAxisCount: 2,
             ),
             pagingController: widget.pagingController,
@@ -50,7 +50,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
               ),
               newPageProgressIndicatorBuilder: (_) => const Center(
                 child: Padding(
-                  padding: EdgeInsets.all(18.0),
+                  padding: EdgeInsets.all(40.0),
                   child: LoadingIndicator(
                     indicatorType: Indicator.pacman, /// Required, The loading type of the widget
                   ),
@@ -58,7 +58,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
               ),
               itemBuilder: (context, game, index) {
                 return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(6.0),
                   child: GamePreviewView(
                     game: game,
                     isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherModel,

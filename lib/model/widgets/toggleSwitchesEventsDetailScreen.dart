@@ -71,7 +71,7 @@ class _EventInfoWidgetState extends State<EventInfoWidget> {
     final containerBackgroundColor = widget.color.darken(10);
 
     final luminance = headerBorderColor.computeLuminance();
-    final targetLuminance = 0.5;
+    const targetLuminance = 0.5;
 
     final adjustedIconColor =
         luminance > targetLuminance ? Colors.black : Colors.white;

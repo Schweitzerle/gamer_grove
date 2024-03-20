@@ -1,63 +1,25 @@
-import 'dart:math';
-
-import 'package:accordion/accordion.dart';
-import 'package:accordion/controllers.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
-import 'package:gamer_grove/model/widgets/RatingWidget.dart';
 import 'package:gamer_grove/model/widgets/bannerImage.dart';
-import 'package:gamer_grove/model/widgets/characterListPreview.dart';
-import 'package:gamer_grove/model/widgets/character_view.dart';
-import 'package:gamer_grove/model/widgets/characters_view.dart';
-import 'package:gamer_grove/model/widgets/circular_rating_widget.dart';
-import 'package:gamer_grove/model/widgets/collection_view.dart';
-import 'package:gamer_grove/model/widgets/company_view.dart';
 import 'package:gamer_grove/model/widgets/countUpRow.dart';
-import 'package:gamer_grove/model/widgets/event_list.dart';
-import 'package:gamer_grove/model/widgets/event_view.dart';
-import 'package:gamer_grove/model/widgets/events_view.dart';
-import 'package:gamer_grove/model/widgets/followingGameRatings.dart';
-import 'package:gamer_grove/model/widgets/franchise_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
-import 'package:gamer_grove/model/widgets/game_engine_view.dart';
-import 'package:gamer_grove/model/widgets/imagePreview.dart';
 import 'package:gamer_grove/model/widgets/infoRow.dart';
-import 'package:gamer_grove/model/widgets/platform_view.dart';
 import 'package:gamer_grove/model/widgets/ratingDialog.dart';
 import 'package:gamer_grove/model/widgets/toggleSwitchesGameDetailScreen.dart';
-
-import 'package:gamer_grove/model/widgets/video_list.dart';
-import 'package:gamer_grove/model/widgets/video_player_view.dart';
-import 'package:gamer_grove/model/widgets/video_view.dart';
-import 'package:gamer_grove/model/widgets/website_List.dart';
-import 'package:get/get.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:intl/intl.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:motion/motion.dart';
 import 'package:palette_generator/palette_generator.dart';
-
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
-import '../singleton/sinlgleton.dart';
-import 'dart:developer';
 
-import '../widgets/language_support_table.dart';
-import '../widgets/gameListPreview.dart';
-import 'gameGridView.dart';
 
 class GameDetailScreen extends StatefulWidget {
   static Route route(Game game, BuildContext context) {

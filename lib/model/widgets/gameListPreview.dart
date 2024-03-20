@@ -121,7 +121,7 @@ class GameListViewState extends State<GameListView> {
                 }
                 Game game = widget.games![index];
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: GamePreviewView(
                     game: game,
                     isCover: false,

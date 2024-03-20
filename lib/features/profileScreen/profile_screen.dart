@@ -1,25 +1,19 @@
 import 'dart:async';
-
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auth_service/auth.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:countup/countup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/firebase/firebaseUser.dart';
-import 'package:gamer_grove/model/singleton/sinlgleton.dart';
-import 'package:gamer_grove/repository/firebase/firebase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:profile_view/profile_view.dart';
 import 'package:vitality/vitality.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
-
 import '../../model/views/theme_screen.dart';
 import '../../model/widgets/ThemeButton.dart';
 import '../../utils/ThemManager.dart';

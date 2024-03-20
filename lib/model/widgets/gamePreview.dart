@@ -186,7 +186,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                       ),
                                     ],
                                   ),
-                                  Row(
+                                  if (otherModel.rating > 0)
+                                    Row(
                                     children: [
                                       const SizedBox(
                                         width: 2,

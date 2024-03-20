@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/features/landingScreen/bottom_nav_bar.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,22 +43,36 @@ class _SignupForm extends StatelessWidget {
         title: const Text('Create Account'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _ProfilePicturePicker(),
-            const SizedBox(height: 15.0),
-            _CreateAccountName(),
-            const SizedBox(height: 15.0),
-            _CreateAccountUsername(),
-            const SizedBox(height: 15.0),
-            _CreateAccountEmail(),
-            const SizedBox(height: 15.0),
-            _CreateAccountPassword(),
-            const SizedBox(height: 30.0),
-            _SubmitButton(),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: 8.0,
+              right: 8,
+              top: MediaQuery.of(context).size.height * .15),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const _ProfilePicturePicker(),
+              const SizedBox(height: 15.0),
+              const Row(
+                children: [
+                  Expanded(child: _CreateAccountName()),
+                  SizedBox(width: 15.0),
+                  Expanded(child: _CreateAccountUsername()),
+                ],
+              ),
+              const SizedBox(height: 15.0),
+              Row(
+                children: [
+                  Expanded(child: _CreateAccountEmail()),
+                  const SizedBox(width: 15.0),
+                  Expanded(child: _CreateAccountPassword()),
+                ],
+              ),
+              const SizedBox(height: 30.0),
+              _SubmitButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -71,9 +87,8 @@ class _CreateAccountName extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width / 2,
       child: TextField(
-        onChanged: (value) => context
-            .read<SignupBloc>()
-            .add(SignupNameChangedEvent(name: value)),
+        onChanged: (value) =>
+            context.read<SignupBloc>().add(SignupNameChangedEvent(name: value)),
         decoration: const InputDecoration(hintText: 'Name'),
       ),
     );
@@ -115,7 +130,6 @@ class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
       },
       child: CircleAvatar(
         radius: 40.0,
-        backgroundColor: Colors.blue,
         backgroundImage: _photo != null ? FileImage(_photo!) : null,
         child: _photo == null ? Icon(Icons.camera_alt, size: 24.0) : null,
       ),
@@ -129,11 +143,12 @@ class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
     if (pickedImage != null) {
       setState(() {
         _photo = File(pickedImage.path);
-        context.read<SignupBloc>().add(SignupProfilePictureChangedEvent(profilePicture: pickedImage));
+        context
+            .read<SignupBloc>()
+            .add(SignupProfilePictureChangedEvent(profilePicture: pickedImage));
       });
     }
   }
-
 
   Future uploadFile() async {
     if (_photo == null) return;
@@ -149,8 +164,6 @@ class _ProfilePicturePickerState extends State<_ProfilePicturePicker> {
       print('error occured');
     }
   }
-
-
 }
 
 class _CreateAccountEmail extends StatelessWidget {
@@ -172,19 +185,44 @@ class _CreateAccountEmail extends StatelessWidget {
   }
 }
 
-class _CreateAccountPassword extends StatelessWidget {
-  _CreateAccountPassword({
+class _CreateAccountPassword extends StatefulWidget {
+  const _CreateAccountPassword({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<_CreateAccountPassword> createState() => _CreateAccountPasswordState();
+}
+
+class _CreateAccountPasswordState extends State<_CreateAccountPassword> {
+  bool _passwordVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = true;
+  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width / 2,
       child: TextField(
-        obscureText: true,
-        decoration: const InputDecoration(
+        obscureText: _passwordVisible,
+        decoration: InputDecoration(
           hintText: 'Password',
+          suffixIcon: IconButton(
+            icon: Icon(
+              _passwordVisible ? Icons.visibility : Icons.visibility_off,
+              color: Theme.of(context).primaryColorDark,
+            ),
+            onPressed: () {
+              // Update the state i.e. toogle the state of passwordVisible variable
+              setState(() {
+                _passwordVisible = !_passwordVisible;
+              });
+            },
+          ),
         ),
         onChanged: (value) => context
             .read<SignupBloc>()

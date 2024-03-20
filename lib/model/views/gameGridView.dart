@@ -19,14 +19,14 @@ class GameGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        childAspectRatio: .7,
+        childAspectRatio: .74,
         crossAxisCount: 2,
       ),
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final game = collectionGames[index];
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(6.0),
             child: GamePreviewView(
               game: game,
               isCover: true,

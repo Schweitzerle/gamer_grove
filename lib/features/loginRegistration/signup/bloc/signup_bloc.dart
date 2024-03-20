@@ -18,7 +18,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     on<SignupPasswordChangedEvent>(_handleSignupPasswordChangedEvent);
     on<SignupUsernameChangedEvent>(_handleSignupUsernameChangedEvent);
     on<SignupNameChangedEvent>(_handleSignupNameChangedEvent);
-    on<SignupProfilePictureChangedEvent>(_handleSignupProfilePictureChangedEvent); // Add this line
+    on<SignupProfilePictureChangedEvent>(_handleSignupProfilePictureChangedEvent);
   }
 
   final AuthService _authService;
@@ -65,7 +65,6 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     try {
       XFile? profilePicture = state.profilePicture;
 
-      print('CreatedUserProfile');
       await _authService.createUserWithEmailAndPassword(
         email: state.email,
         password: state.password,

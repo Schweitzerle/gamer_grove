@@ -6,12 +6,13 @@ class RatingRangeSlider extends StatefulWidget {
   final String title;
   final SfRangeValues values;
   final Function(SfRangeValues) onChanged;
+  final Color color;
 
   const RatingRangeSlider({
     Key? key,
     required this.title,
     required this.values,
-    required this.onChanged,
+    required this.onChanged, required this.color,
   }) : super(key: key);
 
   @override
@@ -28,7 +29,7 @@ class _RatingRangeSliderState extends State<RatingRangeSlider> {
         children: [
           Text(
             '${widget.title} Range: ${widget.values.start} - ${widget.values.end}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: widget.color),
           ),
           SfRangeSlider(
             min: 0.0,

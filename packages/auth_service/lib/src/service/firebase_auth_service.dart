@@ -8,7 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:toasty_box/toast_service.dart';
 import '../../auth.dart';
 import '../models/models.dart';
 
@@ -65,7 +67,6 @@ class FirebaseAuthService implements AuthService {
     }
   }
 
-  @override
   Future<UserEntity> createUserWithEmailAndPassword({
     required String email,
     required String password,
@@ -73,6 +74,11 @@ class FirebaseAuthService implements AuthService {
     required String name,
     XFile? profilePicture,
   }) async {
+    // Check for null values and display toast if necessary
+    if (name.isEmpty || username.isEmpty || profilePicture == null) {
+      return Future.error('Missing required fields'); // Exit early
+    }
+
     try {
       final authResult = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -80,15 +86,16 @@ class FirebaseAuthService implements AuthService {
       );
       final user = authResult.user;
       final userID = user!.uid;
+
+      // Upload profile picture (if provided)
       final ref = firebase_storage.FirebaseStorage.instance
           .ref('userProfileImages/${userID}')
-          .child(profilePicture!.name);
-      final uploadTask = ref.putFile(File(profilePicture.path));
+          .child(profilePicture.name);
 
-      await uploadTask.whenComplete(() => null);
+        final uploadTask = ref.putFile(File(profilePicture.path));
+        await uploadTask.whenComplete(() => null);
 
       final profileURL = await ref.getDownloadURL();
-
 
       await storeUserDataInDatabase(
         userId: userID,
@@ -159,3 +166,4 @@ class FirebaseAuthService implements AuthService {
     }
   }
 }
+

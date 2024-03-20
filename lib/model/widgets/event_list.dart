@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,10 +30,30 @@ class EventListViewState extends State<EventListView> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     return widget.events != null && widget.events!.isNotEmpty
-        ? AspectRatio(aspectRatio: 16/9,
-        child: Column(
+        ? Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            CarouselSlider(
+              options: CarouselOptions(
+                  autoPlayInterval: const Duration(seconds: 10),
+                  autoPlayAnimationDuration:
+                  const Duration(milliseconds: 4500),
+                  autoPlay: true,
+                  aspectRatio: 16/9,
+                  enableInfiniteScroll: true,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.8,
+                  enlargeFactor: .3),
+              items: widget.events!
+                  .map((item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4),
+                    child: EventUI(event: item, buildContext: context),
+                  ))
+                  .toList(),
+            ),
+    /*SizedBox(
+              height: mediaQueryHeight * 0.01,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Row(
@@ -75,9 +96,7 @@ class EventListViewState extends State<EventListView> {
                 ],
               ),
             ),
-            SizedBox(
-              height: mediaQueryHeight * 0.01,
-            ),
+
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -100,9 +119,9 @@ class EventListViewState extends State<EventListView> {
                   );
                 },
               ),
-            ),
+            ),*/
           ],
-        ))
+        )
         : Container();
   }
 }

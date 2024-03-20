@@ -20,10 +20,10 @@ class EventFilterOptions {
 }
 
 enum SortByEvent {
-  startDateAsc,
-  startDateDesc,
   nameAsc,
   nameDesc,
+  startDateAsc,
+  startDateDesc,
 }
 extension SortByEventExtension on SortByEvent {
   String get value {
@@ -60,9 +60,9 @@ String _ratingToString(SortByEvent? rating) {
   if (rating == null) return 'N/A';
   switch (rating) {
     case SortByEvent.startDateAsc:
-      return 'Event Date Asc';
+      return 'Event Date ⬆️';
     case SortByEvent.startDateDesc:
-      return 'Event Date Desc';
+      return 'Event Date ⬇️';
     case SortByEvent.nameAsc:
       return 'Name A-Z';
     case SortByEvent.nameDesc:
@@ -142,6 +142,17 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                           selectedOptionBackgroundColor: color.lighten(15),
                           dropdownBorderRadius: 14,
                           hintColor: onColor,
+                          hintStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          singleSelectItemStyle: TextStyle(color: onColor, fontWeight: FontWeight.bold),
+                          optionBuilder: (context, valueItem, isSelected) {
+                            return ListTile(
+                              title: Text(valueItem.label, style: TextStyle(color: color.darken(20).onColor),),
+                              trailing: isSelected
+                                  ? Icon(Icons.check_circle, color: color.darken(40),)
+                                  : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
+                            );
+                          },
+                          dropdownBackgroundColor: color.darken(20),
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions
@@ -168,11 +179,6 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                           selectionType: SelectionType.single,
                           chipConfig: const ChipConfig(
                               wrapType: WrapType.wrap),
-                          dropdownHeight: 300,
-                          optionTextStyle:
-                          const TextStyle(fontSize: 16),
-                          selectedOptionIcon:
-                          const Icon(Icons.check_circle),
                         ),
                       ),
                     ),
@@ -195,19 +201,19 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                   children: [
                     Text('Event Date',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
+                            fontSize: 16, fontWeight: FontWeight.bold, color: onColor)),
+                    const SizedBox(height: 8),
                     // Add some space between texts
                     Text(
-                      'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions!.values.end)}',
-                      style: TextStyle(fontSize: 14),
+                      'Selected Dates: ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.start)} - ${DateFormat('yyyy-MM-dd').format(widget.filterOptions.values.end)}',
+                      style: TextStyle(fontSize: 14, color: onColor),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     // Add some space between texts and slider
                     SfRangeSlider(
                       min: DateTime(2017),
-                      max: DateTime.now().add(Duration(days: 365)),
-                      values: widget.filterOptions!.values,
+                      max: DateTime.now().add(const Duration(days: 365)),
+                      values: widget.filterOptions.values,
                       interval: 2,
                       showTicks: true,
                       showLabels: true,
@@ -216,7 +222,7 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                       dateIntervalType: DateIntervalType.years,
                       onChanged: (SfRangeValues values) {
                         setState(() {
-                          widget.filterOptions!.values = values;
+                          widget.filterOptions.values = values;
                         });
                       },
                     ),
@@ -237,10 +243,10 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                     widget.searchBarController.close();
                     setState(() {});
                   },
-                  child: FittedBox(child: Text('Cancel')),
+                  child: const FittedBox(child: Text('Cancel')),
                 ),
               ),
-              SizedBox(width: 8,),
+              const SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -249,17 +255,17 @@ class _EventFilterScreenState extends State<EventFilterScreen> {
                     });
                     widget.pagingController.refresh();
                   },
-                  child: FittedBox(child: Text('Reset Event Filter')),
+                  child: const FittedBox(child: Text('Reset Event Filter')),
                 ),
               ),
-              SizedBox(width: 8,),
+              const SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
                     widget.searchBarController.close();
                     widget.pagingController.refresh();
                   },
-                  child: FittedBox(child: Text('Apply')),
+                  child: const FittedBox(child: Text('Apply')),
                 ),
               ),
             ],

@@ -13,7 +13,7 @@ class SignupState extends Equatable {
     this.username = '',
     this.name = '',
     this.message = '',
-    this.profilePicture, // Non-const empty File instance
+    this.profilePicture,
     this.status = SignupStatus.loading,
   });
 
@@ -21,15 +21,15 @@ class SignupState extends Equatable {
   final SignupStatus status;
   final String email;
   final String password;
-  final String username; // Add this field
-  final String name;     // Add this field
-  final XFile? profilePicture; // Add this field
+  final String username;
+  final String name;
+  final XFile? profilePicture;
 
   SignupState copyWith({
     String? email,
     String? password,
-    String? username, // Add this parameter
-    String? name,     // Add this parameter
+    String? username,
+    String? name,
     XFile? profilePicture,
     SignupStatus? status,
     String? message,
@@ -37,9 +37,9 @@ class SignupState extends Equatable {
     return SignupState(
       email: email ?? this.email,
       password: password ?? this.password,
-      username: username ?? this.username, // Update this line
+      username: username ?? this.username,
       name: name ?? this.name,
-      profilePicture: profilePicture ?? this.profilePicture, // Update this line
+      profilePicture: profilePicture ?? this.profilePicture,
       status: status ?? this.status,
       message: message ?? this.message,
     );
@@ -51,8 +51,8 @@ class SignupState extends Equatable {
     status,
     email,
     password,
-    username, // Add this line
-    name,     // Add this line
+    username,
+    name,
     profilePicture,
   ];
 }

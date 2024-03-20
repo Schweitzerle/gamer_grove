@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
@@ -5,12 +6,14 @@ class RatingCountSlider extends StatefulWidget {
   final String title;
   final double value;
   final Function(int) onChanged;
+  final Color color;
 
   const RatingCountSlider({
     super.key,
     required this.title,
     required this.value,
     required this.onChanged,
+    required this.color
   });
 
   @override
@@ -27,7 +30,7 @@ class _RatingCountSliderState extends State<RatingCountSlider> {
         children: [
           Text(
             widget.title,
-            style: const TextStyle(fontWeight: FontWeight.bold), //TODO: coloring auf onColor von gamefilter widget
+            style: TextStyle(fontWeight: FontWeight.bold, color: widget.color.onColor),
           ),
           SfSlider(
             min: 0.0,

@@ -43,7 +43,7 @@ class _RecommendedCarouselSliderState extends State<RecommendedCarouselSlider>
             padding: const EdgeInsets.all(14.0),
             child: GlassContainer(
               blur: 12,
-              shadowStrength: 4,
+              shadowStrength: 2,
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(14),
               shadowColor: Theme.of(context).primaryColor,
@@ -65,14 +65,12 @@ class _RecommendedCarouselSliderState extends State<RecommendedCarouselSlider>
             ),
           ),
         ),
-        const SizedBox(
-          height: 14,
-        ),
+
         CarouselSlider(
           options: CarouselOptions(
-              autoPlayInterval: const Duration(seconds: 8),
+              autoPlayInterval: const Duration(seconds: 10),
               autoPlayAnimationDuration:
-              const Duration(milliseconds: 1500),
+              const Duration(milliseconds: 2500),
               autoPlay: true,
               aspectRatio: 1.5,
               enableInfiniteScroll: true,
