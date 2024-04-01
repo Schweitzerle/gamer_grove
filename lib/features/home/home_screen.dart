@@ -10,6 +10,7 @@ import 'package:gamer_grove/model/singleton/sinlgleton.dart';
 import 'package:gamer_grove/model/widgets/event_list.dart';
 import 'package:gamer_grove/model/widgets/gameListPreview.dart';
 import 'package:gamer_grove/model/widgets/recommendedCarousel.dart';
+import 'package:gamer_grove/model/widgets/shimmerGameItem.dart';
 import 'package:gamer_grove/repository/igdb/IGDBApiService.dart';
 import 'package:get_it/get_it.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final gamesJoin = gameIds.join("|");
     String gamesString = 'w $gamesJoin;';
     String body1 =
-        'query games "User Recommendation" { fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;};';
+        'query games "User Recommendation" { fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;};';
     return body1;
   }
 
@@ -122,47 +123,82 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String getBodyStringMostFollowedGames() {
+    final body3 =
+        'query games "Most Followed Games" {${getInnerBodyStringMostFollowedGames()}};';
+    return body3;
+  }
+
+  String getInnerBodyStringMostFollowedGames() {
     const body3 =
-        'query games "Most Followed Games" {fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s follows desc; w follows != null; l 20;};';
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s follows desc; w follows != null; l 20;';
     return body3;
   }
 
   String getBodyCriticsRatingDesc() {
+    final body4 =
+        'query games "Critics Choices" {${getInnerBodyCriticsRatingDesc()}};';
+    return body4;
+  }
+
+  String getInnerBodyCriticsRatingDesc() {
     const body4 =
-        'query games "Critics Choices" {fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s aggregated_rating desc; w aggregated_rating != null & aggregated_rating_count >= 10; l 20;};';
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s aggregated_rating desc; w aggregated_rating != null & aggregated_rating_count >= 10; l 20;';
     return body4;
   }
 
   String getBodyTopRatedGames() {
+    final body1 =
+        'query games "Top Rated Games" {${getInnerBodyTopRatedGames()}};';
+    return body1;
+  }
+
+  String getInnerBodyTopRatedGames() {
     const body1 =
-        'query games "Top Rated Games" {fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; w total_rating != null & total_rating_count >= 40; l 20;};';
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating desc; w total_rating != null & total_rating_count >= 40; l 20;';
     return body1;
   }
 
   String getBodyNewestGames() {
+    final body2 =
+        'query games "Newest Games" {${getInnerBodyNewestGames()}};';
+    return body2;
+  }
+
+  String getInnerBodyNewestGames() {
     final int unixTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final body2 =
-        'query games "Newest Games" {fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s first_release_date desc; w total_rating_count > 1 & first_release_date != null & first_release_date <= $unixTimestamp; l 20;};';
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s first_release_date desc; w total_rating_count > 1 & first_release_date != null & first_release_date <= $unixTimestamp; l 20;';
     return body2;
   }
 
   String getBodyHypedGames() {
+    final body2 =
+        'query games "Hyped Games" {${getInnerBodyHypedGames()}};';
+    return body2;
+  }
+
+  String getInnerBodyHypedGames() {
     final int unixTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final int futureUnixTimestamp =
         DateTime.now().add(const Duration(days: 365)).millisecondsSinceEpoch ~/
             1000;
-    print(futureUnixTimestamp);
     final body2 =
-        'query games "Hyped Games" {fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s hypes desc; w hypes != null & hypes > 1 & first_release_date >= $unixTimestamp & first_release_date <= $futureUnixTimestamp; l 20;};';
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s hypes desc; w hypes != null & hypes > 1 & first_release_date >= $unixTimestamp & first_release_date <= $futureUnixTimestamp; l 20;';
     return body2;
   }
 
   String getBodyLatestEvents() {
+    final body3 =
+        'query events "Latest Events" {${getInnerBodyLatestEvents()}};';
+    return body3;
+  }
+
+  String getInnerBodyLatestEvents() {
     final int unixTimestamp =
         DateTime.now().add(const Duration(days: 30)).millisecondsSinceEpoch ~/
             1000;
     final body3 =
-        'query events "Latest Events" {fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time desc; w start_time != null & start_time <= $unixTimestamp; l 20;};';
+        'fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time desc; w start_time != null & start_time <= $unixTimestamp; l 20;';
     return body3;
   }
 
@@ -295,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 headline: 'Top Rated Games',
                                 games: topRatedGames,
                                 isPagination: true,
-                                body: getBodyTopRatedGames(),
+                                body: getInnerBodyTopRatedGames(),
                                 showLimit: 10,
                                 isAggregated: false,
                               ),
@@ -304,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 headline: 'Critics Choices',
                                 games: criticsChoices,
                                 isPagination: true,
-                                body: getBodyCriticsRatingDesc(),
+                                body: getInnerBodyCriticsRatingDesc(),
                                 showLimit: 10,
                                 isAggregated: true,
                               ),
@@ -313,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 headline: 'Most Followed Games',
                                 games: mostFollowedGames,
                                 isPagination: true,
-                                body: getBodyStringMostFollowedGames(),
+                                body: getInnerBodyStringMostFollowedGames(),
                                 showLimit: 10,
                                 isAggregated: false,
                               ),
@@ -322,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 headline: 'Newest Games',
                                 games: newestGames,
                                 isPagination: true,
-                                body: getBodyNewestGames(),
+                                body: getInnerBodyNewestGames(),
                                 showLimit: 10,
                                 isAggregated: false,
                               ),
@@ -331,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 headline: 'Hyped Games',
                                 games: hypedGames,
                                 isPagination: true,
-                                body: getBodyHypedGames(),
+                                body: getInnerBodyHypedGames(),
                                 showLimit: 10,
                                 isAggregated: false,
                               ),
@@ -343,16 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
                       // Display a loading indicator while fetching data
-                      return Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).size.height * .34,
-                              left: MediaQuery.of(context).size.width * .2,
-                              right: MediaQuery.of(context).size.width * .2),
-                          child: const LoadingIndicator(
-                              indicatorType: Indicator.pacman),
-                        ),
-                      );
+                      return ShimmerItem.buildShimmerHomeScreenItem(context);
                     })
                 : Container(),
           ),

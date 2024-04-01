@@ -252,8 +252,6 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     final body =
         'fields *, logo.*; $sortString w ${queryString} & start_date != null ${startUnix} & start_date <= ${endUnix}; o $offset; l 20;';
 
-    print(body);
-
     final response =
         await apiService.getIGDBData(IGDBAPIEndpointsEnum.companies, body);
 
@@ -278,8 +276,6 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
 
     final body =
         'fields checksum, created_at, description, end_time, event_logo.*, event_networks.*, games.*, games.cover.*, games.artworks.*, live_stream_url, name, slug, start_time, time_zone, updated_at, videos.*; s start_time asc; $sortString w ${queryString} & start_time >= ${startUnix} & start_time <= ${endUnix}; o $offset; l 20;';
-
-    print(body);
 
     final response =
         await apiService.getIGDBData(IGDBAPIEndpointsEnum.events, body);
@@ -376,9 +372,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
     }
 
     final body =
-        'fields name, cover.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, category, checksum, collection.*, collections.*, created_at, dlcs.*, expanded_games.*, expansions.*, external_games.*, first_release_date, follows, forks.*, franchise.*, franchises.*, game_engines.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, keywords.*, language_supports.*, multiplayer_modes.*, name, parent_game.*, platforms.*, player_perspectives.*, ports, rating, rating_count, release_dates.*, remakes.*, remasters.*, screenshots.*, similar_games, slug, standalone_expansions.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_title, videos.*, websites.*; $sortString where ${queryString}; o $offset; l 20;';
-
-    print(body);
+        'fields name, cover.*, artworks.*, age_ratings.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, category, checksum, collection.*, collections.*, created_at, dlcs.*, expanded_games.*, expansions.*, external_games.*, first_release_date, follows, forks.*, franchise.*, franchises.*, game_engines.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, keywords.*, language_supports.*, multiplayer_modes.*, name, parent_game.*, platforms.*, player_perspectives.*, ports, rating, rating_count, release_dates.*, remakes.*, remasters.*, screenshots.*, similar_games, slug, standalone_expansions.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_title, videos.*, websites.*; $sortString where ${queryString}; o $offset; l 20;';
 
     final response =
         await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, body);
@@ -391,10 +385,8 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
-    final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    Color color = Theme.of(context).colorScheme.tertiaryContainer;
-    Color lightColor = Theme.of(context).colorScheme.tertiaryContainer;
+    Color color = Theme.of(context).colorScheme.inversePrimary.darken(20);
 
     return Scaffold(
       body: Stack(children: [

@@ -52,6 +52,7 @@ import 'dart:developer';
 
 import '../widgets/language_support_table.dart';
 import '../widgets/gameListPreview.dart';
+import '../widgets/shimmerGameItem.dart';
 import 'gameGridView.dart';
 
 class EventDetailScreen extends StatefulWidget {
@@ -79,6 +80,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   late Color darkColor;
   late PaletteColor color;
   bool isColorLoaded = false;
+  final apiService = IGDBApiService();
 
   List<Event> events = [];
 
@@ -94,11 +96,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Future<void> initialize() async {
-    print(widget.event.id);
-    await Future.wait([getColorPalette(), getIGDBData()]);
+    await Future.wait([getColorPalette()]);
   }
 
-  Future<void> getIGDBData() async {
+  Future<List<dynamic>> getIGDBData() async {
     final apiService = IGDBApiService();
     try {
       final body = '''
@@ -112,18 +113,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       final List<dynamic> response =
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.multiquery, body);
 
-      setState(() {
-        final eventsResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Events',
-            orElse: () => null);
-        if (eventsResponse != null) {
-          events = apiService.parseResponseToEvent(eventsResponse['result']);
-        }
-      });
+     return response;
+
     } catch (e, stackTrace) {
       print('Error: $e');
       print('Stack Trace: $stackTrace');
     }
+    return [];
   }
 
   @override
@@ -268,7 +264,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ? widget.event.name!
                                 : 'Loading...',
                             speed: Duration(milliseconds: 150),
-                            textStyle: TextStyle(
+                            textStyle: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -286,22 +282,49 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               SizedBox(
                 height: mediaQueryHeight * .01,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (events.isNotEmpty)
-                    EventInfoWidget(
-                        event: events[0], color: colorPalette),
-                  if (events.isNotEmpty)
-                    EventsVideosContainerSwitchWidget(
-                        event: events[0], color: colorPalette, adjustedTextColor: adjustedTextColor,),
-                  if (events.isNotEmpty)
-                    EventGamesContainerSwitchWidget(
-                      event: events[0],
-                      color: colorPalette,
-                    ),
-                ],
-              ),
+              if (isColorLoaded)
+                FutureBuilder<List<dynamic>>(
+                  future: getIGDBData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final response = snapshot.data!;
+                      List<Event> events = [];
+
+                      final eventsResponse = response.firstWhere(
+                              (item) => item['name'] == 'Game Events',
+                          orElse: () => null);
+                      if (eventsResponse != null) {
+                        events = apiService.parseResponseToEvent(eventsResponse['result']);
+                      }
+
+                      return   Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (events.isNotEmpty)
+                            EventInfoWidget(
+                                event: events[0], color: colorPalette),
+                          if (events.isNotEmpty)
+                            EventsVideosContainerSwitchWidget(
+                              event: events[0], color: colorPalette, adjustedTextColor: adjustedTextColor,),
+                          if (events.isNotEmpty)
+                            EventGamesContainerSwitchWidget(
+                              event: events[0],
+                              color: colorPalette,
+                            ),
+                          const SizedBox(
+                            height: 14,
+                          )
+                        ],
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}'),
+                      );
+                    }
+                    // Display a loading indicator while fetching data
+                    return ShimmerItem.buildShimmerEventDetailScreen(context);
+                  }),
+
             ],
           ),
         ),

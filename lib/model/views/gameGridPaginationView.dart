@@ -2,6 +2,7 @@ import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
+import 'package:gamer_grove/model/widgets/shimmerGameItem.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -40,14 +41,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
             ),
             pagingController: widget.pagingController,
             builderDelegate: PagedChildBuilderDelegate<Game>(
-              firstPageProgressIndicatorBuilder:(_) => const Padding(
-                padding: EdgeInsets.all(78.0),
-                child: Center(
-                  child: LoadingIndicator(
-                      indicatorType: Indicator.pacman, /// Required, The loading type of the widget
-                  ),
-                ),
-              ),
+              firstPageProgressIndicatorBuilder:(_) => ShimmerItem.buildShimmerGameGridItem(context),
               newPageProgressIndicatorBuilder: (_) => const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
@@ -141,7 +135,6 @@ class _AllGamesGridPaginationScreenState
     final apiService = IGDBApiService();
     final offset = pageKey * 20;
     String body = '${widget.body} o $offset; ${sorting}';
-    print(body);
     final response = await apiService.getIGDBData(
         IGDBAPIEndpointsEnum.games, body);
 
@@ -163,7 +156,6 @@ class _AllGamesGridPaginationScreenState
                   buildSortButton(widget.isAggregated ? 'aggregated_rating' : 'total_rating', 'Rating', setState),
                   buildSortButton('name', 'Name', setState),
                   buildSortButton('first_release_date', 'Release Date', setState),
-
                 ],
               );
             },
@@ -207,7 +199,10 @@ class _AllGamesGridPaginationScreenState
                 isAscending = !isAscending;
               } else {
                 selectedSortOption = sortBy;
-                isAscending = true; // Set isAscending to true when selecting a new sorting option
+                if (selectedSortOption == 'my_rating') {
+
+                }
+                isAscending = true;
               }
             });
           },

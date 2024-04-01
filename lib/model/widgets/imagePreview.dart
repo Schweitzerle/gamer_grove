@@ -16,7 +16,6 @@ class ImagePreview extends StatelessWidget {
 
   ImagePreview({super.key, required this.game, required this.isArtwork});
 
-  //TODO:Falls 4 fehler behebung, bsp. Foamstars: Season 1
 
   @override
   Widget build(BuildContext context) {
@@ -233,13 +232,13 @@ class ImagePreview extends StatelessWidget {
                                   decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(0.5),
                                       borderRadius: BorderRadius.circular(8)),
-                                  child: const Center(
+                                  child: Center(
                                     child: Padding(
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: FittedBox(
                                         child: Text(
-                                          'All Artworks',
-                                          style: TextStyle(
+                                          isArtwork ? 'All Artworks' : 'All Screenshots',
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,

@@ -54,7 +54,7 @@ class GameListViewState extends State<GameListView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -64,7 +64,7 @@ class GameListViewState extends State<GameListView> {
                   customBorderRadius: BorderRadius.circular(12),
                   color: backgroundColor,
                   child: Padding(
-                    padding: EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     child: FittedBox(
                         child: Text(
                           widget.headline,
@@ -93,7 +93,7 @@ class GameListViewState extends State<GameListView> {
                               widget.games!, context, widget.headline, widget.otherUserModel));
                     },
                     child: Padding(
-                      padding: EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(5),
                       child: FittedBox(
                         child: Text(
                           'All',

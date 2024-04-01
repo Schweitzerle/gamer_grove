@@ -108,6 +108,10 @@ class CollectionView extends StatelessWidget {
     final contentBackgroundColor = color.darken(10).withOpacity(.8);
 
 
+    final coverScaleHeight = mediaHeight / 3.1;
+    final coverScaleWidth = coverScaleHeight * 0.69;
+
+
     return ClayContainer(
       spread: 2,
       depth: 60,
@@ -122,22 +126,19 @@ class CollectionView extends StatelessWidget {
             ...List.generate(
               selectedGames.length,
                   (index) {
-                    final topOffset = index == 0 ? 0.0 : (mediaHeight * .015) * index;
-                    final rightOffset = index == 0 ? 0.0 : (mediaWidth * .12) * index;
+                    final topOffset = index == 0 ? 0.0 : (mediaHeight * .012) * index;
+                    final rightOffset = index == 0 ? 0.0 : (mediaWidth * .11) * index;
                     return Positioned(
                       top: topOffset,
                       left: rightOffset,
                       child: SizedBox(
-                        width: mediaWidth * .28,
-                        height: mediaHeight * .2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                      child: GamePreviewView(
-                        game: selectedGames[index],
-                        isCover: true,
-                        buildContext: context, needsRating: false, isClickable: true,
-                      ),
-                    ),
+                        width: coverScaleWidth * .56,
+                        height: coverScaleHeight * .56,
+                        child: GamePreviewView(
+                          game: selectedGames[index],
+                          isCover: true,
+                          buildContext: context, needsRating: false, isClickable: true,
+                        ),
                   ),
                 );
               },

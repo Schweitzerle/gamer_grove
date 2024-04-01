@@ -1,36 +1,22 @@
 import 'dart:async';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:animated_emoji/emoji.dart';
 import 'package:animated_emoji/emojis.g.dart';
-import 'package:auth_service/auth.dart';
-import 'package:clay_containers/clay_containers.dart';
-import 'package:country_picker/country_picker.dart';
 import 'package:countup/countup.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/firebase/firebaseUser.dart';
-import 'package:gamer_grove/model/singleton/sinlgleton.dart';
-import 'package:gamer_grove/repository/firebase/firebase.dart';
-import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:profile_view/profile_view.dart';
 import 'package:vitality/vitality.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
 
-import '../../features/loginRegistration/login/bloc/login_bloc.dart';
-import '../../features/loginRegistration/login_registration_page.dart';
-import '../../model/views/theme_screen.dart';
-import '../../model/widgets/ThemeButton.dart';
 import '../../repository/igdb/IGDBApiService.dart';
-import '../../utils/ThemManager.dart';
 import '../igdb_models/game.dart';
 import '../widgets/gameListPreview.dart';
+import '../widgets/shimmerGameItem.dart';
 
 class OtherUserProfileScreen extends StatefulWidget {
   final FirebaseUserModel userModel;
@@ -53,12 +39,39 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    initialize();
   }
 
-  Future<void> initialize() async {
-    await Future.wait(
-        [getRecommendedIGDBData(), getWishlistIGDBData(), getRatedIGDBData()]);
+
+  Future<List<Game>> getIGDBData() async {
+    if (getGameKeys(widget.userModel.games).isNotEmpty) {
+      try {
+        final response3 =
+            await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBody());
+
+        return apiService.parseResponseToGame(response3);
+      } catch (e, stackTrace) {
+        print('Error: $e');
+        print('Stack Trace: $stackTrace');
+        return []; // Return empty list on error
+      }
+    } else {
+      return []; // Return empty list if no games in wishlist
+    }
+  }
+
+  String getBody() {
+    final recommendedGameKeys = getGameKeys(widget.userModel.games);
+    final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
+    final gamesJoin = gameIds.join("|");
+    String gamesString = 'w $gamesJoin;';
+
+    String body1 =
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 500;';
+    return body1;
+  }
+
+  List<String> getGameKeys(Map<String, dynamic> games) {
+    return games.keys.toList();
   }
 
   String getRecommendedBody() {
@@ -68,7 +81,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 20;';
     return body1;
   }
 
@@ -78,22 +91,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     return recommendedGames.map((entry) => entry.key).toList();
   }
 
-  Future<void> getRecommendedIGDBData() async {
-    if (getRecommendedGameKeys(widget.userModel.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getRecommendedBody());
-
-        setState(() {
-          recommendedResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
-
   String getWishlistBody() {
     final recommendedGameKeys = getWishlistGameKeys(widget.userModel.games);
     final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
@@ -101,7 +98,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 20;';
     return body1;
   }
 
@@ -111,22 +108,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     return recommendedGames.map((entry) => entry.key).toList();
   }
 
-  Future<void> getWishlistIGDBData() async {
-    if (getWishlistGameKeys(widget.userModel.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getWishlistBody());
-
-        setState(() {
-          wishlistResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
-
   String getRatedBody() {
     final recommendedGameKeys = getRatedGameKeys(widget.userModel.games);
     final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
@@ -134,7 +115,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     String gamesString = 'w $gamesJoin;';
 
     String body1 =
-        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 50;';
+        'fields name, cover.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; $gamesString l 20;';
     return body1;
   }
 
@@ -144,21 +125,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     return recommendedGames.map((entry) => entry.key).toList();
   }
 
-  Future<void> getRatedIGDBData() async {
-    if (getRatedGameKeys(widget.userModel.games).isNotEmpty) {
-      try {
-        final response3 = await apiService.getIGDBData(
-            IGDBAPIEndpointsEnum.games, getRatedBody());
-
-        setState(() {
-          ratedResponse = apiService.parseResponseToGame(response3);
-        });
-      } catch (e, stackTrace) {
-        print('Error: $e');
-        print('Stack Trace: $stackTrace');
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,14 +153,15 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             ],
             randomItemsBehaviours: [
               ItemBehaviour(
-                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller_fill),
-              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
-              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.person_2_fill),
+                  shape: ShapeType.Icon,
+                  icon: CupertinoIcons.gamecontroller_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.person_2_fill),
               ItemBehaviour(
                   shape: ShapeType.Icon, icon: CupertinoIcons.person_2),
-              ItemBehaviour(
-                  shape: ShapeType.Icon,
-                  icon: Icons.gamepad),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
               ItemBehaviour(
                   shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
               ItemBehaviour(shape: ShapeType.StrokeCircle),
@@ -259,17 +226,21 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 children: [
                                   FittedBox(
                                     child: Text(
-                                      'Followers', // Anzahl der Follower einfügen
+                                      'Followers',
+                                      // Anzahl der Follower einfügen
                                       style: TextStyle(
-                                          color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
+                                        color: widget.colorPalette.onColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   Countup(
                                     begin: 0,
-                                    end:  widget.userModel.followers.length.toDouble(),
+                                    end: widget.userModel.followers.length
+                                        .toDouble(),
                                     duration: Duration(seconds: 3),
                                     separator: '.',
-                                    style:  TextStyle(
+                                    style: TextStyle(
                                         color: widget.colorPalette.onColor),
                                   ),
                                 ],
@@ -284,15 +255,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                       'Following',
                                       // Anzahl der Abonnements einfügen
                                       style: TextStyle(
-                                          color: widget.colorPalette.onColor, fontWeight: FontWeight.bold,),
+                                        color: widget.colorPalette.onColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   Countup(
                                     begin: 0,
-                                    end:  widget.userModel.following.length.toDouble(),
+                                    end: widget.userModel.following.length
+                                        .toDouble(),
                                     duration: Duration(seconds: 3),
                                     separator: '.',
-                                    style:  TextStyle(
+                                    style: TextStyle(
                                         color: widget.colorPalette.onColor),
                                   ),
                                 ],
@@ -307,16 +281,20 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                       'Rated',
                                       // Anzahl der bewerteten Spiele einfügen
                                       style: TextStyle(
-                                          color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
+                                        color: widget.colorPalette.onColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   Countup(
                                     begin: 0,
-                                    end: getRatedGameKeys(widget.userModel.games)
-                                        .length.toDouble(),
+                                    end:
+                                        getRatedGameKeys(widget.userModel.games)
+                                            .length
+                                            .toDouble(),
                                     duration: Duration(seconds: 3),
                                     separator: '.',
-                                    style:  TextStyle(
+                                    style: TextStyle(
                                         color: widget.colorPalette.onColor),
                                   ),
                                 ],
@@ -331,16 +309,20 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                       'Recommended',
                                       // Anzahl der bewerteten Spiele einfügen
                                       style: TextStyle(
-                                          color: widget.colorPalette.onColor,fontWeight: FontWeight.bold,),
+                                        color: widget.colorPalette.onColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   Countup(
                                     begin: 0,
-                                    end: getRecommendedGameKeys(widget.userModel.games)
-                                        .length.toDouble(),
+                                    end: getRecommendedGameKeys(
+                                            widget.userModel.games)
+                                        .length
+                                        .toDouble(),
                                     duration: Duration(seconds: 3),
                                     separator: '.',
-                                    style:  TextStyle(
+                                    style: TextStyle(
                                         color: widget.colorPalette.onColor),
                                   ),
                                 ],
@@ -354,16 +336,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                           SizedBox(height: 28),
                           if (getRecommendedGameKeys(widget.userModel.games)
                                   .isEmpty &&
-                              getWishlistGameKeys(widget.userModel.games).isEmpty &&
+                              getWishlistGameKeys(widget.userModel.games)
+                                  .isEmpty &&
                               getRatedGameKeys(widget.userModel.games).isEmpty)
                             const Padding(
-                              padding:
-                                  EdgeInsets.only(top: 140, left: 20, right: 20),
+                              padding: EdgeInsets.only(
+                                  top: 140, left: 20, right: 20),
                               child: Center(
                                 child: GlassContainer(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       AnimatedEmoji(
@@ -371,7 +355,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                         size: 64,
                                       ),
                                       FittedBox(
-                                          child: Text('Nothing to see here yet...',
+                                          child: Text(
+                                              'Nothing to see here yet...',
                                               style: TextStyle(
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold)))
@@ -380,34 +365,72 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 ),
                               ),
                             ),
-                          GameListView(
-                            headline: 'Recommended Games',
-                            games: recommendedResponse,
-                            isPagination: true,
-                            body: getRecommendedBody(),
-                            showLimit: 10,
-                            isAggregated: false,
-                            otherUserModel: widget.userModel,
-                          ),
-                          GameListView(
-                            headline: 'Wishlist Games',
-                            games: wishlistResponse,
-                            isPagination: true,
-                            body: getWishlistBody(),
-                            showLimit: 10,
-                            isAggregated: false,
-                            otherUserModel: widget.userModel,
-                          ),
-                          GameListView(
-                            headline: 'Rated Games',
-                            games: ratedResponse,
-                            isPagination: true,
-                            body: getRatedBody(),
-                            showLimit: 10,
-                            isAggregated: false,
-                            otherUserModel: widget.userModel,
-                          ),
-                          SizedBox(height: 14),
+                          FutureBuilder<List<Game>>(
+                              future: getIGDBData(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  List<Game> recommendedData = [];
+                                  List<Game> wishlistData = [];
+                                  List<Game> ratedData = [];
+                                  for (var game in snapshot.data!) {
+                                    if (getRecommendedGameKeys(
+                                            widget.userModel.games)
+                                        .contains(game.id.toString())) {
+                                      recommendedData.add(game);
+                                    }
+                                    if (getWishlistGameKeys(
+                                            widget.userModel.games)
+                                        .contains(game.id.toString())) {
+                                      wishlistData.add(game);
+                                    }
+                                    if (getRatedGameKeys(widget.userModel.games)
+                                        .contains(game.id.toString())) {
+                                      ratedData.add(game);
+                                    }
+                                  }
+                                  return Column(
+                                    children: [
+                                      if (recommendedData.isNotEmpty)
+                                        GameListView(
+                                          headline: 'Recommended Games',
+                                          games: recommendedData,
+                                          isPagination: true,
+                                          body: getRecommendedBody(),
+                                          showLimit: 10,
+                                          isAggregated: false,
+                                          otherUserModel: widget.userModel,
+                                        ),
+                                      if (ratedData.isNotEmpty)
+                                        GameListView(
+                                          headline: 'Rated Games',
+                                          games: ratedData,
+                                          isPagination: true,
+                                          body: getRatedBody(),
+                                          showLimit: 10,
+                                          isAggregated: false,
+                                          otherUserModel: widget.userModel,
+                                        ),
+                                      if (wishlistData.isNotEmpty)
+                                        GameListView(
+                                          headline: 'Wishlist Games',
+                                          games: wishlistData,
+                                          isPagination: true,
+                                          body: getWishlistBody(),
+                                          showLimit: 10,
+                                          isAggregated: false,
+                                          otherUserModel: widget.userModel,
+                                        ),
+                                    ],
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error: ${snapshot.error}'),
+                                  );
+                                }
+                                // Display a loading indicator while fetching data
+                                return ShimmerItem
+                                    .buildShimmerWishlistScreenItem(context);
+                              }),
                         ],
                       )
                     ],

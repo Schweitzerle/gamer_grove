@@ -23,7 +23,7 @@ class FirebaseUserModel extends ChangeNotifier {
   final String name;
   final String username;
   final String email;
-  final Map<String, dynamic> games;
+  Map<String, dynamic> games;
   final Map<dynamic, dynamic> following; // Change type to List<String>
   final Map<dynamic, dynamic> followers; // Change type to List<String>
   final String profileUrl;

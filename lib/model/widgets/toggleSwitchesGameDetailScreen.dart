@@ -997,7 +997,6 @@ class _ImagesContainerSwitchWidgetState
                 alignment: Alignment.centerRight,
                 child: SizedBox(
                   height: mediaQueryHeight * .06,
-                  //TODO: noch irgwie den ausgewählten text zu dem container anzeigen in einer reihe oder so
                   child: AnimatedToggleSwitch<int>.size(
                     textDirection: TextDirection.ltr,
                     current: _selectedIndex,

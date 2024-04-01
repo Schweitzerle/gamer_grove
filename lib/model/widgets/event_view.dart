@@ -54,9 +54,6 @@ class _EventUIState extends State<EventUI> {
         .size
         .width;
 
-    final coverScaleWidth = mediaQueryWidth / 2.2;
-    final coverScaleHeight = mediaQueryHeight / 2.3;
-
     return InkWell(
       onTap: () {
         Navigator.of(context).push(EventDetailScreen.route(widget.event, context));
@@ -84,7 +81,7 @@ class _EventUIState extends State<EventUI> {
                       ),
                   errorWidget: (context, url, error) => GlassContainer(
                     color: Theme.of(context).colorScheme.primary,
-                    child: Icon(FontAwesomeIcons.calendarDay),
+                    child: const Icon(FontAwesomeIcons.calendarDay),
                   ),
                   fit: BoxFit.cover,
                 ),

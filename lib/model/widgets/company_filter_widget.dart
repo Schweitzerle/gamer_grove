@@ -111,10 +111,8 @@ class CompanyFilterScreen extends StatefulWidget {
 class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
   @override
   Widget build(BuildContext context) {
-    final mediaQueryHeight = MediaQuery.of(context).size.height;
-
-    Color color = Theme.of(context).colorScheme.tertiaryContainer;
-    Color onColor = Theme.of(context).colorScheme.onTertiaryContainer;
+    Color color = Theme.of(context).colorScheme.inversePrimary.darken(10);
+    Color onColor = color.onColor;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -124,8 +122,8 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
             spread: 2,
             depth: 60,
             borderRadius: 14,
-            color: Theme.of(context).colorScheme.tertiaryContainer,
-            parentColor: Theme.of(context).colorScheme.onTertiaryContainer,
+            color: color,
+            parentColor: onColor,
             child: SizedBox(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -139,9 +137,9 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                           borderRadius: 14,
                           borderWidth: 4,
                           focusedBorderWidth: 2,
-                          focusedBorderColor: color.darken(20),
+                          focusedBorderColor: color.darken(10),
                           fieldBackgroundColor: color,
-                          borderColor: color.darken(20),
+                          borderColor: color.darken(10),
                           optionsBackgroundColor: color.lighten(10),
                           selectedOptionBackgroundColor: color.lighten(15),
                           dropdownBorderRadius: 14,
@@ -156,7 +154,7 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
                                   : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
                             );
                           },
-                          dropdownBackgroundColor: color.darken(20),
+                          dropdownBackgroundColor: color.darken(10),
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions
@@ -196,8 +194,8 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
             spread: 2,
             depth: 60,
             borderRadius: 14,
-            color: Theme.of(context).colorScheme.tertiaryContainer,
-            parentColor: Theme.of(context).colorScheme.onTertiaryContainer,
+            color: color,
+            parentColor: onColor,
             child: SizedBox(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -239,6 +237,15 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     widget.searchBarController.close();
                     setState(() {
@@ -250,6 +257,15 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
               SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     setState(() {
                       widget.filterOptions.values = SfRangeValues(DateTime(1968), DateTime.now().add(Duration(days: 365)));
@@ -262,6 +278,15 @@ class _CompanyFilterScreenState extends State<CompanyFilterScreen> {
               SizedBox(width: 8,),
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     widget.searchBarController.close();
                     widget.pagingController.refresh();

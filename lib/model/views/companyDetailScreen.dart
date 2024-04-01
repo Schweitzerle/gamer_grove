@@ -18,6 +18,7 @@ import 'package:palette_generator/palette_generator.dart';
 
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/website.dart';
+import '../widgets/shimmerGameItem.dart';
 
 class CompanyDetailScreen extends StatefulWidget {
   static Route route(Company company, BuildContext context) {
@@ -44,7 +45,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   late Color darkColor;
   late PaletteColor color;
   bool isColorLoaded = false;
-  List<Company> companies = [];
+  final apiService = IGDBApiService();
 
   @override
   void initState() {
@@ -58,16 +59,10 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   Future<void> initialize() async {
-    await Future.wait([getColorPalette(), getIGDBData()]);
+    await Future.wait([getColorPalette()]);
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  Future<void> getIGDBData() async {
+  Future<List<dynamic>> getIGDBData() async {
     final apiService = IGDBApiService();
     try {
       final body = '''
@@ -78,32 +73,15 @@ w id = ${widget.company.id};
       };
     };
     ''';
-
       final List<dynamic> response =
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.multiquery, body);
 
-      setState(() {
-        // Extract data for game details
-        final gameResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Details',
-            orElse: () => null);
-        if (gameResponse != null) {
-          companies = apiService.parseResponseToCompany(gameResponse['result']);
-          if (companies[0].websites != null) {
-            companies[0]
-                .websites!
-                .add(CompanyWebsite(id: -1, url: companies[0].url!));
-          } else {
-            companies[0].websites = [
-              CompanyWebsite(id: -1, url: companies[0].url!)
-            ];
-          }
-        }
-      });
+      return response;
     } catch (e, stackTrace) {
       print('Error: $e');
       print('Stack Trace: $stackTrace');
     }
+    return [];
   }
 
   Future<void> getColorPalette() async {
@@ -250,19 +228,54 @@ w id = ${widget.company.id};
               SizedBox(
                 height: mediaQueryHeight * .01,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (companies.isNotEmpty)
-                    CompanyInfoWidget(
-                        company: companies[0], color: colorPalette),
-                  if (companies.isNotEmpty)
-                    CompanyGamesContainerSwitchWidget(
-                      company: companies[0],
-                      color: colorPalette,
-                    ),
-                ],
-              ),
+              if (isColorLoaded)
+                FutureBuilder<List<dynamic>>(
+                    future: getIGDBData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final response = snapshot.data!;
+                        List<Company> companies = [];
+
+                        final gameResponse = response.firstWhere(
+                            (item) => item['name'] == 'Game Details',
+                            orElse: () => null);
+                        if (gameResponse != null) {
+                          companies = apiService
+                              .parseResponseToCompany(gameResponse['result']);
+                          if (companies[0].websites != null) {
+                            companies[0].websites!.add(
+                                CompanyWebsite(id: -1, url: companies[0].url!));
+                          } else {
+                            companies[0].websites = [
+                              CompanyWebsite(id: -1, url: companies[0].url!)
+                            ];
+                          }
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (companies.isNotEmpty)
+                              CompanyInfoWidget(
+                                  company: companies[0], color: colorPalette),
+                            if (companies.isNotEmpty)
+                              CompanyGamesContainerSwitchWidget(
+                                company: companies[0],
+                                color: colorPalette,
+                              ),
+                            const SizedBox(
+                              height: 14,
+                            )
+                          ],
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      }
+                      // Display a loading indicator while fetching data
+                      return ShimmerItem.buildShimmerCompanyDetailScreen(
+                          context);
+                    }),
             ],
           ),
         ),

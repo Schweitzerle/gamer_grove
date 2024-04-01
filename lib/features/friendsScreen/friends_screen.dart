@@ -1,8 +1,11 @@
 import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:gamer_grove/model/widgets/shimmerGameItem.dart';
+import 'package:gamer_grove/model/widgets/userList.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -57,14 +60,19 @@ class _FriendsScreenState extends State<FriendsScreen>
   }
 
   Future<List<FirebaseUserModel>> _parseUsers() async {
-    return FirebaseService().getAllUserData();
+    final matchingUsers = await FirebaseService().getUsersByQuery(query);
+    final allUsers = await FirebaseService().getAllUserData();
+    if (query.isEmpty) {
+      return allUsers;
+    }
+    return matchingUsers;
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
-    Color color = Theme.of(context).colorScheme.tertiaryContainer;
+    Color color = Theme.of(context).colorScheme.inversePrimary.darken(20);
     final currentUser = getIt<FirebaseUserModel>();
 
     return Scaffold(
@@ -106,124 +114,107 @@ class _FriendsScreenState extends State<FriendsScreen>
           value: currentUser,
           child: Consumer<FirebaseUserModel>(
               builder: (context, firebaseUserModel, child) {
-            return Consumer<FirebaseUserModel>(
-                builder: (context, firebaseUserModel, child) {
-              return FutureBuilder<List<FirebaseUserModel>>(
-                  future: _parseUsers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      List<FirebaseUserModel> allUsers = snapshot.data!;
-                      allUsers.removeWhere((element) => element.uuid == currentUser.uuid);
-                      List<FirebaseUserModel> following = [];
-                      for (var user in allUsers) {
-                        if (currentUser.following.containsKey(user.uuid)) {
-                          following.add(user);
-                        }
-                      }
-
-                      return Stack(children: [
-                        if (firebaseUserModel.following.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 60.0),
-                            child: ListView.builder(
-                                itemCount: following.length,
-                                itemBuilder: (context, index) {
-                                  final user = following[index];
-                                  return UserListItem(
-                                    user: user,
-                                    buildContext: context,
-                                  );
+            return FutureBuilder<List<FirebaseUserModel>>(
+                future: FirebaseService()
+                    .getFollowingUserData(firebaseUserModel.following),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<FirebaseUserModel> following = snapshot.data!;
+                    return Stack(children: [
+                      UserListView(
+                        games: following,
+                        showLimit: following.length,
+                        isFollowing: true,
+                      ),
+                      FloatingSearchBar(
+                        showCursor: true,
+                        elevation: 20,
+                        borderRadius: BorderRadius.circular(14),
+                        border: BorderSide(
+                            color: Theme.of(context).colorScheme.background),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.inversePrimary,
+                        shadowColor: Theme.of(context).shadowColor,
+                        iconColor: Theme.of(context)
+                            .bottomNavigationBarTheme
+                            .selectedItemColor,
+                        accentColor: Theme.of(context)
+                            .bottomNavigationBarTheme
+                            .selectedItemColor,
+                        backdropColor: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(.7),
+                        controller: _searchBarController,
+                        hint: 'Search for Users',
+                        onSubmitted: (value) {
+                          if (value.isNotEmpty) {
+                            setState(() {
+                              query = value;
+                            });
+                          }
+                        },
+                        scrollPadding:
+                            const EdgeInsets.only(top: 16, bottom: 56),
+                        transitionDuration: const Duration(milliseconds: 800),
+                        transitionCurve: Curves.easeInOut,
+                        physics: const BouncingScrollPhysics(),
+                        axisAlignment: true ? 0.0 : -1.0,
+                        openAxisAlignment: 0.0,
+                        width: true ? 600 : 500,
+                        debounceDelay: const Duration(milliseconds: 500),
+                        onQueryChanged: (value) {
+                          query = value;
+                        },
+                        transition: CircularFloatingSearchBarTransition(),
+                        actions: [
+                          FloatingSearchBarAction(
+                            showIfOpened: false,
+                            child: CircularButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: () {
                                 }),
                           ),
-                        FloatingSearchBar(
-                          showCursor: true,
-                          elevation: 20,
-                          borderRadius: BorderRadius.circular(14),
-                          border: BorderSide(
-                              color: Theme.of(context).colorScheme.background),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.inversePrimary,
-                          shadowColor: Theme.of(context).shadowColor,
-                          iconColor: Theme.of(context)
-                              .bottomNavigationBarTheme
-                              .selectedItemColor,
-                          accentColor: Theme.of(context)
-                              .bottomNavigationBarTheme
-                              .selectedItemColor,
-                          backdropColor: Theme.of(context)
-                              .colorScheme
-                              .background
-                              .withOpacity(.7),
-                          controller: _searchBarController,
-                          hint: 'Search for Users',
-                          onSubmitted: (value) {
-                            if (value.isNotEmpty) {
-                              setState(() {
-                                query = value;
-                              });
-                            }
-                          },
-                          scrollPadding:
-                              const EdgeInsets.only(top: 16, bottom: 56),
-                          transitionDuration: const Duration(milliseconds: 800),
-                          transitionCurve: Curves.easeInOut,
-                          physics: const BouncingScrollPhysics(),
-                          axisAlignment: true ? 0.0 : -1.0,
-                          openAxisAlignment: 0.0,
-                          width: true ? 600 : 500,
-                          debounceDelay: const Duration(milliseconds: 500),
-                          onQueryChanged: (value) {
-                            query = value;
-                          },
-                          transition: CircularFloatingSearchBarTransition(),
-                          actions: [
-                            FloatingSearchBarAction(
-                              showIfOpened: false,
-                              child: CircularButton(
-                                  icon: const Icon(Icons.search),
-                                  onPressed: () {}),
-                            ),
-                            FloatingSearchBarAction.searchToClear(
-                              showIfClosed: false,
-                            ),
-                          ],
-                          clearQueryOnClose: false,
-                          builder: (context, transition) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ClayContainer(
-                                  height: mediaQueryHeight * .7,
-                                  spread: 2,
-                                  depth: 60,
-                                  borderRadius: 14,
-                                  color: color,
-                                  parentColor: Theme.of(context)
-                                      .colorScheme
-                                      .onTertiaryContainer,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: ListView.builder(
-                                        itemCount: allUsers.length,
-                                        itemBuilder: (context, index) {
-                                          final user = allUsers[index];
-                                          return UserListItem(
-                                            user: user,
-                                            buildContext: context,
-                                          );
-                                        }),
-                                  )),
-                            );
-                          },
-                        )
-                      ]);
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${snapshot.error}'),
-                      );
-                    }
-                    return Container();
-                  });
-            });
+                          FloatingSearchBarAction.searchToClear(
+                            showIfClosed: false,
+                          ),
+                        ],
+                        clearQueryOnClose: false,
+                        builder: (context, transition) {
+                          return ClayContainer(
+                              height: mediaQueryHeight * .7,
+                              spread: 2,
+                              depth: 60,
+                              borderRadius: 14,
+                              color: color,
+                              parentColor: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
+                              child: FutureBuilder<List<FirebaseUserModel>>(
+                                  future: _parseUsers(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    List<FirebaseUserModel> allUsers = snapshot.data!;
+                                    allUsers.removeWhere((element) => element.uuid == currentUser.uuid);
+                                    return UserListView(games: allUsers, showLimit: 20, isFollowing: false);
+                                  } else if (snapshot.hasError) {
+                                    return Center(
+                                      child: Text('Error: ${snapshot.error}'),
+                                    );
+                                  }
+                                  return Container();
+                                },
+                              ));
+                        },
+                      )
+                    ]);
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+                  return Container();
+                });
           }),
         ),
       ]),

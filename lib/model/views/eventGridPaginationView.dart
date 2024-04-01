@@ -9,6 +9,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 import '../widgets/customDialog.dart';
+import '../widgets/shimmerGameItem.dart';
 
 class EventGridPaginationView extends StatefulWidget {
   final PagingController<int, Event> pagingController;
@@ -40,14 +41,7 @@ class EventGridPaginationViewState extends State<EventGridPaginationView> {
             ),
             pagingController: widget.pagingController,
             builderDelegate: PagedChildBuilderDelegate<Event>(
-              firstPageProgressIndicatorBuilder:(_) => const Padding(
-                padding: EdgeInsets.all(78.0),
-                child: Center(
-                  child: LoadingIndicator(
-                      indicatorType: Indicator.pacman, /// Required, The loading type of the widget
-                  ),
-                ),
-              ),
+              firstPageProgressIndicatorBuilder:(_) => ShimmerItem.buildShimmerEventGridItem(context),
               newPageProgressIndicatorBuilder: (_) => const Center(
                 child: Padding(
                   padding: EdgeInsets.all(18.0),

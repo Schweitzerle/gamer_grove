@@ -286,8 +286,8 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final mediaQueryWidth = MediaQuery.of(context).size.width;
 
-    Color color = Theme.of(context).colorScheme.tertiaryContainer;
-    Color onColor = Theme.of(context).colorScheme.onTertiaryContainer;
+    Color color = Theme.of(context).colorScheme.inversePrimary.darken(10);
+    Color onColor = color.onColor;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -297,7 +297,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
             spread: 2,
             depth: 60,
             borderRadius: 14,
-            color: Theme.of(context).colorScheme.tertiaryContainer,
+            color: color,
             parentColor: onColor,
             child: SizedBox(
               child: Padding(
@@ -312,9 +312,9 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                           borderRadius: 14,
                           borderWidth: 4,
                           focusedBorderWidth: 2,
-                          focusedBorderColor: color.darken(20),
+                          focusedBorderColor: color.darken(10),
                           fieldBackgroundColor: color,
-                          borderColor: color.darken(20),
+                          borderColor: color.darken(10),
                           optionsBackgroundColor: color.lighten(10),
                           selectedOptionBackgroundColor: color.lighten(15),
                           dropdownBorderRadius: 14,
@@ -329,7 +329,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                   : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
                             );
                           },
-                          dropdownBackgroundColor: color.darken(20),
+                          dropdownBackgroundColor: color.darken(10),
                           hint: 'Sort By',
                           onOptionSelected: (options) {
                             widget.filterOptions.selectedSorting =
@@ -415,18 +415,16 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                               child:
                               MultiSelectBottomSheetField<
                                   int?>(
-                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                confirmText: Text('OK', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: color.darken(20),),
                                 title:
-                                Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                Text("Themes", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color.darken(20)),),
                                 buttonText:
                                 Text("Themes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme.secondaryContainer,
+                                backgroundColor: color,
                                 itemsTextStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme.onSecondaryContainer),
+                                    color: onColor),
                                 decoration: BoxDecoration(
                                     borderRadius:
                                     BorderRadius.circular(
@@ -477,18 +475,16 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                               child:
                               MultiSelectBottomSheetField<
                                   int?>(
-                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                confirmText: Text('OK', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: color.darken(20),),
                                 title:
-                                Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                Text("Genres", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color.darken(20)),),
                                 buttonText:
                                 Text("Genres", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme.secondaryContainer,
+                                backgroundColor: color,
                                 itemsTextStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme.onSecondaryContainer),
+                                    color: onColor),
                                 decoration: BoxDecoration(
                                     borderRadius:
                                     BorderRadius.circular(
@@ -539,18 +535,16 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                               child:
                               MultiSelectBottomSheetField<
                                   int?>(
-                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                confirmText: Text('OK', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: color.darken(20),),
                                 title:
-                                Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                Text("Platforms", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color.darken(20)),),
                                 buttonText:
                                 Text("Platforms", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme.secondaryContainer,
+                                backgroundColor: color,
                                 itemsTextStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme.onSecondaryContainer),
+                                    color: onColor),
                                 decoration: BoxDecoration(
                                     borderRadius:
                                     BorderRadius.circular(
@@ -601,18 +595,16 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                               child:
                               MultiSelectBottomSheetField<
                                   int?>(
-                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                confirmText: Text('OK', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: color.darken(20),),
                                 title:
-                                Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                Text("Game Modes", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color.darken(20)),),
                                 buttonText:
                                 Text("Game Modes", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme.secondaryContainer,
+                                backgroundColor: color,
                                 itemsTextStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme.onSecondaryContainer),
+                                    color: onColor),
                                 decoration: BoxDecoration(
                                     borderRadius:
                                     BorderRadius.circular(
@@ -663,18 +655,16 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                               child:
                               MultiSelectBottomSheetField<
                                   int?>(
-                                confirmText: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                cancelText: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.secondaryContainer.darken(20), fontWeight: FontWeight.bold),),
-                                searchIcon: Icon(CupertinoIcons.search, color: Theme.of(context).colorScheme.secondaryContainer.darken(20),),
+                                confirmText: Text('OK', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                cancelText: Text('Cancel', style: TextStyle(color: color.darken(20), fontWeight: FontWeight.bold),),
+                                searchIcon: Icon(CupertinoIcons.search, color: color.darken(20),),
                                 title:
-                                Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer),),
+                                Text("Player Perspectives", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color.darken(20)),),
                                 buttonText:
-                                Text("Player Perspective", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme.secondaryContainer,
+                                Text("Player Perspectives", style: TextStyle(fontWeight: FontWeight.bold, color: onColor)),
+                                backgroundColor: color,
                                 itemsTextStyle: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme.onSecondaryContainer),
+                                    color: onColor),
                                 decoration: BoxDecoration(
                                     borderRadius:
                                     BorderRadius.circular(
@@ -734,9 +724,9 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                   borderRadius: 14,
                                   borderWidth: 4,
                                   focusedBorderWidth: 2,
-                                  focusedBorderColor: color.darken(20),
+                                  focusedBorderColor: color.darken(10),
                                   fieldBackgroundColor: color,
-                                  borderColor: color.darken(20),
+                                  borderColor: color.darken(10),
                                   optionsBackgroundColor: color.lighten(10),
                                   selectedOptionBackgroundColor: color.lighten(15),
                                   dropdownBorderRadius: 14,
@@ -751,7 +741,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                           : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
                                     );
                                   },
-                                  dropdownBackgroundColor: color.darken(20),
+                                  dropdownBackgroundColor: color.darken(10),
                                   hint: 'Age Rating',
                                   onOptionSelected: (options) {
                                     widget.filterOptions
@@ -794,9 +784,9 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                   borderRadius: 14,
                                   borderWidth: 4,
                                   focusedBorderWidth: 2,
-                                  focusedBorderColor: color.darken(20),
+                                  focusedBorderColor: color.darken(10),
                                   fieldBackgroundColor: color,
-                                  borderColor: color.darken(20),
+                                  borderColor: color.darken(10),
                                   optionsBackgroundColor: color.lighten(10),
                                   selectedOptionBackgroundColor: color.lighten(15),
                                   dropdownBorderRadius: 14,
@@ -811,7 +801,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                           : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
                                     );
                                   },
-                                  dropdownBackgroundColor: color.darken(20),
+                                  dropdownBackgroundColor: color.darken(10),
                                   hint: 'Category',
                                   onOptionSelected: (options) {
                                     widget.filterOptions
@@ -855,9 +845,9 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                   borderRadius: 14,
                                   borderWidth: 4,
                                   focusedBorderWidth: 2,
-                                  focusedBorderColor: color.darken(20),
+                                  focusedBorderColor: color.darken(10),
                                   fieldBackgroundColor: color,
-                                  borderColor: color.darken(20),
+                                  borderColor: color.darken(10),
                                   optionsBackgroundColor: color.lighten(10),
                                   selectedOptionBackgroundColor: color.lighten(15),
                                   dropdownBorderRadius: 14,
@@ -872,7 +862,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                           : Icon(Icons.radio_button_unchecked, color: color.darken(20).onColor,),
                                     );
                                   },
-                                  dropdownBackgroundColor: color.darken(20),
+                                  dropdownBackgroundColor: color.darken(10),
                                   hint: 'Status',
                                   onOptionSelected: (options) {
                                     widget.filterOptions.selectedStatus =
@@ -1027,7 +1017,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions.ratingValues =
                                                 values;
                                           });
-                                        }, color: color,
+                                        }, color: onColor,
                                       ),
                                       RatingRangeSlider(
                                         title: 'Critics Rating Range',
@@ -1039,7 +1029,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                                     .aggregatedRatingValues =
                                                 values;
                                           });
-                                        }, color: color,
+                                        }, color: onColor,
                                       ),
                                       RatingRangeSlider(
                                         title: 'Total Rating Range',
@@ -1050,7 +1040,7 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
                                             widget.filterOptions
                                                 .totalRatingValues = values;
                                           });
-                                        }, color: color,
+                                        }, color: onColor,
                                       ),
                                     ],
                                   ),
@@ -1109,6 +1099,15 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
             children: [
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     widget.searchBarController.close();
                     setState(() {});
@@ -1121,29 +1120,46 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
               ),
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     setState(() {
                       widget.filterOptions.releaseDateValues = SfRangeValues(
                           DateTime(1990),
                           DateTime.now().add(Duration(days: 365)));
-                      if (widget.filterOptions.selectedGameModes != null)
+                      if (widget.filterOptions.selectedGameModes != null) {
                         widget.filterOptions.selectedGameModes!.clear();
+                      }
                       if (widget.filterOptions.selectedPlayerPerspectives !=
-                          null)
+                          null) {
                         widget.filterOptions.selectedPlayerPerspectives!
                             .clear();
-                      if (widget.filterOptions.selectedPlatforms != null)
+                      }
+                      if (widget.filterOptions.selectedPlatforms != null) {
                         widget.filterOptions.selectedPlatforms!.clear();
-                      if (widget.filterOptions.selectedGenres != null)
+                      }
+                      if (widget.filterOptions.selectedGenres != null) {
                         widget.filterOptions.selectedGenres!.clear();
-                      if (widget.filterOptions.selectedThemes != null)
+                      }
+                      if (widget.filterOptions.selectedThemes != null) {
                         widget.filterOptions.selectedThemes!.clear();
-                      if (widget.filterOptions.selectedCategory != null)
+                      }
+                      if (widget.filterOptions.selectedCategory != null) {
                         widget.filterOptions.selectedCategory!.clear();
-                      if (widget.filterOptions.selectedAgeRating != null)
+                      }
+                      if (widget.filterOptions.selectedAgeRating != null) {
                         widget.filterOptions.selectedAgeRating!.clear();
-                      if (widget.filterOptions.selectedStatus != null)
+                      }
+                      if (widget.filterOptions.selectedStatus != null) {
                         widget.filterOptions.selectedStatus!.clear();
+                      }
                       widget.filterOptions.selectedSorting.clear();
                       widget.filterOptions.minRatings = 0;
                       widget.filterOptions.minTotalRatings = 0;
@@ -1167,6 +1183,15 @@ class _GameFilterScreenState extends State<GameFilterScreen> {
               ),
               Expanded(
                 child: ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(color),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                              side: BorderSide(color: onColor)
+                          )
+                      )
+                  ),
                   onPressed: () {
                     widget.searchBarController.close();
                     widget.pagingController.refresh();

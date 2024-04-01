@@ -28,7 +28,6 @@ class AppTokenService {
         final newToken = data['access_token'];
         final expiresIn = data['expires_in'];
 
-        // Calculate the expiration date and save it to Firebase
         expirationDate = DateTime.now().add(Duration(seconds: expiresIn));
 
         print('New token fetched');
@@ -55,7 +54,6 @@ class AppTokenService {
 
           if (firebaseToken != null && expirationDateString != null) {
             expirationDate = DateTime.parse(expirationDateString);
-
             if (expirationDate!.isBefore(DateTime.now())) {
               await getNewToken();
             } else {

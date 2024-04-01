@@ -50,7 +50,6 @@ class _GamePreviewViewState extends State<GamePreviewView> {
   late GameModel otherModel;
   final getIt = GetIt.instance;
   bool isColorLoaded = false;
-  final GlobalKey<SnappableState> _snappableKey = GlobalKey<SnappableState>();
 
   @override
   void initState() {
@@ -475,7 +474,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
       final PaletteGenerator paletteGenerator =
           await PaletteGenerator.fromImageProvider(
         NetworkImage('${widget.game.cover!.url}'),
-        size: Size(100, 150),
+        size: const Size(100, 150),
         maximumColorCount: 10,
       );
       setState(() {

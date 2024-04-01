@@ -13,8 +13,13 @@ class FirebaseService {
 
   Future<FirebaseUserModel> getSingleCurrentUserData() async {
     final userId = _auth.currentUser!.uid;
+    final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
     final snapshot = await _db.collection('Users').where('id', isEqualTo: userId).get();
     final data = snapshot.docs.map((e) => FirebaseUserModel.fromSnapshot(e)).single;
+    data.games.removeWhere((key, value) {
+      return !value['recommended'] && !value['wishlist'] && value['rating'] == 0;
+    });
+    await userDoc.update({'games': data.games});
     return data;
   }
 
@@ -24,10 +29,25 @@ class FirebaseService {
     return data;
   }
 
+  Future<List<FirebaseUserModel>> getFollowingUserData(Map<dynamic, dynamic> following) async {
+    final followingUserIDs = following.keys.toList();
+    if (followingUserIDs.isNotEmpty) {
+      final snapshots = await _db.collection('Users').where('id', whereIn: followingUserIDs).get();
+      // Use map instead of for loop for more concise data conversion
+      final followingUsers = snapshots.docs.map((e) => FirebaseUserModel.fromSnapshot(e)).toList();
+      return followingUsers;
+    }
+   return [];
+  }
+
+
   Future<List<FirebaseUserModel>> getAllUserData() async {
     final snapshot = await _db.collection('Users').get();
-    final data = snapshot.docs.map((e) => FirebaseUserModel.fromSnapshot(e)).toList();
-    return data;
+    if (snapshot.size > 0) {
+      final data = snapshot.docs.map((e) => FirebaseUserModel.fromSnapshot(e)).toList();
+      return data;
+    }
+    return [];
   }
 
   Future<List<FirebaseUserModel>> getAllUsers() async {

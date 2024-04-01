@@ -19,6 +19,7 @@ import 'package:motion/motion.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
+import '../widgets/shimmerGameItem.dart';
 
 
 class GameDetailScreen extends StatefulWidget {
@@ -50,10 +51,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   late Color darkColor;
   late PaletteColor color;
   bool isColorLoaded = false;
+  final apiService = IGDBApiService();
 
-  List<Game> games = [];
-  List<Character> characters = [];
-  List<Event> events = [];
 
   @override
   void initState() {
@@ -67,10 +66,10 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> initialize() async {
-    await Future.wait([getColorPalette(), getIGDBData()]);
+    await Future.wait([getColorPalette()]);
   }
 
-  Future<void> getIGDBData() async {
+  Future<List<dynamic>> getIGDBData() async {
     final apiService = IGDBApiService();
     try {
       final body = '''
@@ -94,47 +93,14 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       final List<dynamic> response =
           await apiService.getIGDBData(IGDBAPIEndpointsEnum.multiquery, body);
 
-      setState(() {
-        // Extract data for game details
-        final gameResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Details',
-            orElse: () => null);
-        if (gameResponse != null) {
-          games = apiService.parseResponseToGame(gameResponse['result']);
-          if (games[0].websites != null) {
-            games[0].websites!.add(Website(id: -1, url: games[0].url!));
-          } else {
-            games[0].websites = [Website(id: -1, url: games[0].url!)];
-          }
-        }
-
-        // Extract data for game characters
-        final charactersResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Characters',
-            orElse: () => null);
-        if (charactersResponse != null) {
-          characters =
-              apiService.parseResponseToCharacter(charactersResponse['result']);
-        }
-
-        final eventsResponse = response.firstWhere(
-            (item) => item['name'] == 'Game Events',
-            orElse: () => null);
-        if (eventsResponse != null) {
-          events = apiService.parseResponseToEvent(eventsResponse['result']);
-        }
-      });
+      return response;
     } catch (e, stackTrace) {
       print('Error: $e');
       print('Stack Trace: $stackTrace');
     }
+    return [];
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
 
   Future<void> getColorPalette() async {
     if (widget.game.cover!.url != null) {
@@ -170,10 +136,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
     final containerBackgroundColor = colorPalette.darken(10);
     final headerBorderColor = colorPalette;
-    final contentBackgroundColor = colorPalette.darken(10).withOpacity(.8);
 
     final luminance = headerBorderColor.computeLuminance();
-    final targetLuminance = 0.5;
+    const targetLuminance = 0.5;
     final adjustedTextColor =
         luminance > targetLuminance ? Colors.black : Colors.white;
 
@@ -199,9 +164,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 Stack(
                   alignment: Alignment.topLeft,
                   children: [
-                    if (games.isNotEmpty)
+                    if (widget.game.artworks != null)
                       BannerImageWidget(
-                        game: games[0],
+                        game: widget.game,
                         color: containerBackgroundColor,
                       ),
                     // Cover image
@@ -360,31 +325,77 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 SizedBox(
                   height: mediaQueryHeight * .01,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (games.isNotEmpty)
-                      SummaryAndStorylineWidget(
-                          game: games[0], color: colorPalette),
-                    if (games.isNotEmpty)
-                      CollectionsEventsContainerSwitchWidget(
-                        game: games[0],
-                        color: colorPalette,
-                        events: events,
-                        characters: characters,
-                        adjustedTextColor: adjustedTextColor,
-                      ),
-                    if (games.isNotEmpty)
-                      GamesContainerSwitchWidget(
-                          game: games[0], color: colorPalette),
-                    if (games.isNotEmpty)
-                      ImagesContainerSwitchWidget(
-                          game: games[0], color: colorPalette),
-                    SizedBox(
-                      height: 14,
-                    )
-                  ],
-                ),
+                if (isColorLoaded)
+                FutureBuilder<List<dynamic>>(
+                    future: getIGDBData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final response = snapshot.data!;
+                        List<Game> games = [];
+                        List<Event> events = [];
+                        List<Character> characters = [];
+
+                        final gameResponse = response.firstWhere(
+                                (item) => item['name'] == 'Game Details',
+                            orElse: () => null);
+                        if (gameResponse != null) {
+                          games = apiService.parseResponseToGame(gameResponse['result']);
+                          if (games[0].websites != null) {
+                            games[0].websites!.add(Website(id: -1, url: games[0].url!));
+                          } else {
+                            games[0].websites = [Website(id: -1, url: games[0].url!)];
+                          }
+                        }
+
+                        // Extract data for game characters
+                        final charactersResponse = response.firstWhere(
+                                (item) => item['name'] == 'Game Characters',
+                            orElse: () => null);
+                        if (charactersResponse != null) {
+                          characters =
+                              apiService.parseResponseToCharacter(charactersResponse['result']);
+                        }
+
+                        final eventsResponse = response.firstWhere(
+                                (item) => item['name'] == 'Game Events',
+                            orElse: () => null);
+                        if (eventsResponse != null) {
+                          events = apiService.parseResponseToEvent(eventsResponse['result']);
+                        }
+
+                        return  Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (games.isNotEmpty)
+                              SummaryAndStorylineWidget(
+                                  game: games[0], color: colorPalette),
+                            if (games.isNotEmpty)
+                              CollectionsEventsContainerSwitchWidget(
+                                game: games[0],
+                                color: colorPalette,
+                                events: events,
+                                characters: characters,
+                                adjustedTextColor: adjustedTextColor,
+                              ),
+                            if (games.isNotEmpty)
+                              GamesContainerSwitchWidget(
+                                  game: games[0], color: colorPalette),
+                            if (games.isNotEmpty)
+                              ImagesContainerSwitchWidget(
+                                  game: games[0], color: colorPalette),
+                            const SizedBox(
+                              height: 14,
+                            )
+                          ],
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      }
+                      // Display a loading indicator while fetching data
+                      return ShimmerItem.buildShimmerGameDetailScreen(context);
+                    }),
               ],
             ),
           ),

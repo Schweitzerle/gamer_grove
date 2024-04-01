@@ -26,7 +26,7 @@ class BannerImageWidget extends StatelessWidget {
     var rng = Random();
 
     return ClipRRect(
-      borderRadius: BorderRadius.only(
+      borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(14),
         bottomRight: Radius.circular(14),
       ),
@@ -41,7 +41,7 @@ class BannerImageWidget extends StatelessWidget {
                   colors: [
                     Colors.transparent,
                     color,],
-                  stops: [0.1, 1.0],
+                  stops: const [0.1, 1.0],
                 ).createShader(bounds);
               },
               blendMode: BlendMode.darken,
@@ -84,7 +84,7 @@ class BannerImageWidget extends StatelessWidget {
                     color.darken(30),
                   ],
                 ),
-                border: Border.fromBorderSide(BorderSide.none),
+                border: const Border.fromBorderSide(BorderSide.none),
                 shadowStrength: 5,
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(14),
