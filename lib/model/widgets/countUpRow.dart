@@ -27,7 +27,6 @@ class CountUpRow{
       borderRadius: BorderRadius.circular(14),
       elevation: 4.0,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.all(2.0),
@@ -39,6 +38,7 @@ class CountUpRow{
                     child: Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Row(
+                        mainAxisSize: MainAxisSize.max,
                         children: [
                           Icon(iconData, color: adjustedIconColor),
                           SizedBox(width: 8),
@@ -51,7 +51,6 @@ class CountUpRow{
                             separator: '.',
                             style: TextStyle(
                               color: adjustedIconColor,
-                              fontSize: 16,
                             ),
                           ),
                         ],

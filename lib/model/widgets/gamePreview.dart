@@ -44,7 +44,7 @@ class GamePreviewView extends StatefulWidget {
 }
 
 class _GamePreviewViewState extends State<GamePreviewView> {
-  late Color colorpalette;
+  late Color colorPalette;
   late Color lightColor;
   late Color darkColor;
   late GameModel otherModel;
@@ -64,7 +64,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
 
   Future<void> initialize() async {
     setState(() {
-      colorpalette = Theme.of(widget.buildContext).colorScheme.inversePrimary;
+      colorPalette = Theme.of(widget.buildContext).colorScheme.inversePrimary;
       lightColor = Theme.of(widget.buildContext).colorScheme.primary;
       darkColor = Theme.of(widget.buildContext).colorScheme.background;
     });
@@ -82,7 +82,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
           final mediaQueryWidth = MediaQuery.of(context).size.width;
           final coverScaleHeight = mediaQueryHeight / 3.1;
           final coverScaleWidth = coverScaleHeight * 0.69;
-          final luminance = colorpalette.computeLuminance();
+          final luminance = colorPalette.computeLuminance();
           final targetLuminance = 0.5;
           final adjustedTextColor =
               luminance > targetLuminance ? Colors.black : Colors.white;
@@ -93,19 +93,19 @@ class _GamePreviewViewState extends State<GamePreviewView> {
               onTap: () {
                 if (widget.isClickable) {
                   Navigator.of(context).push(
-                      GameDetailScreen.route(widget.game, context));
+                      GameDetailScreen.route(widget.game, context, colorPalette, lightColor));
                 }
               },
               onLongPress: () {
                 if (widget.isClickable) {
                   showDialog(
                       context: context,
-                      barrierColor: colorpalette.withOpacity(.8),
+                      barrierColor: colorPalette.withOpacity(.8),
                       builder: (BuildContext context) {
                         return CustomRatingDialog(
-                          colorPalette: colorpalette,
+                          colorPalette: colorPalette,
                           adjustedTextColor: adjustedTextColor,
-                          gameModel: gameModel,
+                          game: widget.game,
                         );
                       });
                 }
@@ -131,7 +131,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                                 Theme.of(context).colorScheme.tertiaryContainer,
                           ),
                           errorWidget: (context, url, error) => GlassContainer(
-                            color: colorpalette.onColor,
+                            color: colorPalette.onColor,
                             child: Icon(FontAwesomeIcons.gamepad),
                           ),
                           fit: BoxFit.fill,
@@ -147,8 +147,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                             shadowStrength: 4,
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(14),
-                            shadowColor: colorpalette,
-                            color: colorpalette.onColor.withOpacity(.1),
+                            shadowColor: colorPalette,
+                            color: colorPalette.onColor.withOpacity(.1),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 2.0, vertical: 4),
@@ -283,8 +283,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                               shadowStrength: 4,
                               shape: BoxShape.rectangle,
                               borderRadius: BorderRadius.circular(14),
-                              shadowColor: colorpalette,
-                              color: colorpalette.onColor.withOpacity(.1),
+                              shadowColor: colorPalette,
+                              color: colorPalette.onColor.withOpacity(.1),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 4.0, vertical: 2),
@@ -478,12 +478,10 @@ class _GamePreviewViewState extends State<GamePreviewView> {
         maximumColorCount: 10,
       );
       setState(() {
-        colorpalette = paletteGenerator.dominantColor?.color ??
+        colorPalette = paletteGenerator.dominantColor?.color ??
             Theme.of(widget.buildContext).colorScheme.inversePrimary;
         lightColor = paletteGenerator.lightVibrantColor?.color ??
             Theme.of(widget.buildContext).colorScheme.primary;
-        darkColor = paletteGenerator.darkVibrantColor?.color ??
-            Theme.of(widget.buildContext).colorScheme.background;
         isColorLoaded = true;
       });
     }

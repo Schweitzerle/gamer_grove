@@ -17,17 +17,18 @@ import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:motion/motion.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:vitality/vitality.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 import '../widgets/shimmerGameItem.dart';
 
 
 class GameDetailScreen extends StatefulWidget {
-  static Route route(Game game, BuildContext context) {
+  static Route route(Game game, BuildContext context, Color colorPalette, Color lightColor) {
     return MaterialPageRoute(
       builder: (context) => GameDetailScreen(
         game: game,
-        context: context,
+        context: context, colorPalette: colorPalette, lightColor: lightColor,
 
       ),
     );
@@ -35,10 +36,12 @@ class GameDetailScreen extends StatefulWidget {
 
   final Game game;
   final BuildContext context;
+  final Color colorPalette;
+  final Color lightColor;
 
   GameDetailScreen({
     required this.game,
-    required this.context,
+    required this.context, required this.colorPalette, required this.lightColor,
   });
 
   @override
@@ -46,10 +49,6 @@ class GameDetailScreen extends StatefulWidget {
 }
 
 class _GameDetailScreenState extends State<GameDetailScreen> {
-  late Color colorPalette;
-  late Color lightColor;
-  late Color darkColor;
-  late PaletteColor color;
   bool isColorLoaded = false;
   final apiService = IGDBApiService();
 
@@ -57,17 +56,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      colorPalette = Theme.of(widget.context).colorScheme.inversePrimary;
-      lightColor = Theme.of(widget.context).colorScheme.primary;
-      darkColor = Theme.of(widget.context).colorScheme.background;
-    });
-    initialize();
   }
 
-  Future<void> initialize() async {
-    await Future.wait([getColorPalette()]);
-  }
 
   Future<List<dynamic>> getIGDBData() async {
     final apiService = IGDBApiService();
@@ -111,13 +101,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         maximumColorCount: 10, // Adjust the maximum color count as needed
       );
       setState(() {
-        color = paletteGenerator.dominantColor!;
-        colorPalette = paletteGenerator.dominantColor?.color ??
-            Theme.of(widget.context).colorScheme.inversePrimary;
-        lightColor = paletteGenerator.lightVibrantColor?.color ??
-            Theme.of(widget.context).colorScheme.primary;
-        darkColor = paletteGenerator.darkVibrantColor?.color ??
-            Theme.of(widget.context).colorScheme.background;
         isColorLoaded = true;
       });
     }
@@ -134,8 +117,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
     final coverPaddingScaleHeight = bannerScaleHeight - coverScaleHeight / 2;
 
-    final containerBackgroundColor = colorPalette.darken(10);
-    final headerBorderColor = colorPalette;
+    final containerBackgroundColor = widget.colorPalette.darken(10);
+    final headerBorderColor = widget.colorPalette;
 
     final luminance = headerBorderColor.computeLuminance();
     const targetLuminance = 0.5;
@@ -145,6 +128,42 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background.darken(20),
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0.1,
+            maxSize: 30,
+            minSpeed: 0.1,
+            randomItemsColors: [
+              widget.colorPalette,
+              widget.colorPalette.darken(10),
+              widget.colorPalette.lighten(10),
+              widget.colorPalette.darken(5),
+              widget.colorPalette.lighten(5),
+              widget.colorPalette.darken(20),
+              widget.colorPalette.lighten(20),
+              widget.colorPalette.onColor,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.videogame_asset_outlined),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.videogame_asset),
+              ItemBehaviour(shape: ShapeType.Icon, icon: Icons.gamepad),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.gamepad_outlined),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: CupertinoIcons.gamecontroller_fill),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.gamecontroller),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
+            ],
+          ),
           Container(
           height: mediaQueryHeight,
           width: mediaQueryWidth,
@@ -153,8 +172,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               begin: Alignment(0.0, 0.9), // Start at the middle left
               end: Alignment(0.0, 0.7), // End a little above the middle
               colors: [
-                colorPalette.lighten(10),
-                colorPalette.darken(40),
+                widget.colorPalette.lighten(10),
+                Colors.transparent,
               ],
             ),
           ),
@@ -178,7 +197,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           // Cover image
                           Motion(
                             glare: GlareConfiguration(
-                              color: colorPalette.lighten(20),
+                              color: widget.colorPalette.lighten(20),
                               minOpacity: 0,
                             ),
                             shadow: const ShadowConfiguration(
@@ -211,7 +230,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         widget.game.versionTitle,
                                         containerBackgroundColor,
                                         Color(0xffff6961),
-                                        false,
                                         context)
                                     : Container(),
                                 widget.game.firstReleaseDate != null
@@ -223,7 +241,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                                     1000)),
                                         containerBackgroundColor,
                                         Color(0xffffb480),
-                                        false,
                                         context)
                                     : Container(),
                                 widget.game.status != null
@@ -232,7 +249,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         widget.game.status,
                                         containerBackgroundColor,
                                         Color(0xfff8f38d),
-                                        false,
                                         context)
                                     : Container(),
                                 widget.game.category != null
@@ -241,7 +257,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         widget.game.category,
                                         containerBackgroundColor,
                                         Color(0xff42d6a4),
-                                        false,
                                         context)
                                     : Container(),
                                 widget.game.hypes != null
@@ -254,7 +269,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         containerBackgroundColor,
                                         context,
                                         'Hypes: Number of follows a game gets before release',
-                                        lightColor)
+                                        widget.lightColor)
                                     : Container(),
                                 widget.game.follows != null
                                     ? CountUpRow.buildCountupRow(
@@ -266,7 +281,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         containerBackgroundColor,
                                         context,
                                         'Follow: Number of people following a game',
-                                        lightColor)
+                                        widget.lightColor)
                                     : Container(),
                                 widget.game.totalRatingCount != null
                                     ? CountUpRow.buildCountupRow(
@@ -278,7 +293,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                         containerBackgroundColor,
                                         context,
                                         'Total Ratings Count: Total number of user and external critic scores',
-                                        lightColor)
+                                        widget.lightColor)
                                     : Container()
                               ],
                             ),
@@ -297,7 +312,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           shadowStrength: 4,
                           shape: BoxShape.rectangle,
                           borderRadius: BorderRadius.circular(14),
-                          shadowColor: colorPalette,
+                          shadowColor: widget.colorPalette,
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: AnimatedTextKit(
@@ -307,7 +322,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                       ? widget.game.name!
                                       : 'Loading...',
                                   speed: Duration(milliseconds: 150),
-                                  textStyle: TextStyle(
+                                  textStyle: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 28,
                                     fontWeight: FontWeight.bold,
@@ -325,7 +340,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 SizedBox(
                   height: mediaQueryHeight * .01,
                 ),
-                if (isColorLoaded)
                 FutureBuilder<List<dynamic>>(
                     future: getIGDBData(),
                     builder: (context, snapshot) {
@@ -368,21 +382,21 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           children: [
                             if (games.isNotEmpty)
                               SummaryAndStorylineWidget(
-                                  game: games[0], color: colorPalette),
+                                  game: games[0], color: widget.colorPalette),
                             if (games.isNotEmpty)
                               CollectionsEventsContainerSwitchWidget(
                                 game: games[0],
-                                color: colorPalette,
+                                color: widget.colorPalette,
                                 events: events,
                                 characters: characters,
                                 adjustedTextColor: adjustedTextColor,
                               ),
                             if (games.isNotEmpty)
                               GamesContainerSwitchWidget(
-                                  game: games[0], color: colorPalette),
+                                  game: games[0], color: widget.colorPalette),
                             if (games.isNotEmpty)
                               ImagesContainerSwitchWidget(
-                                  game: games[0], color: colorPalette),
+                                  game: games[0], color: widget.colorPalette),
                             const SizedBox(
                               height: 14,
                             )
@@ -411,12 +425,12 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 onTap: () {
                   showDialog(
                       context: context,
-                      barrierColor: colorPalette.darken(30).withOpacity(.8),
+                      barrierColor: widget.colorPalette.darken(30).withOpacity(.8),
                       builder: (BuildContext context) {
                         return CustomRatingDialog(
-                          colorPalette: colorPalette,
+                          colorPalette: widget.colorPalette,
                           adjustedTextColor: adjustedTextColor,
-                          gameModel: widget.game.gameModel,
+                          game: widget.game,
                         );
                       });
                 },
@@ -426,12 +440,12 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                     shadowStrength: 4,
                     blur: 12,
                     shape: BoxShape.rectangle,
-                    color: colorPalette.darken(40).withOpacity(.1),
+                    color: widget.colorPalette.darken(40).withOpacity(.1),
                     borderRadius: BorderRadius.circular(14),
-                    shadowColor: colorPalette.lighten(20),
+                    shadowColor: widget.colorPalette.lighten(20),
                     child: Icon(
                       CupertinoIcons.gamecontroller_fill,
-                      color: colorPalette.onColor,
+                      color: widget.colorPalette.onColor,
                     )),
               ),
             ),

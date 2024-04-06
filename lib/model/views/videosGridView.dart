@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/game_video.dart';
 import 'package:gamer_grove/model/widgets/event_view.dart';
 import 'package:gamer_grove/model/widgets/gamePreview.dart';
 import 'package:gamer_grove/model/widgets/video_player_view.dart';
+import 'package:vitality/vitality.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 
@@ -56,10 +58,45 @@ class AllVideosGridScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(appBarText),
       ),
-      body: CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          VideosGridView(videos: videos, color: color,),
+      body: Stack(
+        children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background,
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0.1,
+            maxSize: 30,
+            minSpeed: 0.1,
+            randomItemsColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.live_tv_outlined),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.playpause),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.play_rectangle),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.play_arrow_solid),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: CupertinoIcons.play),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.tv),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
+            ],
+          ),
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              VideosGridView(videos: videos, color: color,),
+            ],
+          ),
         ],
       ),
     );

@@ -224,7 +224,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                       '${DateFormat('dd.MM.yyyy, HH:mm').format(DateTime.fromMillisecondsSinceEpoch(widget.event.startTime! * 1000))} ${widget.event.timeZone}',
                                       containerBackgroundColor,
                                       Color(0xffff6961),
-                                      false,
                                       context)
                                   : Container(),
                               widget.event.endTime != null
@@ -233,7 +232,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   '${DateFormat('dd.MM.yyyy, HH:mm').format(DateTime.fromMillisecondsSinceEpoch(widget.event.endTime! * 1000))} ${widget.event.timeZone}',
                                   containerBackgroundColor,
                                       Color(0xffffb480),
-                                      false,
                                       context)
                                   : Container(),
                             ],

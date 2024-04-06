@@ -5,9 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/features/landingScreen/bottom_nav_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:vitality/models/ItemBehaviour.dart';
+import 'package:vitality/vitality.dart';
 import '../bloc/signup_bloc.dart';
 
 class SignUpView extends StatelessWidget {
@@ -43,37 +46,72 @@ class _SignupForm extends StatelessWidget {
         title: const Text('Create Account'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-              left: 8.0,
-              right: 8,
-              top: MediaQuery.of(context).size.height * .15),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const _ProfilePicturePicker(),
-              const SizedBox(height: 15.0),
-              const Row(
-                children: [
-                  Expanded(child: _CreateAccountName()),
-                  SizedBox(width: 15.0),
-                  Expanded(child: _CreateAccountUsername()),
-                ],
-              ),
-              const SizedBox(height: 15.0),
-              Row(
-                children: [
-                  Expanded(child: _CreateAccountEmail()),
-                  const SizedBox(width: 15.0),
-                  Expanded(child: _CreateAccountPassword()),
-                ],
-              ),
-              const SizedBox(height: 30.0),
-              _SubmitButton(),
+      body: Stack(
+        children: [
+          Vitality.randomly(
+            background: Theme.of(context).colorScheme.background,
+            maxOpacity: 0.8,
+            minOpacity: 0.3,
+            itemsCount: 80,
+            enableXMovements: false,
+            whenOutOfScreenMode: WhenOutOfScreenMode.Teleport,
+            maxSpeed: 0.1,
+            maxSize: 30,
+            minSpeed: 0.1,
+            randomItemsColors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.tertiary,
+              Theme.of(context).colorScheme.onPrimary
+            ],
+            randomItemsBehaviours: [
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: Icons.login),
+              ItemBehaviour(shape: ShapeType.Icon, icon: CupertinoIcons.profile_circled),
+              ItemBehaviour(shape: ShapeType.Icon, icon: FontAwesomeIcons.registered),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.signature),
+              ItemBehaviour(
+                  shape: ShapeType.Icon,
+                  icon: Icons.password_rounded),
+              ItemBehaviour(
+                  shape: ShapeType.Icon, icon: CupertinoIcons.tv),
+              ItemBehaviour(shape: ShapeType.StrokeCircle),
             ],
           ),
-        ),
+          SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: 8.0,
+                  right: 8,
+                  top: MediaQuery.of(context).size.height * .15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const _ProfilePicturePicker(),
+                  const SizedBox(height: 15.0),
+                  const Row(
+                    children: [
+                      Expanded(child: _CreateAccountName()),
+                      SizedBox(width: 15.0),
+                      Expanded(child: _CreateAccountUsername()),
+                    ],
+                  ),
+                  const SizedBox(height: 15.0),
+                  Row(
+                    children: [
+                      Expanded(child: _CreateAccountEmail()),
+                      const SizedBox(width: 15.0),
+                      Expanded(child: _CreateAccountPassword()),
+                    ],
+                  ),
+                  const SizedBox(height: 30.0),
+                  _SubmitButton(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -21,7 +21,7 @@ class PlatformView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final luminance = color.computeLuminance();
-    final targetLuminance = 0.5;
+    const targetLuminance = 0.5;
 
     final adjustedIconColor =
     luminance > targetLuminance ? Colors.black : Colors.white;
@@ -114,7 +114,6 @@ class _PlatformCardState extends State<PlatformCard> {
                       borderRadius: BorderRadius.circular(12),
                       child: Stack(
                         children: [
-                          // Bild des Unternehmens mit ShaderMask
                           if (widget.platform!.platformLogo != null && widget.platform!.platformLogo!.url != null)
                             ShaderMask(
                               shaderCallback: (Rect bounds) {
@@ -124,7 +123,6 @@ class _PlatformCardState extends State<PlatformCard> {
                                   colors: [
                                     Colors.transparent,
                                     Colors.black.withOpacity(0.7),
-                                    // Dunkelheit des Gradients anpassen
                                   ],
                                 ).createShader(bounds);
                               },
@@ -136,7 +134,6 @@ class _PlatformCardState extends State<PlatformCard> {
                                 fit: BoxFit.contain, // Bildgröße anpassen
                               ),
                             ),
-                          // Name des Unternehmens
                           Positioned(
                             bottom: 0,
                             left: 0,
@@ -147,7 +144,7 @@ class _PlatformCardState extends State<PlatformCard> {
                               child: FittedBox(
                                 child: Text(
                                   widget.platform?.name ?? "",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -222,7 +219,7 @@ class _PlatformCardState extends State<PlatformCard> {
                 widget.multiplayerModes!.isNotEmpty ? 
               Flexible(
               child: DataTable2(
-                columns: [
+                columns: const [
                   DataColumn2(
                     label: Text('Mode'),
                     size: ColumnSize.S,
@@ -233,11 +230,9 @@ class _PlatformCardState extends State<PlatformCard> {
                 ],
                 rows: [
                   DataRow(cells: [
-                    DataCell(Flexible(child: Text('Campaign Coop', style: TextStyle(color: color),))),
+                    DataCell(Text('Campaign Coop', style: TextStyle(color: color),)),
                     DataCell(data.first.campaignCoop != null
-                        ? Icon(data.first.campaignCoop!
-                            ? Icons.check
-                            : Icons.close)
+                        ? Icon(data.first.campaignCoop! ? Icons.check : Icons.close)
                         : Text('')),
                   ]),
                   DataRow(cells: [

@@ -179,7 +179,6 @@ w id = ${widget.company.id};
                                                   1000)),
                                       containerBackgroundColor,
                                       Color(0xff9d94ff),
-                                      false,
                                       context)
                                   : Container(),
                             ],

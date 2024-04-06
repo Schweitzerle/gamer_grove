@@ -194,11 +194,11 @@ class _UserListItemState extends State<UserListItem> {
         FirebaseFirestore.instance.collection('Users').doc(widget.user.uuid);
 
     if (isFollowing) {
-      currentUser.follow(currentUser, widget.user);
+      currentUser.follow(currentUser, widget.user, context, colorPalette);
       await userDoc.update({'following': currentUser.following});
       await userFollowsDoc.update({'followers': widget.user.followers});
     } else {
-      currentUser.unfollow(currentUser, widget.user);
+      currentUser.unfollow(currentUser, widget.user, context, colorPalette);
       await userDoc.update({'following': currentUser.following});
       await userFollowsDoc.update({'followers': widget.user.followers});
     }

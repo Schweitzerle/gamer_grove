@@ -64,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ${getBodyNewestGames()}
         ${getBodyLatestEvents()}
         ${getBodyHypedGames()}
+        ${await getBodyStringRecommendationUsedGames()}
     ''';
       final List<dynamic> response = await apiService.getIGDBData(
         IGDBAPIEndpointsEnum.multiquery,
@@ -77,12 +78,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return [];
   }
 
+
+
   Future<void> _parseFollowers() async {
     final currentUser = getIt<FirebaseUserModel>();
     List<FirebaseUserModel> followers = [];
     for (var value in currentUser.following.values) {
       FirebaseUserModel firebaseUserModel =
-          await FirebaseService().getSingleUserData(value);
+      await FirebaseService().getSingleUserData(value);
       followers.add(firebaseUserModel);
     }
     if (followers.isNotEmpty) {
@@ -103,6 +106,182 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<List<Game>> getIGDBRecommendedUserData() async {
+    final currentUser = getIt<FirebaseUserModel>();
+    if (getGameKeys(currentUser.games).isNotEmpty) {
+      try {
+        final response3 =
+        await apiService.getIGDBData(IGDBAPIEndpointsEnum.games, getBody());
+
+        return apiService.parseResponseToGame(response3);
+      } catch (e, stackTrace) {
+        print('Error: $e');
+        print('Stack Trace: $stackTrace');
+        return []; // Return empty list on error
+      }
+    } else {
+      return []; // Return empty list if no games in wishlist
+    }
+  }
+
+  String getBody() {
+    final currentUser = getIt<FirebaseUserModel>();
+
+    final recommendedGameKeys = getGameKeys(currentUser.games);
+    final gameIds = recommendedGameKeys.map((key) => 'id = $key').toList();
+    final gamesJoin = gameIds.join("|");
+    String gamesString = 'w $gamesJoin;';
+
+    String body1 =
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title, themes.*, genres.*, game_modes.*, platforms.*, player_perspectives.*; $gamesString l 500;';
+    return body1;
+  }
+
+  List<String> getGameKeys(Map<String, dynamic> games) {
+    return games.keys.toList();
+  }
+
+  Future<String> getBodyStringRecommendationUsedGames() async {
+    final innerBody = await getInnerBodyStringRecommendationsUserGames();
+    final body3 =
+        'query games "Recommended Games for User" {$innerBody};';
+    return body3;
+  }
+
+  Future<String> getInnerBodyStringRecommendationsUserGames() async {
+    final userGames = await getIGDBRecommendedUserData();
+    userGames.removeWhere((element) => element.gameModel.rating < 7.5);
+    final themes = extractMostCommonThemeIds(userGames);
+    final genres = extractMostCommonGenreIds(userGames);
+    final platforms = extractMostCommonPlatformIds(userGames);
+    final playerPerspectives = extractMostCommonPlayerPerspectiveIds(userGames);
+    final gameModes = extractMostCommonGameModesIds(userGames);
+    String filterString = '';
+
+    if (themes.isNotEmpty || genres.isNotEmpty || gameModes.isNotEmpty || playerPerspectives.isNotEmpty || platforms.isNotEmpty) {
+      filterString = 'w $themes $genres $playerPerspectives $gameModes  $platforms;';
+    }
+
+    final body3 =
+        'fields name, cover.*, artworks.*, first_release_date, follows, category, url, hypes, status, total_rating, total_rating_count, version_title; s total_rating_count desc; $filterString l 20;';
+    return body3;
+  }
+
+  String extractMostCommonThemeIds(List<Game> userGames) {
+    final Map<int, int> themeIdCount = {};
+
+    for (var game in userGames) {
+      if (game.themes != null) {
+        for (var theme in game.themes!) {
+          themeIdCount[theme.id] = (themeIdCount[theme.id] ?? 0) + 1;
+        }
+      }
+    }
+    final sortedIds = themeIdCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topSortedIds = sortedIds.take(1).map((entry) => entry.key).toList();
+
+    if (topSortedIds.isEmpty) {
+      return "";
+    }
+
+    final result = 'themes = (${topSortedIds.join(', ')}) &';
+    return result;
+  }
+
+  String extractMostCommonGenreIds(List<Game> userGames) {
+    final Map<int, int> genreIDCount = {};
+
+    for (var game in userGames) {
+      if (game.genres != null) {
+        for (var genre in game.genres!) {
+          genreIDCount[genre.id] = (genreIDCount[genre.id] ?? 0) + 1;
+        }
+      }
+    }
+    final sortedIds = genreIDCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topSortedIds = sortedIds.take(1).map((entry) => entry.key).toList();
+
+    if (topSortedIds.isEmpty) {
+      return "";
+    }
+
+    final result = 'genres = (${topSortedIds.join(', ')}) &';
+    return result;
+  }
+
+  String extractMostCommonGameModesIds(List<Game> userGames) {
+    final Map<int, int> gameModesIDCount = {};
+
+    for (var game in userGames) {
+      if (game.gameModes != null) {
+        for (var gameMode in game.gameModes!) {
+          gameModesIDCount[gameMode.id] = (gameModesIDCount[gameMode.id] ?? 0) + 1;
+        }
+      }
+    }
+    final sortedIds = gameModesIDCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topSortedIds = sortedIds.take(1).map((entry) => entry.key).toList();
+
+    if (topSortedIds.isEmpty) {
+      return "";
+    }
+
+    final result = 'game_modes = (${topSortedIds.join(', ')}) &';
+    return result;
+  }
+
+  String extractMostCommonPlayerPerspectiveIds(List<Game> userGames) {
+    final Map<int, int> playerPerspectivesIdCount = {};
+
+    for (var game in userGames) {
+      if (game.playerPerspectives != null) {
+        for (var playerPerspective in game.playerPerspectives!) {
+          playerPerspectivesIdCount[playerPerspective.id] = (playerPerspectivesIdCount[playerPerspective.id] ?? 0) + 1;
+        }
+      }
+    }
+    final sortedIds = playerPerspectivesIdCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topSortedIds = sortedIds.take(1).map((entry) => entry.key).toList();
+
+    if (topSortedIds.isEmpty) {
+      return "";
+    }
+
+    final result = 'player_perspectives = (${topSortedIds.join(', ')}) &';
+    return result;
+  }
+
+  String extractMostCommonPlatformIds(List<Game> userGames) {
+    final Map<int, int> platformsIDCount = {};
+
+    for (var game in userGames) {
+      if (game.platforms != null) {
+        for (var platform in game.platforms!) {
+          platformsIDCount[platform.id] = (platformsIDCount[platform.id] ?? 0) + 1;
+        }
+      }
+    }
+    final sortedIds = platformsIDCount.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topSortedIds = sortedIds.take(1).map((entry) => entry.key).toList();
+
+    if (topSortedIds.isEmpty) {
+      return "";
+    }
+
+    final result = 'platforms = (${topSortedIds.join(', ')})';
+    return result;
+  }
+
   Future<String> getRecommendedBody() async {
     final recommendedGameKeys = getRecommendedGameKeys(randomUser.games);
     if (recommendedGameKeys.isEmpty) {
@@ -118,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<String> getRecommendedGameKeys(Map<String, dynamic> games) {
     final recommendedGames =
-        games.entries.where((entry) => entry.value['recommended'] == true);
+    games.entries.where((entry) => entry.value['recommended'] == true);
     return recommendedGames.map((entry) => entry.key).toList();
   }
 
@@ -242,145 +421,175 @@ class _HomeScreenState extends State<HomeScreen> {
             physics: const BouncingScrollPhysics(),
             child: _dataLoaded == true
                 ? FutureBuilder<List<dynamic>>(
-                    future: getIGDBData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final response = snapshot.data!;
-                        List<Game> recommendedGames = [];
-                        List<Game> topRatedGames = [];
-                        List<Game> criticsChoices = [];
-                        List<Game> mostFollowedGames = [];
-                        List<Game> newestGames = [];
-                        List<Game> hypedGames = [];
-                        List<Event> latestEvents = [];
+                future: getIGDBData(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final response = snapshot.data!;
+                    List<Game> recommendedGames = [];
+                    List<Game> topRatedGames = [];
+                    List<Game> criticsChoices = [];
+                    List<Game> mostFollowedGames = [];
+                    List<Game> newestGames = [];
+                    List<Game> hypedGames = [];
+                    List<Event> latestEvents = [];
+                    List<Game> recommendationsUserGames = [];
 
-                        final userRecommendationsResponse = response.firstWhere(
+                    final userRecommendationsResponse = response.firstWhere(
                             (item) => item['name'] == 'User Recommendation',
-                            orElse: () => null);
-                        if (userRecommendationsResponse != null) {
-                          recommendedGames = apiService.parseResponseToGame(
-                              userRecommendationsResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (userRecommendationsResponse != null) {
+                      recommendedGames = apiService.parseResponseToGame(
+                          userRecommendationsResponse['result']);
+                    }
 
-                        final mostFollowedGamesResponse = response.firstWhere(
+                    final mostFollowedGamesResponse = response.firstWhere(
                             (item) => item['name'] == 'Most Followed Games',
-                            orElse: () => null);
-                        if (mostFollowedGamesResponse != null) {
-                          mostFollowedGames = apiService.parseResponseToGame(
-                              mostFollowedGamesResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (mostFollowedGamesResponse != null) {
+                      mostFollowedGames = apiService.parseResponseToGame(
+                          mostFollowedGamesResponse['result']);
+                    }
 
-                        final criticsChoicesResponse = response.firstWhere(
+                    final criticsChoicesResponse = response.firstWhere(
                             (item) => item['name'] == 'Critics Choices',
-                            orElse: () => null);
-                        if (criticsChoicesResponse != null) {
-                          criticsChoices = apiService.parseResponseToGame(
-                              criticsChoicesResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (criticsChoicesResponse != null) {
+                      criticsChoices = apiService.parseResponseToGame(
+                          criticsChoicesResponse['result']);
+                    }
 
-                        final topRatedGamesResponse = response.firstWhere(
+                    final topRatedGamesResponse = response.firstWhere(
                             (item) => item['name'] == 'Top Rated Games',
-                            orElse: () => null);
-                        if (topRatedGamesResponse != null) {
-                          topRatedGames = apiService.parseResponseToGame(
-                              topRatedGamesResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (topRatedGamesResponse != null) {
+                      topRatedGames = apiService.parseResponseToGame(
+                          topRatedGamesResponse['result']);
+                    }
 
-                        final newestGamesResponse = response.firstWhere(
+                    final newestGamesResponse = response.firstWhere(
                             (item) => item['name'] == 'Newest Games',
-                            orElse: () => null);
-                        if (newestGamesResponse != null) {
-                          newestGames = apiService.parseResponseToGame(
-                              newestGamesResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (newestGamesResponse != null) {
+                      newestGames = apiService.parseResponseToGame(
+                          newestGamesResponse['result']);
+                    }
 
-                        final hypedGamesResponse = response.firstWhere(
+                    final hypedGamesResponse = response.firstWhere(
                             (item) => item['name'] == 'Hyped Games',
-                            orElse: () => null);
-                        if (hypedGamesResponse != null) {
-                          hypedGames = apiService.parseResponseToGame(
-                              hypedGamesResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (hypedGamesResponse != null) {
+                      hypedGames = apiService.parseResponseToGame(
+                          hypedGamesResponse['result']);
+                    }
 
-                        final latestEventsResponse = response.firstWhere(
+                    final latestEventsResponse = response.firstWhere(
                             (item) => item['name'] == 'Latest Events',
-                            orElse: () => null);
-                        if (latestEventsResponse != null) {
-                          latestEvents = apiService.parseResponseToEvent(
-                              latestEventsResponse['result']);
-                        }
+                        orElse: () => null);
+                    if (latestEventsResponse != null) {
+                      latestEvents = apiService.parseResponseToEvent(
+                          latestEventsResponse['result']);
+                    }
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                            ),
-                            if (latestEvents.isNotEmpty)
-                              EventListView(
-                                  headline: 'Latest Events',
-                                  events: latestEvents),
-                            if (recommendedGames.isNotEmpty)
-                              RecommendedCarouselSlider(
-                                games: recommendedGames,
-                                otherUserModel: randomUser,
-                              ),
-                            if (topRatedGames.isNotEmpty)
-                              GameListView(
-                                headline: 'Top Rated Games',
-                                games: topRatedGames,
-                                isPagination: true,
-                                body: getInnerBodyTopRatedGames(),
-                                showLimit: 10,
-                                isAggregated: false,
-                              ),
-                            if (criticsChoices.isNotEmpty)
-                              GameListView(
-                                headline: 'Critics Choices',
-                                games: criticsChoices,
-                                isPagination: true,
-                                body: getInnerBodyCriticsRatingDesc(),
-                                showLimit: 10,
-                                isAggregated: true,
-                              ),
-                            if (mostFollowedGames.isNotEmpty)
-                              GameListView(
-                                headline: 'Most Followed Games',
-                                games: mostFollowedGames,
-                                isPagination: true,
-                                body: getInnerBodyStringMostFollowedGames(),
-                                showLimit: 10,
-                                isAggregated: false,
-                              ),
-                            if (newestGames.isNotEmpty)
-                              GameListView(
-                                headline: 'Newest Games',
-                                games: newestGames,
-                                isPagination: true,
-                                body: getInnerBodyNewestGames(),
-                                showLimit: 10,
-                                isAggregated: false,
-                              ),
-                            if (hypedGames.isNotEmpty)
-                              GameListView(
-                                headline: 'Hyped Games',
-                                games: hypedGames,
-                                isPagination: true,
-                                body: getInnerBodyHypedGames(),
-                                showLimit: 10,
-                                isAggregated: false,
-                              ),
-                          ],
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Text('Error: ${snapshot.error}'),
-                        );
-                      }
-                      // Display a loading indicator while fetching data
-                      return ShimmerItem.buildShimmerHomeScreenItem(context);
-                    })
+                    final recommendationsUserResponse = response.firstWhere(
+                            (item) => item['name'] == 'Recommended Games for User',
+                        orElse: () => null);
+                    if (recommendationsUserResponse != null) {
+                      recommendationsUserGames = apiService.parseResponseToGame(
+                          recommendationsUserResponse['result']);
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 40),
+                        ),
+                        if (latestEvents.isNotEmpty)
+                          EventListView(
+                              headline: 'Latest Events',
+                              events: latestEvents),
+                        if (recommendedGames.isNotEmpty)
+                          RecommendedCarouselSlider(
+                            games: recommendedGames,
+                            otherUserModel: randomUser,
+                          ),
+                        if (topRatedGames.isNotEmpty)
+                          GameListView(
+                            headline: 'Top Rated Games',
+                            games: topRatedGames,
+                            isPagination: true,
+                            body: getInnerBodyTopRatedGames(),
+                            showLimit: 10,
+                            isAggregated: false,
+                          ),
+                        if (criticsChoices.isNotEmpty)
+                          GameListView(
+                            headline: 'Critics Choices',
+                            games: criticsChoices,
+                            isPagination: true,
+                            body: getInnerBodyCriticsRatingDesc(),
+                            showLimit: 10,
+                            isAggregated: true,
+                          ),
+                        if (recommendationsUserGames.isNotEmpty)
+                          FutureBuilder<String>(
+                            future: getInnerBodyStringRecommendationsUserGames(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Container();
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                final body = snapshot.data!;
+                                return GameListView(
+                                  headline: 'Recommended for you',
+                                  games: recommendationsUserGames,
+                                  isPagination: true,
+                                  body: body,
+                                  showLimit: 10,
+                                  isAggregated: false,
+                                );
+                              }
+                            },
+                          ),
+                        if (mostFollowedGames.isNotEmpty)
+                          GameListView(
+                            headline: 'Most Followed Games',
+                            games: mostFollowedGames,
+                            isPagination: true,
+                            body: getInnerBodyStringMostFollowedGames(),
+                            showLimit: 10,
+                            isAggregated: false,
+                          ),
+                        if (newestGames.isNotEmpty)
+                          GameListView(
+                            headline: 'Newest Games',
+                            games: newestGames,
+                            isPagination: true,
+                            body: getInnerBodyNewestGames(),
+                            showLimit: 10,
+                            isAggregated: false,
+                          ),
+                        if (hypedGames.isNotEmpty)
+                          GameListView(
+                            headline: 'Hyped Games',
+                            games: hypedGames,
+                            isPagination: true,
+                            body: getInnerBodyHypedGames(),
+                            showLimit: 10,
+                            isAggregated: false,
+                          ),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+                  // Display a loading indicator while fetching data
+                  return ShimmerItem.buildShimmerHomeScreenItem(context);
+                })
                 : Container(),
           ),
         ],

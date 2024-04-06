@@ -190,14 +190,16 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                           shadowColor: Theme.of(context).primaryColor,
                           child: Padding(
                             padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              '${currentUser.name}`s Library',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onBackground,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                            child: FittedBox(
+                              child: Text(
+                                '${currentUser.name}`s Library',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -217,23 +219,26 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                             top: 140, left: 20, right: 20),
                         child: Center(
                           child: GlassContainer(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment:
-                              CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AnimatedEmoji(
-                                  AnimatedEmojis.sleep,
-                                  size: 64,
-                                ),
-                                FittedBox(
-                                    child: Text(
-                                        'Nothing to see here yet...',
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold)))
-                              ],
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AnimatedEmoji(
+                                    AnimatedEmojis.cursing,
+                                    size: 64,
+                                  ),
+                                  FittedBox(
+                                      child: Text(
+                                          'Nothing to see here yet...',
+                                          style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold)))
+                                ],
+                              ),
                             ),
                           ),
                         ),

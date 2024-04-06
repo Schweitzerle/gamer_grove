@@ -11,10 +11,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/views/otherUserProfileView.dart';
 import 'package:gamer_grove/repository/firebase/firebase.dart';
 import 'package:get_it/get_it.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:like_button/like_button.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:profile_view/profile_view.dart';
+import 'package:toasty_box/toast_enums.dart';
+import 'package:toasty_box/toast_service.dart';
 
 import 'gameModel.dart';
 
@@ -85,15 +88,61 @@ class FirebaseUserModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void follow(FirebaseUserModel myModel, FirebaseUserModel otherModel) {
+  void follow(FirebaseUserModel myModel, FirebaseUserModel otherModel, BuildContext context, Color color) {
     following[otherModel.uuid] = otherModel.uuid;
     otherModel.followers[myModel.uuid] = myModel.uuid;
+    ToastService.showToast(
+      context,
+      isClosable: true,
+      backgroundColor: color,
+      shadowColor: color.darken(20),
+      length: ToastLength.medium,
+      expandedHeight: 100,
+      message: "Followed ${otherModel.username}! 🫂",
+      messageStyle: TextStyle(color: color.onColor),
+      leading: GlassContainer(child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(
+          FontAwesomeIcons.solidHeart,
+          color:
+              Theme.of(context)
+              .colorScheme
+              .primary
+        )
+      )),
+      slideCurve: Curves.elasticInOut,
+      positionCurve: Curves.bounceOut,
+      dismissDirection: DismissDirection.none,
+    );
     notifyListeners();
   }
 
-  void unfollow(FirebaseUserModel myModel, FirebaseUserModel otherModel) {
+  void unfollow(FirebaseUserModel myModel, FirebaseUserModel otherModel, BuildContext context, Color color) {
     following.remove(otherModel.uuid);
     otherModel.followers.remove(myModel.uuid);
+    ToastService.showToast(
+      context,
+      isClosable: true,
+      backgroundColor: color,
+      shadowColor: color.darken(20),
+      length: ToastLength.medium,
+      expandedHeight: 100,
+      message: "Unfollowed ${otherModel.username}! 🤬",
+      messageStyle: TextStyle(color: color.onColor),
+      leading: GlassContainer(child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+              FontAwesomeIcons.solidHeart,
+              color:
+              Theme.of(context)
+                  .colorScheme
+                  .onPrimary,
+          )
+      )),
+      slideCurve: Curves.elasticInOut,
+      positionCurve: Curves.bounceOut,
+      dismissDirection: DismissDirection.none,
+    );
     notifyListeners();
   }
 

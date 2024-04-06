@@ -168,7 +168,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                       widget.character.species,
                                       containerBackgroundColor,
                                       Color(0xffff6961),
-                                      false,
                                       context)
                                   : Container(),
                               widget.character.countryName != null
@@ -177,7 +176,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                       widget.character.countryName!,
                                       containerBackgroundColor,
                                       Color(0xffffb480),
-                                      false,
                                       context)
                                   : Container(),
                               widget.character.gender != null
@@ -186,7 +184,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                       widget.character.gender,
                                       containerBackgroundColor,
                                       Color(0xffc780e8),
-                                      false,
                                       context)
                                   : Container(),
                             ],

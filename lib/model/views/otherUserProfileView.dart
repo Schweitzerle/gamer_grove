@@ -344,23 +344,26 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                   top: 140, left: 20, right: 20),
                               child: Center(
                                 child: GlassContainer(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      AnimatedEmoji(
-                                        AnimatedEmojis.sleep,
-                                        size: 64,
-                                      ),
-                                      FittedBox(
-                                          child: Text(
-                                              'Nothing to see here yet...',
-                                              style: TextStyle(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold)))
-                                    ],
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        AnimatedEmoji(
+                                          AnimatedEmojis.cursing,
+                                          size: 64,
+                                        ),
+                                        FittedBox(
+                                            child: Text(
+                                                'Nothing to see here yet...',
+                                                style: TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.bold)))
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

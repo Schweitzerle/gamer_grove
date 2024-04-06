@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class InfoRow {
   static Widget buildInfoRow(IconData iconData, String? text, Color color,
-      Color iconColor, bool isLink, BuildContext context) {
+      Color iconColor, BuildContext context) {
 
       final luminance = color.computeLuminance();
       final targetLuminance = 0.5;
@@ -14,7 +14,6 @@ class InfoRow {
       final adjustedIconColor = luminance > targetLuminance ? iconColor.darken(10) : iconColor.lighten(10);
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.all(2.0),
@@ -26,30 +25,14 @@ class InfoRow {
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     Icon(iconData, color: adjustedIconColor), // Verwenden der angepassten Icon-Farbe
                     SizedBox(width: 8),
-                    isLink
-                        ? GestureDetector(
-                      onTap: () async {
-                        final Uri url = Uri.parse(text!);
-                        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                          throw Exception('Could not launch $url');
-                        }
-                      },
-                      child: Text(
-                        'IGDB Website',
-                        style: TextStyle(
-                          color: adjustedIconColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    )
-                        : Text(
+                    Text(
                       text!,
                       style: TextStyle(
                         color: adjustedIconColor,
-                        fontSize: 16,
                       ),
                     ),
                   ],

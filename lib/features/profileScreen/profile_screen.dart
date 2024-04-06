@@ -11,7 +11,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/model/firebase/firebaseUser.dart';
 import 'package:get_it/get_it.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:profile_view/profile_view.dart';
+import 'package:toasty_box/toast_enums.dart';
+import 'package:toasty_box/toast_service.dart';
 import 'package:vitality/vitality.dart';
 import 'package:widget_circular_animator/widget_circular_animator.dart';
 import '../../model/views/theme_screen.dart';
@@ -150,6 +153,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       onPressed: () async {
                         FirebaseAuthService(authService: FirebaseAuth.instance)
                             .signOut();
+                        ToastService.showToast(
+                          context,
+                          isClosable: true,
+                          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                          shadowColor: Theme.of(context).colorScheme.inversePrimary.darken(20),
+                          length: ToastLength.medium,
+                          expandedHeight: 100,
+                          message: "Bye Bye. Hope to see you again soon! 😶‍🌫️",
+                          messageStyle: TextStyle(color: Theme.of(context).colorScheme.inversePrimary.onColor),
+                          leading: const GlassContainer(child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(Icons.waving_hand_outlined, color: Colors.orangeAccent,)
+                          )),
+                          slideCurve: Curves.elasticInOut,
+                          positionCurve: Curves.bounceOut,
+                          dismissDirection: DismissDirection.none,
+                        );
                         await Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
