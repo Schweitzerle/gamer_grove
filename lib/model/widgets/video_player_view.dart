@@ -145,6 +145,7 @@ class _VideoDetailScreenState extends State<VideoDetailScreen> {
 
   void listener() {
     if (_isPlayerReady && mounted && !_controller.value.isFullScreen) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
       setState(() {});
     }
     setState(() {

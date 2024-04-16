@@ -6,10 +6,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/model/widgets/shimmerGameItem.dart';
+import 'package:gamer_grove/model/widgets/topThreeUserGamesWidgetView.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:textura/textura.dart';
 import 'package:vitality/vitality.dart';
 
@@ -17,6 +19,7 @@ import '../../model/firebase/firebaseUser.dart';
 import '../../model/igdb_models/game.dart';
 import '../../model/singleton/sinlgleton.dart';
 import '../../model/widgets/gameListPreview.dart';
+import '../../model/widgets/topThreeUserGamesWidget.dart';
 import '../../repository/igdb/IGDBApiService.dart';
 
 class WatchlistScreen extends StatefulWidget {
@@ -263,21 +266,25 @@ class _WatchlistScreenState extends State<WatchlistScreen>
                             }
                             return Column(
                               children: [
-                                if (recommendedData.isNotEmpty)
-                                  GameListView(
-                                    headline: 'Recommended Games',
-                                    games: recommendedData,
-                                    isPagination: true,
-                                    body: getRecommendedBody(),
-                                    showLimit: 10,
-                                    isAggregated: false,
-                                  ),
+                                TopThreeUserGamesWidgetView(user: currentUser, isLoggedInUserData: true,),
+                                const SizedBox(
+                                  height: 14,
+                                ),
                                 if (ratedData.isNotEmpty)
                                   GameListView(
                                     headline: 'Rated Games',
                                     games: ratedData,
                                     isPagination: true,
                                     body: getRatedBody(),
+                                    showLimit: 10,
+                                    isAggregated: false,
+                                  ),
+                                if (recommendedData.isNotEmpty)
+                                  GameListView(
+                                    headline: 'Recommended Games',
+                                    games: recommendedData,
+                                    isPagination: true,
+                                    body: getRecommendedBody(),
                                     showLimit: 10,
                                     isAggregated: false,
                                   ),

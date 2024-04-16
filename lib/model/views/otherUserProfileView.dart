@@ -17,6 +17,7 @@ import '../../repository/igdb/IGDBApiService.dart';
 import '../igdb_models/game.dart';
 import '../widgets/gameListPreview.dart';
 import '../widgets/shimmerGameItem.dart';
+import '../widgets/topThreeUserGamesWidgetView.dart';
 
 class OtherUserProfileScreen extends StatefulWidget {
   final FirebaseUserModel userModel;
@@ -393,6 +394,10 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                   }
                                   return Column(
                                     children: [
+                                      TopThreeUserGamesWidgetView(user: widget.userModel, isLoggedInUserData: false,),
+                                      const SizedBox(
+                                        height: 14,
+                                      ),
                                       if (recommendedData.isNotEmpty)
                                         GameListView(
                                           headline: 'Recommended Games',

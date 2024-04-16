@@ -195,7 +195,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     List<FirebaseUserModel> allUsers = snapshot.data!;
-                                    allUsers.removeWhere((element) => element.uuid == currentUser.uuid);
+                                    allUsers.removeWhere((element) => element.id == currentUser.id);
                                     return UserListView(games: allUsers, showLimit: 20, isFollowing: false);
                                   } else if (snapshot.hasError) {
                                     return Center(

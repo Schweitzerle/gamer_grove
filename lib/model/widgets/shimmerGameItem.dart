@@ -25,16 +25,17 @@ class ShimmerItem {
   }
 
   static Widget buildShimmerWishlistScreenItem(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: EdgeInsets.only(top: 14),
+        buildShimmerTopThreeGamesItem(context),
+        const SizedBox(
+          height: 14,
         ),
-        ShimmerGlassContainerGameList(),
-        ShimmerGlassContainerGameList(),
-        ShimmerGlassContainerGameList(),
+        const ShimmerGlassContainerGameList(),
+        const ShimmerGlassContainerGameList(),
+        const ShimmerGlassContainerGameList(),
       ],
     );
   }
@@ -49,10 +50,79 @@ class ShimmerItem {
           crossAxisCount: 2,
         ),
         itemBuilder: (context, index) {
-          return const ShimmerGlassContainerGame(); // Entfernen Sie das 'const' Keyword hier
+          return const ShimmerGlassContainerGame(
+            needsRating: true,
+          ); // Entfernen Sie das 'const' Keyword hier
         },
         itemCount: 10,
       ),
+    );
+  }
+
+  static Widget buildShimmerTopThreeGamesItem(BuildContext context) {
+    final mediaQueryHeight = MediaQuery.of(context).size.height;
+    return  Column(
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * .04,
+          width: MediaQuery.of(context).size.width * .42,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                flex: 3,
+                child: GlassContainer(
+                  blur: 12,
+                  borderRadius: BorderRadius.circular(14),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(.2),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.transparent,
+                    highlightColor:
+                    Theme.of(context).colorScheme.onPrimaryContainer,
+                    child: Container(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .tertiaryContainer
+                          .withOpacity(.8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 8,
+        ),
+        Row(
+          children: [
+            Expanded(
+                flex: 5,
+                child: SizedBox(
+                    height: mediaQueryHeight * .21,
+                    child: const ShimmerGlassContainerGameTopGames(
+                      needsRating: false,
+                    ))),
+            Expanded(
+                flex: 6,
+                child: SizedBox(
+                    height: mediaQueryHeight * .26,
+                    child: const ShimmerGlassContainerGameTopGames(
+                      needsRating: false,
+                    ))),
+            Expanded(
+                flex: 4,
+                child: SizedBox(
+                    height: mediaQueryHeight * .16,
+                    child: const ShimmerGlassContainerGameTopGames(
+                      needsRating: false,
+                    ))),
+          ],
+        ),
+      ],
     );
   }
 
@@ -133,8 +203,6 @@ class ShimmerItem {
       ],
     );
   }
-
-
 }
 
 class ShimmerGlassContainerEventCarousel extends StatelessWidget {
@@ -215,7 +283,9 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               itemCount: 4,
               itemBuilder: (context, index) {
-                return const ShimmerGlassContainerGame();
+                return const ShimmerGlassContainerGame(
+                  needsRating: true,
+                );
               },
             ),
           ),
@@ -226,8 +296,11 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
 }
 
 class ShimmerGlassContainerGame extends StatelessWidget {
+  final bool needsRating;
+
   const ShimmerGlassContainerGame({
     super.key,
+    required this.needsRating,
   });
 
   @override
@@ -264,36 +337,39 @@ class ShimmerGlassContainerGame extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: SizedBox(
-                    height: mediaQueryHeight * .06,
+                    height: needsRating
+                        ? mediaQueryHeight * .06
+                        : mediaQueryHeight * .04,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Expanded(
-                            flex: 3,
-                            child: GlassContainer(
-                              blur: 12,
-                              borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
-                                  .withOpacity(.2),
-                              child: Shimmer.fromColors(
-                                baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
+                          if (needsRating)
+                            Expanded(
+                              flex: 3,
+                              child: GlassContainer(
+                                blur: 12,
+                                borderRadius: BorderRadius.circular(14),
+                                color: Theme.of(context)
                                     .colorScheme
-                                    .onPrimaryContainer,
-                                child: Container(
-                                  color: Theme.of(context)
+                                    .primaryContainer
+                                    .withOpacity(.2),
+                                child: Shimmer.fromColors(
+                                  baseColor: Colors.transparent,
+                                  highlightColor: Theme.of(context)
                                       .colorScheme
-                                      .tertiaryContainer
-                                      .withOpacity(.8),
+                                      .onPrimaryContainer,
+                                  child: Container(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .tertiaryContainer
+                                        .withOpacity(.8),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
+                          if (needsRating) const SizedBox(width: 8),
                           Expanded(
                             flex: 5,
                             child: GlassContainer(
@@ -329,21 +405,25 @@ class ShimmerGlassContainerGame extends StatelessWidget {
   }
 }
 
-class ShimmerGlassContainerCompany extends StatelessWidget {
-  const ShimmerGlassContainerCompany({
+
+class ShimmerGlassContainerGameTopGames extends StatelessWidget {
+  final bool needsRating;
+
+  const ShimmerGlassContainerGameTopGames({
     super.key,
+    required this.needsRating,
   });
 
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
-    const coverScaleHeight = 200;
-    const coverScaleWidth = coverScaleHeight;
+    final coverScaleHeight = mediaQueryHeight / 3.1;
+    final coverScaleWidth = coverScaleHeight * 0.69;
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: GlassContainer(
-        height: coverScaleHeight.toDouble(),
-        width: coverScaleWidth.toDouble(),
+        height: coverScaleHeight,
+        width: coverScaleWidth,
         blur: 12,
         borderRadius: BorderRadius.circular(14),
         color:
@@ -362,6 +442,109 @@ class ShimmerGlassContainerCompany extends StatelessWidget {
                         .tertiaryContainer
                         .withOpacity(.8),
                   )),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                height: needsRating
+                    ? mediaQueryHeight * .06
+                    : mediaQueryHeight * .04,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (needsRating)
+                        Expanded(
+                          flex: 3,
+                          child: GlassContainer(
+                            blur: 12,
+                            borderRadius: BorderRadius.circular(14),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(.2),
+                            child: Shimmer.fromColors(
+                              baseColor: Colors.transparent,
+                              highlightColor: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              child: Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer
+                                    .withOpacity(.8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (needsRating) const SizedBox(width: 8),
+                      Expanded(
+                        flex: 5,
+                        child: GlassContainer(
+                          blur: 12,
+                          borderRadius: BorderRadius.circular(14),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withOpacity(.2),
+                          child: Shimmer.fromColors(
+                            baseColor: Colors.transparent,
+                            highlightColor: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                            child: Container(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .tertiaryContainer
+                                  .withOpacity(.8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ShimmerGlassContainerCompany extends StatelessWidget {
+  const ShimmerGlassContainerCompany({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQueryHeight = MediaQuery.of(context).size.height;
+    const coverScaleHeight = 200;
+    const coverScaleWidth = coverScaleHeight;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GlassContainer(
+        height: coverScaleHeight.toDouble(),
+        width: coverScaleWidth.toDouble(),
+        blur: 12,
+        borderRadius: BorderRadius.circular(14),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        child: Stack(
+          children: [
+            Shimmer.fromColors(
+              baseColor: Colors.transparent,
+              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              child: Container(
+                  decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withOpacity(.8),
+              )),
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -422,24 +605,22 @@ class ShimmerGlassContainerEvent extends StatelessWidget {
           child: GlassContainer(
             blur: 12,
             borderRadius: BorderRadius.circular(14),
-            color: Theme.of(context)
-                .colorScheme
-                .tertiaryContainer
-                .withOpacity(.2),
+            color:
+                Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
             child: Stack(
               children: [
                 Shimmer.fromColors(
                   baseColor: Colors.transparent,
                   highlightColor:
-                  Theme.of(context).colorScheme.onTertiaryContainer,
+                      Theme.of(context).colorScheme.onTertiaryContainer,
                   child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        color: Theme.of(context)
-                            .colorScheme
-                            .tertiaryContainer
-                            .withOpacity(.8),
-                      )),
+                    borderRadius: BorderRadius.circular(14),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .tertiaryContainer
+                        .withOpacity(.8),
+                  )),
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -523,20 +704,20 @@ class ShimmerGlassContainerToggleInfo extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color:
-        Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
               child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color:  Theme.of(context).colorScheme.tertiaryContainer
-                        .withOpacity(.8),
-                  )),
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withOpacity(.8),
+              )),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -551,7 +732,8 @@ class ShimmerGlassContainerToggleInfo extends StatelessWidget {
                         Expanded(
                           flex: 1,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 2.0),
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
@@ -638,20 +820,20 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color:
-        Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
               child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color:  Theme.of(context).colorScheme.tertiaryContainer
-                        .withOpacity(.8),
-                  )),
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withOpacity(.8),
+              )),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -669,7 +851,8 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
                             Expanded(
                               flex: 1,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2.0),
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
@@ -778,20 +961,20 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color:
-        Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
               child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color:  Theme.of(context).colorScheme.tertiaryContainer
-                        .withOpacity(.8),
-                  )),
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withOpacity(.8),
+              )),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -807,31 +990,32 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
                           Expanded(flex: 1, child: Container()),
                           for (int i = 0; i < 4; i++)
                             Expanded(
-                            flex: 1,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                              flex: 1,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: GlassContainer(
+                                  blur: 12,
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
+                                      .primaryContainer
+                                      .withOpacity(.2),
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.transparent,
+                                    highlightColor: Theme.of(context)
                                         .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
+                                        .onPrimaryContainer,
+                                    child: Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                          .withOpacity(.8),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -862,22 +1046,20 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color:
-        Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
               child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
-                        .withOpacity(.8),
-                  )),
+                borderRadius: BorderRadius.circular(14),
+                color: Theme.of(context)
+                    .colorScheme
+                    .tertiaryContainer
+                    .withOpacity(.8),
+              )),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -895,7 +1077,8 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             Expanded(
                               flex: 1,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2.0),
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
@@ -929,144 +1112,146 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                       mainAxisSpacing: 4,
                       crossAxisSpacing: 4,
                       children: [
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 4,
-                            mainAxisCellCount: 2,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9, // Aspect ratio for the first artwork
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            // Aspect ratio for the first artwork
+                            child: GlassContainer(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(.2),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.transparent,
+                                highlightColor: Theme.of(context)
                                     .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                                    .onPrimaryContainer,
+                                child: Container(
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
-                                  ),
+                                      .tertiaryContainer
+                                      .withOpacity(.8),
                                 ),
                               ),
                             ),
                           ),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 2,
-                            mainAxisCellCount: 2,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              // Aspect ratio for the second artwork
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            // Aspect ratio for the second artwork
+                            child: GlassContainer(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(.2),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.transparent,
+                                highlightColor: Theme.of(context)
                                     .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                                    .onPrimaryContainer,
+                                child: Container(
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
-                                  ),
+                                      .tertiaryContainer
+                                      .withOpacity(.8),
                                 ),
                               ),
                             ),
                           ),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 2,
-                            mainAxisCellCount: 1,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              // Aspect ratio for the second artwork
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 1,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            // Aspect ratio for the second artwork
+                            child: GlassContainer(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(.2),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.transparent,
+                                highlightColor: Theme.of(context)
                                     .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                                    .onPrimaryContainer,
+                                child: Container(
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
-                                  ),
+                                      .tertiaryContainer
+                                      .withOpacity(.8),
                                 ),
                               ),
                             ),
                           ),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 1,
-                            mainAxisCellCount: 1,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9, // Aspect ratio for the fifth artwork
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 1,
+                          mainAxisCellCount: 1,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            // Aspect ratio for the fifth artwork
+                            child: GlassContainer(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(.2),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.transparent,
+                                highlightColor: Theme.of(context)
                                     .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                                    .onPrimaryContainer,
+                                child: Container(
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
-                                  ),
+                                      .tertiaryContainer
+                                      .withOpacity(.8),
                                 ),
                               ),
                             ),
                           ),
-                          StaggeredGridTile.count(
-                            crossAxisCellCount: 1,
-                            mainAxisCellCount: 1,
-                            child: AspectRatio(
-                              aspectRatio: 16 / 9,
-                              // Aspect ratio for the fourth artwork
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 1,
+                          mainAxisCellCount: 1,
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            // Aspect ratio for the fourth artwork
+                            child: GlassContainer(
+                              blur: 12,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(.2),
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.transparent,
+                                highlightColor: Theme.of(context)
                                     .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                                    .onPrimaryContainer,
+                                child: Container(
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
-                                  ),
+                                      .tertiaryContainer
+                                      .withOpacity(.8),
                                 ),
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -1091,120 +1276,118 @@ class ShimmerUserItem extends StatelessWidget {
       children: [
         GlassContainer(
           height: 80,
-        blur: 12,
-        borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context)
-            .colorScheme
-            .tertiaryContainer
-            .withOpacity(.2),
-        child: Stack(
-          children: [
-            Shimmer.fromColors(
-              baseColor: Colors.transparent,
-              highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
-              child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
-                        .withOpacity(.8),
-                  )),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.all(14.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    GlassContainer(
-                      blur: 12,
-                      width: mediaQueryHeight *.065,
-                      borderRadius: BorderRadius.circular(90),
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withOpacity(.2),
-                      child: Shimmer.fromColors(
-                        baseColor: Colors.transparent,
-                        highlightColor: Theme.of(context)
+          blur: 12,
+          borderRadius: BorderRadius.circular(14),
+          color:
+              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
+          child: Stack(
+            children: [
+              Shimmer.fromColors(
+                baseColor: Colors.transparent,
+                highlightColor:
+                    Theme.of(context).colorScheme.onTertiaryContainer,
+                child: Container(
+                    decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .tertiaryContainer
+                      .withOpacity(.8),
+                )),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      GlassContainer(
+                        blur: 12,
+                        width: mediaQueryHeight * .065,
+                        borderRadius: BorderRadius.circular(90),
+                        color: Theme.of(context)
                             .colorScheme
-                            .onPrimaryContainer,
-                        child: Container(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .tertiaryContainer
-                              .withOpacity(.8),
+                            .primaryContainer
+                            .withOpacity(.2),
+                        child: Shimmer.fromColors(
+                          baseColor: Colors.transparent,
+                          highlightColor:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
+                          child: Container(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .tertiaryContainer
+                                .withOpacity(.8),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: GlassContainer(
+                                  blur: 12,
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
+                                      .primaryContainer
+                                      .withOpacity(.2),
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.transparent,
+                                    highlightColor: Theme.of(context)
                                         .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
+                                        .onPrimaryContainer,
+                                    child: Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                          .withOpacity(.8),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 7,),
-                            Expanded(
-                              child: GlassContainer(
-                                blur: 12,
-                                borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withOpacity(.2),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
+                              SizedBox(
+                                height: 7,
+                              ),
+                              Expanded(
+                                child: GlassContainer(
+                                  blur: 12,
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: Theme.of(context)
                                       .colorScheme
-                                      .onPrimaryContainer,
-                                  child: Container(
-                                    color: Theme.of(context)
+                                      .primaryContainer
+                                      .withOpacity(.2),
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.transparent,
+                                    highlightColor: Theme.of(context)
                                         .colorScheme
-                                        .tertiaryContainer
-                                        .withOpacity(.8),
+                                        .onPrimaryContainer,
+                                    child: Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                          .withOpacity(.8),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ],
     );
   }
 }
-

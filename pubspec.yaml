@@ -15,6 +15,7 @@ dependencies:
     path: packages/auth_service
   cupertino_icons: ^1.0.2
   glassmorphism_ui: ^0.3.0
+  fluttertoast: ^8.2.5
   textura: ^0.1.0+1
   snappable_thanos: ^0.0.4
   wave: ^0.2.2

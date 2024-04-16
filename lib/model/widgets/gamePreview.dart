@@ -113,7 +113,7 @@ class _GamePreviewViewState extends State<GamePreviewView> {
               child: ClayContainer(
                 height: coverScaleHeight,
                 width: coverScaleWidth,
-                color: darkColor,
+                color: colorPalette,
                 spread: 2,
                 depth: 60,
                 borderRadius: 14,
@@ -482,6 +482,8 @@ class _GamePreviewViewState extends State<GamePreviewView> {
             Theme.of(widget.buildContext).colorScheme.inversePrimary;
         lightColor = paletteGenerator.lightVibrantColor?.color ??
             Theme.of(widget.buildContext).colorScheme.primary;
+        darkColor = paletteGenerator.darkVibrantColor?.color ??
+            Theme.of(widget.buildContext).colorScheme.background;
         isColorLoaded = true;
       });
     }

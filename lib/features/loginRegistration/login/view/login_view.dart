@@ -1,12 +1,20 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/features/landingScreen/bottom_nav_bar.dart';
+import 'package:get_it/get_it.dart';
+import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:toasty_box/toast_enums.dart';
+import 'package:toasty_box/toast_service.dart';
 import 'package:vitality/models/ItemBehaviour.dart';
 import 'package:vitality/models/WhenOutOfScreenMode.dart';
 import 'package:vitality/vitality.dart';
 
+import '../../../../model/firebase/firebaseUser.dart';
+import '../../../../repository/firebase/firebase.dart';
 import '../../../home/home_screen.dart';
 import '../../signup/view/signup_page.dart';
 import '../bloc/login_bloc.dart';
@@ -14,18 +22,61 @@ import '../bloc/login_bloc.dart';
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
 
+  Future<void> registerCurrentUserData() async {
+    final getIt = GetIt.instance;
+    final currentUser = await FirebaseService().getSingleCurrentUserData();
+    getIt.allowReassignment = true;
+    getIt.registerSingletonAsync<FirebaseUserModel>(
+          () => Future.value(currentUser),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state.status == LoginStatus.success) {
+          Future.wait([registerCurrentUserData()]);
+          Color color = Theme.of(context).colorScheme.primaryContainer;
+          ToastService.showToast(
+            context,
+            isClosable: true,
+            backgroundColor: color,
+            shadowColor: color.darken(20),
+            length: ToastLength.medium,
+            expandedHeight: 100,
+            message: "Logged in successfully! 🤗",
+            messageStyle: TextStyle(color: color.onColor),
+            leading: GlassContainer(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('1.', style: TextStyle(color: color.onColor, fontWeight: FontWeight.bold),),
+                )),
+            slideCurve: Curves.elasticInOut,
+            positionCurve: Curves.bounceOut,
+            dismissDirection: DismissDirection.none,
+          );
           Navigator.of(context).pushReplacement(LiquidTabBar.route());
         }
         if (state.status == LoginStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-            ),
+          Color color = Theme.of(context).colorScheme.tertiaryContainer;
+          ToastService.showToast(
+            context,
+            isClosable: true,
+            backgroundColor: color,
+            shadowColor: color.darken(20),
+            length: ToastLength.medium,
+            expandedHeight: 100,
+            message: "${state.message}! 🙃",
+            messageStyle: TextStyle(color: color.onColor),
+            leading: GlassContainer(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('1.', style: TextStyle(color: color.onColor, fontWeight: FontWeight.bold),),
+                )),
+            slideCurve: Curves.elasticInOut,
+            positionCurve: Curves.bounceOut,
+            dismissDirection: DismissDirection.none,
           );
         }
       },
@@ -176,7 +227,7 @@ class _SubmitButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         context.read<LoginBloc>().add(
-              LoginButtonPressedEvent(),
+              const LoginButtonPressedEvent(),
             );
       },
       child: const Text('Login'),

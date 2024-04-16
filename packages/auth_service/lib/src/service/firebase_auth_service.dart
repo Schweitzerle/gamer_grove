@@ -9,8 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:toasty_box/toast_service.dart';
 import '../../auth.dart';
 import '../models/models.dart';
 
@@ -60,7 +60,6 @@ class FirebaseAuthService implements AuthService {
         email: email,
         password: password,
       );
-
       return _mapFirebaseUser(userCredential.user!);
     } on auth.FirebaseAuthException catch (e) {
       throw _determineError(e);
@@ -105,7 +104,7 @@ class FirebaseAuthService implements AuthService {
         profilePictureURL: profileURL,
       );
 
-      return _mapFirebaseUser(user!);
+      return _mapFirebaseUser(user);
     } on FirebaseAuthException catch (e) {
       throw _determineError(e);
     }

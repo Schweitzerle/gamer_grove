@@ -49,7 +49,7 @@ class _UserListItemState extends State<UserListItem> {
   }
 
   bool isFollowingUser(FirebaseUserModel currentUser) {
-    return currentUser.following.containsValue(widget.user.uuid);
+    return currentUser.following.containsValue(widget.user.id);
   }
 
   Future<void> getColorPalette() async {
@@ -189,9 +189,9 @@ class _UserListItemState extends State<UserListItem> {
   Future<void> _updateFollowStatusInDatabase(bool isFollowing) async {
     final currentUser = getIt<FirebaseUserModel>();
     final userDoc =
-        FirebaseFirestore.instance.collection('Users').doc(currentUser.uuid);
+        FirebaseFirestore.instance.collection('Users').doc(currentUser.id);
     final userFollowsDoc =
-        FirebaseFirestore.instance.collection('Users').doc(widget.user.uuid);
+        FirebaseFirestore.instance.collection('Users').doc(widget.user.id);
 
     if (isFollowing) {
       currentUser.follow(currentUser, widget.user, context, colorPalette);

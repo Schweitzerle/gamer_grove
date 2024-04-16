@@ -62,7 +62,7 @@ class FirebaseService {
 
       for (final value in userMaps.values) {
         FirebaseUserModel userModel = FirebaseUserModel.fromMap(value);
-        if(userModel.uuid != userId) {
+        if(userModel.id != userId) {
           allUsers.add(userModel);
         }
     }
@@ -81,7 +81,7 @@ class FirebaseService {
 
     for (FirebaseUserModel user in usersRef) {
       if (user.name.toLowerCase().contains(query.toLowerCase()) || user.username.toLowerCase().contains(query.toLowerCase())) {
-        if(user.uuid != userId) {
+        if(user.id != userId) {
           matchingUsers.add(user);
         }
       }

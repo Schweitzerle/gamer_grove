@@ -29,7 +29,6 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   final initialIndex = 2;
   late int currentIndex;
   late PageController controller;
-  final getIt = GetIt.instance;
 
   final List<Widget> pages = [
     WatchlistScreen(),
@@ -42,17 +41,10 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   @override
   void initState() {
     super.initState();
-    registerCurrentUserData();
     currentIndex = initialIndex;
     controller = PageController(initialPage: initialIndex);
   }
 
-  Future<void> registerCurrentUserData() async {
-    final currentUser = await FirebaseService().getSingleCurrentUserData();
-    getIt.allowReassignment = true;
-    getIt.registerSingletonAsync<FirebaseUserModel>(
-          () => Future.value(currentUser),
-    );  }
 
   @override
   void dispose() {

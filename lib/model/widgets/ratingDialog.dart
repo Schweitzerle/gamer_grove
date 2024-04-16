@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/model/widgets/topThreeUserGamesWidget.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:like_button/like_button.dart';
+import 'package:toasty_box/toast_enums.dart';
+import 'package:toasty_box/toast_service.dart';
 import '../firebase/firebaseUser.dart';
-import '../firebase/gameModel.dart';
 import '../igdb_models/game.dart';
 
 class CustomRatingDialog extends StatefulWidget {
@@ -34,7 +36,6 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
   final getIt = GetIt.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool toggleDummy = false;
 
   @override
   void initState() {
@@ -51,7 +52,6 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
       child: contentBox(context),
     );
   }
-
   contentBox(context) {
     return StatefulBuilder(
         builder: (context, setState) {
@@ -84,21 +84,25 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
                           shadowColor: widget.colorPalette.darken(20),
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text(
-                              'Rate this Game',
-                              style: TextStyle(
-                                color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .onBackground,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                            child: FittedBox(
+                              child: Text(
+                                '${widget.game.name}',
+                                style: TextStyle(
+                                  color: Theme
+                                      .of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 14,),
+                      TopThreeUserGamesWidget(game: widget.game,),
                       const SizedBox(
                         height: 14,
                       ),
@@ -374,13 +378,14 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     );
   }
 
+
   Future<void> _updateRatingInDatabase() async {
     final currentUser = getIt<FirebaseUserModel>();
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.game.gameModel.updateRating(context, widget.colorPalette, widget.game);
-    currentUser.update(widget.game.gameModel);
+    currentUser.updateGames(widget.game.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -390,7 +395,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.game.gameModel.deleteRating(context, widget.colorPalette, widget.game);
-    currentUser.update(widget.game.gameModel);
+    currentUser.updateGames(widget.game.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -400,7 +405,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.game.gameModel.updateRecommended(context, widget.colorPalette, widget.game);
-    currentUser.update(widget.game.gameModel);
+    currentUser.updateGames(widget.game.gameModel);
     await userDoc.update({'games': currentUser.games});
   }
 
@@ -410,8 +415,7 @@ class _CustomRatingDialogState extends State<CustomRatingDialog>
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
     widget.game.gameModel.updateWishlist(context, widget.colorPalette, widget.game);
-    currentUser.update(widget.game.gameModel);
+    currentUser.updateGames(widget.game.gameModel);
     await userDoc.update({'games': currentUser.games});
-
   }
 }

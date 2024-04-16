@@ -95,14 +95,17 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } else {
       randomUser = FirebaseUserModel(
-          uuid: '',
+          id: '',
           name: '',
           username: '',
           email: '',
           games: {},
           following: {},
           followers: {},
-          profileUrl: '');
+          profileUrl: '',
+          firstTopGame: {},
+          secondTopGame: {},
+          thirdTopGame: {});
     }
   }
 
