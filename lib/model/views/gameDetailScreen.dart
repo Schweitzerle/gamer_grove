@@ -124,12 +124,13 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     const targetLuminance = 0.5;
     final adjustedTextColor =
         luminance > targetLuminance ? Colors.black : Colors.white;
+    print(widget.game.cover!.url);
 
     return Scaffold(
       body: Stack(
         children: [
           Vitality.randomly(
-            background: Theme.of(context).colorScheme.background.darken(20),
+            background: Theme.of(context).colorScheme.background,
             maxOpacity: 0.8,
             minOpacity: 0.3,
             itemsCount: 80,

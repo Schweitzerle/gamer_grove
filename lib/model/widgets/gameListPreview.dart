@@ -106,8 +106,8 @@ class GameListViewState extends State<GameListView> {
               ],
             ),
           ),
-          SizedBox(
-            height: coverScaleHeight,
+          AspectRatio(
+            aspectRatio: 16 /9,
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,

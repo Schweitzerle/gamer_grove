@@ -28,7 +28,6 @@ import 'firebase_options.dart';
 import 'model/firebase/firebaseUser.dart';
 
 void main() async {
-  //TODO: vllt systemchrome verschieben, wegen null value error
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive, overlays: []);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

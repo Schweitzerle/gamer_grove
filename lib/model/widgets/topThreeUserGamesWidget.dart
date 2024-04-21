@@ -84,17 +84,20 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
   Widget build(BuildContext context) {
     final currentUser = getIt<FirebaseUserModel>();
     final mediaQueryHeight = MediaQuery.of(context).size.height;
-    return  ChangeNotifierProvider.value(
-        value: currentUser,
-        child: Consumer<FirebaseUserModel>(
-        builder: (context, firebaseUserModel, child) {
+    return ChangeNotifierProvider.value(
+      value: currentUser,
+      child: Consumer<FirebaseUserModel>(
+          builder: (context, firebaseUserModel, child) {
         return FutureBuilder<List<Game>>(
             future: getIGDBData(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<Game> topThreeGames = snapshot.data!;
                 Game? firstGame = currentUser.firstTopGame.isNotEmpty
-                    ? topThreeGames.where((element) => currentUser.firstTopGame.containsKey(element.id.toString())).singleOrNull
+                    ? topThreeGames
+                        .where((element) => currentUser.firstTopGame
+                            .containsKey(element.id.toString()))
+                        .singleOrNull
                     : null;
                 Game? secondGame = currentUser.secondTopGame.isNotEmpty
                     ? topThreeGames
@@ -116,128 +119,157 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(14),
                       shadowColor: Theme.of(context).colorScheme.inversePrimary,
-                      color:
-                      Theme.of(context).colorScheme.inversePrimary.withOpacity(.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .inversePrimary
+                          .withOpacity(.3),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 4.0, vertical: 4),
-                        child: Text('Your Top Three Games', style: TextStyle(fontWeight: FontWeight.bold,)),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 4.0, vertical: 4),
+                        child: Text('Your Top Three Games',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            )),
                       ),
                     ),
-                    SizedBox(height: 8,),
+                    SizedBox(
+                      height: 8,
+                    ),
                     Row(
                       children: [
                         Expanded(
                             flex: 5,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .15,
+                            child: AspectRatio(
+                                aspectRatio: 9 / 13,
                                 child: secondGame != null
                                     ? Stack(children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: ClayContainer(
-                                      color: middleColor,
-                                      spread: 2,
-                                      depth: 60,
-                                      borderRadius: 14,
-                                      child: GamePreviewView(
-                                          game: secondGame,
-                                          isCover: false,
-                                          buildContext: context,
-                                          needsRating: false,
-                                          isClickable: false),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    bottom: 0,
-                                    child: GlassContainer(
-                                      blur: 12,
-                                      shadowStrength: 4,
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(14),
-                                      shadowColor: middleColor,
-                                      color:
-                                      middleColor.onColor.withOpacity(.1),
-                                      child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2.0, vertical: 4),
-                                          child: Column(children: [
-                                            GestureDetector(
-                                                onTap: () {
-                                                  _updateSecondTopGameInDatabase(
-                                                      context,
-                                                      middleColor,
-                                                      widget.game);
-                                                },
-                                                child: const Icon(
-                                                  Icons.change_circle_outlined,
-                                                  color: Colors.yellow,
-                                                )),
-                                            const SizedBox(
-                                              height: 4,
-                                            ),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  _deleteSecondTopGameInDatabase(
-                                                      context,
-                                                      middleColor,
-                                                      widget.game);
-                                                },
-                                                child: const Icon(
-                                                  CupertinoIcons.delete,
-                                                  color: Colors.red,
-                                                )),
-                                          ])),
-                                    ),
-                                  ),
-                                ])
-                                    : topGamesPlaceholder(middleColor))),
-                        Expanded(
-                            flex: 6,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .18,
-                                child: firstGame != null
-                                    ? Stack(children: [
                                         Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: ClayContainer(
-                                            color: topColor,
-                                            spread: 2,
-                                            depth: 60,
-                                            borderRadius: 14,
-                                            child: GamePreviewView(
-                                                game: firstGame,
-                                                isCover: false,
-                                                buildContext: context,
-                                                needsRating: false,
-                                                isClickable: false),
+                                          padding: const EdgeInsets.all(2.0),
+                                          child: GlassContainer(
+                                            color: middleColor.withOpacity(.3),
+                                            blur: 12,
+                                            shadowStrength: 2,
+                                            shape: BoxShape.rectangle,
+                                            borderRadius:
+                                            BorderRadius.circular(14),
+                                            shadowColor: middleColor.lighten(20),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(1.0),
+                                              child: GamePreviewView(
+                                                  game: secondGame,
+                                                  isCover: false,
+                                                  buildContext: context,
+                                                  needsRating: false,
+                                                  isClickable: false),
+                                            ),
                                           ),
                                         ),
                                         Positioned(
-                                          right: 0,
-                                          bottom: 0,
+                                          right: 2,
+                                          bottom: 2,
                                           child: GlassContainer(
                                             blur: 12,
                                             shadowStrength: 4,
                                             shape: BoxShape.rectangle,
-                                            borderRadius: BorderRadius.circular(14),
-                                            shadowColor: topColor,
-                                            color:
-                                                topColor.onColor.withOpacity(.1),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            shadowColor: middleColor,
+                                            color: middleColor.onColor
+                                                .withOpacity(.1),
                                             child: Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 2.0, vertical: 4),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 2.0,
+                                                        vertical: 4),
+                                                child: Column(children: [
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        _updateSecondTopGameInDatabase(
+                                                            context,
+                                                            middleColor,
+                                                            widget.game);
+                                                      },
+                                                      child: const Icon(
+                                                        Icons
+                                                            .change_circle_outlined,
+                                                        color: Colors.yellow,
+                                                      )),
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        _deleteSecondTopGameInDatabase(
+                                                            context,
+                                                            middleColor,
+                                                            widget.game);
+                                                      },
+                                                      child: const Icon(
+                                                        CupertinoIcons.delete,
+                                                        color: Colors.red,
+                                                      )),
+                                                ])),
+                                          ),
+                                        ),
+                                      ])
+                                    : topGamesPlaceholder(middleColor))),
+                        Expanded(
+                            flex: 6,
+                            child: AspectRatio(
+                                aspectRatio: 9 / 13,
+                                child: firstGame != null
+                                    ? Stack(children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(2.0),
+                                          child: GlassContainer(
+                                            color: topColor.withOpacity(.3),
+                                            blur: 12,
+                                            shadowStrength: 2,
+                                            shape: BoxShape.rectangle,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            shadowColor: topColor.lighten(20),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(1.0),
+                                              child: GamePreviewView(
+                                                  game: firstGame,
+                                                  isCover: false,
+                                                  buildContext: context,
+                                                  needsRating: false,
+                                                  isClickable: false),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 2,
+                                          bottom: 2,
+                                          child: GlassContainer(
+                                            blur: 12,
+                                            shadowStrength: 4,
+                                            shape: BoxShape.rectangle,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            shadowColor: topColor,
+                                            color: topColor.onColor
+                                                .withOpacity(.1),
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 2.0,
+                                                        vertical: 4),
                                                 child: Column(children: [
                                                   GestureDetector(
                                                       onTap: () {
                                                         _updateFirstTopGameInDatabase(
                                                             context,
-                                                           topColor,
+                                                            topColor,
                                                             widget.game);
                                                       },
                                                       child: const Icon(
-                                                        Icons.change_circle_outlined,
+                                                        Icons
+                                                            .change_circle_outlined,
                                                         color: Colors.yellow,
                                                       )),
                                                   const SizedBox(
@@ -261,70 +293,81 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                                     : topGamesPlaceholder(topColor))),
                         Expanded(
                             flex: 4,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .12,
-                                child: thirdGame != null
-                                    ? Stack(children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: ClayContainer(
-                                      color: bottomColor,
-                                      spread: 2,
-                                      depth: 60,
-                                      borderRadius: 14,
-                                      child: GamePreviewView(
-                                          game: thirdGame,
-                                          isCover: false,
-                                          buildContext: context,
-                                          needsRating: false,
-                                          isClickable: false),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    bottom: 0,
-                                    child: GlassContainer(
-                                      blur: 12,
-                                      shadowStrength: 4,
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(14),
-                                      shadowColor: bottomColor,
-                                      color:
-                                      bottomColor.onColor.withOpacity(.1),
-                                      child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2.0, vertical: 4),
-                                          child: Column(children: [
-                                            GestureDetector(
-                                                onTap: () {
-                                                  _updateThirdTopGameInDatabase(
-                                                      context,
-                                                      bottomColor,
-                                                      widget.game);
-                                                },
-                                                child: const Icon(
-                                                  Icons.change_circle_outlined,
-                                                  color: Colors.yellow,
-                                                )),
-                                            const SizedBox(
-                                              height: 4,
-                                            ),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  _deleteThirdTopGameInDatabase(
-                                                      context,
-                                                      bottomColor,
-                                                      widget.game);
-                                                },
-                                                child: const Icon(
-                                                  CupertinoIcons.delete,
-                                                  color: Colors.red,
-                                                )),
-                                          ])),
-                                    ),
-                                  ),
-                                ])
-                                    : topGamesPlaceholder(bottomColor))),
+                            child: AspectRatio(
+                              aspectRatio: 9 / 13,
+                              child: thirdGame != null
+                                  ? Stack(children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: GlassContainer(
+                                          color: bottomColor.withOpacity(.3),
+                                          blur: 12,
+                                          shadowStrength: 2,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                          BorderRadius.circular(14),
+                                          shadowColor: bottomColor.lighten(20),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(1.0),
+                                            child: GamePreviewView(
+                                                game: thirdGame,
+                                                isCover: false,
+                                                buildContext: context,
+                                                needsRating: false,
+                                                isClickable: false),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 2,
+                                        bottom: 2,
+                                        child: GlassContainer(
+                                          blur: 12,
+                                          shadowStrength: 4,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          shadowColor: bottomColor,
+                                          color: bottomColor.onColor
+                                              .withOpacity(.1),
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 2.0,
+                                                      vertical: 4),
+                                              child: Column(children: [
+                                                GestureDetector(
+                                                    onTap: () {
+                                                      _updateThirdTopGameInDatabase(
+                                                          context,
+                                                          bottomColor,
+                                                          widget.game);
+                                                    },
+                                                    child: const Icon(
+                                                      Icons
+                                                          .change_circle_outlined,
+                                                      color: Colors.yellow,
+                                                    )),
+                                                const SizedBox(
+                                                  height: 4,
+                                                ),
+                                                GestureDetector(
+                                                    onTap: () {
+                                                      _deleteThirdTopGameInDatabase(
+                                                          context,
+                                                          bottomColor,
+                                                          widget.game);
+                                                    },
+                                                    child: const Icon(
+                                                      CupertinoIcons.delete,
+                                                      color: Colors.red,
+                                                    )),
+                                              ])),
+                                        ),
+                                      ),
+                                    ])
+                                  : topGamesPlaceholder(bottomColor),
+                            )),
                       ],
                     ),
                   ],
@@ -343,44 +386,45 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                     shape: BoxShape.rectangle,
                     borderRadius: BorderRadius.circular(14),
                     shadowColor: Theme.of(context).colorScheme.inversePrimary,
-                    color:
-                    Theme.of(context).colorScheme.inversePrimary.withOpacity(.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .inversePrimary
+                        .withOpacity(.3),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 4.0, vertical: 4),
-                      child: Text('Your Top Three Games', style: TextStyle(fontWeight: FontWeight.bold,)),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 4.0, vertical: 4),
+                      child: Text('Your Top Three Games',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          )),
                     ),
                   ),
-                  SizedBox(height: 8,),
+                  SizedBox(
+                    height: 8,
+                  ),
                   Row(
                     children: [
                       Expanded(
                           flex: 5,
-                          child: SizedBox(
-                              height: mediaQueryHeight * .15,
-                              child: const ShimmerGlassContainerGame(
-                                needsRating: false,
-                              ))),
+                          child: const ShimmerGlassContainerGame(
+                            needsRating: false,
+                          )),
                       Expanded(
                           flex: 6,
-                          child: SizedBox(
-                              height: mediaQueryHeight * .18,
-                              child: const ShimmerGlassContainerGame(
-                                needsRating: false,
-                              ))),
+                          child: const ShimmerGlassContainerGame(
+                            needsRating: false,
+                          )),
                       Expanded(
                           flex: 4,
-                          child: SizedBox(
-                              height: mediaQueryHeight * .12,
-                              child: const ShimmerGlassContainerGame(
-                                needsRating: false,
-                              ))),
+                          child: const ShimmerGlassContainerGame(
+                            needsRating: false,
+                          )),
                     ],
                   ),
                 ],
               );
             });
-        }),
+      }),
     );
   }
 
@@ -411,7 +455,8 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-    currentUser.updateSecondTopGame(game.gameModel, context, middleColor, widget.game);
+    currentUser.updateSecondTopGame(
+        game.gameModel, context, middleColor, widget.game);
     await userDoc.update({'secondTopGame': currentUser.secondTopGame});
   }
 
@@ -431,7 +476,8 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
     final userId = _auth.currentUser!.uid;
     final userDoc = FirebaseFirestore.instance.collection('Users').doc(userId);
 
-    currentUser.updateThirdTopGame(game.gameModel, context, bottomColor, widget.game);
+    currentUser.updateThirdTopGame(
+        game.gameModel, context, bottomColor, widget.game);
     await userDoc.update({'thirdTopGame': currentUser.thirdTopGame});
   }
 
@@ -445,7 +491,6 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
     await userDoc.update({'thirdTopGame': currentUser.thirdTopGame});
   }
 
-
   Widget topGamesPlaceholder(Color color) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
@@ -453,40 +498,48 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: GestureDetector(
-          onTap: () {
-            switch (color) {
-              case middleColor:
-                _updateSecondTopGameInDatabase(context, color, widget.game);
-                break;
-              case topColor:
-                _updateFirstTopGameInDatabase(context, color, widget.game);
-                break;
-              case bottomColor:
-                _updateThirdTopGameInDatabase(context, color, widget.game);
-                break;
-              default:
-                break;
-            }
-          },
-          child: ClayContainer(
-              height: coverScaleHeight,
-              width: coverScaleWidth,
-              color: color,
-              spread: 4,
-              depth: 60,
-              borderRadius: 14,
-              child: Center(
-                child: GlassContainer(
-                  blur: 12,
-                  shadowStrength: 2,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(14),
-                  shadowColor: color.lighten(20),
-                  child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(CupertinoIcons.add_circled, color: color.onColor,)),
-                ),
-              ))),
+        onTap: () {
+          switch (color) {
+            case middleColor:
+              _updateSecondTopGameInDatabase(context, color, widget.game);
+              break;
+            case topColor:
+              _updateFirstTopGameInDatabase(context, color, widget.game);
+              break;
+            case bottomColor:
+              _updateThirdTopGameInDatabase(context, color, widget.game);
+              break;
+            default:
+              break;
+          }
+        },
+        child: AspectRatio(
+          aspectRatio: 9 / 13,
+          child: GlassContainer(
+            color: color.withOpacity(.3),
+            blur: 12,
+            shadowStrength: 2,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(14),
+            shadowColor: color.lighten(20),
+            child: Center(
+              child: GlassContainer(
+                blur: 12,
+                shadowStrength: 2,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(14),
+                shadowColor: color.lighten(20),
+                child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      CupertinoIcons.add_circled,
+                      color: color.onColor,
+                    )),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

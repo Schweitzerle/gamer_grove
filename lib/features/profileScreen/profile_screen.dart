@@ -42,7 +42,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _themeChangeSubscription = ThemeManager().onThemeChanged.listen((_) {
       setState(() {
         _storedSchemeFuture = _loadAndSetTheme();
-        print('received theme change notification');
       });
     });
   }
@@ -124,7 +123,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           SingleChildScrollView(
             child: Stack(
               children: [
-
                 Container(
                   height: mediaQueryHeight * .74,
                   width: mediaQueryWidth,
@@ -222,8 +220,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           const SizedBox(height: 10),
                           Text(
                             user.username,
-                            // Hier den tatsächlichen Benutzernamen einfügen
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 10),
@@ -319,7 +316,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       FittedBox(
                                         child: Text(
                                           'Recommended',
-                                          // Anzahl der bewerteten Spiele einfügen
                                           style: TextStyle(
                                             color:  Theme.of(context)
                                                 .colorScheme
@@ -346,102 +342,105 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           const SizedBox(height: 20),
                         ],
                       ),
-                      Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: ClayContainer(
-                              spread: 2,
-                              depth: 60,
-                              height: MediaQuery.of(context).size.height * .18,
-                              customBorderRadius: BorderRadius.circular(12),
-                              color: Theme.of(context).cardColor,
-                              child: Padding(
-                                padding: EdgeInsets.all(10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Expanded(
-                                            flex: 3,
-                                            child: ClayContainer(
-                                              spread: 2,
-                                              depth: 60,
-                                              customBorderRadius:
-                                                  BorderRadius.circular(12),
-                                              color: Theme.of(context).cardColor,
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Center(
-                                                  child: Text(
-                                                    'Current Theme',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: Theme.of(context)
-                                                          .cardTheme
-                                                          .surfaceTintColor,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: ClayContainer(
+                                spread: 2,
+                                depth: 60,
+                                height: MediaQuery.of(context).size.height * .18,
+                                customBorderRadius: BorderRadius.circular(12),
+                                color: Theme.of(context).cardColor,
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: ClayContainer(
+                                                spread: 2,
+                                                depth: 60,
+                                                customBorderRadius:
+                                                    BorderRadius.circular(12),
+                                                color: Theme.of(context).cardColor,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Center(
+                                                    child: Text(
+                                                      'Current Theme',
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Theme.of(context)
+                                                            .cardTheme
+                                                            .surfaceTintColor,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          Expanded(
-                                            flex: 4,
-                                            child: Center(
-                                              child: ElevatedButton(
-                                                onPressed: () async {
-                                                  _navigateAndDisplaySelection(
-                                                      context);
-                                                },
-                                                child: Text('View All Themes'),
+                                            SizedBox(height: 10),
+                                            Expanded(
+                                              flex: 4,
+                                              child: Center(
+                                                child: ElevatedButton(
+                                                  onPressed: () async {
+                                                    _navigateAndDisplaySelection(
+                                                        context);
+                                                  },
+                                                  child: Text('View All Themes'),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      flex: 1,
-                                      child: FutureBuilder<FlexScheme>(
-                                        future: _storedSchemeFuture,
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return Center(
-                                                child: CircularProgressIndicator());
-                                          } else {
-                                            if (snapshot.hasError) {
-                                              return Text(
-                                                  'Error: ${snapshot.error}');
+                                      SizedBox(width: 10),
+                                      Expanded(
+                                        flex: 1,
+                                        child: FutureBuilder<FlexScheme>(
+                                          future: _storedSchemeFuture,
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return Center(
+                                                  child: CircularProgressIndicator());
                                             } else {
-                                              final scheme = snapshot.data!;
-                                              return ThemeButton(
-                                                scheme: scheme,
-                                                themeName: scheme
-                                                    .toString()
-                                                    .split('.')
-                                                    .last,
-                                              );
+                                              if (snapshot.hasError) {
+                                                return Text(
+                                                    'Error: ${snapshot.error}');
+                                              } else {
+                                                final scheme = snapshot.data!;
+                                                return ThemeButton(
+                                                  scheme: scheme,
+                                                  themeName: scheme
+                                                      .toString()
+                                                      .split('.')
+                                                      .last,
+                                                );
+                                              }
                                             }
-                                          }
-                                        },
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       Column(
                         children: [

@@ -103,7 +103,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     var rng = Random();
     int rndGame = rng.nextInt(widget.character.gameIDs!.length);
 
-    //TODO: Banner nicht scrollable machen
     return Scaffold(
       body: Container(
         height: mediaQueryHeight,

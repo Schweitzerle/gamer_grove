@@ -40,10 +40,13 @@ class _FriendsScreenState extends State<FriendsScreen>
   String query = "";
   final getIt = GetIt.instance;
   List<FirebaseUserModel> userFollowing = [];
+  List<FirebaseUserModel> allFetchedUsers = [];
+  List<FirebaseUserModel> queryUsers = [];
 
   @override
   void initState() {
     super.initState();
+    Future.wait([_parseUsers()]);
     _searchBarController = FloatingSearchBarController();
     _scrollController = ScrollController();
     _scrollController.addListener(() {
@@ -59,13 +62,14 @@ class _FriendsScreenState extends State<FriendsScreen>
     });
   }
 
-  Future<List<FirebaseUserModel>> _parseUsers() async {
-    final matchingUsers = await FirebaseService().getUsersByQuery(query);
+  Future<void> _parseUsers() async {
+    final currentUser = getIt<FirebaseUserModel>();
     final allUsers = await FirebaseService().getAllUserData();
-    if (query.isEmpty) {
-      return allUsers;
-    }
-    return matchingUsers;
+    setState(() {
+      allUsers.removeWhere((element) => element.id == currentUser.id);
+      allUsers.shuffle();
+      allFetchedUsers = allUsers;
+    });
   }
 
   @override
@@ -74,7 +78,6 @@ class _FriendsScreenState extends State<FriendsScreen>
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     Color color = Theme.of(context).colorScheme.inversePrimary.darken(20);
     final currentUser = getIt<FirebaseUserModel>();
-
     return Scaffold(
       body: Stack(children: [
         Vitality.randomly(
@@ -151,6 +154,12 @@ class _FriendsScreenState extends State<FriendsScreen>
                           if (value.isNotEmpty) {
                             setState(() {
                               query = value;
+                              final filteredUsers = allFetchedUsers.where((user) {
+                                final username = user.username.toLowerCase();
+                                final name = user.name.toLowerCase();
+                                return username.contains(query.toLowerCase()) || name.contains(query.toLowerCase());
+                              }).toList();
+                              queryUsers = filteredUsers;
                             });
                           }
                         },
@@ -164,7 +173,15 @@ class _FriendsScreenState extends State<FriendsScreen>
                         width: true ? 600 : 500,
                         debounceDelay: const Duration(milliseconds: 500),
                         onQueryChanged: (value) {
-                          query = value;
+                          setState(() {
+                            query = value;
+                            final filteredUsers = allFetchedUsers.where((user) {
+                              final username = user.username.toLowerCase();
+                              final name = user.name.toLowerCase();
+                              return username.contains(query.toLowerCase()) || name.contains(query.toLowerCase());
+                            }).toList();
+                            queryUsers = filteredUsers;
+                          });
                         },
                         transition: CircularFloatingSearchBarTransition(),
                         actions: [
@@ -190,21 +207,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                               parentColor: Theme.of(context)
                                   .colorScheme
                                   .onInverseSurface,
-                              child: FutureBuilder<List<FirebaseUserModel>>(
-                                  future: _parseUsers(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    List<FirebaseUserModel> allUsers = snapshot.data!;
-                                    allUsers.removeWhere((element) => element.id == currentUser.id);
-                                    return UserListView(games: allUsers, showLimit: 20, isFollowing: false);
-                                  } else if (snapshot.hasError) {
-                                    return Center(
-                                      child: Text('Error: ${snapshot.error}'),
-                                    );
-                                  }
-                                  return Container();
-                                },
-                              ));
+                              child: UserListView(games: query.isNotEmpty ? queryUsers : allFetchedUsers, showLimit: query.isEmpty ? 20 : queryUsers.length, isFollowing: false));
                         },
                       )
                     ]);

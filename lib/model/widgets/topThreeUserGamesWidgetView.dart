@@ -109,7 +109,8 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                             .containsKey(element.id.toString()))
                         .singleOrNull
                     : null;
-                return Column(
+                if (firstGame != null || secondGame != null || thirdGame != null) {
+                  return Column(
                   children: [
                     GlassContainer(
                       blur: 12,
@@ -130,17 +131,19 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                       children: [
                         Expanded(
                             flex: 5,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .21,
+                            child: AspectRatio(
+                                aspectRatio: 9/13,
                                 child: secondGame != null
                                     ? Stack(children: [
                                   Padding(
                                     padding: const EdgeInsets.all(4.0),
-                                    child: ClayContainer(
-                                      color: middleColor,
-                                      spread: 2,
-                                      depth: 60,
-                                      borderRadius: 14,
+                                    child: GlassContainer(
+                                      color: middleColor.withOpacity(.3),
+                                      blur: 12,
+                                      shadowStrength: 2,
+                                      shape: BoxShape.rectangle,
+                                      borderRadius: BorderRadius.circular(14),
+                                      shadowColor: middleColor.lighten(20),
                                       child: GamePreviewView(
                                           game: secondGame,
                                           isCover: false,
@@ -151,8 +154,8 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                                   ),
                                   if (widget.isLoggedInUserData)
                                   Positioned(
-                                    right: 0,
-                                    bottom: 0,
+                                    right: 4,
+                                    bottom: 4,
                                     child: GlassContainer(
                                       blur: 12,
                                       shadowStrength: 4,
@@ -183,29 +186,34 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                                     : topGamesPlaceholder(middleColor))),
                         Expanded(
                             flex: 6,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .26,
+                            child: AspectRatio(
+                                aspectRatio: 9/13,
                                 child: firstGame != null
                                     ? Stack(children: [
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: ClayContainer(
-                                            color: topColor,
-                                            spread: 2,
-                                            depth: 60,
-                                            borderRadius: 14,
-                                            child: GamePreviewView(
-                                                game: firstGame,
-                                                isCover: false,
-                                                buildContext: context,
-                                                needsRating: false,
-                                                isClickable: false),
+                                          child: GlassContainer(
+                                            color: topColor.withOpacity(.3),
+                                            blur: 12,
+                                            shadowStrength: 2,
+                                            shape: BoxShape.rectangle,
+                                            borderRadius: BorderRadius.circular(14),
+                                            shadowColor: topColor.lighten(20),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(2.0),
+                                              child: GamePreviewView(
+                                                  game: firstGame,
+                                                  isCover: false,
+                                                  buildContext: context,
+                                                  needsRating: false,
+                                                  isClickable: false),
+                                            ),
                                           ),
                                         ),
                                   if (widget.isLoggedInUserData)
                                     Positioned(
-                                          right: 0,
-                                          bottom: 0,
+                                          right: 4,
+                                          bottom: 4,
                                           child: GlassContainer(
                                             blur: 12,
                                             shadowStrength: 4,
@@ -236,18 +244,22 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                                     : topGamesPlaceholder(topColor))),
                         Expanded(
                             flex: 4,
-                            child: SizedBox(
-                                height: mediaQueryHeight * .16,
-                                child: thirdGame != null
-                                    ? Stack
-                                  (children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: ClayContainer(
-                                      color: bottomColor,
-                                      spread: 2,
-                                      depth: 60,
-                                      borderRadius: 14,
+                            child: AspectRatio(
+                              aspectRatio: 9/13,
+                              child: thirdGame != null
+                                  ? Stack
+                                (children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: GlassContainer(
+                                    color: bottomColor.withOpacity(.3),
+                                    blur: 12,
+                                    shadowStrength: 2,
+                                    shape: BoxShape.rectangle,
+                                    borderRadius: BorderRadius.circular(14),
+                                    shadowColor: bottomColor.lighten(20),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(2.0),
                                       child: GamePreviewView(
                                           game: thirdGame,
                                           isCover: false,
@@ -256,42 +268,45 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
                                           isClickable: false),
                                     ),
                                   ),
-                                  if (widget.isLoggedInUserData)
-                                    Positioned(
-                                    right: 0,
-                                    bottom: 0,
-                                    child: GlassContainer(
-                                      blur: 12,
-                                      shadowStrength: 4,
-                                      shape: BoxShape.rectangle,
-                                      borderRadius: BorderRadius.circular(14),
-                                      shadowColor: bottomColor,
-                                      color:
-                                      bottomColor.onColor.withOpacity(.1),
-                                      child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2.0, vertical: 4),
-                                          child: Column(children: [
-                                            GestureDetector(
-                                                onTap: () {
-                                                  _deleteThirdTopGameInDatabase(
-                                                      context,
-                                                      bottomColor,
-                                                      thirdGame);
-                                                },
-                                                child: const Icon(
-                                                  CupertinoIcons.delete,
-                                                  color: Colors.red,
-                                                )),
-                                          ])),
-                                    ),
+                                ),
+                                if (widget.isLoggedInUserData)
+                                  Positioned(
+                                  right: 4,
+                                  bottom: 4,
+                                  child: GlassContainer(
+                                    blur: 12,
+                                    shadowStrength: 4,
+                                    shape: BoxShape.rectangle,
+                                    borderRadius: BorderRadius.circular(14),
+                                    shadowColor: bottomColor,
+                                    color:
+                                    bottomColor.onColor.withOpacity(.1),
+                                    child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 2.0, vertical: 4),
+                                        child: Column(children: [
+                                          GestureDetector(
+                                              onTap: () {
+                                                _deleteThirdTopGameInDatabase(
+                                                    context,
+                                                    bottomColor,
+                                                    thirdGame);
+                                              },
+                                              child: const Icon(
+                                                CupertinoIcons.delete,
+                                                color: Colors.red,
+                                              )),
+                                        ])),
                                   ),
-                                ])
-                                    : topGamesPlaceholder(bottomColor))),
+                                ),
+                              ])
+                                  : topGamesPlaceholder(bottomColor),
+                            )),
                       ],
                     ),
                   ],
                 );
+                } return Container();
               } else if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),
@@ -341,25 +356,24 @@ class _TopThreeUserGamesWidgetViewState extends State<TopThreeUserGamesWidgetVie
     final coverScaleWidth = coverScaleHeight * 0.69;
     return Padding(
       padding: const EdgeInsets.all(4.0),
-      child: ClayContainer(
-          height: coverScaleHeight,
-          width: coverScaleWidth,
-          color: color,
-          spread: 4,
-          depth: 60,
-          borderRadius: 14,
-          child: Center(
-            child: GlassContainer(
-              blur: 12,
-              shadowStrength: 2,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(14),
-              shadowColor: color.lighten(20),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(CupertinoIcons.add_circled, color: color.onColor,)),
-            ),
-          )),
+      child: AspectRatio(
+        aspectRatio: 9/13,
+        child: GlassContainer(
+          color: color.withOpacity(.3),
+          blur: 12,
+          shadowStrength: 2,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(14),
+          shadowColor: color.lighten(20),
+          child: GlassContainer(
+            blur: 12,
+            shadowStrength: 2,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(14),
+            shadowColor: color.lighten(20),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:clay_containers/widgets/clay_container.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:shimmer/shimmer.dart';
@@ -275,8 +276,8 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
           const SizedBox(
             height: 6,
           ),
-          SizedBox(
-            height: coverScaleHeight,
+          AspectRatio(
+            aspectRatio: 16 / 9,
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
@@ -312,42 +313,66 @@ class ShimmerGlassContainerGame extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: Padding(
           padding: const EdgeInsets.all(4.0),
-          child: GlassContainer(
-            height: coverScaleHeight,
-            width: coverScaleWidth,
-            blur: 12,
-            borderRadius: BorderRadius.circular(14),
-            color:
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
-            child: Stack(
-              children: [
-                Shimmer.fromColors(
-                  baseColor: Colors.transparent,
-                  highlightColor:
-                      Theme.of(context).colorScheme.onTertiaryContainer,
-                  child: Container(
-                      decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
-                        .withOpacity(.8),
-                  )),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    height: needsRating
-                        ? mediaQueryHeight * .06
-                        : mediaQueryHeight * .04,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (needsRating)
+          child: AspectRatio(
+            aspectRatio: 9 / 13,
+            child: GlassContainer(
+              blur: 12,
+              borderRadius: BorderRadius.circular(14),
+              color:
+                  Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+              child: Stack(
+                children: [
+                  Shimmer.fromColors(
+                    baseColor: Colors.transparent,
+                    highlightColor:
+                        Theme.of(context).colorScheme.onTertiaryContainer,
+                    child: Container(
+                        decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .tertiaryContainer
+                          .withOpacity(.8),
+                    )),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      height: needsRating
+                          ? mediaQueryHeight * .06
+                          : mediaQueryHeight * .04,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (needsRating)
+                              Expanded(
+                                flex: 3,
+                                child: GlassContainer(
+                                  blur: 12,
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                      .withOpacity(.2),
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.transparent,
+                                    highlightColor: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                    child: Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                          .withOpacity(.8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (needsRating) const SizedBox(width: 8),
                             Expanded(
-                              flex: 3,
+                              flex: 5,
                               child: GlassContainer(
                                 blur: 12,
                                 borderRadius: BorderRadius.circular(14),
@@ -369,36 +394,13 @@ class ShimmerGlassContainerGame extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          if (needsRating) const SizedBox(width: 8),
-                          Expanded(
-                            flex: 5,
-                            child: GlassContainer(
-                              blur: 12,
-                              borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
-                                  .withOpacity(.2),
-                              child: Shimmer.fromColors(
-                                baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                                child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
-                                      .withOpacity(.8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ));
