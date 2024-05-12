@@ -212,7 +212,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                                 isCover: true,
                                 buildContext: context,
                                 needsRating: true,
-                                isClickable: false,
+                                isClickable: false, showRatedItem: true,
                               ),
                             ),
                           ),

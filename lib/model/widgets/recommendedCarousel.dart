@@ -78,7 +78,7 @@ class _RecommendedCarouselSliderState extends State<RecommendedCarouselSlider>
               viewportFraction: 0.5,
               enlargeFactor: .4),
           items: widget.games!
-              .map((item) => GamePreviewView(game: item, isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherUserModel))
+              .map((item) => GamePreviewView(game: item, isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherUserModel, showRatedItem: true,))
               .toList(),
         ),
       ],

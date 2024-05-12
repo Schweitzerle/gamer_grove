@@ -30,6 +30,7 @@ class GamePreviewView extends StatefulWidget {
   final bool needsRating;
   final bool isClickable;
   FirebaseUserModel? otherUserModel;
+  bool showRatedItem;
 
   GamePreviewView(
       {required this.game,
@@ -37,7 +38,7 @@ class GamePreviewView extends StatefulWidget {
       required this.buildContext,
       required this.needsRating,
       required this.isClickable,
-      this.otherUserModel});
+      this.otherUserModel, required this.showRatedItem});
 
   @override
   _GamePreviewViewState createState() => _GamePreviewViewState();
@@ -124,17 +125,20 @@ class _GamePreviewViewState extends State<GamePreviewView> {
                         borderRadius: BorderRadius.circular(14.0),
                         child: Hero(
                           tag: widget.game.id,
-                          child: CachedNetworkImage(
-                            imageUrl: '${widget.game.cover?.url}',
-                            placeholder: (context, url) => Container(
-                              color:
-                                  Theme.of(context).colorScheme.tertiaryContainer,
+                          child: Opacity(
+                            opacity: widget.showRatedItem ? 1 : widget.game.gameModel.rating > 0 ? .08 : 1,
+                            child: CachedNetworkImage(
+                              imageUrl: '${widget.game.cover?.url}',
+                              placeholder: (context, url) => Container(
+                                color:
+                                    Theme.of(context).colorScheme.tertiaryContainer,
+                              ),
+                              errorWidget: (context, url, error) => GlassContainer(
+                                color: colorPalette.onColor,
+                                child: Icon(FontAwesomeIcons.gamepad),
+                              ),
+                              fit: BoxFit.fill,
                             ),
-                            errorWidget: (context, url, error) => GlassContainer(
-                              color: colorPalette.onColor,
-                              child: Icon(FontAwesomeIcons.gamepad),
-                            ),
-                            fit: BoxFit.fill,
                           ),
                         ),
                       ),

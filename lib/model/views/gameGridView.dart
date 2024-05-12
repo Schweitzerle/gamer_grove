@@ -9,10 +9,15 @@ import '../widgets/customDialog.dart';
 
 class GameGridView extends StatelessWidget {
   final List<Game> collectionGames;
-  FirebaseUserModel? otherUserModel;
+  final FirebaseUserModel? otherUserModel;
+  final bool showRatedItems;
+  final VoidCallback toggleRatedItemsVisibility;
 
   GameGridView({
-    required this.collectionGames, this.otherUserModel,
+    required this.collectionGames,
+    this.otherUserModel,
+    required this.showRatedItems,
+    required this.toggleRatedItemsVisibility,
   });
 
   @override
@@ -23,14 +28,18 @@ class GameGridView extends StatelessWidget {
         crossAxisCount: 2,
       ),
       delegate: SliverChildBuilderDelegate(
-        (context, index) {
+            (context, index) {
           final game = collectionGames[index];
           return Padding(
             padding: const EdgeInsets.all(6.0),
             child: GamePreviewView(
               game: game,
               isCover: true,
-              buildContext: context, needsRating: true, isClickable: true, otherUserModel: otherUserModel,
+              buildContext: context,
+              needsRating: true,
+              isClickable: true,
+              otherUserModel: otherUserModel,
+              showRatedItem: showRatedItems,
             ),
           );
         },
@@ -65,6 +74,7 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
   List<Game> sortedGames = [];
   String selectedSortOption = 'Rating';
   bool isAscending = true;
+  bool showRatedItems = true;
 
   @override
   void initState() {
@@ -116,6 +126,78 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
     });
   }
 
+  void toggleRatedItemsVisibility() {
+    setState(() {
+      showRatedItems = !showRatedItems;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: FittedBox(child: Text(widget.appBarText)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: () {
+              showSortOptionsDialog(context);
+            },
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          GameGridView(
+            collectionGames: sortedGames,
+            otherUserModel: widget.otherUserModel,
+            showRatedItems: showRatedItems,
+            toggleRatedItemsVisibility: toggleRatedItemsVisibility, // Pass the callback function
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showSortOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomDialog(
+          title: 'Sort by',
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildSortButton('Rating', setState),
+                  buildSortButton('My Rating', setState),
+                  buildSortButton('Name', setState),
+                  buildSortButton('Release Date', setState),
+                  buildVisibilityButton(setState),
+                ],
+              );
+            },
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Apply'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget buildSortButton(String sortBy, StateSetter setState) {
     return Padding(
@@ -163,65 +245,43 @@ class _AllGamesGridScreenState extends State<AllGamesGridScreen> {
     );
   }
 
-  void showSortOptionsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomDialog(
-          title: 'Sort by',
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  buildSortButton('Rating', setState),
-                  buildSortButton('My Rating', setState),
-                  buildSortButton('Name', setState),
-                  buildSortButton('Release Date', setState),
-                ],
-              );
-            },
+  Widget buildVisibilityButton(StateSetter setState) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GlassContainer(
+        blur: 10,
+        color: Theme.of(context).colorScheme.background.withOpacity(.8),
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              toggleRatedItemsVisibility(); // Call the function to toggle visibility
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                showRatedItems ? 'Rated items are visible' : 'Rated items are not visible',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+              ),
+              GlassContainer(
+                color: Theme.of(context).colorScheme.tertiary,
+                borderRadius: BorderRadius.circular(90),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    color: Theme.of(context).colorScheme.onTertiary,
+                    showRatedItems
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                ),
+              ),
+            ],
           ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Abbrechen'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Anwenden'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: FittedBox(child: Text(widget.appBarText)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {
-              showSortOptionsDialog(context);
-            },
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          GameGridView(
-            collectionGames: sortedGames, otherUserModel: widget.otherUserModel,
-          ),
-        ],
+        ),
       ),
     );
   }

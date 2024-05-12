@@ -1,12 +1,14 @@
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auth_service/auth.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gamer_grove/features/landingScreen/bottom_nav_bar.dart';
 import 'package:gamer_grove/features/loginRegistration/login_registration_page.dart';
 import 'package:gamer_grove/features/loginRegistration/login/view/login_page.dart';
@@ -121,6 +123,16 @@ class _GamerGroveAppState extends State<GamerGroveApp> {
                 swapLegacyOnMaterial3: true,
               ),
               builder: (theme, darkTheme) => MaterialApp(
+                supportedLocales: const [
+                  Locale('en'),
+                  Locale('de'),
+                ],
+                localizationsDelegates: const [
+                  CountryLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
                 debugShowCheckedModeBanner: false,
                 title: 'Gamer Grove',
                 theme: theme,

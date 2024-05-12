@@ -14,9 +14,13 @@ class GameGridPaginationView extends StatefulWidget {
   final PagingController<int, Game> pagingController;
   final ScrollController scrollController;
   final FirebaseUserModel? otherModel;
+  bool showRatedItems;
+  final VoidCallback toggleRatedItemsVisibility;
 
   GameGridPaginationView({
-    required this.pagingController, required this.scrollController, this.otherModel,
+    required this.pagingController, required this.scrollController, this.otherModel, required this.showRatedItems,
+    required this.toggleRatedItemsVisibility,
+
   });
 
   @override
@@ -55,7 +59,7 @@ class GameGridPaginationViewState extends State<GameGridPaginationView> {
                     padding: const EdgeInsets.all(6.0),
                   child: GamePreviewView(
                     game: game,
-                    isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherModel,
+                    isCover: false, buildContext: context, needsRating: true, isClickable: true, otherUserModel: widget.otherModel, showRatedItem: widget.showRatedItems,
                   ),
                 );
               },
@@ -95,6 +99,7 @@ class _AllGamesGridPaginationScreenState
   late String selectedSortOption = 'Rating';
   late bool isAscending = true;
   String sorting = '';
+  bool showRatedItems = true;
 
   @override
   void initState() {
@@ -156,6 +161,7 @@ class _AllGamesGridPaginationScreenState
                   buildSortButton(widget.isAggregated ? 'aggregated_rating' : 'total_rating', 'Rating', setState),
                   buildSortButton('name', 'Name', setState),
                   buildSortButton('first_release_date', 'Release Date', setState),
+                  buildVisibilityButton(setState)
                 ],
               );
             },
@@ -237,6 +243,53 @@ class _AllGamesGridPaginationScreenState
     );
   }
 
+  void toggleRatedItemsVisibility() {
+    setState(() {
+      showRatedItems = !showRatedItems;
+    });
+  }
+
+  Widget buildVisibilityButton(StateSetter setState) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GlassContainer(
+        blur: 10,
+        color: Theme.of(context).colorScheme.background.withOpacity(.8),
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              toggleRatedItemsVisibility();
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                showRatedItems ? 'Rated items are visible' : 'Rated items are not visible',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+              ),
+              GlassContainer(
+                color: Theme.of(context).colorScheme.tertiary,
+                borderRadius: BorderRadius.circular(90),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    color: Theme.of(context).colorScheme.onTertiary,
+                    showRatedItems
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +307,7 @@ class _AllGamesGridPaginationScreenState
       ),
       body: GameGridPaginationView(
         pagingController: _pagingController,
-        scrollController: _scrollController, otherModel: widget.otherModel
+        scrollController: _scrollController, otherModel: widget.otherModel, showRatedItems: showRatedItems, toggleRatedItemsVisibility: toggleRatedItemsVisibility,
       ),
     );
   }

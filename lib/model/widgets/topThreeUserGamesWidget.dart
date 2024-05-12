@@ -155,13 +155,13 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                                             shadowColor: middleColor.lighten(20),
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.all(1.0),
+                                                  const EdgeInsets.all(2.0),
                                               child: GamePreviewView(
                                                   game: secondGame,
                                                   isCover: false,
                                                   buildContext: context,
                                                   needsRating: false,
-                                                  isClickable: false),
+                                                  isClickable: false, showRatedItem: true,),
                                             ),
                                           ),
                                         ),
@@ -232,13 +232,13 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                                             shadowColor: topColor.lighten(20),
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.all(1.0),
+                                                  const EdgeInsets.all(2.0),
                                               child: GamePreviewView(
                                                   game: firstGame,
                                                   isCover: false,
                                                   buildContext: context,
                                                   needsRating: false,
-                                                  isClickable: false),
+                                                  isClickable: false, showRatedItem: true,),
                                             ),
                                           ),
                                         ),
@@ -308,13 +308,13 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                                           BorderRadius.circular(14),
                                           shadowColor: bottomColor.lighten(20),
                                           child: Padding(
-                                            padding: const EdgeInsets.all(1.0),
+                                            padding: const EdgeInsets.all(2.0),
                                             child: GamePreviewView(
                                                 game: thirdGame,
                                                 isCover: false,
                                                 buildContext: context,
                                                 needsRating: false,
-                                                isClickable: false),
+                                                isClickable: false, showRatedItem: true,),
                                           ),
                                         ),
                                       ),

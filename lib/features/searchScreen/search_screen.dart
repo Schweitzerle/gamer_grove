@@ -424,7 +424,7 @@ class _GameSearchScreenState extends State<GameSearchScreen> {
         _selectedIndex == 0
             ? GameGridPaginationView(
                 pagingController: _pagingController,
-                scrollController: _scrollController,
+                scrollController: _scrollController, showRatedItems: true, toggleRatedItemsVisibility: () {  }, //TODO: showRatedItems in floatingsearchbar filter mit einbauen und hier übergeben
               )
             : _selectedIndex == 1
                 ? EventGridPaginationView(

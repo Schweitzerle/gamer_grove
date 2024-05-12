@@ -84,7 +84,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final mediaQueryWidth = MediaQuery.of(context).size.width;
     final mediaQueryHeight = MediaQuery.of(context).size.height;
 
-    final bannerScaleHeight = mediaQueryHeight * 0.3;
     final user = getIt<FirebaseUserModel>();
     return Scaffold(
       body: Stack(
@@ -353,7 +352,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 depth: 60,
                                 height: MediaQuery.of(context).size.height * .18,
                                 customBorderRadius: BorderRadius.circular(12),
-                                color: Theme.of(context).cardColor,
+                                color: Theme.of(context).colorScheme.secondaryContainer,
                                 child: Padding(
                                   padding: EdgeInsets.all(10),
                                   child: Row(
@@ -451,7 +450,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               depth: 60,
                               height: MediaQuery.of(context).size.height * .18,
                               customBorderRadius: BorderRadius.circular(12),
-                              color: Theme.of(context).cardColor,
+                              color: Theme.of(context).colorScheme.secondaryContainer,
                               child: Padding(
                                 padding: EdgeInsets.all(10),
                                 child: Row(

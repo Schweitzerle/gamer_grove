@@ -132,7 +132,7 @@ class FranchiseView extends StatelessWidget {
                     child: GamePreviewView(
                       game: selectedGames[index],
                       isCover: true,
-                      buildContext: context, needsRating: false, isClickable: true,
+                      buildContext: context, needsRating: false, isClickable: true, showRatedItem: true,
                     ),
                   ),
                 );

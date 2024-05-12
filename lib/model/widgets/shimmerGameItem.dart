@@ -319,7 +319,7 @@ class ShimmerGlassContainerGame extends StatelessWidget {
               blur: 12,
               borderRadius: BorderRadius.circular(14),
               color:
-                  Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+                  Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
               child: Stack(
                 children: [
                   Shimmer.fromColors(

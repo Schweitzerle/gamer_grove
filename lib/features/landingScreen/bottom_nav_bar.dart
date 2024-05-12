@@ -55,8 +55,9 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       bottomNavigationBar: BottomBarBubble(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary!,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         color: Theme.of(context).bottomNavigationBarTheme.selectedItemColor!,
         selectedIndex: currentIndex,
         items: [
@@ -90,6 +91,7 @@ class _LiquidTabBarState extends State<LiquidTabBar> {
         },
       ),
       body: PageView(
+        physics: NeverScrollableScrollPhysics(),
           controller: controller,
           onPageChanged: (index) {
             setState(() {
