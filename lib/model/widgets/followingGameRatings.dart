@@ -20,7 +20,8 @@ class FollowingGameRatings extends StatefulWidget {
 
   const FollowingGameRatings({
     super.key,
-    required this.game, required this.color,
+    required this.game,
+    required this.color,
   });
 
   @override
@@ -61,87 +62,134 @@ class _FollowingGameRatingsState extends State<FollowingGameRatings>
     });
   }
 
+  double _calculateAverageRating() {
+    if (followingRatedGame.isEmpty) return 0.0;
+
+    double totalRating = 0.0;
+    for (var follower in followingRatedGame) {
+      totalRating += follower.games[widget.game.id.toString()]["rating"] * 10;
+    }
+    return totalRating / followingRatedGame.length;
+  }
+
   @override
   Widget build(BuildContext context) {
+    Color secondColor =
+        widget.color.computeLuminance() <= 0.5 ? Colors.white : Colors.black;
     return followingRatedGame.isEmpty
         ? Container()
         : Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CarouselSlider(
-              options: CarouselOptions(
-                  height: 80,
-                  autoPlayInterval: const Duration(seconds: 8),
-                  autoPlayAnimationDuration:
-                      const Duration(milliseconds: 1500),
-                  autoPlay: true,
-                  aspectRatio: 1,
-                  enableInfiniteScroll: false,
-                  enlargeCenterPage: true,
-                  viewportFraction: 0.2,
-                  enlargeFactor: .2),
-              items: followingRatedGame.map((follower) {
-                var rating = 0.0;
-                for (var game in follower.games.entries) {
-                  if (game.key == widget.game.id.toString()) {
-                    rating = game.value["rating"] as double;
-                    break;
-                  }
-                }
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Stack(
-                        children: [
-                          GlassContainer(
-                            height: 80,
-                            width: 80,
-                            blur: 12,
-                            shadowStrength: 1.7,
-                            color: widget.color.darken(10).withOpacity(.7),
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(14),
-                            shadowColor: widget.color.darken(30),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: ProfileView(
-                                  image: NetworkImage(follower.profileUrl),
-                                ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14), color: widget.color),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: CircularRatingWidget(
+                                ratingValue: _calculateAverageRating(),
+                                radiusMultiplicator: .07,
+                                fontSize: 18,
+                                lineWidth: 6,
                               ),
+                              flex: 1,
                             ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: GlassContainer(
-                              blur: 12,
-                              shadowStrength: 4,
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.circular(14),
-                              shadowColor: Colors.black,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 2.0, vertical: 4),
-                                child: CircularRatingWidget(
-                                  ratingValue: rating * 10,
-                                  radiusMultiplicator: .03,
-                                  fontSize: 8,
-                                  lineWidth: 2,
-                                ),
+                            Expanded(
+                              child: Text(
+                                'Average rating based on ${followingRatedGame.length} gamers you follow',
+                                style: TextStyle(color: Colors.white),
                               ),
+                              flex: 4,
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-        );
+                          ],
+                        ),
+                        CarouselSlider(
+                          options: CarouselOptions(
+                              height: 80,
+                              autoPlayInterval: const Duration(seconds: 8),
+                              autoPlayAnimationDuration:
+                              const Duration(milliseconds: 1500),
+                              autoPlay: true,
+                              aspectRatio: 1,
+                              enableInfiniteScroll: false,
+                              enlargeCenterPage: true,
+                              viewportFraction: 0.2,
+                              enlargeFactor: .2),
+                          items: followingRatedGame.map((follower) {
+                            var rating = 0.0;
+                            for (var game in follower.games.entries) {
+                              if (game.key == widget.game.id.toString()) {
+                                rating = game.value["rating"] as double;
+                                break;
+                              }
+                            }
+                            return Builder(
+                              builder: (BuildContext context) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Stack(
+                                    children: [
+                                      GlassContainer(
+                                        height: 80,
+                                        width: 80,
+                                        blur: 12,
+                                        shadowStrength: 1.7,
+                                        color: widget.color.darken(10).withOpacity(.7),
+                                        shape: BoxShape.rectangle,
+                                        borderRadius: BorderRadius.circular(14),
+                                        shadowColor: widget.color.darken(30),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(14),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: ProfileView(
+                                              image: NetworkImage(follower.profileUrl),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: GlassContainer(
+                                          blur: 12,
+                                          shadowStrength: 4,
+                                          shape: BoxShape.rectangle,
+                                          borderRadius: BorderRadius.circular(14),
+                                          shadowColor: Colors.black,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 2.0, vertical: 4),
+                                            child: CircularRatingWidget(
+                                              ratingValue: rating * 10,
+                                              radiusMultiplicator: .03,
+                                              fontSize: 8,
+                                              lineWidth: 2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 }

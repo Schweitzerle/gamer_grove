@@ -283,7 +283,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       );
                     }
                     // Display a loading indicator while fetching data
-                    return ShimmerItem.buildShimmerEventDetailScreen(context);
+                    return ShimmerItem.buildShimmerEventDetailScreen(context, colorPalette);
                   }),
 
             ],

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_collapsing_toolbar/flutter_collapsing_toolbar.dart';
 import 'package:gamer_grove/model/igdb_models/character.dart';
 import 'package:gamer_grove/model/igdb_models/event.dart';
 import 'package:gamer_grove/model/igdb_models/website.dart';
@@ -178,7 +179,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               ],
             ),
           ),
-          child: SingleChildScrollView(
+            child: SingleChildScrollView(
             child: Column(
               children: [
                 Stack(
@@ -409,7 +410,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         );
                       }
                       // Display a loading indicator while fetching data
-                      return ShimmerItem.buildShimmerGameDetailScreen(context);
+                      return ShimmerItem.buildShimmerGameDetailScreen(context, widget.colorPalette);
                     }),
               ],
             ),

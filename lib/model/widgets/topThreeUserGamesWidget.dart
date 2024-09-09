@@ -84,6 +84,7 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
   Widget build(BuildContext context) {
     final currentUser = getIt<FirebaseUserModel>();
     final mediaQueryHeight = MediaQuery.of(context).size.height;
+    Color color = Theme.of(context).primaryColor;
     return ChangeNotifierProvider.value(
       value: currentUser,
       child: Consumer<FirebaseUserModel>(
@@ -406,18 +407,18 @@ class _TopThreeUserGamesWidgetState extends State<TopThreeUserGamesWidget> {
                     children: [
                       Expanded(
                           flex: 5,
-                          child: const ShimmerGlassContainerGame(
-                            needsRating: false,
+                          child: ShimmerGlassContainerGame(
+                            needsRating: false, color: color,
                           )),
                       Expanded(
                           flex: 6,
-                          child: const ShimmerGlassContainerGame(
-                            needsRating: false,
+                          child: ShimmerGlassContainerGame(
+                            needsRating: false, color: color,
                           )),
                       Expanded(
                           flex: 4,
-                          child: const ShimmerGlassContainerGame(
-                            needsRating: false,
+                          child: ShimmerGlassContainerGame(
+                            needsRating: false, color: color,
                           )),
                     ],
                   ),

@@ -147,10 +147,10 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             maxSize: 30,
             minSpeed: 0.1,
             randomItemsColors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
-              Theme.of(context).colorScheme.tertiary,
-              Theme.of(context).colorScheme.onPrimary
+              widget.colorPalette,
+              widget.colorPalette..lighten(10),
+              widget.colorPalette.darken(10),
+              widget.colorPalette.onColor
             ],
             randomItemsBehaviours: [
               ItemBehaviour(

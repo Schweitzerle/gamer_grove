@@ -273,7 +273,7 @@ w id = ${widget.company.id};
                       }
                       // Display a loading indicator while fetching data
                       return ShimmerItem.buildShimmerCompanyDetailScreen(
-                          context);
+                          context, colorPalette);
                     }),
             ],
           ),

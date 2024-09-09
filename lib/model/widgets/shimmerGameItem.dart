@@ -10,22 +10,24 @@ import 'package:shimmer/shimmer.dart';
 
 class ShimmerItem {
   static Widget buildShimmerHomeScreenItem(BuildContext context) {
-    return const Column(
+    Color color = Theme.of(context).colorScheme.primaryContainer;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(top: 40),
         ),
-        ShimmerGlassContainerEventCarousel(),
-        ShimmerGlassContainerGameList(),
-        ShimmerGlassContainerGameList(),
-        ShimmerGlassContainerGameList(),
+        ShimmerGlassContainerEventCarousel(color: color),
+        ShimmerGlassContainerGameList(color: color,),
+        ShimmerGlassContainerGameList(color: color,),
+        ShimmerGlassContainerGameList(color: color,),
       ],
     );
   }
 
   static Widget buildShimmerWishlistScreenItem(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -34,14 +36,15 @@ class ShimmerItem {
         const SizedBox(
           height: 14,
         ),
-        const ShimmerGlassContainerGameList(),
-        const ShimmerGlassContainerGameList(),
-        const ShimmerGlassContainerGameList(),
+        ShimmerGlassContainerGameList(color: color,),
+        ShimmerGlassContainerGameList(color: color,),
+        ShimmerGlassContainerGameList(color: color,),
       ],
     );
   }
 
   static Widget buildShimmerGameGridItem(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -51,8 +54,8 @@ class ShimmerItem {
           crossAxisCount: 2,
         ),
         itemBuilder: (context, index) {
-          return const ShimmerGlassContainerGame(
-            needsRating: true,
+          return ShimmerGlassContainerGame(
+            needsRating: true, color: color,
           ); // Entfernen Sie das 'const' Keyword hier
         },
         itemCount: 10,
@@ -61,7 +64,9 @@ class ShimmerItem {
   }
 
   static Widget buildShimmerTopThreeGamesItem(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
     final mediaQueryHeight = MediaQuery.of(context).size.height;
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     return  Column(
       children: [
         SizedBox(
@@ -75,18 +80,14 @@ class ShimmerItem {
                 child: GlassContainer(
                   blur: 12,
                   borderRadius: BorderRadius.circular(14),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
+                  color: color
                       .withOpacity(.2),
                   child: Shimmer.fromColors(
                     baseColor: Colors.transparent,
                     highlightColor:
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+                    color.onColor,
                     child: Container(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .tertiaryContainer
+                      color: secondColor
                           .withOpacity(.8),
                     ),
                   ),
@@ -144,6 +145,7 @@ class ShimmerItem {
   }
 
   static Widget buildShimmerEventGridItem(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -153,66 +155,68 @@ class ShimmerItem {
           crossAxisCount: 2,
         ),
         itemBuilder: (context, index) {
-          return const ShimmerGlassContainerEvent(); // Entfernen Sie das 'const' Keyword hier
+          return ShimmerGlassContainerEvent(color: color,); // Entfernen Sie das 'const' Keyword hier
         },
         itemCount: 10,
       ),
     );
   }
 
-  static Widget buildShimmerGameDetailScreen(BuildContext context) {
-    return const Column(
+  static Widget buildShimmerGameDetailScreen(BuildContext context, Color color) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: EdgeInsets.only(top: 14),
         ),
-        ShimmerGlassContainerToggleInfo(),
-        ShimmerGlassContainerToggleCollection(),
-        ShimmerGlassContainerToggleGames(),
-        ShimmerGlassContainerToggleImages()
+        ShimmerGlassContainerToggleInfo(color: color,),
+        ShimmerGlassContainerToggleCollection(color: color),
+        ShimmerGlassContainerToggleGames(color: color),
+        ShimmerGlassContainerToggleImages(color: color)
       ],
     );
   }
 
-  static Widget buildShimmerEventDetailScreen(BuildContext context) {
-    return const Column(
+  static Widget buildShimmerEventDetailScreen(BuildContext context, Color color) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: EdgeInsets.only(top: 14),
         ),
-        ShimmerGlassContainerToggleInfo(),
-        ShimmerGlassContainerToggleCollection(),
-        ShimmerGlassContainerToggleGames(),
+        ShimmerGlassContainerToggleInfo(color: color,),
+        ShimmerGlassContainerToggleCollection(color: color),
+        ShimmerGlassContainerToggleGames(color: color),
       ],
     );
   }
 
-  static Widget buildShimmerCompanyDetailScreen(BuildContext context) {
-    return const Column(
+  static Widget buildShimmerCompanyDetailScreen(BuildContext context, Color color) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: EdgeInsets.only(top: 14),
         ),
-        ShimmerGlassContainerToggleInfo(),
-        ShimmerGlassContainerToggleGames(),
+        ShimmerGlassContainerToggleInfo(color: color,),
+        ShimmerGlassContainerToggleGames(color: color,),
       ],
     );
   }
 }
 
 class ShimmerGlassContainerEventCarousel extends StatelessWidget {
-  const ShimmerGlassContainerEventCarousel({
+  final Color color;
+  const ShimmerGlassContainerEventCarousel({required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     return Container(
       margin: EdgeInsets.only(bottom: mediaQueryHeight * 0.01),
@@ -227,7 +231,7 @@ class ShimmerGlassContainerEventCarousel extends StatelessWidget {
           enlargeFactor: .3,
         ),
         items: List.generate(3, (index) {
-          return const ShimmerGlassContainerEvent();
+          return ShimmerGlassContainerEvent(color: color);
         }),
       ),
     );
@@ -235,12 +239,14 @@ class ShimmerGlassContainerEventCarousel extends StatelessWidget {
 }
 
 class ShimmerGlassContainerGameList extends StatelessWidget {
-  const ShimmerGlassContainerGameList({
+  final Color color;
+  const ShimmerGlassContainerGameList({required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -256,18 +262,13 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
               width: mediaQueryHeight * .2,
               blur: 12,
               borderRadius: BorderRadius.circular(14),
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
+              color: color
                   .withOpacity(.2),
               child: Shimmer.fromColors(
                 baseColor: Colors.transparent,
-                highlightColor:
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+                highlightColor:color.onColor,
                 child: Container(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .tertiaryContainer
+                  color: secondColor
                       .withOpacity(.8),
                 ),
               ),
@@ -284,8 +285,8 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               itemCount: 4,
               itemBuilder: (context, index) {
-                return const ShimmerGlassContainerGame(
-                  needsRating: true,
+                return ShimmerGlassContainerGame(
+                  needsRating: true, color: color,
                 );
               },
             ),
@@ -298,14 +299,17 @@ class ShimmerGlassContainerGameList extends StatelessWidget {
 
 class ShimmerGlassContainerGame extends StatelessWidget {
   final bool needsRating;
+  final Color color;
 
   const ShimmerGlassContainerGame({
     super.key,
     required this.needsRating,
+    required this.color
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -319,19 +323,17 @@ class ShimmerGlassContainerGame extends StatelessWidget {
               blur: 12,
               borderRadius: BorderRadius.circular(14),
               color:
-                  Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
+                  secondColor.withOpacity(.2),
               child: Stack(
                 children: [
                   Shimmer.fromColors(
                     baseColor: Colors.transparent,
                     highlightColor:
-                        Theme.of(context).colorScheme.onTertiaryContainer,
+                        secondColor.onColor,
                     child: Container(
                         decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      color: Theme.of(context)
-                          .colorScheme
-                          .tertiaryContainer
+                      color: secondColor
                           .withOpacity(.8),
                     )),
                   ),
@@ -352,19 +354,13 @@ class ShimmerGlassContainerGame extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
@@ -376,19 +372,13 @@ class ShimmerGlassContainerGame extends StatelessWidget {
                               child: GlassContainer(
                                 blur: 12,
                                 borderRadius: BorderRadius.circular(14),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
+                                color: color
                                     .withOpacity(.2),
                                 child: Shimmer.fromColors(
                                   baseColor: Colors.transparent,
-                                  highlightColor: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer,
+                                  highlightColor: color.onColor,
                                   child: Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .tertiaryContainer
+                                    color: secondColor
                                         .withOpacity(.8),
                                   ),
                                 ),
@@ -418,6 +408,8 @@ class ShimmerGlassContainerGameTopGames extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -429,19 +421,17 @@ class ShimmerGlassContainerGameTopGames extends StatelessWidget {
         blur: 12,
         borderRadius: BorderRadius.circular(14),
         color:
-        Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
               highlightColor:
-              Theme.of(context).colorScheme.onTertiaryContainer,
+              color.onColor,
               child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
+                    color: secondColor
                         .withOpacity(.8),
                   )),
             ),
@@ -462,19 +452,13 @@ class ShimmerGlassContainerGameTopGames extends StatelessWidget {
                           child: GlassContainer(
                             blur: 12,
                             borderRadius: BorderRadius.circular(14),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            color: color
                                 .withOpacity(.2),
                             child: Shimmer.fromColors(
                               baseColor: Colors.transparent,
-                              highlightColor: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                              highlightColor: color.onColor,
                               child: Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer
+                                color: secondColor
                                     .withOpacity(.8),
                               ),
                             ),
@@ -486,19 +470,13 @@ class ShimmerGlassContainerGameTopGames extends StatelessWidget {
                         child: GlassContainer(
                           blur: 12,
                           borderRadius: BorderRadius.circular(14),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
+                          color: color
                               .withOpacity(.2),
                           child: Shimmer.fromColors(
                             baseColor: Colors.transparent,
-                            highlightColor: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
+                            highlightColor: color.onColor,
                             child: Container(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .tertiaryContainer
+                              color: secondColor
                                   .withOpacity(.8),
                             ),
                           ),
@@ -523,6 +501,8 @@ class ShimmerGlassContainerCompany extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     const coverScaleHeight = 200;
     const coverScaleWidth = coverScaleHeight;
@@ -533,18 +513,16 @@ class ShimmerGlassContainerCompany extends StatelessWidget {
         width: coverScaleWidth.toDouble(),
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: color.onColor,
               child: Container(
                   decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
+                color: secondColor
                     .withOpacity(.8),
               )),
             ),
@@ -562,19 +540,13 @@ class ShimmerGlassContainerCompany extends StatelessWidget {
                         child: GlassContainer(
                           blur: 12,
                           borderRadius: BorderRadius.circular(14),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
+                          color: color
                               .withOpacity(.2),
                           child: Shimmer.fromColors(
                             baseColor: Colors.transparent,
-                            highlightColor: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
+                            highlightColor: color.onColor,
                             child: Container(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .tertiaryContainer
+                              color: secondColor
                                   .withOpacity(.8),
                             ),
                           ),
@@ -593,12 +565,15 @@ class ShimmerGlassContainerCompany extends StatelessWidget {
 }
 
 class ShimmerGlassContainerEvent extends StatelessWidget {
-  const ShimmerGlassContainerEvent({
+  final Color color;
+
+  const ShimmerGlassContainerEvent({required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4),
@@ -608,19 +583,17 @@ class ShimmerGlassContainerEvent extends StatelessWidget {
             blur: 12,
             borderRadius: BorderRadius.circular(14),
             color:
-                Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
+                color.withOpacity(.2),
             child: Stack(
               children: [
                 Shimmer.fromColors(
                   baseColor: Colors.transparent,
                   highlightColor:
-                      Theme.of(context).colorScheme.onTertiaryContainer,
+                      color.onColor,
                   child: Container(
                       decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .tertiaryContainer
+                    color: secondColor
                         .withOpacity(.8),
                   )),
                 ),
@@ -638,19 +611,13 @@ class ShimmerGlassContainerEvent extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -662,19 +629,13 @@ class ShimmerGlassContainerEvent extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -693,31 +654,32 @@ class ShimmerGlassContainerEvent extends StatelessWidget {
 }
 
 class ShimmerGlassContainerToggleInfo extends StatelessWidget {
-  const ShimmerGlassContainerToggleInfo({
+  final Color color;
+
+  const ShimmerGlassContainerToggleInfo({ required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final mediaQueryHeight = MediaQuery.of(context).size.height;
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     return Container(
       height: mediaQueryHeight * .16,
       padding: const EdgeInsets.only(right: 16.0, left: 16, top: 24),
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: secondColor.onColor,
               child: Container(
                   decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
+                color: secondColor
                     .withOpacity(.8),
               )),
             ),
@@ -739,19 +701,13 @@ class ShimmerGlassContainerToggleInfo extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor:color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -777,19 +733,13 @@ class ShimmerGlassContainerToggleInfo extends StatelessWidget {
                         child: GlassContainer(
                           blur: 12,
                           borderRadius: BorderRadius.circular(14),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
+                          color: color
                               .withOpacity(.2),
                           child: Shimmer.fromColors(
                             baseColor: Colors.transparent,
-                            highlightColor: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
+                            highlightColor:color.onColor,
                             child: Container(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .tertiaryContainer
+                              color: secondColor
                                   .withOpacity(.8),
                             ),
                           ),
@@ -808,12 +758,16 @@ class ShimmerGlassContainerToggleInfo extends StatelessWidget {
 }
 
 class ShimmerGlassContainerToggleCollection extends StatelessWidget {
-  const ShimmerGlassContainerToggleCollection({
+  final Color color;
+
+  const ShimmerGlassContainerToggleCollection({ required this.color,
     super.key,
   });
 
+
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -822,18 +776,16 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: secondColor.onColor,
               child: Container(
                   decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
+                color: secondColor
                     .withOpacity(.8),
               )),
             ),
@@ -858,19 +810,13 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
@@ -892,19 +838,13 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
                             blur: 12,
                             height: mediaQueryHeight * .2,
                             borderRadius: BorderRadius.circular(14),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            color: color
                                 .withOpacity(.2),
                             child: Shimmer.fromColors(
                               baseColor: Colors.transparent,
-                              highlightColor: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                              highlightColor: color.onColor,
                               child: Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer
+                                color: secondColor
                                     .withOpacity(.8),
                               ),
                             ),
@@ -917,19 +857,13 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
                             blur: 12,
                             height: mediaQueryHeight * .09,
                             borderRadius: BorderRadius.circular(14),
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            color:  color
                                 .withOpacity(.2),
                             child: Shimmer.fromColors(
                               baseColor: Colors.transparent,
-                              highlightColor: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                              highlightColor: color.onColor,
                               child: Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer
+                                color: secondColor
                                     .withOpacity(.8),
                               ),
                             ),
@@ -949,12 +883,15 @@ class ShimmerGlassContainerToggleCollection extends StatelessWidget {
 }
 
 class ShimmerGlassContainerToggleGames extends StatelessWidget {
-  const ShimmerGlassContainerToggleGames({
+  final Color color;
+
+  const ShimmerGlassContainerToggleGames({required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -963,18 +900,16 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: secondColor.onColor,
               child: Container(
                   decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
+                color: secondColor
                     .withOpacity(.8),
               )),
             ),
@@ -999,19 +934,13 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
@@ -1022,7 +951,7 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
                       ),
                     ),
                   ),
-                  ShimmerGlassContainerGameList()
+                  ShimmerGlassContainerGameList(color: color,)
                 ],
               ),
             ),
@@ -1034,12 +963,14 @@ class ShimmerGlassContainerToggleGames extends StatelessWidget {
 }
 
 class ShimmerGlassContainerToggleImages extends StatelessWidget {
-  const ShimmerGlassContainerToggleImages({
+  final Color color;
+  const ShimmerGlassContainerToggleImages({required this.color,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
     final coverScaleHeight = mediaQueryHeight / 3.1;
     final coverScaleWidth = coverScaleHeight * 0.69;
@@ -1048,18 +979,16 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
       child: GlassContainer(
         blur: 12,
         borderRadius: BorderRadius.circular(14),
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.2),
+        color: color.withOpacity(.2),
         child: Stack(
           children: [
             Shimmer.fromColors(
               baseColor: Colors.transparent,
-              highlightColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              highlightColor: secondColor.onColor,
               child: Container(
                   decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Theme.of(context)
-                    .colorScheme
-                    .tertiaryContainer
+                color: secondColor
                     .withOpacity(.8),
               )),
             ),
@@ -1084,19 +1013,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
@@ -1123,19 +1046,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -1151,19 +1068,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -1179,19 +1090,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -1207,19 +1112,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -1235,19 +1134,13 @@ class ShimmerGlassContainerToggleImages extends StatelessWidget {
                             child: GlassContainer(
                               blur: 12,
                               borderRadius: BorderRadius.circular(14),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
+                              color: color
                                   .withOpacity(.2),
                               child: Shimmer.fromColors(
                                 baseColor: Colors.transparent,
-                                highlightColor: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                highlightColor: color.onColor,
                                 child: Container(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .tertiaryContainer
+                                  color: secondColor
                                       .withOpacity(.8),
                                 ),
                               ),
@@ -1272,8 +1165,9 @@ class ShimmerUserItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).colorScheme.primaryContainer;
+    Color secondColor = color.computeLuminance() <= 0.5 ? color.lighten(10) : color.darken(10);
     final mediaQueryHeight = MediaQuery.of(context).size.height;
-
     return Column(
       children: [
         GlassContainer(
@@ -1281,19 +1175,17 @@ class ShimmerUserItem extends StatelessWidget {
           blur: 12,
           borderRadius: BorderRadius.circular(14),
           color:
-              Theme.of(context).colorScheme.tertiaryContainer.withOpacity(.2),
+              secondColor.withOpacity(.2),
           child: Stack(
             children: [
               Shimmer.fromColors(
                 baseColor: Colors.transparent,
                 highlightColor:
-                    Theme.of(context).colorScheme.onTertiaryContainer,
+                    secondColor.onColor,
                 child: Container(
                     decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .tertiaryContainer
+                  color: color
                       .withOpacity(.8),
                 )),
               ),
@@ -1308,18 +1200,14 @@ class ShimmerUserItem extends StatelessWidget {
                         blur: 12,
                         width: mediaQueryHeight * .065,
                         borderRadius: BorderRadius.circular(90),
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
+                        color: color
                             .withOpacity(.2),
                         child: Shimmer.fromColors(
                           baseColor: Colors.transparent,
                           highlightColor:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                              color.onColor,
                           child: Container(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .tertiaryContainer
+                            color: secondColor
                                 .withOpacity(.8),
                           ),
                         ),
@@ -1335,19 +1223,13 @@ class ShimmerUserItem extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
@@ -1360,19 +1242,13 @@ class ShimmerUserItem extends StatelessWidget {
                                 child: GlassContainer(
                                   blur: 12,
                                   borderRadius: BorderRadius.circular(14),
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
+                                  color: color
                                       .withOpacity(.2),
                                   child: Shimmer.fromColors(
                                     baseColor: Colors.transparent,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
+                                    highlightColor: color.onColor,
                                     child: Container(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .tertiaryContainer
+                                      color: secondColor
                                           .withOpacity(.8),
                                     ),
                                   ),
