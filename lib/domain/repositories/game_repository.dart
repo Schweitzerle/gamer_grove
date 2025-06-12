@@ -49,3 +49,4 @@ abstract class GameRepository {
   Future<Either<Failure, List<Game>>> getUserRatedGames(String userId);
 }
 
+

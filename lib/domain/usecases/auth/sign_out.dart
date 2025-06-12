@@ -16,7 +16,3 @@ class SignOut extends NoParamsUseCase<void> {
   }
 }
 
-class NoParams extends Equatable {
-  @override
-  List<Object> get props => [];
-}

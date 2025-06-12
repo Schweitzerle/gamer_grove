@@ -142,44 +142,24 @@ class _ProfileContent extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: Text(
                 user.username[0].toUpperCase(),
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineLarge
-                    ?.copyWith(
-                  color: Theme
-                      .of(context)
-                      .colorScheme
-                      .onPrimary,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               user.username,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .headlineSmall,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
               user.email,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .onSurfaceVariant,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

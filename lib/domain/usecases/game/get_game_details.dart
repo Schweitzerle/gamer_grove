@@ -25,3 +25,4 @@ class GameDetailsParams extends Equatable {
   @override
   List<Object> get props => [gameId];
 }
+

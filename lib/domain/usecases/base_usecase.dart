@@ -11,5 +11,11 @@ abstract class NoParamsUseCase<Type> {
   Future<Either<Failure, Type>> call();
 }
 
+class NoParams extends Equatable {
+  const NoParams();
+
+  @override
+  List<Object> get props => [];
+}
 
 

@@ -31,3 +31,4 @@ class ToggleWishlistParams extends Equatable {
   @override
   List<Object> get props => [gameId, userId];
 }
+

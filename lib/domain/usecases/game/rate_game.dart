@@ -38,3 +38,4 @@ class RateGameParams extends Equatable {
   @override
   List<Object> get props => [gameId, userId, rating];
 }
+

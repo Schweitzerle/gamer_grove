@@ -1,10 +1,10 @@
 // data/repositories/auth_repository_impl.dart
 import 'package:dartz/dartz.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
-import '../../domain/entities/user.dart';
+import '../../domain/entities/user.dart' as domain;
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/supabase_remote_datasource.dart';
@@ -23,7 +23,7 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, User>> signIn({
+  Future<Either<Failure, domain.User>> signIn({
     required String email,
     required String password,
   }) async {
@@ -48,7 +48,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUp({
+  Future<Either<Failure, domain.User>> signUp({
     required String email,
     required String password,
     required String username,
@@ -85,7 +85,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> getCurrentUser() async {
+  Future<Either<Failure, domain.User>> getCurrentUser() async {
     try {
       // Try to get from cache first
       final cachedUser = await localDataSource.getCachedUser();
@@ -137,7 +137,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
     try {
       await supabase.auth.updateUser(
-        UserAttributes(password: newPassword),
+        sb.UserAttributes(password: newPassword),
       );
       return const Right(null);
     } catch (e) {
@@ -162,7 +162,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<User?> get authStateChanges {
+  Stream<domain.User?> get authStateChanges {
     return remoteDataSource.authStateChanges.asyncMap((authState) async {
       if (authState.session != null) {
         final user = await remoteDataSource.getCurrentUser();
@@ -175,4 +175,3 @@ class AuthRepositoryImpl implements AuthRepository {
     });
   }
 }
-

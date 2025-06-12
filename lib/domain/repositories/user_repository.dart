@@ -35,4 +35,3 @@ abstract class UserRepository {
 
   Future<Either<Failure, List<User>>> getUserFollowing(String userId);
 }
-
