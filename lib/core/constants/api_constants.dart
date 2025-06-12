@@ -1,12 +1,12 @@
 class ApiConstants {
   // IGDB API
   static const String igdbBaseUrl = 'https://api.igdb.com/v4';
-  static const String igdbClientId = 'YOUR_CLIENT_ID'; // Später aus env laden
-  static const String igdbClientSecret = 'YOUR_CLIENT_SECRET';
+  static const String igdbClientId = 'lbesf37nfwly4czho4wp8vqbzhexu8';
+  static const String igdbClientSecret = 's6xa3psvwt8sroq2ox8k5r7972a1ka';
 
   // Supabase
-  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+  static const String supabaseUrl = 'https://jmvhqefqjuljrbxlhanf.supabase.co';
+  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptdmhxZWZxanVsanJieGxoYW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2NzIxNjYsImV4cCI6MjA2NTI0ODE2Nn0.Y552iva57JPH4sPKW7lGr5Mdof0KBq5TXgCceP6fSco';
 
   // API Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);

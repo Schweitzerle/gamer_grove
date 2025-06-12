@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../widgets/game_card.dart';
+import '../../widgets/game_card_shimmer.dart';
 import '../../widgets/game_list_shimmer.dart';
 import '../../../core/widgets/error_widget.dart';
 

@@ -14,13 +14,23 @@ import 'data/repositories/user_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'domain/repositories/game_repository.dart';
 import 'domain/repositories/user_repository.dart';
+import 'domain/usecases/auth/get_current_user.dart';
+import 'domain/usecases/auth/reset_password.dart';
 import 'domain/usecases/auth/sign_in.dart';
 import 'domain/usecases/auth/sign_up.dart';
 import 'domain/usecases/auth/sign_out.dart';
+import 'domain/usecases/auth/update_password.dart';
 import 'domain/usecases/game/search_games.dart';
 import 'domain/usecases/game/get_game_details.dart';
 import 'domain/usecases/game/rate_game.dart';
 import 'domain/usecases/game/toggle_wishlist.dart';
+import 'domain/usecases/user/follow_user.dart';
+import 'domain/usecases/user/get_user_followers.dart';
+import 'domain/usecases/user/get_user_following.dart';
+import 'domain/usecases/user/get_user_profile.dart';
+import 'domain/usecases/user/search_users.dart';
+import 'domain/usecases/user/update_top_three_games.dart';
+import 'domain/usecases/user/update_user_profile.dart';
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/game/game_bloc.dart';
 import 'core/network/network_info.dart';
@@ -47,14 +57,28 @@ Future<void> init() async {
     ),
   );
 
-  // Use cases
+  // Use cases - Auth
   sl.registerLazySingleton(() => SignIn(sl()));
   sl.registerLazySingleton(() => SignUp(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
+  sl.registerLazySingleton(() => GetCurrentUser(sl()));
+  sl.registerLazySingleton(() => ResetPassword(sl()));
+  sl.registerLazySingleton(() => UpdatePassword(sl()));
+
+  // Use cases - Game
   sl.registerLazySingleton(() => SearchGames(sl()));
   sl.registerLazySingleton(() => GetGameDetails(sl()));
   sl.registerLazySingleton(() => RateGame(sl()));
   sl.registerLazySingleton(() => ToggleWishlist(sl()));
+
+  // Use cases - User
+  sl.registerLazySingleton(() => GetUserProfile(sl()));
+  sl.registerLazySingleton(() => UpdateUserProfile(sl()));
+  sl.registerLazySingleton(() => FollowUser(sl()));
+  sl.registerLazySingleton(() => UpdateTopThreeGames(sl()));
+  sl.registerLazySingleton(() => SearchUsers(sl()));
+  sl.registerLazySingleton(() => GetUserFollowers(sl()));
+  sl.registerLazySingleton(() => GetUserFollowing(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

@@ -1,4 +1,4 @@
-// domain/usecases/user/get_user_profile.dart
+// domain/usecases/user/get_user_followers.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
@@ -6,29 +6,26 @@ import '../../entities/user.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class GetUserProfile extends UseCase<User, GetUserProfileParams> {
+class GetUserFollowers extends UseCase<List<User>, GetUserFollowersParams> {
   final UserRepository repository;
 
-  GetUserProfile(this.repository);
+  GetUserFollowers(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(GetUserProfileParams params) async {
+  Future<Either<Failure, List<User>>> call(GetUserFollowersParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserProfile(params.userId);
+    return await repository.getUserFollowers(params.userId);
   }
 }
 
-class GetUserProfileParams extends Equatable {
+class GetUserFollowersParams extends Equatable {
   final String userId;
 
-  const GetUserProfileParams({required this.userId});
+  const GetUserFollowersParams({required this.userId});
 
   @override
   List<Object> get props => [userId];
 }
-
-
-

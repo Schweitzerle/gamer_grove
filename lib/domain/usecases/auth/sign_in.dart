@@ -1,4 +1,4 @@
-// domain/usecases/auth/sign_up.dart
+// domain/usecases/auth/sign_in.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
@@ -6,38 +6,30 @@ import '../../entities/user.dart';
 import '../../repositories/auth_repository.dart';
 import '../base_usecase.dart';
 
-class SignUp extends UseCase<User, SignUpParams> {
+class SignIn extends UseCase<User, SignInParams> {
   final AuthRepository repository;
 
-  SignUp(this.repository);
+  SignIn(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(SignUpParams params) async {
+  Future<Either<Failure, User>> call(SignInParams params) async {
     // Email validation
     if (!_isValidEmail(params.email)) {
       return const Left(ValidationFailure(message: 'Invalid email format'));
     }
 
     // Password validation
+    if (params.password.isEmpty) {
+      return const Left(ValidationFailure(message: 'Password cannot be empty'));
+    }
+
     if (params.password.length < 6) {
       return const Left(ValidationFailure(message: 'Password must be at least 6 characters'));
     }
 
-    // Username validation
-    if (params.username.length < 3) {
-      return const Left(ValidationFailure(message: 'Username must be at least 3 characters'));
-    }
-
-    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(params.username)) {
-      return const Left(ValidationFailure(
-        message: 'Username can only contain letters, numbers, and underscores',
-      ));
-    }
-
-    return await repository.signUp(
+    return await repository.signIn(
       email: params.email,
       password: params.password,
-      username: params.username,
     );
   }
 
@@ -46,18 +38,18 @@ class SignUp extends UseCase<User, SignUpParams> {
   }
 }
 
-class SignUpParams extends Equatable {
+class SignInParams extends Equatable {
   final String email;
   final String password;
-  final String username;
 
-  const SignUpParams({
+  const SignInParams({
     required this.email,
     required this.password,
-    required this.username,
   });
 
   @override
-  List<Object> get props => [email, password, username];
+  List<Object> get props => [email, password];
 }
+
+
 
