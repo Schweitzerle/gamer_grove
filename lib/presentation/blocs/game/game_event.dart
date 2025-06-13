@@ -56,6 +56,34 @@ class ToggleWishlistEvent extends GameEvent {
   List<Object> get props => [gameId, userId];
 }
 
+// Toggle Recommendation Event
+class ToggleRecommendEvent extends GameEvent {
+  final int gameId;
+  final String userId;
+
+  const ToggleRecommendEvent({
+    required this.gameId,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [gameId, userId];
+}
+
+// Add to Top Three Event
+class AddToTopThreeEvent extends GameEvent {
+  final int gameId;
+  final String userId;
+
+  const AddToTopThreeEvent({
+    required this.gameId,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [gameId, userId];
+}
+
 class ClearSearchEvent extends GameEvent {}
 
 // NEW EVENTS FOR HOME PAGE
@@ -102,3 +130,31 @@ class LoadUserRecommendationsEvent extends GameEvent {
   @override
   List<Object> get props => [userId];
 }
+
+class GetGameDetailsWithUserDataEvent extends GameEvent {
+  final int gameId;
+  final String? userId; // Optional for logged-in users
+
+  const GetGameDetailsWithUserDataEvent({
+    required this.gameId,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, userId];
+}
+
+
+class LoadGameWithUserDataEvent extends GameEvent {
+  final int gameId;
+  final String? userId;
+
+  const LoadGameWithUserDataEvent({
+    required this.gameId,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, userId];
+}
+

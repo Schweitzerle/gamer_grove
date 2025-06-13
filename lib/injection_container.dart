@@ -39,6 +39,8 @@ import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/game/game_bloc.dart';
 import 'core/network/network_info.dart';
 import 'core/network/api_client.dart';
+import 'domain/usecases/game/toggle_recommend.dart';
+import 'domain/usecases/user/add_to_top_three.dart';
 
 final sl = GetIt.instance;
 
@@ -117,6 +119,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUserRecommendations(sl()));
   sl.registerLazySingleton(() => RateGame(sl()));
   sl.registerLazySingleton(() => ToggleWishlist(sl()));
+  sl.registerLazySingleton(() => ToggleRecommend(sl()));
 
   // Use cases - User
   print('👤 DI: Registering user use cases...');
@@ -127,6 +130,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SearchUsers(sl()));
   sl.registerLazySingleton(() => GetUserFollowers(sl()));
   sl.registerLazySingleton(() => GetUserFollowing(sl()));
+  sl.registerLazySingleton(() => AddToTopThree(sl()));
 
   // BLoCs
   print('🧠 DI: Registering BLoCs...');
@@ -149,6 +153,8 @@ Future<void> init() async {
       getUserRecommendations: sl(),
       rateGame: sl(),
       toggleWishlist: sl(),
+      toggleRecommend: sl(),
+      addToTopThree: sl(),
     ),
   );
 

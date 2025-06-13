@@ -668,7 +668,17 @@ class _HomeContentState extends State<HomeContent> {
   void _navigateToGameDetail(int gameId) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => GameDetailPage(gameId: gameId),
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => sl<GameBloc>(),
+            ),
+            BlocProvider.value(
+              value: context.read<AuthBloc>(),
+            ),
+          ],
+          child: GameDetailPage(gameId: gameId),
+        ),
       ),
     );
   }

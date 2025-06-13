@@ -204,3 +204,49 @@ class HomePageDataLoaded extends GameState {
     isLoading,
   ];
 }
+
+class GameDetailsWithUserDataLoaded extends GameState {
+  final Game game;
+  final bool isWishlisted;
+  final bool isRecommended;
+  final double? userRating;
+  final bool isInTopThree;
+  final List<int> userTopThreeGames;
+
+  const GameDetailsWithUserDataLoaded({
+    required this.game,
+    this.isWishlisted = false,
+    this.isRecommended = false,
+    this.userRating,
+    this.isInTopThree = false,
+    this.userTopThreeGames = const [],
+  });
+
+  GameDetailsWithUserDataLoaded copyWith({
+    Game? game,
+    bool? isWishlisted,
+    bool? isRecommended,
+    double? userRating,
+    bool? isInTopThree,
+    List<int>? userTopThreeGames,
+  }) {
+    return GameDetailsWithUserDataLoaded(
+      game: game ?? this.game,
+      isWishlisted: isWishlisted ?? this.isWishlisted,
+      isRecommended: isRecommended ?? this.isRecommended,
+      userRating: userRating ?? this.userRating,
+      isInTopThree: isInTopThree ?? this.isInTopThree,
+      userTopThreeGames: userTopThreeGames ?? this.userTopThreeGames,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    game,
+    isWishlisted,
+    isRecommended,
+    userRating,
+    isInTopThree,
+    userTopThreeGames,
+  ];
+}

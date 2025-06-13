@@ -790,9 +790,15 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
         return;
       }
 
+      // ✅ Duplikate entfernen
+      final uniqueGameIds = gameIds.toSet().toList();
+      if (uniqueGameIds.length != gameIds.length) {
+        _addTestResult('⚠️ Duplicate games removed. Using: ${uniqueGameIds.join(", ")}');
+      }
+
       setState(() => _isLoading = true);
-      await _supabaseDataSource.updateTopThreeGames(_currentUserId!, gameIds);
-      _addTestResult('✅ Top games updated: ${gameIds.join(", ")}');
+      await _supabaseDataSource.updateTopThreeGames(_currentUserId!, uniqueGameIds);
+      _addTestResult('✅ Top games updated: ${uniqueGameIds.join(", ")}');
     } catch (e) {
       _addTestResult('❌ Failed to update top games: $e');
     }
