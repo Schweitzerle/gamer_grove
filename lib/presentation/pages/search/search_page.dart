@@ -2,11 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../injection_container.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/input_validator.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../widgets/game_card.dart';
 import '../../widgets/game_card_shimmer.dart';
 import '../../widgets/game_list_shimmer.dart';
 import '../../../core/widgets/error_widget.dart';
+import '../game_detail/game_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -20,22 +23,28 @@ class _SearchPageState extends State<SearchPage> {
   final _scrollController = ScrollController();
   late GameBloc _gameBloc;
 
+  // Recent searches
+  List<String> _recentSearches = [];
+  bool _showRecentSearches = true;
+
   @override
   void initState() {
     super.initState();
     _gameBloc = sl<GameBloc>();
     _scrollController.addListener(_onScroll);
+    _loadRecentSearches();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _gameBloc.close();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) {
+    if (_isBottom && !_gameBloc.state.isLoadingMore) {
       _gameBloc.add(LoadMoreGamesEvent());
     }
   }
@@ -47,6 +56,54 @@ class _SearchPageState extends State<SearchPage> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
+  void _loadRecentSearches() {
+    // TODO: Load from SharedPreferences
+    setState(() {
+      _recentSearches = ['The Witcher', 'Cyberpunk', 'Mario', 'Zelda'];
+    });
+  }
+
+  void _addToRecentSearches(String query) {
+    if (query.trim().isEmpty) return;
+
+    setState(() {
+      _recentSearches.remove(query);
+      _recentSearches.insert(0, query);
+      if (_recentSearches.length > 10) {
+        _recentSearches = _recentSearches.take(10).toList();
+      }
+    });
+
+    // TODO: Save to SharedPreferences
+  }
+
+  void _performSearch(String query) {
+    if (query.trim().isEmpty) return;
+
+    final validation = InputValidator.validateSearchQuery(query);
+    if (validation != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validation)),
+      );
+      return;
+    }
+
+    _addToRecentSearches(query.trim());
+    setState(() {
+      _showRecentSearches = false;
+    });
+
+    _gameBloc.add(SearchGamesEvent(query.trim()));
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _gameBloc.add(ClearSearchEvent());
+    setState(() {
+      _showRecentSearches = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -55,25 +112,45 @@ class _SearchPageState extends State<SearchPage> {
         body: SafeArea(
           child: Column(
             children: [
-              _buildSearchBar(),
+              _buildSearchHeader(),
               Expanded(
-                child: BlocBuilder<GameBloc, GameState>(
+                child: BlocConsumer<GameBloc, GameState>(
+                  listener: (context, state) {
+                    if (state is GameError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          action: SnackBarAction(
+                            label: 'Retry',
+                            onPressed: () {
+                              if (_searchController.text.isNotEmpty) {
+                                _performSearch(_searchController.text);
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    }
+                  },
                   builder: (context, state) {
-                    if (state is GameInitial) {
+                    if (_showRecentSearches && state is GameInitial) {
                       return _buildInitialView();
-                    } else if (state is GameSearchLoading) {
+                    } else if (state is GameSearchLoading && state.games.isEmpty) {
                       return const GameListShimmer();
                     } else if (state is GameSearchLoaded) {
                       return _buildSearchResults(state);
-                    } else if (state is GameError) {
+                    } else if (state is GameError && state.games.isEmpty) {
                       return CustomErrorWidget(
                         message: state.message,
                         onRetry: () {
-                          _gameBloc.add(SearchGamesEvent(_searchController.text));
+                          if (_searchController.text.isNotEmpty) {
+                            _performSearch(_searchController.text);
+                          }
                         },
                       );
                     }
-                    return const SizedBox.shrink();
+                    return _buildInitialView();
                   },
                 ),
               ),
@@ -84,77 +161,218 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          _gameBloc.add(SearchGamesEvent(value));
-        },
-        decoration: InputDecoration(
-          hintText: 'Search for games...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-              _gameBloc.add(ClearSearchEvent());
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Main Search Bar
+          TextField(
+            controller: _searchController,
+            onSubmitted: _performSearch,
+            onChanged: (value) {
+              // Show recent searches when field becomes empty
+              if (value.isEmpty && !_showRecentSearches) {
+                setState(() {
+                  _showRecentSearches = true;
+                });
+                _gameBloc.add(ClearSearchEvent());
+              }
             },
-          )
-              : null,
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            decoration: InputDecoration(
+              hintText: 'Search for games...',
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                icon: const Icon(Icons.clear_rounded),
+                onPressed: _clearSearch,
+              )
+                  : IconButton(
+                icon: const Icon(Icons.tune_rounded),
+                onPressed: _showFilters,
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
+              ),
             ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
-            ),
+
+          // Search Stats (when showing results)
+          BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              if (state is GameSearchLoaded && state.games.isNotEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Found ${state.games.length} games',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (!state.hasReachedMax) ...[
+                        const Text(' • '),
+                        Text(
+                          'Scroll for more',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                      const Spacer(),
+                      if (state.isLoadingMore)
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildInitialView() {
-    return Center(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.search_rounded,
-            size: 100,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Search for your favorite games',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // Welcome Section
+          Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.search_rounded,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                ),
+                const SizedBox(height: AppConstants.paddingMedium),
+                Text(
+                  'Discover Games',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.paddingSmall),
+                Text(
+                  'Search for your favorite games and discover new ones',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Discover new titles and add them to your wishlist',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+
+          const SizedBox(height: AppConstants.paddingXLarge),
+
+          // Recent Searches
+          if (_recentSearches.isNotEmpty) ...[
+            Text(
+              'Recent Searches',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            textAlign: TextAlign.center,
+            const SizedBox(height: AppConstants.paddingSmall),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _recentSearches.map((search) => _buildSearchChip(search)).toList(),
+            ),
+            const SizedBox(height: AppConstants.paddingLarge),
+          ],
+
+          // Popular Searches
+          Text(
+            'Popular Searches',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingSmall),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              'The Witcher 3',
+              'Cyberpunk 2077',
+              'Elden Ring',
+              'God of War',
+              'Red Dead Redemption',
+            ].map((search) => _buildPopularSearchChip(search)).toList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchChip(String search) {
+    return ActionChip(
+      label: Text(search),
+      avatar: const Icon(Icons.history, size: 18),
+      onPressed: () {
+        _searchController.text = search;
+        _performSearch(search);
+      },
+      deleteIcon: const Icon(Icons.close, size: 18),
+      onDeleted: () {
+        setState(() {
+          _recentSearches.remove(search);
+        });
+      },
+    );
+  }
+
+  Widget _buildPopularSearchChip(String search) {
+    return ActionChip(
+      label: Text(search),
+      avatar: const Icon(Icons.trending_up, size: 18),
+      onPressed: () {
+        _searchController.text = search;
+        _performSearch(search);
+      },
     );
   }
 
@@ -169,17 +387,24 @@ class _SearchPageState extends State<SearchPage> {
               size: 80,
               color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.paddingMedium),
             Text(
               'No games found',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.paddingSmall),
             Text(
-              'Try searching for something else',
+              'Try searching for something else or check your spelling',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.paddingLarge),
+            OutlinedButton.icon(
+              onPressed: _clearSearch,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Start New Search'),
             ),
           ],
         ),
@@ -188,16 +413,18 @@ class _SearchPageState extends State<SearchPage> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        _gameBloc.add(SearchGamesEvent(_searchController.text));
+        if (_searchController.text.isNotEmpty) {
+          _gameBloc.add(SearchGamesEvent(_searchController.text));
+        }
       },
       child: GridView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
+          crossAxisCount: AppConstants.gridCrossAxisCount,
+          childAspectRatio: AppConstants.gridChildAspectRatio,
+          crossAxisSpacing: AppConstants.gridSpacing,
+          mainAxisSpacing: AppConstants.gridSpacing,
         ),
         itemCount: state.hasReachedMax
             ? state.games.length
@@ -206,20 +433,43 @@ class _SearchPageState extends State<SearchPage> {
           if (index >= state.games.length) {
             return const GameCardShimmer();
           }
+
+          final game = state.games[index];
           return GameCard(
-            game: state.games[index],
-            onTap: () {
-              // TODO: Navigate to game details
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Tapped on ${state.games[index].name}'),
-                ),
-              );
-            },
+            game: game,
+            onTap: () => _navigateToGameDetail(game.id),
+            onWishlistTap: () => _toggleWishlist(game.id),
           );
         },
       ),
     );
   }
-}
 
+  void _navigateToGameDetail(int gameId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => GameDetailPage(gameId: gameId),
+      ),
+    );
+  }
+
+  void _toggleWishlist(int gameId) {
+    // TODO: Implement wishlist toggle
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Wishlist feature coming soon!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showFilters() {
+    // TODO: Implement filters
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Filters coming soon!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}

@@ -6,6 +6,10 @@ abstract class GameState extends Equatable {
 
   @override
   List<Object?> get props => [];
+
+  // Helper getter for checking loading state
+  bool get isLoadingMore => false;
+  List<Game> get games => [];
 }
 
 class GameInitial extends GameState {}
@@ -56,9 +60,10 @@ class GameDetailsLoaded extends GameState {
 
 class GameError extends GameState {
   final String message;
+  final List<Game> games; // Keep existing games on error
 
-  const GameError(this.message);
+  const GameError(this.message, {this.games = const []});
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, games];
 }

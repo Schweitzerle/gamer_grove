@@ -90,13 +90,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onCheckAuthStatus(
+  Future<void> _onCheckAuthStatus(
       CheckAuthStatus event,
       Emitter<AuthState> emit,
-      ) {
-    // This will be handled by the auth state stream
+      ) async {
     emit(AuthLoading());
+
+    // Try to get current user
+    final result = await getCurrentUser(const NoParams());
+
+    result.fold(
+          (failure) => emit(Unauthenticated()),
+          (user) => emit(Authenticated(user)),
+    );
   }
+
 
   @override
   Future<void> close() {
@@ -105,3 +113,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 }
 
+@override
+Future<UserModel?> getCurrentUser() async {
+  try {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      return null;
+    }
+
+    // Get full profile data
+    return await getUserProfile(user.id);
+  } catch (e) {
+    // Return null if user is not authenticated or profile doesn't exist
+    return null;
+  }
+}
+
+@override
+Future<Either<Failure, domain.User>> getCurrentUser() async {
+  try {
+    // Check if network is available for remote check
+    if (await networkInfo.isConnected) {
+      // Try to get from remote first
+      final user = await remoteDataSource.getCurrentUser();
+      if (user != null) {
+        // Cache the user
+        await localDataSource.cacheUser(user);
+        return Right(user);
+      }
+    }
+
+    // If no remote user, try cache
+    final cachedUser = await localDataSource.getCachedUser();
+    if (cachedUser != null) {
+      return Right(cachedUser);
+    }
+
+    // No user found anywhere
+    return const Left(AuthenticationFailure(message: 'No user logged in'));
+  } catch (e) {
+    return const Left(AuthenticationFailure(message: 'Failed to get current user'));
+  }
+}

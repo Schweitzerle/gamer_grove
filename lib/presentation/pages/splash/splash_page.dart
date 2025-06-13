@@ -1,4 +1,5 @@
 // presentation/pages/splash/splash_page.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_constants.dart';
@@ -56,9 +57,22 @@ class _SplashPageState extends State<SplashPage>
     // Wait for minimum splash duration
     await Future.delayed(const Duration(seconds: 2));
 
-    // Check auth status
+    // Check auth status with timeout
     if (mounted) {
+      print('🚀 SplashPage: Checking auth status...');
       context.read<AuthBloc>().add(CheckAuthStatus());
+
+      // Add a safety timeout
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          final currentState = context.read<AuthBloc>().state;
+          print('⏰ SplashPage: Timeout reached, current state: ${currentState.runtimeType}');
+          if (currentState is AuthLoading) {
+            print('🔧 SplashPage: Still loading after timeout, forcing navigation to login');
+            _navigateToLogin();
+          }
+        }
+      });
     }
   }
 
@@ -72,10 +86,17 @@ class _SplashPageState extends State<SplashPage>
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
+        print('🔥 SplashPage: Auth state changed to ${state.runtimeType}');
+
         if (state is Authenticated) {
+          print('✅ SplashPage: User authenticated, navigating to home');
           _navigateToHome();
         } else if (state is Unauthenticated) {
+          print('❌ SplashPage: User not authenticated, navigating to login');
           _navigateToLogin();
+        } else if (state is AuthError) {
+          print('💥 SplashPage: Auth error: ${state.message}');
+          _navigateToLogin(); // Navigate to login on error
         }
         // Don't navigate on AuthLoading - let it complete
       },
@@ -151,30 +172,44 @@ class _SplashPageState extends State<SplashPage>
                 // Loading Indicator
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
+                    String loadingText = 'Loading...';
+
                     if (state is AuthLoading) {
-                      return Column(
-                        children: [
-                          SizedBox(
-                            width: 30,
-                            height: 30,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white.withOpacity(0.8),
-                              ),
-                              strokeWidth: 3,
+                      loadingText = 'Checking authentication...';
+                    } else if (state is AuthError) {
+                      loadingText = 'Error: ${state.message}';
+                    }
+
+                    return Column(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white.withOpacity(0.8),
                             ),
+                            strokeWidth: 3,
                           ),
-                          const SizedBox(height: AppConstants.paddingMedium),
+                        ),
+                        const SizedBox(height: AppConstants.paddingMedium),
+                        Text(
+                          loadingText,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                        if (kDebugMode) ...[
+                          const SizedBox(height: AppConstants.paddingSmall),
                           Text(
-                            'Loading...',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.8),
+                            'State: ${state.runtimeType}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.6),
                             ),
                           ),
                         ],
-                      );
-                    }
-                    return const SizedBox.shrink();
+                      ],
+                    );
                   },
                 ),
               ],

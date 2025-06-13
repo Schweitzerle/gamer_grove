@@ -1,8 +1,10 @@
 // presentation/pages/home/home_page.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../search/search_page.dart';
+import '../test/igdb_test_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,6 +73,21 @@ class _HomeContent extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Gamer Grove'),
         centerTitle: true,
+        actions: [
+          // Debug button only in development
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              tooltip: 'IGDB API Test',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const IGDBTestPage(),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -92,6 +109,42 @@ class _HomeContent extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
+            ),
+            const SizedBox(height: 24),
+
+            // Quick action buttons
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Navigate to search
+                    // You can use a global key or provider to change tab
+                  },
+                  icon: const Icon(Icons.search),
+                  label: const Text('Search Games'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    // Navigate to wishlist
+                  },
+                  icon: const Icon(Icons.favorite_outline),
+                  label: const Text('My Wishlist'),
+                ),
+                if (kDebugMode)
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const IGDBTestPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.bug_report),
+                    label: const Text('Test IGDB API'),
+                  ),
+              ],
             ),
           ],
         ),
@@ -162,6 +215,42 @@ class _ProfileContent extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+
+            // Debug info
+            if (kDebugMode) ...[
+              const SizedBox(height: 24),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Debug Info',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text('User ID: ${user.id}'),
+                      Text('Created: ${user.createdAt}'),
+                      Text('Wishlisted Games: ${user.wishlistGameIds.length}'),
+                      Text('Rated Games: ${user.gameRatings.length}'),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const IGDBTestPage(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.api),
+                        label: const Text('Test IGDB API'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       )
