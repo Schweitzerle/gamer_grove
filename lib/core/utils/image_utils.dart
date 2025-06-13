@@ -12,8 +12,22 @@ class ImageUtils {
       baseUrl = 'https:$baseUrl';
     }
 
-    // Replace size placeholder
-    return baseUrl.replaceAll('t_thumb', size);
+    // If URL doesn't start with http, add https://
+    if (!baseUrl.startsWith('http')) {
+      baseUrl = 'https://$baseUrl';
+    }
+
+    // IGDB URL structure: https://images.igdb.com/igdb/image/upload/t_{size}/{hash}.jpg
+    // We need to replace the size part in the path, not just the t_thumb part
+
+    // Find and replace any existing size parameter
+    final RegExp sizeRegex = RegExp(r't_[a-zA-Z0-9_]+');
+    if (sizeRegex.hasMatch(baseUrl)) {
+      baseUrl = baseUrl.replaceAll(sizeRegex, size);
+    }
+
+    print('🖼️ ImageUtils: Built URL: $baseUrl');
+    return baseUrl;
   }
 
   // Get different image sizes

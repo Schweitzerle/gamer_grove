@@ -349,19 +349,20 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchChip(String search) {
-    return ActionChip(
+    return InputChip(
       label: Text(search),
       avatar: const Icon(Icons.history, size: 18),
       onPressed: () {
         _searchController.text = search;
         _performSearch(search);
       },
-      deleteIcon: const Icon(Icons.close, size: 18),
       onDeleted: () {
         setState(() {
           _recentSearches.remove(search);
         });
+        // TODO: Save updated recent searches to SharedPreferences
       },
+      deleteIcon: const Icon(Icons.close, size: 18),
     );
   }
 

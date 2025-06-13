@@ -39,15 +39,14 @@ import 'core/network/api_client.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // Blocs
   sl.registerFactory(
         () => AuthBloc(
       signIn: sl(),
       signUp: sl(),
       signOut: sl(),
+      getCurrentUser: sl(),
     ),
   );
-
   sl.registerFactory(
         () => GameBloc(
       searchGames: sl(),

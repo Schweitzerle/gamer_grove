@@ -238,9 +238,18 @@ class GameCard extends StatelessWidget {
   Widget _buildReleaseDateBadge(BuildContext context) {
     final releaseDate = game.releaseDate!;
     final isUpcoming = DateFormatter.isFutureDate(releaseDate);
+    final now = DateTime.now();
+    final daysDifference = releaseDate.difference(now).inDays;
 
-    if (!isUpcoming && DateTime.now().difference(releaseDate).inDays > 365) {
-      // Don't show very old dates
+    // Don't show badge for very old games (more than 2 years old)
+    if (!isUpcoming && now.difference(releaseDate).inDays > 730) {
+      return const SizedBox.shrink();
+    }
+
+    // Show "NEW" for games released within the last 6 months
+    final isNew = !isUpcoming && now.difference(releaseDate).inDays <= 180;
+
+    if (!isUpcoming && !isNew) {
       return const SizedBox.shrink();
     }
 
@@ -256,7 +265,9 @@ class GameCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        isUpcoming ? 'UPCOMING' : 'NEW',
+        isUpcoming
+            ? (daysDifference < 30 ? 'SOON' : 'UPCOMING')
+            : 'NEW',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.white,
           fontSize: 10,

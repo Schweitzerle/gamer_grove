@@ -6,7 +6,7 @@ class CustomShimmer extends StatefulWidget {
   const CustomShimmer({super.key, required this.child});
 
   @override
-  _CustomShimmerState createState() => _CustomShimmerState();
+  State<CustomShimmer> createState() => _CustomShimmerState();
 }
 
 class _CustomShimmerState extends State<CustomShimmer>
@@ -19,7 +19,14 @@ class _CustomShimmerState extends State<CustomShimmer>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )..repeat();
+    );
+    _controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,9 +43,9 @@ class _CustomShimmerState extends State<CustomShimmer>
                 Colors.grey[300]!,
               ],
               stops: [
-                _controller.value - 0.3,
-                _controller.value,
-                _controller.value + 0.3,
+                (_controller.value - 0.3).clamp(0.0, 1.0),
+                _controller.value.clamp(0.0, 1.0),
+                (_controller.value + 0.3).clamp(0.0, 1.0),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

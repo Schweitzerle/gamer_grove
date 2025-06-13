@@ -25,12 +25,15 @@ class CachedImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl == null || imageUrl!.isEmpty) {
+    // Validate and clean image URL
+    final cleanUrl = _cleanImageUrl(imageUrl);
+
+    if (cleanUrl.isEmpty) {
       return _buildErrorWidget(context);
     }
 
     final image = CachedNetworkImage(
-      imageUrl: imageUrl!,
+      imageUrl: cleanUrl,
       width: width,
       height: height,
       fit: fit,
@@ -43,8 +46,10 @@ class CachedImageWidget extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
-      errorWidget: (context, url, error) =>
-      errorWidget ?? _buildErrorWidget(context),
+      errorWidget: (context, url, error) {
+        print('🖼️ CachedImageWidget: Error loading image $url: $error');
+        return errorWidget ?? _buildErrorWidget(context);
+      },
     );
 
     if (borderRadius != null) {
@@ -55,6 +60,19 @@ class CachedImageWidget extends StatelessWidget {
     }
 
     return image;
+  }
+
+  String _cleanImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+
+    // Ensure URL starts with https://
+    if (url.startsWith('//')) {
+      return 'https:$url';
+    } else if (!url.startsWith('http')) {
+      return 'https://$url';
+    }
+
+    return url;
   }
 
   Widget _buildErrorWidget(BuildContext context) {

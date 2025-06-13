@@ -93,7 +93,9 @@ class DateFormatter {
 
   // Check if date is in the future
   static bool isFutureDate(DateTime date) {
-    return date.isAfter(DateTime.now());
+    final now = DateTime.now();
+    // Add a small buffer (1 day) to account for timezone differences
+    return date.isAfter(now.add(const Duration(days: 1)));
   }
 
   // Check if date is today

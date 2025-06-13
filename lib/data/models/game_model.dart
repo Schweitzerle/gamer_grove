@@ -85,14 +85,17 @@ class GameModel extends Game {
 
     try {
       if (value is int) {
-        // IGDB returns Unix timestamp
-        return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+        // IGDB returns Unix timestamp in SECONDS, not milliseconds
+        // Convert to milliseconds for DateTime.fromMillisecondsSinceEpoch
+        if (value > 0) {
+          return DateTime.fromMillisecondsSinceEpoch(value * 1000);
+        }
       }
       if (value is String) {
         return DateTime.parse(value);
       }
     } catch (e) {
-      print('⚠️ GameModel: Failed to parse release date: $e');
+      print('⚠️ GameModel: Failed to parse release date: $e for value: $value');
     }
     return null;
   }

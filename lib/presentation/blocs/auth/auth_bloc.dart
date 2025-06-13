@@ -7,6 +7,7 @@ import '../../../domain/usecases/auth/sign_in.dart';
 import '../../../domain/usecases/auth/sign_up.dart';
 import '../../../domain/usecases/auth/sign_out.dart';
 import '../../../domain/usecases/base_usecase.dart';
+import '../../../domain/usecases/auth/get_current_user.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -15,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignIn signIn;
   final SignUp signUp;
   final SignOut signOut;
+  final GetCurrentUser getCurrentUser;
 
   StreamSubscription<User?>? _authStateSubscription;
 
@@ -22,6 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signIn,
     required this.signUp,
     required this.signOut,
+    required this.getCurrentUser,
   }) : super(AuthInitial()) {
     on<SignInRequested>(_onSignInRequested);
     on<SignUpRequested>(_onSignUpRequested);
@@ -51,18 +54,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SignUpRequested event,
       Emitter<AuthState> emit,
       ) async {
+    print('🔐 AuthBloc: Starting signup process...');
+    print('📧 AuthBloc: Email: ${event.email}');
+    print('👤 AuthBloc: Username: ${event.username}');
+
     emit(AuthLoading());
 
-    final result = await signUp(SignUpParams(
-      email: event.email,
-      password: event.password,
-      username: event.username,
-    ));
+    try {
+      final result = await signUp(SignUpParams(
+        email: event.email,
+        password: event.password,
+        username: event.username,
+      ));
 
-    result.fold(
-          (failure) => emit(AuthError(failure.message)),
-          (user) => emit(Authenticated(user)),
-    );
+      result.fold(
+            (failure) {
+          print('❌ AuthBloc: Signup failed with failure: ${failure.message}');
+          emit(AuthError(failure.message));
+        },
+            (user) {
+          print('✅ AuthBloc: Signup successful for user: ${user.username}');
+          emit(Authenticated(user));
+        },
+      );
+    } catch (e, stackTrace) {
+      print('💥 AuthBloc: Unexpected error during signup: $e');
+      print('📚 AuthBloc: Stack trace: $stackTrace');
+      emit(AuthError('Unexpected error during signup: $e'));
+    }
   }
 
   Future<void> _onSignOutRequested(
@@ -96,8 +115,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ) async {
     emit(AuthLoading());
 
-    // Try to get current user
-    final result = await getCurrentUser(const NoParams());
+    final result = await getCurrentUser();
 
     result.fold(
           (failure) => emit(Unauthenticated()),
@@ -113,45 +131,3 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 }
 
-@override
-Future<UserModel?> getCurrentUser() async {
-  try {
-    final user = _supabase.auth.currentUser;
-    if (user == null) {
-      return null;
-    }
-
-    // Get full profile data
-    return await getUserProfile(user.id);
-  } catch (e) {
-    // Return null if user is not authenticated or profile doesn't exist
-    return null;
-  }
-}
-
-@override
-Future<Either<Failure, domain.User>> getCurrentUser() async {
-  try {
-    // Check if network is available for remote check
-    if (await networkInfo.isConnected) {
-      // Try to get from remote first
-      final user = await remoteDataSource.getCurrentUser();
-      if (user != null) {
-        // Cache the user
-        await localDataSource.cacheUser(user);
-        return Right(user);
-      }
-    }
-
-    // If no remote user, try cache
-    final cachedUser = await localDataSource.getCachedUser();
-    if (cachedUser != null) {
-      return Right(cachedUser);
-    }
-
-    // No user found anywhere
-    return const Left(AuthenticationFailure(message: 'No user logged in'));
-  } catch (e) {
-    return const Left(AuthenticationFailure(message: 'Failed to get current user'));
-  }
-}

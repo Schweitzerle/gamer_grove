@@ -28,9 +28,9 @@ class IGDBEndpoints {
 }
 
 class SupabaseTables {
-  static const String users = 'users';
+  static const String profiles = 'profiles';
   static const String userGames = 'user_games';
-  static const String userRatings = 'user_ratings';
+  static const String gameRatings = 'game_ratings';
   static const String userFollows = 'user_follows';
-  static const String gameRecommendations = 'game_recommendations';
+  static const String userTopGames = 'user_top_games';
 }

@@ -53,26 +53,37 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String username,
   }) async {
+    print('🌐 AuthRepository: Checking network connection...');
+
     if (!await networkInfo.isConnected) {
+      print('❌ AuthRepository: No network connection');
       return const Left(NetworkFailure());
     }
 
+    print('✅ AuthRepository: Network connected, calling remote data source...');
+
     try {
       final user = await remoteDataSource.signUp(email, password, username);
+      print('✅ AuthRepository: Remote signup successful for: ${user.username}');
 
       // Cache user data
+      print('💾 AuthRepository: Caching user data...');
       await localDataSource.cacheUser(user);
+      print('✅ AuthRepository: User data cached successfully');
 
       return Right(user);
     } on AuthException catch (e) {
+      print('🔐 AuthRepository: Auth exception: ${e.message}');
       return Left(AuthenticationFailure(message: e.message));
     } on ServerException catch (e) {
+      print('🖥️ AuthRepository: Server exception: ${e.message}');
       return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(ServerFailure());
+    } catch (e, stackTrace) {
+      print('💥 AuthRepository: Unexpected error: $e');
+      print('📚 AuthRepository: Stack trace: $stackTrace');
+      return Left(ServerFailure(message: 'Unexpected error: $e'));
     }
   }
-
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
@@ -87,28 +98,27 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, domain.User>> getCurrentUser() async {
     try {
-      // Try to get from cache first
+      // Check if network is available for remote check
+      if (await networkInfo.isConnected) {
+        // Try to get from remote first
+        final user = await remoteDataSource.getCurrentUser();
+        if (user != null) {
+          // Cache the user
+          await localDataSource.cacheUser(user);
+          return Right(user);
+        }
+      }
+
+      // If no remote user, try cache
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         return Right(cachedUser);
       }
 
-      // If not in cache, get from remote
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      final user = await remoteDataSource.getCurrentUser();
-      if (user == null) {
-        return const Left(AuthenticationFailure(message: 'No user logged in'));
-      }
-
-      // Cache the user
-      await localDataSource.cacheUser(user);
-
-      return Right(user);
+      // No user found anywhere
+      return const Left(AuthenticationFailure(message: 'No user logged in'));
     } catch (e) {
-      return const Left(ServerFailure());
+      return const Left(AuthenticationFailure(message: 'Failed to get current user'));
     }
   }
 

@@ -381,73 +381,6 @@ class _GameDetailPageState extends State<GameDetailPage> {
     );
   }
 
-  Widget _buildDetailsGrid(BuildContext context, game) {
-    final details = <String, String>{};
-
-    if (game.releaseDate != null) {
-      details['Release Date'] = DateFormatter.formatShortDate(game.releaseDate!);
-    }
-
-    if (game.genres.isNotEmpty) {
-      details['Genres'] = game.genres.take(3).map((g) => g.name).join(', ');
-    }
-
-    if (game.platforms.isNotEmpty) {
-      details['Platforms'] = game.platforms.take(3).map((p) => p.abbreviation).join(', ');
-    }
-
-    if (game.gameModes.isNotEmpty) {
-      details['Game Modes'] = game.gameModes.take(3).map((gm) => gm.name).join(', ');
-    }
-
-    if (details.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Details',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Column(
-              children: details.entries.map((entry) =>
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 100,
-                          child: Text(
-                            entry.key,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            entry.value,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ).toList(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildScreenshotsSection(BuildContext context, game) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,15 +431,15 @@ class _GameDetailPageState extends State<GameDetailPage> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: game.platforms.map((platform) =>
-              Chip(
-                label: Text(platform.name),
-                avatar: Icon(
-                  Icons.devices,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+          children: game.platforms.map<Widget>((platform) => // HINZUGEFÜGT: <Widget>
+          Chip(
+            label: Text(platform.name),
+            avatar: Icon(
+              Icons.devices,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           ).toList(),
         ),
       ],
@@ -527,14 +460,81 @@ class _GameDetailPageState extends State<GameDetailPage> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: game.genres.map((genre) =>
-              FilterChip(
-                label: Text(genre.name),
-                onSelected: (selected) {
-                  // TODO: Navigate to genre search
-                },
-              ),
+          children: game.genres.map<Widget>((genre) => // HINZUGEFÜGT: <Widget>
+          FilterChip(
+            label: Text(genre.name),
+            onSelected: (selected) {
+              // TODO: Navigate to genre search
+            },
+          ),
           ).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailsGrid(BuildContext context, game) {
+    final details = <String, String>{};
+
+    if (game.releaseDate != null) {
+      details['Release Date'] = DateFormatter.formatShortDate(game.releaseDate!);
+    }
+
+    if (game.genres.isNotEmpty) {
+      details['Genres'] = game.genres.take(3).map((g) => g.name).join(', ');
+    }
+
+    if (game.platforms.isNotEmpty) {
+      details['Platforms'] = game.platforms.take(3).map((p) => p.abbreviation).join(', ');
+    }
+
+    if (game.gameModes.isNotEmpty) {
+      details['Game Modes'] = game.gameModes.take(3).map((gm) => gm.name).join(', ');
+    }
+
+    if (details.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Details',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: AppConstants.paddingSmall),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: Column(
+              children: details.entries.map<Widget>((entry) => // HINZUGEFÜGT: <Widget>
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        entry.value,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ).toList(),
+            ),
+          ),
         ),
       ],
     );
