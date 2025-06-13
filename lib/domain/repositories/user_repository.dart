@@ -34,4 +34,8 @@ abstract class UserRepository {
   Future<Either<Failure, List<User>>> getUserFollowers(String userId);
 
   Future<Either<Failure, List<User>>> getUserFollowing(String userId);
+
+  Future<Either<Failure, List<int>>> getUserTopThreeGames(String userId);
+
+  Future<Either<Failure, void>> updateUserTopThreeGames(String userId, List<int> gameIds);
 }

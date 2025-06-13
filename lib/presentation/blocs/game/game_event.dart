@@ -70,18 +70,19 @@ class ToggleRecommendEvent extends GameEvent {
   List<Object> get props => [gameId, userId];
 }
 
-// Add to Top Three Event
 class AddToTopThreeEvent extends GameEvent {
   final int gameId;
   final String userId;
+  final int? position; // Add position parameter
 
   const AddToTopThreeEvent({
     required this.gameId,
     required this.userId,
+    this.position,
   });
 
   @override
-  List<Object> get props => [gameId, userId];
+  List<Object?> get props => [gameId, userId, position];
 }
 
 class ClearSearchEvent extends GameEvent {}

@@ -40,6 +40,160 @@ abstract class SupabaseRemoteDataSource {
 class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   final _supabase = supabase;
 
+
+  // Updated methods using RPC functions in SupabaseRemoteDataSource
+
+  @override
+  Future<void> rateGame(int gameId, String userId, double rating) async {
+    try {
+      print('⭐ Supabase: Rating game $gameId with $rating by user $userId');
+
+      // Validate rating
+      if (rating < 0 || rating > 10) {
+        throw ServerException(message: 'Rating must be between 0 and 10');
+      }
+
+      // Check if the current user matches the userId
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null || currentUser.id != userId) {
+        throw ServerException(message: 'Unauthorized: User mismatch');
+      }
+
+      // Use RPC function if available
+      try {
+        await _supabase.rpc('rate_game', params: {
+          'p_game_id': gameId,
+          'p_rating': rating,
+        });
+        print('✅ Supabase: Rating saved via RPC: $rating');
+      } catch (rpcError) {
+        // Fallback to direct insert/update if RPC fails
+        print('⚠️ RPC failed, using direct method: $rpcError');
+
+        // Delete existing rating first
+        await _supabase
+            .from(SupabaseTables.gameRatings)
+            .delete()
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+
+        // Then insert new rating
+        await _supabase
+            .from(SupabaseTables.gameRatings)
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'rating': rating,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+
+        print('✅ Supabase: Rating saved directly: $rating');
+      }
+    } catch (e) {
+      print('❌ Supabase: Failed to rate game: $e');
+      throw ServerException(message: 'Failed to rate game: $e');
+    }
+  }
+
+  @override
+  Future<void> updateTopThreeGames(String userId, List<int> gameIds) async {
+    try {
+      print('🏆 Supabase: Updating top games for user $userId: $gameIds');
+
+      if (gameIds.length > 3) {
+        throw ServerException(message: 'Maximum 3 games allowed');
+      }
+
+      // Check if the current user matches the userId
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null || currentUser.id != userId) {
+        throw ServerException(message: 'Unauthorized: User mismatch');
+      }
+
+      // Remove duplicates
+      final uniqueGameIds = gameIds.toSet().toList();
+
+      // Use RPC function if available
+      try {
+        await _supabase.rpc('update_top_three_games', params: {
+          'p_game_ids': uniqueGameIds,
+        });
+        print('✅ Supabase: Top games updated via RPC');
+      } catch (rpcError) {
+        // Fallback to direct method if RPC fails
+        print('⚠️ RPC failed, using direct method: $rpcError');
+
+        // Delete all existing entries for this user
+        await _supabase
+            .from(SupabaseTables.userTopGames)
+            .delete()
+            .eq('user_id', userId);
+
+        // Small delay to ensure deletion is processed
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        // Insert new entries one by one
+        for (int i = 0; i < uniqueGameIds.length; i++) {
+          try {
+            await _supabase
+                .from(SupabaseTables.userTopGames)
+                .insert({
+              'user_id': userId,
+              'game_id': uniqueGameIds[i],
+              'position': i + 1,
+              'created_at': DateTime.now().toIso8601String(),
+            });
+          } catch (e) {
+            print('⚠️ Failed to insert position ${i + 1}: $e');
+          }
+        }
+
+        print('✅ Supabase: Top games updated directly');
+      }
+    } catch (e) {
+      print('❌ Supabase: Failed to update top games: $e');
+      throw ServerException(message: 'Failed to update top games: $e');
+    }
+  }
+
+// Also update AddToTopThree to handle the position properly
+  Future<void> addToTopThree(int gameId, String userId, int position) async {
+    try {
+      print('🏆 Supabase: Adding game $gameId to position $position for user $userId');
+
+      // Get current top three
+      final currentTopThree = await getTopThreeGames(userId);
+
+      // Create new list with the game at the specified position
+      List<int> newTopThree = List.from(currentTopThree);
+
+      // Remove the game if it already exists
+      newTopThree.remove(gameId);
+
+      // Ensure list has enough space
+      while (newTopThree.length < 3) {
+        newTopThree.add(0); // Use 0 as placeholder
+      }
+
+      // Insert at the specified position (converting from 1-based to 0-based)
+      if (position > 0 && position <= 3) {
+        newTopThree[position - 1] = gameId;
+      }
+
+      // Remove any 0 placeholders
+      newTopThree = newTopThree.where((id) => id != 0).toList();
+
+      // Update the top three
+      await updateTopThreeGames(userId, newTopThree);
+
+      print('✅ Supabase: Game added to top three at position $position');
+    } catch (e) {
+      print('❌ Supabase: Failed to add to top three: $e');
+      throw ServerException(message: 'Failed to add to top three: $e');
+    }
+  }
+
   @override
   Future<UserModel> signIn(String email, String password) async {
     try {
@@ -344,51 +498,6 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   }
 
   @override
-  Future<void> rateGame(int gameId, String userId, double rating) async {
-    try {
-      print('⭐ Supabase: Rating game $gameId with $rating by user $userId');
-
-      // Validate rating
-      if (rating < 0 || rating > 10) {
-        throw ServerException(message: 'Rating must be between 0 and 10');
-      }
-
-      // Check if rating already exists
-      final existing = await _supabase
-          .from(SupabaseTables.gameRatings)
-          .select()
-          .eq('user_id', userId)
-          .eq('game_id', gameId)
-          .maybeSingle();
-
-      if (existing != null) {
-        // Update existing rating
-        await _supabase
-            .from(SupabaseTables.gameRatings)
-            .update({
-          'rating': rating,
-          'updated_at': DateTime.now().toIso8601String(),
-        })
-            .eq('id', existing['id']);
-        print('✅ Supabase: Rating updated to $rating');
-      } else {
-        // Insert new rating
-        await _supabase
-            .from(SupabaseTables.gameRatings)
-            .insert({
-          'user_id': userId,
-          'game_id': gameId,
-          'rating': rating,
-        });
-        print('✅ Supabase: New rating created: $rating');
-      }
-    } catch (e) {
-      print('❌ Supabase: Failed to rate game: $e');
-      throw ServerException(message: 'Failed to rate game: $e');
-    }
-  }
-
-  @override
   Future<List<int>> getUserWishlistIds(String userId) async {
     try {
       final results = await _supabase
@@ -533,42 +642,6 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     } catch (e) {
       print('⚠️ Supabase: Error getting following: $e');
       return [];
-    }
-  }
-
-  @override
-  Future<void> updateTopThreeGames(String userId, List<int> gameIds) async {
-    try {
-      print('🏆 Supabase: Updating top games for user $userId: $gameIds');
-
-      if (gameIds.length > 3) {
-        throw ServerException(message: 'Maximum 3 games allowed');
-      }
-
-      // Use a transaction-like approach by doing operations in sequence
-      // First, delete existing top games
-      await _supabase
-          .from(SupabaseTables.userTopGames)
-          .delete()
-          .eq('user_id', userId);
-
-      // Then insert new top games if any
-      if (gameIds.isNotEmpty) {
-        final inserts = gameIds.asMap().entries.map((entry) => {
-          'user_id': userId,
-          'game_id': entry.value,
-          'position': entry.key + 1,
-        }).toList();
-
-        await _supabase
-            .from(SupabaseTables.userTopGames)
-            .insert(inserts);
-      }
-
-      print('✅ Supabase: Top games updated successfully');
-    } catch (e) {
-      print('❌ Supabase: Failed to update top games: $e');
-      throw ServerException(message: 'Failed to update top games: $e');
     }
   }
 

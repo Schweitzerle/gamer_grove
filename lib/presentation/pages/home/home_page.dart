@@ -514,6 +514,7 @@ class _HomeContentState extends State<HomeContent> {
               onTap: () => _navigateToGameDetail(game.id),
               onWishlistTap: () => _toggleWishlist(game.id),
               showPlatforms: false,
+              gameBloc: _gameBloc,
             ),
           );
         },

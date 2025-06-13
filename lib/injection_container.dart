@@ -32,6 +32,7 @@ import 'domain/usecases/user/follow_user.dart';
 import 'domain/usecases/user/get_user_followers.dart';
 import 'domain/usecases/user/get_user_following.dart';
 import 'domain/usecases/user/get_user_profile.dart';
+import 'domain/usecases/user/get_user_top_three.dart';
 import 'domain/usecases/user/search_users.dart';
 import 'domain/usecases/user/update_top_three_games.dart';
 import 'domain/usecases/user/update_user_profile.dart';
@@ -131,6 +132,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUserFollowers(sl()));
   sl.registerLazySingleton(() => GetUserFollowing(sl()));
   sl.registerLazySingleton(() => AddToTopThree(sl()));
+  sl.registerLazySingleton(() => GetUserTopThreeGames(sl()));
 
   // BLoCs
   print('🧠 DI: Registering BLoCs...');
@@ -147,16 +149,16 @@ Future<void> init() async {
         () => GameBloc(
       searchGames: sl(),
       getGameDetails: sl(),
-      getPopularGames: sl(),
-      getUpcomingGames: sl(),
-      getUserWishlist: sl(),
-      getUserRecommendations: sl(),
       rateGame: sl(),
       toggleWishlist: sl(),
       toggleRecommend: sl(),
       addToTopThree: sl(),
+      getPopularGames: sl(),
+      getUpcomingGames: sl(),
+      getUserWishlist: sl(),
+      getUserRecommendations: sl(),
+      getUserTopThreeGames: sl(), // Add this line
     ),
   );
-
   print('✅ DI: Dependency injection setup complete!');
 }

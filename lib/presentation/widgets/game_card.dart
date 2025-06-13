@@ -1,11 +1,16 @@
 // presentation/widgets/game_card.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/game.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';
 import '../../core/widgets/cached_image_widget.dart';
+import '../blocs/game/game_bloc.dart';
+import '../blocs/auth/auth_bloc.dart';
 import 'custom_shimmer.dart';
+import 'game_quick_actions_dialog.dart';
 
 class GameCard extends StatelessWidget {
   final Game game;
@@ -14,6 +19,8 @@ class GameCard extends StatelessWidget {
   final bool showGenres;
   final bool showPlatforms;
   final bool showRating;
+  final bool showUserStates;
+  final GameBloc? gameBloc; // Optional GameBloc for quick actions
 
   const GameCard({
     super.key,
@@ -23,7 +30,23 @@ class GameCard extends StatelessWidget {
     this.showGenres = true,
     this.showPlatforms = true,
     this.showRating = true,
+    this.showUserStates = true,
+    this.gameBloc,
   });
+
+  void _showQuickActions(BuildContext context) {
+    HapticFeedback.mediumImpact();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GameQuickActionsDialog(
+        game: game,
+        gameBloc: gameBloc ?? context.read<GameBloc>(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +58,7 @@ class GameCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
+        onLongPress: () => _showQuickActions(context),
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,6 +93,14 @@ class GameCard extends StatelessWidget {
           ),
         ),
 
+        // User States Overlay (Top Left)
+        if (showUserStates)
+          Positioned(
+            top: AppConstants.paddingSmall,
+            left: AppConstants.paddingSmall,
+            child: _buildUserStatesOverlay(context),
+          ),
+
         // Platform Icons (Top Right)
         if (showPlatforms && game.platforms.isNotEmpty)
           Positioned(
@@ -92,15 +124,92 @@ class GameCard extends StatelessWidget {
             left: AppConstants.paddingSmall,
             child: _buildRatingBadge(context),
           ),
-
-        // Release Date Badge (Top Left)
-        if (game.releaseDate != null)
-          Positioned(
-            top: AppConstants.paddingSmall,
-            left: AppConstants.paddingSmall,
-            child: _buildReleaseDateBadge(context),
-          ),
       ],
+    );
+  }
+
+  Widget _buildUserStatesOverlay(BuildContext context) {
+    final states = <Widget>[];
+
+    // User Rating
+    if (game.userRating != null) {
+      states.add(_buildStateBadge(
+        context,
+        icon: Icons.star,
+        label: game.userRating!.toStringAsFixed(1),
+        color: Colors.amber,
+      ));
+    }
+
+    // Recommended
+    if (game.isRecommended) {
+      states.add(_buildStateBadge(
+        context,
+        icon: Icons.thumb_up,
+        label: null,
+        color: Colors.green,
+      ));
+    }
+
+    // In Top 3
+    if (game.isInTopThree ?? false) {
+      states.add(_buildStateBadge(
+        context,
+        icon: Icons.emoji_events,
+        label: null,
+        color: Colors.orange,
+      ));
+    }
+
+    if (states.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int i = 0; i < states.length; i++) ...[
+          states[i],
+          if (i < states.length - 1) const SizedBox(width: 4),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStateBadge(
+      BuildContext context, {
+        required IconData icon,
+        String? label,
+        required Color color,
+      }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          if (label != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -153,7 +262,7 @@ class GameCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.devices,
             size: 12,
             color: Colors.white,
@@ -202,78 +311,46 @@ class GameCard extends StatelessWidget {
 
   Widget _buildRatingBadge(BuildContext context) {
     final rating = game.rating!;
-    final color = _getRatingColor(rating);
+    final color = rating >= 8.0
+        ? Colors.green
+        : rating >= 6.0
+        ? Colors.orange
+        : Colors.red;
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 6,
+        horizontal: 8,
         vertical: 4,
       ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.9),
         borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.star_rounded,
-            size: 12,
+            size: 14,
             color: Colors.white,
           ),
           const SizedBox(width: 2),
           Text(
-            rating.toStringAsFixed(0),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            rating.toStringAsFixed(1),
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildReleaseDateBadge(BuildContext context) {
-    final releaseDate = game.releaseDate!;
-    final isUpcoming = DateFormatter.isFutureDate(releaseDate);
-    final now = DateTime.now();
-    final daysDifference = releaseDate.difference(now).inDays;
-
-    // Don't show badge for very old games (more than 2 years old)
-    if (!isUpcoming && now.difference(releaseDate).inDays > 730) {
-      return const SizedBox.shrink();
-    }
-
-    // Show "NEW" for games released within the last 6 months
-    final isNew = !isUpcoming && now.difference(releaseDate).inDays <= 180;
-
-    if (!isUpcoming && !isNew) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: isUpcoming
-            ? Colors.orange.withOpacity(0.9)
-            : Colors.green.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        isUpcoming
-            ? (daysDifference < 30 ? 'SOON' : 'UPCOMING')
-            : 'NEW',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
       ),
     );
   }
@@ -287,95 +364,50 @@ class GameCard extends StatelessWidget {
           // Game Title
           Text(
             game.name,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 4),
+          const Spacer(),
 
           // Genres
-          if (showGenres && game.genres.isNotEmpty)
+          if (showGenres && game.genres.isNotEmpty) ...[
             Text(
-              game.genres.take(2).map((g) => g.name).join(' • '),
+              game.genres.take(2).map((g) => g.name).join(', '),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+          ],
 
-          const Spacer(),
-
-          // Bottom Row: Rating & Release Date
-          Row(
-            children: [
-              // Detailed Rating
-              if (game.rating != null) ...[
+          // Release Date
+          if (game.releaseDate != null) ...[
+            const SizedBox(height: 2),
+            Row(
+              children: [
                 Icon(
-                  Icons.star_rounded,
-                  size: 14,
-                  color: _getRatingColor(game.rating!),
+                  Icons.calendar_today,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: 4),
                 Text(
-                  '${game.rating!.toStringAsFixed(1)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: _getRatingColor(game.rating!),
-                  ),
-                ),
-                if (game.ratingCount != null) ...[
-                  Text(
-                    ' (${_formatRatingCount(game.ratingCount!)})',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ] else ...[
-                Text(
-                  'Not rated',
+                  DateFormatter.formatYearOnly(game.releaseDate!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
-
-              const Spacer(),
-
-              // Release Year
-              if (game.releaseDate != null)
-                Text(
-                  DateFormatter.formatYearOnly(game.releaseDate!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
-  }
-
-  Color _getRatingColor(double rating) {
-    if (rating >= 80) return Colors.green;
-    if (rating >= 70) return Colors.lightGreen;
-    if (rating >= 60) return Colors.orange;
-    if (rating >= 50) return Colors.deepOrange;
-    return Colors.red;
-  }
-
-  String _formatRatingCount(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}k';
-    }
-    return count.toString();
   }
 }
 
@@ -384,13 +416,29 @@ class CompactGameCard extends StatelessWidget {
   final Game game;
   final VoidCallback onTap;
   final VoidCallback? onWishlistTap;
+  final GameBloc? gameBloc;
 
   const CompactGameCard({
     super.key,
     required this.game,
     required this.onTap,
     this.onWishlistTap,
+    this.gameBloc,
   });
+
+  void _showQuickActions(BuildContext context) {
+    HapticFeedback.mediumImpact();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GameQuickActionsDialog(
+        game: game,
+        gameBloc: gameBloc ?? context.read<GameBloc>(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -398,6 +446,7 @@ class CompactGameCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        onLongPress: () => _showQuickActions(context),
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.paddingSmall),
           child: Row(
@@ -420,14 +469,37 @@ class CompactGameCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      game.name,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    // Title with user states
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            game.name,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (game.userRating != null)
+                          _buildCompactStateBadge(
+                            context,
+                            icon: Icons.star,
+                            label: game.userRating!.toStringAsFixed(1),
+                            color: Colors.amber,
+                          ),
+                        if (game.isRecommended) ...[
+                          const SizedBox(width: 4),
+                          _buildCompactStateBadge(
+                            context,
+                            icon: Icons.thumb_up,
+                            color: Colors.green,
+                          ),
+                        ],
+                      ],
                     ),
+
                     if (game.genres.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
@@ -439,6 +511,7 @@ class CompactGameCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
+
                     if (game.rating != null) ...[
                       const SizedBox(height: 4),
                       Row(
@@ -470,12 +543,45 @@ class CompactGameCard extends StatelessWidget {
                     game.isWishlisted ? Icons.favorite : Icons.favorite_outline,
                     color: game.isWishlisted
                         ? Theme.of(context).colorScheme.primary
-                        : null,
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCompactStateBadge(
+      BuildContext context, {
+        required IconData icon,
+        String? label,
+        required Color color,
+      }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          if (label != null) ...[
+            const SizedBox(width: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

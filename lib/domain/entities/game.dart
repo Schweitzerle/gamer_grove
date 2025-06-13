@@ -26,6 +26,7 @@ class Game extends Equatable {
   final bool isWishlisted;
   final bool isRecommended;
   final double? userRating;
+  final bool? isInTopThree;
 
   const Game({
     required this.id,
@@ -47,6 +48,7 @@ class Game extends Equatable {
     this.isWishlisted = false,
     this.isRecommended = false,
     this.userRating,
+    this.isInTopThree,
   });
 
   @override
@@ -92,6 +94,7 @@ class Game extends Equatable {
     bool? isWishlisted,
     bool? isRecommended,
     double? userRating,
+    bool? isInTopThree,
   }) {
     return Game(
       id: id ?? this.id,
@@ -113,6 +116,8 @@ class Game extends Equatable {
       isWishlisted: isWishlisted ?? this.isWishlisted,
       isRecommended: isRecommended ?? this.isRecommended,
       userRating: userRating ?? this.userRating,
+      isInTopThree: isInTopThree ?? this.isInTopThree,
+
     );
   }
 }

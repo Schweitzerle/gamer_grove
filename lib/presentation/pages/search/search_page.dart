@@ -440,6 +440,7 @@ class _SearchPageState extends State<SearchPage> {
             game: game,
             onTap: () => _navigateToGameDetail(game.id),
             onWishlistTap: () => _toggleWishlist(game.id),
+            gameBloc: _gameBloc,
           );
         },
       ),

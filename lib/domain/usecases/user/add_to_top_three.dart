@@ -5,52 +5,74 @@ import '../../../core/errors/failures.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
+class AddToTopThree implements UseCase<void, AddToTopThreeParams> {
   final UserRepository repository;
 
   AddToTopThree(this.repository);
 
   @override
   Future<Either<Failure, void>> call(AddToTopThreeParams params) async {
-    // Get current top three games
-    final currentTopThreeResult = await repository.getUserProfile(params.userId);
+    try {
+      // Get current top three
+      final currentTopThreeResult = await repository.getUserTopThreeGames(params.userId);
 
-    return currentTopThreeResult.fold(
-          (failure) => Left(failure),
-          (user) async {
-        // Create new list with the game added (max 3 games)
-        final currentTopThree = List<int>.from(user.topThreeGames);
+      return currentTopThreeResult.fold(
+            (failure) => Left(failure),
+            (currentTopThree) async {
+          // Create new list with the game at the specified position
+          List<int> newTopThree = List.from(currentTopThree);
 
-        // Remove if already exists
-        currentTopThree.remove(params.gameId);
+          // Remove the game if it already exists
+          newTopThree.remove(params.gameId);
 
-        // Add to front
-        currentTopThree.insert(0, params.gameId);
+          // If position is specified, insert at that position
+          if (params.position != null && params.position! > 0 && params.position! <= 3) {
+            // Ensure list has enough space
+            while (newTopThree.length < params.position!) {
+              newTopThree.add(0); // Use 0 as placeholder
+            }
 
-        // Keep only first 3
-        if (currentTopThree.length > 3) {
-          currentTopThree.removeLast();
-        }
+            // Insert at the specified position (converting from 1-based to 0-based)
+            newTopThree.insert(params.position! - 1, params.gameId);
 
-        // Update top three games
-        return await repository.updateTopThreeGames(
-          userId: params.userId,
-          gameIds: currentTopThree,
-        );
-      },
-    );
+            // Keep only the first 3 items
+            if (newTopThree.length > 3) {
+              newTopThree = newTopThree.take(3).toList();
+            }
+          } else {
+            // No position specified, add to the end
+            newTopThree.add(params.gameId);
+
+            // Keep only the first 3 items
+            if (newTopThree.length > 3) {
+              newTopThree = newTopThree.take(3).toList();
+            }
+          }
+
+          // Remove any 0 placeholders
+          newTopThree = newTopThree.where((id) => id != 0).toList();
+
+          // Update the top three
+          return await repository.updateUserTopThreeGames(params.userId, newTopThree);
+        },
+      );
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 }
 
 class AddToTopThreeParams extends Equatable {
   final int gameId;
   final String userId;
+  final int? position; // 1, 2, or 3
 
   const AddToTopThreeParams({
     required this.gameId,
     required this.userId,
+    this.position,
   });
 
   @override
-  List<Object> get props => [gameId, userId];
+  List<Object?> get props => [gameId, userId, position];
 }

@@ -219,4 +219,32 @@ class UserRepositoryImpl implements UserRepository {
       return const Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, List<int>>> getUserTopThreeGames(String userId) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final topThreeIds = await remoteDataSource.getTopThreeGames(userId);
+        return Right(topThreeIds);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateUserTopThreeGames(String userId, List<int> gameIds) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.updateTopThreeGames(userId, gameIds);
+        return const Right(null);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure());
+    }
+  }
 }
