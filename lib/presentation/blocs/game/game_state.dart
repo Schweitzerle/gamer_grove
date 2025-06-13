@@ -14,6 +14,7 @@ abstract class GameState extends Equatable {
 
 class GameInitial extends GameState {}
 
+// Search States
 class GameSearchLoading extends GameState {}
 
 class GameSearchLoaded extends GameState {
@@ -47,6 +48,99 @@ class GameSearchLoaded extends GameState {
   List<Object> get props => [games, hasReachedMax, isLoadingMore, currentQuery];
 }
 
+// Popular Games States
+class PopularGamesLoading extends GameState {}
+
+class PopularGamesLoaded extends GameState {
+  final List<Game> games;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const PopularGamesLoaded({
+    required this.games,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  PopularGamesLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return PopularGamesLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax, isLoadingMore];
+}
+
+// Upcoming Games States
+class UpcomingGamesLoading extends GameState {}
+
+class UpcomingGamesLoaded extends GameState {
+  final List<Game> games;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const UpcomingGamesLoaded({
+    required this.games,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  UpcomingGamesLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return UpcomingGamesLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax, isLoadingMore];
+}
+
+// Wishlist States
+class UserWishlistLoading extends GameState {}
+
+class UserWishlistLoaded extends GameState {
+  final List<Game> games;
+  final String userId;
+
+  const UserWishlistLoaded({
+    required this.games,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [games, userId];
+}
+
+// Recommendations States
+class UserRecommendationsLoading extends GameState {}
+
+class UserRecommendationsLoaded extends GameState {
+  final List<Game> games;
+  final String userId;
+
+  const UserRecommendationsLoaded({
+    required this.games,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [games, userId];
+}
+
+// Game Details States
 class GameDetailsLoading extends GameState {}
 
 class GameDetailsLoaded extends GameState {
@@ -58,6 +152,7 @@ class GameDetailsLoaded extends GameState {
   List<Object> get props => [game];
 }
 
+// Error State
 class GameError extends GameState {
   final String message;
   final List<Game> games; // Keep existing games on error
@@ -66,4 +161,46 @@ class GameError extends GameState {
 
   @override
   List<Object> get props => [message, games];
+}
+
+// Multi-state for home page (combining multiple data sources)
+class HomePageDataLoaded extends GameState {
+  final List<Game> popularGames;
+  final List<Game> upcomingGames;
+  final List<Game>? userWishlist;
+  final List<Game>? userRecommendations;
+  final bool isLoading;
+
+  const HomePageDataLoaded({
+    this.popularGames = const [],
+    this.upcomingGames = const [],
+    this.userWishlist,
+    this.userRecommendations,
+    this.isLoading = false,
+  });
+
+  HomePageDataLoaded copyWith({
+    List<Game>? popularGames,
+    List<Game>? upcomingGames,
+    List<Game>? userWishlist,
+    List<Game>? userRecommendations,
+    bool? isLoading,
+  }) {
+    return HomePageDataLoaded(
+      popularGames: popularGames ?? this.popularGames,
+      upcomingGames: upcomingGames ?? this.upcomingGames,
+      userWishlist: userWishlist ?? this.userWishlist,
+      userRecommendations: userRecommendations ?? this.userRecommendations,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    popularGames,
+    upcomingGames,
+    userWishlist,
+    userRecommendations,
+    isLoading,
+  ];
 }

@@ -58,3 +58,47 @@ class ToggleWishlistEvent extends GameEvent {
 
 class ClearSearchEvent extends GameEvent {}
 
+// NEW EVENTS FOR HOME PAGE
+class LoadPopularGamesEvent extends GameEvent {
+  final int limit;
+  final int offset;
+
+  const LoadPopularGamesEvent({
+    this.limit = 20,
+    this.offset = 0,
+  });
+
+  @override
+  List<Object> get props => [limit, offset];
+}
+
+class LoadUpcomingGamesEvent extends GameEvent {
+  final int limit;
+  final int offset;
+
+  const LoadUpcomingGamesEvent({
+    this.limit = 20,
+    this.offset = 0,
+  });
+
+  @override
+  List<Object> get props => [limit, offset];
+}
+
+class LoadUserWishlistEvent extends GameEvent {
+  final String userId;
+
+  const LoadUserWishlistEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserRecommendationsEvent extends GameEvent {
+  final String userId;
+
+  const LoadUserRecommendationsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}

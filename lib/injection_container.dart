@@ -53,6 +53,10 @@ Future<void> init() async {
       getGameDetails: sl(),
       rateGame: sl(),
       toggleWishlist: sl(),
+      getPopularGames: sl(),
+      getUpcomingGames: sl(),
+      getUserWishlist: sl(),
+      getUserRecommendations: sl(),
     ),
   );
 
