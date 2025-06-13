@@ -1,6 +1,7 @@
 // presentation/pages/test/supabase_test_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/datasources/remote/supabase_remote_datasource.dart';
 import '../../../data/models/user_model.dart';
@@ -38,6 +39,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
   void initState() {
     super.initState();
     _getCurrentUser();
+    checkAuthStatus();
   }
 
   @override
@@ -66,6 +68,18 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
     setState(() {
       _testResults += '${DateTime.now().toString().substring(11, 19)}: $result\n';
     });
+  }
+
+  // In eurer Supabase Test Page hinzufügen:
+  void checkAuthStatus() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    print('🔐 Current User: ${user?.id}');
+    print('🔐 User Email: ${user?.email}');
+    print('🔐 Session valid: ${user != null}');
+
+    // JWT Token prüfen
+    final session = Supabase.instance.client.auth.currentSession;
+    print('🔐 Session: ${session?.accessToken != null}');
   }
 
   @override
