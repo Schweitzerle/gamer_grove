@@ -22,6 +22,10 @@ import 'domain/usecases/auth/sign_out.dart';
 import 'domain/usecases/auth/update_password.dart';
 import 'domain/usecases/game/search_games.dart';
 import 'domain/usecases/game/get_game_details.dart';
+import 'domain/usecases/game/get_popular_games.dart';
+import 'domain/usecases/game/get_upcoming_games.dart';
+import 'domain/usecases/game/get_user_wishlist.dart';
+import 'domain/usecases/game/get_user_recommendations.dart';
 import 'domain/usecases/game/rate_game.dart';
 import 'domain/usecases/game/toggle_wishlist.dart';
 import 'domain/usecases/user/follow_user.dart';
@@ -39,51 +43,36 @@ import 'core/network/api_client.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  sl.registerFactory(
-        () => AuthBloc(
-      signIn: sl(),
-      signUp: sl(),
-      signOut: sl(),
-      getCurrentUser: sl(),
-    ),
+  print('🔧 DI: Starting dependency injection setup...');
+
+  // External dependencies
+  print('📦 DI: Registering external dependencies...');
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => Connectivity());
+
+  // Core
+  print('🔨 DI: Registering core dependencies...');
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+  sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));
+
+  // Data sources
+  print('📡 DI: Registering data sources...');
+  sl.registerLazySingleton<IGDBRemoteDataSource>(
+        () => IGDBRemoteDataSourceImpl(client: sl()),
   );
-  sl.registerFactory(
-        () => GameBloc(
-      searchGames: sl(),
-      getGameDetails: sl(),
-      rateGame: sl(),
-      toggleWishlist: sl(),
-      getPopularGames: sl(),
-      getUpcomingGames: sl(),
-      getUserWishlist: sl(),
-      getUserRecommendations: sl(),
-    ),
+
+  sl.registerLazySingleton<SupabaseRemoteDataSource>(
+        () => SupabaseRemoteDataSourceImpl(),
   );
 
-  // Use cases - Auth
-  sl.registerLazySingleton(() => SignIn(sl()));
-  sl.registerLazySingleton(() => SignUp(sl()));
-  sl.registerLazySingleton(() => SignOut(sl()));
-  sl.registerLazySingleton(() => GetCurrentUser(sl()));
-  sl.registerLazySingleton(() => ResetPassword(sl()));
-  sl.registerLazySingleton(() => UpdatePassword(sl()));
+  sl.registerLazySingleton<LocalDataSource>(
+        () => LocalDataSourceImpl(sharedPreferences: sl()),
+  );
 
-  // Use cases - Game
-  sl.registerLazySingleton(() => SearchGames(sl()));
-  sl.registerLazySingleton(() => GetGameDetails(sl()));
-  sl.registerLazySingleton(() => RateGame(sl()));
-  sl.registerLazySingleton(() => ToggleWishlist(sl()));
-
-  // Use cases - User
-  sl.registerLazySingleton(() => GetUserProfile(sl()));
-  sl.registerLazySingleton(() => UpdateUserProfile(sl()));
-  sl.registerLazySingleton(() => FollowUser(sl()));
-  sl.registerLazySingleton(() => UpdateTopThreeGames(sl()));
-  sl.registerLazySingleton(() => SearchUsers(sl()));
-  sl.registerLazySingleton(() => GetUserFollowers(sl()));
-  sl.registerLazySingleton(() => GetUserFollowing(sl()));
-
-  // Repository
+  // Repositories
+  print('🏛️ DI: Registering repositories...');
   sl.registerLazySingleton<AuthRepository>(
         () => AuthRepositoryImpl(
       remoteDataSource: sl(),
@@ -109,26 +98,59 @@ Future<void> init() async {
     ),
   );
 
-  // Data sources
-  sl.registerLazySingleton<IGDBRemoteDataSource>(
-        () => IGDBRemoteDataSourceImpl(client: sl()),
+  // Use cases - Auth
+  print('🔐 DI: Registering auth use cases...');
+  sl.registerLazySingleton(() => SignIn(sl()));
+  sl.registerLazySingleton(() => SignUp(sl()));
+  sl.registerLazySingleton(() => SignOut(sl()));
+  sl.registerLazySingleton(() => GetCurrentUser(sl()));
+  sl.registerLazySingleton(() => ResetPassword(sl()));
+  sl.registerLazySingleton(() => UpdatePassword(sl()));
+
+  // Use cases - Game
+  print('🎮 DI: Registering game use cases...');
+  sl.registerLazySingleton(() => SearchGames(sl()));
+  sl.registerLazySingleton(() => GetGameDetails(sl()));
+  sl.registerLazySingleton(() => GetPopularGames(sl()));
+  sl.registerLazySingleton(() => GetUpcomingGames(sl()));
+  sl.registerLazySingleton(() => GetUserWishlist(sl()));
+  sl.registerLazySingleton(() => GetUserRecommendations(sl()));
+  sl.registerLazySingleton(() => RateGame(sl()));
+  sl.registerLazySingleton(() => ToggleWishlist(sl()));
+
+  // Use cases - User
+  print('👤 DI: Registering user use cases...');
+  sl.registerLazySingleton(() => GetUserProfile(sl()));
+  sl.registerLazySingleton(() => UpdateUserProfile(sl()));
+  sl.registerLazySingleton(() => FollowUser(sl()));
+  sl.registerLazySingleton(() => UpdateTopThreeGames(sl()));
+  sl.registerLazySingleton(() => SearchUsers(sl()));
+  sl.registerLazySingleton(() => GetUserFollowers(sl()));
+  sl.registerLazySingleton(() => GetUserFollowing(sl()));
+
+  // BLoCs
+  print('🧠 DI: Registering BLoCs...');
+  sl.registerFactory(
+        () => AuthBloc(
+      signIn: sl(),
+      signUp: sl(),
+      signOut: sl(),
+      getCurrentUser: sl(),
+    ),
   );
 
-  sl.registerLazySingleton<SupabaseRemoteDataSource>(
-        () => SupabaseRemoteDataSourceImpl(),
+  sl.registerFactory(
+        () => GameBloc(
+      searchGames: sl(),
+      getGameDetails: sl(),
+      getPopularGames: sl(),
+      getUpcomingGames: sl(),
+      getUserWishlist: sl(),
+      getUserRecommendations: sl(),
+      rateGame: sl(),
+      toggleWishlist: sl(),
+    ),
   );
 
-  sl.registerLazySingleton<LocalDataSource>(
-        () => LocalDataSourceImpl(sharedPreferences: sl()),
-  );
-
-  // Core
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-  sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));
-
-  // External
-  final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton(() => sharedPreferences);
-  sl.registerLazySingleton(() => http.Client());
-  sl.registerLazySingleton(() => Connectivity());
+  print('✅ DI: Dependency injection setup complete!');
 }
