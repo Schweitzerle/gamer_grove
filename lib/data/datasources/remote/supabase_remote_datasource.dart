@@ -34,14 +34,103 @@ abstract class SupabaseRemoteDataSource {
 
   // Top Games
   Future<void> updateTopThreeGames(String userId, List<int> gameIds);
+  Future<List<Map<String, dynamic>>> getTopThreeGamesWithPosition(String userId);
   Future<List<int>> getTopThreeGames(String userId);
 }
 
 class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   final _supabase = supabase;
 
+  // Angepasste supabase_remote_datasource.dart für die neue Struktur
+// Ersetze die Game Operations Methoden mit diesen:
 
-  // Updated methods using RPC functions in SupabaseRemoteDataSource
+  // =======================================
+  // GAME OPERATIONS - NEUE IMPLEMENTIERUNG
+  // =======================================
+
+  @override
+  Future<void> toggleWishlist(int gameId, String userId) async {
+    try {
+      print('💝 Supabase: Toggling wishlist for game $gameId, user $userId');
+
+      // Check current state
+      final existing = await _supabase
+          .from('user_game_interactions')
+          .select('is_wishlisted')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (existing != null) {
+        // Toggle existing
+        final newState = !(existing['is_wishlisted'] ?? false);
+        await _supabase
+            .from('user_game_interactions')
+            .update({
+          'is_wishlisted': newState,
+          // Timestamp wird automatisch durch Trigger gesetzt
+        })
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+        print('✅ Supabase: Wishlist toggled to: $newState');
+      } else {
+        // Create new entry
+        await _supabase
+            .from('user_game_interactions')
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'is_wishlisted': true,
+        });
+        print('✅ Supabase: New wishlist entry created');
+      }
+    } catch (e) {
+      print('❌ Supabase: Failed to toggle wishlist: $e');
+      throw ServerException(message: 'Failed to toggle wishlist: $e');
+    }
+  }
+
+  @override
+  Future<void> toggleRecommended(int gameId, String userId) async {
+    try {
+      print('👍 Supabase: Toggling recommendation for game $gameId, user $userId');
+
+      // Check current state
+      final existing = await _supabase
+          .from('user_game_interactions')
+          .select('is_recommended')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (existing != null) {
+        // Toggle existing
+        final newState = !(existing['is_recommended'] ?? false);
+        await _supabase
+            .from('user_game_interactions')
+            .update({
+          'is_recommended': newState,
+          // Timestamp wird automatisch durch Trigger gesetzt
+        })
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+        print('✅ Supabase: Recommendation toggled to: $newState');
+      } else {
+        // Create new entry
+        await _supabase
+            .from('user_game_interactions')
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'is_recommended': true,
+        });
+        print('✅ Supabase: New recommendation entry created');
+      }
+    } catch (e) {
+      print('❌ Supabase: Failed to toggle recommendation: $e');
+      throw ServerException(message: 'Failed to toggle recommendation: $e');
+    }
+  }
 
   @override
   Future<void> rateGame(int gameId, String userId, double rating) async {
@@ -53,42 +142,35 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw ServerException(message: 'Rating must be between 0 and 10');
       }
 
-      // Check if the current user matches the userId
-      final currentUser = _supabase.auth.currentUser;
-      if (currentUser == null || currentUser.id != userId) {
-        throw ServerException(message: 'Unauthorized: User mismatch');
-      }
+      // Check if entry exists
+      final existing = await _supabase
+          .from('user_game_interactions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
 
-      // Use RPC function if available
-      try {
-        await _supabase.rpc('rate_game', params: {
-          'p_game_id': gameId,
-          'p_rating': rating,
-        });
-        print('✅ Supabase: Rating saved via RPC: $rating');
-      } catch (rpcError) {
-        // Fallback to direct insert/update if RPC fails
-        print('⚠️ RPC failed, using direct method: $rpcError');
-
-        // Delete existing rating first
+      if (existing != null) {
+        // Update existing
         await _supabase
-            .from(SupabaseTables.gameRatings)
-            .delete()
+            .from('user_game_interactions')
+            .update({
+          'rating': rating,
+          // rated_at wird automatisch durch Trigger gesetzt
+        })
             .eq('user_id', userId)
             .eq('game_id', gameId);
-
-        // Then insert new rating
+        print('✅ Supabase: Rating updated: $rating');
+      } else {
+        // Create new entry
         await _supabase
-            .from(SupabaseTables.gameRatings)
+            .from('user_game_interactions')
             .insert({
           'user_id': userId,
           'game_id': gameId,
           'rating': rating,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
         });
-
-        print('✅ Supabase: Rating saved directly: $rating');
+        print('✅ Supabase: New rating created: $rating');
       }
     } catch (e) {
       print('❌ Supabase: Failed to rate game: $e');
@@ -96,6 +178,80 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     }
   }
 
+  @override
+  Future<List<int>> getUserWishlistIds(String userId) async {
+    try {
+      final results = await _supabase
+          .from('user_game_interactions')
+          .select('game_id')
+          .eq('user_id', userId)
+          .eq('is_wishlisted', true)
+          .order('wishlisted_at', ascending: false);
+
+      return results.map<int>((item) => item['game_id'] as int).toList();
+    } catch (e) {
+      print('⚠️ Supabase: Error getting wishlist: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<int>> getUserRecommendedIds(String userId) async {
+    try {
+      final results = await _supabase
+          .from('user_game_interactions')
+          .select('game_id')
+          .eq('user_id', userId)
+          .eq('is_recommended', true)
+          .order('recommended_at', ascending: false);
+
+      return results.map<int>((item) => item['game_id'] as int).toList();
+    } catch (e) {
+      print('⚠️ Supabase: Error getting recommended games: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<Map<int, double>> getUserRatings(String userId) async {
+    try {
+      final results = await _supabase
+          .from('user_game_interactions')
+          .select('game_id, rating')
+          .eq('user_id', userId)
+          .not('rating', 'is', null)
+          .order('rated_at', ascending: false);
+
+      return Map.fromEntries(
+        results.map((item) => MapEntry(
+          item['game_id'] as int,
+          double.parse(item['rating'].toString()),
+        )),
+      );
+    } catch (e) {
+      print('⚠️ Supabase: Error getting ratings: $e');
+      return {};
+    }
+  }
+
+  // NEUE HILFSMETHODE: Hole alle User-Game Daten auf einmal
+  Future<Map<String, dynamic>?> getUserGameInteraction(int gameId, String userId) async {
+    try {
+      final result = await _supabase
+          .from('user_game_interactions')
+          .select()
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      return result;
+    } catch (e) {
+      print('⚠️ Supabase: Error getting user game interaction: $e');
+      return null;
+    }
+  }
+
+  // Top Games bleiben gleich, da die Tabelle nicht geändert wurde
   @override
   Future<void> updateTopThreeGames(String userId, List<int> gameIds) async {
     try {
@@ -105,55 +261,45 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw ServerException(message: 'Maximum 3 games allowed');
       }
 
-      // Check if the current user matches the userId
-      final currentUser = _supabase.auth.currentUser;
-      if (currentUser == null || currentUser.id != userId) {
-        throw ServerException(message: 'Unauthorized: User mismatch');
-      }
+      // Delete existing top games
+      await _supabase
+          .from('user_top_games')
+          .delete()
+          .eq('user_id', userId);
 
-      // Remove duplicates
-      final uniqueGameIds = gameIds.toSet().toList();
+      // Insert new top games
+      if (gameIds.isNotEmpty) {
+        final inserts = gameIds.asMap().entries.map((entry) => {
+          'user_id': userId,
+          'game_id': entry.value,
+          'position': entry.key + 1,
+        }).toList();
 
-      // Use RPC function if available
-      try {
-        await _supabase.rpc('update_top_three_games', params: {
-          'p_game_ids': uniqueGameIds,
-        });
-        print('✅ Supabase: Top games updated via RPC');
-      } catch (rpcError) {
-        // Fallback to direct method if RPC fails
-        print('⚠️ RPC failed, using direct method: $rpcError');
-
-        // Delete all existing entries for this user
         await _supabase
-            .from(SupabaseTables.userTopGames)
-            .delete()
-            .eq('user_id', userId);
-
-        // Small delay to ensure deletion is processed
-        await Future.delayed(const Duration(milliseconds: 200));
-
-        // Insert new entries one by one
-        for (int i = 0; i < uniqueGameIds.length; i++) {
-          try {
-            await _supabase
-                .from(SupabaseTables.userTopGames)
-                .insert({
-              'user_id': userId,
-              'game_id': uniqueGameIds[i],
-              'position': i + 1,
-              'created_at': DateTime.now().toIso8601String(),
-            });
-          } catch (e) {
-            print('⚠️ Failed to insert position ${i + 1}: $e');
-          }
-        }
-
-        print('✅ Supabase: Top games updated directly');
+            .from('user_top_games')
+            .insert(inserts);
       }
+
+      print('✅ Supabase: Top games updated');
     } catch (e) {
       print('❌ Supabase: Failed to update top games: $e');
       throw ServerException(message: 'Failed to update top games: $e');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getTopThreeGamesWithPosition(String userId) async {
+    try {
+      final results = await _supabase
+          .from('user_top_games')
+          .select('game_id, position')
+          .eq('user_id', userId)
+          .order('position');
+
+      return results;
+    } catch (e) {
+      print('⚠️ Supabase: Error getting top games with position: $e');
+      return [];
     }
   }
 
@@ -163,7 +309,7 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
       print('🏆 Supabase: Adding game $gameId to position $position for user $userId');
 
       // Get current top three
-      final currentTopThree = await getTopThreeGames(userId);
+      final currentTopThree = await getTopThreeGamesWithPosition(userId);
 
       // Create new list with the game at the specified position
       List<int> newTopThree = List.from(currentTopThree);
@@ -336,7 +482,7 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         getUserRatings(userId),
         getUserFollowers(userId),
         getUserFollowing(userId),
-        getTopThreeGames(userId),
+        getTopThreeGamesWithPosition(userId),
       ]);
 
       final wishlist = futures[0] as List<int>;
@@ -422,130 +568,6 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     } catch (e) {
       print('❌ Supabase: Failed to search users: $e');
       throw ServerException(message: 'Failed to search users: $e');
-    }
-  }
-
-  @override
-  Future<void> toggleWishlist(int gameId, String userId) async {
-    try {
-      print('💝 Supabase: Toggling wishlist for game $gameId, user $userId');
-
-      final existing = await _supabase
-          .from(SupabaseTables.userGames)
-          .select()
-          .eq('user_id', userId)
-          .eq('game_id', gameId)
-          .maybeSingle();
-
-      if (existing != null) {
-        final newWishlistState = !(existing['is_wishlisted'] ?? false);
-        await _supabase
-            .from(SupabaseTables.userGames)
-            .update({'is_wishlisted': newWishlistState})
-            .eq('id', existing['id']);
-        print('✅ Supabase: Wishlist toggled to: $newWishlistState');
-      } else {
-        await _supabase
-            .from(SupabaseTables.userGames)
-            .insert({
-          'user_id': userId,
-          'game_id': gameId,
-          'is_wishlisted': true,
-          'is_recommended': false,
-        });
-        print('✅ Supabase: New wishlist entry created');
-      }
-    } catch (e) {
-      print('❌ Supabase: Failed to toggle wishlist: $e');
-      throw ServerException(message: 'Failed to toggle wishlist: $e');
-    }
-  }
-
-  @override
-  Future<void> toggleRecommended(int gameId, String userId) async {
-    try {
-      print('👍 Supabase: Toggling recommendation for game $gameId, user $userId');
-
-      final existing = await _supabase
-          .from(SupabaseTables.userGames)
-          .select()
-          .eq('user_id', userId)
-          .eq('game_id', gameId)
-          .maybeSingle();
-
-      if (existing != null) {
-        final newRecommendedState = !(existing['is_recommended'] ?? false);
-        await _supabase
-            .from(SupabaseTables.userGames)
-            .update({'is_recommended': newRecommendedState})
-            .eq('id', existing['id']);
-        print('✅ Supabase: Recommendation toggled to: $newRecommendedState');
-      } else {
-        await _supabase
-            .from(SupabaseTables.userGames)
-            .insert({
-          'user_id': userId,
-          'game_id': gameId,
-          'is_wishlisted': false,
-          'is_recommended': true,
-        });
-        print('✅ Supabase: New recommendation entry created');
-      }
-    } catch (e) {
-      print('❌ Supabase: Failed to toggle recommendation: $e');
-      throw ServerException(message: 'Failed to toggle recommendation: $e');
-    }
-  }
-
-  @override
-  Future<List<int>> getUserWishlistIds(String userId) async {
-    try {
-      final results = await _supabase
-          .from(SupabaseTables.userGames)
-          .select('game_id')
-          .eq('user_id', userId)
-          .eq('is_wishlisted', true);
-
-      return results.map<int>((item) => item['game_id'] as int).toList();
-    } catch (e) {
-      print('⚠️ Supabase: Error getting wishlist: $e');
-      return [];
-    }
-  }
-
-  @override
-  Future<List<int>> getUserRecommendedIds(String userId) async {
-    try {
-      final results = await _supabase
-          .from(SupabaseTables.userGames)
-          .select('game_id')
-          .eq('user_id', userId)
-          .eq('is_recommended', true);
-
-      return results.map<int>((item) => item['game_id'] as int).toList();
-    } catch (e) {
-      print('⚠️ Supabase: Error getting recommended games: $e');
-      return [];
-    }
-  }
-
-  @override
-  Future<Map<int, double>> getUserRatings(String userId) async {
-    try {
-      final results = await _supabase
-          .from(SupabaseTables.gameRatings)
-          .select('game_id, rating')
-          .eq('user_id', userId);
-
-      return Map.fromEntries(
-        results.map((item) => MapEntry(
-          item['game_id'] as int,
-          (item['rating'] as num).toDouble(),
-        )),
-      );
-    } catch (e) {
-      print('⚠️ Supabase: Error getting ratings: $e');
-      return {};
     }
   }
 
@@ -645,11 +667,28 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     }
   }
 
+  // Neue Methode in SupabaseRemoteDataSourceImpl
+  Future<Map<String, dynamic>> getUserGameData(String userId, int gameId) async {
+    try {
+      final result = await _supabase
+          .rpc('get_user_game_data', params: {
+        'p_user_id': userId,
+        'p_game_id': gameId,
+      })
+          .single();
+      return result;
+    } catch (e) {
+      print('⚠️ Error calling get_user_game_data: $e');
+      throw e;
+    }
+  }
+
+  // Diese Methode sollte weiterhin existieren für Kompatibilität
   @override
   Future<List<int>> getTopThreeGames(String userId) async {
     try {
       final results = await _supabase
-          .from(SupabaseTables.userTopGames)
+          .from('user_top_games')
           .select('game_id, position')
           .eq('user_id', userId)
           .order('position');

@@ -268,6 +268,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
 
+  // Komplette _onGetGameDetailsWithUserData Methode für game_bloc.dart
+
   Future<void> _onGetGameDetailsWithUserData(
       GetGameDetailsWithUserDataEvent event,
       Emitter<GameState> emit,
@@ -280,7 +282,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         GameDetailsParams(gameId: event.gameId),
       );
 
-      // Handle the result with proper async/await
       await gameResult.fold(
             (failure) async {
           if (!emit.isDone) {
@@ -288,37 +289,88 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           }
         },
             (game) async {
-          // If user is logged in, fetch user-specific data
           if (event.userId != null) {
             try {
-              // Fetch all user data in parallel
-              final futures = await Future.wait([
-                _getUserWishlistIds(event.userId!),
-                _getUserRecommendedIds(event.userId!),
-                _getUserRatings(event.userId!),
-                _getUserTopThreeGames(event.userId!),
-              ]);
+              print('🔍 Loading user data for game ${event.gameId}');
 
-              final wishlistIds = futures[0] as List<int>;
-              final recommendedIds = futures[1] as List<int>;
-              final userRatings = futures[2] as Map<int, double>;
-              final topThreeIds = futures[3] as List<int>;
+              final supabaseDataSource = sl<SupabaseRemoteDataSource>() as SupabaseRemoteDataSourceImpl;
 
-              // Update game with user-specific data
-              final enhancedGame = game.copyWith(
-                isWishlisted: wishlistIds.contains(game.id),
-                isRecommended: recommendedIds.contains(game.id),
-                userRating: userRatings[game.id],
-                isInTopThree: topThreeIds.contains(game.id),
-              );
+              // Try to use RPC function first
+              try {
+                final userGameData = await supabaseDataSource.getUserGameData(
+                    event.userId!,
+                    event.gameId
+                );
 
-              // Check if emit is still active before emitting
-              if (!emit.isDone) {
-                emit(GameDetailsLoaded(enhancedGame));
+                // Get top three position separately
+                final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(event.userId!);
+
+                // Find position for current game
+                int? gamePosition;
+                bool isInTopThree = false;
+
+                for (var entry in topThreeData) {
+                  if (entry['game_id'] == event.gameId) {
+                    isInTopThree = true;
+                    gamePosition = entry['position'] as int;
+                    break;
+                  }
+                }
+
+                // Update game with all user-specific data
+                final enhancedGame = game.copyWith(
+                  isWishlisted: userGameData['is_wishlisted'] ?? false,
+                  isRecommended: userGameData['is_recommended'] ?? false,
+                  userRating: userGameData['user_rating']?.toDouble(),
+                  isInTopThree: isInTopThree,
+                  topThreePosition: gamePosition,
+                );
+
+                print('✅ User data loaded: wishlist=${enhancedGame.isWishlisted}, '
+                    'recommended=${enhancedGame.isRecommended}, '
+                    'rating=${enhancedGame.userRating}, '
+                    'top3=${enhancedGame.isInTopThree} (position: $gamePosition)');
+
+                if (!emit.isDone) {
+                  emit(GameDetailsLoaded(enhancedGame));
+                }
+              } catch (rpcError) {
+                // Fallback: Load data individually
+                print('⚠️ RPC failed, loading data individually: $rpcError');
+
+                final futures = await Future.wait([
+                  _getUserWishlistIds(event.userId!),
+                  _getUserRecommendedIds(event.userId!),
+                  _getUserRatings(event.userId!),
+                  _getUserTopThreeGames(event.userId!),
+                ]);
+
+                final wishlistIds = futures[0] as List<int>;
+                final recommendedIds = futures[1] as List<int>;
+                final userRatings = futures[2] as Map<int, double>;
+                final topThreeIds = futures[3] as List<int>;
+
+                // Get position if in top three
+                int? gamePosition;
+                if (topThreeIds.contains(game.id)) {
+                  gamePosition = topThreeIds.indexOf(game.id) + 1;
+                }
+
+                final enhancedGame = game.copyWith(
+                  isWishlisted: wishlistIds.contains(game.id),
+                  isRecommended: recommendedIds.contains(game.id),
+                  userRating: userRatings[game.id],
+                  isInTopThree: topThreeIds.contains(game.id),
+                  topThreePosition: gamePosition,
+                );
+
+                if (!emit.isDone) {
+                  emit(GameDetailsLoaded(enhancedGame));
+                }
               }
             } catch (e) {
               // If user data fails, still show game without user data
-              print('⚠️ Failed to load user data: $e');
+              print('❌ Failed to load user data: $e');
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(game));
               }
@@ -338,7 +390,86 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-  // Additional fixes for other event handlers in GameBloc:
+// Die anderen Handler bleiben gleich, aber hier nochmal die wichtigen:
+
+  Future<void> _onRateGame(
+      RateGameEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await rateGame(
+      RateGameParams(
+        gameId: event.gameId,
+        userId: event.userId,
+        rating: event.rating,
+      ),
+    );
+
+    if (!emit.isDone) {
+      result.fold(
+            (failure) => emit(GameError(failure.message)),
+            (_) {
+          if (state is GameDetailsLoaded) {
+            final currentGame = (state as GameDetailsLoaded).game;
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(userRating: event.rating),
+            ));
+          }
+        },
+      );
+    }
+  }
+
+  Future<void> _onToggleWishlist(
+      ToggleWishlistEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await toggleWishlist(
+      ToggleWishlistParams(
+        gameId: event.gameId,
+        userId: event.userId,
+      ),
+    );
+
+    if (!emit.isDone) {
+      result.fold(
+            (failure) => emit(GameError(failure.message)),
+            (_) {
+          if (state is GameDetailsLoaded) {
+            final currentGame = (state as GameDetailsLoaded).game;
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(isWishlisted: !currentGame.isWishlisted),
+            ));
+          }
+        },
+      );
+    }
+  }
+
+  Future<void> _onToggleRecommend(
+      ToggleRecommendEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await toggleRecommend(
+      ToggleRecommendParams(
+        gameId: event.gameId,
+        userId: event.userId,
+      ),
+    );
+
+    if (!emit.isDone) {
+      result.fold(
+            (failure) => emit(GameError(failure.message)),
+            (_) {
+          if (state is GameDetailsLoaded) {
+            final currentGame = (state as GameDetailsLoaded).game;
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(isRecommended: !currentGame.isRecommended),
+            ));
+          }
+        },
+      );
+    }
+  }
 
 // Fix for _onGetGameDetails
   Future<void> _onGetGameDetails(
@@ -359,90 +490,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-// Fix for _onRateGame
-  Future<void> _onRateGame(
-      RateGameEvent event,
-      Emitter<GameState> emit,
-      ) async {
-    final result = await rateGame(
-      RateGameParams(
-        gameId: event.gameId,
-        userId: event.userId,
-        rating: event.rating,
-      ),
-    );
-
-    if (!emit.isDone) {
-      result.fold(
-            (failure) => emit(GameError(failure.message)),
-            (_) {
-          // Update the game in current state if needed
-          if (state is GameDetailsLoaded) {
-            final currentGame = (state as GameDetailsLoaded).game;
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(userRating: event.rating),
-            ));
-          }
-        },
-      );
-    }
-  }
-
-// Fix for _onToggleWishlist
-  Future<void> _onToggleWishlist(
-      ToggleWishlistEvent event,
-      Emitter<GameState> emit,
-      ) async {
-    final result = await toggleWishlist(
-      ToggleWishlistParams(
-        gameId: event.gameId,
-        userId: event.userId,
-      ),
-    );
-
-    if (!emit.isDone) {
-      result.fold(
-            (failure) => emit(GameError(failure.message)),
-            (_) {
-          // Update the game in current state if needed
-          if (state is GameDetailsLoaded) {
-            final currentGame = (state as GameDetailsLoaded).game;
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(isWishlisted: !currentGame.isWishlisted),
-            ));
-          }
-        },
-      );
-    }
-  }
-
-// Fix for _onToggleRecommend
-  Future<void> _onToggleRecommend(
-      ToggleRecommendEvent event,
-      Emitter<GameState> emit,
-      ) async {
-    final result = await toggleRecommend(
-      ToggleRecommendParams(
-        gameId: event.gameId,
-        userId: event.userId,
-      ),
-    );
-
-    if (!emit.isDone) {
-      result.fold(
-            (failure) => emit(GameError(failure.message)),
-            (_) {
-          // Update the game in current state if needed
-          if (state is GameDetailsLoaded) {
-            final currentGame = (state as GameDetailsLoaded).game;
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(isRecommended: !currentGame.isRecommended),
-            ));
-          }
-        },
-      );
-    }
-  }
 
   Future<void> _onAddToTopThree(
       AddToTopThreeEvent event,

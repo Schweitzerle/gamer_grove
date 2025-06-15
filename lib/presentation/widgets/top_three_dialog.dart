@@ -1,19 +1,21 @@
-// lib/presentation/widgets/top_three_dialog.dart
+// top_three_dialog.dart - Korrigierte Version
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/entities/game.dart';
 import '../blocs/game/game_bloc.dart';
+import '../blocs/auth/auth_bloc.dart';
+import '../../injection_container.dart';
+import '../../data/datasources/remote/supabase_remote_datasource.dart';
 
 class TopThreeDialog extends StatefulWidget {
   final Game game;
   final String userId;
-  final List<int> currentTopThree; // Current top three games
 
   const TopThreeDialog({
     super.key,
     required this.game,
     required this.userId,
-    required this.currentTopThree,
   });
 
   @override
@@ -21,170 +23,243 @@ class TopThreeDialog extends StatefulWidget {
 }
 
 class _TopThreeDialogState extends State<TopThreeDialog> {
-  int selectedPosition = 1;
+  List<Game> _currentTopThree = [];
+  List<int> _currentTopThreeIds = [];
+  bool _isLoading = true;
+  int? _selectedPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentTopThree();
+  }
+
+  Future<void> _loadCurrentTopThree() async {
+    try {
+      // Lade die aktuellen Top 3 Game IDs mit Position
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+      final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(widget.userId);
+
+      // Extrahiere nur die game_ids in der richtigen Reihenfolge
+      final topThreeIds = topThreeData
+          .map<int>((item) => item['game_id'] as int)
+          .toList();
+
+      setState(() {
+        _isLoading = false;
+        _currentTopThreeIds = topThreeIds;
+        // TODO: Hier könnten wir die Game Details laden wenn nötig
+        // Vorerst zeigen wir nur die IDs
+      });
+    } catch (e) {
+      print('Error loading top three: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.star, color: Colors.amber),
-          const SizedBox(width: 8),
-          const Text('Add to Top 3'),
-        ],
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Add "${widget.game.name}" to your top 3 games?'),
-          const SizedBox(height: 16),
-
-          // Position Selection
-          Text(
-            'Select position:',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Position Options
-          Column(
-            children: [
-              for (int i = 1; i <= 3; i++)
-                RadioListTile<int>(
-                  value: i,
-                  groupValue: selectedPosition,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedPosition = value!;
-                    });
-                  },
-                  title: Row(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events,
+                    color: Colors.amber,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: _getPositionColor(i),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$i',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
+                      const Text(
+                        'Add to Top 3',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _getPositionText(i),
-                          style: Theme.of(context).textTheme.bodyMedium,
+                      Text(
+                        widget.game.name,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ),
-                  subtitle: widget.currentTopThree.length >= i
-                      ? Padding(
-                    padding: const EdgeInsets.only(left: 36),
-                    child: Text(
-                      'Currently: Game ${widget.currentTopThree[i - 1]}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                      : null,
-                  dense: true,
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Info Container
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.amber[700], size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    selectedPosition <= widget.currentTopThree.length
-                        ? 'This will replace the current game at position $selectedPosition'
-                        : 'This will add the game to position $selectedPosition',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.amber[700],
-                    ),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+
+            const SizedBox(height: 24),
+
+            // Current Top 3 or Empty Slots
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Select position to add or replace:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Position Slots
+                  ...List.generate(3, (index) {
+                    final position = index + 1;
+                    final hasGame = _currentTopThreeIds.length > index;
+                    final gameId = hasGame ? _currentTopThreeIds[index] : null;
+
+                    return _buildPositionSlot(
+                      position: position,
+                      gameId: gameId,
+                      isSelected: _selectedPosition == position,
+                      onTap: () {
+                        setState(() {
+                          _selectedPosition = position;
+                        });
+                      },
+                    );
+                  }),
+                ],
+              ),
+
+            const SizedBox(height: 24),
+
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 12),
+                FilledButton(
+                  onPressed: _selectedPosition != null
+                      ? () => _addToTopThree()
+                      : null,
+                  child: const Text('Confirm'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop();
-            _addToTopThreeAtPosition(selectedPosition);
-          },
-          icon: const Icon(Icons.star),
-          label: Text('Add to Position $selectedPosition'),
-          style: FilledButton.styleFrom(
-            backgroundColor: _getPositionColor(selectedPosition),
-          ),
-        ),
-      ],
     );
   }
 
-  void _addToTopThreeAtPosition(int position) {
-    // Create new top three list
-    final newTopThree = List<int>.from(widget.currentTopThree);
+  Widget _buildPositionSlot({
+    required int position,
+    int? gameId,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Position Badge
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _getPositionColor(position),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '#$position',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
 
-    // Remove the game if it already exists
-    newTopThree.remove(widget.game.id);
+            const SizedBox(width: 12),
 
-    // Ensure list has enough elements
-    while (newTopThree.length < 3) {
-      newTopThree.add(0); // 0 as placeholder for empty slots
-    }
+            // Game Info or Empty Slot
+            Expanded(
+              child: gameId != null
+                  ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Game ID: $gameId',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'Current #$position',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              )
+                  : Text(
+                'Empty Slot',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
 
-    // Insert at the selected position
-    newTopThree[position - 1] = widget.game.id;
-
-    // Remove any 0 placeholders and keep only actual game IDs
-    final finalTopThree = newTopThree.where((id) => id != 0).toList();
-
-    // Add the event to BLoC
-    context.read<GameBloc>().add(AddToTopThreeEvent(
-      gameId: widget.game.id,
-      userId: widget.userId,
-    ));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Added "${widget.game.name}" to position $position!'),
-        backgroundColor: _getPositionColor(position),
-        behavior: SnackBarBehavior.floating,
+            if (isSelected)
+              Icon(
+                Icons.swap_horiz,
+                color: Theme.of(context).primaryColor,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -192,26 +267,74 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   Color _getPositionColor(int position) {
     switch (position) {
       case 1:
-        return Colors.amber[700]!; // Gold
+        return Colors.amber;
       case 2:
-        return Colors.grey[600]!; // Silver
+        return Colors.grey[600]!;
       case 3:
-        return Colors.brown[600]!; // Bronze
+        return Colors.brown[600]!;
       default:
         return Colors.grey;
     }
   }
 
-  String _getPositionText(int position) {
-    switch (position) {
-      case 1:
-        return 'Position 1 (Gold)';
-      case 2:
-        return 'Position 2 (Silver)';
-      case 3:
-        return 'Position 3 (Bronze)';
-      default:
-        return 'Position $position';
+  void _addToTopThree() async {
+    if (_selectedPosition == null) return;
+
+    try {
+      // Erstelle neue Top 3 Liste
+      final newTopThree = List<int>.from(_currentTopThreeIds);
+
+      // Stelle sicher, dass die Liste mindestens so lang ist wie die Position
+      while (newTopThree.length < _selectedPosition!) {
+        newTopThree.add(0); // Temporärer Platzhalter
+      }
+
+      // Setze das neue Spiel an der gewählten Position
+      newTopThree[_selectedPosition! - 1] = widget.game.id;
+
+      // Entferne leere/null Einträge und limitiere auf 3
+      final cleanedTopThree = newTopThree
+          .where((id) => id != 0)
+          .take(3)
+          .toList();
+
+      // Update in Supabase
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+      await supabaseDataSource.updateTopThreeGames(widget.userId, cleanedTopThree);
+
+      // Zeige Erfolg
+      if (mounted) {
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${widget.game.name} added to position #$_selectedPosition!',
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Trigger reload of game details
+        context.read<GameBloc>().add(
+          GetGameDetailsWithUserDataEvent(
+            gameId: widget.game.id,
+            userId: widget.userId,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error updating top three: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update top 3: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 }

@@ -189,7 +189,6 @@ class _GameDetailPageState extends State<GameDetailPage> {
         child: TopThreeDialog(
           game: game,
           userId: _currentUserId!,
-          currentTopThree: [], // TODO: Get from user profile
         ),
       ),
     );
@@ -280,7 +279,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
       slivers: [
         // App Bar with Cover
         _buildSliverAppBar(game),
-
+        _buildGameStatusBar(game),
         // Content
         SliverToBoxAdapter(
           child: Padding(
@@ -655,6 +654,199 @@ class _GameDetailPageState extends State<GameDetailPage> {
         ),
       ],
     );
+  }
+  Widget _buildTopThreeIndicator(Game game) {
+    final position = game.topThreePosition ?? 1;
+    final medal = _getMedalIcon(position);
+    final color = _getPositionColor(position);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color.withOpacity(0.8), color],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            medal,
+            color: Colors.white,
+            size: 24,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '#$position',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                'Favorite',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGameStatusBar(Game game) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          if (game.isInTopThree ?? false)
+            _buildTopThreeIndicator(game),
+          if (game.userRating != null)
+            _buildRatingIndicator(game.userRating!),
+          if (game.isWishlisted)
+            _buildStatusIndicator(
+              Icons.favorite,
+              'In Wishlist',
+              Colors.red,
+            ),
+          if (game.isRecommended)
+            _buildStatusIndicator(
+              Icons.thumb_up,
+              'Recommended',
+              Colors.green,
+            ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildRatingIndicator(double rating) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: _getRatingColor(rating),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _getRatingColor(rating).withOpacity(0.4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.star,
+            color: Colors.white,
+            size: 24,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                'Your Rating',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusIndicator(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getRatingColor(double rating) {
+    if (rating >= 9.0) return Colors.purple;
+    if (rating >= 8.0) return Colors.green;
+    if (rating >= 7.0) return Colors.teal;
+    if (rating >= 6.0) return Colors.orange;
+    return Colors.red;
+  }
+
+  IconData _getMedalIcon(int position) {
+    switch (position) {
+      case 1:
+        return Icons.looks_one;
+      case 2:
+        return Icons.looks_two;
+      case 3:
+        return Icons.looks_3;
+      default:
+        return Icons.emoji_events;
+    }
+  }
+
+  Color _getPositionColor(int position) {
+    switch (position) {
+      case 1:
+        return Colors.amber;
+      case 2:
+        return Colors.grey[600]!;
+      case 3:
+        return Colors.brown[600]!;
+      default:
+        return Colors.grey;
+    }
   }
 }
 

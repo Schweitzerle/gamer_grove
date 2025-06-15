@@ -810,7 +810,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final topGames = await _supabaseDataSource.getTopThreeGames(_currentUserId!);
+      final topGames = await _supabaseDataSource.getTopThreeGamesWithPosition(_currentUserId!);
       _addTestResult('✅ Top games retrieved: ${topGames.length}');
       if (topGames.isNotEmpty) {
         _addTestResult('   Game IDs: ${topGames.join(", ")}');

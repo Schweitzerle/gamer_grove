@@ -128,52 +128,6 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserStatesOverlay(BuildContext context) {
-    final states = <Widget>[];
-
-    // User Rating
-    if (game.userRating != null) {
-      states.add(_buildStateBadge(
-        context,
-        icon: Icons.star,
-        label: game.userRating!.toStringAsFixed(1),
-        color: Colors.amber,
-      ));
-    }
-
-    // Recommended
-    if (game.isRecommended) {
-      states.add(_buildStateBadge(
-        context,
-        icon: Icons.thumb_up,
-        label: null,
-        color: Colors.green,
-      ));
-    }
-
-    // In Top 3
-    if (game.isInTopThree ?? false) {
-      states.add(_buildStateBadge(
-        context,
-        icon: Icons.emoji_events,
-        label: null,
-        color: Colors.orange,
-      ));
-    }
-
-    if (states.isEmpty) return const SizedBox.shrink();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (int i = 0; i < states.length; i++) ...[
-          states[i],
-          if (i < states.length - 1) const SizedBox(width: 4),
-        ],
-      ],
-    );
-  }
-
   Widget _buildStateBadge(
       BuildContext context, {
         required IconData icon,
@@ -409,6 +363,81 @@ class GameCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildUserStatesOverlay(BuildContext context) {
+    final states = <Widget>[];
+
+    // User Rating - nur wenn vorhanden
+    if (game.userRating != null) {
+      states.add(_buildStateBadge(
+        context,
+        icon: Icons.star,
+        label: game.userRating!.toStringAsFixed(1),
+        color: Colors.amber,
+      ));
+    }
+
+    // Recommended - nur wenn true
+    if (game.isRecommended) {
+      states.add(_buildStateBadge(
+        context,
+        icon: Icons.thumb_up,
+        label: null,
+        color: Colors.green,
+      ));
+    }
+
+    // In Top 3 - nur wenn true
+    if (game.isInTopThree ?? false) {
+      final position = game.topThreePosition ?? 1;
+      states.add(_buildStateBadge(
+        context,
+        icon: _getMedalIcon(position),
+        label: '#$position',
+        color: _getPositionColor(position),
+      ));
+    }
+
+    // Zeige nichts wenn keine States vorhanden
+    if (states.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (int i = 0; i < states.length; i++) ...[
+          states[i],
+          if (i < states.length - 1) const SizedBox(width: 4),
+        ],
+      ],
+    );
+  }
+
+  IconData _getMedalIcon(int position) {
+    switch (position) {
+      case 1:
+        return Icons.looks_one;
+      case 2:
+        return Icons.looks_two;
+      case 3:
+        return Icons.looks_3;
+      default:
+        return Icons.emoji_events;
+    }
+  }
+
+  Color _getPositionColor(int position) {
+    switch (position) {
+      case 1:
+        return Colors.amber;
+      case 2:
+        return Colors.grey[600]!;
+      case 3:
+        return Colors.brown[600]!;
+      default:
+        return Colors.grey;
+    }
+  }
+
 }
 
 // Compact version for lists
@@ -470,6 +499,7 @@ class CompactGameCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Title with user states
+                    // In CompactGameCard, in der Row wo die User States angezeigt werden:
                     Row(
                       children: [
                         Expanded(
@@ -482,6 +512,7 @@ class CompactGameCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        // Zeige User Rating Badge wenn vorhanden
                         if (game.userRating != null)
                           _buildCompactStateBadge(
                             context,
@@ -489,12 +520,23 @@ class CompactGameCard extends StatelessWidget {
                             label: game.userRating!.toStringAsFixed(1),
                             color: Colors.amber,
                           ),
+                        // Zeige Recommended Badge wenn recommended
                         if (game.isRecommended) ...[
                           const SizedBox(width: 4),
                           _buildCompactStateBadge(
                             context,
                             icon: Icons.thumb_up,
                             color: Colors.green,
+                          ),
+                        ],
+                        // Zeige Top 3 Badge wenn in Top 3
+                        if (game.isInTopThree ?? false) ...[
+                          const SizedBox(width: 4),
+                          _buildCompactStateBadge(
+                            context,
+                            icon: _getMedalIcon(game.topThreePosition ?? 1),
+                            label: '#${game.topThreePosition ?? 1}',
+                            color: _getPositionColor(game.topThreePosition ?? 1),
                           ),
                         ],
                       ],
@@ -584,5 +626,75 @@ class CompactGameCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildTopThreeBadge() {
+    final position = game.topThreePosition ?? 1;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _getPositionColor(position).withOpacity(0.9),
+            _getPositionColor(position),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: _getPositionColor(position).withOpacity(0.5),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getMedalIcon(position),
+            size: 16,
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '#$position',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getMedalIcon(int position) {
+    switch (position) {
+      case 1:
+        return Icons.looks_one;
+      case 2:
+        return Icons.looks_two;
+      case 3:
+        return Icons.looks_3;
+      default:
+        return Icons.emoji_events;
+    }
+  }
+
+  Color _getPositionColor(int position) {
+    switch (position) {
+      case 1:
+        return Colors.amber;
+      case 2:
+        return Colors.grey[600]!;
+      case 3:
+        return Colors.brown[600]!;
+      default:
+        return Colors.grey;
+    }
   }
 }

@@ -220,11 +220,16 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  // In der Repository Implementation anpassen:
   @override
   Future<Either<Failure, List<int>>> getUserTopThreeGames(String userId) async {
     if (await networkInfo.isConnected) {
       try {
-        final topThreeIds = await remoteDataSource.getTopThreeGames(userId);
+        final topThreeData = await remoteDataSource.getTopThreeGamesWithPosition(userId);
+        // Extrahiere nur die game_ids
+        final topThreeIds = topThreeData
+            .map<int>((item) => item['game_id'] as int)
+            .toList();
         return Right(topThreeIds);
       } catch (e) {
         return Left(ServerFailure(message: e.toString()));
