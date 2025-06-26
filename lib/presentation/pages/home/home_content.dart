@@ -1,25 +1,27 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
+// presentation/pages/home/home_page.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
-import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/header_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/upcoming_games_section.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/game/game_bloc.dart';
+import '../../widgets/sections/popular_games_section.dart';
 import '../../widgets/sections/recommendations_section.dart';
 import '../../widgets/sections/wishlist_section.dart';
+import '../test/igdb_test_page.dart';
+import '../test/supabase_test_page.dart';
 
-class GrovePage extends StatefulWidget {
-  const GrovePage({super.key});
+class HomeContent extends StatefulWidget {
+  const HomeContent({super.key});
 
   @override
-  State<GrovePage> createState() => _GrovePageState();
+  State<HomeContent> createState() => _HomeContentState();
 }
 
-class _GrovePageState extends State<GrovePage> {
+class _HomeContentState extends State<HomeContent> {
   late GameBloc _gameBloc;
   String? _currentUserId;
 
@@ -44,7 +46,7 @@ class _GrovePageState extends State<GrovePage> {
     }
 
     // Load all data at once
-    _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    _gameBloc.add(LoadHomePageDataEvent(userId: _currentUserId));
   }
 
   @override
@@ -72,18 +74,48 @@ class _GrovePageState extends State<GrovePage> {
                     const Text('Gamer Grove'),
                   ],
                 ),
+                actions: [
+                  // Debug buttons only in development
+                  if (kDebugMode) ...[
+                    IconButton(
+                      icon: const Icon(Icons.storage),
+                      tooltip: 'Supabase Test',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SupabaseTestPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.bug_report),
+                      tooltip: 'IGDB API Test',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const IGDBTestPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ),
 
-
-              if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: TopThreeSection(),
-                ),
-
-              // Rated Game Section
-              if (_currentUserId != null)
+              // Header Section
               const SliverToBoxAdapter(
-                child: RatedSection(),
+                child: HeaderSection(),
+              ),
+
+              // Popular Games Section
+              const SliverToBoxAdapter(
+                child: PopularGamesSection(),
+              ),
+
+              // Upcoming Games Section
+              const SliverToBoxAdapter(
+                child: UpcomingGamesSection(),
               ),
 
               // User Wishlist Section (if logged in)
@@ -108,6 +140,4 @@ class _GrovePageState extends State<GrovePage> {
       ),
     );
   }
-
-
 }

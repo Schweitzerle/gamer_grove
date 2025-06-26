@@ -1,6 +1,7 @@
 // presentation/widgets/game_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../domain/entities/game.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
@@ -176,7 +177,7 @@ class GameCard extends StatelessWidget {
     required double rating,
     required bool isUserRating,
   }) {
-    final ratingColor = _getRatingColor(rating);
+    final ratingColor = ColorScales.getRatingColor(rating);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
@@ -387,13 +388,6 @@ class GameCard extends StatelessWidget {
   }
 }
 
-Color _getRatingColor(double rating) {
-  if (rating >= 90.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
-  if (rating >= 80.0) return const Color(0xFFd98b0b); // Gold
-  if (rating >= 60.0) return const Color(0xFF6a6f75); // Silver
-  if (rating >= 40.0) return const Color(0xFF7c3614); // Bronze
-  return const Color(0xFF51483a); // Ash (dunkelgrau)
-}
 
 // Shimmer Loading Version
 class GameCardShimmer extends StatelessWidget {
