@@ -194,3 +194,44 @@ class LoadGrovePageDataEvent extends GameEvent {
   @override
   List<Object?> get props => [userId];
 }
+
+class GetSimilarGamesEvent extends GameEvent {
+  final int gameId;
+
+  const GetSimilarGamesEvent({required this.gameId});
+
+  @override
+  List<Object> get props => [gameId];
+}
+
+class GetGameDLCsEvent extends GameEvent {
+  final int gameId;
+
+  const GetGameDLCsEvent({required this.gameId});
+
+  @override
+  List<Object> get props => [gameId];
+}
+
+class GetGameExpansionsEvent extends GameEvent {
+  final int gameId;
+
+  const GetGameExpansionsEvent({required this.gameId});
+
+  @override
+  List<Object> get props => [gameId];
+}
+
+class GetCompleteGameDetailsEvent extends GameEvent {
+  final int gameId;
+  final String? userId;
+
+  const GetCompleteGameDetailsEvent({
+    required this.gameId,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, userId];
+}
+

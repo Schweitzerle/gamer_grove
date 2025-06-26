@@ -18,14 +18,16 @@ class GetUserRecommendations extends UseCase<List<Game>, GetUserRecommendationsP
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserRecommendations(params.userId);
+    return await repository.getUserRecommendations(params.userId, params.limit, params.offset);
   }
 }
 
 class GetUserRecommendationsParams extends Equatable {
   final String userId;
+  final int limit;
+  final int offset;
 
-  const GetUserRecommendationsParams({required this.userId});
+  const GetUserRecommendationsParams({required this.userId, required this.limit, required this.offset, });
 
   @override
   List<Object> get props => [userId];

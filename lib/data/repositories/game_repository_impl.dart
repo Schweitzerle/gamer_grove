@@ -1,4 +1,8 @@
 // data/repositories/game_repository_impl.dart
+import '../../domain/entities/age_rating.dart';
+import '../../domain/entities/company.dart';
+import '../../domain/entities/game_video.dart';
+import '../../domain/entities/website.dart';
 import '../../injection_container.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:dartz/dartz.dart';
@@ -56,27 +60,48 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getPopularGames({
-    int limit = 20,
-    int offset = 0,
-  }) async {
+  Future<Either<Failure, List<Game>>> searchGames(
+      String query, int limit, int offset) async {
+    // Check cache first
+    final cachedResults = await localDataSource.getCachedSearchResults(query);
+    if (cachedResults != null && cachedResults.isNotEmpty) {
+      return Right(await _enrichGamesWithUserData(cachedResults)); // await hinzugefügt
+    }
+
+    // Check network
     if (!await networkInfo.isConnected) {
-      // Try to get from cache
-      final cachedGames = await localDataSource.getCachedGames();
-      if (cachedGames.isNotEmpty) {
-        return Right(await _enrichGamesWithUserData(cachedGames));
-      }
+      return const Left(NetworkFailure(
+        message: 'No internet connection. Please check your network.',
+      ));
+    }
+
+    try {
+      // Search games from IGDB
+      final games = await igdbDataSource.searchGames(query, limit, offset);
+
+      // Cache the results
+      await localDataSource.cacheSearchResults(query, games);
+
+      // Enrich with user data
+      return Right(await _enrichGamesWithUserData(games)); // await hinzugefügt
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+        message: 'An unexpected error occurred while searching games.',
+      ));
+    }
+  }
+
+
+  @override
+  Future<Either<Failure, List<Game>>> getPopularGames(int limit, int offset) async {
+    if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
 
     try {
-      final games = await igdbDataSource.getPopularGames(limit, offset);
-
-      // Cache popular games
-      if (offset == 0) {
-        await localDataSource.cacheGames(games);
-      }
-
+      final games = await igdbDataSource.getUpcomingGames(limit, offset);
       return Right(await _enrichGamesWithUserData(games));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -86,10 +111,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getUpcomingGames({
-    int limit = 20,
-    int offset = 0,
-  }) async {
+  Future<Either<Failure, List<Game>>> getUpcomingGames(int limit, int offset) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
@@ -125,10 +147,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, void>> toggleWishlist({
-    required int gameId,
-    required String userId,
-  }) async {
+  Future<Either<Failure, void>> toggleWishlist(int gameId, String userId) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
@@ -163,11 +182,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, void>> rateGame({
-    required int gameId,
-    required String userId,
-    required double rating,
-  }) async {
+  Future<Either<Failure, void>> rateGame(int gameId, String userId, double rating) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
@@ -183,7 +198,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getUserWishlist(String userId) async {
+  Future<Either<Failure, List<Game>>> getUserWishlist(String userId, int limit, int offset) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
@@ -201,7 +216,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getUserRecommendations(String userId) async {
+  Future<Either<Failure, List<Game>>> getUserRecommendations(String userId, int limit, int offset) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
@@ -217,6 +232,8 @@ class GameRepositoryImpl implements GameRepository {
       return const Left(ServerFailure());
     }
   }
+
+
 
   @override
   Future<Either<Failure, List<Game>>> getUserRatedGames(String userId) async {
@@ -235,8 +252,6 @@ class GameRepositoryImpl implements GameRepository {
       return const Left(ServerFailure());
     }
   }
-
-
 
   @override
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId) async {
@@ -329,21 +344,17 @@ class GameRepositoryImpl implements GameRepository {
     }
 
     if (currentUserId == null) {
-      // No user logged in
       return game;
     }
 
     try {
-      // Use the new RPC function to get all user data for this game
       final userGameData = await supabaseDataSource.getUserGameData(currentUserId, game.id);
-
-      // Get top three position separately
       final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(currentUserId);
       final topThreeMap = <int, int>{};
       for (var entry in topThreeData) {
         topThreeMap[entry['game_id'] as int] = entry['position'] as int;
       }
-      // Return enriched game
+
       return game.copyWith(
         isWishlisted: userGameData?['is_wishlisted'] ?? false,
         isRecommended: userGameData?['is_recommended'] ?? false,
@@ -353,49 +364,223 @@ class GameRepositoryImpl implements GameRepository {
       );
     } catch (e) {
       print('Error enriching game with user data: $e');
-      // If there's an error, return game without user data
       return game;
     }
   }
 
-// Ändern Sie z.B. searchGames, getPopularGames, etc. zu:
-
   @override
-  Future<Either<Failure, List<Game>>> searchGames({
-    required String query,
-    int limit = 20,
-    int offset = 0,
-  }) async {
-    // Check cache first
-    final cachedResults = await localDataSource.getCachedSearchResults(query);
-    if (cachedResults != null && cachedResults.isNotEmpty) {
-      return Right(await _enrichGamesWithUserData(cachedResults)); // await hinzugefügt
-    }
-
-    // Check network
+  Future<Either<Failure, Game>> getCompleteGameDetails(int gameId, String? userId) async {
     if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(
-        message: 'No internet connection. Please check your network.',
-      ));
+      return const Left(NetworkFailure());
     }
 
     try {
-      // Search games from IGDB
-      final games = await igdbDataSource.searchGames(query, limit, offset);
+      print('🎮 GameRepository: Getting COMPLETE game details for ID: $gameId');
 
-      // Cache the results
-      await localDataSource.cacheSearchResults(query, games);
+      // Get complete game data from IGDB
+      final gameModel = await igdbDataSource.getCompleteGameDetails(gameId);
 
-      // Enrich with user data
-      return Right(await _enrichGamesWithUserData(games)); // await hinzugefügt
+      // Get user-specific data if user is logged in
+      Game game = gameModel;
+      if (userId != null) {
+        game = await _enrichGameWithUserData(gameModel);
+      }
+
+      // Cache the complete game data
+      await localDataSource.cacheGameDetails(gameId, gameModel);
+
+      print('✅ GameRepository: Complete game details loaded successfully');
+      return Right(game);
     } on ServerException catch (e) {
+      print('💥 GameRepository: Server error: ${e.message}');
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(
-        message: 'An unexpected error occurred while searching games.',
-      ));
+      print('💥 GameRepository: Unexpected error: $e');
+      return Left(ServerFailure(message: 'Failed to load complete game details'));
     }
   }
 
-// Ähnliche Änderungen für getGameDetails, getPopularGames, getUpcomingGames, etc.
+  @override
+  Future<Either<Failure, List<Company>>> getCompanies({List<int>? ids, String? search}) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final companies = await igdbDataSource.getCompanies(ids: ids, search: search);
+      return Right(companies);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load companies'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Website>>> getGameWebsites(List<int> gameIds) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final websites = await igdbDataSource.getWebsites(gameIds);
+      return Right(websites);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load game websites'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<GameVideo>>> getGameVideos(List<int> gameIds) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final videos = await igdbDataSource.getGameVideos(gameIds);
+      return Right(videos);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load game videos'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<AgeRating>>> getGameAgeRatings(List<int> gameIds) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final ageRatings = await igdbDataSource.getAgeRatings(gameIds);
+      return Right(ageRatings);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load age ratings'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getSimilarGames(int gameId) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final similarGames = await igdbDataSource.getSimilarGames(gameId);
+      return Right(similarGames);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load similar games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGameDLCs(int gameId) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final dlcs = await igdbDataSource.getGameDLCs(gameId);
+      return Right(dlcs);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load game DLCs'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGameExpansions(int gameId) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final expansions = await igdbDataSource.getGameExpansions(gameId);
+      return Right(expansions);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load game expansions'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Game>> getGameDetailsWithUserData(int gameId, String? userId) async {
+    if (!await networkInfo.isConnected) {
+      // Try to get from cache first
+      try {
+        final cachedGame = await localDataSource.getCachedGameDetails(gameId);
+        if (cachedGame != null && userId != null) {
+          final enrichedGame = await _enrichGameWithUserData(cachedGame);
+          return Right(enrichedGame);
+        }
+      } catch (e) {
+        print('⚠️ GameRepository: Cache read failed: $e');
+      }
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      // Get basic game details from IGDB
+      final gameModel = await igdbDataSource.getGameDetails(gameId);
+
+      // Enrich with user data if user is logged in
+      Game game = gameModel;
+      if (userId != null) {
+        game = await _enrichGameWithUserData(gameModel);
+      }
+
+      // Cache the game
+      await localDataSource.cacheGameDetails(gameId, gameModel);
+
+      return Right(game);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load game details'));
+    }
+  }
+
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRated(String userId, int limit, int offset) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final gameIds = await supabaseDataSource.getUserRatedIds(userId);
+      if (gameIds.isEmpty) {
+        return const Right([]);
+      }
+
+      return getGamesByIds(gameIds);
+    } catch (e) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> toggleRecommend(int gameId, String userId) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      await supabaseDataSource.toggleRecommended(gameId, userId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return const Left(ServerFailure());
+    }
+  }
 }

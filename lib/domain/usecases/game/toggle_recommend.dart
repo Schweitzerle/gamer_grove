@@ -12,9 +12,9 @@ class ToggleRecommend extends UseCase<void, ToggleRecommendParams> {
 
   @override
   Future<Either<Failure, void>> call(ToggleRecommendParams params) async {
-    return await repository.toggleRecommended(
-      gameId: params.gameId,
-      userId: params.userId,
+    return await repository.toggleRecommend(
+      params.gameId,
+      params.userId,
     );
   }
 }

@@ -118,4 +118,69 @@ class DateFormatter {
 
     return age;
   }
+
+  static String formatTimeAgo(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays < 1) {
+      if (difference.inHours < 1) {
+        if (difference.inMinutes < 1) {
+          return 'Just now';
+        }
+        return '${difference.inMinutes}m ago';
+      }
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inDays < 30) {
+      final weeks = difference.inDays ~/ 7;
+      return '${weeks}w ago';
+    } else if (difference.inDays < 365) {
+      final months = difference.inDays ~/ 30;
+      return '${months}mo ago';
+    } else {
+      return formatShortDate(date);
+    }
+  }
+
+  static String formatRelativeReleaseDate(DateTime releaseDate) {
+    final now = DateTime.now();
+    final difference = releaseDate.difference(now);
+
+    if (difference.isNegative) {
+      // Game already released
+      final pastDifference = now.difference(releaseDate);
+      if (pastDifference.inDays < 30) {
+        return 'Released ${pastDifference.inDays} days ago';
+      } else if (pastDifference.inDays < 365) {
+        final months = pastDifference.inDays ~/ 30;
+        return 'Released $months months ago';
+      } else {
+        return 'Released ${formatYearOnly(releaseDate)}';
+      }
+    } else {
+      // Game not yet released
+      if (difference.inDays < 30) {
+        return 'Releases in ${difference.inDays} days';
+      } else if (difference.inDays < 365) {
+        final months = difference.inDays ~/ 30;
+        return 'Releases in $months months';
+      } else {
+        return 'Releases ${formatYearOnly(releaseDate)}';
+      }
+    }
+  }
+
+  static bool isUpcoming(DateTime? releaseDate) {
+    if (releaseDate == null) return false;
+    return releaseDate.isAfter(DateTime.now());
+  }
+
+  static bool isRecentlyReleased(DateTime? releaseDate) {
+    if (releaseDate == null) return false;
+    final now = DateTime.now();
+    final difference = now.difference(releaseDate);
+    return !difference.isNegative && difference.inDays <= 30;
+  }
 }

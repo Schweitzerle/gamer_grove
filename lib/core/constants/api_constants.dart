@@ -18,13 +18,31 @@ class ApiConstants {
 }
 
 class IGDBEndpoints {
-  static const String games = '/games';
-  static const String genres = '/genres';
-  static const String platforms = '/platforms';
-  static const String companies = '/companies';
-  static const String gameModes = '/game_modes';
-  static const String themes = '/themes';
-  static const String multiquery = '/multiquery';
+  static const String games = 'games';
+  static const String companies = 'companies';
+  static const String involvedCompanies = 'involved_companies';
+  static const String websites = 'websites';
+  static const String videos = 'game_videos';
+  static const String ageRatings = 'age_ratings';
+  static const String gameEngines = 'game_engines';
+  static const String keywords = 'keywords';
+  static const String multiplayerModes = 'multiplayer_modes';
+  static const String playerPerspectives = 'player_perspectives';
+  static const String franchises = 'franchises';
+  static const String collections = 'collections';
+  static const String externalGames = 'external_games';
+  static const String languageSupports = 'language_supports';
+  static const String alternativeNames = 'alternative_names';
+  static const String characters = 'characters';
+  static const String events = 'events';
+  static const String platforms = 'platforms';
+  static const String genres = 'genres';
+  static const String themes = 'themes';
+  static const String gameModes = 'game_modes';
+  static const String covers = 'covers';
+  static const String screenshots = 'screenshots';
+  static const String artworks = 'artworks';
+  static const String releaseDates = 'release_dates';
 }
 
 class SupabaseTables {

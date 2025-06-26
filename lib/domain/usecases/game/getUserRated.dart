@@ -16,14 +16,16 @@ class GetUserRated extends UseCase<List<Game>, GetUserRatedParams> {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserRatedGames(params.userId);
+    return await repository.getUserRated(params.userId, params.limit, params.offset);
   }
 }
 
 class GetUserRatedParams extends Equatable {
   final String userId;
+  final int limit;
+  final int offset;
 
-  const GetUserRatedParams({required this.userId});
+  const GetUserRatedParams({required this.userId, required this.limit, required this.offset});
 
   @override
   List<Object> get props => [userId];

@@ -16,14 +16,16 @@ class GetUserWishlist extends UseCase<List<Game>, GetUserWishlistParams> {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserWishlist(params.userId);
+    return await repository.getUserWishlist(params.userId, params.limit, params.offset);
   }
 }
 
 class GetUserWishlistParams extends Equatable {
   final String userId;
+  final int limit;
+  final int offset;
 
-  const GetUserWishlistParams({required this.userId});
+  const GetUserWishlistParams({required this.userId, required this.limit, required this.offset});
 
   @override
   List<Object> get props => [userId];

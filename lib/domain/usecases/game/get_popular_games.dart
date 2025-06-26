@@ -14,8 +14,8 @@ class GetPopularGames extends UseCase<List<Game>, GetPopularGamesParams> {
   @override
   Future<Either<Failure, List<Game>>> call(GetPopularGamesParams params) async {
     return await repository.getPopularGames(
-      limit: params.limit,
-      offset: params.offset,
+      params.limit,
+      params.offset,
     );
   }
 }

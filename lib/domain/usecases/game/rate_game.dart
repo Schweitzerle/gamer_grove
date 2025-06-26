@@ -17,9 +17,9 @@ class RateGame extends UseCase<void, RateGameParams> {
     }
 
     return await repository.rateGame(
-      gameId: params.gameId,
-      userId: params.userId,
-      rating: params.rating,
+      params.gameId,
+      params.userId,
+      params.rating,
     );
   }
 }

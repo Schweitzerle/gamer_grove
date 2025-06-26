@@ -14,8 +14,8 @@ class GetUpcomingGames extends UseCase<List<Game>, GetUpcomingGamesParams> {
   @override
   Future<Either<Failure, List<Game>>> call(GetUpcomingGamesParams params) async {
     return await repository.getUpcomingGames(
-      limit: params.limit,
-      offset: params.offset,
+      params.limit,
+      params.offset,
     );
   }
 }

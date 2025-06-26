@@ -3,9 +3,14 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
+import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase_remote_datasource.dart';
 import '../../../domain/entities/game.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
+import '../../../domain/usecases/game/get_complete_game_details.dart';
+import '../../../domain/usecases/game/get_game_dlcs.dart';
+import '../../../domain/usecases/game/get_game_expansions.dart';
+import '../../../domain/usecases/game/get_similar_games.dart';
 import '../../../domain/usecases/game/get_user_top_three.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
@@ -19,6 +24,7 @@ import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
 import '../../../injection_container.dart';
+import '../../pages/game_detail/game_detail_page.dart';
 
 part 'game_event.dart';
 part 'game_state.dart';
@@ -37,6 +43,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetUserTopThreeGames getUserTopThreeGames;
   final GetUserTopThree getUserTopThree;
   final GetUserRated getUserRated;
+  final GetCompleteGameDetails getCompleteGameDetails;
+  final GetSimilarGames getSimilarGames;
+  final GetGameDLCs getGameDLCs;
+  final GetGameExpansions getGameExpansions;
 
   GameBloc({
     required this.searchGames,
@@ -52,6 +62,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getUserTopThreeGames,
     required this.getUserTopThree,
     required this.getUserRated,
+    required this.getCompleteGameDetails,
+    required this.getSimilarGames,
+    required this.getGameDLCs,
+    required this.getGameExpansions,
   }) : super(GameInitial()) {
     // Search events
     on<SearchGamesEvent>(
@@ -80,6 +94,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
     on<LoadGrovePageDataEvent>(_onLoadGrovePageData);
+
+    on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
+    on<GetSimilarGamesEvent>(_onGetSimilarGames);
+    on<GetGameDLCsEvent>(_onGetGameDLCs);
+    on<GetGameExpansionsEvent>(_onGetGameExpansions);
+    on<AddToTopThreeEvent>(_onAddToTopThree);
   }
 
   // Debounce transformer for search
@@ -245,7 +265,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(UserWishlistLoading());
 
     final result = await getUserWishlist(
-      GetUserWishlistParams(userId: event.userId),
+      GetUserWishlistParams(userId: event.userId, limit: 20, offset: 0),
     );
 
     result.fold(
@@ -264,7 +284,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(UserRecommendationsLoading());
 
     final result = await getUserRecommendations(
-      GetUserRecommendationsParams(userId: event.userId),
+      GetUserRecommendationsParams(userId: event.userId, limit: 20, offset: 0),
     );
 
     result.fold(
@@ -283,7 +303,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(UserRatedLoading());
 
     final result = await getUserRated(
-      GetUserRatedParams(userId: event.userId),
+      GetUserRatedParams(userId: event.userId, limit: 20, offset: 0),
     );
 
     result.fold(
@@ -591,38 +611,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
 
-  Future<void> _onAddToTopThree(
-      AddToTopThreeEvent event,
-      Emitter<GameState> emit,
-      ) async {
-    final result = await addToTopThree(
-      AddToTopThreeParams(
-        gameId: event.gameId,
-        userId: event.userId,
-        position: event.position,
-      ),
-    );
-
-    if (!emit.isDone) {
-      result.fold(
-            (failure) => emit(GameError(failure.message)),
-            (_) {
-          // Update the game in current state if needed
-          if (state is GameDetailsLoaded) {
-            final currentGame = (state as GameDetailsLoaded).game;
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(isInTopThree: true),
-            ));
-          }
-        },
-      );
-    }
-  }
 
 
 // Helper methods for user data (add to GameBloc)
   Future<List<int>> _getUserWishlistIds(String userId) async {
-    final result = await getUserWishlist(GetUserWishlistParams(userId: userId));
+    final result = await getUserWishlist(GetUserWishlistParams(userId: userId, limit: 20, offset: 0));
     return result.fold(
           (failure) => <int>[],
           (games) => games.map((game) => game.id).toList(),
@@ -631,7 +624,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   Future<List<int>> _getUserRecommendedIds(String userId) async {
     final result = await getUserRecommendations(
-        GetUserRecommendationsParams(userId: userId));
+        GetUserRecommendationsParams(userId: userId, limit: 20, offset: 0));
     return result.fold(
           (failure) => <int>[],
           (games) => games.map((game) => game.id).toList(),
@@ -685,8 +678,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getPopularGames(const GetPopularGamesParams(limit: 10)),
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
         if (event.userId != null) ...[
-          getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
-          getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
+          getUserWishlist(GetUserWishlistParams(userId: event.userId!, limit: 20, offset: 0)),
+          getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!, limit: 20, offset: 0)),
         ],
       ]);
 
@@ -751,9 +744,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Alle Daten parallel laden
       final results = await Future.wait([
-        getUserRated(GetUserRatedParams(userId: event.userId!)),
-        getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
-        getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
+        getUserRated(GetUserRatedParams(userId: event.userId!, limit: 20, offset: 0)),
+        getUserWishlist(GetUserWishlistParams(userId: event.userId!, limit: 20, offset: 0)),
+        getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!, limit: 20, offset: 0)),
         getUserTopThree(GetUserTopThreeParams(userId: event.userId!)),
       ]);
 
@@ -872,6 +865,96 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
+
+  Future<void> _onGetCompleteGameDetails(
+      GetCompleteGameDetailsEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    final result = await getCompleteGameDetails(
+      GetCompleteGameDetailsParams(
+        gameId: event.gameId,
+        userId: event.userId,
+      ),
+    );
+
+    result.fold(
+          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (game) => emit(GameDetailsLoaded(game)),
+    );
+  }
+
+  Future<void> _onGetSimilarGames(
+      GetSimilarGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await getSimilarGames(event.gameId);
+
+    result.fold(
+          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (games) => emit(SimilarGamesLoaded(games)),
+    );
+  }
+
+  Future<void> _onGetGameDLCs(
+      GetGameDLCsEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await getGameDLCs(event.gameId);
+
+    result.fold(
+          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (dlcs) => emit(GameDLCsLoaded(dlcs)),
+    );
+  }
+
+  Future<void> _onGetGameExpansions(
+      GetGameExpansionsEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await getGameExpansions(event.gameId);
+
+    result.fold(
+          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (expansions) => emit(GameExpansionsLoaded(expansions)),
+    );
+  }
+
+  Future<void> _onAddToTopThree(
+      AddToTopThreeEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await addToTopThree(AddToTopThreeParams(
+      userId: event.userId,
+      gameId: event.gameId,
+      position: event.position,
+    ));
+
+    result.fold(
+          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (_) {
+        // Refresh the game details to show updated top three status
+        add(GetCompleteGameDetailsEvent(
+          gameId: event.gameId,
+          userId: event.userId,
+        ));
+      },
+    );
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure:
+        return 'Server error occurred';
+      case NetworkFailure:
+        return 'Network error occurred';
+      case CacheFailure:
+        return 'Cache error occurred';
+      default:
+        return 'An unexpected error occurred';
+    }
+  }
 }
 
 

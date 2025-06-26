@@ -18,9 +18,9 @@ class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
     }
 
     return await repository.searchGames(
-      query: params.query,
-      limit: params.limit,
-      offset: params.offset,
+      params.query,
+      params.limit,
+      params.offset,
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/game/game_bloc.dart';
 import '../../presentation/pages/game_detail/game_detail_page.dart';
+import '../../presentation/pages/game_detail/game_detail_pageSafety.dart';
 import '../../presentation/pages/test/igdb_test_page.dart';
 import '../../presentation/pages/test/supabase_test_page.dart';
 

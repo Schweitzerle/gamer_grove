@@ -13,8 +13,8 @@ class ToggleWishlist extends UseCase<void, ToggleWishlistParams> {
   @override
   Future<Either<Failure, void>> call(ToggleWishlistParams params) async {
     return await repository.toggleWishlist(
-      gameId: params.gameId,
-      userId: params.userId,
+      params.gameId,
+      params.userId,
     );
   }
 }

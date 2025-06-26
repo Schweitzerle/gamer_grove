@@ -365,5 +365,30 @@ class GrovePageLoaded extends GameState {
   }
 }
 
+class SimilarGamesLoaded extends GameState {
+  final List<Game> games;
 
+  const SimilarGamesLoaded(this.games);
+
+  @override
+  List<Object> get props => [games];
+}
+
+class GameDLCsLoaded extends GameState {
+  final List<Game> dlcs;
+
+  const GameDLCsLoaded(this.dlcs);
+
+  @override
+  List<Object> get props => [dlcs];
+}
+
+class GameExpansionsLoaded extends GameState {
+  final List<Game> expansions;
+
+  const GameExpansionsLoaded(this.expansions);
+
+  @override
+  List<Object> get props => [expansions];
+}
 

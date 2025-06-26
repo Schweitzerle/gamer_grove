@@ -1,6 +1,7 @@
 // presentation/pages/search/search_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
 import '../../../injection_container.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
@@ -438,20 +439,13 @@ class _SearchPageState extends State<SearchPage> {
           final game = state.games[index];
           return GameCard(
             game: game,
-            onTap: () => _navigateToGameDetail(game.id),
+            onTap: () => Navigations.navigateToGameDetail(game.id, context),
           );
         },
       ),
     );
   }
 
-  void _navigateToGameDetail(int gameId) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => GameDetailPage(gameId: gameId),
-      ),
-    );
-  }
 
   void _toggleWishlist(int gameId) {
     // TODO: Implement wishlist toggle

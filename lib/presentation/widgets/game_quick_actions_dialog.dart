@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../domain/entities/game.dart';
 import '../blocs/game/game_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
@@ -106,7 +107,8 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
                             _buildStatusChip(
                               label: widget.game.userRating!.toStringAsFixed(1),
                               icon: Icons.star,
-                              color: _getRatingColor(widget.game.userRating!),
+                              color: ColorScales.getRatingColor(
+                                  widget.game.userRating!),
                             ),
                           if (widget.game.isWishlisted)
                             _buildStatusChip(
@@ -135,38 +137,44 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildActionButton(
-                  icon: widget.game.userRating != null ? Icons.star : Icons.star_outline,
-                  label: widget.game.userRating != null ? 'Rated' : 'Rate',
-                  color: Colors.amber,
-                  isActive: widget.game.userRating != null,
-                  onTap: _rateGame,
-                ),
-                _buildActionButton(
-                  icon: widget.game.isWishlisted ? Icons.favorite : Icons.favorite_outline,
-                  label: 'Wishlist',
-                  color: Colors.red,
-                  isActive: widget.game.isWishlisted,
-                  onTap: _toggleWishlist,
-                ),
-                _buildActionButton(
-                  icon: widget.game.isRecommended ? Icons.thumb_up : Icons.thumb_up_outlined,
-                  label: 'Recommend',
-                  color: Colors.green,
-                  isActive: widget.game.isRecommended,
-                  onTap: _toggleRecommend,
-                ),
-                _buildActionButton(
-                  icon: Icons.emoji_events,
-                  label: 'Top 3',
-                  color: Colors.orange,
-                  isActive: widget.game.isInTopThree ?? false,
-                  onTap: _addToTopThree,
-                ),
-              ],
-            ),
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionButton(
+                    icon: widget.game.userRating != null
+                        ? Icons.star
+                        : Icons.star_outline,
+                    label: widget.game.userRating != null ? 'Rated' : 'Rate',
+                    color: Colors.amber,
+                    isActive: widget.game.userRating != null,
+                    onTap: _rateGame,
+                  ),
+                  _buildActionButton(
+                    icon: widget.game.isWishlisted
+                        ? Icons.favorite
+                        : Icons.favorite_outline,
+                    label: 'Wishlist',
+                    color: Colors.red,
+                    isActive: widget.game.isWishlisted,
+                    onTap: _toggleWishlist,
+                  ),
+                  _buildActionButton(
+                    icon: widget.game.isRecommended
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
+                    label: 'Recommend',
+                    color: Colors.green,
+                    isActive: widget.game.isRecommended,
+                    onTap: _toggleRecommend,
+                  ),
+                  _buildActionButton(
+                      icon: Icons.emoji_events,
+                      label: 'Top 3',
+                      color: Colors.orange,
+                      isActive: widget.game.isInTopThree ?? false,
+                      onTap: () {
+                        _showTopThreeDialog(widget.game);
+                      }),
+                ]),
           ),
 
           // Bottom padding for gesture area
@@ -252,14 +260,6 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     );
   }
 
-  Color _getRatingColor(double rating) {
-    if (rating >= 9.0) return Colors.purple;
-    if (rating >= 8.0) return Colors.green;
-    if (rating >= 7.0) return Colors.teal;
-    if (rating >= 6.0) return Colors.orange;
-    return Colors.red;
-  }
-
   void _rateGame() {
     Navigator.pop(context);
     showDialog(
@@ -297,13 +297,48 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     HapticFeedback.lightImpact();
   }
 
-  void _addToTopThree() {
-    Navigator.pop(context);
+  void _showTopThreeDialog(Game game) {
+    if (_currentUserId == null) {
+      _showLoginRequiredSnackBar();
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => TopThreeDialog(
-        game: widget.game,
-        userId: _currentUserId!,
+        game: game,
+        onPositionSelected: (position) {
+          _addToTopThree(game.id, position);
+        },
+      ),
+    );
+  }
+
+  void _addToTopThree(int gameId, int position) {
+    if (_currentUserId == null) return;
+
+    widget.gameBloc.add(AddToTopThreeEvent(
+      gameId: gameId,
+      userId: _currentUserId!,
+      position: position,
+    ));
+
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added to Top 3 at position $position'),
+        backgroundColor: Colors.amber,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showLoginRequiredSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please login to use this feature'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

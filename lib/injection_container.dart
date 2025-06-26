@@ -21,6 +21,11 @@ import 'domain/usecases/auth/sign_in.dart';
 import 'domain/usecases/auth/sign_up.dart';
 import 'domain/usecases/auth/sign_out.dart';
 import 'domain/usecases/auth/update_password.dart';
+import 'domain/usecases/game/get_complete_game_details.dart';
+import 'domain/usecases/game/get_game_companies.dart';
+import 'domain/usecases/game/get_game_dlcs.dart';
+import 'domain/usecases/game/get_game_expansions.dart';
+import 'domain/usecases/game/get_similar_games.dart';
 import 'domain/usecases/game/get_user_top_three.dart';
 import 'domain/usecases/game/search_games.dart';
 import 'domain/usecases/game/get_game_details.dart';
@@ -76,6 +81,7 @@ Future<void> init() async {
         () => LocalDataSourceImpl(sharedPreferences: sl()),
   );
 
+
   // Repositories
   print('🏛️ DI: Registering repositories...');
   sl.registerLazySingleton<AuthRepository>(
@@ -125,6 +131,11 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ToggleRecommend(sl()));
   sl.registerLazySingleton(() => GetUserRated(sl()));
   sl.registerLazySingleton(() => GetUserTopThree(sl()));
+  sl.registerLazySingleton(() => GetCompleteGameDetails(sl()));
+  sl.registerLazySingleton(() => GetGameCompanies(sl()));
+  sl.registerLazySingleton(() => GetSimilarGames(sl()));
+  sl.registerLazySingleton(() => GetGameDLCs(sl()));
+  sl.registerLazySingleton(() => GetGameExpansions(sl()));
 
   // Use cases - User
   print('👤 DI: Registering user use cases...');
@@ -151,19 +162,22 @@ Future<void> init() async {
 
   sl.registerFactory(
         () => GameBloc(
-      searchGames: sl(),
-      getGameDetails: sl(),
-      rateGame: sl(),
-      toggleWishlist: sl(),
-      toggleRecommend: sl(),
-      addToTopThree: sl(),
-      getPopularGames: sl(),
-      getUpcomingGames: sl(),
-      getUserWishlist: sl(),
-      getUserRecommendations: sl(),
-      getUserTopThreeGames: sl(),
-      getUserRated: sl(), getUserTopThree: sl(), // Add this line
-    ),
+          searchGames: sl(),
+          getGameDetails: sl(),
+          getCompleteGameDetails: sl(), // NEW
+          getSimilarGames: sl(), // NEW
+          getGameDLCs: sl(), // NEW
+          getGameExpansions: sl(), // NEW
+          rateGame: sl(),
+          toggleWishlist: sl(),
+          toggleRecommend: sl(),
+          addToTopThree: sl(),
+          getPopularGames: sl(),
+          getUpcomingGames: sl(),
+          getUserWishlist: sl(),
+          getUserRecommendations: sl(),
+          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(),
+        ),
   );
   print('✅ DI: Dependency injection setup complete!');
 }
