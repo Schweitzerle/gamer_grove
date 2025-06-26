@@ -21,6 +21,7 @@ import 'domain/usecases/auth/sign_in.dart';
 import 'domain/usecases/auth/sign_up.dart';
 import 'domain/usecases/auth/sign_out.dart';
 import 'domain/usecases/auth/update_password.dart';
+import 'domain/usecases/game/get_user_top_three.dart';
 import 'domain/usecases/game/search_games.dart';
 import 'domain/usecases/game/get_game_details.dart';
 import 'domain/usecases/game/get_popular_games.dart';
@@ -123,6 +124,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ToggleWishlist(sl()));
   sl.registerLazySingleton(() => ToggleRecommend(sl()));
   sl.registerLazySingleton(() => GetUserRated(sl()));
+  sl.registerLazySingleton(() => GetUserTopThree(sl()));
 
   // Use cases - User
   print('👤 DI: Registering user use cases...');
@@ -160,7 +162,7 @@ Future<void> init() async {
       getUserWishlist: sl(),
       getUserRecommendations: sl(),
       getUserTopThreeGames: sl(),
-      getUserRated: sl(), // Add this line
+      getUserRated: sl(), getUserTopThree: sl(), // Add this line
     ),
   );
   print('✅ DI: Dependency injection setup complete!');

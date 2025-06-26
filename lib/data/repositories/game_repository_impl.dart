@@ -238,6 +238,24 @@ class GameRepositoryImpl implements GameRepository {
 
 
 
+  @override
+  Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final gameIds = await supabaseDataSource.getTopThreeGames(userId);
+      if (gameIds.isEmpty) {
+        return const Right([]);
+      }
+
+      return getGamesByIds(gameIds);
+    } catch (e) {
+      return const Left(ServerFailure());
+    }
+  }
+
 // Helper methods to enrich games with user data
   Future<List<Game>> _enrichGamesWithUserData(List<GameModel> games) async {
     // Get current user ID from AuthBloc
@@ -285,7 +303,7 @@ class GameRepositoryImpl implements GameRepository {
         return game.copyWith(
           isWishlisted: wishlistedSet.contains(game.id),
           isRecommended: recommendedSet.contains(game.id),
-          userRating: ratings[game.id],
+          userRating: ratings[game.id]!,
           isInTopThree: topThreeMap.containsKey(game.id),
           topThreePosition: topThreeMap[game.id],
         );
@@ -340,7 +358,6 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
-// WICHTIG: Alle Methoden die Spiele zurückgeben müssen jetzt async sein.
 // Ändern Sie z.B. searchGames, getPopularGames, etc. zu:
 
   @override

@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../data/datasources/remote/supabase_remote_datasource.dart';
 import '../../../domain/entities/game.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
+import '../../../domain/usecases/game/get_user_top_three.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
 import '../../../domain/usecases/game/get_game_details.dart';
@@ -34,6 +35,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetUserWishlist getUserWishlist;
   final GetUserRecommendations getUserRecommendations;
   final GetUserTopThreeGames getUserTopThreeGames;
+  final GetUserTopThree getUserTopThree;
   final GetUserRated getUserRated;
 
   GameBloc({
@@ -48,6 +50,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getUserWishlist,
     required this.getUserRecommendations,
     required this.getUserTopThreeGames,
+    required this.getUserTopThree,
     required this.getUserRated,
   }) : super(GameInitial()) {
     // Search events
@@ -647,6 +650,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       return <int, double>{};
     }
   }
+
+  Future<List<int>> _getTopThreeGames(String userId) async {
+    final result = await getUserTopThree(
+        GetUserTopThreeParams(userId: userId)
+    );
+    return result.fold(
+          (failure) => <int>[],
+          (topThreeIds) => topThreeIds.map((game) => game.id).toList(),
+    );
+  }
+
   Future<List<int>> _getUserTopThreeGames(String userId) async {
     final result = await getUserTopThreeGames(
         GetUserTopThreeGamesParams(userId: userId)
@@ -730,6 +744,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           userRated: <Game>[],
           userWishlist: <Game>[],
           userRecommendations: <Game>[],
+          userTopThree: <Game>[],
         ));
         return;
       }
@@ -739,12 +754,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getUserRated(GetUserRatedParams(userId: event.userId!)),
         getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
         getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
+        getUserTopThree(GetUserTopThreeParams(userId: event.userId!)),
       ]);
 
       // ✅ KORREKTE Result-Extraktion (keine conditional spreads!)
       final userRated = results[0].fold((l) => <Game>[], (r) => r);
       final userWishlist = results[1].fold((l) => <Game>[], (r) => r);
       final userRecommendations = results[2].fold((l) => <Game>[], (r) => r);
+      final userTopThree = results[3].fold((l) => <Game>[], (r) => r);
 
       // Games mit User Data anreichern
       final enrichedRated = userRated.isNotEmpty
@@ -756,12 +773,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final enrichedRecommendations = userRecommendations.isNotEmpty
           ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
           : <Game>[];
+      final enrichedTopThree = userTopThree.isNotEmpty
+          ? await _enrichGamesWithUserData(userTopThree, event.userId!)
+          : <Game>[];
 
       // ✅ State emittieren (das fehlte!)
       emit(GrovePageLoaded(
         userRated: enrichedRated,
         userWishlist: enrichedWishlist,
         userRecommendations: enrichedRecommendations,
+        userTopThree: enrichedTopThree,
       ));
 
     } catch (e) {

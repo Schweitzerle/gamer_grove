@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,14 @@ class _GrovePageState extends State<GrovePage> {
                 ),
               ),
 
-              // Upcoming Games Section
+
+              if (_currentUserId != null)
+                SliverToBoxAdapter(
+                  child: _buildTopThreeSection(),
+                ),
+
+              // Rated Game Section
+              if (_currentUserId != null)
               SliverToBoxAdapter(
                 child: _buildRatedSection(),
               ),
@@ -184,7 +192,6 @@ class _GrovePageState extends State<GrovePage> {
     return _buildHorizontalGameListSkeleton();
   }
 
-
   Widget _buildRecommendationsSection() {
     return BlocBuilder<GameBloc, GameState>(
       builder: (context, state) {
@@ -228,7 +235,6 @@ class _GrovePageState extends State<GrovePage> {
     }
     return _buildHorizontalGameListSkeleton();
   }
-
 
   Widget _buildGameSection({
     required String title,
@@ -291,7 +297,6 @@ class _GrovePageState extends State<GrovePage> {
       ),
     );
   }
-
   Widget _buildHorizontalGameList(List<Game> games) {
     return SizedBox(
       height: 280,
@@ -494,6 +499,168 @@ class _GrovePageState extends State<GrovePage> {
     // TODO: Implement navigation to full recommendations list
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Wishlist list coming soon!')),
+    );
+  }
+
+
+  // Füge diese Methode zu deiner GrovePageState Klasse hinzu:
+
+  Widget _buildTopThreeSection() {
+    return BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        return _buildGameSection(
+          title: 'My Top 3',
+          subtitle: 'Your personal favorites',
+          icon: Icons.star, // oder Icons.emoji_events für einen Pokal
+          showViewAll: false, // Da es nur 3 Games sind, kein "View All" nötig
+          child: _buildTopThreeContent(state),
+        );
+      },
+    );
+  }
+
+  Widget _buildTopThreeContent(GameState state) {
+    if (state is GrovePageLoading) {
+      return _buildHorizontalGameListSkeleton();
+    } else if (state is GrovePageLoaded) {
+      if (state.userTopThree.isEmpty) {
+        return _buildEmptyTopThreeSection();
+      }
+      return _buildTopThreeGameList(state.userTopThree);
+    } else if (state is GameError) {
+      return _buildErrorSection('Failed to load top games', () {
+        if (_currentUserId != null) {
+          _gameBloc.add(LoadGrovePageDataEvent(userId:_currentUserId!));
+        }
+      });
+    }
+    return _buildHorizontalGameListSkeleton();
+  }
+
+  Widget _buildTopThreeGameList(List<Game> games) {
+    return SizedBox(
+      height: 140, // Etwas höher für die Ranking-Nummern
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingMedium,
+        ),
+        itemCount: games.length,
+        itemBuilder: (context, index) {
+          final game = games[index];
+          return Container(
+            width: 100,
+            margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+            child: Column(
+              children: [
+                // Ranking Badge
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: _getRankingColor(index),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Game Card
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _navigateToGameDetail(game.id),
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: game.coverUrl != null
+                          ? CachedNetworkImage(
+                        imageUrl: game.coverUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          child: const Icon(Icons.games),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          child: const Icon(Icons.games),
+                        ),
+                      )
+                          : Container(
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        child: const Icon(Icons.games),
+                      ),
+                    ),
+                  ),
+                ),
+                // Game Title
+                const SizedBox(height: 4),
+                Text(
+                  game.name,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Color _getRankingColor(int index) {
+    switch (index) {
+      case 0: return Colors.amber; // Gold für Platz 1
+      case 1: return Colors.grey[400]!; // Silber für Platz 2
+      case 2: return Colors.brown[400]!; // Bronze für Platz 3
+      default: return Colors.black;
+    }
+  }
+
+  Widget _buildEmptyTopThreeSection() {
+    return Container(
+      height: 120,
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppConstants.paddingMedium,
+      ),
+      child: Card(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.star_border,
+                size: 32,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose your top 3 favorite games',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Tap the star icon on game pages',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

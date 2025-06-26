@@ -86,7 +86,7 @@ class GameCard extends StatelessWidget {
             child: _buildRatingChip(
               context,
               icon: Icons.star,
-              rating: game.userRating!,
+              rating: game.displayUserRating!,
               isUserRating: true,
             ),
           ),

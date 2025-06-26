@@ -47,6 +47,9 @@ abstract class GameRepository {
   Future<Either<Failure, List<Game>>> getUserRecommendations(String userId);
 
   Future<Either<Failure, List<Game>>> getUserRatedGames(String userId);
+
+  Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
+
 }
 
 

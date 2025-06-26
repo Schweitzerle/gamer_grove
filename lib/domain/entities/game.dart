@@ -76,6 +76,8 @@ class Game extends Equatable {
     userRating,
   ];
 
+  double? get displayUserRating => userRating != null ? userRating! * 10 : null;
+
   Game copyWith({
     int? id,
     String? name,
