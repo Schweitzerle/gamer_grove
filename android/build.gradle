@@ -3,6 +3,13 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // Java 17 für alle Subprojekte erzwingen
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ["-Xlint:-options"]
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 rootProject.buildDir = "../build"

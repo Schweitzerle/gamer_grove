@@ -350,9 +350,9 @@ class GameRepositoryImpl implements GameRepository {
 
       // Return enriched game
       return game.copyWith(
-        isWishlisted: userGameData['is_wishlisted'] ?? false,
-        isRecommended: userGameData['is_recommended'] ?? false,
-        userRating: userGameData['rating']?.toDouble(),
+        isWishlisted: userGameData?['is_wishlisted'] ?? false,
+        isRecommended: userGameData?['is_recommended'] ?? false,
+        userRating: userGameData?['rating']?.toDouble(),
         isInTopThree: isInTopThree,
         topThreePosition: gamePosition,
       );

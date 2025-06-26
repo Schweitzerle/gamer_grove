@@ -250,3 +250,49 @@ class GameDetailsWithUserDataLoaded extends GameState {
     userTopThreeGames,
   ];
 }
+
+// 1. Füge diese States zu deiner game_state.dart hinzu:
+
+// Home Page States
+class HomePageLoading extends GameState {}
+
+class HomePageLoaded extends GameState {
+  final List<Game> popularGames;
+  final List<Game> upcomingGames;
+  final List<Game>? userWishlist;
+  final List<Game>? userRecommendations;
+
+  const HomePageLoaded({
+    required this.popularGames,
+    required this.upcomingGames,
+    this.userWishlist,
+    this.userRecommendations,
+  });
+
+  // copyWith Methode hinzufügen
+  HomePageLoaded copyWith({
+    List<Game>? popularGames,
+    List<Game>? upcomingGames,
+    List<Game>? userWishlist,
+    List<Game>? userRecommendations,
+  }) {
+    return HomePageLoaded(
+      popularGames: popularGames ?? this.popularGames,
+      upcomingGames: upcomingGames ?? this.upcomingGames,
+      userWishlist: userWishlist ?? this.userWishlist,
+      userRecommendations: userRecommendations ?? this.userRecommendations,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    popularGames,
+    upcomingGames,
+    userWishlist,
+    userRecommendations,
+  ];
+}
+
+
+
+

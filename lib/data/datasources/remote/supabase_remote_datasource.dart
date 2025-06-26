@@ -25,8 +25,9 @@ abstract class SupabaseRemoteDataSource {
   Future<List<int>> getUserWishlistIds(String userId);
   Future<List<int>> getUserRecommendedIds(String userId);
   Future<Map<int, double>> getUserRatings(String userId);
+  Future<Map<String, dynamic>?> getUserGameData(String userId, int gameId);
 
-  // Social
+    // Social
   Future<void> followUser(String currentUserId, String targetUserId);
   Future<void> unfollowUser(String currentUserId, String targetUserId);
   Future<List<String>> getUserFollowers(String userId);
@@ -482,7 +483,7 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         getUserRatings(userId),
         getUserFollowers(userId),
         getUserFollowing(userId),
-        getTopThreeGamesWithPosition(userId),
+        getTopThreeGames(userId),
       ]);
 
       final wishlist = futures[0] as List<int>;
@@ -667,19 +668,28 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     }
   }
 
-  // Neue Methode in SupabaseRemoteDataSourceImpl
-  Future<Map<String, dynamic>> getUserGameData(String userId, int gameId) async {
+  @override
+  Future<Map<String, dynamic>?> getUserGameData(String userId, int gameId) async {
     try {
+      print('🎮 Supabase: Getting user game data for user $userId, game $gameId');
+
       final result = await _supabase
-          .rpc('get_user_game_data', params: {
-        'p_user_id': userId,
-        'p_game_id': gameId,
-      })
-          .single();
-      return result;
+          .from('user_game_interactions')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (result != null) {
+        print('✅ Supabase: Found user game data');
+        return result;
+      } else {
+        print('ℹ️ Supabase: No user game data found');
+        return null;
+      }
     } catch (e) {
-      print('⚠️ Error calling get_user_game_data: $e');
-      throw e;
+      print('⚠️ Supabase: Error getting user game data: $e');
+      return null;
     }
   }
 
@@ -699,4 +709,5 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
       return [];
     }
   }
+
 }

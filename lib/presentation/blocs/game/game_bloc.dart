@@ -70,6 +70,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // User-specific events
     on<LoadUserWishlistEvent>(_onLoadUserWishlist);
     on<LoadUserRecommendationsEvent>(_onLoadUserRecommendations);
+
+    on<LoadHomePageDataEvent>(_onLoadHomePageData);
   }
 
   // Debounce transformer for search
@@ -319,9 +321,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
                 // Update game with all user-specific data
                 final enhancedGame = game.copyWith(
-                  isWishlisted: userGameData['is_wishlisted'] ?? false,
-                  isRecommended: userGameData['is_recommended'] ?? false,
-                  userRating: userGameData['user_rating']?.toDouble(),
+                  isWishlisted: userGameData?['is_wishlisted'] ?? false,
+                  isRecommended: userGameData?['is_recommended'] ?? false,
+                  userRating: userGameData?['user_rating']?.toDouble(),
                   isInTopThree: isInTopThree,
                   topThreePosition: gamePosition,
                 );
@@ -614,6 +616,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  // 4. Aktualisierte _onLoadHomePageData Methode:
+
   Future<void> _onLoadHomePageData(
       LoadHomePageDataEvent event,
       Emitter<GameState> emit,
@@ -621,7 +625,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(HomePageLoading());
 
     try {
-      // Load all data in parallel
+// Load all data in parallel
       final results = await Future.wait([
         getPopularGames(const GetPopularGamesParams(limit: 10)),
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
@@ -631,7 +635,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         ],
       ]);
 
-      // Extract results
+// Extract results
       final popularGames = results[0].fold((l) => <Game>[], (r) => r as List<Game>);
       final upcomingGames = results[1].fold((l) => <Game>[], (r) => r as List<Game>);
       final userWishlist = event.userId != null && results.length > 2
@@ -641,7 +645,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ? results[3].fold((l) => <Game>[], (r) => r as List<Game>)
           : <Game>[];
 
-      // Enrich all games with user data if user is logged in
+// Enrich all games with user data if user is logged in
       if (event.userId != null) {
         final enrichedPopular = await _enrichGamesWithUserData(popularGames, event.userId);
         final enrichedUpcoming = await _enrichGamesWithUserData(upcomingGames, event.userId);
@@ -662,6 +666,50 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(GameError('Failed to load home page data: $e'));
     }
   }
+
+  Future<List<Game>> _enrichGamesWithUserData(List<Game> games, String? userId) async {
+    if (userId == null || games.isEmpty) return games;
+
+    try {
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+
+      // Hole alle User-Game Daten parallel
+      final futures = games.map((game) =>
+          supabaseDataSource.getUserGameData(userId, game.id)
+      ).toList();
+
+      final userGameDataList = await Future.wait(futures);
+
+      // Erstelle angereicherte Games Liste
+      final enrichedGames = <Game>[];
+      for (int i = 0; i < games.length; i++) {
+        final game = games[i];
+        final userGameData = userGameDataList[i];
+
+        if (userGameData != null) {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: userGameData['is_wishlisted'] ?? false,
+            isRecommended: userGameData['is_recommended'] ?? false,
+            userRating: userGameData['rating']?.toDouble(),
+            isInTopThree: false, // Wird separat gesetzt falls nötig
+          ));
+        } else {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: false,
+            isRecommended: false,
+            userRating: null,
+            isInTopThree: false,
+          ));
+        }
+      }
+
+      return enrichedGames;
+    } catch (e) {
+      print('❌ GameBloc: Error enriching games with user data: $e');
+      return games; // Return original games if enrichment fails
+    }
+  }
+
 }
 
 
