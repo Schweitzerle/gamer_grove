@@ -439,8 +439,6 @@ class _SearchPageState extends State<SearchPage> {
           return GameCard(
             game: game,
             onTap: () => _navigateToGameDetail(game.id),
-            onWishlistTap: () => _toggleWishlist(game.id),
-            gameBloc: _gameBloc,
           );
         },
       ),

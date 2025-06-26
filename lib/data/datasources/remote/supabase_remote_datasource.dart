@@ -24,6 +24,7 @@ abstract class SupabaseRemoteDataSource {
   Future<void> rateGame(int gameId, String userId, double rating);
   Future<List<int>> getUserWishlistIds(String userId);
   Future<List<int>> getUserRecommendedIds(String userId);
+  Future<List<int>> getUserRatedIds(String userId);
   Future<Map<int, double>> getUserRatings(String userId);
   Future<Map<String, dynamic>?> getUserGameData(String userId, int gameId);
 
@@ -706,6 +707,29 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
       return results.map<int>((item) => item['game_id'] as int).toList();
     } catch (e) {
       print('⚠️ Supabase: Error getting top games: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<int>> getUserRatedIds(String userId) async {
+    try {
+      final results = await _supabase
+          .from('user_game_interactions')
+          .select('game_id, rating')
+          .eq('user_id', userId)
+          .not('rating', 'is', null)
+          .order('rated_at', ascending: false);
+
+      final ratedMap = Map.fromEntries(
+        results.map((item) => MapEntry(
+          item['game_id'] as int,
+          double.parse(item['rating'].toString()),
+        )),
+      );
+      return ratedMap.keys.toList();
+    } catch (e) {
+      print('⚠️ Supabase: Error getting wishlist: $e');
       return [];
     }
   }

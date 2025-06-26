@@ -822,11 +822,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
   }
 
   Color _getRatingColor(double rating) {
-    if (rating >= 9.0) return Colors.purple;
-    if (rating >= 8.0) return Colors.green;
-    if (rating >= 7.0) return Colors.teal;
-    if (rating >= 6.0) return Colors.orange;
-    return Colors.red;
+    if (rating >= 9.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
+    if (rating >= 8.0) return const Color(0xFFd98b0b); // Gold
+    if (rating >= 6.0) return const Color(0xFF6a6f75); // Silver
+    if (rating >= 4.0) return const Color(0xFF7c3614); // Bronze
+    return const Color(0xFF51483a); // Ash (dunkelgrau)
   }
 
   IconData _getMedalIcon(int position) {

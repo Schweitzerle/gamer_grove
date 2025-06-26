@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../data/datasources/remote/supabase_remote_datasource.dart';
 import '../../../domain/entities/game.dart';
+import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
 import '../../../domain/usecases/game/get_game_details.dart';
@@ -33,6 +34,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetUserWishlist getUserWishlist;
   final GetUserRecommendations getUserRecommendations;
   final GetUserTopThreeGames getUserTopThreeGames;
+  final GetUserRated getUserRated;
 
   GameBloc({
     required this.searchGames,
@@ -46,6 +48,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getUserWishlist,
     required this.getUserRecommendations,
     required this.getUserTopThreeGames,
+    required this.getUserRated,
   }) : super(GameInitial()) {
     // Search events
     on<SearchGamesEvent>(
@@ -70,6 +73,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // User-specific events
     on<LoadUserWishlistEvent>(_onLoadUserWishlist);
     on<LoadUserRecommendationsEvent>(_onLoadUserRecommendations);
+    on<LoadUserRatedEvent>(_onLoadUserRated);
 
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
   }
@@ -269,6 +273,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  // Load User Rated
+  Future<void> _onLoadUserRated(LoadUserRatedEvent event,
+      Emitter<GameState> emit,) async {
+    emit(UserRatedLoading());
+
+    final result = await getUserRated(
+      GetUserRatedParams(userId: event.userId),
+    );
+
+    result.fold(
+          (failure) => emit(GameError(failure.message)),
+          (games) =>
+          emit(UserRatedLoaded(
+            games: games,
+            userId: event.userId,
+          )),
+    );
+  }
 
   // Komplette _onGetGameDetailsWithUserData Methode für game_bloc.dart
 
@@ -394,33 +416,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
 // Die anderen Handler bleiben gleich, aber hier nochmal die wichtigen:
 
-  Future<void> _onRateGame(
-      RateGameEvent event,
-      Emitter<GameState> emit,
-      ) async {
-    final result = await rateGame(
-      RateGameParams(
-        gameId: event.gameId,
-        userId: event.userId,
-        rating: event.rating,
-      ),
-    );
-
-    if (!emit.isDone) {
-      result.fold(
-            (failure) => emit(GameError(failure.message)),
-            (_) {
-          if (state is GameDetailsLoaded) {
-            final currentGame = (state as GameDetailsLoaded).game;
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(userRating: event.rating),
-            ));
-          }
-        },
-      );
-    }
-  }
-
+  // ✅ Update Toggle Wishlist um Home State zu aktualisieren
   Future<void> _onToggleWishlist(
       ToggleWishlistEvent event,
       Emitter<GameState> emit,
@@ -435,7 +431,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
           (failure) => emit(GameError(failure.message)),
           (_) {
-        // Update the game in all loaded states
+        // Update in allen States
+        _updateGameInHomePageState(event.gameId, (game) {
+          return game.copyWith(isWishlisted: !game.isWishlisted);
+        });
+
+        // Falls aktueller State ein anderer ist, auch dort updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isWishlisted: !game.isWishlisted);
         });
@@ -443,7 +444,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-// Toggle Recommendation
+  // ✅ Update Toggle Recommend um Home State zu aktualisieren
   Future<void> _onToggleRecommend(
       ToggleRecommendEvent event,
       Emitter<GameState> emit,
@@ -458,10 +459,49 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
           (failure) => emit(GameError(failure.message)),
           (_) {
-        // Update the game in all loaded states
+        // Update in allen States
+        _updateGameInHomePageState(event.gameId, (game) {
+          return game.copyWith(isRecommended: !game.isRecommended);
+        });
+
+        // Falls aktueller State ein anderer ist, auch dort updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isRecommended: !game.isRecommended);
         });
+      },
+    );
+  }
+
+  // ✅ Update Rate Game um Home State zu aktualisieren
+  Future<void> _onRateGame(
+      RateGameEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    final result = await rateGame(
+      RateGameParams(
+        gameId: event.gameId,
+        userId: event.userId,
+        rating: event.rating,
+      ),
+    );
+
+    result.fold(
+          (failure) => emit(GameError(failure.message)),
+          (_) {
+        // Update in allen States
+        _updateGameInHomePageState(event.gameId, (game) {
+          return game.copyWith(userRating: event.rating);
+        });
+
+        // Falls aktueller State GameDetailsLoaded ist
+        if (state is GameDetailsLoaded) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(userRating: event.rating),
+            ));
+          }
+        }
       },
     );
   }
@@ -625,7 +665,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(HomePageLoading());
 
     try {
-// Load all data in parallel
+      // Load all data in parallel
       final results = await Future.wait([
         getPopularGames(const GetPopularGamesParams(limit: 10)),
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
@@ -635,26 +675,33 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         ],
       ]);
 
-// Extract results
-      final popularGames = results[0].fold((l) => <Game>[], (r) => r as List<Game>);
-      final upcomingGames = results[1].fold((l) => <Game>[], (r) => r as List<Game>);
+      // Extract results
+      final popularGames = results[0].fold((l) => <Game>[], (r) => r);
+      final upcomingGames = results[1].fold((l) => <Game>[], (r) => r);
       final userWishlist = event.userId != null && results.length > 2
-          ? results[2].fold((l) => <Game>[], (r) => r as List<Game>)
+          ? results[2].fold((l) => <Game>[], (r) => r)
           : <Game>[];
       final userRecommendations = event.userId != null && results.length > 3
-          ? results[3].fold((l) => <Game>[], (r) => r as List<Game>)
+          ? results[3].fold((l) => <Game>[], (r) => r)
           : <Game>[];
 
-// Enrich all games with user data if user is logged in
+      // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
-        final enrichedPopular = await _enrichGamesWithUserData(popularGames, event.userId);
-        final enrichedUpcoming = await _enrichGamesWithUserData(upcomingGames, event.userId);
+        final enrichedPopular = await _enrichGamesWithUserData(popularGames, event.userId!);
+        final enrichedUpcoming = await _enrichGamesWithUserData(upcomingGames, event.userId!);
+        // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
+        final enrichedWishlist = userWishlist.isNotEmpty
+            ? await _enrichGamesWithUserData(userWishlist, event.userId!)
+            : <Game>[];
+        final enrichedRecommendations = userRecommendations.isNotEmpty
+            ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
+            : <Game>[];
 
         emit(HomePageLoaded(
           popularGames: enrichedPopular,
           upcomingGames: enrichedUpcoming,
-          userWishlist: userWishlist,
-          userRecommendations: userRecommendations,
+          userWishlist: enrichedWishlist,
+          userRecommendations: enrichedRecommendations,
         ));
       } else {
         emit(HomePageLoaded(
@@ -666,6 +713,58 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(GameError('Failed to load home page data: $e'));
     }
   }
+
+
+  Future<void> _onLoadGrovePageData(
+      LoadGrovePageDataEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GrovePageLoading());
+
+    try {
+      // Load all data in parallel
+      final results = await Future.wait([
+        if (event.userId != null) ...[
+          getUserRated(GetUserRatedParams(userId: event.userId!)),
+          getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
+          getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
+        ],
+      ]);
+
+      // Extract results
+      final userRated = results[0].fold((l) => <Game>[], (r) => r);
+      final userWishlist = event.userId != null && results.length > 2
+          ? results[1].fold((l) => <Game>[], (r) => r)
+          : <Game>[];
+      final userRecommendations = event.userId != null && results.length > 3
+          ? results[2].fold((l) => <Game>[], (r) => r)
+          : <Game>[];
+
+      // 🔥 WICHTIG: Alle Games mit User Data anreichern
+      if (event.userId != null) {
+        final enrichedRated = userRated.isNotEmpty
+            ? await _enrichGamesWithUserData(userRated, event.userId!)
+            : <Game>[];
+        final enrichedWishlist = userWishlist.isNotEmpty
+            ? await _enrichGamesWithUserData(userWishlist, event.userId!)
+            : <Game>[];
+        final enrichedRecommendations = userRecommendations.isNotEmpty
+            ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
+            : <Game>[];
+
+        emit(GrovePageLoaded(
+          userRated: enrichedRated,
+          userWishlist: enrichedWishlist,
+          userRecommendations: enrichedRecommendations,
+        ));
+      } else {
+        emit(GrovePageLoaded());
+      }
+    } catch (e) {
+      emit(GameError('Failed to load home page data: $e'));
+    }
+  }
+
 
   Future<List<Game>> _enrichGamesWithUserData(List<Game> games, String? userId) async {
     if (userId == null || games.isEmpty) return games;
@@ -680,6 +779,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       final userGameDataList = await Future.wait(futures);
 
+      final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(userId);
+      final topThreeMap = <int, int>{};
+      for (var entry in topThreeData) {
+        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
+      }
+
       // Erstelle angereicherte Games Liste
       final enrichedGames = <Game>[];
       for (int i = 0; i < games.length; i++) {
@@ -691,7 +796,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             isWishlisted: userGameData['is_wishlisted'] ?? false,
             isRecommended: userGameData['is_recommended'] ?? false,
             userRating: userGameData['rating']?.toDouble(),
-            isInTopThree: false, // Wird separat gesetzt falls nötig
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
           ));
         } else {
           enrichedGames.add(game.copyWith(
@@ -707,6 +813,36 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } catch (e) {
       print('❌ GameBloc: Error enriching games with user data: $e');
       return games; // Return original games if enrichment fails
+    }
+  }
+
+  void _updateGameInHomePageState(int gameId, Game Function(Game) updateFunction) {
+    final currentState = state;
+
+    if (currentState is HomePageLoaded) {
+      // Update in allen Listen
+      final updatedPopular = currentState.popularGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedUpcoming = currentState.upcomingGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedWishlist = currentState.userWishlist?.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedRecommendations = currentState.userRecommendations?.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      emit(currentState.copyWith(
+        popularGames: updatedPopular,
+        upcomingGames: updatedUpcoming,
+        userWishlist: updatedWishlist,
+        userRecommendations: updatedRecommendations,
+      ));
     }
   }
 

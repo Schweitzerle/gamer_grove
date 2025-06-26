@@ -1,700 +1,475 @@
 // presentation/widgets/game_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/game.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';
 import '../../core/widgets/cached_image_widget.dart';
-import '../blocs/game/game_bloc.dart';
-import '../blocs/auth/auth_bloc.dart';
-import 'custom_shimmer.dart';
-import 'game_quick_actions_dialog.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 class GameCard extends StatelessWidget {
   final Game game;
   final VoidCallback onTap;
-  final VoidCallback? onWishlistTap;
-  final bool showGenres;
-  final bool showPlatforms;
-  final bool showRating;
-  final bool showUserStates;
-  final GameBloc? gameBloc; // Optional GameBloc for quick actions
 
   const GameCard({
     super.key,
     required this.game,
     required this.onTap,
-    this.onWishlistTap,
-    this.showGenres = true,
-    this.showPlatforms = true,
-    this.showRating = true,
-    this.showUserStates = true,
-    this.gameBloc,
   });
-
-  void _showQuickActions(BuildContext context) {
-    HapticFeedback.mediumImpact();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => GameQuickActionsDialog(
-        game: game,
-        gameBloc: gameBloc ?? context.read<GameBloc>(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 4,
       clipBehavior: Clip.antiAlias,
-      elevation: AppConstants.cardElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-      ),
       child: InkWell(
-        onTap: onTap,
-        onLongPress: () => _showQuickActions(context),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: Stack(
           children: [
-            // Game Cover Image
-            Expanded(
-              flex: 3,
-              child: _buildCoverImage(context),
-            ),
-
-            // Game Information
-            Expanded(
-              flex: 2,
-              child: _buildGameInfo(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCoverImage(BuildContext context) {
-    return Stack(
-      children: [
-        // Cover Image
-        Positioned.fill(
-          child: CachedImageWidget(
-            imageUrl: ImageUtils.getMediumImageUrl(game.coverUrl),
-            fit: BoxFit.cover,
-            placeholder: _buildImagePlaceholder(context),
-            errorWidget: _buildImageError(context),
-          ),
-        ),
-
-        // User States Overlay (Top Left)
-        if (showUserStates)
-          Positioned(
-            top: AppConstants.paddingSmall,
-            left: AppConstants.paddingSmall,
-            child: _buildUserStatesOverlay(context),
-          ),
-
-        // Platform Icons (Top Right)
-        if (showPlatforms && game.platforms.isNotEmpty)
-          Positioned(
-            top: AppConstants.paddingSmall,
-            right: AppConstants.paddingSmall,
-            child: _buildPlatformBadge(context),
-          ),
-
-        // Wishlist Button (Bottom Right)
-        if (onWishlistTap != null)
-          Positioned(
-            bottom: AppConstants.paddingSmall,
-            right: AppConstants.paddingSmall,
-            child: _buildWishlistButton(context),
-          ),
-
-        // Rating Badge (Bottom Left)
-        if (showRating && game.rating != null)
-          Positioned(
-            bottom: AppConstants.paddingSmall,
-            left: AppConstants.paddingSmall,
-            child: _buildRatingBadge(context),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildStateBadge(
-      BuildContext context, {
-        required IconData icon,
-        String? label,
-        required Color color,
-      }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Colors.white),
-          if (label != null) ...[
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImagePlaceholder(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: CustomShimmer(
-        child: Container(
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageError(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.gamepad_rounded,
-            size: 40,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'No Image',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlatformBadge(BuildContext context) {
-    final platformNames = game.platforms.take(3).map((p) => p.abbreviation).toList();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.devices,
-            size: 12,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            platformNames.join(', '),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWishlistButton(BuildContext context) {
-    return GestureDetector(
-      onTap: onWishlistTap,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: game.isWishlisted
-              ? Theme.of(context).colorScheme.primary
-              : Colors.black.withOpacity(0.7),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: game.isWishlisted
-                ? Theme.of(context).colorScheme.primary
-                : Colors.white.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          game.isWishlisted ? Icons.favorite : Icons.favorite_outline,
-          size: 16,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRatingBadge(BuildContext context) {
-    final rating = game.rating!;
-    final color = rating >= 8.0
-        ? Colors.green
-        : rating >= 6.0
-        ? Colors.orange
-        : Colors.red;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(6),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.star_rounded,
-            size: 14,
-            color: Colors.white,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            rating.toStringAsFixed(1),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGameInfo(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingSmall),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Game Title
-          Text(
-            game.name,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const Spacer(),
-
-          // Genres
-          if (showGenres && game.genres.isNotEmpty) ...[
-            Text(
-              game.genres.take(2).map((g) => g.name).join(', '),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-
-          // Release Date
-          if (game.releaseDate != null) ...[
-            const SizedBox(height: 2),
-            Row(
+            // Main Content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                // Cover Image Section with Overlay Info
+                Expanded(
+                  flex: 4,
+                  child: _buildCoverSection(context),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  DateFormatter.formatYearOnly(game.releaseDate!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+
+                // Bottom Info Section
+                Expanded(
+                  flex: 2,
+                  child: _buildInfoSection(context),
                 ),
               ],
             ),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildUserStatesOverlay(BuildContext context) {
-    final states = <Widget>[];
-
-    // User Rating - nur wenn vorhanden
-    if (game.userRating != null) {
-      states.add(_buildStateBadge(
-        context,
-        icon: Icons.star,
-        label: game.userRating!.toStringAsFixed(1),
-        color: Colors.amber,
-      ));
-    }
-
-    // Recommended - nur wenn true
-    if (game.isRecommended) {
-      states.add(_buildStateBadge(
-        context,
-        icon: Icons.thumb_up,
-        label: null,
-        color: Colors.green,
-      ));
-    }
-
-    // In Top 3 - nur wenn true
-    if (game.isInTopThree ?? false) {
-      final position = game.topThreePosition ?? 1;
-      states.add(_buildStateBadge(
-        context,
-        icon: _getMedalIcon(position),
-        label: '#$position',
-        color: _getPositionColor(position),
-      ));
-    }
-
-    // Zeige nichts wenn keine States vorhanden
-    if (states.isEmpty) return const SizedBox.shrink();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildCoverSection(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        for (int i = 0; i < states.length; i++) ...[
-          states[i],
-          if (i < states.length - 1) const SizedBox(width: 4),
-        ],
+        // Cover Image
+        CachedImageWidget(
+          imageUrl: ImageUtils.getMediumImageUrl(game.coverUrl),
+          fit: BoxFit.cover,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          ),
+        ),
+
+        // Community Rating (bottom left)
+        if (game.rating != null)
+          Positioned(
+            bottom: 8,
+            left: 8,
+            child: _buildRatingChip(
+              context,
+              icon: Icons.star_outline,
+              rating: game.rating!,
+              isUserRating: false,
+            ),
+          ),
+        if (game.userRating != null)
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: _buildRatingChip(
+              context,
+              icon: Icons.star,
+              rating: game.userRating!,
+              isUserRating: true,
+            ),
+          ),
       ],
     );
   }
 
-  IconData _getMedalIcon(int position) {
-    switch (position) {
-      case 1:
-        return Icons.looks_one;
-      case 2:
-        return Icons.looks_two;
-      case 3:
-        return Icons.looks_3;
-      default:
-        return Icons.emoji_events;
-    }
-  }
-
-  Color _getPositionColor(int position) {
-    switch (position) {
-      case 1:
-        return Colors.amber;
-      case 2:
-        return Colors.grey[600]!;
-      case 3:
-        return Colors.brown[600]!;
-      default:
-        return Colors.grey;
-    }
-  }
-
-}
-
-// Compact version for lists
-class CompactGameCard extends StatelessWidget {
-  final Game game;
-  final VoidCallback onTap;
-  final VoidCallback? onWishlistTap;
-  final GameBloc? gameBloc;
-
-  const CompactGameCard({
-    super.key,
-    required this.game,
-    required this.onTap,
-    this.onWishlistTap,
-    this.gameBloc,
-  });
-
-  void _showQuickActions(BuildContext context) {
-    HapticFeedback.mediumImpact();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => GameQuickActionsDialog(
-        game: game,
-        gameBloc: gameBloc ?? context.read<GameBloc>(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: () => _showQuickActions(context),
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingSmall),
-          child: Row(
-            children: [
-              // Cover Image
-              SizedBox(
-                width: 60,
-                height: 80,
-                child: CachedImageWidget(
-                  imageUrl: ImageUtils.getSmallImageUrl(game.coverUrl),
-                  fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-
-              const SizedBox(width: AppConstants.paddingSmall),
-
-              // Game Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title with user states
-                    // In CompactGameCard, in der Row wo die User States angezeigt werden:
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            game.name,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        // Zeige User Rating Badge wenn vorhanden
-                        if (game.userRating != null)
-                          _buildCompactStateBadge(
-                            context,
-                            icon: Icons.star,
-                            label: game.userRating!.toStringAsFixed(1),
-                            color: Colors.amber,
-                          ),
-                        // Zeige Recommended Badge wenn recommended
-                        if (game.isRecommended) ...[
-                          const SizedBox(width: 4),
-                          _buildCompactStateBadge(
-                            context,
-                            icon: Icons.thumb_up,
-                            color: Colors.green,
-                          ),
-                        ],
-                        // Zeige Top 3 Badge wenn in Top 3
-                        if (game.isInTopThree ?? false) ...[
-                          const SizedBox(width: 4),
-                          _buildCompactStateBadge(
-                            context,
-                            icon: _getMedalIcon(game.topThreePosition ?? 1),
-                            label: '#${game.topThreePosition ?? 1}',
-                            color: _getPositionColor(game.topThreePosition ?? 1),
-                          ),
-                        ],
-                      ],
-                    ),
-
-                    if (game.genres.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        game.genres.take(2).map((g) => g.name).join(', '),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-
-                    if (game.rating != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star_rounded,
-                            size: 14,
-                            color: Colors.amber,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            game.rating!.toStringAsFixed(1),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              // Wishlist Button
-              if (onWishlistTap != null)
-                IconButton(
-                  onPressed: onWishlistTap,
-                  icon: Icon(
-                    game.isWishlisted ? Icons.favorite : Icons.favorite_outline,
-                    color: game.isWishlisted
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactStateBadge(
-      BuildContext context, {
-        required IconData icon,
-        String? label,
-        required Color color,
-      }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildInfoSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 12, color: color),
-          if (label != null) ...[
-            const SizedBox(width: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+          // Game Title
+          Expanded(
+            flex: 3,
+            child: FittedBox(
+              child: Text(
+                game.name,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // Release Date and Genres Row
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                // Release Date
+                if (game.releaseDate != null) ...[
+                  Text(
+                    DateFormatter.formatYearOnly(game.releaseDate!),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  if (game.genres.isNotEmpty) ...[
+                    Text(
+                      ' • ',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ],
+
+                // Genres
+                if (game.genres.isNotEmpty)
+                  Expanded(
+                    child: Text(
+                      game.genres.take(2).map((g) => g.name).join(', '),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Expanded(
+              flex: 3,
+              child: _buildQuickStateIndicators(context))
         ],
       ),
     );
   }
 
-  Widget _buildTopThreeBadge() {
-    final position = game.topThreePosition ?? 1;
-
+  Widget _buildRatingChip(
+    BuildContext context, {
+    required IconData icon,
+    required double rating,
+    required bool isUserRating,
+  }) {
+    final ratingColor = _getRatingColor(rating);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _getPositionColor(position).withOpacity(0.9),
-            _getPositionColor(position),
-          ],
-        ),
+        color: ratingColor.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: _getPositionColor(position).withOpacity(0.5),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: ratingColor.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _getMedalIcon(position),
-            size: 16,
-            color: Colors.white,
+            icon,
+            size: 12,
+            color: ratingColor.onColor,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 3),
           Text(
-            '#$position',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            rating.toStringAsFixed(1),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: ratingColor.onColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
           ),
         ],
       ),
     );
   }
 
-  IconData _getMedalIcon(int position) {
+  Widget _buildQuickStateIndicators(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        if (game.isWishlisted) ...[
+          _buildStateIcon(
+            context,
+            icon: Icons.favorite,
+            color: Colors.red,
+            size: 16,
+          ),
+        ],
+        if (game.isRecommended) ...[
+          _buildStateIcon(
+            context,
+            icon: Icons.thumb_up,
+            color: Colors.green,
+            size: 16,
+          ),
+        ],
+        if (game.isInTopThree ?? false) _buildTopThreeCrown(context),
+      ],
+    );
+  }
+
+  Widget _buildStateIcon(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required double size,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        icon,
+        size: size,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _buildUserStatesBadges(BuildContext context) {
+    final badges = <Widget>[];
+
+    // Recommended Badge
+    if (game.isRecommended) {
+      badges.add(_buildStateIconBadge(
+        context,
+        icon: Icons.thumb_up,
+        color: Colors.green,
+      ));
+    }
+
+    // Wishlist Badge
+    if (game.isWishlisted) {
+      badges.add(_buildStateIconBadge(
+        context,
+        icon: Icons.favorite,
+        color: Colors.red,
+      ));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: badges
+          .map((badge) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: badge,
+              ))
+          .toList(),
+    );
+  }
+
+  Widget _buildStateIconBadge(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: 14,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildTopThreeCrown(BuildContext context) {
+    final position = game.topThreePosition ?? 1;
+    final crownColor = _getTopThreeColor(position);
+
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: crownColor,
+          borderRadius: const BorderRadius.all(Radius.circular(12),),
+          boxShadow: [
+            BoxShadow(
+              color: crownColor.withValues(alpha: 0.4),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _getTopThreeIcon(position),
+              color: crownColor.onColor,
+              size: 16,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '#$position',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: crownColor.onColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getTopThreeColor(int position) {
     switch (position) {
       case 1:
-        return Icons.looks_one;
+        return const Color(0xFFFFD700); // Gold
       case 2:
-        return Icons.looks_two;
+        return const Color(0xFFC0C0C0); // Silver
       case 3:
-        return Icons.looks_3;
+        return const Color(0xFFCD7F32); // Bronze
+      default:
+        return Colors.amber;
+    }
+  }
+
+  IconData _getTopThreeIcon(int position) {
+    switch (position) {
+      case 1:
+        return Icons.emoji_events; // Trophy
+      case 2:
+        return Icons.emoji_events; // Trophy
+      case 3:
+        return Icons.emoji_events; // Trophy
       default:
         return Icons.emoji_events;
     }
   }
+}
 
-  Color _getPositionColor(int position) {
-    switch (position) {
-      case 1:
-        return Colors.amber;
-      case 2:
-        return Colors.grey[600]!;
-      case 3:
-        return Colors.brown[600]!;
-      default:
-        return Colors.grey;
-    }
+Color _getRatingColor(double rating) {
+  if (rating >= 9.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
+  if (rating >= 8.0) return const Color(0xFFd98b0b); // Gold
+  if (rating >= 6.0) return const Color(0xFF6a6f75); // Silver
+  if (rating >= 4.0) return const Color(0xFF7c3614); // Bronze
+  return const Color(0xFF51483a); // Ash (dunkelgrau)
+}
+
+// Shimmer Loading Version
+class GameCardShimmer extends StatelessWidget {
+  const GameCardShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cover Image Shimmer
+          Expanded(
+            flex: 4,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+            ),
+          ),
+
+          // Info Section Shimmer
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Rating chips shimmer
+                  Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 60,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Genres shimmer
+                  Container(
+                    width: 80,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

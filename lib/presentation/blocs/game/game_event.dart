@@ -114,6 +114,15 @@ class LoadUpcomingGamesEvent extends GameEvent {
   List<Object> get props => [limit, offset];
 }
 
+class LoadUserRatedEvent extends GameEvent {
+  final String userId;
+
+  const LoadUserRatedEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
 class LoadUserWishlistEvent extends GameEvent {
   final String userId;
 
@@ -163,6 +172,15 @@ class LoadHomePageDataEvent extends GameEvent {
   final String? userId;
 
   const LoadHomePageDataEvent({this.userId});
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+class LoadGrovePageDataEvent extends GameEvent {
+  final String? userId;
+
+  const LoadGrovePageDataEvent({this.userId});
 
   @override
   List<Object?> get props => [userId];

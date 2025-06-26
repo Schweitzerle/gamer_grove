@@ -225,26 +225,12 @@ class GameRepositoryImpl implements GameRepository {
     }
 
     try {
-      final ratings = await supabaseDataSource.getUserRatings(userId);
-      if (ratings.isEmpty) {
+      final gameIds = await supabaseDataSource.getUserRatedIds(userId);
+      if (gameIds.isEmpty) {
         return const Right([]);
       }
 
-      final gameIds = ratings.keys.toList();
-      final gamesResult = await getGamesByIds(gameIds);
-
-      return gamesResult.fold(
-            (failure) => Left(failure),
-            (games) {
-          // Add user ratings to games
-          final gamesWithRatings = games.map((game) {
-            final userRating = ratings[game.id];
-            return game.copyWith(userRating: userRating);
-          }).toList();
-
-          return Right(gamesWithRatings);
-        },
-      );
+      return getGamesByIds(gameIds);
     } catch (e) {
       return const Left(ServerFailure());
     }
@@ -335,26 +321,17 @@ class GameRepositoryImpl implements GameRepository {
 
       // Get top three position separately
       final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(currentUserId);
-
-      // Find position for current game
-      int? gamePosition;
-      bool isInTopThree = false;
-
+      final topThreeMap = <int, int>{};
       for (var entry in topThreeData) {
-        if (entry['game_id'] == game.id) {
-          isInTopThree = true;
-          gamePosition = entry['position'] as int;
-          break;
-        }
+        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
       }
-
       // Return enriched game
       return game.copyWith(
         isWishlisted: userGameData?['is_wishlisted'] ?? false,
         isRecommended: userGameData?['is_recommended'] ?? false,
         userRating: userGameData?['rating']?.toDouble(),
-        isInTopThree: isInTopThree,
-        topThreePosition: gamePosition,
+        isInTopThree: topThreeMap.containsKey(game.id),
+        topThreePosition: topThreeMap[game.id],
       );
     } catch (e) {
       print('Error enriching game with user data: $e');

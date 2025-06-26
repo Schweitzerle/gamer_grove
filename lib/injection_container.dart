@@ -1,4 +1,5 @@
 // lib/injection_container.dart
+import 'package:gamer_grove/domain/usecases/game/getUserRated.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,6 +122,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RateGame(sl()));
   sl.registerLazySingleton(() => ToggleWishlist(sl()));
   sl.registerLazySingleton(() => ToggleRecommend(sl()));
+  sl.registerLazySingleton(() => GetUserRated(sl()));
 
   // Use cases - User
   print('👤 DI: Registering user use cases...');
@@ -157,7 +159,8 @@ Future<void> init() async {
       getUpcomingGames: sl(),
       getUserWishlist: sl(),
       getUserRecommendations: sl(),
-      getUserTopThreeGames: sl(), // Add this line
+      getUserTopThreeGames: sl(),
+      getUserRated: sl(), // Add this line
     ),
   );
   print('✅ DI: Dependency injection setup complete!');

@@ -140,6 +140,23 @@ class UserRecommendationsLoaded extends GameState {
   List<Object> get props => [games, userId];
 }
 
+//rated states
+class UserRatedLoading extends GameState {}
+
+class UserRatedLoaded extends GameState {
+  final List<Game> games;
+  final String userId;
+
+  const UserRatedLoaded({
+    required this.games,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [games, userId];
+}
+
+
 // Game Details States
 class GameDetailsLoading extends GameState {}
 
@@ -293,6 +310,40 @@ class HomePageLoaded extends GameState {
   ];
 }
 
+
+class GrovePageLoading extends GameState {}
+
+class GrovePageLoaded extends GameState {
+  final List<Game>? userRated;
+  final List<Game>? userWishlist;
+  final List<Game>? userRecommendations;
+
+  const GrovePageLoaded({
+    this.userRated,
+    this.userWishlist,
+    this.userRecommendations,
+  });
+
+  // copyWith Methode hinzufügen
+  GrovePageLoaded copyWith({
+    List<Game>? userRated,
+    List<Game>? userWishlist,
+    List<Game>? userRecommendations,
+  }) {
+    return GrovePageLoaded(
+      userRated: userRated ?? this.userRated,
+      userWishlist: userWishlist ?? this.userWishlist,
+      userRecommendations: userRecommendations ?? this.userRecommendations,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    userRated,
+    userWishlist,
+    userRecommendations,
+  ];
+}
 
 
 
