@@ -156,6 +156,21 @@ class UserRatedLoaded extends GameState {
   List<Object> get props => [games, userId];
 }
 
+//top three states
+class UserTopThreeLoading extends GameState {}
+
+class UserTopThreeLoaded extends GameState {
+  final List<Game> games;
+  final String userId;
+
+  const UserTopThreeLoaded({
+    required this.games,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [games, userId];
+}
 
 // Game Details States
 class GameDetailsLoading extends GameState {}
@@ -317,11 +332,12 @@ class GrovePageLoaded extends GameState {
   final List<Game>? userRated;
   final List<Game>? userWishlist;
   final List<Game>? userRecommendations;
+  final List<Game>? userTopThreeGames;
 
   const GrovePageLoaded({
     this.userRated,
     this.userWishlist,
-    this.userRecommendations,
+    this.userRecommendations,this.userTopThreeGames,
   });
 
   // copyWith Methode hinzufügen
@@ -329,11 +345,13 @@ class GrovePageLoaded extends GameState {
     List<Game>? userRated,
     List<Game>? userWishlist,
     List<Game>? userRecommendations,
+    List<Game>? userTopThreeGames
   }) {
     return GrovePageLoaded(
       userRated: userRated ?? this.userRated,
       userWishlist: userWishlist ?? this.userWishlist,
       userRecommendations: userRecommendations ?? this.userRecommendations,
+      userTopThreeGames: userTopThreeGames ?? this.userTopThreeGames,
     );
   }
 
@@ -342,6 +360,7 @@ class GrovePageLoaded extends GameState {
     userRated,
     userWishlist,
     userRecommendations,
+    userTopThreeGames
   ];
 }
 

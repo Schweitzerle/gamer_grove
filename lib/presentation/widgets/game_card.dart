@@ -388,10 +388,10 @@ class GameCard extends StatelessWidget {
 }
 
 Color _getRatingColor(double rating) {
-  if (rating >= 9.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
-  if (rating >= 8.0) return const Color(0xFFd98b0b); // Gold
-  if (rating >= 6.0) return const Color(0xFF6a6f75); // Silver
-  if (rating >= 4.0) return const Color(0xFF7c3614); // Bronze
+  if (rating >= 90.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
+  if (rating >= 80.0) return const Color(0xFFd98b0b); // Gold
+  if (rating >= 60.0) return const Color(0xFF6a6f75); // Silver
+  if (rating >= 40.0) return const Color(0xFF7c3614); // Bronze
   return const Color(0xFF51483a); // Ash (dunkelgrau)
 }
 

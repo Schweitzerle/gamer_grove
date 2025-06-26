@@ -123,6 +123,15 @@ class LoadUserRatedEvent extends GameEvent {
   List<Object> get props => [userId];
 }
 
+class LoadUserTopThreeEvent extends GameEvent {
+  final String userId;
+
+  const LoadUserTopThreeEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
 class LoadUserWishlistEvent extends GameEvent {
   final String userId;
 

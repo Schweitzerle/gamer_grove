@@ -43,7 +43,7 @@ class _GrovePageState extends State<GrovePage> {
     }
 
     // Load all data at once
-    _gameBloc.add(LoadHomePageDataEvent(userId: _currentUserId));
+    _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
   }
 
   @override
@@ -156,15 +156,20 @@ class _GrovePageState extends State<GrovePage> {
   }
 
   Widget _buildWishlistContent(GameState state) {
-    if (state is UserWishlistLoading || state is HomePageLoading) {
+    if (state is UserWishlistLoading || state is GrovePageLoading) { // ✅ GrovePageLoading hinzugefügt
       return _buildHorizontalGameListSkeleton();
     } else if (state is UserWishlistLoaded) {
       if (state.games.isEmpty) {
         return _buildEmptySection('Your wishlist is empty');
       }
       return _buildHorizontalGameList(state.games.take(10).toList());
+    } else if (state is GrovePageLoaded && state.userWishlist != null) { // ✅ GrovePageLoaded hinzugefügt
+      if (state.userWishlist!.isEmpty) {
+        return _buildEmptySection('Your wishlist is empty');
+      }
+      return _buildHorizontalGameList(state.userWishlist!.take(10).toList());
     } else if (state is HomePageLoaded && state.userWishlist != null) {
-      // ✅ Neu: Reagiere auch auf HomePageLoaded State
+      // Backup für HomePageLoaded (falls irgendwo noch verwendet)
       if (state.userWishlist!.isEmpty) {
         return _buildEmptySection('Your wishlist is empty');
       }
@@ -178,6 +183,7 @@ class _GrovePageState extends State<GrovePage> {
     }
     return _buildHorizontalGameListSkeleton();
   }
+
 
   Widget _buildRecommendationsSection() {
     return BlocBuilder<GameBloc, GameState>(
@@ -195,15 +201,20 @@ class _GrovePageState extends State<GrovePage> {
   }
 
   Widget _buildRecommendationsContent(GameState state) {
-    if (state is UserRecommendationsLoading || state is HomePageLoading) {
+    if (state is UserRecommendationsLoading || state is GrovePageLoading) { // ✅ GrovePageLoading hinzugefügt
       return _buildHorizontalGameListSkeleton();
     } else if (state is UserRecommendationsLoaded) {
       if (state.games.isEmpty) {
         return _buildEmptySection('No recommendations yet');
       }
       return _buildHorizontalGameList(state.games.take(10).toList());
+    } else if (state is GrovePageLoaded && state.userRecommendations != null) { // ✅ GrovePageLoaded hinzugefügt
+      if (state.userRecommendations!.isEmpty) {
+        return _buildEmptySection('No recommendations yet');
+      }
+      return _buildHorizontalGameList(state.userRecommendations!.take(10).toList());
     } else if (state is HomePageLoaded && state.userRecommendations != null) {
-      // ✅ Neu: Reagiere auch auf HomePageLoaded State
+      // Backup für HomePageLoaded (falls irgendwo noch verwendet)
       if (state.userRecommendations!.isEmpty) {
         return _buildEmptySection('No recommendations yet');
       }
@@ -217,6 +228,7 @@ class _GrovePageState extends State<GrovePage> {
     }
     return _buildHorizontalGameListSkeleton();
   }
+
 
   Widget _buildGameSection({
     required String title,

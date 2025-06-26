@@ -76,6 +76,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<LoadUserRatedEvent>(_onLoadUserRated);
 
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
+    on<LoadGrovePageDataEvent>(_onLoadGrovePageData);
   }
 
   // Debounce transformer for search
@@ -715,6 +716,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
 
+
   Future<void> _onLoadGrovePageData(
       LoadGrovePageDataEvent event,
       Emitter<GameState> emit,
@@ -722,46 +724,49 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GrovePageLoading());
 
     try {
-      // Load all data in parallel
+      if (event.userId == null) {
+        // Wenn kein User eingeloggt ist, leere Listen zurückgeben
+        emit(const GrovePageLoaded(
+          userRated: <Game>[],
+          userWishlist: <Game>[],
+          userRecommendations: <Game>[],
+        ));
+        return;
+      }
+
+      // Alle Daten parallel laden
       final results = await Future.wait([
-        if (event.userId != null) ...[
-          getUserRated(GetUserRatedParams(userId: event.userId!)),
-          getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
-          getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
-        ],
+        getUserRated(GetUserRatedParams(userId: event.userId!)),
+        getUserWishlist(GetUserWishlistParams(userId: event.userId!)),
+        getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!)),
       ]);
 
-      // Extract results
+      // ✅ KORREKTE Result-Extraktion (keine conditional spreads!)
       final userRated = results[0].fold((l) => <Game>[], (r) => r);
-      final userWishlist = event.userId != null && results.length > 2
-          ? results[1].fold((l) => <Game>[], (r) => r)
+      final userWishlist = results[1].fold((l) => <Game>[], (r) => r);
+      final userRecommendations = results[2].fold((l) => <Game>[], (r) => r);
+
+      // Games mit User Data anreichern
+      final enrichedRated = userRated.isNotEmpty
+          ? await _enrichGamesWithUserData(userRated, event.userId!)
           : <Game>[];
-      final userRecommendations = event.userId != null && results.length > 3
-          ? results[2].fold((l) => <Game>[], (r) => r)
+      final enrichedWishlist = userWishlist.isNotEmpty
+          ? await _enrichGamesWithUserData(userWishlist, event.userId!)
+          : <Game>[];
+      final enrichedRecommendations = userRecommendations.isNotEmpty
+          ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
           : <Game>[];
 
-      // 🔥 WICHTIG: Alle Games mit User Data anreichern
-      if (event.userId != null) {
-        final enrichedRated = userRated.isNotEmpty
-            ? await _enrichGamesWithUserData(userRated, event.userId!)
-            : <Game>[];
-        final enrichedWishlist = userWishlist.isNotEmpty
-            ? await _enrichGamesWithUserData(userWishlist, event.userId!)
-            : <Game>[];
-        final enrichedRecommendations = userRecommendations.isNotEmpty
-            ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
-            : <Game>[];
+      // ✅ State emittieren (das fehlte!)
+      emit(GrovePageLoaded(
+        userRated: enrichedRated,
+        userWishlist: enrichedWishlist,
+        userRecommendations: enrichedRecommendations,
+      ));
 
-        emit(GrovePageLoaded(
-          userRated: enrichedRated,
-          userWishlist: enrichedWishlist,
-          userRecommendations: enrichedRecommendations,
-        ));
-      } else {
-        emit(GrovePageLoaded());
-      }
     } catch (e) {
-      emit(GameError('Failed to load home page data: $e'));
+      print('❌ Failed to load grove page data: $e');
+      emit(GameError('Failed to load grove page data: $e'));
     }
   }
 
