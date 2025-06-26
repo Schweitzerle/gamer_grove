@@ -159,3 +159,11 @@ class LoadGameWithUserDataEvent extends GameEvent {
   List<Object?> get props => [gameId, userId];
 }
 
+class LoadHomePageDataEvent extends GameEvent {
+  final String? userId;
+
+  const LoadHomePageDataEvent({this.userId});
+
+  @override
+  List<Object?> get props => [userId];
+}

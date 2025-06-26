@@ -102,15 +102,8 @@ class _HomeContentState extends State<HomeContent> {
       _currentUserId = authState.user.id;
     }
 
-    // Load popular and upcoming games
-    _gameBloc.add(const LoadPopularGamesEvent(limit: 10));
-    _gameBloc.add(const LoadUpcomingGamesEvent(limit: 10));
-
-    // Load user-specific data if logged in
-    if (_currentUserId != null) {
-      _gameBloc.add(LoadUserWishlistEvent(_currentUserId!));
-      _gameBloc.add(LoadUserRecommendationsEvent(_currentUserId!));
-    }
+    // Load all data at once
+    _gameBloc.add(LoadHomePageDataEvent(userId: _currentUserId));
   }
 
   @override

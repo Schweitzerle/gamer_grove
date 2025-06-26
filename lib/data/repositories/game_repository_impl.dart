@@ -1,4 +1,6 @@
 // data/repositories/game_repository_impl.dart
+import '../../injection_container.dart';
+import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:dartz/dartz.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
@@ -23,49 +25,13 @@ class GameRepositoryImpl implements GameRepository {
     required this.networkInfo,
   });
 
-  @override
-  Future<Either<Failure, List<Game>>> searchGames({
-    required String query,
-    int limit = 20,
-    int offset = 0,
-  }) async {
-    // Check cache first
-    final cachedResults = await localDataSource.getCachedSearchResults(query);
-    if (cachedResults != null && cachedResults.isNotEmpty) {
-      return Right(_enrichGamesWithUserData(cachedResults));
-    }
-
-    // Check network
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(
-        message: 'No internet connection. Please check your network.',
-      ));
-    }
-
-    try {
-      // Search games from IGDB
-      final games = await igdbDataSource.searchGames(query, limit, offset);
-
-      // Cache the results
-      await localDataSource.cacheSearchResults(query, games);
-
-      // Enrich with user data
-      return Right(_enrichGamesWithUserData(games));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(
-        message: 'An unexpected error occurred while searching games.',
-      ));
-    }
-  }
 
   @override
   Future<Either<Failure, Game>> getGameDetails(int gameId) async {
     // Check cache first
     final cachedGame = await localDataSource.getCachedGameDetails(gameId);
     if (cachedGame != null) {
-      return Right(_enrichGameWithUserData(cachedGame));
+      return Right(await _enrichGameWithUserData(cachedGame));
     }
 
     // Check network
@@ -81,7 +47,7 @@ class GameRepositoryImpl implements GameRepository {
       await localDataSource.cacheGameDetails(gameId, game);
 
       // Enrich with user data
-      return Right(_enrichGameWithUserData(game));
+      return Right(await _enrichGameWithUserData(game));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -98,7 +64,7 @@ class GameRepositoryImpl implements GameRepository {
       // Try to get from cache
       final cachedGames = await localDataSource.getCachedGames();
       if (cachedGames.isNotEmpty) {
-        return Right(_enrichGamesWithUserData(cachedGames));
+        return Right(await _enrichGamesWithUserData(cachedGames));
       }
       return const Left(NetworkFailure());
     }
@@ -111,7 +77,7 @@ class GameRepositoryImpl implements GameRepository {
         await localDataSource.cacheGames(games);
       }
 
-      return Right(_enrichGamesWithUserData(games));
+      return Right(await _enrichGamesWithUserData(games));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -130,7 +96,7 @@ class GameRepositoryImpl implements GameRepository {
 
     try {
       final games = await igdbDataSource.getUpcomingGames(limit, offset);
-      return Right(_enrichGamesWithUserData(games));
+      return Right(await _enrichGamesWithUserData(games));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -150,7 +116,7 @@ class GameRepositoryImpl implements GameRepository {
 
     try {
       final games = await igdbDataSource.getGamesByIds(gameIds);
-      return Right(_enrichGamesWithUserData(games));
+      return Right(await _enrichGamesWithUserData(games));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -284,16 +250,158 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
-  // Helper methods to enrich games with user data
-  List<Game> _enrichGamesWithUserData(List<GameModel> games) {
-    // TODO: Get current user ID and enrich games with user-specific data
-    // For now, just return the games as is
-    return games;
+
+
+// Helper methods to enrich games with user data
+  Future<List<Game>> _enrichGamesWithUserData(List<GameModel> games) async {
+    // Get current user ID from AuthBloc
+    String? currentUserId;
+    try {
+      final authBloc = sl<AuthBloc>();
+      final authState = authBloc.state;
+      if (authState is Authenticated) {
+        currentUserId = authState.user.id;
+      }
+    } catch (e) {
+      // If we can't get the auth bloc, proceed without user data
+      print('Could not get current user for enriching games: $e');
+    }
+
+    if (currentUserId == null || games.isEmpty) {
+      // No user logged in or no games to enrich
+      return games;
+    }
+
+    try {
+      // Get all user data for these games in batch
+      final gameIds = games.map((g) => g.id).toList();
+
+      // Get wishlisted games
+      final wishlistedIds = await supabaseDataSource.getUserWishlistIds(currentUserId);
+      final wishlistedSet = wishlistedIds.toSet();
+
+      // Get recommended games
+      final recommendedIds = await supabaseDataSource.getUserRecommendedIds(currentUserId);
+      final recommendedSet = recommendedIds.toSet();
+
+      // Get user ratings
+      final ratings = await supabaseDataSource.getUserRatings(currentUserId);
+
+      // Get top three data
+      final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(currentUserId);
+      final topThreeMap = <int, int>{};
+      for (var entry in topThreeData) {
+        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
+      }
+
+      // Enrich each game with user data
+      return games.map((game) {
+        return game.copyWith(
+          isWishlisted: wishlistedSet.contains(game.id),
+          isRecommended: recommendedSet.contains(game.id),
+          userRating: ratings[game.id],
+          isInTopThree: topThreeMap.containsKey(game.id),
+          topThreePosition: topThreeMap[game.id],
+        );
+      }).toList();
+    } catch (e) {
+      print('Error enriching games with user data: $e');
+      // If there's an error, return games without user data
+      return games;
+    }
   }
 
-  Game _enrichGameWithUserData(GameModel game) {
-    // TODO: Get current user ID and enrich game with user-specific data
-    // For now, just return the game as is
-    return game;
+  Future<Game> _enrichGameWithUserData(GameModel game) async {
+    // Get current user ID from AuthBloc
+    String? currentUserId;
+    try {
+      final authBloc = sl<AuthBloc>();
+      final authState = authBloc.state;
+      if (authState is Authenticated) {
+        currentUserId = authState.user.id;
+      }
+    } catch (e) {
+      print('Could not get current user for enriching game: $e');
+    }
+
+    if (currentUserId == null) {
+      // No user logged in
+      return game;
+    }
+
+    try {
+      // Use the new RPC function to get all user data for this game
+      final userGameData = await supabaseDataSource.getUserGameData(currentUserId, game.id);
+
+      // Get top three position separately
+      final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(currentUserId);
+
+      // Find position for current game
+      int? gamePosition;
+      bool isInTopThree = false;
+
+      for (var entry in topThreeData) {
+        if (entry['game_id'] == game.id) {
+          isInTopThree = true;
+          gamePosition = entry['position'] as int;
+          break;
+        }
+      }
+
+      // Return enriched game
+      return game.copyWith(
+        isWishlisted: userGameData['is_wishlisted'] ?? false,
+        isRecommended: userGameData['is_recommended'] ?? false,
+        userRating: userGameData['rating']?.toDouble(),
+        isInTopThree: isInTopThree,
+        topThreePosition: gamePosition,
+      );
+    } catch (e) {
+      print('Error enriching game with user data: $e');
+      // If there's an error, return game without user data
+      return game;
+    }
   }
+
+// WICHTIG: Alle Methoden die Spiele zurückgeben müssen jetzt async sein.
+// Ändern Sie z.B. searchGames, getPopularGames, etc. zu:
+
+  @override
+  Future<Either<Failure, List<Game>>> searchGames({
+    required String query,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    // Check cache first
+    final cachedResults = await localDataSource.getCachedSearchResults(query);
+    if (cachedResults != null && cachedResults.isNotEmpty) {
+      return Right(await _enrichGamesWithUserData(cachedResults)); // await hinzugefügt
+    }
+
+    // Check network
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(
+        message: 'No internet connection. Please check your network.',
+      ));
+    }
+
+    try {
+      // Search games from IGDB
+      final games = await igdbDataSource.searchGames(query, limit, offset);
+
+      // Cache the results
+      await localDataSource.cacheSearchResults(query, games);
+
+      // Enrich with user data
+      return Right(await _enrichGamesWithUserData(games)); // await hinzugefügt
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+        message: 'An unexpected error occurred while searching games.',
+      ));
+    }
+  }
+
+// Ähnliche Änderungen für getGameDetails, getPopularGames, getUpcomingGames, etc.
 }

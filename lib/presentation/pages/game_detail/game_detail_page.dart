@@ -274,12 +274,18 @@ class _GameDetailPageState extends State<GameDetailPage> {
     );
   }
 
+
   Widget _buildLoadedState(Game game) {
     return CustomScrollView(
       slivers: [
         // App Bar with Cover
         _buildSliverAppBar(game),
-        _buildGameStatusBar(game),
+
+        // WICHTIG: Wrap den Container in SliverToBoxAdapter
+        SliverToBoxAdapter(
+          child: _buildGameStatusBar(game),
+        ),
+
         // Content
         SliverToBoxAdapter(
           child: Padding(
