@@ -437,9 +437,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-// Die anderen Handler bleiben gleich, aber hier nochmal die wichtigen:
-
-  // ✅ Update Toggle Wishlist um Home State zu aktualisieren
   Future<void> _onToggleWishlist(
       ToggleWishlistEvent event,
       Emitter<GameState> emit,
@@ -452,14 +449,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
 
     result.fold(
-          (failure) => emit(GameError(failure.message)),
+          (failure) {
+        if (!emit.isDone) {
+          emit(GameError(failure.message));
+        }
+      },
           (_) {
-        // Update in allen States
-        _updateGameInHomePageState(event.gameId, (game) {
-          return game.copyWith(isWishlisted: !game.isWishlisted);
-        });
+        // ✅ EXPLIZIT GameDetailsLoaded State aktualisieren
+        if (state is GameDetailsLoaded && !emit.isDone) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(isWishlisted: !currentGame.isWishlisted),
+            ));
+          }
+        }
 
-        // Falls aktueller State ein anderer ist, auch dort updaten
+        // Auch andere States updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isWishlisted: !game.isWishlisted);
         });
@@ -467,7 +473,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  // ✅ Update Toggle Recommend um Home State zu aktualisieren
   Future<void> _onToggleRecommend(
       ToggleRecommendEvent event,
       Emitter<GameState> emit,
@@ -480,14 +485,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
 
     result.fold(
-          (failure) => emit(GameError(failure.message)),
+          (failure) {
+        if (!emit.isDone) {
+          emit(GameError(failure.message));
+        }
+      },
           (_) {
-        // Update in allen States
-        _updateGameInHomePageState(event.gameId, (game) {
-          return game.copyWith(isRecommended: !game.isRecommended);
-        });
+        // ✅ EXPLIZIT GameDetailsLoaded State aktualisieren
+        if (state is GameDetailsLoaded && !emit.isDone) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            emit(GameDetailsLoaded(
+              currentGame.copyWith(isRecommended: !currentGame.isRecommended),
+            ));
+          }
+        }
 
-        // Falls aktueller State ein anderer ist, auch dort updaten
+        // Auch andere States updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isRecommended: !game.isRecommended);
         });
@@ -869,19 +883,49 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       GetCompleteGameDetailsEvent event,
       Emitter<GameState> emit,
       ) async {
+    if (emit.isDone) return; // ✅ Safety check
+
     emit(GameDetailsLoading());
 
-    final result = await getCompleteGameDetails(
-      GetCompleteGameDetailsParams(
-        gameId: event.gameId,
-        userId: event.userId,
-      ),
-    );
+    try {
+      // ✅ Game ohne User-Daten laden (Repository sollte userId = null setzen)
+      final result = await getCompleteGameDetails(
+        GetCompleteGameDetailsParams(
+          gameId: event.gameId,
+          userId: null, // ✅ Keine User-Daten im Repository
+        ),
+      );
 
-    result.fold(
-          (failure) => emit(GameError(_mapFailureToMessage(failure))),
-          (game) => emit(GameDetailsLoaded(game)),
-    );
+      await result.fold(
+            (failure) async {
+          if (!emit.isDone) {
+            emit(GameError(_mapFailureToMessage(failure)));
+          }
+        },
+            (game) async {
+          // ✅ User-Daten im BLoC hinzufügen (wie bei Home/Grove)
+          if (event.userId != null && !emit.isDone) {
+            try {
+              final enrichedGames = await _enrichGamesWithUserData([game], event.userId!);
+              if (!emit.isDone) {
+                emit(GameDetailsLoaded(enrichedGames.first));
+              }
+            } catch (e) {
+              print('❌ Failed to enrich game with user data: $e');
+              if (!emit.isDone) {
+                emit(GameDetailsLoaded(game)); // ✅ Fallback ohne User-Daten
+              }
+            }
+          } else if (!emit.isDone) {
+            emit(GameDetailsLoaded(game));
+          }
+        },
+      );
+    } catch (e) {
+      if (!emit.isDone) {
+        emit(GameError('Failed to load game details: $e'));
+      }
+    }
   }
 
   Future<void> _onGetSimilarGames(
@@ -931,13 +975,32 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     ));
 
     result.fold(
-          (failure) => emit(GameError(_mapFailureToMessage(failure))),
+          (failure) {
+        if (!emit.isDone) {
+          emit(GameError(_mapFailureToMessage(failure)));
+        }
+      },
           (_) {
-        // Refresh the game details to show updated top three status
-        add(GetCompleteGameDetailsEvent(
-          gameId: event.gameId,
-          userId: event.userId,
-        ));
+        // ✅ NICHT rekursiv ein neues Event triggern!
+        // Stattdessen aktuellen State updaten
+        if (state is GameDetailsLoaded && !emit.isDone) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            final updatedGame = currentGame.copyWith(
+              isInTopThree: true,
+              topThreePosition: event.position,
+            );
+            emit(GameDetailsLoaded(updatedGame));
+          }
+        }
+
+        // ✅ Auch andere States updaten
+        _updateGameInAllStates(event.gameId, (game) {
+          return game.copyWith(
+            isInTopThree: true,
+            topThreePosition: event.position,
+          );
+        });
       },
     );
   }

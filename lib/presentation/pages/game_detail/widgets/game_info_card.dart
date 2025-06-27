@@ -1,5 +1,5 @@
 // ==================================================
-// GAME DETAIL WIDGETS
+// GAME DETAIL WIDGETS - CLEAN VERSION
 // ==================================================
 
 // lib/presentation/pages/game_detail/widgets/game_info_card.dart
@@ -10,14 +10,10 @@ import '../../../../domain/entities/game.dart';
 
 class GameInfoCard extends StatelessWidget {
   final Game game;
-  final VoidCallback? onRatePressed;
-  final VoidCallback? onAddToTopThreePressed;
 
   const GameInfoCard({
     super.key,
     required this.game,
-    this.onRatePressed,
-    this.onAddToTopThreePressed,
   });
 
   @override
@@ -26,6 +22,7 @@ class GameInfoCard extends StatelessWidget {
       elevation: 8,
       clipBehavior: Clip.antiAlias,
       child: Container(
+        // ✅ Keine feste Höhe mehr - dynamisch basierend auf Inhalt
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -40,182 +37,119 @@ class GameInfoCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppConstants.paddingMedium),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              // Game Title
+              // Game Title - mehr Platz da keine Ratings oben
               Text(
                 game.name,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
+                maxLines: 3, // ✅ Kann jetzt mehr Zeilen haben bei Bedarf
+                overflow: TextOverflow.ellipsis,
               ),
 
-              if (game.releaseDate != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  'Released ${DateFormatter.formatYearOnly(game.releaseDate!)}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                  ),
-                ),
-              ],
+              const SizedBox(height: 12),
 
-              if (game.developers.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  'by ${game.developers.first.company.name}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: AppConstants.paddingMedium),
-
-              // Rating and Stats Row
-              Row(
+              // Game Info Section
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (game.rating != null) ...[
-                    _buildStatChip(
-                      context,
-                      icon: Icons.star,
-                      label: game.rating!.toStringAsFixed(1),
-                      color: Colors.amber,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-
-                  if (game.userRating != null) ...[
-                    _buildStatChip(
-                      context,
-                      icon: Icons.star_border,
-                      label: game.userRating!.toStringAsFixed(1),
-                      color: Colors.blue,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-
-                  if (game.isInTopThree) ...[
-                    _buildStatChip(
-                      context,
-                      icon: Icons.emoji_events,
-                      label: 'Top ${game.topThreePosition}',
-                      color: Colors.yellow,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-
-                  const Spacer(),
-
-                  // Action Buttons
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (onRatePressed != null)
-                        _buildActionButton(
-                          context,
-                          icon: game.userRating != null ? Icons.star : Icons.star_border,
-                          onPressed: onRatePressed!,
-                          color: Colors.blue,
+                  // Release Date
+                  if (game.releaseDate != null)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 14,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryContainer
+                              .withOpacity(0.7),
                         ),
-
-                      const SizedBox(width: 8),
-
-                      if (onAddToTopThreePressed != null)
-                        _buildActionButton(
-                          context,
-                          icon: game.isInTopThree ? Icons.emoji_events : Icons.emoji_events_outlined,
-                          onPressed: onAddToTopThreePressed!,
-                          color: Colors.amber,
+                        const SizedBox(width: 6),
+                        Text(
+                          'Released ${DateFormatter.formatYearOnly(game.releaseDate!)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer
+                                .withOpacity(0.8),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                    ],
-                  ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 6),
+
+                  // Developer
+                  if (game.developers.isNotEmpty)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.business,
+                          size: 14,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryContainer
+                              .withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'by ${game.developers.first.company.name}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withOpacity(0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
 
-              // Genres (max 3)
-              if (game.genres.isNotEmpty) ...[
-                const SizedBox(height: AppConstants.paddingMedium),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: game.genres
-                      .take(3)
-                      .map((genre) => Chip(
-                    label: Text(
-                      genre.name,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.8),
-                  ))
-                      .toList(),
+              const SizedBox(height: 12),
+
+              // Genres Section
+              if (game.genres.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: game.genres
+                        .take(6) // ✅ Kann jetzt mehr Genres zeigen
+                        .map((genre) => Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      child: Chip(
+                        label: Text(
+                          genre.name,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withOpacity(0.8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ))
+                        .toList(),
+                  ),
                 ),
-              ],
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildStatChip(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-      }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton(
-      BuildContext context, {
-        required IconData icon,
-        required VoidCallback onPressed,
-        required Color color,
-      }) {
-    return Material(
-      color: color.withOpacity(0.2),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, color: color, size: 20),
-        ),
-      ),
-    );
-  }
 }
-
-
-
-
-
-
-
-
-

@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/community_info_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/dlc_expansion_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_description_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/similar_games_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -66,9 +70,26 @@ class _GameDetailPageState extends State<GameDetailPage>
   void _setupBloc() {
     _gameBloc = sl<GameBloc>();
     final authState = context.read<AuthBloc>().state;
+
+    print('🔍 DEBUG: AuthState = ${authState.runtimeType}');
+
     if (authState is Authenticated) {
       _currentUserId = authState.user.id;
+      print('✅ DEBUG: User authenticated, ID = $_currentUserId');
+    } else {
+      print('❌ DEBUG: User not authenticated, _currentUserId = null');
     }
+  }
+
+  void _loadGameDetails() {
+    print('🎮 DEBUG: Loading game details...');
+    print('📋 DEBUG: gameId = ${widget.gameId}');
+    print('👤 DEBUG: userId = $_currentUserId');
+
+    _gameBloc.add(GetCompleteGameDetailsEvent(
+      gameId: widget.gameId,
+      userId: _currentUserId,
+    ));
   }
 
   void _initializeMediaTabs(Game game) {
@@ -89,12 +110,6 @@ class _GameDetailPageState extends State<GameDetailPage>
       super.dispose();
   }
 
-  void _loadGameDetails() {
-    _gameBloc.add(GetCompleteGameDetailsEvent(
-      gameId: widget.gameId,
-      userId: _currentUserId,
-    ));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,9 +163,11 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
+
+
   Widget _buildSliverAppBar(Game game) {
     return SliverAppBar(
-      expandedHeight: 450,
+      expandedHeight: 350,
       pinned: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       flexibleSpace: FlexibleSpaceBar(
@@ -169,16 +186,6 @@ class _GameDetailPageState extends State<GameDetailPage>
         )
             : null,
       ),
-      actions: [
-        if (game.isWishlisted != null)
-          IconButton(
-            icon: Icon(
-              game.isWishlisted! ? Icons.bookmark : Icons.bookmark_border,
-              color: game.isWishlisted! ? Colors.amber : Colors.white,
-            ),
-            onPressed: () => _toggleWishlist(game),
-          ),
-      ],
     );
   }
 
@@ -229,11 +236,10 @@ class _GameDetailPageState extends State<GameDetailPage>
       right: 20,
       child: GameInfoCard(
         game: game,
-        onRatePressed: () => _showRatingDialog(game),
-        onAddToTopThreePressed: () => _showTopThreeDialog(game),
       ),
     );
   }
+
 
   Widget _buildGameContent(Game game) {
     return SliverToBoxAdapter(
@@ -243,12 +249,13 @@ class _GameDetailPageState extends State<GameDetailPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppConstants.paddingLarge),
+            // Quick Info Cards
+            _buildCommunityInfoSection(game),
+
+            _buildUserInfoSection(game),
 
             // Game Description with expandable storyline
             if (game.summary != null) _buildEnhancedDescriptionSection(game),
-
-            // Quick Info Cards
-            _buildQuickInfoSection(game),
 
             // Media Gallery with Tabs
             if (game.screenshots.isNotEmpty ||
@@ -282,211 +289,23 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
   Widget _buildEnhancedDescriptionSection(Game game) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Card(
-        elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.description,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'About ${game.name}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.paddingMedium),
-              Text(
-                game.summary!,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.6,
-                ),
-              ),
-              if (game.storyline != null) ...[
-                const SizedBox(height: AppConstants.paddingMedium),
-                Theme(
-                  data: Theme.of(context).copyWith(
-                    dividerColor: Colors.transparent,
-                  ),
-                  child: ExpansionTile(
-                    tilePadding: EdgeInsets.zero,
-                    title: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_stories,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('Read Full Storyline'),
-                      ],
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          game.storyline!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+    return GameDescriptionSection(game: game);
+  }
+
+  Widget _buildCommunityInfoSection(Game game) {
+    return CommunityInfoSection(game: game);
+  }
+
+  Widget _buildUserInfoSection(Game game) {
+    return UserStatesSection(
+      game: game,
+      onRatePressed: () => _showRatingDialog(game),
+      onToggleWishlist: () => _toggleWishlist(game),
+      onToggleRecommend: () => _toggleRecommend(game),
+      onAddToTopThree: () => _showTopThreeDialog(game),
     );
   }
 
-  Widget _buildQuickInfoSection(Game game) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-      child: Row(
-        children: [
-          if (game.rating != null)
-            Expanded(
-              child: _buildInfoCard(
-                icon: Icons.star,
-                label: 'IGDB Rating',
-                value: '${game.rating!.toStringAsFixed(1)}/10',
-                color: Colors.amber,
-              ),
-            ),
-          const SizedBox(width: 8),
-          if (game.releaseDate != null)
-            Expanded(
-              child: _buildInfoCard(
-                icon: Icons.calendar_today,
-                label: 'Release Date',
-                value: DateFormatter.formatShortDate(game.releaseDate!),
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Card(
-      elevation: 0,
-      color: color.withOpacity(0.1),
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEnhancedMediaGallery(Game game) {
-    final List<Tab> tabs = [];
-    final List<Widget> tabViews = [];
-
-    if (game.screenshots.isNotEmpty) {
-      tabs.add(Tab(text: 'Screenshots (${game.screenshots.length})'));
-      tabViews.add(_buildScreenshotsView(game.screenshots));
-    }
-
-    if (game.videos.isNotEmpty) {
-      tabs.add(Tab(text: 'Videos (${game.videos.length})'));
-      tabViews.add(_buildVideosView(game.videos));
-    }
-
-    if (game.artworks.isNotEmpty) {
-      tabs.add(Tab(text: 'Artworks (${game.artworks.length})'));
-      tabViews.add(_buildArtworksView(game.artworks));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Card(
-        elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-        child: Column(
-          children: [
-            TabBar(
-              controller: _mediaTabController,
-              tabs: tabs,
-              labelColor: Theme.of(context).colorScheme.primary,
-              unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
-              indicatorColor: Theme.of(context).colorScheme.primary,
-              indicatorWeight: 3,
-            ),
-            SizedBox(
-              height: 250,
-              child: TabBarView(
-                controller: _mediaTabController,
-                children: tabViews,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildScreenshotsView(List<String> screenshots) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      itemCount: screenshots.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-            child: InkWell(
-              onTap: () => _showFullScreenImage(screenshots[index]),
-              child: CachedImageWidget(
-                imageUrl: ImageUtils.getMediumImageUrl(screenshots[index]),
-                width: 350,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildVideosView(List<GameVideo> videos) {
     return ListView.builder(
@@ -507,29 +326,11 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildArtworksView(List<String> artworks) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      itemCount: artworks.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-            child: InkWell(
-              onTap: () => _showFullScreenImage(artworks[index]),
-              child: CachedImageWidget(
-                imageUrl: ImageUtils.getMediumImageUrl(artworks[index]),
-                width: 350,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  Widget _buildEnhancedMediaGallery(Game game) {
+    return EnhancedMediaGallery(game: game);
   }
+
+
 
   Widget _buildGameDetailsAccordion(Game game) {
     return Padding(
@@ -1147,17 +948,42 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
   void _toggleWishlist(Game game) {
+    if (_currentUserId != null) {
+      _gameBloc.add(
+        ToggleWishlistEvent(
+          gameId: game.id,
+          userId: _currentUserId!,
+        ),
+      );
+    }
+  }
+
+  void _toggleRecommend(Game game) {
+    if (_currentUserId != null) {
+      _gameBloc.add(
+        ToggleRecommendEvent(
+          gameId: game.id,
+          userId: _currentUserId!,
+        ),
+      );
+    }
+  }
+
+  void _showTopThreeDialog(Game game) {
     if (_currentUserId == null) {
       _showLoginRequiredSnackBar();
       return;
     }
 
-    _gameBloc.add(ToggleWishlistEvent(
-      gameId: game.id,
-      userId: _currentUserId!,
-    ));
-
-    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (context) => TopThreeDialog(
+        game: game,
+        onPositionSelected: (position) {
+          _addToTopThree(game.id, position);
+        },
+      ),
+    );
   }
 
   void _showRatingDialog(Game game) {
@@ -1197,22 +1023,6 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  void _showTopThreeDialog(Game game) {
-    if (_currentUserId == null) {
-      _showLoginRequiredSnackBar();
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => TopThreeDialog(
-        game: game,
-        onPositionSelected: (position) {
-          _addToTopThree(game.id, position);
-        },
-      ),
-    );
-  }
 
   void _addToTopThree(int gameId, int position) {
     if (_currentUserId == null) return;

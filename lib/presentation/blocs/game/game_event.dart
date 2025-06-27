@@ -164,19 +164,6 @@ class GetGameDetailsWithUserDataEvent extends GameEvent {
 }
 
 
-class LoadGameWithUserDataEvent extends GameEvent {
-  final int gameId;
-  final String? userId;
-
-  const LoadGameWithUserDataEvent({
-    required this.gameId,
-    this.userId,
-  });
-
-  @override
-  List<Object?> get props => [gameId, userId];
-}
-
 class LoadHomePageDataEvent extends GameEvent {
   final String? userId;
 
@@ -227,6 +214,19 @@ class GetCompleteGameDetailsEvent extends GameEvent {
   final String? userId;
 
   const GetCompleteGameDetailsEvent({
+    required this.gameId,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, userId];
+}
+
+class LoadGameWithUserDataEvent extends GameEvent {
+  final int gameId;
+  final String? userId;
+
+  const LoadGameWithUserDataEvent({
     required this.gameId,
     this.userId,
   });

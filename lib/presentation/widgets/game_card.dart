@@ -245,10 +245,10 @@ class GameCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -260,68 +260,10 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserStatesBadges(BuildContext context) {
-    final badges = <Widget>[];
-
-    // Recommended Badge
-    if (game.isRecommended) {
-      badges.add(_buildStateIconBadge(
-        context,
-        icon: Icons.thumb_up,
-        color: Colors.green,
-      ));
-    }
-
-    // Wishlist Badge
-    if (game.isWishlisted) {
-      badges.add(_buildStateIconBadge(
-        context,
-        icon: Icons.favorite,
-        color: Colors.red,
-      ));
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: badges
-          .map((badge) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: badge,
-              ))
-          .toList(),
-    );
-  }
-
-  Widget _buildStateIconBadge(
-    BuildContext context, {
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.9),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Icon(
-        icon,
-        size: 14,
-        color: Colors.white,
-      ),
-    );
-  }
 
   Widget _buildTopThreeCrown(BuildContext context) {
     final position = game.topThreePosition ?? 1;
-    final crownColor = _getTopThreeColor(position);
+    final crownColor = ColorScales.getTopThreeColor(position);
 
     return Center(
       child: Container(
@@ -342,7 +284,7 @@ class GameCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              _getTopThreeIcon(position),
+              Icons.emoji_events,
               color: crownColor.onColor,
               size: 16,
             ),
@@ -361,31 +303,8 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Color _getTopThreeColor(int position) {
-    switch (position) {
-      case 1:
-        return const Color(0xFFFFD700); // Gold
-      case 2:
-        return const Color(0xFFC0C0C0); // Silver
-      case 3:
-        return const Color(0xFFCD7F32); // Bronze
-      default:
-        return Colors.amber;
-    }
-  }
 
-  IconData _getTopThreeIcon(int position) {
-    switch (position) {
-      case 1:
-        return Icons.emoji_events; // Trophy
-      case 2:
-        return Icons.emoji_events; // Trophy
-      case 3:
-        return Icons.emoji_events; // Trophy
-      default:
-        return Icons.emoji_events;
-    }
-  }
+
 }
 
 
