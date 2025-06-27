@@ -14,8 +14,32 @@ class WebsiteModel extends Website {
       id: json['id'] ?? 0,
       url: json['url'] ?? '',
       category: _parseCategory(json['category']),
-      title: json['title'],
+      title: _generateTitle(json['category']), // Generate title from category
     );
+  }
+
+  static String? _generateTitle(dynamic category) {
+    if (category is int) {
+      switch (category) {
+        case 1: return 'Official Website';
+        case 2: return 'Wikia';
+        case 3: return 'Wikipedia';
+        case 4: return 'Facebook';
+        case 5: return 'Twitter';
+        case 6: return 'Twitch';
+        case 8: return 'Instagram';
+        case 9: return 'YouTube';
+        case 13: return 'Steam';
+        case 14: return 'Reddit';
+        case 15: return 'itch.io';
+        case 16: return 'Epic Games';
+        case 17: return 'GOG';
+        case 18: return 'Discord';
+        case 19: return 'Bluesky';
+        default: return 'Website';
+      }
+    }
+    return 'Website';
   }
 
   static WebsiteCategory _parseCategory(dynamic category) {

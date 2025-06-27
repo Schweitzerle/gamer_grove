@@ -99,7 +99,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GetSimilarGamesEvent>(_onGetSimilarGames);
     on<GetGameDLCsEvent>(_onGetGameDLCs);
     on<GetGameExpansionsEvent>(_onGetGameExpansions);
-    on<AddToTopThreeEvent>(_onAddToTopThree);
   }
 
   // Debounce transformer for search

@@ -20,39 +20,59 @@ import '../../models/website_model.dart';
 abstract class IGDBRemoteDataSource {
   // EXISTING METHODS
   Future<List<GameModel>> searchGames(String query, int limit, int offset);
+
   Future<GameModel> getGameDetails(int gameId);
+
   Future<List<GameModel>> getPopularGames(int limit, int offset);
+
   Future<List<GameModel>> getUpcomingGames(int limit, int offset);
+
   Future<List<GameModel>> getGamesByIds(List<int> gameIds);
 
   // NEW METHODS FOR EXTENDED API
   Future<List<CompanyModel>> getCompanies({List<int>? ids, String? search});
+
   Future<List<WebsiteModel>> getWebsites(List<int> gameIds);
+
   Future<List<GameVideoModel>> getGameVideos(List<int> gameIds);
+
   Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds);
-  Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search});
+
+  Future<List<GameEngineModel>> getGameEngines(
+      {List<int>? ids, String? search});
+
   Future<List<KeywordModel>> getKeywords({List<int>? ids, String? search});
+
   Future<List<MultiplayerModeModel>> getMultiplayerModes(List<int> gameIds);
+
   Future<List<PlayerPerspectiveModel>> getPlayerPerspectives({List<int>? ids});
+
   Future<List<FranchiseModel>> getFranchises({List<int>? ids, String? search});
-  Future<List<CollectionModel>> getCollections({List<int>? ids, String? search});
+
+  Future<List<CollectionModel>> getCollections(
+      {List<int>? ids, String? search});
+
   Future<List<ExternalGameModel>> getExternalGames(List<int> gameIds);
+
   Future<List<LanguageSupportModel>> getLanguageSupports(List<int> gameIds);
+
   Future<List<String>> getAlternativeNames(List<int> gameIds);
+
   Future<List<GameModel>> getSimilarGames(int gameId);
+
   Future<List<GameModel>> getGameDLCs(int gameId);
+
   Future<List<GameModel>> getGameExpansions(int gameId);
 
   // COMPREHENSIVE GAME DETAILS
   Future<GameModel> getCompleteGameDetails(int gameId);
 }
 
-
 class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   final http.Client client;
   String? _accessToken;
   DateTime? _tokenExpiry;
-  
+
   IGDBRemoteDataSourceImpl({required this.client});
 
   Future<Map<String, String>> get _headers async {
@@ -99,7 +119,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         print('✅ IGDB: Token refreshed successfully');
         print('📅 IGDB: Token expires at: $_tokenExpiry');
       } else {
-        print('❌ IGDB: Token refresh failed with status ${response.statusCode}');
+        print(
+            '❌ IGDB: Token refresh failed with status ${response.statusCode}');
         throw ServerException(
           message: 'Failed to refresh token: ${response.body}',
           statusCode: response.statusCode,
@@ -112,7 +133,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<GameModel>> searchGames(String query, int limit, int offset) async {
+  Future<List<GameModel>> searchGames(
+      String query, int limit, int offset) async {
     try {
       print('🔍 IGDB: Searching games with query: "$query"');
 
@@ -230,17 +252,19 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<GameModel>> _makeRequest(String endpoint, String body) async {
     try {
       final headers = await _headers;
-      final url = '${ApiConstants.igdbBaseUrl}$endpoint';
+      final url = '${ApiConstants.igdbBaseUrl}/$endpoint';
 
       print('📡 IGDB: Making request to $url');
       print('📋 IGDB: Headers: $headers');
       print('📝 IGDB: Body: ${body.trim()}');
 
-      final response = await client.post(
+      final response = await client
+          .post(
         Uri.parse(url),
         headers: headers,
         body: body.trim(),
-      ).timeout(
+      )
+          .timeout(
         ApiConstants.connectionTimeout,
         onTimeout: () {
           throw ServerException(message: 'Request timeout');
@@ -260,15 +284,19 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
           final List<dynamic> jsonList = json.decode(response.body);
           print('✅ IGDB: Successfully parsed ${jsonList.length} games');
 
-          final games = jsonList.map((json) {
-            try {
-              return GameModel.fromJson(json);
-            } catch (e) {
-              print('⚠️ IGDB: Failed to parse game: $e');
-              print('🔍 IGDB: Problematic JSON: $json');
-              return null;
-            }
-          }).where((game) => game != null).cast<GameModel>().toList();
+          final games = jsonList
+              .map((json) {
+                try {
+                  return GameModel.fromJson(json);
+                } catch (e) {
+                  print('⚠️ IGDB: Failed to parse game: $e');
+                  print('🔍 IGDB: Problematic JSON: $json');
+                  return null;
+                }
+              })
+              .where((game) => game != null)
+              .cast<GameModel>()
+              .toList();
 
           print('🎮 IGDB: Successfully converted ${games.length} games');
           return games;
@@ -311,32 +339,33 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       print('🎮 IGDB: Getting COMPLETE game details for ID: $gameId');
 
       final body = '''
-        where id = $gameId;
-        fields id, name, summary, storyline, total_rating, total_rating_count,
-               cover.url, screenshots.url, artworks.url, first_release_date, status,
-               genres.name, platforms.name, platforms.abbreviation,
-               game_modes.name, themes.name, follows, hypes,
-               involved_companies.company.name, involved_companies.company.logo.url,
-               involved_companies.developer, involved_companies.publisher,
-               involved_companies.porting, involved_companies.supporting,
-               websites.url, websites.category, websites.title,
-               videos.video_id, videos.name, videos.description,
-               age_ratings.category, age_ratings.rating, age_ratings.synopsis,
-               game_engines.name, game_engines.logo.url, game_engines.url,
-               keywords.name, keywords.slug,
-               multiplayer_modes.*, player_perspectives.name,
-               franchises.name, franchises.slug, franchises.url,
-               collections.name, collections.slug, collections.url,
-               similar_games.name, similar_games.cover.url, similar_games.total_rating,
-               dlcs.name, dlcs.cover.url, dlcs.first_release_date,
-               expansions.name, expansions.cover.url, expansions.first_release_date,
-               external_games.uid, external_games.url, external_games.category,
-               language_supports.language, language_supports.language_support_type,
-               alternative_names.name, alternative_names.comment,
-               release_dates.date, release_dates.platform.name, release_dates.region,
-               version_title, category, parent_game.name, parent_game.cover.url;
-        limit 1;
-      ''';
+  where id = $gameId;
+  fields id, name, summary, storyline, total_rating, total_rating_count,
+         cover.url, screenshots.url, artworks.url, first_release_date, status,
+         genres.name, platforms.name, platforms.abbreviation,
+         game_modes.name, themes.name, follows, hypes,
+         involved_companies.company.name, involved_companies.company.logo.url,
+         involved_companies.developer, involved_companies.publisher,
+         involved_companies.porting, involved_companies.supporting,
+         websites.url, websites.category, websites.trusted,
+         videos.video_id, videos.name,
+         age_ratings.category, age_ratings.rating, age_ratings.synopsis,
+         game_engines.name, game_engines.logo.url, game_engines.url,
+         keywords.name, keywords.slug,
+         multiplayer_modes.*,
+         player_perspectives.name, player_perspectives.slug,
+         franchises.name, franchises.slug, franchises.url,
+         collections.name, collections.slug, collections.url,
+         similar_games.name, similar_games.cover.url, similar_games.total_rating,
+         dlcs.name, dlcs.cover.url, dlcs.first_release_date,
+         expansions.name, expansions.cover.url, expansions.first_release_date,
+         external_games.uid, external_games.url, external_games.category,
+         language_supports.language, language_supports.language_support_type,
+         alternative_names.name, alternative_names.comment,
+         release_dates.date, release_dates.platform.name, release_dates.region,
+         version_title, category, parent_game.name, parent_game.cover.url;
+  limit 1;
+''';
 
       final games = await _makeRequest(IGDBEndpoints.games, body);
       if (games.isEmpty) {
@@ -350,7 +379,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CompanyModel>> getCompanies({List<int>? ids, String? search}) async {
+  Future<List<CompanyModel>> getCompanies(
+      {List<int>? ids, String? search}) async {
     try {
       String body;
       if (ids != null && ids.isNotEmpty) {
@@ -456,7 +486,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       if (mainGames.isEmpty) return [];
 
       // Extract similar game IDs and fetch their details
-      final similarIds = _extractSimilarGameIds(mainGames.first as Map<String, dynamic>);
+      final similarIds =
+          _extractSimilarGameIds(mainGames.first as Map<String, dynamic>);
       if (similarIds.isEmpty) return [];
 
       return getGamesByIds(similarIds);
@@ -510,7 +541,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         limit 200;
       ''';
 
-      final response = await _makeRequestRaw(IGDBEndpoints.alternativeNames, body);
+      final response =
+          await _makeRequestRaw(IGDBEndpoints.alternativeNames, body);
       final List<dynamic> data = json.decode(response.body);
       return data
           .where((item) => item['name'] != null)
@@ -569,37 +601,43 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   // Add implementations for other missing methods...
   @override
-  Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search}) async {
+  Future<List<GameEngineModel>> getGameEngines(
+      {List<int>? ids, String? search}) async {
     // Implementation similar to getCompanies
     throw UnimplementedError('getGameEngines not yet implemented');
   }
 
   @override
-  Future<List<KeywordModel>> getKeywords({List<int>? ids, String? search}) async {
+  Future<List<KeywordModel>> getKeywords(
+      {List<int>? ids, String? search}) async {
     // Implementation similar to getCompanies
     throw UnimplementedError('getKeywords not yet implemented');
   }
 
   @override
-  Future<List<MultiplayerModeModel>> getMultiplayerModes(List<int> gameIds) async {
+  Future<List<MultiplayerModeModel>> getMultiplayerModes(
+      List<int> gameIds) async {
     // Implementation similar to getWebsites
     throw UnimplementedError('getMultiplayerModes not yet implemented');
   }
 
   @override
-  Future<List<PlayerPerspectiveModel>> getPlayerPerspectives({List<int>? ids}) async {
+  Future<List<PlayerPerspectiveModel>> getPlayerPerspectives(
+      {List<int>? ids}) async {
     // Implementation similar to getCompanies
     throw UnimplementedError('getPlayerPerspectives not yet implemented');
   }
 
   @override
-  Future<List<FranchiseModel>> getFranchises({List<int>? ids, String? search}) async {
+  Future<List<FranchiseModel>> getFranchises(
+      {List<int>? ids, String? search}) async {
     // Implementation similar to getCompanies
     throw UnimplementedError('getFranchises not yet implemented');
   }
 
   @override
-  Future<List<CollectionModel>> getCollections({List<int>? ids, String? search}) async {
+  Future<List<CollectionModel>> getCollections(
+      {List<int>? ids, String? search}) async {
     // Implementation similar to getCompanies
     throw UnimplementedError('getCollections not yet implemented');
   }
@@ -611,7 +649,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<LanguageSupportModel>> getLanguageSupports(List<int> gameIds) async {
+  Future<List<LanguageSupportModel>> getLanguageSupports(
+      List<int> gameIds) async {
     // Implementation similar to getWebsites
     throw UnimplementedError('getLanguageSupports not yet implemented');
   }

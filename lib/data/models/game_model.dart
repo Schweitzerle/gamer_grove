@@ -357,7 +357,6 @@ class GameModel extends Game {
                 id: id,
                 videoId: videoId,
                 title: _parseString(v['name']),
-                description: _parseString(v['description']),
               ));
             }
           }

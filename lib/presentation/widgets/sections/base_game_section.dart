@@ -1,6 +1,8 @@
 // lib/presentation/widgets/base_game_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game.dart';
 import '../../blocs/game/game_bloc.dart';
@@ -129,11 +131,7 @@ abstract class BaseGameSection extends StatelessWidget {
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
               game: game,
-              onTap: () => Navigator.pushNamed(
-                context,
-                '/game-detail',
-                arguments: game.id,
-              ),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context)
             ),
           );
         },
