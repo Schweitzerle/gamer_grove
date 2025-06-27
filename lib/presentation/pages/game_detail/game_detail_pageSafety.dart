@@ -1,15 +1,30 @@
 // lib/presentation/pages/game_detail/game_detail_page.dart
-/*import 'package:flutter/material.dart';
+// ==================================================
+// KOMPLETT NEUE GAME DETAIL PAGE MIT VOLLSTÄNDIGER API INTEGRATION
+// ==================================================
+
+// lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
+/*
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/dlc_expansion_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/media_gallery.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/similar_games_section.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
+import '../../../domain/entities/external_game.dart';
 import '../../../domain/entities/game.dart';
+import '../../../domain/entities/website.dart';
+import '../../../domain/entities/age_rating.dart';
+import '../../../domain/entities/game_video.dart';
 import '../../../injection_container.dart';
-import '../../../data/datasources/remote/supabase_remote_datasource.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
@@ -24,34 +39,792 @@ class GameDetailPage extends StatefulWidget {
   State<GameDetailPage> createState() => _GameDetailPageState();
 }
 
-class _GameDetailPageState extends State<GameDetailPage> {
+class _GameDetailPageState extends State<GameDetailPage>
+    with TickerProviderStateMixin {
   String? _currentUserId;
   late GameBloc _gameBloc;
+  late ScrollController _scrollController;
+  late AnimationController _fabAnimationController;
+  late AnimationController _headerAnimationController;
+  bool _showTitle = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+    _setupBloc();
+    _loadGameDetails();
+  }
 
-    // Create a new GameBloc instance for this page
+  void _initializeControllers() {
+    _scrollController = ScrollController();
+    _fabAnimationController = AnimationController(
+      duration: AppConstants.mediumAnimation,
+      vsync: this,
+    );
+    _headerAnimationController = AnimationController(
+      duration: AppConstants.mediumAnimation,
+      vsync: this,
+    );
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _setupBloc() {
     _gameBloc = sl<GameBloc>();
-
-    // Get current user
     final authState = context.read<AuthBloc>().state;
     if (authState is Authenticated) {
       _currentUserId = authState.user.id;
     }
+  }
 
-    // Load game details with user data
-    _gameBloc.add(GetGameDetailsWithUserDataEvent(
+  void _loadGameDetails() {
+    _gameBloc.add(GetCompleteGameDetailsEvent(
       gameId: widget.gameId,
       userId: _currentUserId,
     ));
   }
 
+  void _onScroll() {
+    const showTitleOffset = 300.0;
+    final shouldShowTitle = _scrollController.offset > showTitleOffset;
+
+    if (shouldShowTitle != _showTitle) {
+      setState(() {
+        _showTitle = shouldShowTitle;
+      });
+
+      if (shouldShowTitle) {
+        _headerAnimationController.forward();
+      } else {
+        _headerAnimationController.reverse();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _fabAnimationController.dispose();
+    _headerAnimationController.dispose();
     _gameBloc.close();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _gameBloc,
+      child: Scaffold(
+        body: BlocBuilder<GameBloc, GameState>(
+          builder: (context, state) {
+            if (state is GameDetailsLoading) {
+              return _buildLoadingState();
+            } else if (state is GameDetailsLoaded) {
+              return _buildLoadedState(state.game);
+            } else if (state is GameError) {
+              return _buildErrorState(state.message);
+            }
+            return _buildInitialState();
+          },
+        ),
+        floatingActionButton: _buildFloatingActionButtons(),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading complete game details...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Error')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading game',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(message),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadGameDetails,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitialState() {
+    return const Scaffold(
+      body: Center(child: Text('Loading...')),
+    );
+  }
+
+  Widget _buildLoadedState(Game game) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        _buildAnimatedSliverAppBar(game),
+        _buildGameContent(game),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedSliverAppBar(Game game) {
+    return SliverAppBar(
+      expandedHeight: 500,
+      pinned: true,
+      floating: false,
+      snap: false,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      foregroundColor: Colors.white,
+      flexibleSpace: FlexibleSpaceBar(
+        title: AnimatedBuilder(
+          animation: _headerAnimationController,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _headerAnimationController.value,
+              child: Text(
+                game.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Hero Background Image
+            _buildHeroImage(game),
+
+            // Gradient Overlays
+            _buildGradientOverlays(),
+
+            // Floating Game Info Card
+            _buildFloatingGameCard(game),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.share),
+          onPressed: () => _shareGame(game),
+        ),
+        if (_currentUserId != null)
+          IconButton(
+            icon: Icon(
+              game.isWishlisted ? Icons.bookmark : Icons.bookmark_border,
+              color: game.isWishlisted ? Colors.amber : Colors.white,
+            ),
+            onPressed: () => _toggleWishlist(game),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHeroImage(Game game) {
+    return Hero(
+      tag: 'game_cover_${game.id}',
+      child: CachedImageWidget(
+        imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
+        fit: BoxFit.cover,
+        placeholder: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientOverlays() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: [0.0, 0.3, 0.7, 1.0],
+          colors: [
+            Colors.transparent,
+            Colors.black12,
+            Colors.black45,
+            Colors.black87,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingGameCard(Game game) {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: GameInfoCard(
+        game: game,
+        onRatePressed: () => _showRatingDialog(game),
+        onAddToTopThreePressed: () => _showTopThreeDialog(game),
+      ),
+    );
+  }
+
+  Widget _buildGameContent(Game game) {
+    return SliverToBoxAdapter(
+      child: Container(
+        color: Theme.of(context).colorScheme.surface,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppConstants.paddingLarge),
+
+            // Game Description
+            if (game.summary != null) _buildDescriptionSection(game),
+
+            // Age Ratings
+            if (game.ageRatings.isNotEmpty) _buildAgeRatingsSection(game),
+
+            // Companies (Developer, Publisher)
+            if (game.involvedCompanies.isNotEmpty)
+              CompanySection(companies: game.involvedCompanies),
+
+            // Platforms & Release Info
+            if (game.platforms.isNotEmpty) _buildPlatformsSection(game),
+
+            // Genres & Tags
+            _buildGenresAndTagsSection(game),
+
+            // Game Features
+            _buildGameFeaturesSection(game),
+
+            // Media Gallery (Screenshots, Videos, Artwork)
+            if (game.screenshots.isNotEmpty ||
+                game.videos.isNotEmpty ||
+                game.artworks.isNotEmpty)
+              MediaGallery(
+                screenshots: game.screenshots,
+                videos: game.videos,
+                artworks: game.artworks,
+              ),
+
+            // External Links & Stores
+            if (game.websites.isNotEmpty || game.externalGames.isNotEmpty)
+              _buildExternalLinksSection(game),
+
+            // System Requirements (if available)
+            // RequirementsSection(),
+
+            // Similar Games
+            if (game.similarGames.isNotEmpty)
+              SimilarGamesSection(games: game.similarGames),
+
+            // DLCs & Expansions
+            if (game.dlcs.isNotEmpty || game.expansions.isNotEmpty)
+              DLCExpansionSection(
+                dlcs: game.dlcs,
+                expansions: game.expansions,
+              ),
+
+            // Franchise & Collection
+            if (game.franchises.isNotEmpty) _buildFranchiseSection(game),
+
+            // Game Statistics
+            _buildStatisticsSection(game),
+
+            const SizedBox(height: 100), // Space for FAB
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'About ${game.name}',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          Text(
+            game.summary!,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              height: 1.6,
+            ),
+          ),
+          if (game.storyline != null) ...[
+            const SizedBox(height: AppConstants.paddingMedium),
+            ExpansionTile(
+              title: const Text('Full Storyline'),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                  child: Text(
+                    game.storyline!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgeRatingsSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Age Ratings',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: game.ageRatings.map((rating) => _buildAgeRatingChip(rating)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgeRatingChip(AgeRating rating) {
+    Color chipColor;
+    switch (rating.category) {
+      case AgeRatingCategory.esrb:
+        chipColor = Colors.blue;
+        break;
+      case AgeRatingCategory.pegi:
+        chipColor = Colors.green;
+        break;
+      default:
+        chipColor = Colors.grey;
+    }
+
+    return Chip(
+      backgroundColor: chipColor.withOpacity(0.1),
+      side: BorderSide(color: chipColor),
+      label: Text(
+        rating.displayName,
+        style: TextStyle(
+          color: chipColor,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      avatar: Icon(
+        Icons.verified_user,
+        color: chipColor,
+        size: 18,
+      ),
+    );
+  }
+
+  Widget _buildPlatformsSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Available Platforms',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: game.platforms.map((platform) => Chip(
+              label: Text(platform.name),
+              avatar: const Icon(Icons.devices, size: 16),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            )).toList(),
+          ),
+          if (game.releaseDate != null) ...[
+            const SizedBox(height: AppConstants.paddingMedium),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Release Date'),
+              subtitle: Text(DateFormatter.formatFullDate(game.releaseDate!)),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenresAndTagsSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (game.genres.isNotEmpty) ...[
+            Text(
+              'Genres',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: game.genres.map((genre) => Chip(
+                label: Text(genre.name),
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              )).toList(),
+            ),
+            const SizedBox(height: AppConstants.paddingLarge),
+          ],
+
+          if (game.themes.isNotEmpty) ...[
+            Text(
+              'Themes',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: game.themes.map((theme) => Chip(
+                label: Text(theme),
+                backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              )).toList(),
+            ),
+          ],
+
+          if (game.keywords.isNotEmpty) ...[
+            const SizedBox(height: AppConstants.paddingLarge),
+            Text(
+              'Keywords',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingSmall),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: game.keywords.map((keyword) => Chip(
+                label: Text(
+                  keyword.name,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              )).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGameFeaturesSection(Game game) {
+    final features = <String>[];
+
+    if (game.gameModes.isNotEmpty) {
+      features.addAll(game.gameModes.map((mode) => mode.name));
+    }
+
+    if (game.playerPerspectives.isNotEmpty) {
+      features.addAll(game.playerPerspectives.map((perspective) => perspective.name));
+    }
+
+    if (game.hasMultiplayer) {
+      if (game.hasOnlineMultiplayer) features.add('Online Multiplayer');
+      if (game.hasLocalMultiplayer) features.add('Local Multiplayer');
+    }
+
+    if (features.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Game Features',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: features.map((feature) => Chip(
+              label: Text(feature),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              labelStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExternalLinksSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'External Links & Stores',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+
+          // Store Links
+          if (game.externalGames.isNotEmpty) ...[
+            Text(
+              'Buy Game',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingSmall),
+            ...game.externalGames.map((store) => _buildExternalLinkTile(
+              title: store.categoryDisplayName,
+              url: store.url,
+              icon: _getStoreIcon(store.category),
+            )),
+          ],
+
+          // Official & Social Links
+          if (game.websites.isNotEmpty) ...[
+            const SizedBox(height: AppConstants.paddingMedium),
+            Text(
+              'Official Links',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppConstants.paddingSmall),
+            ...game.websites.map((website) => _buildExternalLinkTile(
+              title: website.categoryDisplayName,
+              url: website.url,
+              icon: _getWebsiteIcon(website.category),
+            )),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExternalLinkTile({
+    required String title,
+    required String? url,
+    required IconData icon,
+  }) {
+    if (url == null) return const SizedBox.shrink();
+
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      trailing: const Icon(Icons.open_in_new),
+      onTap: () => _launchUrl(url),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+    );
+  }
+
+  Widget _buildFranchiseSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Part of Franchise',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          ...game.franchises.map((franchise) => Card(
+            child: ListTile(
+              leading: const Icon(Icons.library_books),
+              title: Text(franchise.name),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                // Navigate to franchise page
+              },
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatisticsSection(Game game) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Community Stats',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.paddingMedium),
+          Row(
+            children: [
+              _buildStatCard(
+                title: 'Rating',
+                value: game.rating?.toStringAsFixed(1) ?? 'N/A',
+                subtitle: '${game.ratingCount ?? 0} reviews',
+                icon: Icons.star,
+              ),
+              const SizedBox(width: AppConstants.paddingMedium),
+              _buildStatCard(
+                title: 'Follows',
+                value: _formatNumber(game.follows ?? 0),
+                subtitle: 'followers',
+                icon: Icons.people,
+              ),
+              const SizedBox(width: AppConstants.paddingMedium),
+              _buildStatCard(
+                title: 'Hype',
+                value: _formatNumber(game.hypes ?? 0),
+                subtitle: 'hype points',
+                icon: Icons.trending_up,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingMedium),
+          child: Column(
+            children: [
+              Icon(icon, size: 24),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButtons() {
+    return BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        if (state is! GameDetailsLoaded) return const SizedBox.shrink();
+
+        final game = state.game;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              heroTag: 'rate_fab',
+              onPressed: () => _showRatingDialog(game),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                game.userRating != null ? Icons.star : Icons.star_border,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            FloatingActionButton(
+              heroTag: 'wishlist_fab',
+              onPressed: () => _toggleWishlist(game),
+              backgroundColor: game.isWishlisted
+                  ? Colors.amber
+                  : Theme.of(context).colorScheme.secondary,
+              child: Icon(
+                game.isWishlisted ? Icons.bookmark : Icons.bookmark_border,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // ==========================================
@@ -76,6 +849,23 @@ class _GameDetailPageState extends State<GameDetailPage> {
     );
   }
 
+  void _showTopThreeDialog(Game game) {
+    if (_currentUserId == null) {
+      _showLoginRequiredSnackBar();
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => TopThreeDialog(
+        game: game,
+        onPositionSelected: (position) {
+          _addToTopThree(game.id, position);
+        },
+      ),
+    );
+  }
+
   void _rateGame(int gameId, double rating) {
     if (_currentUserId == null) return;
 
@@ -86,19 +876,30 @@ class _GameDetailPageState extends State<GameDetailPage> {
     ));
 
     HapticFeedback.lightImpact();
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Game rated ${rating.toStringAsFixed(1)}/10'),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'UNDO',
-          textColor: Colors.white,
-          onPressed: () {
-            // TODO: Implement undo rating
-          },
-        ),
+      ),
+    );
+  }
+
+  void _addToTopThree(int gameId, int position) {
+    if (_currentUserId == null) return;
+
+    _gameBloc.add(AddToTopThreeEvent(
+      gameId: gameId,
+      userId: _currentUserId!,
+      position: position,
+    ));
+
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added to Top 3 at position $position'),
+        backgroundColor: Colors.amber,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -115,807 +916,87 @@ class _GameDetailPageState extends State<GameDetailPage> {
     ));
 
     HapticFeedback.lightImpact();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          game.isWishlisted
-              ? 'Removed from wishlist'
-              : 'Added to wishlist',
-        ),
-        backgroundColor: game.isWishlisted ? Colors.orange : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'UNDO',
-          textColor: Colors.white,
-          onPressed: () {
-            // Undo the action
-            _gameBloc.add(ToggleWishlistEvent(
-              gameId: game.id,
-              userId: _currentUserId!,
-            ));
-          },
-        ),
-      ),
-    );
   }
 
-  void _toggleRecommendation(Game game) {
-    if (_currentUserId == null) {
-      _showLoginRequiredSnackBar();
-      return;
-    }
-
-    _gameBloc.add(ToggleRecommendEvent(
-      gameId: game.id,
-      userId: _currentUserId!,
-    ));
-
-    HapticFeedback.lightImpact();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          game.isRecommended
-              ? 'Removed recommendation'
-              : 'Game recommended!',
-        ),
-        backgroundColor: game.isRecommended ? Colors.orange : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'UNDO',
-          textColor: Colors.white,
-          onPressed: () {
-            _gameBloc.add(ToggleRecommendEvent(
-              gameId: game.id,
-              userId: _currentUserId!,
-            ));
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showTopThreeDialog(Game game) {
-    if (_currentUserId == null) {
-      _showLoginRequiredSnackBar();
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => BlocProvider.value(
-        value: _gameBloc,
-        child: TopThreeDialog(
-          game: game,
-          userId: _currentUserId!,
-        ),
-      ),
-    );
+  void _shareGame(Game game) {
+    // Implement game sharing
+    HapticFeedback.selectionClick();
   }
 
   void _showLoginRequiredSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Please log in to use this feature'),
+        content: Text('Please login to use this feature'),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  // ==========================================
-  // BUILD METHODS
-  // ==========================================
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _gameBloc,
-      child: Scaffold(
-        body: BlocBuilder<GameBloc, GameState>(
-          bloc: _gameBloc,
-          builder: (context, state) {
-            if (state is GameDetailsLoading) {
-              return _buildLoadingState();
-            } else if (state is GameDetailsLoaded) {
-              return _buildLoadedState(state.game);
-            } else if (state is GameError) {
-              return _buildErrorState(state.message);
-            }
-            return _buildInitialState();
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 60,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Error loading game',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(message),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              _gameBloc.add(GetGameDetailsWithUserDataEvent(
-                gameId: widget.gameId,
-                userId: _currentUserId,
-              ));
-            },
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInitialState() {
-    return const Center(
-      child: Text('Loading game details...'),
-    );
-  }
-
-
-  Widget _buildLoadedState(Game game) {
-    return CustomScrollView(
-      slivers: [
-        // App Bar with Cover
-        _buildSliverAppBar(game),
-
-        // WICHTIG: Wrap den Container in SliverToBoxAdapter
-        SliverToBoxAdapter(
-          child: _buildGameStatusBar(game),
-        ),
-
-        // Content
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Game Title and Year
-                _buildTitleSection(game),
-                const SizedBox(height: AppConstants.paddingMedium),
-
-                // Action Buttons
-                _buildActionButtons(game),
-                const SizedBox(height: AppConstants.paddingLarge),
-
-                // User Stats (if logged in)
-                if (_currentUserId != null) ...[
-                  _buildUserStats(game),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                ],
-
-                // Quick Info
-                _buildQuickInfo(game),
-                const SizedBox(height: AppConstants.paddingLarge),
-
-                // Description
-                if (game.summary != null) ...[
-                  _buildSection('Summary', game.summary!),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                ],
-
-                // Genres
-                if (game.genres.isNotEmpty) ...[
-                  _buildGenresSection(game),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                ],
-
-                // Platforms
-                if (game.platforms.isNotEmpty) ...[
-                  _buildPlatformsSection(game),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                ],
-
-                // Screenshots
-                if (game.screenshots.isNotEmpty) ...[
-                  _buildScreenshotsSection(game),
-                  const SizedBox(height: AppConstants.paddingLarge),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSliverAppBar(Game game) {
-    return SliverAppBar(
-      expandedHeight: 400,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background Image
-            CachedImageWidget(
-              imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-              fit: BoxFit.cover,
-            ),
-
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.7),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitleSection(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          game.name,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        if (game.releaseDate != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Released ${DateFormatter.formatYearOnly(game.releaseDate!)}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(Game game) {
-    return Row(
-      children: [
-        // Rating Button
-        Expanded(
-          child: _ActionButton(
-            onPressed: () => _showRatingDialog(game),
-            icon: Icons.star,
-            label: game.userRating != null
-                ? 'Rated ${game.userRating!.toStringAsFixed(1)}'
-                : 'Rate',
-            isActive: game.userRating != null,
-            activeColor: Colors.amber,
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        // Wishlist Button
-        Expanded(
-          child: _ActionButton(
-            onPressed: () => _toggleWishlist(game),
-            icon: game.isWishlisted ? Icons.favorite : Icons.favorite_outline,
-            label: game.isWishlisted ? 'Wishlisted' : 'Wishlist',
-            isActive: game.isWishlisted,
-            activeColor: Colors.red,
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        // Recommend Button
-        Expanded(
-          child: _ActionButton(
-            onPressed: () => _toggleRecommendation(game),
-            icon: game.isRecommended ? Icons.thumb_up : Icons.thumb_up_outlined,
-            label: game.isRecommended ? 'Recommended' : 'Recommend',
-            isActive: game.isRecommended,
-            activeColor: Colors.green,
-          ),
-        ),
-        const SizedBox(width: 8),
-
-        // Top 3 Button
-        IconButton.filled(
-          onPressed: () => _showTopThreeDialog(game),
-          icon: const Icon(Icons.emoji_events),
-          tooltip: 'Add to Top 3',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUserStats(Game game) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildStatItem(
-              icon: Icons.star,
-              value: game.userRating?.toStringAsFixed(1) ?? '-',
-              label: 'Your Rating',
-              color: Colors.amber,
-            ),
-            _buildStatItem(
-              icon: Icons.favorite,
-              value: game.isWishlisted ? 'Yes' : 'No',
-              label: 'Wishlisted',
-              color: Colors.red,
-            ),
-            _buildStatItem(
-              icon: Icons.thumb_up,
-              value: game.isRecommended ? 'Yes' : 'No',
-              label: 'Recommended',
-              color: Colors.green,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickInfo(Game game) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          children: [
-            if (game.rating != null)
-              _buildInfoRow(
-                'IGDB Rating',
-                '${game.rating!.toStringAsFixed(1)}/10',
-                Icons.star,
-              ),
-            if (game.releaseDate != null)
-              _buildInfoRow(
-                'Release Date',
-                DateFormatter.formatShortDate(game.releaseDate!),
-                Icons.calendar_today,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, String content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGenresSection(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Genres',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: game.genres
-              .map((genre) => Chip(
-            label: Text(genre.name),
-            backgroundColor:
-            Theme.of(context).colorScheme.primaryContainer,
-          ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlatformsSection(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Platforms',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: game.platforms
-              .map((platform) => Chip(
-            label: Text(platform.name),
-            avatar: const Icon(Icons.devices, size: 16),
-          ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildScreenshotsSection(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Screenshots',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: game.screenshots.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                  child: CachedImageWidget(
-                    imageUrl: ImageUtils.getMediumImageUrl(
-                      game.screenshots[index],
-                    ),
-                    width: 300,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-  Widget _buildTopThreeIndicator(Game game) {
-    final position = game.topThreePosition ?? 1;
-    final medal = _getMedalIcon(position);
-    final color = _getPositionColor(position);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.8), color],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            medal,
-            color: Colors.white,
-            size: 24,
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '#$position',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              Text(
-                'Favorite',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGameStatusBar(Game game) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          if (game.isInTopThree ?? false)
-            _buildTopThreeIndicator(game),
-          if (game.userRating != null)
-            _buildRatingIndicator(game.userRating!),
-          if (game.isWishlisted)
-            _buildStatusIndicator(
-              Icons.favorite,
-              'In Wishlist',
-              Colors.red,
-            ),
-          if (game.isRecommended)
-            _buildStatusIndicator(
-              Icons.thumb_up,
-              'Recommended',
-              Colors.green,
-            ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _buildRatingIndicator(double rating) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: _getRatingColor(rating),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: _getRatingColor(rating).withOpacity(0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.star,
-            color: Colors.white,
-            size: 24,
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                rating.toStringAsFixed(1),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                'Your Rating',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusIndicator(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getRatingColor(double rating) {
-    if (rating >= 90.0) return const Color(0xFF5b041d); // Iridescent (orchid/lila)
-    if (rating >= 80.0) return const Color(0xFFd98b0b); // Gold
-    if (rating >= 60.0) return const Color(0xFF6a6f75); // Silver
-    if (rating >= 40.0) return const Color(0xFF7c3614); // Bronze
-    return const Color(0xFF51483a); // Ash (dunkelgrau)
-  }
-
-  IconData _getMedalIcon(int position) {
-    switch (position) {
-      case 1:
-        return Icons.looks_one;
-      case 2:
-        return Icons.looks_two;
-      case 3:
-        return Icons.looks_3;
-      default:
-        return Icons.emoji_events;
+  void _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
-  Color _getPositionColor(int position) {
-    switch (position) {
-      case 1:
-        return Colors.amber;
-      case 2:
-        return Colors.grey[600]!;
-      case 3:
-        return Colors.brown[600]!;
+  // ==========================================
+  // HELPER METHODS
+  // ==========================================
+
+  IconData _getStoreIcon(ExternalGameCategory category) {
+    switch (category) {
+      case ExternalGameCategory.steam:
+        return Icons.store;
+      case ExternalGameCategory.epicGames:
+        return Icons.store;
+      case ExternalGameCategory.gog:
+        return Icons.store;
+      case ExternalGameCategory.playstation:
+        return Icons.gamepad;
+      case ExternalGameCategory.xbox:
+        return Icons.gamepad;
+      case ExternalGameCategory.nintendo:
+        return Icons.gamepad;
       default:
-        return Colors.grey;
+        return Icons.shopping_cart;
     }
   }
-}
 
-// Action Button Widget
-class _ActionButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final Color activeColor;
+  IconData _getWebsiteIcon(WebsiteCategory category) {
+    switch (category) {
+      case WebsiteCategory.official:
+        return Icons.home;
+      case WebsiteCategory.facebook:
+        return Icons.facebook;
+      case WebsiteCategory.twitter:
+        return Icons.alternate_email;
+      case WebsiteCategory.youtube:
+        return Icons.play_circle;
+      case WebsiteCategory.twitch:
+        return Icons.live_tv;
+      case WebsiteCategory.instagram:
+        return Icons.photo_camera;
+      case WebsiteCategory.discord:
+        return Icons.chat;
+      case WebsiteCategory.reddit:
+        return Icons.forum;
+      case WebsiteCategory.wikipedia:
+        return Icons.article;
+      case WebsiteCategory.wikia:
+        return Icons.library_books;
+      default:
+        return Icons.link;
+    }
+  }
 
-  const _ActionButton({
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.activeColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: isActive
-          ? activeColor.withOpacity(0.1)
-          : Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.paddingSmall,
-            vertical: AppConstants.paddingSmall + 4,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isActive
-                    ? activeColor
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isActive
-                        ? activeColor
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}K';
+    }
+    return number.toString();
   }
 }
-
  */
