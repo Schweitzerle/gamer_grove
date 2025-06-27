@@ -41,14 +41,14 @@ class PlatformSection extends StatelessWidget {
         ),
 
         // Release Date
-        if (game.releaseDate != null) ...[
+        if (game.firstReleaseDate != null) ...[
           const SizedBox(height: 16),
           Row(
             children: [
               const Icon(Icons.calendar_today, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Released: ${DateFormatter.formatFullDate(game.releaseDate!)}',
+                'Released: ${DateFormatter.formatFullDate(game.firstReleaseDate!)}',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],

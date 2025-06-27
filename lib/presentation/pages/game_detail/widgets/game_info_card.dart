@@ -56,7 +56,7 @@ class GameInfoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Release Date
-                  if (game.releaseDate != null)
+                  if (game.firstReleaseDate != null)
                     Row(
                       children: [
                         Icon(
@@ -69,7 +69,7 @@ class GameInfoCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Released ${DateFormatter.formatYearOnly(game.releaseDate!)}',
+                          'Released ${DateFormatter.formatYearOnly(game.firstReleaseDate!)}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme

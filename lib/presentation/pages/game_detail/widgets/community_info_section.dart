@@ -101,17 +101,17 @@ class _CommunityInfoSectionState extends State<CommunityInfoSection> {
                         ),
                       ),
 
-                    if (widget.game.rating != null && widget.game.releaseDate != null)
+                    if (widget.game.rating != null && widget.game.firstReleaseDate != null)
                       const SizedBox(width: 8),
 
                     // Release Date
-                    if (widget.game.releaseDate != null)
+                    if (widget.game.firstReleaseDate != null)
                       Expanded(
                         child: _buildInfoCard(
                           context,
                           icon: Icons.calendar_today,
                           label: 'Release Date',
-                          value: DateFormatter.formatShortDate(widget.game.releaseDate!),
+                          value: DateFormatter.formatShortDate(widget.game.firstReleaseDate!),
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
@@ -135,8 +135,8 @@ class _CommunityInfoSectionState extends State<CommunityInfoSection> {
       info.add('⭐${widget.game.rating!.toStringAsFixed(1)}');
     }
 
-    if (widget.game.releaseDate != null) {
-      info.add('📅${DateFormatter.formatYearOnly(widget.game.releaseDate!)}');
+    if (widget.game.firstReleaseDate != null) {
+      info.add('📅${DateFormatter.formatYearOnly(widget.game.firstReleaseDate!)}');
     }
 
     return Text(

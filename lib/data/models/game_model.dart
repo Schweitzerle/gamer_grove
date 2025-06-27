@@ -1,37 +1,42 @@
-// data/models/game_model.dart
-import 'package:gamer_grove/data/models/player_perspective_model.dart';
-
+// lib/data/models/game_model.dart (VOLLSTÄNDIG ERWEITERT)
 import '../../core/utils/date_formatter.dart';
-import '../../domain/entities/age_rating.dart';
-import '../../domain/entities/collection.dart';
-import '../../domain/entities/external_game.dart';
-import '../../domain/entities/franchise.dart';
 import '../../domain/entities/game.dart';
-import '../../domain/entities/game_engine.dart';
-import '../../domain/entities/game_video.dart';
 import '../../domain/entities/genre.dart';
-import '../../domain/entities/involved_company.dart';
-import '../../domain/entities/keyword.dart';
-import '../../domain/entities/language_support.dart';
-import '../../domain/entities/multiplayer_mode.dart';
 import '../../domain/entities/platform.dart';
 import '../../domain/entities/game_mode.dart';
-import 'language_support_model.dart';
-import '../../domain/entities/game.dart';
-import '../../domain/entities/player_perspective.dart';
+import '../../domain/entities/involved_company.dart';
 import '../../domain/entities/website.dart';
-import '../datasources/remote/idgb_remote_datasource.dart';
-import 'collection_model.dart';
-import 'company_model.dart';
-import 'external_game_model.dart';
-import 'franchise_model.dart';
-import 'game_engine_model.dart';
+import '../../domain/entities/game_video.dart';
+import '../../domain/entities/age_rating.dart';
+import '../../domain/entities/game_engine.dart';
+import '../../domain/entities/keyword.dart';
+import '../../domain/entities/multiplayer_mode.dart';
+import '../../domain/entities/player_perspective.dart';
+import '../../domain/entities/franchise.dart';
+import '../../domain/entities/collection.dart';
+import '../../domain/entities/external_game.dart';
+import '../../domain/entities/language_support.dart';
+import '../../domain/entities/release_date.dart';
+import '../../domain/entities/game_localization.dart';
+
+// Imports für Models
+import 'genre_model.dart';
+import 'platform_model.dart';
+import 'game_mode_model.dart';
 import 'involved_company_model.dart';
-import 'keyword_model.dart';
-import 'multiplayer_mode_model.dart';
 import 'website_model.dart';
 import 'game_video_model.dart';
 import 'age_rating_model.dart';
+import 'game_engine_model.dart';
+import 'keyword_model.dart';
+import 'multiplayer_mode_model.dart';
+import 'player_perspective_model.dart';
+import 'franchise_model.dart';
+import 'collection_model.dart';
+import 'external_game_model.dart';
+import 'language_support_model.dart';
+import 'release_date_model.dart';
+import 'game_localization_model.dart';
 
 class GameModel extends Game {
   const GameModel({
@@ -39,10 +44,24 @@ class GameModel extends Game {
     required super.name,
     super.summary,
     super.storyline,
+    super.slug,
+    super.url,
+    super.checksum,
+    super.createdAt,
+    super.updatedAt,
+    super.totalRating,
+    super.totalRatingCount,
     super.rating,
     super.ratingCount,
+    super.aggregatedRating,
+    super.aggregatedRatingCount,
+    super.firstReleaseDate,
+    super.releaseDates,
+    super.gameStatus,
+    super.gameType,
+    super.versionTitle,
+    super.versionParent,
     super.coverUrl,
-    super.releaseDate,
     super.screenshots,
     super.artworks,
     super.videos,
@@ -52,6 +71,7 @@ class GameModel extends Game {
     super.themes,
     super.keywords,
     super.playerPerspectives,
+    super.tags,
     super.involvedCompanies,
     super.gameEngines,
     super.websites,
@@ -59,27 +79,28 @@ class GameModel extends Game {
     super.ageRatings,
     super.multiplayerModes,
     super.languageSupports,
+    super.gameLocalizations,
+    super.mainFranchise,
     super.franchises,
     super.collections,
     super.similarGames,
     super.dlcs,
     super.expansions,
+    super.standaloneExpansions,
+    super.bundles,
+    super.expandedGames,
+    super.forks,
+    super.ports,
+    super.remakes,
+    super.remasters,
+    super.parentGame,
     super.alternativeNames,
-    super.follows,
     super.hypes,
     super.isWishlisted,
     super.isRecommended,
     super.userRating,
     super.isInTopThree,
     super.topThreePosition,
-    super.firstReleaseDate,
-    super.status,
-    super.releaseDates,
-    super.versionTitle,
-    super.isBundle,
-    super.isExpansion,
-    super.isStandalone,
-    super.parentGame,
   });
 
   factory GameModel.fromJson(Map<String, dynamic> json) {
@@ -88,46 +109,87 @@ class GameModel extends Game {
       name: _parseString(json['name']) ?? 'Unknown Game',
       summary: _parseString(json['summary']),
       storyline: _parseString(json['storyline']),
-      rating: _parseDouble(json['total_rating']),
-      ratingCount: _parseInt(json['total_rating_count']),
+      slug: _parseString(json['slug']),
+      url: _parseString(json['url']),
+      checksum: _parseString(json['checksum']),
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+
+      // Bewertungen
+      totalRating: _parseDouble(json['total_rating']),
+      totalRatingCount: _parseInt(json['total_rating_count']),
+      rating: _parseDouble(json['rating']),
+      ratingCount: _parseInt(json['rating_count']),
+      aggregatedRating: _parseDouble(json['aggregated_rating']),
+      aggregatedRatingCount: _parseInt(json['aggregated_rating_count']),
+
+      // Release & Status
+      firstReleaseDate: _parseUnixTimestamp(json['first_release_date']),
+      releaseDates: _extractReleaseDates(json['release_dates']),
+      gameStatus: _parseGameStatus(json['game_status']),
+      gameType: _parseGameType(json['game_type']),
+      versionTitle: _parseString(json['version_title']),
+      versionParent: _extractVersionParent(json['version_parent']),
+
+      // Medien
       coverUrl: _extractCoverUrl(json['cover']),
-      releaseDate: _parseReleaseDate(json['first_release_date']),
       screenshots: _extractScreenshots(json['screenshots']),
       artworks: _extractArtworks(json['artworks']),
       videos: _extractVideos(json['videos']),
+
+      // Kategorisierung
       genres: _extractGenres(json['genres']),
       platforms: _extractPlatforms(json['platforms']),
       gameModes: _extractGameModes(json['game_modes']),
       themes: _extractThemes(json['themes']),
       keywords: _extractKeywords(json['keywords']),
       playerPerspectives: _extractPlayerPerspectives(json['player_perspectives']),
+      tags: _extractTags(json['tags']),
+
+      // Unternehmen
       involvedCompanies: _extractInvolvedCompanies(json['involved_companies']),
       gameEngines: _extractGameEngines(json['game_engines']),
+
+      // Externe Links
       websites: _extractWebsites(json['websites']),
       externalGames: _extractExternalGames(json['external_games']),
+
+      // Bewertungen & Regulierung
       ageRatings: _extractAgeRatings(json['age_ratings']),
+
+      // Features
       multiplayerModes: _extractMultiplayerModes(json['multiplayer_modes']),
       languageSupports: _extractLanguageSupports(json['language_supports']),
+      gameLocalizations: _extractGameLocalizations(json['game_localizations']),
+
+      // Serien & Sammlungen
+      mainFranchise: _extractMainFranchise(json['franchise']),
       franchises: _extractFranchises(json['franchises']),
       collections: _extractCollections(json['collections']),
+
+      // Verwandte Spiele
       similarGames: _extractSimilarGames(json['similar_games']),
       dlcs: _extractDLCs(json['dlcs']),
       expansions: _extractExpansions(json['expansions']),
+      standaloneExpansions: _extractStandaloneExpansions(json['standalone_expansions']),
+      bundles: _extractBundles(json['bundles']),
+      expandedGames: _extractExpandedGames(json['expanded_games']),
+      forks: _extractForks(json['forks']),
+      ports: _extractPorts(json['ports']),
+      remakes: _extractRemakes(json['remakes']),
+      remasters: _extractRemasters(json['remasters']),
+      parentGame: _extractParentGame(json['parent_game']),
+
+      // Alternative Namen
       alternativeNames: _extractAlternativeNames(json['alternative_names']),
-      follows: _parseInt(json['follows']),
+
+      // Community
       hypes: _parseInt(json['hypes']),
-      firstReleaseDate: _parseReleaseDate(json['first_release_date']),
-      status: _parseGameStatus(json['status']),
-      releaseDates: _extractReleaseDates(json['release_dates']),
-      versionTitle: _parseString(json['version_title']),
-      isBundle: _parseCategory(json['category']) == 4,
-      isExpansion: _parseCategory(json['category']) == 2,
-      isStandalone: _parseCategory(json['category']) == 0,
-      parentGame: _parseParentGame(json['parent_game']),
     );
   }
 
-  // Safe parsing helpers
+  // ===== PARSING HELPER METHODS =====
+
   static int _parseId(dynamic value) {
     if (value is int) return value;
     if (value is String) return int.tryParse(value) ?? 0;
@@ -153,663 +215,645 @@ class GameModel extends Game {
     return null;
   }
 
-  static DateTime? _parseReleaseDate(dynamic value) {
-    if (value == null) return null;
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
 
-    try {
-      if (value is int) {
-        // IGDB returns Unix timestamp in SECONDS, not milliseconds
-        // Convert to milliseconds for DateTime.fromMillisecondsSinceEpoch
-        if (value > 0) {
-          return DateTime.fromMillisecondsSinceEpoch(value * 1000);
-        }
-      }
-      if (value is String) {
-        return DateTime.parse(value);
-      }
-    } catch (e) {
-      print('⚠️ GameModel: Failed to parse release date: $e for value: $value');
+  static DateTime? _parseUnixTimestamp(dynamic timestamp) {
+    if (timestamp is int) {
+      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     }
     return null;
   }
+
+  // ===== ENUM PARSING =====
+
+  static GameStatus _parseGameStatus(dynamic status) {
+    if (status is Map && status['id'] is int) {
+      // Wenn es ein Objekt mit ID ist
+      return _mapGameStatusId(status['id']);
+    } else if (status is int) {
+      // Direkter Wert (deprecated)
+      return _mapGameStatusId(status);
+    }
+    return GameStatus.unknown;
+  }
+
+  static GameStatus _mapGameStatusId(int id) {
+    switch (id) {
+      case 0: return GameStatus.released;
+      case 2: return GameStatus.alpha;
+      case 3: return GameStatus.beta;
+      case 4: return GameStatus.earlyAccess;
+      case 5: return GameStatus.offline;
+      case 6: return GameStatus.cancelled;
+      case 7: return GameStatus.rumored;
+      case 8: return GameStatus.delisted;
+      default: return GameStatus.unknown;
+    }
+  }
+
+  static GameType _parseGameType(dynamic type) {
+    if (type is Map && type['id'] is int) {
+      // Wenn es ein Objekt mit ID ist
+      return _mapGameTypeId(type['id']);
+    } else if (type is int) {
+      // Direkter Wert (deprecated category)
+      return _mapGameTypeId(type);
+    }
+    return GameType.unknown;
+  }
+
+  static GameType _mapGameTypeId(int id) {
+    switch (id) {
+      case 0: return GameType.mainGame;
+      case 1: return GameType.dlcAddon;
+      case 2: return GameType.expansion;
+      case 3: return GameType.bundle;
+      case 4: return GameType.standaloneExpansion;
+      case 5: return GameType.mod;
+      case 6: return GameType.episode;
+      case 7: return GameType.season;
+      case 8: return GameType.remake;
+      case 9: return GameType.remaster;
+      case 10: return GameType.expandedGame;
+      case 11: return GameType.port;
+      case 12: return GameType.fork;
+      case 13: return GameType.pack;
+      case 14: return GameType.update;
+      default: return GameType.unknown;
+    }
+  }
+
+  // ===== EXTRACTION METHODS =====
 
   static String? _extractCoverUrl(dynamic cover) {
-    if (cover == null) return null;
-
-    try {
-      String? url;
-      if (cover is Map && cover['url'] != null) {
-        url = cover['url'] as String;
-      } else if (cover is String) {
-        url = cover;
-      }
-
-      if (url != null) {
-        // Ensure URL starts with https:
-        if (url.startsWith('//')) {
-          url = 'https:$url';
-        }
-        // Replace thumbnail with bigger image
-        return url.replaceAll('t_thumb', 't_cover_big');
-      }
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract cover URL: $e');
-    }
-    return null;
-  }
-
-  static List<String> _extractImageUrls(dynamic images) {
-    if (images == null) return [];
-
-    try {
-      final List<String> urls = [];
-      if (images is List) {
-        for (final img in images) {
-          String? url;
-          if (img is Map && img['url'] != null) {
-            url = img['url'] as String;
-          } else if (img is String) {
-            url = img;
-          }
-
-          if (url != null) {
-            if (url.startsWith('//')) {
-              url = 'https:$url';
-            }
-            // Use high resolution for screenshots
-            url = url.replaceAll('t_thumb', 't_1080p');
-            urls.add(url);
-          }
-        }
-      }
-      return urls;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract image URLs: $e');
-      return [];
-    }
-  }
-
-  static List<Genre> _extractGenres(dynamic genres) {
-    if (genres == null) return [];
-
-    try {
-      final List<Genre> genreList = [];
-      if (genres is List) {
-        for (final g in genres) {
-          if (g is Map) {
-            final id = _parseId(g['id']);
-            final name = _parseString(g['name']);
-            final slug = _parseString(g['slug']) ?? name?.toLowerCase().replaceAll(' ', '-') ?? 'unknown';
-
-            if (id > 0 && name != null) {
-              genreList.add(Genre(
-                id: id,
-                name: name,
-                slug: slug,
-              ));
-            }
-          }
-        }
-      }
-      return genreList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract genres: $e');
-      return [];
-    }
-  }
-
-  static List<Platform> _extractPlatforms(dynamic platforms) {
-    if (platforms == null) return [];
-
-    try {
-      final List<Platform> platformList = [];
-      if (platforms is List) {
-        for (final p in platforms) {
-          if (p is Map) {
-            final id = _parseId(p['id']);
-            final name = _parseString(p['name']);
-            final abbreviation = _parseString(p['abbreviation']) ?? name ?? 'Unknown';
-
-            if (id > 0 && name != null) {
-              platformList.add(Platform(
-                id: id,
-                name: name,
-                abbreviation: abbreviation,
-                logoUrl: _parseString(p['platform_logo']?['url']),
-              ));
-            }
-          }
-        }
-      }
-      return platformList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract platforms: $e');
-      return [];
-    }
-  }
-
-  static List<GameMode> _extractGameModes(dynamic gameModes) {
-    if (gameModes == null) return [];
-
-    try {
-      final List<GameMode> gameModeList = [];
-      if (gameModes is List) {
-        for (final gm in gameModes) {
-          if (gm is Map) {
-            final id = _parseId(gm['id']);
-            final name = _parseString(gm['name']);
-            final slug = _parseString(gm['slug']) ?? name?.toLowerCase().replaceAll(' ', '-') ?? 'unknown';
-
-            if (id > 0 && name != null) {
-              gameModeList.add(GameMode(
-                id: id,
-                name: name,
-                slug: slug,
-              ));
-            }
-          }
-        }
-      }
-      return gameModeList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract game modes: $e');
-      return [];
-    }
-  }
-
-  static List<String> _extractThemes(dynamic themes) {
-    if (themes == null) return [];
-
-    try {
-      final List<String> themeList = [];
-      if (themes is List) {
-        for (final t in themes) {
-          String? name;
-          if (t is Map && t['name'] != null) {
-            name = _parseString(t['name']);
-          } else if (t is String) {
-            name = t;
-          }
-
-          if (name != null && name.isNotEmpty) {
-            themeList.add(name);
-          }
-        }
-      }
-      return themeList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract themes: $e');
-      return [];
-    }
-  }
-
-  static List<GameVideo> _extractVideos(dynamic videos) {
-    if (videos == null) return [];
-    try {
-      final List<GameVideo> videoList = [];
-      if (videos is List) {
-        for (final v in videos) {
-          if (v is Map) {
-            final id = _parseId(v['id']);
-            final videoId = _parseString(v['video_id']);
-            if (id > 0 && videoId != null) {
-              videoList.add(GameVideo(
-                id: id,
-                videoId: videoId,
-                title: _parseString(v['name']),
-              ));
-            }
-          }
-        }
-      }
-      return videoList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract videos: $e');
-      return [];
-    }
-  }
-
-  static List<Website> _extractWebsites(dynamic websites) {
-    if (websites == null) return [];
-    try {
-      final List<Website> websiteList = [];
-      if (websites is List) {
-        for (final w in websites) {
-          if (w is Map) {
-            final id = _parseId(w['id']);
-            final url = _parseString(w['url']);
-            if (id > 0 && url != null) {
-              websiteList.add(WebsiteModel.fromJson(w as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return websiteList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract websites: $e');
-      return [];
-    }
-  }
-
-  static List<AgeRating> _extractAgeRatings(dynamic ageRatings) {
-    if (ageRatings == null) return [];
-    try {
-      final List<AgeRating> ratingList = [];
-      if (ageRatings is List) {
-        for (final r in ageRatings) {
-          if (r is Map) {
-            final id = _parseId(r['id']);
-            if (id > 0) {
-              ratingList.add(AgeRatingModel.fromJson(r as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return ratingList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract age ratings: $e');
-      return [];
-    }
-  }
-
-  static List<String> _extractAlternativeNames(dynamic altNames) {
-    if (altNames == null) return [];
-    try {
-      final List<String> nameList = [];
-      if (altNames is List) {
-        for (final name in altNames) {
-          if (name is Map && name['name'] != null) {
-            nameList.add(name['name'].toString());
-          }
-        }
-      }
-      return nameList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract alternative names: $e');
-      return [];
-    }
-  }
-
-  static String? _parseGameStatus(dynamic status) {
-    if (status is int) {
-      switch (status) {
-        case 0: return 'released';
-        case 2: return 'alpha';
-        case 3: return 'beta';
-        case 4: return 'early_access';
-        case 5: return 'offline';
-        case 6: return 'cancelled';
-        case 7: return 'rumoured';
-        case 8: return 'delisted';
-        default: return 'unknown';
+    if (cover is Map) {
+      final url = cover['url'];
+      if (url is String) {
+        return url.startsWith('//') ? 'https:$url' : url;
       }
     }
     return null;
-  }
-
-  static int _parseCategory(dynamic category) {
-    if (category is int) return category;
-    return 0; // Default to main game
-  }
-
-  static Game? _parseParentGame(dynamic parentGame) {
-    if (parentGame is Map) {
-      return GameModel.fromJson(parentGame as Map<String, dynamic>);
-    }
-    return null;
-  }
-
-  static List<Keyword> _extractKeywords(dynamic keywords) {
-    if (keywords == null) return [];
-    try {
-      final List<Keyword> keywordList = [];
-      if (keywords is List) {
-        for (final k in keywords) {
-          if (k is Map) {
-            final id = _parseId(k['id']);
-            final name = _parseString(k['name']);
-            if (id > 0 && name != null) {
-              keywordList.add(KeywordModel.fromJson(k as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return keywordList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract keywords: $e');
-      return [];
-    }
-  }
-
-  static List<PlayerPerspective> _extractPlayerPerspectives(dynamic perspectives) {
-    if (perspectives == null) return [];
-    try {
-      final List<PlayerPerspective> perspectiveList = [];
-      if (perspectives is List) {
-        for (final p in perspectives) {
-          if (p is Map) {
-            final id = _parseId(p['id']);
-            final name = _parseString(p['name']);
-            if (id > 0 && name != null) {
-              perspectiveList.add(PlayerPerspectiveModel.fromJson(p as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return perspectiveList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract player perspectives: $e');
-      return [];
-    }
-  }
-
-  static List<InvolvedCompany> _extractInvolvedCompanies(dynamic companies) {
-    if (companies == null) return [];
-    try {
-      final List<InvolvedCompany> companyList = [];
-      if (companies is List) {
-        for (final c in companies) {
-          if (c is Map) {
-            final id = _parseId(c['id']);
-            if (id > 0) {
-              companyList.add(InvolvedCompanyModel.fromJson(c as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return companyList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract involved companies: $e');
-      return [];
-    }
-  }
-
-  static List<GameEngine> _extractGameEngines(dynamic engines) {
-    if (engines == null) return [];
-    try {
-      final List<GameEngine> engineList = [];
-      if (engines is List) {
-        for (final e in engines) {
-          if (e is Map) {
-            final id = _parseId(e['id']);
-            final name = _parseString(e['name']);
-            if (id > 0 && name != null) {
-              engineList.add(GameEngineModel.fromJson(e as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return engineList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract game engines: $e');
-      return [];
-    }
-  }
-
-  static List<ExternalGame> _extractExternalGames(dynamic external) {
-    if (external == null) return [];
-    try {
-      final List<ExternalGame> externalList = [];
-      if (external is List) {
-        for (final e in external) {
-          if (e is Map) {
-            final id = _parseId(e['id']);
-            final uid = _parseString(e['uid']);
-            if (id > 0 && uid != null) {
-              externalList.add(ExternalGameModel.fromJson(e as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return externalList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract external games: $e');
-      return [];
-    }
-  }
-
-  static List<MultiplayerMode> _extractMultiplayerModes(dynamic multiplayer) {
-    if (multiplayer == null) return [];
-    try {
-      final List<MultiplayerMode> modeList = [];
-      if (multiplayer is List) {
-        for (final m in multiplayer) {
-          if (m is Map) {
-            final id = _parseId(m['id']);
-            if (id > 0) {
-              modeList.add(MultiplayerModeModel.fromJson(m as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return modeList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract multiplayer modes: $e');
-      return [];
-    }
-  }
-
-  static List<LanguageSupport> _extractLanguageSupports(dynamic languages) {
-    if (languages == null) return [];
-    try {
-      final List<LanguageSupport> languageList = [];
-      if (languages is List) {
-        for (final l in languages) {
-          if (l is Map) {
-            final id = _parseId(l['id']);
-            if (id > 0) {
-              languageList.add(LanguageSupportModel.fromJson(l as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return languageList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract language supports: $e');
-      return [];
-    }
-  }
-
-  static List<Franchise> _extractFranchises(dynamic franchises) {
-    if (franchises == null) return [];
-    try {
-      final List<Franchise> franchiseList = [];
-      if (franchises is List) {
-        for (final f in franchises) {
-          if (f is Map) {
-            final id = _parseId(f['id']);
-            final name = _parseString(f['name']);
-            if (id > 0 && name != null) {
-              franchiseList.add(FranchiseModel.fromJson(f as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return franchiseList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract franchises: $e');
-      return [];
-    }
-  }
-
-  static List<Collection> _extractCollections(dynamic collections) {
-    if (collections == null) return [];
-    try {
-      final List<Collection> collectionList = [];
-      if (collections is List) {
-        for (final c in collections) {
-          if (c is Map) {
-            final id = _parseId(c['id']);
-            final name = _parseString(c['name']);
-            if (id > 0 && name != null) {
-              collectionList.add(CollectionModel.fromJson(c as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return collectionList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract collections: $e');
-      return [];
-    }
-  }
-
-  static List<Game> _extractSimilarGames(dynamic similar) {
-    if (similar == null) return [];
-    try {
-      final List<Game> gameList = [];
-      if (similar is List) {
-        for (final s in similar) {
-          if (s is Map) {
-            final id = _parseId(s['id']);
-            final name = _parseString(s['name']);
-            if (id > 0 && name != null) {
-              gameList.add(GameModel.fromJson(s as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return gameList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract similar games: $e');
-      return [];
-    }
-  }
-
-  static List<Game> _extractDLCs(dynamic dlcs) {
-    if (dlcs == null) return [];
-    try {
-      final List<Game> dlcList = [];
-      if (dlcs is List) {
-        for (final d in dlcs) {
-          if (d is Map) {
-            final id = _parseId(d['id']);
-            final name = _parseString(d['name']);
-            if (id > 0 && name != null) {
-              dlcList.add(GameModel.fromJson(d as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return dlcList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract DLCs: $e');
-      return [];
-    }
-  }
-
-  static List<Game> _extractExpansions(dynamic expansions) {
-    if (expansions == null) return [];
-    try {
-      final List<Game> expansionList = [];
-      if (expansions is List) {
-        for (final e in expansions) {
-          if (e is Map) {
-            final id = _parseId(e['id']);
-            final name = _parseString(e['name']);
-            if (id > 0 && name != null) {
-              expansionList.add(GameModel.fromJson(e as Map<String, dynamic>));
-            }
-          }
-        }
-      }
-      return expansionList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract expansions: $e');
-      return [];
-    }
-  }
-
-  static List<String> _extractReleaseDates(dynamic dates) {
-    if (dates == null) return [];
-    try {
-      final List<String> dateList = [];
-      if (dates is List) {
-        for (final d in dates) {
-          if (d is Map && d['date'] != null) {
-            final date = _parseReleaseDate(d['date']);
-            final platform = d['platform']?['name'];
-            if (date != null) {
-              final formatted = platform != null
-                  ? '${DateFormatter.formatShortDate(date)} ($platform)'
-                  : DateFormatter.formatShortDate(date);
-              dateList.add(formatted);
-            }
-          }
-        }
-      }
-      return dateList;
-    } catch (e) {
-      print('⚠️ GameModel: Failed to extract release dates: $e');
-      return [];
-    }
   }
 
   static List<String> _extractScreenshots(dynamic screenshots) {
-    return _extractImageUrls(screenshots);
+    if (screenshots is List) {
+      return screenshots
+          .where((item) => item is Map && item['url'] is String)
+          .map((item) {
+        final url = item['url'] as String;
+        return url.startsWith('//') ? 'https:$url' : url;
+      })
+          .toList();
+    }
+    return [];
   }
 
   static List<String> _extractArtworks(dynamic artworks) {
-    return _extractImageUrls(artworks);
+    if (artworks is List) {
+      return artworks
+          .where((item) => item is Map && item['url'] is String)
+          .map((item) {
+        final url = item['url'] as String;
+        return url.startsWith('//') ? 'https:$url' : url;
+      })
+          .toList();
+    }
+    return [];
   }
 
+  static List<GameVideo> _extractVideos(dynamic videos) {
+    if (videos is List) {
+      return videos
+          .where((item) => item is Map)
+          .map((item) => GameVideoModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Genre> _extractGenres(dynamic genres) {
+    if (genres is List) {
+      return genres
+          .where((item) => item is Map && item['name'] is String)
+          .map((item) {
+        try {
+          return GenreModel.fromJson(item as Map<String, dynamic>);
+        } catch (e) {
+          print('⚠️ GameModel: Failed to parse genre: $item - Error: $e');
+          return null;
+        }
+      })
+          .where((genre) => genre != null)
+          .cast<Genre>()
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Platform> _extractPlatforms(dynamic platforms) {
+    if (platforms is List) {
+      return platforms
+          .where((item) => item is Map)
+          .map((item) {
+        try {
+          return PlatformModel.fromJson(item as Map<String, dynamic>);
+        } catch (e) {
+          print('⚠️ GameModel: Failed to parse platform: $item - Error: $e');
+          return null;
+        }
+      })
+          .where((platform) => platform != null)
+          .cast<Platform>()
+          .toList();
+    }
+    return [];
+  }
+
+  static List<GameMode> _extractGameModes(dynamic gameModes) {
+    if (gameModes is List) {
+      return gameModes
+          .where((item) => item is Map && item['name'] is String)
+          .map((item) {
+        try {
+          return GameModeModel.fromJson(item as Map<String, dynamic>);
+        } catch (e) {
+          print('⚠️ GameModel: Failed to parse game mode: $item - Error: $e');
+          return null;
+        }
+      })
+          .where((gameMode) => gameMode != null)
+          .cast<GameMode>()
+          .toList();
+    }
+    return [];
+  }
+
+  static List<String> _extractThemes(dynamic themes) {
+    if (themes is List) {
+      return themes
+          .where((item) => item is Map && item['name'] is String)
+          .map((item) => item['name'] as String)
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Keyword> _extractKeywords(dynamic keywords) {
+    if (keywords is List) {
+      return keywords
+          .where((item) => item is Map)
+          .map((item) => KeywordModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<PlayerPerspective> _extractPlayerPerspectives(dynamic perspectives) {
+    if (perspectives is List) {
+      return perspectives
+          .where((item) => item is Map)
+          .map((item) => PlayerPerspectiveModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<int> _extractTags(dynamic tags) {
+    if (tags is List) {
+      return tags
+          .where((item) => item is int)
+          .map((item) => item as int)
+          .toList();
+    }
+    return [];
+  }
+
+  static List<InvolvedCompany> _extractInvolvedCompanies(dynamic companies) {
+    if (companies is List) {
+      return companies
+          .where((item) => item is Map)
+          .map((item) => InvolvedCompanyModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<GameEngine> _extractGameEngines(dynamic engines) {
+    if (engines is List) {
+      return engines
+          .where((item) => item is Map)
+          .map((item) => GameEngineModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Website> _extractWebsites(dynamic websites) {
+    if (websites is List) {
+      return websites
+          .where((item) => item is Map)
+          .map((item) => WebsiteModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<ExternalGame> _extractExternalGames(dynamic external) {
+    if (external is List) {
+      return external
+          .where((item) => item is Map)
+          .map((item) => ExternalGameModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<AgeRating> _extractAgeRatings(dynamic ratings) {
+    if (ratings is List) {
+      return ratings
+          .where((item) => item is Map)
+          .map((item) => AgeRatingModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<MultiplayerMode> _extractMultiplayerModes(dynamic modes) {
+    if (modes is List) {
+      return modes
+          .where((item) => item is Map)
+          .map((item) => MultiplayerModeModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<LanguageSupport> _extractLanguageSupports(dynamic supports) {
+    if (supports is List) {
+      return supports
+          .where((item) => item is Map)
+          .map((item) => LanguageSupportModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<GameLocalization> _extractGameLocalizations(dynamic localizations) {
+    if (localizations is List) {
+      return localizations
+          .where((item) => item is Map)
+          .map((item) => GameLocalizationModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<ReleaseDate> _extractReleaseDates(dynamic dates) {
+    if (dates is List) {
+      return dates
+          .where((item) => item is Map)
+          .map((item) => ReleaseDateModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static Franchise? _extractMainFranchise(dynamic franchise) {
+    if (franchise is Map) {
+      return FranchiseModel.fromJson(franchise as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  static List<Franchise> _extractFranchises(dynamic franchises) {
+    if (franchises is List) {
+      return franchises
+          .where((item) => item is Map)
+          .map((item) => FranchiseModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Collection> _extractCollections(dynamic collections) {
+    if (collections is List) {
+      return collections
+          .where((item) => item is Map)
+          .map((item) => CollectionModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  // Verwandte Spiele Extraction Methods
+  static List<Game> _extractSimilarGames(dynamic games) => _extractGameList(games);
+  static List<Game> _extractDLCs(dynamic games) => _extractGameList(games);
+  static List<Game> _extractExpansions(dynamic games) => _extractGameList(games);
+  static List<Game> _extractStandaloneExpansions(dynamic games) => _extractGameList(games);
+  static List<Game> _extractBundles(dynamic games) => _extractGameList(games);
+  static List<Game> _extractExpandedGames(dynamic games) => _extractGameList(games);
+  static List<Game> _extractForks(dynamic games) => _extractGameList(games);
+  static List<Game> _extractPorts(dynamic games) => _extractGameList(games);
+  static List<Game> _extractRemakes(dynamic games) => _extractGameList(games);
+  static List<Game> _extractRemasters(dynamic games) => _extractGameList(games);
+
+  static List<Game> _extractGameList(dynamic games) {
+    if (games is List) {
+      return games
+          .where((item) => item is Map)
+          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static Game? _extractParentGame(dynamic parent) {
+    if (parent is Map) {
+      return GameModel.fromJson(parent as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  static Game? _extractVersionParent(dynamic parent) {
+    if (parent is Map) {
+      return GameModel.fromJson(parent as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  static List<String> _extractAlternativeNames(dynamic names) {
+    if (names is List) {
+      return names
+          .where((item) => item is Map && item['name'] is String)
+          .map((item) => item['name'] as String)
+          .toList();
+    }
+    return [];
+  }
+
+  // ===== SERIALIZATION =====
+
+  /// Konvertiert das GameModel zu JSON für Caching und API-Responses
   Map<String, dynamic> toJson() {
     return {
+      // Grundlegende Daten
       'id': id,
       'name': name,
       'summary': summary,
       'storyline': storyline,
-      'total_rating': rating,
-      'total_rating_count': ratingCount,
-      'cover_url': coverUrl,
-      'screenshots': screenshots,
-      'artworks': artworks,
-      'first_release_date': releaseDate?.millisecondsSinceEpoch,
-      'genres': genres.map((g) => {
-        'id': g.id,
-        'name': g.name,
-        'slug': g.slug
+      'slug': slug,
+      'url': url,
+      'checksum': checksum,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+
+      // Bewertungen
+      'total_rating': totalRating,
+      'total_rating_count': totalRatingCount,
+      'rating': rating,
+      'rating_count': ratingCount,
+      'aggregated_rating': aggregatedRating,
+      'aggregated_rating_count': aggregatedRatingCount,
+
+      // Release & Status
+      'first_release_date': firstReleaseDate != null
+          ? firstReleaseDate!.millisecondsSinceEpoch ~/ 1000
+          : null,
+      'release_dates': releaseDates.map((rd) => {
+        'id': rd.id,
+        'date': rd.date != null ? rd.date!.millisecondsSinceEpoch ~/ 1000 : null,
+        'platform': rd.platform != null ? {
+          'id': rd.platform!.id,
+          'name': rd.platform!.name,
+          'abbreviation': rd.platform!.abbreviation,
+        } : null,
+        'region': rd.region.index,
+        'human': rd.human,
       }).toList(),
-      'platforms': platforms.map((p) => {
-        'id': p.id,
-        'name': p.name,
-        'abbreviation': p.abbreviation
+      'game_status': gameStatus.index,
+      'game_type': gameType.index,
+      'version_title': versionTitle,
+      'version_parent': versionParent != null ? {
+        'id': versionParent!.id,
+        'name': versionParent!.name,
+        'cover': {'url': versionParent!.coverUrl},
+      } : null,
+
+      // Medien
+      'cover': coverUrl != null ? {'url': coverUrl} : null,
+      'screenshots': screenshots.map((url) => {'url': url}).toList(),
+      'artworks': artworks.map((url) => {'url': url}).toList(),
+      'videos': videos.map((video) => {
+        'id': video.id,
+        'video_id': video.videoId,
+        'name': video.title,
       }).toList(),
-      'game_modes': gameModes.map((gm) => {
-        'id': gm.id,
-        'name': gm.name,
-        'slug': gm.slug
+
+      // Kategorisierung
+      'genres': genres.map((genre) => {
+        'id': genre.id,
+        'name': genre.name,
+        'slug': genre.slug,
       }).toList(),
-      'themes': themes,
-      'follows': follows,
+      'platforms': platforms.map((platform) => {
+        'id': platform.id,
+        'name': platform.name,
+        'abbreviation': platform.abbreviation,
+        'logo': platform.logoUrl != null ? {'url': platform.logoUrl} : null,
+      }).toList(),
+      'game_modes': gameModes.map((mode) => {
+        'id': mode.id,
+        'name': mode.name,
+        'slug': mode.slug,
+      }).toList(),
+      'themes': themes.map((theme) => {'name': theme}).toList(),
+      'keywords': keywords.map((keyword) => {
+        'id': keyword.id,
+        'name': keyword.name,
+        'slug': keyword.slug,
+      }).toList(),
+      'player_perspectives': playerPerspectives.map((pp) => {
+        'id': pp.id,
+        'name': pp.name,
+        'slug': pp.slug,
+      }).toList(),
+      'tags': tags,
+
+      // Unternehmen & Entwicklung
+      'involved_companies': involvedCompanies.map((ic) => {
+        'id': ic.id,
+        'company': {
+          'id': ic.company.id,
+          'name': ic.company.name,
+          'logo': ic.company.logoUrl != null ? {'url': ic.company.logoUrl} : null,
+        },
+        'developer': ic.isDeveloper,
+        'publisher': ic.isPublisher,
+        'porting': ic.isPorting,
+        'supporting': ic.isSupporting,
+      }).toList(),
+      'game_engines': gameEngines.map((engine) => {
+        'id': engine.id,
+        'name': engine.name,
+        'logo': engine.logoUrl != null ? {'url': engine.logoUrl} : null,
+        'description': engine.description,
+      }).toList(),
+
+      // Externe Links & Stores
+      'websites': websites.map((website) => {
+        'id': website.id,
+        'url': website.url,
+        'category': website.category.index,
+        'title': website.title,
+      }).toList(),
+      'external_games': externalGames.map((eg) => {
+        'id': eg.id,
+        'uid': eg.uid,
+        'url': eg.url,
+        'category': eg.category.index,
+        'name': eg.name,
+      }).toList(),
+
+      // Bewertungen & Regulierung
+      'age_ratings': ageRatings.map((rating) => {
+        'id': rating.id,
+        'organization': rating.organization.index,
+        'rating_category': rating.ratingCategory.index,
+        'synopsis': rating.synopsis,
+        'rating_cover_url': rating.ratingCoverUrl,
+        'content_descriptions': rating.contentDescriptions,
+      }).toList(),
+
+      // Features
+      'multiplayer_modes': multiplayerModes.map((mm) => {
+        'id': mm.id,
+        'campaigncoop': mm.campaignCoop,
+        'dropin': mm.dropin,
+        'lancoop': mm.lancoop,
+        'offlinecoop': mm.offlineCoop,
+        'offlinecoopmax': mm.offlineCoopMax,
+        'offlinemax': mm.offlineMax,
+        'onlinecoop': mm.onlineCoop,
+        'onlinecoopmax': mm.onlineCoopMax,
+        'onlinemax': mm.onlineMax,
+        'splitscreen': mm.splitscreen,
+        'splitscreenonline': mm.splitscreenOnline,
+      }).toList(),
+      'language_supports': languageSupports.map((ls) => {
+        'id': ls.id,
+        'language': ls.languageName,
+        'language_support_type': ls.supportType.index,
+      }).toList(),
+      'game_localizations': gameLocalizations.map((gl) => {
+        'id': gl.id,
+        'name': gl.name,
+        'region': gl.region.index,
+      }).toList(),
+
+      // Serien & Sammlungen
+      'franchise': mainFranchise != null ? {
+        'id': mainFranchise!.id,
+        'name': mainFranchise!.name,
+        'slug': mainFranchise!.slug,
+        'url': mainFranchise!.url,
+      } : null,
+      'franchises': franchises.map((franchise) => {
+        'id': franchise.id,
+        'name': franchise.name,
+        'slug': franchise.slug,
+        'url': franchise.url,
+      }).toList(),
+      'collections': collections.map((collection) => {
+        'id': collection.id,
+        'name': collection.name,
+        'slug': collection.slug,
+        'url': collection.url,
+      }).toList(),
+
+      // Verwandte Spiele (simplified für JSON)
+      'similar_games': _serializeGameList(similarGames),
+      'dlcs': _serializeGameList(dlcs),
+      'expansions': _serializeGameList(expansions),
+      'standalone_expansions': _serializeGameList(standaloneExpansions),
+      'bundles': _serializeGameList(bundles),
+      'expanded_games': _serializeGameList(expandedGames),
+      'forks': _serializeGameList(forks),
+      'ports': _serializeGameList(ports),
+      'remakes': _serializeGameList(remakes),
+      'remasters': _serializeGameList(remasters),
+      'parent_game': parentGame != null ? {
+        'id': parentGame!.id,
+        'name': parentGame!.name,
+        'cover': {'url': parentGame!.coverUrl},
+      } : null,
+
+      // Alternative Namen
+      'alternative_names': alternativeNames.map((name) => {'name': name}).toList(),
+
+      // Community & Hype
       'hypes': hypes,
+
+      // User Daten (für Caching)
       'is_wishlisted': isWishlisted,
       'is_recommended': isRecommended,
       'user_rating': userRating,
+      'is_in_top_three': isInTopThree,
+      'top_three_position': topThreePosition,
     };
   }
 
-  // Helper method to create a test/mock game
+  /// Vereinfachte Serialisierung für Game-Listen (vermeidet Zirkularität)
+  static List<Map<String, dynamic>> _serializeGameList(List<Game> games) {
+    return games.map((game) => {
+      'id': game.id,
+      'name': game.name,
+      'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
+      'total_rating': game.bestRating,
+      'first_release_date': game.bestReleaseDate != null
+          ? game.bestReleaseDate!.millisecondsSinceEpoch ~/ 1000
+          : null,
+    }).toList();
+  }
+
+  /// Erstellt ein vollständiges Mock-Game für Tests und Entwicklung
   factory GameModel.mock({
     int id = 1,
-    String name = 'Test Game',
+    String name = 'Mock Game',
+    String? summary,
+    double? totalRating,
+    List<Genre>? genres,
+    List<Platform>? platforms,
   }) {
     return GameModel(
       id: id,
       name: name,
-      summary: 'This is a test game for development purposes.',
-      rating: 85.5,
-      ratingCount: 1500,
-      coverUrl: 'https://via.placeholder.com/264x352.png?text=$name',
-      releaseDate: DateTime.now().subtract(const Duration(days: 365)),
-      genres: const [
-        Genre(id: 1, name: 'Action', slug: 'action'),
-        Genre(id: 2, name: 'Adventure', slug: 'adventure'),
+      summary: summary ?? 'This is a mock game for testing and development purposes.',
+      totalRating: totalRating ?? 85.5,
+      totalRatingCount: 1500,
+      coverUrl: 'https://via.placeholder.com/264x352.png?text=${Uri.encodeComponent(name)}',
+      firstReleaseDate: DateTime.now().subtract(const Duration(days: 365)),
+      gameStatus: GameStatus.released,
+      gameType: GameType.mainGame,
+      genres: genres ?? [
+        const GenreModel(id: 1, name: 'Action', slug: 'action'),
+        const GenreModel(id: 2, name: 'Adventure', slug: 'adventure'),
       ],
-      platforms: const [
-        Platform(id: 1, name: 'PC', abbreviation: 'PC'),
-        Platform(id: 2, name: 'PlayStation 5', abbreviation: 'PS5'),
+      platforms: platforms ?? [
+        const PlatformModel(id: 6, name: 'PC (Microsoft Windows)', abbreviation: 'PC'),
+        const PlatformModel(id: 167, name: 'PlayStation 5', abbreviation: 'PS5'),
       ],
+      gameModes: const [
+        GameModeModel(id: 1, name: 'Single player', slug: 'singleplayer'),
+        GameModeModel(id: 2, name: 'Multiplayer', slug: 'multiplayer'),
+      ],
+      screenshots: [
+        'https://via.placeholder.com/1920x1080.png?text=Screenshot+1',
+        'https://via.placeholder.com/1920x1080.png?text=Screenshot+2',
+      ],
+      hypes: 150,
     );
   }
 }

@@ -26,12 +26,6 @@ class StatisticsSection extends StatelessWidget {
           color: Colors.amber,
         ),
         StatItem(
-          icon: Icons.people,
-          label: 'Popularity',
-          value: game.follows?.toStringAsFixed(0) ?? 'N/A',
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        StatItem(
           icon: Icons.trending_up,
           label: 'Hype',
           value: game.hypes?.toStringAsFixed(0) ?? 'N/A',

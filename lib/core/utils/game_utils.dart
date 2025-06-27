@@ -137,26 +137,11 @@ class GameUtils {
       highlights.add('Highly Rated (${game.rating!.toStringAsFixed(0)}/100)');
     }
 
-    // Add popularity highlight
-    if (game.follows != null && game.follows! > 10000) {
-      highlights.add('Popular (${_formatNumber(game.follows!)} followers)');
-    }
-
     // Add hype highlight
     if (game.hypes != null && game.hypes! > 100) {
       highlights.add('Hyped (${game.hypes} hype points)');
     }
 
-    // Add multiplayer highlight
-    if (game.hasMultiplayer) {
-      if (game.hasOnlineMultiplayer && game.hasLocalMultiplayer) {
-        highlights.add('Online & Local Multiplayer');
-      } else if (game.hasOnlineMultiplayer) {
-        highlights.add('Online Multiplayer');
-      } else if (game.hasLocalMultiplayer) {
-        highlights.add('Local Multiplayer');
-      }
-    }
 
     // Add platform highlights
     if (game.platforms.length >= 5) {

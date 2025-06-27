@@ -76,7 +76,7 @@ class GameCard extends StatelessWidget {
             child: _buildRatingChip(
               context,
               icon: Icons.star_outline,
-              rating: game.rating!,
+              rating: game.totalRating!,
               isUserRating: false,
             ),
           ),
@@ -87,7 +87,7 @@ class GameCard extends StatelessWidget {
             child: _buildRatingChip(
               context,
               icon: Icons.star,
-              rating: game.displayUserRating,
+              rating: game.userRating! * 10 ,
               isUserRating: true,
             ),
           ),
@@ -124,9 +124,9 @@ class GameCard extends StatelessWidget {
             child: Row(
               children: [
                 // Release Date
-                if (game.releaseDate != null) ...[
+                if (game.firstReleaseDate != null) ...[
                   Text(
-                    DateFormatter.formatYearOnly(game.releaseDate!),
+                    DateFormatter.formatYearOnly(game.firstReleaseDate!),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,

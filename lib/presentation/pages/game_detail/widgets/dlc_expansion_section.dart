@@ -81,8 +81,8 @@ class DLCExpansionSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(type),
-            if (content.releaseDate != null)
-              Text(DateFormatter.formatShortDate(content.releaseDate!)),
+            if (content.firstReleaseDate != null)
+              Text(DateFormatter.formatShortDate(content.firstReleaseDate!)),
           ],
         ),
         trailing: content.rating != null

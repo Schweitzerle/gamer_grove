@@ -7,11 +7,11 @@ class MultiplayerMode extends Equatable {
   final bool dropin;
   final bool lancoop;
   final bool offlineCoop;
-  final bool offlineCoopMax;
-  final bool offlineMax;
+  final int offlineCoopMax;
+  final int offlineMax;
   final bool onlineCoop;
-  final bool onlineCoopMax;
-  final bool onlineMax;
+  final int onlineCoopMax;
+  final int onlineMax;
   final bool splitscreen;
   final bool splitscreenOnline;
 
@@ -21,11 +21,11 @@ class MultiplayerMode extends Equatable {
     this.dropin = false,
     this.lancoop = false,
     this.offlineCoop = false,
-    this.offlineCoopMax = false,
-    this.offlineMax = false,
+    this.offlineCoopMax = 0,
+    this.offlineMax = 0,
     this.onlineCoop = false,
-    this.onlineCoopMax = false,
-    this.onlineMax = false,
+    this.onlineCoopMax = 0,
+    this.onlineMax = 0,
     this.splitscreen = false,
     this.splitscreenOnline = false,
   });
