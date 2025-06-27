@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 
 class CommunityInfoSection extends StatefulWidget {
   final Game game;

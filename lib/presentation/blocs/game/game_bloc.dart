@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase_remote_datasource.dart';
-import '../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/game/get_complete_game_details.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';

@@ -1,4 +1,4 @@
-// lib/data/models/collection_model.dart
+// lib/data/models/collection.dart
 import '../../domain/entities/collection.dart';
 
 class CollectionModel extends Collection {

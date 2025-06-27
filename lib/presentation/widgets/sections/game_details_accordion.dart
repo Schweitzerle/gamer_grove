@@ -5,7 +5,7 @@
 // lib/presentation/pages/game_detail/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../pages/game_detail/widgets/company_section.dart';
 import '../accordion_tile.dart';
 import 'external_links_section.dart';

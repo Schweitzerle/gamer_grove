@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
-import '../../domain/entities/game.dart';
+import '../../domain/entities/game/game.dart';
 import '../blocs/game/game_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import 'rating_dialog.dart';

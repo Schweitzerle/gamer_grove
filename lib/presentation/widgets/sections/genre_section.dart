@@ -1,13 +1,13 @@
 // ==================================================
 // GENRE SECTION
 // ==================================================
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 import 'package:flutter/material.dart';
 
 
 // lib/presentation/pages/game_detail/widgets/sections/genre_section.dart
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 
 class GenreSection extends StatelessWidget {
   final Game game;

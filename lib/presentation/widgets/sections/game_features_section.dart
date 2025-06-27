@@ -2,7 +2,7 @@
 // GAME FEATURES SECTION (ERWEITERT FÜR NEUE API)
 // ==================================================
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 
 class GameFeaturesSection extends StatelessWidget {
   final Game game;

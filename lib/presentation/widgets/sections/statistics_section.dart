@@ -4,7 +4,7 @@
 
 // lib/presentation/pages/game_detail/widgets/sections/statistics_section.dart
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 
 class StatisticsSection extends StatelessWidget {
   final Game game;

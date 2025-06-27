@@ -1,7 +1,7 @@
 // ===== RELEASE DATE ENTITY =====
 // lib/domain/entities/release_date.dart
 import 'package:equatable/equatable.dart';
-import 'platform.dart';
+import 'platform/platform.dart';
 
 enum ReleaseRegion {
   europe,

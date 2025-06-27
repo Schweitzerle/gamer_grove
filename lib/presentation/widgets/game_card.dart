@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
-import '../../domain/entities/game.dart';
+import '../../domain/entities/game/game.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';

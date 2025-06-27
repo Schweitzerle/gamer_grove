@@ -8,7 +8,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 import '../../../../domain/entities/game_video.dart';
 import '../../allVideosGrid/all_videos_grid.dart';
 import '../../all_images_grid/all_images_grid.dart';

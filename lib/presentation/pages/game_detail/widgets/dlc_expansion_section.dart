@@ -8,7 +8,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 import '../game_detail_page.dart';
 
 class DLCExpansionSection extends StatelessWidget {

@@ -3,7 +3,7 @@
 // ==================================================
 
 // lib/core/error/error_handler.dart
-import '../../domain/entities/game.dart';
+import '../../domain/entities/game/game.dart';
 import 'failures.dart';
 
 class ErrorHandler {

@@ -2,7 +2,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
-import '../../entities/game.dart';
+import '../../entities/game/game.dart';
 import '../../repositories/game_repository.dart';
 import '../base_usecase.dart';
 class GetUserRated extends UseCase<List<Game>, GetUserRatedParams> {

@@ -1,6 +1,6 @@
 // lib/presentation/widgets/top_three_dialog.dart
 import 'package:flutter/material.dart';
-import '../../domain/entities/game.dart';
+import '../../domain/entities/game/game.dart';
 
 class TopThreeDialog extends StatefulWidget {
   final Game game;

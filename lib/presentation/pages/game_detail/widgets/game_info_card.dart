@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 
 class GameInfoCard extends StatelessWidget {
   final Game game;

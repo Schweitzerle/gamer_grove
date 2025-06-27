@@ -1,8 +1,8 @@
 // ===== RELEASE DATE MODEL =====
 // lib/data/models/release_date_model.dart
 import '../../domain/entities/release_date.dart';
-import '../../domain/entities/platform.dart';
-import 'platform_model.dart';
+import '../../domain/entities/platform/platform.dart';
+import 'platform/platform_model.dart';
 
 class ReleaseDateModel extends ReleaseDate {
   const ReleaseDateModel({

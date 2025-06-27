@@ -4,7 +4,7 @@
 
 // lib/presentation/pages/game_detail/widgets/sections/platform_section.dart
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../../../../core/utils/date_formatter.dart';
 
 class PlatformSection extends StatelessWidget {

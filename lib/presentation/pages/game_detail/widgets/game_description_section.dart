@@ -5,7 +5,7 @@
 // lib/presentation/pages/game_detail/widgets/game_description_section.dart
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 
 class GameDescriptionSection extends StatefulWidget {
   final Game game;

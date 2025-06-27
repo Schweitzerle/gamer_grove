@@ -7,7 +7,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/game.dart';
+import '../../../../domain/entities/game/game.dart';
 
 class UserStatesSection extends StatefulWidget {
   final Game game;

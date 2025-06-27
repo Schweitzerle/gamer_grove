@@ -5,11 +5,11 @@
 // lib/domain/repositories/game_repository.dart (UPDATED)
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
-import '../entities/game.dart';
+import '../entities/game/game.dart';
 import '../entities/company.dart';
+import '../entities/game/game_video.dart';
 import '../entities/website.dart';
-import '../entities/game_video.dart';
-import '../entities/age_rating.dart';
+import '../entities/ageRating/age_rating.dart';
 
 abstract class GameRepository {
   // EXISTING METHODS

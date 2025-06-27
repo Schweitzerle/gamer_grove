@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:gamer_grove/presentation/widgets/gameItems/top_three_game_item.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 
 class TopThreeGameList extends StatelessWidget {
   final List<Game> games;

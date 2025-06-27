@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../custom_shimmer.dart';
 import '../game_card.dart';

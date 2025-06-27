@@ -4,7 +4,7 @@
 
 // lib/presentation/pages/game_detail/widgets/sections/age_ratings_section.dart
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/age_rating.dart';
+import '../../../domain/entities/ageRating/age_rating.dart';
 
 class AgeRatingsSection extends StatelessWidget {
   final List<AgeRating> ageRatings;

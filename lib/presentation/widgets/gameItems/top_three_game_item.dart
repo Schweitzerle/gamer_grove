@@ -5,7 +5,7 @@ import 'package:gamer_grove/core/utils/colorSchemes.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/game.dart';
+import '../../../domain/entities/game/game.dart';
 
 class TopThreeGameItem extends StatelessWidget {
   final Game game;

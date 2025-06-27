@@ -1,5 +1,5 @@
 // data/repositories/game_repository_impl.dart
-import '../../domain/entities/age_rating.dart';
+import '../../domain/entities/ageRating/age_rating.dart';
 import '../../domain/entities/company.dart';
 import '../../domain/entities/game_video.dart';
 import '../../domain/entities/website.dart';
@@ -9,7 +9,7 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
-import '../../domain/entities/game.dart';
+import '../../domain/entities/game/game.dart';
 import '../../domain/repositories/game_repository.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/idgb_remote_datasource.dart';
