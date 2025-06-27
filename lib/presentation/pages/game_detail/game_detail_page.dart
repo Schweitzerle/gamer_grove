@@ -12,6 +12,7 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_car
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/similar_games_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -163,8 +164,6 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-
-
   Widget _buildSliverAppBar(Game game) {
     return SliverAppBar(
       expandedHeight: 350,
@@ -212,20 +211,41 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
   Widget _buildGradientOverlays() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: [0.0, 0.2, 0.7, 1.0],
-          colors: [
-            Colors.transparent,
-            Colors.black12,
-            Colors.black54,
-            Colors.black87,
-          ],
+    return Stack(
+      children: [
+        // Horizontaler Gradient (links-rechts)
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              stops: const [0.0, 0.05, 0.95, 1.0],
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface,
+              ],
+            ),
+          ),
         ),
-      ),
+        // Vertikaler Gradient (oben-unten)
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0.0, 0.05, 0.8, 1.0],
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface.withValues(alpha: .8),
+                Theme.of(context).colorScheme.surface,
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -241,6 +261,7 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
 
+  //Game Content
   Widget _buildGameContent(Game game) {
     return SliverToBoxAdapter(
       child: Container(
@@ -307,425 +328,16 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
 
-  Widget _buildVideosView(List<GameVideo> videos) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      itemCount: videos.length,
-      itemBuilder: (context, index) {
-        final video = videos[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const Icon(Icons.play_circle_filled, size: 40),
-            title: Text(video.title ?? 'Unknown'),
-            subtitle: Text('Tap to watch on YouTube'),
-            onTap: () => _launchUrl('https://youtube.com/watch?v=${video.videoId}'),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildEnhancedMediaGallery(Game game) {
     return EnhancedMediaGallery(game: game);
   }
 
-
-
   Widget _buildGameDetailsAccordion(Game game) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Card(
-        elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-        child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: Column(
-            children: [
-              // Platforms & Release Info
-              if (game.platforms.isNotEmpty)
-                _buildAccordionTile(
-                  title: 'Platforms & Release',
-                  icon: Icons.devices,
-                  child: _buildPlatformsContent(game),
-                ),
-
-              // Genres & Categories
-              if (game.genres.isNotEmpty || game.themes.isNotEmpty)
-                _buildAccordionTile(
-                  title: 'Genres & Categories',
-                  icon: Icons.category,
-                  child: _buildGenresAndCategoriesContent(game),
-                ),
-
-              // Game Features
-              if (_hasGameFeatures(game))
-                _buildAccordionTile(
-                  title: 'Game Features',
-                  icon: Icons.featured_play_list,
-                  child: _buildGameFeaturesContent(game),
-                ),
-
-              // Age Ratings
-              if (game.ageRatings.isNotEmpty)
-                _buildAccordionTile(
-                  title: 'Age Ratings',
-                  icon: Icons.verified_user,
-                  child: _buildAgeRatingsContent(game),
-                ),
-
-              // Companies
-              if (game.involvedCompanies.isNotEmpty)
-                _buildAccordionTile(
-                  title: 'Companies',
-                  icon: Icons.business,
-                  child: CompanySection(companies: game.involvedCompanies),
-                ),
-
-              // Keywords
-              if (game.keywords.isNotEmpty)
-                _buildAccordionTile(
-                  title: 'Keywords',
-                  icon: Icons.label,
-                  child: _buildKeywordsContent(game),
-                ),
-
-              // Game Statistics
-              _buildAccordionTile(
-                title: 'Statistics',
-                icon: Icons.analytics,
-                child: _buildStatisticsContent(game),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return GameDetailsAccordion(game: game);
   }
 
-  Widget _buildAccordionTile({
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    return ExpansionTile(
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: child,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlatformsContent(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 40,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: game.platforms.length,
-            itemBuilder: (context, index) {
-              final platform = game.platforms[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Chip(
-                  avatar: const Icon(Icons.devices, size: 16),
-                  label: Text(platform.name),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                ),
-              );
-            },
-          ),
-        ),
-        if (game.releaseDate != null) ...[
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Released: ${DateFormatter.formatFullDate(game.releaseDate!)}',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildGenresAndCategoriesContent(Game game) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (game.genres.isNotEmpty) ...[
-          Text(
-            'Genres',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: game.genres.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Chip(
-                    label: Text(game.genres[index].name),
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-        if (game.themes.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text(
-            'Themes',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: game.themes.map((category) {
-              return Chip(
-                label: Text(
-                  category,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-              );
-            }).toList(),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildGameFeaturesContent(Game game) {
-    final features = <Widget>[];
-
-    if (game.gameModes.isNotEmpty) {
-      features.add(_buildFeatureSection('Game Modes', game.gameModes.map((m) => m.name).toList()));
-    }
-
-    if (game.playerPerspectives.isNotEmpty) {
-      features.add(_buildFeatureSection('Perspectives', game.playerPerspectives.map((p) => p.name).toList()));
-    }
-
-    if (game.hasMultiplayer) {
-      final multiplayerFeatures = <String>[];
-      if (game.hasOnlineMultiplayer) multiplayerFeatures.add('Online Multiplayer');
-      if (game.hasLocalMultiplayer) multiplayerFeatures.add('Local Multiplayer');
-      features.add(_buildFeatureSection('Multiplayer', multiplayerFeatures));
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: features,
-    );
-  }
-
-  Widget _buildFeatureSection(String title, List<String> items) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: items.map((item) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  item,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontSize: 12,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAgeRatingsContent(Game game) {
-    return SizedBox(
-      height: 60,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: game.ageRatings.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: _buildEnhancedAgeRatingChip(game.ageRatings[index]),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildEnhancedAgeRatingChip(AgeRating rating) {
-    Color chipColor;
-    IconData icon;
-
-    switch (rating.category) {
-      case AgeRatingCategory.esrb:
-        chipColor = Colors.blue;
-        icon = Icons.flag;
-        break;
-      case AgeRatingCategory.pegi:
-        chipColor = Colors.green;
-        icon = Icons.euro;
-        break;
-      default:
-        chipColor = Colors.grey;
-        icon = Icons.public;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.1),
-        border: Border.all(color: chipColor, width: 2),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: chipColor, size: 20),
-          const SizedBox(width: 8),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                rating.displayName,
-                style: TextStyle(
-                  color: chipColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                rating.category.name.toUpperCase(),
-                style: TextStyle(
-                  color: chipColor.withOpacity(0.7),
-                  fontSize: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKeywordsContent(Game game) {
-    return SizedBox(
-      height: 35,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: game.keywords.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: Chip(
-              label: Text(
-                game.keywords[index].name,
-                style: const TextStyle(fontSize: 11),
-              ),
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-              visualDensity: VisualDensity.compact,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatisticsContent(Game game) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildStatItem(
-          icon: Icons.star,
-          label: 'IGDB Rating',
-          value: game.rating?.toStringAsFixed(1) ?? 'N/A',
-          color: Colors.amber,
-        ),
-        _buildStatItem(
-          icon: Icons.people,
-          label: 'Popularity',
-          value: game.follows?.toStringAsFixed(0) ?? 'N/A',
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        _buildStatItem(
-          icon: Icons.trending_up,
-          label: 'Hype',
-          value: game.hypes?.toStringAsFixed(0) ?? 'N/A',
-          color: Colors.red,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
+ 
 
   Widget _buildEnhancedExternalLinksSection(Game game) {
     return Padding(
@@ -826,12 +438,6 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  // Helper methods
-  bool _hasGameFeatures(Game game) {
-    return game.gameModes.isNotEmpty ||
-        game.playerPerspectives.isNotEmpty ||
-        game.hasMultiplayer;
-  }
 
   String _getWebsiteName(WebsiteCategory category) {
     switch (category) {
