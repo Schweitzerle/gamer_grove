@@ -151,6 +151,7 @@ abstract class LocalDataSource {
   Future<void> clearExpiredCache();
   Future<int> getCacheSize();
   Future<Map<String, DateTime>> getCacheInfo();
+  Future<void> clearCachedGameDetails(int gameId);
 }
 
 enum CacheType {
@@ -1137,6 +1138,20 @@ class LocalDataSourceImpl implements LocalDataSource {
       return cacheInfo;
     } catch (e) {
       return {};
+    }
+  }
+
+
+  @override
+  Future<void> clearCachedGameDetails(int gameId) async {
+    try {
+      final key = '${StorageConstants.gameDetailsKey}_$gameId';
+      await _removeKeyWithTimestamp(key);
+
+      final completeKey = '${StorageConstants.completeGameDetailsKey}_$gameId';
+      await _removeKeyWithTimestamp(completeKey);
+    } catch (e) {
+      throw CacheException(message: 'Failed to clear cached game details');
     }
   }
 }

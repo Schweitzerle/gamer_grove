@@ -38,6 +38,9 @@ abstract class SupabaseRemoteDataSource {
   Future<void> updateTopThreeGames(String userId, List<int> gameIds);
   Future<List<Map<String, dynamic>>> getTopThreeGamesWithPosition(String userId);
   Future<List<int>> getTopThreeGames(String userId);
+
+  Future<List<Map<String, dynamic>>> getUserTopThreeGames(String userId);
+  Future<Map<int, Map<String, dynamic>>> getBatchUserGameData(List<int> gameIds, String userId);
 }
 
 class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
@@ -731,6 +734,37 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     } catch (e) {
       print('⚠️ Supabase: Error getting wishlist: $e');
       return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserTopThreeGames(String userId) async {
+    return await getTopThreeGamesWithPosition(userId);
+  }
+
+  @override
+  Future<Map<int, Map<String, dynamic>>> getBatchUserGameData(List<int> gameIds, String userId) async {
+    try {
+      print('🎮 Supabase: Getting batch user game data for ${gameIds.length} games');
+
+      final results = await _supabase
+          .from('user_game_interactions')
+          .select('*')
+          .eq('user_id', userId)
+          .inFilter('game_id', gameIds);
+
+      // Convert to Map with gameId as key
+      final Map<int, Map<String, dynamic>> batchData = {};
+      for (var result in results) {
+        final gameId = result['game_id'] as int;
+        batchData[gameId] = result;
+      }
+
+      print('✅ Supabase: Loaded batch user data for ${batchData.length} games');
+      return batchData;
+    } catch (e) {
+      print('⚠️ Supabase: Error getting batch user game data: $e');
+      return {};
     }
   }
 
