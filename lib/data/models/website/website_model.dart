@@ -1,5 +1,5 @@
 // lib/data/models/website_model.dart
-import '../../domain/entities/website.dart';
+import '../../../domain/entities/website/website.dart';
 
 class WebsiteModel extends Website {
   const WebsiteModel({

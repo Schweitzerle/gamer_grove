@@ -1,8 +1,9 @@
-// lib/data/models/game/game_engine_logo_model.dart
-import '../../../domain/entities/game/game_engine_logo.dart';
+// ===== COMPANY LOGO MODEL =====
+// lib/data/models/company/company_logo_model.dart
+import '../../../../domain/entities/company/company_logo.dart';
 
-class GameEngineLogoModel extends GameEngineLogo {
-  const GameEngineLogoModel({
+class CompanyLogoModel extends CompanyLogo {
+  const CompanyLogoModel({
     required super.id,
     required super.checksum,
     required super.imageId,
@@ -13,8 +14,8 @@ class GameEngineLogoModel extends GameEngineLogo {
     super.url,
   });
 
-  factory GameEngineLogoModel.fromJson(Map<String, dynamic> json) {
-    return GameEngineLogoModel(
+  factory CompanyLogoModel.fromJson(Map<String, dynamic> json) {
+    return CompanyLogoModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       imageId: json['image_id'] ?? '',
@@ -40,7 +41,7 @@ class GameEngineLogoModel extends GameEngineLogo {
   }
 
   // Factory method for easy creation with IGDB image URL
-  factory GameEngineLogoModel.withImageUrl({
+  factory CompanyLogoModel.withImageUrl({
     required int id,
     required String checksum,
     required String imageId,
@@ -50,7 +51,7 @@ class GameEngineLogoModel extends GameEngineLogo {
     bool animated = false,
     String? customUrl,
   }) {
-    return GameEngineLogoModel(
+    return CompanyLogoModel(
       id: id,
       checksum: checksum,
       imageId: imageId,
@@ -62,3 +63,4 @@ class GameEngineLogoModel extends GameEngineLogo {
     );
   }
 }
+

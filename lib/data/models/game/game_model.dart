@@ -1,11 +1,12 @@
 // lib/data/models/game_model.dart (VOLLSTÄNDIG ERWEITERT)
 import '../../../core/utils/date_formatter.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/game/game_type.dart';
 import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../domain/entities/game/game_mode.dart';
 import '../../../domain/entities/involved_company.dart';
-import '../../../domain/entities/website.dart';
+import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/game/game_video.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../domain/entities/game/game_engine.dart';
@@ -16,7 +17,7 @@ import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/collection.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/language_support.dart';
-import '../../../domain/entities/release_date.dart';
+import '../../../domain/entities/releaseDate/release_date.dart';
 import '../../../domain/entities/game/game_localization.dart';
 
 // Imports für Models
@@ -24,7 +25,7 @@ import '../genre_model.dart';
 import '../platform/platform_model.dart';
 import 'game_mode_model.dart';
 import '../involved_company_model.dart';
-import '../website_model.dart';
+import '../website/website_model.dart';
 import 'game_video_model.dart';
 import '../ageRating/age_rating_model.dart';
 import 'game_engine_model.dart';
@@ -35,7 +36,7 @@ import '../franchise_model.dart';
 import '../collection_model.dart';
 import '../externalGame/external_game_model.dart';
 import '../language_support_model.dart';
-import '../release_date_model.dart';
+import '../release_date/release_date_model.dart';
 import 'game_localization_model.dart';
 
 class GameModel extends Game {
@@ -105,6 +106,7 @@ class GameModel extends Game {
 
   factory GameModel.fromJson(Map<String, dynamic> json) {
     return GameModel(
+
       id: _parseId(json['id']),
       name: _parseString(json['name']) ?? 'Unknown Game',
       summary: _parseString(json['summary']),

@@ -1,8 +1,8 @@
 // data/repositories/game_repository_impl.dart
 import '../../domain/entities/ageRating/age_rating.dart';
-import '../../domain/entities/company.dart';
+import '../../domain/entities/company/company.dart';
 import '../../domain/entities/game_video.dart';
-import '../../domain/entities/website.dart';
+import '../../domain/entities/website/website.dart';
 import '../../injection_container.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:dartz/dartz.dart';

@@ -20,7 +20,7 @@ import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website.dart';
+import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../domain/entities/game_video.dart';
 import '../../../domain/usecases/game/toggle_wishlist.dart';

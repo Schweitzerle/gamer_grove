@@ -1,7 +1,7 @@
 // lib/domain/usecases/game/get_game_companies.dart
 import 'package:dartz/dartz.dart';
 import '../../../core/errors/failures.dart';
-import '../../entities/company.dart';
+import '../../entities/company/company.dart';
 import '../../repositories/game_repository.dart';
 import '../base_usecase.dart';
 

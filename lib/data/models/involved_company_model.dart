@@ -1,7 +1,7 @@
 // lib/data/models/involved_company_model.dart
 import '../../domain/entities/involved_company.dart';
-import '../../domain/entities/company.dart';
-import 'company_model.dart';
+import '../../domain/entities/company/company.dart';
+import 'company/company_model.dart';
 
 class InvolvedCompanyModel extends InvolvedCompany {
   const InvolvedCompanyModel({

@@ -4,9 +4,12 @@ import 'package:http/http.dart' as http;
 import '../../../core/constants/api_constants.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../domain/entities/character/character.dart';
+import '../../../domain/entities/company/company_website.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/platform/platform.dart';
+import '../../../domain/entities/popularity/popularity_primitive.dart';
+import '../../../domain/entities/search/search.dart';
 import '../../models/ageRating/age_rating_category_model.dart';
 import '../../models/ageRating/age_rating_model.dart';
 import '../../models/ageRating/age_rating_organization.dart';
@@ -19,84 +22,770 @@ import '../../models/collection/collection_membership_model.dart';
 import '../../models/collection/collection_relation_model.dart';
 import '../../models/collection/collection_type_model.dart';
 import '../../models/collection_model.dart';
-import '../../models/company_model.dart';
+import '../../models/company/company_model.dart';
+import '../../models/company/company_model_logo.dart';
+import '../../models/company/company_status_model.dart';
+import '../../models/company/company_website_model.dart';
+import '../../models/date/date_format_model.dart';
+import '../../models/event/event_logo_model.dart';
+import '../../models/event/event_model.dart';
+import '../../models/event/event_network_model.dart';
+import '../../models/event/network_type_model.dart';
 import '../../models/externalGame/external_game_model.dart';
 import '../../models/externalGame/external_game_source_model.dart';
 import '../../models/franchise_model.dart';
+import '../../models/game/game_engine_logo_model.dart';
 import '../../models/game/game_engine_model.dart';
 import '../../models/game/game_mode_model.dart';
 import '../../models/game/game_model.dart';
-import '../../models/game/game_release_format_entity.dart';
+import '../../models/game/game_release_format_model.dart';
+import '../../models/game/game_status_model.dart';
+import '../../models/game/game_time_to_beat_model.dart';
+import '../../models/game/game_type_model.dart';
+import '../../models/game/game_version_feature_model.dart';
+import '../../models/game/game_version_feature_value_model.dart';
+import '../../models/game/game_version_model.dart';
 import '../../models/game/game_video_model.dart';
 import '../../models/genre_model.dart';
 import '../../models/keyword_model.dart';
+import '../../models/language/language_support_type_model.dart';
+import '../../models/language/lanuage_model.dart';
 import '../../models/language_support_model.dart';
 import '../../models/multiplayer_mode_model.dart';
 import '../../models/platform/paltform_type_model.dart';
 import '../../models/platform/platform_family_model.dart';
 import '../../models/platform/platform_logo_model.dart';
 import '../../models/platform/platform_model.dart';
+import '../../models/platform/platform_version_company_model.dart';
+import '../../models/platform/platform_version_model.dart';
+import '../../models/platform/platform_version_release_date_model.dart';
 import '../../models/player_perspective_model.dart';
+import '../../models/popularity/popularity_primitive_model.dart';
+import '../../models/popularity/popularity_type_model.dart';
+import '../../models/region_model.dart';
+import '../../models/release_date/release_date_model.dart';
+import '../../models/release_date/release_date_region_model.dart';
+import '../../models/release_date/release_date_status_model.dart';
+import '../../models/search/search_model.dart';
 import '../../models/theme_model.dart';
-import '../../models/website_model.dart';
+import '../../models/website/website_model.dart';
+import '../../models/website/website_type_model.dart';
+
+// lib/data/datasources/remote/igdb_remote_datasource.dart - Interface Update
+// Diese Methoden gehören in das IGDBRemoteDataSource abstract interface
 
 abstract class IGDBRemoteDataSource {
-
-  // EXISTING METHODS
+  // EXISTING METHODS...
   Future<List<GameModel>> searchGames(String query, int limit, int offset);
-
   Future<GameModel> getGameDetails(int gameId);
-
   Future<List<GameModel>> getPopularGames(int limit, int offset);
-
   Future<List<GameModel>> getUpcomingGames(int limit, int offset);
-
   Future<List<GameModel>> getGamesByIds(List<int> gameIds);
 
-  // NEW METHODS FOR EXTENDED API
-  Future<List<CompanyModel>> getCompanies({List<int>? ids, String? search});
-
+  // EXISTING API METHODS...
   Future<List<WebsiteModel>> getWebsites(List<int> gameIds);
-
   Future<List<GameVideoModel>> getGameVideos(List<int> gameIds);
-
-  Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds);
-
-  Future<List<GameEngineModel>> getGameEngines(
-      {List<int>? ids, String? search});
-
-  Future<List<KeywordModel>> getKeywords({List<int>? ids, String? search});
-
+  Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search});
   Future<List<MultiplayerModeModel>> getMultiplayerModes(List<int> gameIds);
-
   Future<List<PlayerPerspectiveModel>> getPlayerPerspectives({List<int>? ids});
-
-  Future<List<FranchiseModel>> getFranchises({List<int>? ids, String? search});
-
-  Future<List<CollectionModel>> getCollections(
-      {List<int>? ids, String? search});
-
-  Future<List<ExternalGameModel>> getExternalGames(List<int> gameIds);
-
   Future<List<LanguageSupportModel>> getLanguageSupports(List<int> gameIds);
-
+  // ALTERNATIVE NAMES METHODS
   Future<List<String>> getAlternativeNames(List<int> gameIds);
+  Future<List<AlternativeNameModel>> getAlternativeNamesDetailed(List<int> gameIds);
+  Future<List<GameModel>> searchGamesByAlternativeNames(String query);
 
+  // PLATFORM METHODS
+  Future<List<PlatformModel>> getPlatforms({
+    List<int>? ids,
+    String? search,
+    PlatformCategoryEnum? category,
+    bool includeFamilyInfo = false,
+  });
+  Future<List<PlatformModel>> getPlatformsByCategory(PlatformCategoryEnum category);
+  Future<List<PlatformModel>> getPopularPlatforms();
+  Future<List<PlatformFamilyModel>> getPlatformFamilies({List<int>? ids});
+  Future<List<PlatformTypeModel>> getPlatformTypes({List<int>? ids});
+  Future<List<PlatformLogoModel>> getPlatformLogos(List<int> logoIds);
+  Future<List<Map<String, dynamic>>> getCompletePlatformData({
+    List<int>? platformIds,
+    PlatformCategoryEnum? category,
+  });
+
+  // GENRE METHODS
+  Future<List<GenreModel>> getGenres({
+    List<int>? ids,
+    String? search,
+    int limit = 100,
+  });
+  Future<List<GenreModel>> getPopularGenres();
+  Future<List<GenreModel>> getTopGenres();
+  Future<List<GenreModel>> searchGenres(String query);
+  Future<List<GenreModel>> getAllGenres();
+  Future<List<Map<String, dynamic>>> getGenresWithGameCount({
+    List<int>? genreIds,
+    int limit = 50,
+  });
+  Future<GenreModel?> getGenreByName(String name);
+
+  // THEME METHODS
+  Future<List<ThemeModel>> getThemes({
+    List<int>? ids,
+    String? search,
+    int limit = 100,
+  });
+  Future<List<ThemeModel>> getPopularThemes();
+  Future<List<ThemeModel>> searchThemes(String query);
+  Future<List<ThemeModel>> getAllThemes();
+  Future<ThemeModel?> getThemeByName(String name);
+
+  // GAME MODE METHODS
+  Future<List<GameModeModel>> getGameModes({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+  Future<List<GameModeModel>> getPopularGameModes();
+  Future<List<GameModeModel>> searchGameModes(String query);
+  Future<List<GameModeModel>> getAllGameModes();
+  Future<GameModeModel?> getGameModeByName(String name);
+
+  // KEYWORD METHODS
+  Future<List<KeywordModel>> getKeywords({
+    List<int>? ids,
+    String? search,
+    int limit = 100,
+  });
+  Future<List<KeywordModel>> searchKeywords(String query);
+  Future<List<KeywordModel>> getTrendingKeywords();
+  Future<List<KeywordModel>> getKeywordsForGames(List<int> gameIds);
+  Future<List<KeywordModel>> getSimilarKeywords(String keywordName);
+  Future<List<KeywordModel>> getKeywordsByCategory(String category);
+  Future<KeywordModel?> getKeywordByName(String name);
+  Future<List<KeywordModel>> getRandomKeywords({int limit = 20});
+  Future<List<GameModel>> searchGamesByKeywords(List<String> keywordNames);
+
+  // CHARACTER METHODS
+  Future<List<CharacterModel>> getCharacters({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+  Future<List<CharacterModel>> searchCharacters(String query);
+  Future<List<CharacterModel>> getCharactersForGames(List<int> gameIds);
+  Future<List<CharacterModel>> getPopularCharacters({int limit = 20});
+  Future<List<CharacterModel>> getCharactersByGender(CharacterGenderEnum gender);
+  Future<List<CharacterModel>> getCharactersBySpecies(CharacterSpeciesEnum species);
+  Future<List<CharacterGenderModel>> getCharacterGenders({List<int>? ids});
+  Future<List<CharacterSpeciesModel>> getCharacterSpecies({List<int>? ids});
+  Future<List<CharacterMugShotModel>> getCharacterMugShots(List<int> mugShotIds);
+  Future<List<Map<String, dynamic>>> getCompleteCharacterData({
+    List<int>? characterIds,
+    String? search,
+    int limit = 20,
+  });
+  Future<CharacterModel?> getCharacterByName(String name);
+  Future<List<CharacterModel>> getRandomCharacters({int limit = 10});
+
+  // EXTERNAL GAME METHODS
+  Future<List<ExternalGameModel>> getExternalGames(List<int> gameIds);
+  Future<List<ExternalGameModel>> getExternalGamesByStore(
+      ExternalGameCategoryEnum store, {
+        int limit = 100,
+      });
+  Future<Map<int, List<ExternalGameModel>>> getStoreLinksForGames(
+      List<int> gameIds, {
+        List<ExternalGameCategoryEnum>? preferredStores,
+      });
+  Future<List<ExternalGameModel>> getMainStoreLinks(List<int> gameIds);
+  Future<List<ExternalGameModel>> getSteamLinks(List<int> gameIds);
+  Future<Map<String, List<ExternalGameModel>>> getExternalGamesByMedia(List<int> gameIds);
+  Future<List<ExternalGameSourceModel>> getExternalGameSources({List<int>? ids});
+  Future<List<GameReleaseFormatModel>> getGameReleaseFormats({List<int>? ids});
+  Future<List<Map<String, dynamic>>> getCompleteExternalGameData(List<int> gameIds);
+  Future<ExternalGameModel?> getBestStoreLink(
+      int gameId, {
+        List<ExternalGameCategoryEnum>? preferredStores,
+      });
+  Future<List<ExternalGameModel>> searchExternalGamesByUid(String uid);
+  Future<List<Map<String, dynamic>>> getPopularStores();
+
+  // COLLECTION METHODS
+  Future<List<CollectionModel>> getCollections({
+    List<int>? ids,
+    String? search,
+    int limit = 100,
+  });
+  Future<List<CollectionModel>> searchCollections(String query);
+  Future<List<CollectionModel>> getCollectionsForGames(List<int> gameIds);
+  Future<List<CollectionModel>> getPopularCollections({int limit = 20});
+  Future<List<CollectionModel>> getCollectionsByType(int typeId);
+  Future<List<CollectionModel>> getParentCollections({int limit = 50});
+  Future<List<CollectionModel>> getChildCollections(int parentCollectionId);
+  Future<List<CollectionTypeModel>> getCollectionTypes({List<int>? ids});
+  Future<List<CollectionMembershipModel>> getCollectionMemberships({
+    int? collectionId,
+    int? gameId,
+    List<int>? ids,
+  });
+  Future<List<CollectionRelationModel>> getCollectionRelations({
+    int? parentCollectionId,
+    int? childCollectionId,
+    List<int>? ids,
+  });
+  Future<Map<String, dynamic>> getCollectionHierarchy(int collectionId);
+  Future<List<Map<String, dynamic>>> getCompleteCollectionData({
+    List<int>? collectionIds,
+    String? search,
+    int limit = 20,
+  });
+  Future<List<Map<String, dynamic>>> getFamousGameSeries({int limit = 20});
+  Future<CollectionModel?> getCollectionByName(String name);
+  Future<Map<String, dynamic>> getCollectionStatistics();
+
+  // FRANCHISE METHODS
+  Future<List<FranchiseModel>> getFranchises({
+    List<int>? ids,
+    String? search,
+    int limit = 100,
+  });
+  Future<List<FranchiseModel>> searchFranchises(String query);
+  Future<List<FranchiseModel>> getFranchisesForGames(List<int> gameIds);
+  Future<List<FranchiseModel>> getPopularFranchises({int limit = 20});
+  Future<List<FranchiseModel>> getMajorFranchises({int limit = 20});
+  Future<List<FranchiseModel>> getTrendingFranchises();
+  Future<List<Map<String, dynamic>>> getFranchisesWithGames({
+    List<int>? franchiseIds,
+    String? search,
+    int limit = 20,
+    int maxGamesPerFranchise = 10,
+  });
+  Future<Map<String, dynamic>> getFranchiseStatistics();
+  Future<List<FranchiseModel>> getRandomFranchises({int limit = 10});
+  Future<FranchiseModel?> getFranchiseByName(String name);
+  Future<Map<String, dynamic>> getFranchiseTimeline(int franchiseId);
+  Future<List<FranchiseModel>> getSimilarFranchises(int franchiseId, {int limit = 10});
   Future<List<GameModel>> getSimilarGames(int gameId);
-
   Future<List<GameModel>> getGameDLCs(int gameId);
-
   Future<List<GameModel>> getGameExpansions(int gameId);
-
-  // COMPREHENSIVE GAME DETAILS
   Future<GameModel> getCompleteGameDetails(int gameId);
 
+  // NEW AGE RATING METHODS
+  Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds);
   Future<List<AgeRatingOrganizationModel>> getAgeRatingOrganizations({List<int>? ids});
   Future<List<AgeRatingCategoryModel>> getAgeRatingCategories({
     List<int>? ids,
     int? organizationId,
   });
   Future<List<Map<String, dynamic>>> getCompleteAgeRatings(List<int> gameIds);
+  // ===== NEW DATASOURCE METHODS FOR COMPANY =====
+// Diese Methoden gehören in die IGDBRemoteDataSource abstract class
+
+  // COMPANY METHODS
+  Future<List<CompanyModel>> getCompanies({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  Future<CompanyModel?> getCompanyById(int id);
+
+  Future<List<CompanyModel>> searchCompanies(String query, {int limit = 20});
+
+  Future<List<CompanyModel>> getPopularCompanies({int limit = 50});
+
+  Future<List<CompanyModel>> getCompaniesByDevelopedGames(List<int> gameIds);
+
+  Future<List<CompanyModel>> getCompaniesByPublishedGames(List<int> gameIds);
+
+  // COMPANY LOGO METHODS
+  Future<List<CompanyLogoModel>> getCompanyLogos({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<CompanyLogoModel?> getCompanyLogoById(int id);
+
+  // COMPANY STATUS METHODS
+  Future<List<CompanyStatusModel>> getCompanyStatuses({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<CompanyStatusModel?> getCompanyStatusById(int id);
+
+  // COMPANY WEBSITE METHODS
+  Future<List<CompanyWebsiteModel>> getCompanyWebsites({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<CompanyWebsiteModel?> getCompanyWebsiteById(int id);
+
+  Future<List<CompanyWebsiteModel>> getCompanyWebsitesByCategory(
+      CompanyWebsiteCategory category, {
+        int limit = 50,
+      });
+
+  // COMPREHENSIVE COMPANY DATA
+  Future<Map<String, dynamic>> getCompleteCompanyData(int companyId);
+
+  Future<List<CompanyModel>> getCompanyHierarchy(int companyId);
+
+  // ===== GAME ENGINE LOGO DATASOURCE METHODS =====
+// Diese Methoden in die IGDBRemoteDataSource abstract class hinzufügen:
+
+  // GAME ENGINE LOGO METHODS
+  Future<List<GameEngineLogoModel>> getGameEngineLogos({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<GameEngineLogoModel?> getGameEngineLogoById(int id);
+
+  // ===== NEW DATASOURCE METHODS FOR EVENTS =====
+// Diese Methoden gehören in die IGDBRemoteDataSource abstract class
+
+  // EVENT METHODS
+  Future<List<EventModel>> getEvents({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  Future<EventModel?> getEventById(int id);
+
+  Future<List<EventModel>> searchEvents(String query, {int limit = 20});
+
+  Future<List<EventModel>> getUpcomingEvents({int limit = 50});
+
+  Future<List<EventModel>> getLiveEvents({int limit = 50});
+
+  Future<List<EventModel>> getPastEvents({int limit = 50});
+
+  Future<List<EventModel>> getEventsByDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  });
+
+  Future<List<EventModel>> getEventsByGames(List<int> gameIds);
+
+  // EVENT LOGO METHODS
+  Future<List<EventLogoModel>> getEventLogos({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<EventLogoModel?> getEventLogoById(int id);
+
+  Future<EventLogoModel?> getEventLogoByEventId(int eventId);
+
+  // EVENT NETWORK METHODS
+  Future<List<EventNetworkModel>> getEventNetworks({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<EventNetworkModel?> getEventNetworkById(int id);
+
+  Future<List<EventNetworkModel>> getEventNetworksByEventId(int eventId);
+
+  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(int networkTypeId);
+
+  // NETWORK TYPE METHODS
+  Future<List<NetworkTypeModel>> getNetworkTypes({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  Future<NetworkTypeModel?> getNetworkTypeById(int id);
+
+  Future<List<NetworkTypeModel>> searchNetworkTypes(String query, {int limit = 20});
+
+  // COMPREHENSIVE EVENT DATA
+  Future<Map<String, dynamic>> getCompleteEventData(int eventId);
+
+  Future<List<EventModel>> getEventsWithGamesAndNetworks({
+    bool includeLogos = true,
+    int limit = 50,
+  });
+
+  // ===== NEW DATASOURCE METHODS FOR RELEASE DATES =====
+// Diese Methoden gehören in die IGDBRemoteDataSource abstract class
+
+  // RELEASE DATE METHODS
+  Future<List<ReleaseDateModel>> getReleaseDates({
+    List<int>? ids,
+    int limit = 50,
+  });
+
+  Future<ReleaseDateModel?> getReleaseDateById(int id);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesByGame(int gameId);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesByPlatform(int platformId);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesByRegion(int regionId);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesByStatus(int statusId);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesByDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  });
+
+  Future<List<ReleaseDateModel>> getUpcomingReleaseDates({int limit = 50});
+
+  Future<List<ReleaseDateModel>> getRecentReleaseDates({int limit = 50});
+
+  Future<List<ReleaseDateModel>> getTodaysReleaseDates();
+
+  Future<List<ReleaseDateModel>> getThisWeeksReleaseDates();
+
+  Future<List<ReleaseDateModel>> getThisMonthsReleaseDates();
+
+  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year, {int limit = 100});
+
+  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(int year, int quarter, {int limit = 50});
+
+  // RELEASE DATE REGION METHODS
+  Future<List<ReleaseDateRegionModel>> getReleaseDateRegions({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  Future<ReleaseDateRegionModel?> getReleaseDateRegionById(int id);
+
+  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query, {int limit = 20});
+
+  // RELEASE DATE STATUS METHODS
+  Future<List<ReleaseDateStatusModel>> getReleaseDateStatuses({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  Future<ReleaseDateStatusModel?> getReleaseDateStatusById(int id);
+
+  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query, {int limit = 20});
+
+  // COMPREHENSIVE RELEASE DATE DATA
+  Future<Map<String, dynamic>> getCompleteReleaseDateData(int releaseDateId);
+
+  Future<List<ReleaseDateModel>> getReleaseDatesWithRegionsAndStatuses({
+    int limit = 50,
+  });
+
+  // GAME-SPECIFIC RELEASE DATE METHODS
+  Future<List<ReleaseDateModel>> getGameReleaseDatesWithDetails(int gameId);
+
+  Future<ReleaseDateModel?> getEarliestReleaseDate(int gameId);
+
+  Future<ReleaseDateModel?> getLatestReleaseDate(int gameId);
+
+  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(int gameId);
+
+  // ===== NEW DATASOURCE METHODS FOR SEARCH & POPULARITY =====
+// Diese Methoden gehören in die IGDBRemoteDataSource abstract class
+
+  // SEARCH METHODS
+  Future<List<SearchModel>> search({
+    required String query,
+    SearchResultType? resultType,
+    int limit = 50,
+  });
+
+  Future<List<SearchModel>> searchGlobal(String query, {int limit = 50});
+
+  Future<List<SearchModel>> searchGames(String query, {int limit = 20});
+
+  Future<List<SearchModel>> searchCompanies(String query, {int limit = 20});
+
+  Future<List<SearchModel>> searchPlatforms(String query, {int limit = 20});
+
+  Future<List<SearchModel>> searchCharacters(String query, {int limit = 20});
+
+  Future<List<SearchModel>> searchCollections(String query, {int limit = 20});
+
+  Future<List<SearchModel>> searchThemes(String query, {int limit = 20});
+
+  Future<List<SearchModel>> getSearchSuggestions(String partialQuery, {int limit = 10});
+
+  Future<List<SearchModel>> getTrendingSearches({int limit = 20});
+
+  Future<List<SearchModel>> getPopularSearches({int limit = 20});
+
+  // POPULARITY PRIMITIVE METHODS
+  Future<List<PopularityPrimitiveModel>> getPopularityPrimitives({
+    List<int>? ids,
+    int? gameId,
+    int? popularityTypeId,
+    PopularitySourceEnum? source,
+    int limit = 50,
+  });
+
+  Future<PopularityPrimitiveModel?> getPopularityPrimitiveById(int id);
+
+  Future<List<PopularityPrimitiveModel>> getGamePopularityMetrics(int gameId);
+
+  Future<List<PopularityPrimitiveModel>> getPopularityByType(int popularityTypeId);
+
+  Future<List<PopularityPrimitiveModel>> getPopularityBySource(PopularitySourceEnum source);
+
+  Future<List<PopularityPrimitiveModel>> getTopPopularGames({
+    int limit = 50,
+    PopularitySourceEnum? source,
+    int? popularityTypeId,
+  });
+
+  Future<List<PopularityPrimitiveModel>> getTrendingGames({
+    int limit = 20,
+    Duration? timeWindow,
+  });
+
+  Future<List<PopularityPrimitiveModel>> getRecentPopularityUpdates({
+    int limit = 50,
+    Duration? timeWindow,
+  });
+
+  // POPULARITY TYPE METHODS
+  Future<List<PopularityTypeModel>> getPopularityTypes({
+    List<int>? ids,
+    String? search,
+    PopularitySourceEnum? source,
+    int limit = 50,
+  });
+
+  Future<PopularityTypeModel?> getPopularityTypeById(int id);
+
+  Future<List<PopularityTypeModel>> searchPopularityTypes(String query, {int limit = 20});
+
+  Future<List<PopularityTypeModel>> getPopularityTypesBySource(PopularitySourceEnum source);
+
+  // COMPREHENSIVE SEARCH & POPULARITY DATA
+  Future<Map<String, dynamic>> getCompleteSearchResults(String query, {int limit = 50});
+
+  Future<Map<String, dynamic>> getGamePopularityAnalysis(int gameId);
+
+  Future<Map<String, dynamic>> getPopularityTrends({
+    int? gameId,
+    Duration? timeWindow,
+    PopularitySourceEnum? source,
+  });
+
+  // ADVANCED SEARCH METHODS
+  Future<List<SearchModel>> searchWithFilters({
+    required String query,
+    SearchResultType? resultType,
+    DateTime? publishedAfter,
+    DateTime? publishedBefore,
+    int limit = 50,
+  });
+
+  Future<List<SearchModel>> autocompleteSearch(String partialQuery, {int limit = 10});
+
+  Future<List<String>> getSearchHistory();
+
+  Future<void> saveSearchQuery(String query);
+
+  // POPULARITY ANALYTICS
+  Future<List<Map<String, dynamic>>> getPopularityLeaderboard({
+    PopularitySourceEnum? source,
+    int? popularityTypeId,
+    int limit = 100,
+  });
+
+  Future<Map<String, dynamic>> getPopularityStatistics(int gameId);
+
+  Future<List<PopularityPrimitiveModel>> getPopularityChanges({
+    int? gameId,
+    Duration? timeWindow,
+    int limit = 50,
+  });
+
+  // SEARCH ANALYTICS
+  Future<Map<String, dynamic>> getSearchAnalytics();
+
+  Future<List<Map<String, dynamic>>> getSearchStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  });
+
+  Future<List<DateFormatModel>> getDateFormats({List<int>? ids});
+  Future<DateFormatModel?> getDateFormatById(int id);
+
+  // Website Type Methods
+  Future<List<WebsiteTypeModel>> getWebsiteTypes({List<int>? ids});
+  Future<WebsiteTypeModel?> getWebsiteTypeById(int id);
+
+  // Language Methods
+  Future<List<LanguageModel>> getLanguages({List<int>? ids, String? search});
+  Future<LanguageModel?> getLanguageById(int id);
+  Future<List<LanguageModel>> getLanguagesByLocale(List<String> locales);
+
+  // Language Support Type Methods
+  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes({List<int>? ids});
+  Future<LanguageSupportTypeModel?> getLanguageSupportTypeById(int id);
+
+  // ===== REGION METHODS =====
+
+  // Get all regions or filter by IDs
+  Future<List<RegionModel>> getRegions({
+  List<int>? ids,
+  String? category, // 'locale' or 'continent'
+  });
+
+  // Get a specific region by ID
+  Future<RegionModel?> getRegionById(int id);
+
+  // Get regions by identifiers (e.g., ['US', 'GB', 'DE'])
+  Future<List<RegionModel>> getRegionsByIdentifiers(List<String> identifiers);
+
+  // Get all locale regions (countries)
+  Future<List<RegionModel>> getLocaleRegions();
+
+  // Get all continent regions
+  Future<List<RegionModel>> getContinentRegions();
+
+  // ===== PLATFORM VERSION METHODS =====
+
+  // Get platform versions with optional filters
+  Future<List<PlatformVersionModel>> getPlatformVersions({
+  List<int>? ids,
+  int? platformId,
+  bool includeReleaseDates = false,
+  });
+
+  // Get a specific platform version by ID
+  Future<PlatformVersionModel?> getPlatformVersionById(int id);
+
+  // Get all versions for a specific platform
+  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(int platformId);
+
+  // Get platform versions with full details (including companies, release dates)
+  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(List<int> versionIds);
+
+  // ===== PLATFORM VERSION COMPANY METHODS =====
+
+  // Get platform version companies
+  Future<List<PlatformVersionCompanyModel>> getPlatformVersionCompanies({
+  List<int>? ids,
+  List<int>? versionIds,
+  });
+
+  // Get companies for specific platform versions
+  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(List<int> versionIds);
+
+  // ===== PLATFORM VERSION RELEASE DATE METHODS =====
+
+  // Get platform version release dates
+  Future<List<PlatformVersionReleaseDateModel>> getPlatformVersionReleaseDates({
+  List<int>? ids,
+  List<int>? versionIds,
+  int? regionId,
+  });
+
+  // Get release dates for specific platform versions
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(List<int> versionIds);
+
+  // Get release dates for a specific region
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByRegion(int regionId);
+
+  // ===== PLATFORM WEBSITE METHODS =====
+
+  // Get platform websites
+  Future<List<PlatformWebsiteModel>> getPlatformWebsites({
+  List<int>? ids,
+  List<int>? platformIds,
+  });
+
+  // Get websites for specific platforms
+  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(List<int> platformIds);
+
+  // Get platform websites by type
+  Future<List<PlatformWebsiteModel>> getPlatformWebsitesByType(int typeId);
+
+  // ===== HELPER METHODS =====
+
+  // Get complete platform data with all related information
+  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(int platformId);
+
+  // Get platform version history with release dates
+  Future<List<Map<String, dynamic>>> getPlatformVersionHistory(int platformId);
+
+  // Search platforms by region
+  Future<List<PlatformModel>> getPlatformsByRegion(int regionId);
+
+
+
+  // ===== GAME STATUS METHODS =====
+
+  Future<List<GameStatusModel>> getGameStatuses({List<int>? ids});
+  Future<GameStatusModel?> getGameStatusById(int id);
+
+  // ===== GAME TIME TO BEAT METHODS =====
+
+  Future<List<GameTimeToBeatModel>> getGameTimesToBeat({
+  List<int>? ids,
+  List<int>? gameIds,
+  });
+  Future<GameTimeToBeatModel?> getGameTimeToBeatByGameId(int gameId);
+
+  // ===== GAME TYPE METHODS =====
+
+  Future<List<GameTypeModel>> getGameTypes({List<int>? ids});
+  Future<GameTypeModel?> getGameTypeById(int id);
+
+  // ===== GAME VERSION METHODS =====
+
+  Future<List<GameVersionModel>> getGameVersions({
+  List<int>? ids,
+  int? mainGameId,
+  });
+  Future<GameVersionModel?> getGameVersionById(int id);
+  Future<List<GameVersionModel>> getGameVersionsByMainGame(int gameId);
+
+  // ===== GAME VERSION FEATURE METHODS =====
+
+  Future<List<GameVersionFeatureModel>> getGameVersionFeatures({
+  List<int>? ids,
+  String? category,
+  });
+  Future<GameVersionFeatureModel?> getGameVersionFeatureById(int id);
+  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(String category);
+
+  // ===== GAME VERSION FEATURE VALUE METHODS =====
+
+  Future<List<GameVersionFeatureValueModel>> getGameVersionFeatureValues({
+  List<int>? ids,
+  List<int>? gameIds,
+  List<int>? featureIds,
+  });
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByGame(int gameId);
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(int featureId);
+
+  // ===== ENHANCED GAME METHODS =====
+
+  // Get complete game details with all new fields
+  Future<GameModel> getCompleteGameDetails(int gameId);
+
+  // Get games with specific status
+  Future<List<GameModel>> getGamesByStatus(int statusId, {int limit = 20, int offset = 0});
+
+  // Get games by type/category
+  Future<List<GameModel>> getGamesByType(int typeId, {int limit = 20, int offset = 0});
+
+  // Get game with version features
+  Future<Map<String, dynamic>> getGameWithVersionFeatures(int gameId);
+
+  // Get games sorted by completion time
+  Future<List<Map<String, dynamic>>> getGamesSortedByTimeToBeat({
+  String sortBy = 'normally', // hastily, normally, completely
+  int limit = 20,
+  });
 
 }
 
@@ -3489,5 +4178,3730 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       return [];
     }
   }
+
+  // ===== COMPANY DATASOURCE IMPLEMENTATION METHODS =====
+// Diese Methoden gehören in die IGDBRemoteDataSourceImpl Klasse
+
+  // ===== COMPANY METHODS =====
+  @override
+  Future<List<CompanyModel>> getCompanies({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, description, slug, url, country, created_at, updated_at,
+        change_date, change_date_category, change_date_format, changed_company_id,
+        parent, logo, status, start_date, start_date_category, start_date_format,
+        developed, published, websites
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get companies error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<CompanyModel?> getCompanyById(int id) async {
+    try {
+      final companies = await getCompanies(ids: [id]);
+      return companies.isNotEmpty ? companies.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get company by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<CompanyModel>> searchCompanies(String query, {int limit = 20}) async {
+    return await getCompanies(search: query, limit: limit);
+  }
+
+  @override
+  Future<List<CompanyModel>> getPopularCompanies({int limit = 50}) async {
+    try {
+      const body = '''
+        fields id, checksum, name, description, slug, url, country, created_at, updated_at,
+               change_date, change_date_category, change_date_format, changed_company_id,
+               parent, logo, status, start_date, start_date_category, start_date_format,
+               developed, published, websites;
+        where developed != null & published != null;
+        sort developed.count desc, published.count desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popular companies error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<CompanyModel>> getCompaniesByDevelopedGames(List<int> gameIds) async {
+    try {
+      if (gameIds.isEmpty) return [];
+
+      final gameIdsString = gameIds.join(',');
+      const body = '''
+        fields id, checksum, name, description, slug, url, country, created_at, updated_at,
+               change_date, change_date_category, change_date_format, changed_company_id,
+               parent, logo, status, start_date, start_date_category, start_date_format,
+               developed, published, websites;
+        where developed = [$gameIdsString];
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get companies by developed games error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<CompanyModel>> getCompaniesByPublishedGames(List<int> gameIds) async {
+    try {
+      if (gameIds.isEmpty) return [];
+
+      final gameIdsString = gameIds.join(',');
+      const body = '''
+        fields id, checksum, name, description, slug, url, country, created_at, updated_at,
+               change_date, change_date_category, change_date_format, changed_company_id,
+               parent, logo, status, start_date, start_date_category, start_date_format,
+               developed, published, websites;
+        where published = [$gameIdsString];
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get companies by published games error: $e');
+      return [];
+    }
+  }
+
+  // ===== COMPANY LOGO METHODS =====
+  @override
+  Future<List<CompanyLogoModel>> getCompanyLogos({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, alpha_channel, animated, height, image_id, url, width
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companyLogos, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyLogoModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get company logos error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<CompanyLogoModel?> getCompanyLogoById(int id) async {
+    try {
+      final logos = await getCompanyLogos(ids: [id]);
+      return logos.isNotEmpty ? logos.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get company logo by ID error: $e');
+      return null;
+    }
+  }
+
+  // ===== COMPANY STATUS METHODS =====
+  @override
+  Future<List<CompanyStatusModel>> getCompanyStatuses({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companyStatuses, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyStatusModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get company statuses error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<CompanyStatusModel?> getCompanyStatusById(int id) async {
+    try {
+      final statuses = await getCompanyStatuses(ids: [id]);
+      return statuses.isNotEmpty ? statuses.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get company status by ID error: $e');
+      return null;
+    }
+  }
+
+  // ===== COMPANY WEBSITE METHODS =====
+  @override
+  Future<List<CompanyWebsiteModel>> getCompanyWebsites({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, url, trusted, category, type
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companyWebsites, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyWebsiteModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get company websites error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<CompanyWebsiteModel?> getCompanyWebsiteById(int id) async {
+    try {
+      final websites = await getCompanyWebsites(ids: [id]);
+      return websites.isNotEmpty ? websites.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get company website by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<CompanyWebsiteModel>> getCompanyWebsitesByCategory(
+      CompanyWebsiteCategory category, {
+        int limit = 50,
+      }) async {
+    try {
+      final body = '''
+        fields id, checksum, url, trusted, category, type;
+        where category = ${category.value};
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companyWebsites, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyWebsiteModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get company websites by category error: $e');
+      return [];
+    }
+  }
+
+  // ===== COMPREHENSIVE COMPANY DATA =====
+  @override
+  Future<Map<String, dynamic>> getCompleteCompanyData(int companyId) async {
+    try {
+      print('🏢 IGDB: Getting complete company data for ID: $companyId');
+
+      // Get main company data
+      final company = await getCompanyById(companyId);
+      if (company == null) {
+        throw ServerException(message: 'Company not found');
+      }
+
+      // Get related data in parallel
+      final futures = await Future.wait([
+        company.hasLogo && company.logoId != null
+            ? getCompanyLogoById(company.logoId!)
+            : Future.value(null),
+        company.hasStatus && company.statusId != null
+            ? getCompanyStatusById(company.statusId!)
+            : Future.value(null),
+        company.hasWebsites
+            ? getCompanyWebsites(ids: company.websiteIds)
+            : Future.value(<CompanyWebsiteModel>[]),
+      ]);
+
+      final logo = futures[0] as CompanyLogoModel?;
+      final status = futures[1] as CompanyStatusModel?;
+      final websites = futures[2] as List<CompanyWebsiteModel>;
+
+      return {
+        'company': company,
+        'logo': logo,
+        'status': status,
+        'websites': websites,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete company data error: $e');
+      throw ServerException(message: 'Failed to get complete company data: $e');
+    }
+  }
+
+  @override
+  Future<List<CompanyModel>> getCompanyHierarchy(int companyId) async {
+    try {
+      print('🏢 IGDB: Getting company hierarchy for ID: $companyId');
+
+      final List<CompanyModel> hierarchy = [];
+      final company = await getCompanyById(companyId);
+
+      if (company == null) return hierarchy;
+
+      hierarchy.add(company);
+
+      // Get parent companies
+      CompanyModel? currentCompany = company;
+      while (currentCompany?.hasParent == true) {
+        final parent = await getCompanyById(currentCompany!.parentId!);
+        if (parent != null) {
+          hierarchy.insert(0, parent); // Add parent at the beginning
+          currentCompany = parent;
+        } else {
+          break;
+        }
+      }
+
+      // Get child companies
+      final childCompanies = await getCompanies();
+      final children = childCompanies
+          .where((c) => c.parentId == companyId)
+          .toList();
+
+      hierarchy.addAll(children);
+
+      return hierarchy;
+    } catch (e) {
+      print('💥 IGDB: Get company hierarchy error: $e');
+      return [];
+    }
+  }
+
+  // ===== HELPER METHODS FOR COMPANY =====
+
+  /// Get company by name (exact match)
+  Future<CompanyModel?> getCompanyByName(String name) async {
+    try {
+      final companies = await searchCompanies(name, limit: 10);
+      return companies
+          .where((company) => company.name.toLowerCase() == name.toLowerCase())
+          .firstOrNull;
+    } catch (e) {
+      print('💥 IGDB: Get company by name error: $e');
+      return null;
+    }
+  }
+
+  /// Get companies that are both developers and publishers
+  Future<List<CompanyModel>> getDeveloperPublisherCompanies({int limit = 50}) async {
+    try {
+      const body = '''
+        fields id, checksum, name, description, slug, url, country, created_at, updated_at,
+               change_date, change_date_category, change_date_format, changed_company_id,
+               parent, logo, status, start_date, start_date_category, start_date_format,
+               developed, published, websites;
+        where developed != null & published != null;
+        sort name asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get developer-publisher companies error: $e');
+      return [];
+    }
+  }
+
+  /// Get companies founded in a specific year
+  Future<List<CompanyModel>> getCompaniesByFoundingYear(int year, {int limit = 50}) async {
+    try {
+      final startOfYear = DateTime(year).millisecondsSinceEpoch ~/ 1000;
+      final endOfYear = DateTime(year + 1).millisecondsSinceEpoch ~/ 1000;
+
+      final body = '''
+        fields id, checksum, name, description, slug, url, country, created_at, updated_at,
+               change_date, change_date_category, change_date_format, changed_company_id,
+               parent, logo, status, start_date, start_date_category, start_date_format,
+               developed, published, websites;
+        where start_date >= $startOfYear & start_date < $endOfYear;
+        sort start_date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.companies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => CompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get companies by founding year error: $e');
+      return [];
+    }
+  }
+
+
+
+
+// ===== GAME ENGINE LOGO DATASOURCE IMPLEMENTATION =====
+// Diese Methoden in die IGDBRemoteDataSourceImpl Klasse hinzufügen:
+
+  // ===== GAME ENGINE LOGO METHODS =====
+  @override
+  Future<List<GameEngineLogoModel>> getGameEngineLogos({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, alpha_channel, animated, height, image_id, url, width
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameEngineLogos, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameEngineLogoModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game engine logos error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameEngineLogoModel?> getGameEngineLogoById(int id) async {
+    try {
+      final logos = await getGameEngineLogos(ids: [id]);
+      return logos.isNotEmpty ? logos.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get game engine logo by ID error: $e');
+      return null;
+    }
+  }
+
+  // ===== ENHANCED GAME ENGINE METHODS (Updated) =====
+  // Diese Methode in der IGDBRemoteDataSourceImpl Klasse erweitern/aktualisieren:
+
+  @override
+  Future<List<GameEngineModel>> getGameEngines({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, description, logo, slug, url, companies, platforms, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameEngines, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameEngineModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game engines error: $e');
+      return [];
+    }
+  }
+
+  // ===== COMPREHENSIVE GAME ENGINE DATA =====
+  Future<Map<String, dynamic>> getCompleteGameEngineData(int gameEngineId) async {
+    try {
+      print('🔧 IGDB: Getting complete game engine data for ID: $gameEngineId');
+
+      // Get main game engine data
+      final gameEngine = await getGameEngines(ids: [gameEngineId]);
+      if (gameEngine.isEmpty) {
+        throw ServerException(message: 'Game engine not found');
+      }
+
+      final engine = gameEngine.first;
+
+      // Get logo if available
+      GameEngineLogoModel? logo;
+      if (engine.hasLogo && engine.logoId != null) {
+        logo = await getGameEngineLogoById(engine.logoId!);
+      }
+
+      return {
+        'game_engine': engine,
+        'logo': logo,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete game engine data error: $e');
+      throw ServerException(message: 'Failed to get complete game engine data: $e');
+    }
+  }
+
+  // ===== HELPER METHODS FOR GAME ENGINE =====
+
+  /// Get game engine by name (exact match)
+  Future<GameEngineModel?> getGameEngineByName(String name) async {
+    try {
+      final engines = await getGameEngines(search: name, limit: 10);
+      return engines
+          .where((engine) => engine.name.toLowerCase() == name.toLowerCase())
+          .firstOrNull;
+    } catch (e) {
+      print('💥 IGDB: Get game engine by name error: $e');
+      return null;
+    }
+  }
+
+  /// Get popular game engines (used by many companies)
+  Future<List<GameEngineModel>> getPopularGameEngines({int limit = 50}) async {
+    try {
+      const body = '''
+        fields id, checksum, name, description, logo, slug, url, companies, platforms, created_at, updated_at;
+        where companies != null;
+        sort companies.count desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameEngines, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameEngineModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popular game engines error: $e');
+      return [];
+    }
+  }
+
+  /// Get game engines by company ID
+  Future<List<GameEngineModel>> getGameEnginesByCompany(int companyId, {int limit = 50}) async {
+    try {
+      final body = '''
+        fields id, checksum, name, description, logo, slug, url, companies, platforms, created_at, updated_at;
+        where companies = [$companyId];
+        sort name asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameEngines, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameEngineModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game engines by company error: $e');
+      return [];
+    }
+  }
+
+  // ===== EVENT DATASOURCE IMPLEMENTATION METHODS =====
+// Diese Methoden gehören in die IGDBRemoteDataSourceImpl Klasse
+
+  // ===== EVENT METHODS =====
+  @override
+  Future<List<EventModel>> getEvents({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, description, slug, created_at, updated_at,
+        start_time, end_time, time_zone, event_logo, live_stream_url,
+        event_networks, games, videos
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort start_time desc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get events error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<EventModel?> getEventById(int id) async {
+    try {
+      final events = await getEvents(ids: [id]);
+      return events.isNotEmpty ? events.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get event by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<EventModel>> searchEvents(String query, {int limit = 20}) async {
+    return await getEvents(search: query, limit: limit);
+  }
+
+  @override
+  Future<List<EventModel>> getUpcomingEvents({int limit = 50}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where start_time > $now;
+        sort start_time asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get upcoming events error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<EventModel>> getLiveEvents({int limit = 50}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where start_time <= $now & end_time >= $now;
+        sort start_time asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get live events error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<EventModel>> getPastEvents({int limit = 50}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where end_time < $now;
+        sort end_time desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get past events error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<EventModel>> getEventsByDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  }) async {
+    try {
+      String whereClause = '';
+
+      if (startDate != null && endDate != null) {
+        final startTimestamp = startDate.millisecondsSinceEpoch ~/ 1000;
+        final endTimestamp = endDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
+      } else if (startDate != null) {
+        final startTimestamp = startDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where start_time >= $startTimestamp;';
+      } else if (endDate != null) {
+        final endTimestamp = endDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where start_time <= $endTimestamp;';
+      }
+
+      final body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        $whereClause
+        sort start_time asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get events by date range error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<EventModel>> getEventsByGames(List<int> gameIds) async {
+    try {
+      if (gameIds.isEmpty) return [];
+
+      final gameIdsString = gameIds.join(',');
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where games = [$gameIdsString];
+        sort start_time desc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get events by games error: $e');
+      return [];
+    }
+  }
+
+  // ===== EVENT LOGO METHODS =====
+  @override
+  Future<List<EventLogoModel>> getEventLogos({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, alpha_channel, animated, event, height, image_id,
+        url, width, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.eventLogos, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventLogoModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get event logos error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<EventLogoModel?> getEventLogoById(int id) async {
+    try {
+      final logos = await getEventLogos(ids: [id]);
+      return logos.isNotEmpty ? logos.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get event logo by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<EventLogoModel?> getEventLogoByEventId(int eventId) async {
+    try {
+      const body = '''
+        fields id, checksum, alpha_channel, animated, event, height, image_id,
+               url, width, created_at, updated_at;
+        where event = $eventId;
+        limit 1;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.eventLogos, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.isNotEmpty ? EventLogoModel.fromJson(data.first) : null;
+    } catch (e) {
+      print('💥 IGDB: Get event logo by event ID error: $e');
+      return null;
+    }
+  }
+
+  // ===== EVENT NETWORK METHODS =====
+  @override
+  Future<List<EventNetworkModel>> getEventNetworks({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, url, event, network_type, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.eventNetworks, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventNetworkModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get event networks error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<EventNetworkModel?> getEventNetworkById(int id) async {
+    try {
+      final networks = await getEventNetworks(ids: [id]);
+      return networks.isNotEmpty ? networks.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get event network by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<EventNetworkModel>> getEventNetworksByEventId(int eventId) async {
+    try {
+      const body = '''
+        fields id, checksum, url, event, network_type, created_at, updated_at;
+        where event = $eventId;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.eventNetworks, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventNetworkModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get event networks by event ID error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(int networkTypeId) async {
+    try {
+      const body = '''
+        fields id, checksum, url, event, network_type, created_at, updated_at;
+        where network_type = $networkTypeId;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.eventNetworks, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventNetworkModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get event networks by network type error: $e');
+      return [];
+    }
+  }
+
+  // ===== NETWORK TYPE METHODS =====
+  @override
+  Future<List<NetworkTypeModel>> getNetworkTypes({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, event_networks, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.networkTypes, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => NetworkTypeModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get network types error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<NetworkTypeModel?> getNetworkTypeById(int id) async {
+    try {
+      final networkTypes = await getNetworkTypes(ids: [id]);
+      return networkTypes.isNotEmpty ? networkTypes.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get network type by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<NetworkTypeModel>> searchNetworkTypes(String query, {int limit = 20}) async {
+    return await getNetworkTypes(search: query, limit: limit);
+  }
+
+  // ===== COMPREHENSIVE EVENT DATA =====
+  @override
+  Future<Map<String, dynamic>> getCompleteEventData(int eventId) async {
+    try {
+      print('🎪 IGDB: Getting complete event data for ID: $eventId');
+
+      // Get main event data
+      final event = await getEventById(eventId);
+      if (event == null) {
+        throw ServerException(message: 'Event not found');
+      }
+
+      // Get related data in parallel
+      final futures = await Future.wait([
+        event.hasLogo && event.eventLogoId != null
+            ? getEventLogoById(event.eventLogoId!)
+            : Future.value(null),
+        event.hasNetworks
+            ? getEventNetworksByEventId(eventId)
+            : Future.value(<EventNetworkModel>[]),
+        event.hasGames
+            ? getGamesByIds(event.gameIds)
+            : Future.value(<GameModel>[]),
+        event.hasVideos
+            ? getGameVideos(event.gameIds) // Assuming we have this method
+            : Future.value(<GameVideoModel>[]),
+      ]);
+
+      final logo = futures[0] as EventLogoModel?;
+      final networks = futures[1] as List<EventNetworkModel>;
+      final games = futures[2] as List<GameModel>;
+      final videos = futures[3] as List<GameVideoModel>;
+
+      // Get network types for the networks
+      final networkTypeIds = networks
+          .where((network) => network.hasNetworkType)
+          .map((network) => network.networkTypeId!)
+          .toSet()
+          .toList();
+
+      List<NetworkTypeModel> networkTypes = [];
+      if (networkTypeIds.isNotEmpty) {
+        networkTypes = await getNetworkTypes(ids: networkTypeIds);
+      }
+
+      return {
+        'event': event,
+        'logo': logo,
+        'networks': networks,
+        'network_types': networkTypes,
+        'games': games,
+        'videos': videos,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete event data error: $e');
+      throw ServerException(message: 'Failed to get complete event data: $e');
+    }
+  }
+
+  @override
+  Future<List<EventModel>> getEventsWithGamesAndNetworks({
+    bool includeLogos = true,
+    int limit = 50,
+  }) async {
+    try {
+      print('🎪 IGDB: Getting events with games and networks');
+
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where games != null & event_networks != null;
+        sort start_time desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get events with games and networks error: $e');
+      return [];
+    }
+  }
+
+  // ===== HELPER METHODS FOR EVENTS =====
+
+  /// Get events happening today
+  Future<List<EventModel>> getTodaysEvents() async {
+    try {
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      return await getEventsByDateRange(
+        startDate: startOfDay,
+        endDate: endOfDay,
+        limit: 50,
+      );
+    } catch (e) {
+      print('💥 IGDB: Get today\'s events error: $e');
+      return [];
+    }
+  }
+
+  /// Get events happening this week
+  Future<List<EventModel>> getThisWeeksEvents() async {
+    try {
+      final now = DateTime.now();
+      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+
+      return await getEventsByDateRange(
+        startDate: startOfWeek,
+        endDate: endOfWeek,
+        limit: 100,
+      );
+    } catch (e) {
+      print('💥 IGDB: Get this week\'s events error: $e');
+      return [];
+    }
+  }
+
+  /// Get event by name (exact match)
+  Future<EventModel?> getEventByName(String name) async {
+    try {
+      final events = await searchEvents(name, limit: 10);
+      return events
+          .where((event) => event.name.toLowerCase() == name.toLowerCase())
+          .firstOrNull;
+    } catch (e) {
+      print('💥 IGDB: Get event by name error: $e');
+      return null;
+    }
+  }
+
+  /// Get events with live streams
+  Future<List<EventModel>> getEventsWithLiveStreams({int limit = 50}) async {
+    try {
+      const body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at,
+               start_time, end_time, time_zone, event_logo, live_stream_url,
+               event_networks, games, videos;
+        where live_stream_url != null;
+        sort start_time desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.events, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => EventModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get events with live streams error: $e');
+      return [];
+    }
+  }
+
+  // ===== RELEASE DATE DATASOURCE IMPLEMENTATION METHODS =====
+// Diese Methoden gehören in die IGDBRemoteDataSourceImpl Klasse
+
+  // ===== RELEASE DATE METHODS =====
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDates({
+    List<int>? ids,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, created_at, updated_at, date, human, m, y,
+        game, platform, date_format, release_region, status, category, region
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort date desc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<ReleaseDateModel?> getReleaseDateById(int id) async {
+    try {
+      final releaseDates = await getReleaseDates(ids: [id]);
+      return releaseDates.isNotEmpty ? releaseDates.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get release date by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesByGame(int gameId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where game = $gameId;
+        sort date asc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by game error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesByPlatform(int platformId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where platform = $platformId;
+        sort date desc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by platform error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesByRegion(int regionId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where release_region = $regionId;
+        sort date desc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by region error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesByStatus(int statusId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where status = $statusId;
+        sort date desc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by status error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesByDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  }) async {
+    try {
+      String whereClause = '';
+
+      if (startDate != null && endDate != null) {
+        final startTimestamp = startDate.millisecondsSinceEpoch ~/ 1000;
+        final endTimestamp = endDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where date >= $startTimestamp & date <= $endTimestamp;';
+      } else if (startDate != null) {
+        final startTimestamp = startDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where date >= $startTimestamp;';
+      } else if (endDate != null) {
+        final endTimestamp = endDate.millisecondsSinceEpoch ~/ 1000;
+        whereClause = 'where date <= $endTimestamp;';
+      }
+
+      final body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        $whereClause
+        sort date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by date range error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getUpcomingReleaseDates({int limit = 50}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where date > $now;
+        sort date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get upcoming release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getRecentReleaseDates({int limit = 50}) async {
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where date <= $now;
+        sort date desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get recent release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getTodaysReleaseDates() async {
+    try {
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      return await getReleaseDatesByDateRange(
+        startDate: startOfDay,
+        endDate: endOfDay,
+        limit: 50,
+      );
+    } catch (e) {
+      print('💥 IGDB: Get today\'s release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getThisWeeksReleaseDates() async {
+    try {
+      final now = DateTime.now();
+      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+
+      return await getReleaseDatesByDateRange(
+        startDate: startOfWeek,
+        endDate: endOfWeek,
+        limit: 100,
+      );
+    } catch (e) {
+      print('💥 IGDB: Get this week\'s release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getThisMonthsReleaseDates() async {
+    try {
+      final now = DateTime.now();
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      final endOfMonth = DateTime(now.year, now.month + 1, 1);
+
+      return await getReleaseDatesByDateRange(
+        startDate: startOfMonth,
+        endDate: endOfMonth,
+        limit: 200,
+      );
+    } catch (e) {
+      print('💥 IGDB: Get this month\'s release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year, {int limit = 100}) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where y = $year;
+        sort date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates for year error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(int year, int quarter, {int limit = 50}) async {
+    try {
+      int categoryValue;
+      switch (quarter) {
+        case 1: categoryValue = 3; break; // YYYYQ1
+        case 2: categoryValue = 4; break; // YYYYQ2
+        case 3: categoryValue = 5; break; // YYYYQ3
+        case 4: categoryValue = 6; break; // YYYYQ4
+        default: return [];
+      }
+
+      final body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where y = $year & category = $categoryValue;
+        sort date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates for quarter error: $e');
+      return [];
+    }
+  }
+
+  // ===== RELEASE DATE REGION METHODS =====
+  @override
+  Future<List<ReleaseDateRegionModel>> getReleaseDateRegions({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, region, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort region asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDateRegions, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateRegionModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release date regions error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<ReleaseDateRegionModel?> getReleaseDateRegionById(int id) async {
+    try {
+      final regions = await getReleaseDateRegions(ids: [id]);
+      return regions.isNotEmpty ? regions.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get release date region by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query, {int limit = 20}) async {
+    return await getReleaseDateRegions(search: query, limit: limit);
+  }
+
+  // ===== RELEASE DATE STATUS METHODS =====
+  @override
+  Future<List<ReleaseDateStatusModel>> getReleaseDateStatuses({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, description, created_at, updated_at
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        body = '''
+          search "$search";
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDateStatuses, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateStatusModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release date statuses error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<ReleaseDateStatusModel?> getReleaseDateStatusById(int id) async {
+    try {
+      final statuses = await getReleaseDateStatuses(ids: [id]);
+      return statuses.isNotEmpty ? statuses.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get release date status by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query, {int limit = 20}) async {
+    return await getReleaseDateStatuses(search: query, limit: limit);
+  }
+
+  // ===== COMPREHENSIVE RELEASE DATE DATA =====
+  @override
+  Future<Map<String, dynamic>> getCompleteReleaseDateData(int releaseDateId) async {
+    try {
+      print('📅 IGDB: Getting complete release date data for ID: $releaseDateId');
+
+      // Get main release date data
+      final releaseDate = await getReleaseDateById(releaseDateId);
+      if (releaseDate == null) {
+        throw ServerException(message: 'Release date not found');
+      }
+
+      // Get related data in parallel
+      final futures = await Future.wait([
+        releaseDate.hasRegion && releaseDate.releaseRegionId != null
+            ? getReleaseDateRegionById(releaseDate.releaseRegionId!)
+            : Future.value(null),
+        releaseDate.hasStatus && releaseDate.statusId != null
+            ? getReleaseDateStatusById(releaseDate.statusId!)
+            : Future.value(null),
+        releaseDate.isAssociatedWithGame && releaseDate.gameId != null
+            ? getGameDetails(releaseDate.gameId!)
+            : Future.value(null),
+        releaseDate.isAssociatedWithPlatform && releaseDate.platformId != null
+            ? getPlatforms(ids: [releaseDate.platformId!])
+            : Future.value(<PlatformModel>[]),
+      ]);
+
+      final region = futures[0] as ReleaseDateRegionModel?;
+      final status = futures[1] as ReleaseDateStatusModel?;
+      final game = futures[2] as GameModel?;
+      final platforms = futures[3] as List<PlatformModel>;
+
+      return {
+        'release_date': releaseDate,
+        'region': region,
+        'status': status,
+        'game': game,
+        'platform': platforms.isNotEmpty ? platforms.first : null,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete release date data error: $e');
+      throw ServerException(message: 'Failed to get complete release date data: $e');
+    }
+  }
+
+  @override
+  Future<List<ReleaseDateModel>> getReleaseDatesWithRegionsAndStatuses({
+    int limit = 50,
+  }) async {
+    try {
+      print('📅 IGDB: Getting release dates with regions and statuses');
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where release_region != null & status != null;
+        sort date desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates with regions and statuses error: $e');
+      return [];
+    }
+  }
+
+  // ===== GAME-SPECIFIC RELEASE DATE METHODS =====
+  @override
+  Future<List<ReleaseDateModel>> getGameReleaseDatesWithDetails(int gameId) async {
+    try {
+      print('📅 IGDB: Getting release dates with details for game ID: $gameId');
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where game = $gameId;
+        sort date asc;
+        limit 50;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game release dates with details error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<ReleaseDateModel?> getEarliestReleaseDate(int gameId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where game = $gameId & date != null;
+        sort date asc;
+        limit 1;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.isNotEmpty ? ReleaseDateModel.fromJson(data.first) : null;
+    } catch (e) {
+      print('💥 IGDB: Get earliest release date error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<ReleaseDateModel?> getLatestReleaseDate(int gameId) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where game = $gameId & date != null;
+        sort date desc;
+        limit 1;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.isNotEmpty ? ReleaseDateModel.fromJson(data.first) : null;
+    } catch (e) {
+      print('💥 IGDB: Get latest release date error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(int gameId) async {
+    try {
+      final releaseDates = await getGameReleaseDatesWithDetails(gameId);
+      final Map<String, List<ReleaseDateModel>> regionMap = {};
+
+      for (final releaseDate in releaseDates) {
+        final regionName = releaseDate.regionDisplayName;
+        if (!regionMap.containsKey(regionName)) {
+          regionMap[regionName] = [];
+        }
+        regionMap[regionName]!.add(releaseDate);
+      }
+
+      return regionMap;
+    } catch (e) {
+      print('💥 IGDB: Get game release dates by region error: $e');
+      return {};
+    }
+  }
+
+  // ===== HELPER METHODS FOR RELEASE DATES =====
+
+  /// Get release dates for games releasing this year
+  Future<List<ReleaseDateModel>> getThisYearsReleaseDates() async {
+    return await getReleaseDatesForYear(DateTime.now().year);
+  }
+
+  /// Get release dates for games releasing next year
+  Future<List<ReleaseDateModel>> getNextYearsReleaseDates() async {
+    return await getReleaseDatesForYear(DateTime.now().year + 1);
+  }
+
+  /// Get TBD release dates
+  Future<List<ReleaseDateModel>> getTbdReleaseDates({int limit = 50}) async {
+    try {
+      const body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where category = 7;
+        sort created_at desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get TBD release dates error: $e');
+      return [];
+    }
+  }
+
+  /// Get games releasing in a specific month of a year
+  Future<List<ReleaseDateModel>> getReleaseDatesForMonth(int year, int month, {int limit = 50}) async {
+    try {
+      final body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where y = $year & m = $month;
+        sort date asc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates for month error: $e');
+      return [];
+    }
+  }
+
+  /// Get release dates by region enum (deprecated but useful)
+  Future<List<ReleaseDateModel>> getReleaseDatesByRegionEnum(ReleaseDateRegionEnum region, {int limit = 50}) async {
+    try {
+      final body = '''
+        fields id, checksum, created_at, updated_at, date, human, m, y,
+               game, platform, date_format, release_region, status, category, region;
+        where region = ${region.value};
+        sort date desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.releaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => ReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get release dates by region enum error: $e');
+      return [];
+    }
+  }
+
+  // ===== SEARCH & POPULARITY DATASOURCE IMPLEMENTATION METHODS =====
+// Diese Methoden gehören in die IGDBRemoteDataSourceImpl Klasse
+
+  // ===== SEARCH METHODS =====
+  @override
+  Future<List<SearchModel>> search({
+    required String query,
+    SearchResultType? resultType,
+    int limit = 50,
+  }) async {
+    try {
+      print('🔍 IGDB: Searching for "$query"');
+
+      final body = '''
+        search "$query";
+        fields id, checksum, name, alternative_name, description, published_at,
+               character, collection, company, game, platform, theme, test_dummy;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.search, body);
+      final List<dynamic> data = json.decode(response.body);
+      final results = data.map((json) => SearchModel.fromJson(json)).toList();
+
+      // Filter by result type if specified
+      if (resultType != null) {
+        return results.where((result) => result.resultType == resultType).toList();
+      }
+
+      return results;
+    } catch (e) {
+      print('💥 IGDB: Search error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SearchModel>> searchGlobal(String query, {int limit = 50}) async {
+    return await search(query: query, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchGames(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.game, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchCompanies(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.company, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchPlatforms(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.platform, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchCharacters(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.character, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchCollections(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.collection, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> searchThemes(String query, {int limit = 20}) async {
+    return await search(query: query, resultType: SearchResultType.theme, limit: limit);
+  }
+
+  @override
+  Future<List<SearchModel>> getSearchSuggestions(String partialQuery, {int limit = 10}) async {
+    try {
+      // Use autocomplete-style search with shorter query
+      if (partialQuery.length < 2) return [];
+
+      final results = await search(query: partialQuery, limit: limit * 2);
+
+      // Filter and sort suggestions by relevance
+      final suggestions = results
+          .where((result) => result.name.toLowerCase().contains(partialQuery.toLowerCase()))
+          .take(limit)
+          .toList();
+
+      // Sort by name length (shorter names first for better suggestions)
+      suggestions.sort((a, b) => a.name.length.compareTo(b.name.length));
+
+      return suggestions;
+    } catch (e) {
+      print('💥 IGDB: Get search suggestions error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SearchModel>> getTrendingSearches({int limit = 20}) async {
+    try {
+      // Search for popular gaming terms that are likely trending
+      final trendingTerms = [
+        'cyberpunk', 'elden ring', 'god of war', 'witcher', 'zelda',
+        'pokemon', 'call of duty', 'fortnite', 'minecraft', 'gta',
+        'souls', 'rpg', 'indie', 'battle royale', 'multiplayer'
+      ];
+
+      final List<SearchModel> trendingResults = [];
+
+      for (final term in trendingTerms.take(5)) {
+        final results = await search(query: term, limit: 4);
+        trendingResults.addAll(results);
+        if (trendingResults.length >= limit) break;
+      }
+
+      return trendingResults.take(limit).toList();
+    } catch (e) {
+      print('💥 IGDB: Get trending searches error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SearchModel>> getPopularSearches({int limit = 20}) async {
+    try {
+      // Search for universally popular games/franchises
+      final popularTerms = [
+        'grand theft auto', 'call of duty', 'pokemon', 'mario',
+        'zelda', 'final fantasy', 'elder scrolls', 'fallout',
+        'assassins creed', 'resident evil', 'street fighter', 'tekken'
+      ];
+
+      final List<SearchModel> popularResults = [];
+
+      for (final term in popularTerms.take(6)) {
+        final results = await search(query: term, limit: 3);
+        popularResults.addAll(results);
+        if (popularResults.length >= limit) break;
+      }
+
+      return popularResults.take(limit).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popular searches error: $e');
+      return [];
+    }
+  }
+
+  // ===== POPULARITY PRIMITIVE METHODS =====
+  @override
+  Future<List<PopularityPrimitiveModel>> getPopularityPrimitives({
+    List<int>? ids,
+    int? gameId,
+    int? popularityTypeId,
+    PopularitySourceEnum? source,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, created_at, updated_at, calculated_at, game_id,
+        value, popularity_type, external_popularity_source, popularity_source
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else {
+        List<String> conditions = [];
+
+        if (gameId != null) {
+          conditions.add('game_id = $gameId');
+        }
+
+        if (popularityTypeId != null) {
+          conditions.add('popularity_type = $popularityTypeId');
+        }
+
+        if (source != null) {
+          conditions.add('popularity_source = ${source.value}');
+        }
+
+        final whereClause = conditions.isNotEmpty
+            ? 'where ${conditions.join(' & ')};'
+            : '';
+
+        body = '''
+          fields $fields;
+          $whereClause
+          sort value desc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.popularityPrimitives, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PopularityPrimitiveModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popularity primitives error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<PopularityPrimitiveModel?> getPopularityPrimitiveById(int id) async {
+    try {
+      final primitives = await getPopularityPrimitives(ids: [id]);
+      return primitives.isNotEmpty ? primitives.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get popularity primitive by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getGamePopularityMetrics(int gameId) async {
+    return await getPopularityPrimitives(gameId: gameId, limit: 50);
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getPopularityByType(int popularityTypeId) async {
+    return await getPopularityPrimitives(popularityTypeId: popularityTypeId, limit: 100);
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getPopularityBySource(PopularitySourceEnum source) async {
+    return await getPopularityPrimitives(source: source, limit: 100);
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getTopPopularGames({
+    int limit = 50,
+    PopularitySourceEnum? source,
+    int? popularityTypeId,
+  }) async {
+    try {
+      final primitives = await getPopularityPrimitives(
+        source: source,
+        popularityTypeId: popularityTypeId,
+        limit: limit,
+      );
+
+      // Sort by popularity value (descending)
+      primitives.sort((a, b) => b.value.compareTo(a.value));
+
+      return primitives;
+    } catch (e) {
+      print('💥 IGDB: Get top popular games error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getTrendingGames({
+    int limit = 20,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final window = timeWindow ?? const Duration(days: 7);
+      final cutoffDate = DateTime.now().subtract(window);
+      final cutoffTimestamp = cutoffDate.millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, calculated_at, game_id,
+               value, popularity_type, external_popularity_source, popularity_source;
+        where calculated_at > $cutoffTimestamp;
+        sort value desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.popularityPrimitives, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PopularityPrimitiveModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get trending games error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getRecentPopularityUpdates({
+    int limit = 50,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final window = timeWindow ?? const Duration(days: 1);
+      final cutoffDate = DateTime.now().subtract(window);
+      final cutoffTimestamp = cutoffDate.millisecondsSinceEpoch ~/ 1000;
+
+      const body = '''
+        fields id, checksum, created_at, updated_at, calculated_at, game_id,
+               value, popularity_type, external_popularity_source, popularity_source;
+        where updated_at > $cutoffTimestamp;
+        sort updated_at desc;
+        limit $limit;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.popularityPrimitives, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PopularityPrimitiveModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get recent popularity updates error: $e');
+      return [];
+    }
+  }
+
+  // ===== POPULARITY TYPE METHODS =====
+  @override
+  Future<List<PopularityTypeModel>> getPopularityTypes({
+    List<int>? ids,
+    String? search,
+    PopularitySourceEnum? source,
+    int limit = 50,
+  }) async {
+    try {
+      String body;
+
+      const fields = '''
+        id, checksum, name, created_at, updated_at,
+        external_popularity_source, popularity_source
+      ''';
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (search != null) {
+        String whereClause = 'search "$search";';
+        if (source != null) {
+          whereClause += ' where popularity_source = ${source.value};';
+        }
+        body = '''
+          $whereClause
+          fields $fields;
+          limit $limit;
+        ''';
+      } else {
+        String whereClause = '';
+        if (source != null) {
+          whereClause = 'where popularity_source = ${source.value};';
+        }
+        body = '''
+          fields $fields;
+          $whereClause
+          sort name asc;
+          limit $limit;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.popularityTypes, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PopularityTypeModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popularity types error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<PopularityTypeModel?> getPopularityTypeById(int id) async {
+    try {
+      final types = await getPopularityTypes(ids: [id]);
+      return types.isNotEmpty ? types.first : null;
+    } catch (e) {
+      print('💥 IGDB: Get popularity type by ID error: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<List<PopularityTypeModel>> searchPopularityTypes(String query, {int limit = 20}) async {
+    return await getPopularityTypes(search: query, limit: limit);
+  }
+
+  @override
+  Future<List<PopularityTypeModel>> getPopularityTypesBySource(PopularitySourceEnum source) async {
+    return await getPopularityTypes(source: source, limit: 50);
+  }
+
+  // ===== COMPREHENSIVE SEARCH & POPULARITY DATA =====
+  @override
+  Future<Map<String, dynamic>> getCompleteSearchResults(String query, {int limit = 50}) async {
+    try {
+      print('🔍 IGDB: Getting complete search results for "$query"');
+
+      // Get search results
+      final searchResults = await search(query: query, limit: limit);
+
+      // Group results by type
+      final gameResults = searchResults.where((r) => r.isGameResult).toList();
+      final companyResults = searchResults.where((r) => r.isCompanyResult).toList();
+      final platformResults = searchResults.where((r) => r.isPlatformResult).toList();
+      final characterResults = searchResults.where((r) => r.isCharacterResult).toList();
+      final collectionResults = searchResults.where((r) => r.isCollectionResult).toList();
+      final themeResults = searchResults.where((r) => r.isThemeResult).toList();
+
+      return {
+        'query': query,
+        'total_results': searchResults.length,
+        'all_results': searchResults,
+        'games': gameResults,
+        'companies': companyResults,
+        'platforms': platformResults,
+        'characters': characterResults,
+        'collections': collectionResults,
+        'themes': themeResults,
+        'result_counts': {
+          'games': gameResults.length,
+          'companies': companyResults.length,
+          'platforms': platformResults.length,
+          'characters': characterResults.length,
+          'collections': collectionResults.length,
+          'themes': themeResults.length,
+        },
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete search results error: $e');
+      return {
+        'query': query,
+        'total_results': 0,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getGamePopularityAnalysis(int gameId) async {
+    try {
+      print('📊 IGDB: Getting popularity analysis for game ID: $gameId');
+
+      // Get all popularity metrics for the game
+      final popularityMetrics = await getGamePopularityMetrics(gameId);
+
+      if (popularityMetrics.isEmpty) {
+        return {
+          'game_id': gameId,
+          'has_popularity_data': false,
+          'message': 'No popularity data available for this game',
+        };
+      }
+
+      // Calculate statistics
+      final values = popularityMetrics.map((p) => p.value).toList();
+      final averagePopularity = values.reduce((a, b) => a + b) / values.length;
+      final maxPopularity = values.reduce((a, b) => a > b ? a : b);
+      final minPopularity = values.reduce((a, b) => a < b ? a : b);
+
+      // Group by source
+      final steamMetrics = popularityMetrics.where((p) => p.isFromSteam).toList();
+      final igdbMetrics = popularityMetrics.where((p) => p.isFromIgdb).toList();
+
+      // Find latest update
+      final sortedByDate = popularityMetrics
+          .where((p) => p.calculatedAt != null)
+          .toList()
+        ..sort((a, b) => b.calculatedAt!.compareTo(a.calculatedAt!));
+
+      return {
+        'game_id': gameId,
+        'has_popularity_data': true,
+        'total_metrics': popularityMetrics.length,
+        'statistics': {
+          'average_popularity': averagePopularity,
+          'max_popularity': maxPopularity,
+          'min_popularity': minPopularity,
+          'popularity_range': maxPopularity - minPopularity,
+        },
+        'by_source': {
+          'steam': {
+            'count': steamMetrics.length,
+            'metrics': steamMetrics,
+          },
+          'igdb': {
+            'count': igdbMetrics.length,
+            'metrics': igdbMetrics,
+          },
+        },
+        'latest_update': sortedByDate.isNotEmpty ? sortedByDate.first : null,
+        'all_metrics': popularityMetrics,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get game popularity analysis error: $e');
+      return {
+        'game_id': gameId,
+        'has_popularity_data': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPopularityTrends({
+    int? gameId,
+    Duration? timeWindow,
+    PopularitySourceEnum? source,
+  }) async {
+    try {
+      print('📈 IGDB: Getting popularity trends');
+
+      final window = timeWindow ?? const Duration(days: 30);
+      final recentUpdates = await getRecentPopularityUpdates(
+        limit: 100,
+        timeWindow: window,
+      );
+
+      // Filter by game and source if specified
+      var filteredUpdates = recentUpdates;
+      if (gameId != null) {
+        filteredUpdates = filteredUpdates.where((p) => p.gameId == gameId).toList();
+      }
+      if (source != null) {
+        filteredUpdates = filteredUpdates.where((p) => p.popularitySourceEnum == source).toList();
+      }
+
+      // Group by date for trend analysis
+      final Map<String, List<PopularityPrimitiveModel>> dailyData = {};
+      for (final update in filteredUpdates) {
+        if (update.calculatedAt != null) {
+          final dateKey = '${update.calculatedAt!.year}-${update.calculatedAt!.month.toString().padLeft(2, '0')}-${update.calculatedAt!.day.toString().padLeft(2, '0')}';
+          dailyData[dateKey] = (dailyData[dateKey] ?? [])..add(update);
+        }
+      }
+
+      // Calculate daily averages
+      final dailyAverages = dailyData.map((date, updates) {
+        final averageValue = updates.map((u) => u.value).reduce((a, b) => a + b) / updates.length;
+        return MapEntry(date, averageValue);
+      });
+
+      return {
+        'time_window_days': window.inDays,
+        'total_updates': filteredUpdates.length,
+        'game_id': gameId,
+        'source': source?.displayName,
+        'daily_data': dailyData,
+        'daily_averages': dailyAverages,
+        'trend_direction': _calculateTrendDirection(dailyAverages),
+        'all_updates': filteredUpdates,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get popularity trends error: $e');
+      return {
+        'error': e.toString(),
+      };
+    }
+  }
+
+  // ===== ADVANCED SEARCH METHODS =====
+  @override
+  Future<List<SearchModel>> searchWithFilters({
+    required String query,
+    SearchResultType? resultType,
+    DateTime? publishedAfter,
+    DateTime? publishedBefore,
+    int limit = 50,
+  }) async {
+    try {
+      final results = await search(query: query, resultType: resultType, limit: limit);
+
+      // Apply date filters
+      var filteredResults = results;
+
+      if (publishedAfter != null) {
+        filteredResults = filteredResults.where((result) {
+          return result.publishedAt != null && result.publishedAt!.isAfter(publishedAfter);
+        }).toList();
+      }
+
+      if (publishedBefore != null) {
+        filteredResults = filteredResults.where((result) {
+          return result.publishedAt != null && result.publishedAt!.isBefore(publishedBefore);
+        }).toList();
+      }
+
+      return filteredResults;
+    } catch (e) {
+      print('💥 IGDB: Search with filters error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<SearchModel>> autocompleteSearch(String partialQuery, {int limit = 10}) async {
+    return await getSearchSuggestions(partialQuery, limit: limit);
+  }
+
+  @override
+  Future<List<String>> getSearchHistory() async {
+    try {
+      // This would typically be stored locally or in a database
+      // For now, return empty list as it requires local storage implementation
+      return [];
+    } catch (e) {
+      print('💥 IGDB: Get search history error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<void> saveSearchQuery(String query) async {
+    try {
+      // This would typically save to local storage or database
+      // For now, just log the query
+      print('💾 IGDB: Saving search query: $query');
+    } catch (e) {
+      print('💥 IGDB: Save search query error: $e');
+    }
+  }
+
+  // ===== POPULARITY ANALYTICS =====
+  @override
+  Future<List<Map<String, dynamic>>> getPopularityLeaderboard({
+    PopularitySourceEnum? source,
+    int? popularityTypeId,
+    int limit = 100,
+  }) async {
+    try {
+      final primitives = await getTopPopularGames(
+        limit: limit,
+        source: source,
+        popularityTypeId: popularityTypeId,
+      );
+
+      return primitives.asMap().entries.map((entry) {
+        final index = entry.key;
+        final primitive = entry.value;
+
+        return {
+          'rank': index + 1,
+          'game_id': primitive.gameId,
+          'popularity_value': primitive.value,
+          'popularity_level': primitive.popularityLevel,
+          'source': primitive.sourceDisplayName,
+          'calculated_at': primitive.calculatedAt?.toIso8601String(),
+          'is_fresh': primitive.isFresh,
+          'is_stale': primitive.isStale,
+        };
+      }).toList();
+    } catch (e) {
+      print('💥 IGDB: Get popularity leaderboard error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPopularityStatistics(int gameId) async {
+    return await getGamePopularityAnalysis(gameId);
+  }
+
+  @override
+  Future<List<PopularityPrimitiveModel>> getPopularityChanges({
+    int? gameId,
+    Duration? timeWindow,
+    int limit = 50,
+  }) async {
+    return await getRecentPopularityUpdates(
+      limit: limit,
+      timeWindow: timeWindow,
+    );
+  }
+
+  // ===== SEARCH ANALYTICS =====
+  @override
+  Future<Map<String, dynamic>> getSearchAnalytics() async {
+    try {
+      // Get trending and popular searches for analytics
+      final trending = await getTrendingSearches(limit: 10);
+      final popular = await getPopularSearches(limit: 10);
+
+      return {
+        'trending_searches': trending,
+        'popular_searches': popular,
+        'total_trending': trending.length,
+        'total_popular': popular.length,
+        'analysis_timestamp': DateTime.now().toIso8601String(),
+      };
+    } catch (e) {
+      print('💥 IGDB: Get search analytics error: $e');
+      return {
+        'error': e.toString(),
+      };
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSearchStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      // This would typically analyze search logs stored in a database
+      // For now, return empty list as it requires search logging implementation
+      return [];
+    } catch (e) {
+      print('💥 IGDB: Get search statistics error: $e');
+      return [];
+    }
+  }
+
+  // ===== HELPER METHODS =====
+
+  String _calculateTrendDirection(Map<String, double> dailyAverages) {
+    if (dailyAverages.length < 2) return 'insufficient_data';
+
+    final values = dailyAverages.values.toList();
+    final firstValue = values.first;
+    final lastValue = values.last;
+
+    if (lastValue > firstValue) return 'increasing';
+    if (lastValue < firstValue) return 'decreasing';
+    return 'stable';
+  }
+
+  @override
+  Future<List<DateFormatModel>> getDateFormats({List<int>? ids}) async {
+    try {
+      String body;
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, format, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, format, created_at, updated_at;
+          limit 20;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.dateFormats, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => DateFormatModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get date formats error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<DateFormatModel?> getDateFormatById(int id) async {
+    final formats = await getDateFormats(ids: [id]);
+    return formats.isNotEmpty ? formats.first : null;
+  }
+
+  // ===== WEBSITE TYPE METHODS =====
+
+  @override
+  Future<List<WebsiteTypeModel>> getWebsiteTypes({List<int>? ids}) async {
+    try {
+      String body;
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, type, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, type, created_at, updated_at;
+          sort type asc;
+          limit 50;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.websiteTypes, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => WebsiteTypeModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get website types error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<WebsiteTypeModel?> getWebsiteTypeById(int id) async {
+    final types = await getWebsiteTypes(ids: [id]);
+    return types.isNotEmpty ? types.first : null;
+  }
+
+  // ===== LANGUAGE METHODS =====
+
+  @override
+  Future<List<LanguageModel>> getLanguages({
+    List<int>? ids,
+    String? search,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, locale, name, native_name, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else if (search != null && search.isNotEmpty) {
+        body = '''
+          search "$search";
+          fields id, checksum, locale, name, native_name, created_at, updated_at;
+          limit 50;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, locale, name, native_name, created_at, updated_at;
+          sort name asc;
+          limit 200;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.languages, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => LanguageModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get languages error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<LanguageModel?> getLanguageById(int id) async {
+    final languages = await getLanguages(ids: [id]);
+    return languages.isNotEmpty ? languages.first : null;
+  }
+
+  @override
+  Future<List<LanguageModel>> getLanguagesByLocale(List<String> locales) async {
+    try {
+      final localesString = locales.map((l) => '"$l"').join(',');
+      final body = '''
+        where locale = ($localesString);
+        fields id, checksum, locale, name, native_name, created_at, updated_at;
+        limit ${locales.length};
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.languages, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => LanguageModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get languages by locale error: $e');
+      return [];
+    }
+  }
+
+  // ===== LANGUAGE SUPPORT TYPE METHODS =====
+
+  @override
+  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes({
+    List<int>? ids,
+  }) async {
+    try {
+      String body;
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, name, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, name, created_at, updated_at;
+          sort name asc;
+          limit 20;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.languageSupportTypes, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => LanguageSupportTypeModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get language support types error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<LanguageSupportTypeModel?> getLanguageSupportTypeById(int id) async {
+    final types = await getLanguageSupportTypes(ids: [id]);
+    return types.isNotEmpty ? types.first : null;
+  }
+
+  // Helper method to get language supports with full details
+  Future<List<LanguageSupportModel>> getLanguageSupportsWithDetails(
+      List<int> gameIds,
+      ) async {
+    try {
+      if (gameIds.isEmpty) return [];
+
+      final idsString = gameIds.join(',');
+      final body = '''
+        where game = ($idsString);
+        fields id, checksum, game, 
+               language.id, language.locale, language.name, language.native_name,
+               language_support_type.id, language_support_type.name,
+               created_at, updated_at;
+        limit 500;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.languageSupports, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => LanguageSupportModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get language supports with details error: $e');
+      return [];
+    }
+  }
+
+  // Add these implementations to IGDBRemoteDataSourceImpl class:
+// File: lib/data/datasources/remote/igdb_remote_datasource_impl.dart
+
+
+
+  @override
+  Future<List<RegionModel>> getRegions({
+    List<int>? ids,
+    String? category,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, category, identifier, name, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else if (category != null) {
+        body = '''
+          where category = "$category";
+          fields id, checksum, category, identifier, name, created_at, updated_at;
+          sort name asc;
+          limit 100;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, category, identifier, name, created_at, updated_at;
+          sort name asc;
+          limit 200;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.regions, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => RegionModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get regions error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<RegionModel?> getRegionById(int id) async {
+    final regions = await getRegions(ids: [id]);
+    return regions.isNotEmpty ? regions.first : null;
+  }
+
+  @override
+  Future<List<RegionModel>> getRegionsByIdentifiers(List<String> identifiers) async {
+    try {
+      final identifiersString = identifiers.map((i) => '"$i"').join(',');
+      final body = '''
+        where identifier = ($identifiersString);
+        fields id, checksum, category, identifier, name, created_at, updated_at;
+        limit ${identifiers.length};
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.regions, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => RegionModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get regions by identifiers error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<RegionModel>> getLocaleRegions() async {
+    return getRegions(category: 'locale');
+  }
+
+  @override
+  Future<List<RegionModel>> getContinentRegions() async {
+    return getRegions(category: 'continent');
+  }
+
+  // ===== PLATFORM VERSION IMPLEMENTATIONS =====
+
+  @override
+  Future<List<PlatformVersionModel>> getPlatformVersions({
+    List<int>? ids,
+    int? platformId,
+    bool includeReleaseDates = false,
+  }) async {
+    try {
+      String fields = '''
+        id, checksum, connectivity, cpu, graphics, main_manufacturer,
+        media, memory, name, os, output, platform_logo, resolutions,
+        slug, sound, storage, summary, url, companies
+      ''';
+
+      if (includeReleaseDates) {
+        fields += ', platform_version_release_dates';
+      }
+
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields $fields;
+          limit ${ids.length};
+        ''';
+      } else if (platformId != null) {
+        // Note: Platform versions are linked through platform.versions field
+        // This query would need to be adjusted based on actual API structure
+        body = '''
+          fields $fields;
+          limit 100;
+        ''';
+      } else {
+        body = '''
+          fields $fields;
+          sort name asc;
+          limit 200;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.platformVersions, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PlatformVersionModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform versions error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<PlatformVersionModel?> getPlatformVersionById(int id) async {
+    final versions = await getPlatformVersions(ids: [id]);
+    return versions.isNotEmpty ? versions.first : null;
+  }
+
+  @override
+  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(int platformId) async {
+    // First get the platform to get its version IDs
+    final platforms = await getPlatforms(ids: [platformId]);
+    if (platforms.isEmpty) return [];
+
+    final versionIds = platforms.first.versionIds;
+    if (versionIds.isEmpty) return [];
+
+    return getPlatformVersions(ids: versionIds);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(List<int> versionIds) async {
+    try {
+      if (versionIds.isEmpty) return [];
+
+      // 1. Get platform versions
+      final versions = await getPlatformVersions(ids: versionIds, includeReleaseDates: true);
+
+      // 2. Get all company IDs
+      final companyIds = <int>{};
+      for (final version in versions) {
+        companyIds.addAll(version.companyIds);
+        if (version.mainManufacturerId != null) {
+          companyIds.add(version.mainManufacturerId!);
+        }
+      }
+
+      // 3. Get companies
+      final companies = companyIds.isNotEmpty
+          ? await getCompaniesByVersionIds(versionIds.toList())
+          : <PlatformVersionCompanyModel>[];
+
+      // 4. Get release dates
+      final releaseDates = await getReleaseDatesByVersionIds(versionIds);
+
+      // 5. Combine data
+      return versions.map((version) {
+        return {
+          'version': version,
+          'companies': companies.where((c) =>
+          version.companyIds.contains(c.companyId) ||
+              c.companyId == version.mainManufacturerId
+          ).toList(),
+          'releaseDates': releaseDates.where((rd) =>
+          rd.platformVersionId == version.id
+          ).toList(),
+        };
+      }).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform versions with details error: $e');
+      return [];
+    }
+  }
+
+  // ===== PLATFORM VERSION COMPANY IMPLEMENTATIONS =====
+
+  @override
+  Future<List<PlatformVersionCompanyModel>> getPlatformVersionCompanies({
+    List<int>? ids,
+    List<int>? versionIds,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, comment, company, developer, manufacturer;
+          limit ${ids.length};
+        ''';
+      } else if (versionIds != null && versionIds.isNotEmpty) {
+        // This would need adjustment based on actual API structure
+        body = '''
+          fields id, checksum, comment, company, developer, manufacturer;
+          limit 500;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, comment, company, developer, manufacturer;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.platformVersionCompanies, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PlatformVersionCompanyModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform version companies error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(List<int> versionIds) async {
+    return getPlatformVersionCompanies(versionIds: versionIds);
+  }
+
+  // ===== PLATFORM VERSION RELEASE DATE IMPLEMENTATIONS =====
+
+  @override
+  Future<List<PlatformVersionReleaseDateModel>> getPlatformVersionReleaseDates({
+    List<int>? ids,
+    List<int>? versionIds,
+    int? regionId,
+  }) async {
+    try {
+      String body;
+      String whereConditions = [];
+
+      if (ids != null && ids.isNotEmpty) {
+        whereConditions.add('id = (${ids.join(',')})');
+      }
+
+      if (versionIds != null && versionIds.isNotEmpty) {
+        whereConditions.add('platform_version = (${versionIds.join(',')})');
+      }
+
+      if (regionId != null) {
+        whereConditions.add('release_region = $regionId');
+      }
+
+      if (whereConditions.isNotEmpty) {
+        body = '''
+          where ${whereConditions.join(' & ')};
+          fields id, checksum, date, date_format, human, m, y,
+                 platform_version, release_region, created_at, updated_at;
+          limit 500;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, date, date_format, human, m, y,
+                 platform_version, release_region, created_at, updated_at;
+          sort date asc;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.platformVersionReleaseDates, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PlatformVersionReleaseDateModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform version release dates error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(List<int> versionIds) async {
+    return getPlatformVersionReleaseDates(versionIds: versionIds);
+  }
+
+  @override
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByRegion(int regionId) async {
+    return getPlatformVersionReleaseDates(regionId: regionId);
+  }
+
+  // ===== PLATFORM WEBSITE IMPLEMENTATIONS =====
+
+  @override
+  Future<List<PlatformWebsiteModel>> getPlatformWebsites({
+    List<int>? ids,
+    List<int>? platformIds,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, url, trusted, type, category;
+          limit ${ids.length};
+        ''';
+      } else if (platformIds != null && platformIds.isNotEmpty) {
+        // Platform websites are linked through platform.websites field
+        // This query would need adjustment
+        body = '''
+          fields id, checksum, url, trusted, type, category;
+          limit 200;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, url, trusted, type, category;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.platformWebsites, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PlatformWebsiteModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform websites error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(List<int> platformIds) async {
+    // First get platforms to get their website IDs
+    final platforms = await getPlatforms(ids: platformIds);
+    final websiteIds = <int>{};
+
+    for (final platform in platforms) {
+      websiteIds.addAll(platform.websiteIds);
+    }
+
+    if (websiteIds.isEmpty) return [];
+
+    return getPlatformWebsites(ids: websiteIds.toList());
+  }
+
+  @override
+  Future<List<PlatformWebsiteModel>> getPlatformWebsitesByType(int typeId) async {
+    try {
+      final body = '''
+        where type = $typeId;
+        fields id, checksum, url, trusted, type, category;
+        limit 200;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.platformWebsites, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PlatformWebsiteModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get platform websites by type error: $e');
+      return [];
+    }
+  }
+
+  // ===== HELPER IMPLEMENTATIONS =====
+
+  @override
+  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(int platformId) async {
+    try {
+      // 1. Get platform
+      final platforms = await getPlatforms(ids: [platformId]);
+      if (platforms.isEmpty) return {};
+
+      final platform = platforms.first;
+
+      // 2. Get versions with details
+      final versionsWithDetails = await getPlatformVersionsWithDetails(platform.versionIds);
+
+      // 3. Get platform websites
+      final websites = await getWebsitesByPlatformIds([platformId]);
+
+      // 4. Get platform logo if exists
+      PlatformLogoModel? logo;
+      if (platform.platformLogoId != null) {
+        final logos = await getPlatformLogos([platform.platformLogoId!]);
+        logo = logos.isNotEmpty ? logos.first : null;
+      }
+
+      return {
+        'platform': platform,
+        'logo': logo,
+        'versions': versionsWithDetails,
+        'websites': websites,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get complete platform data error: $e');
+      return {};
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPlatformVersionHistory(int platformId) async {
+    try {
+      // 1. Get platform versions
+      final versions = await getPlatformVersionsByPlatformId(platformId);
+
+      // 2. Get all release dates
+      final versionIds = versions.map((v) => v.id).toList();
+      final releaseDates = await getReleaseDatesByVersionIds(versionIds);
+
+      // 3. Sort by release date
+      final history = <Map<String, dynamic>>[];
+
+      for (final version in versions) {
+        final versionDates = releaseDates
+            .where((rd) => rd.platformVersionId == version.id)
+            .toList()
+          ..sort((a, b) => (a.date ?? DateTime(2100))
+              .compareTo(b.date ?? DateTime(2100)));
+
+        history.add({
+          'version': version,
+          'releaseDates': versionDates,
+          'firstReleaseDate': versionDates.isNotEmpty ? versionDates.first.date : null,
+        });
+      }
+
+      // Sort by first release date
+      history.sort((a, b) {
+        final dateA = a['firstReleaseDate'] as DateTime?;
+        final dateB = b['firstReleaseDate'] as DateTime?;
+        if (dateA == null && dateB == null) return 0;
+        if (dateA == null) return 1;
+        if (dateB == null) return -1;
+        return dateA.compareTo(dateB);
+      });
+
+      return history;
+    } catch (e) {
+      print('💥 IGDB: Get platform version history error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<PlatformModel>> getPlatformsByRegion(int regionId) async {
+    try {
+      // First get release dates for the region
+      final releaseDates = await getPlatformVersionReleaseDates(regionId: regionId);
+
+      // Get unique platform version IDs
+      final versionIds = releaseDates
+          .map((rd) => rd.platformVersionId)
+          .where((id) => id != null)
+          .toSet()
+          .cast<int>()
+          .toList();
+
+      if (versionIds.isEmpty) return [];
+
+      // Get platform versions
+      final versions = await getPlatformVersions(ids: versionIds);
+
+      // Get platforms that have these versions
+      // This would need to query platforms by their version IDs
+      // Implementation depends on actual API structure
+
+      return [];
+    } catch (e) {
+      print('💥 IGDB: Get platforms by region error: $e');
+      return [];
+    }
+  }
+
+
+
+  // ===== GAME STATUS IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameStatusModel>> getGameStatuses({List<int>? ids}) async {
+    try {
+      String body;
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, name, description, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, name, description, created_at, updated_at;
+          sort id asc;
+          limit 20;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameStatuses, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameStatusModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game statuses error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameStatusModel?> getGameStatusById(int id) async {
+    final statuses = await getGameStatuses(ids: [id]);
+    return statuses.isNotEmpty ? statuses.first : null;
+  }
+
+  // ===== GAME TIME TO BEAT IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameTimeToBeatModel>> getGameTimesToBeat({
+    List<int>? ids,
+    List<int>? gameIds,
+  }) async {
+    try {
+      String body;
+      String whereConditions = [];
+
+      if (ids != null && ids.isNotEmpty) {
+        whereConditions.add('id = (${ids.join(',')})');
+      }
+
+      if (gameIds != null && gameIds.isNotEmpty) {
+        whereConditions.add('game = (${gameIds.join(',')})');
+      }
+
+      if (whereConditions.isNotEmpty) {
+        body = '''
+          where ${whereConditions.join(' & ')};
+          fields id, checksum, game, hastily, normally, completely, 
+                 created_at, updated_at;
+          limit ${ids?.length ?? gameIds?.length ?? 100};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, game, hastily, normally, completely, 
+                 created_at, updated_at;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameTimesToBeat, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameTimeToBeatModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game times to beat error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameTimeToBeatModel?> getGameTimeToBeatByGameId(int gameId) async {
+    final times = await getGameTimesToBeat(gameIds: [gameId]);
+    return times.isNotEmpty ? times.first : null;
+  }
+
+  // ===== GAME TYPE IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameTypeModel>> getGameTypes({List<int>? ids}) async {
+    try {
+      String body;
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, name, created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, name, created_at, updated_at;
+          sort id asc;
+          limit 20;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameTypes, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameTypeModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game types error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameTypeModel?> getGameTypeById(int id) async {
+    final types = await getGameTypes(ids: [id]);
+    return types.isNotEmpty ? types.first : null;
+  }
+
+  // ===== GAME VERSION IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameVersionModel>> getGameVersions({
+    List<int>? ids,
+    int? mainGameId,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, game, features, games, url, 
+                 created_at, updated_at;
+          limit ${ids.length};
+        ''';
+      } else if (mainGameId != null) {
+        body = '''
+          where game = $mainGameId;
+          fields id, checksum, game, features, games, url, 
+                 created_at, updated_at;
+          limit 100;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, game, features, games, url, 
+                 created_at, updated_at;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameVersions, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameVersionModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game versions error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameVersionModel?> getGameVersionById(int id) async {
+    final versions = await getGameVersions(ids: [id]);
+    return versions.isNotEmpty ? versions.first : null;
+  }
+
+  @override
+  Future<List<GameVersionModel>> getGameVersionsByMainGame(int gameId) async {
+    return getGameVersions(mainGameId: gameId);
+  }
+
+  // ===== GAME VERSION FEATURE IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameVersionFeatureModel>> getGameVersionFeatures({
+    List<int>? ids,
+    String? category,
+  }) async {
+    try {
+      String body;
+
+      if (ids != null && ids.isNotEmpty) {
+        final idsString = ids.join(',');
+        body = '''
+          where id = ($idsString);
+          fields id, checksum, title, description, category, position, values;
+          limit ${ids.length};
+        ''';
+      } else if (category != null) {
+        body = '''
+          where category = "$category";
+          fields id, checksum, title, description, category, position, values;
+          sort position asc;
+          limit 100;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, title, description, category, position, values;
+          sort position asc;
+          limit 200;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameVersionFeatures, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameVersionFeatureModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game version features error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<GameVersionFeatureModel?> getGameVersionFeatureById(int id) async {
+    final features = await getGameVersionFeatures(ids: [id]);
+    return features.isNotEmpty ? features.first : null;
+  }
+
+  @override
+  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(String category) async {
+    return getGameVersionFeatures(category: category);
+  }
+
+  // ===== GAME VERSION FEATURE VALUE IMPLEMENTATIONS =====
+
+  @override
+  Future<List<GameVersionFeatureValueModel>> getGameVersionFeatureValues({
+    List<int>? ids,
+    List<int>? gameIds,
+    List<int>? featureIds,
+  }) async {
+    try {
+      String body;
+      List<String> whereConditions = [];
+
+      if (ids != null && ids.isNotEmpty) {
+        whereConditions.add('id = (${ids.join(',')})');
+      }
+
+      if (gameIds != null && gameIds.isNotEmpty) {
+        whereConditions.add('game = (${gameIds.join(',')})');
+      }
+
+      if (featureIds != null && featureIds.isNotEmpty) {
+        whereConditions.add('game_feature = (${featureIds.join(',')})');
+      }
+
+      if (whereConditions.isNotEmpty) {
+        body = '''
+          where ${whereConditions.join(' & ')};
+          fields id, checksum, game, game_feature, included_feature, note;
+          limit 500;
+        ''';
+      } else {
+        body = '''
+          fields id, checksum, game, game_feature, included_feature, note;
+          limit 100;
+        ''';
+      }
+
+      final response = await _makeRequestRaw(IGDBEndpoints.gameVersionFeatureValues, body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => GameVersionFeatureValueModel.fromJson(json)).toList();
+    } catch (e) {
+      print('💥 IGDB: Get game version feature values error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByGame(int gameId) async {
+    return getGameVersionFeatureValues(gameIds: [gameId]);
+  }
+
+  @override
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(int featureId) async {
+    return getGameVersionFeatureValues(featureIds: [featureId]);
+  }
+
+  // ===== ENHANCED GAME IMPLEMENTATIONS =====
+
+  @override
+  Future<GameModel> getCompleteGameDetails(int gameId) async {
+    try {
+      final body = '''
+        where id = $gameId;
+        fields *,
+          game_type.*,
+          game_status.*,
+          time_to_beat.*,
+          version_parent.*,
+          version_title,
+          game_localizations.*,
+          involved_companies.company.*,
+          involved_companies.developer,
+          involved_companies.publisher,
+          involved_companies.porting,
+          involved_companies.supporting,
+          game_engines.*,
+          game_modes.*,
+          genres.*,
+          keywords.*,
+          multiplayer_modes.*,
+          player_perspectives.*,
+          platforms.*,
+          release_dates.*,
+          screenshots.*,
+          themes.*,
+          videos.*,
+          websites.*,
+          language_supports.*,
+          age_ratings.*,
+          artworks.*,
+          bundles.*,
+          collection.*,
+          cover.*,
+          dlcs.*,
+          expanded_games.*,
+          expansions.*,
+          follows,
+          franchise.*,
+          franchises.*,
+          hypes,
+          parent_game.*,
+          ports.*,
+          remakes.*,
+          remasters.*,
+          similar_games.*,
+          standalone_expansions.*,
+          tags;
+        limit 1;
+      ''';
+
+      final games = await _makeRequest(IGDBEndpoints.games, body);
+      if (games.isEmpty) {
+        throw ServerException(message: 'Game not found');
+      }
+      return games.first;
+    } catch (e) {
+      print('💥 IGDB: Get complete game details error: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByStatus(int statusId, {int limit = 20, int offset = 0}) async {
+    try {
+      final body = '''
+        where game_status = $statusId;
+        fields ${_gameDetailFields};
+        limit $limit;
+        offset $offset;
+      ''';
+
+      return await _makeRequest(IGDBEndpoints.games, body);
+    } catch (e) {
+      print('💥 IGDB: Get games by status error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByType(int typeId, {int limit = 20, int offset = 0}) async {
+    try {
+      final body = '''
+        where game_type = $typeId;
+        fields ${_gameDetailFields};
+        limit $limit;
+        offset $offset;
+      ''';
+
+      return await _makeRequest(IGDBEndpoints.games, body);
+    } catch (e) {
+      print('💥 IGDB: Get games by type error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getGameWithVersionFeatures(int gameId) async {
+    try {
+      // 1. Get game details
+      final game = await getGameDetails(gameId);
+
+      // 2. Get game versions
+      final versions = await getGameVersionsByMainGame(gameId);
+
+      // 3. Get all feature IDs
+      final featureIds = <int>{};
+      for (final version in versions) {
+        featureIds.addAll(version.featureIds);
+      }
+
+      // 4. Get features
+      final features = featureIds.isNotEmpty
+          ? await getGameVersionFeatures(ids: featureIds.toList())
+          : <GameVersionFeatureModel>[];
+
+      // 5. Get feature values for this game
+      final featureValues = await getFeatureValuesByGame(gameId);
+
+      return {
+        'game': game,
+        'versions': versions,
+        'features': features,
+        'featureValues': featureValues,
+      };
+    } catch (e) {
+      print('💥 IGDB: Get game with version features error: $e');
+      return {};
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getGamesSortedByTimeToBeat({
+    String sortBy = 'normally',
+    int limit = 20,
+  }) async {
+    try {
+      // Note: IGDB API doesn't support direct sorting by time_to_beat fields
+      // So we need to fetch games with time_to_beat data and sort locally
+
+      final body = '''
+        where time_to_beat != null;
+        fields id, name, cover.url, time_to_beat.*;
+        limit 100;
+      ''';
+
+      final response = await _makeRequestRaw(IGDBEndpoints.games, body);
+      final List<dynamic> data = json.decode(response.body);
+
+      // Parse and sort
+      final gamesWithTime = <Map<String, dynamic>>[];
+
+      for (final gameData in data) {
+        if (gameData['time_to_beat'] != null) {
+          final game = GameModel.fromJson(gameData);
+          final timeToBeat = GameTimeToBeatModel.fromJson(gameData['time_to_beat']);
+
+          // Only include if the requested sort field has a value
+          int? sortValue;
+          switch (sortBy) {
+            case 'hastily':
+              sortValue = timeToBeat.hastily;
+              break;
+            case 'completely':
+              sortValue = timeToBeat.completely;
+              break;
+            default:
+              sortValue = timeToBeat.normally;
+          }
+
+          if (sortValue != null) {
+            gamesWithTime.add({
+              'game': game,
+              'timeToBeat': timeToBeat,
+              'sortValue': sortValue,
+            });
+          }
+        }
+      }
+
+      // Sort by the requested field
+      gamesWithTime.sort((a, b) => a['sortValue'].compareTo(b['sortValue']));
+
+      // Return limited results
+      return gamesWithTime.take(limit).toList();
+    } catch (e) {
+      print('💥 IGDB: Get games sorted by time to beat error: $e');
+      return [];
+    }
+  }
+
+
+
 
 }

@@ -6,9 +6,9 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../entities/game/game.dart';
-import '../entities/company.dart';
+import '../entities/company/company.dart';
 import '../entities/game/game_video.dart';
-import '../entities/website.dart';
+import '../entities/website/website.dart';
 import '../entities/ageRating/age_rating.dart';
 
 abstract class GameRepository {

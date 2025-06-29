@@ -1,6 +1,6 @@
 // lib/domain/entities/involved_company.dart
 import 'package:equatable/equatable.dart';
-import 'company.dart';
+import 'company/company.dart';
 
 class InvolvedCompany extends Equatable {
   final int id;
