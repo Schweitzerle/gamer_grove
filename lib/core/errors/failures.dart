@@ -49,3 +49,11 @@ class ValidationFailure extends Failure {
   });
 }
 
+
+class NotFoundFailure extends Failure {
+  const NotFoundFailure({
+    super.message = 'Requested resource was not found',
+    super.code,
+  });
+}
+

@@ -9,6 +9,7 @@ import '../../../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
+import '../../../domain/entities/website/website_type.dart';
 
 class ExternalLinksSection extends StatelessWidget {
   final Game game;

@@ -3269,4 +3269,79 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(List<int> gameIds) async => await getInvolvedCompanies(gameIds: gameIds, supporting: true);
+
+  // ==========================================
+  // PHASE 1 - HOME SCREEN DATA METHODS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<List<GameModel>> getGamesSortedByRating({
+  int limit = 20,
+  int offset = 0,
+  double minRating = 70.0,
+  }) async {
+  final body = '''
+      where total_rating >= $minRating & total_rating_count >= 10;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort total_rating desc;
+      limit $limit;
+      offset $offset;
+    ''';
+
+  return await _makeRequest(
+  'games',
+  body,
+  (json) => GameModel.fromJson(json),
+  );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesSortedByReleaseDate({
+  int limit = 20,
+  int offset = 0,
+  int maxDaysOld = 365,
+  }) async {
+  final cutoffDate = DateTime.now().subtract(Duration(days: maxDaysOld));
+  final cutoffTimestamp = (cutoffDate.millisecondsSinceEpoch / 1000).round();
+
+  final body = '''
+      where first_release_date >= $cutoffTimestamp & category = 0;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort first_release_date desc;
+      limit $limit;
+      offset $offset;
+    ''';
+
+  return await _makeRequest(
+  'games',
+  body,
+  (json) => GameModel.fromJson(json),
+  );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByReleaseDateRange({
+  required List<int> gameIds,
+  required DateTime fromDate,
+  required DateTime toDate,
+  }) async {
+  if (gameIds.isEmpty) return [];
+
+  final fromTimestamp = (fromDate.millisecondsSinceEpoch / 1000).round();
+  final toTimestamp = (toDate.millisecondsSinceEpoch / 1000).round();
+  final gameIdsString = gameIds.join(',');
+
+  final body = '''
+      where id = ($gameIdsString) & first_release_date >= $fromTimestamp & first_release_date <= $toTimestamp;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort first_release_date desc;
+      limit ${gameIds.length};
+    ''';
+
+  return await _makeRequest(
+  'games',
+  body,
+  (json) => GameModel.fromJson(json),
+  );
+  }
 }

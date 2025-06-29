@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../domain/entities/game_video.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
+import '../../../domain/entities/game/game_video.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final GameVideo video;

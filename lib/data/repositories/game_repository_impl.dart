@@ -723,4 +723,112 @@ class GameRepositoryImpl implements GameRepository {
       return games;
     }
   }
+
+  // ==========================================
+  // PHASE 1 - HOME SCREEN METHODS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Game>>> getTopRatedGames(int limit, int offset) async {
+  try {
+  if (!await networkInfo.isConnected) {
+  return const Left(NetworkFailure());
+  }
+
+  print('⭐ GameRepository: Getting top rated games (limit: $limit, offset: $offset)');
+
+  // Get games sorted by total_rating, excluding those without ratings
+  final topRatedGames = await igdbDataSource.getGamesSortedByRating(
+  limit: limit,
+  offset: offset
+  );
+
+  // Enrich with user data
+  final enrichedGames = await _enrichGamesWithUserData(topRatedGames);
+
+  print('✅ GameRepository: Loaded ${enrichedGames.length} top rated games');
+  return Right(enrichedGames);
+
+  } on ServerException catch (e) {
+  return Left(ServerFailure(message: e.message));
+  } catch (e) {
+  return Left(ServerFailure(message: 'Failed to load top rated games'));
+  }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getNewestGames(int limit, int offset) async {
+  try {
+  if (!await networkInfo.isConnected) {
+  return const Left(NetworkFailure());
+  }
+
+  print('🆕 GameRepository: Getting newest games (limit: $limit, offset: $offset)');
+
+  // Get games sorted by release date (most recent first)
+  final newestGames = await igdbDataSource.getGamesSortedByReleaseDate(
+  limit: limit,
+  offset: offset
+  );
+
+  // Enrich with user data
+  final enrichedGames = await _enrichGamesWithUserData(newestGames);
+
+  print('✅ GameRepository: Loaded ${enrichedGames.length} newest games');
+  return Right(enrichedGames);
+
+  } on ServerException catch (e) {
+  return Left(ServerFailure(message: e.message));
+  } catch (e) {
+  return Left(ServerFailure(message: 'Failed to load newest games'));
+  }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getWishlistRecentReleases(
+  String userId,
+  {DateTime? fromDate, DateTime? toDate}
+  ) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      // Default date range: 1 month ago to 2 weeks from now
+      final now = DateTime.now();
+      fromDate ??= now.subtract(const Duration(days: 30));
+      toDate ??= now.add(const Duration(days: 14));
+
+      print(
+          '❤️ GameRepository: Getting wishlist recent releases for user: $userId');
+      print('📅 GameRepository: Date range: ${fromDate.toString()} to ${toDate
+          .toString()}');
+
+      // Get user's wishlist game IDs
+      final wishlistIds = await supabaseDataSource.getUserWishlistIds(userId);
+
+      if (wishlistIds.isEmpty) {
+        return const Right([]);
+      }
+
+      // Get wishlist games with release dates in the specified range
+      final recentReleases = await igdbDataSource.getGamesByReleaseDateRange(
+          gameIds: wishlistIds,
+          fromDate: fromDate,
+          toDate: toDate
+      );
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(recentReleases);
+
+      print('✅ GameRepository: Found ${enrichedGames
+          .length} wishlist games with recent/upcoming releases');
+      return Right(enrichedGames);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Failed to load wishlist recent releases'));
+    }
+  }
 }

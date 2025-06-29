@@ -1258,4 +1258,29 @@ abstract class IGDBRemoteDataSource {
 
   /// Get supporting companies for games
   Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(List<int> gameIds);
+
+  // ==========================================
+  // PHASE 1 - HOME SCREEN DATA METHODS
+  // ==========================================
+
+  /// Get games sorted by rating (highest first)
+  Future<List<GameModel>> getGamesSortedByRating({
+  int limit = 20,
+  int offset = 0,
+  double minRating = 70.0, // Minimum rating to include
+  });
+
+  /// Get games sorted by release date (newest first)
+  Future<List<GameModel>> getGamesSortedByReleaseDate({
+  int limit = 20,
+  int offset = 0,
+  int maxDaysOld = 365, // Only games released in last X days
+  });
+
+  /// Get specific games by IDs with release dates in a range
+  Future<List<GameModel>> getGamesByReleaseDateRange({
+  required List<int> gameIds,
+  required DateTime fromDate,
+  required DateTime toDate,
+  });
 }

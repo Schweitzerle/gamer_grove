@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/datasources/remote/igdb/idgb_remote_datasource.dart';
-import '../../../data/models/game_model.dart';
+import '../../../data/models/game/game_model.dart';
 import '../../../injection_container.dart';
 
 class IGDBTestPage extends StatefulWidget {

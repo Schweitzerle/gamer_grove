@@ -128,4 +128,21 @@ abstract class GameRepository {
 
   /// Toggle game recommendation status
   Future<Either<Failure, void>> toggleRecommend(int gameId, String userId);
+
+  // ==========================================
+  // PHASE 1 - HOME SCREEN METHODS
+  // ==========================================
+
+  /// Get top rated games with pagination
+  Future<Either<Failure, List<Game>>> getTopRatedGames(int limit, int offset);
+
+  /// Get newest/recently released games with pagination
+  Future<Either<Failure, List<Game>>> getNewestGames(int limit, int offset);
+
+  /// Get wishlist items that were recently released (last month)
+  /// or are releasing soon (next 2 weeks)
+  Future<Either<Failure, List<Game>>> getWishlistRecentReleases(
+  String userId,
+  {DateTime? fromDate, DateTime? toDate}
+  );
 }

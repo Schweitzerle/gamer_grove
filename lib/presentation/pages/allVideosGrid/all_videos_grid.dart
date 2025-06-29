@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/game_video.dart';
+import '../../../domain/entities/game/game_video.dart';
 import '../videoPlayer/video_player_screen.dart';
 
 class AllVideosGrid extends StatelessWidget {
