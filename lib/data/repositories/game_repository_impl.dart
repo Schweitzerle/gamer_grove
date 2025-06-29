@@ -12,7 +12,7 @@ import '../../core/network/network_info.dart';
 import '../../domain/entities/game/game.dart';
 import '../../domain/repositories/game_repository.dart';
 import '../datasources/local/cache_datasource.dart';
-import '../datasources/remote/idgb_remote_datasource.dart';
+import '../datasources/remote/igdb/idgb_remote_datasource.dart';
 import '../datasources/remote/supabase_remote_datasource.dart';
 import '../models/game/game_model.dart';
 

@@ -1,7 +1,7 @@
 // presentation/pages/test/igdb_test_page.dart
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/datasources/remote/idgb_remote_datasource.dart';
+import '../../../data/datasources/remote/igdb/idgb_remote_datasource.dart';
 import '../../../data/models/game_model.dart';
 import '../../../injection_container.dart';
 

@@ -7,7 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Import all your classes here
 import 'data/datasources/local/cache_datasource.dart';
-import 'data/datasources/remote/idgb_remote_datasource.dart';
+import 'data/datasources/remote/igdb/idgb_remote_datasource.dart';
 import 'data/datasources/remote/supabase_remote_datasource.dart';
 import 'data/repositories/auth_repository_impl.dart';
 import 'data/repositories/game_repository_impl.dart';
