@@ -1,6 +1,7 @@
 // lib/data/models/collection_model.dart
 
-import '../../../domain/entities/collection.dart';
+
+import '../../../domain/entities/collection/collection.dart';
 
 class CollectionModel extends Collection {
   const CollectionModel({

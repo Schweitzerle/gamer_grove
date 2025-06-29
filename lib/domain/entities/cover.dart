@@ -4,13 +4,14 @@ import 'package:equatable/equatable.dart';
 class Cover extends Equatable {
   final int id;
   final String checksum;
-  final bool alphaChannel;
-  final bool animated;
-  final int? gameId;
-  final int height;
   final String imageId;
   final String? url;
-  final int width;
+  final int? width;
+  final int? height;
+  final bool? alphaChannel;
+  final bool? animated;
+  final int? gameId;
+  final int? gameLocalizationId;
 
   const Cover({
     required this.id,
@@ -22,6 +23,7 @@ class Cover extends Equatable {
     this.animated = false,
     this.gameId,
     this.url,
+    this.gameLocalizationId,
   });
 
   // Helper getters for different cover sizes (IGDB image API)

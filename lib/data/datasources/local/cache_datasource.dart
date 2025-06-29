@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/constants/storage_constants.dart';
+import '../../models/game/game_model.dart';
 import '../../models/user_model.dart';
-import '../../models/game_model.dart';
 
 abstract class LocalDataSource {
   // User Caching

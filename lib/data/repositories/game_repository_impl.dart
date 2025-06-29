@@ -1,7 +1,7 @@
 // data/repositories/game_repository_impl.dart
 import '../../domain/entities/ageRating/age_rating.dart';
 import '../../domain/entities/company/company.dart';
-import '../../domain/entities/game_video.dart';
+import '../../domain/entities/game/game_video.dart';
 import '../../domain/entities/website/website.dart';
 import '../../injection_container.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
@@ -14,7 +14,7 @@ import '../../domain/repositories/game_repository.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/idgb_remote_datasource.dart';
 import '../datasources/remote/supabase_remote_datasource.dart';
-import '../models/game_model.dart';
+import '../models/game/game_model.dart';
 
 class GameRepositoryImpl implements GameRepository {
   final IGDBRemoteDataSource igdbDataSource;

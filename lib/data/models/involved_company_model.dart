@@ -31,7 +31,7 @@ class InvolvedCompanyModel extends InvolvedCompany {
     // Fallback for simple company data
     return CompanyModel(
       id: companyData['id'] ?? 0,
-      name: companyData['name'] ?? 'Unknown Company',
+      name: companyData['name'] ?? 'Unknown Company', checksum: companyData['checksum'] ?? 'N/A',
     );
   }
 }

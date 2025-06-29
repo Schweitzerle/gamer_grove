@@ -1,23 +1,6 @@
 // lib/domain/entities/website.dart
 import 'package:equatable/equatable.dart';
-
-enum WebsiteCategory {
-  official,
-  wikia,
-  wikipedia,
-  facebook,
-  twitter,
-  twitch,
-  instagram,
-  youtube,
-  steam,
-  epicGames,
-  gog,
-  discord,
-  reddit,
-  itch,
-  unknown,
-}
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class Website extends Equatable {
   final int id;
@@ -38,7 +21,7 @@ class Website extends Equatable {
         return 'Official Website';
       case WebsiteCategory.steam:
         return 'Steam';
-      case WebsiteCategory.epicGames:
+      case WebsiteCategory.epicgames:
         return 'Epic Games';
       case WebsiteCategory.gog:
         return 'GOG';

@@ -1,7 +1,9 @@
 // lib/domain/entities/game.dart (VOLLSTÄNDIG ERWEITERT)
 import 'package:equatable/equatable.dart';
+import '../collection/collection.dart';
 import '../genre.dart';
 import '../platform/platform.dart';
+import '../website/website_type.dart';
 import 'game_mode.dart';
 import '../involved_company.dart';
 import '../website/website.dart';
@@ -15,7 +17,6 @@ import '../keyword.dart';
 import '../multiplayer_mode.dart';
 import '../player_perspective.dart';
 import '../franchise.dart';
-import '../collection.dart';
 import '../externalGame/external_game.dart';
 import '../language_support.dart';
 import '../releaseDate/release_date.dart';

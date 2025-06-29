@@ -1,5 +1,6 @@
 // lib/data/models/website_model.dart
 import '../../../domain/entities/website/website.dart';
+import '../../../domain/entities/website/website_type.dart';
 
 class WebsiteModel extends Website {
   const WebsiteModel({
@@ -54,12 +55,12 @@ class WebsiteModel extends Website {
         case 8: return WebsiteCategory.instagram;
         case 9: return WebsiteCategory.youtube;
         case 13: return WebsiteCategory.steam;
-        case 16: return WebsiteCategory.epicGames;
+        case 16: return WebsiteCategory.epicgames;
         case 17: return WebsiteCategory.gog;
         case 18: return WebsiteCategory.discord;
-        default: return WebsiteCategory.unknown;
+        default: return WebsiteCategory.official;
       }
     }
-    return WebsiteCategory.unknown;
+    return WebsiteCategory.official;
   }
 }
