@@ -3,16 +3,38 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
+import '../../domain/entities/artwork.dart';
+import '../../domain/entities/character/character.dart';
+import '../../domain/entities/character/character_gender.dart';
+import '../../domain/entities/character/character_species.dart';
+import '../../domain/entities/event/event.dart';
 import '../../domain/entities/game/game.dart';
 import '../../domain/entities/ageRating/age_rating.dart';
 import '../../domain/entities/company/company.dart';
+import '../../domain/entities/game/game_media_collection.dart';
+import '../../domain/entities/game/game_sort_options.dart';
 import '../../domain/entities/game/game_video.dart';
-import '../../domain/entities/user.dart';
+import '../../domain/entities/genre.dart';
+import '../../domain/entities/platform/platform.dart';
+import '../../domain/entities/recommendations/discovery_challenge.dart';
+import '../../domain/entities/recommendations/game_mood.dart';
+import '../../domain/entities/recommendations/genre_trend.dart';
+import '../../domain/entities/recommendations/recommendation_signal.dart';
+import '../../domain/entities/recommendations/seasons.dart';
+import '../../domain/entities/screenshot.dart';
+import '../../domain/entities/search/search_filters.dart';
+import '../../domain/entities/user/user.dart';
+import '../../domain/entities/user/user_collection_filters.dart';
+import '../../domain/entities/user/user_collection_sort_options.dart';
+import '../../domain/entities/user/user_collection_summary.dart';
 import '../../domain/entities/website/website.dart';
 import '../../domain/repositories/game_repository.dart';
+import '../../domain/usecases/game/getUserRated.dart';
+import '../../domain/usecases/game/get_user_recommendations.dart';
+import '../../domain/usecases/game/get_user_wishlist.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/igdb/idgb_remote_datasource.dart';
-import '../datasources/remote/supabase_remote_datasource.dart';
+import '../datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:get_it/get_it.dart';
 
@@ -292,26 +314,6 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, List<GameVideo>>> getGameVideos(List<int> gameIds) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎥 GameRepository: Getting videos for ${gameIds.length} games');
-
-      final videos = await igdbDataSource.getGameVideos(gameIds);
-
-      print('✅ GameRepository: Loaded ${videos.length} videos');
-      return Right(videos);
-
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load game videos'));
-    }
-  }
 
   @override
   Future<Either<Failure, List<AgeRating>>> getGameAgeRatings(List<int> gameIds) async {
@@ -830,5 +832,2110 @@ class GameRepositoryImpl implements GameRepository {
       return Left(
           ServerFailure(message: 'Failed to load wishlist recent releases'));
     }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> searchGamesWithFilters({
+    required String query,
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure(
+            message: 'No internet connection. Please check your network.'
+        ));
+      }
+
+      print('🔍 GameRepository: Enhanced search for: "$query" with filters');
+      print('📊 GameRepository: Genres: ${filters.genreIds}, Platforms: ${filters.platformIds}');
+
+      final searchResults = await igdbDataSource.searchGamesWithFilters(
+        query: query,
+        filters: filters,
+        limit: limit,
+        offset: offset,
+      );
+
+      // Enrich with user data
+      final enrichedResults = await _enrichGamesWithUserData(searchResults);
+
+      print('✅ GameRepository: Enhanced search completed - found ${enrichedResults.length} results');
+      return Right(enrichedResults);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to search games with filters'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByGenre({
+    required List<int> genreIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.popularity,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (genreIds.isEmpty) {
+        return const Right([]);
+      }
+
+      print('🎨 GameRepository: Getting games by genres: $genreIds');
+
+      final games = await igdbDataSource.getGamesByGenres(
+        genreIds: genreIds,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for genres');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by genre'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByPlatform({
+    required List<int> platformIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.popularity,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (platformIds.isEmpty) {
+        return const Right([]);
+      }
+
+      print('🎮 GameRepository: Getting games by platforms: $platformIds');
+
+      final games = await igdbDataSource.getGamesByPlatforms(
+        platformIds: platformIds,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for platforms');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by platform'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByReleaseYear({
+    required int fromYear,
+    required int toYear,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.releaseDate,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📅 GameRepository: Getting games from $fromYear to $toYear');
+
+      final games = await igdbDataSource.getGamesByYearRange(
+        fromYear: fromYear,
+        toYear: toYear,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for year range');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by release year'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByRatingRange({
+    required double minRating,
+    required double maxRating,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.rating,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('⭐ GameRepository: Getting games with rating $minRating-$maxRating');
+
+      final games = await igdbDataSource.getGamesByRatingRange(
+        minRating: minRating,
+        maxRating: maxRating,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for rating range');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by rating range'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Genre>>> getAllGenres() async {
+    try {
+      // Check cache first
+      final cachedGenres = await localDataSource.getCachedGenres();
+      if (cachedGenres != null && cachedGenres.isNotEmpty) {
+        print('🎨 GameRepository: Found cached genres');
+        return Right(cachedGenres);
+      }
+
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎨 GameRepository: Fetching all genres');
+
+      final genres = await igdbDataSource.getAllGenres();
+
+      // Cache genres for future use
+      await localDataSource.cacheGenres(genres);
+
+      print('✅ GameRepository: Loaded ${genres.length} genres');
+      return Right(genres);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get genres'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Platform>>> getAllPlatforms() async {
+    try {
+      // Check cache first
+      final cachedPlatforms = await localDataSource.getCachedPlatforms();
+      if (cachedPlatforms != null && cachedPlatforms.isNotEmpty) {
+        print('🎮 GameRepository: Found cached platforms');
+        return Right(cachedPlatforms);
+      }
+
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Fetching all platforms');
+
+      final platforms = await igdbDataSource.getAllPlatforms();
+
+      // Cache platforms for future use
+      await localDataSource.cachePlatforms(platforms);
+
+      print('✅ GameRepository: Loaded ${platforms.length} platforms');
+      return Right(platforms);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get platforms'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getFilteredGames({
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🔍 GameRepository: Getting filtered games');
+      print('📊 GameRepository: Active filters: ${filters.hasFilters ? 'Yes' : 'No'}');
+
+      final games = await igdbDataSource.getFilteredGames(
+        filters: filters,
+        limit: limit,
+        offset: offset,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} filtered games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get filtered games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> advancedGameSearch({
+    String? textQuery,
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🔍 GameRepository: Advanced search - Query: "${textQuery ?? 'None'}"');
+
+      final games = await igdbDataSource.searchGamesWithFilters(
+        query: textQuery ?? '',
+        filters: filters,
+        limit: limit,
+        offset: offset,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Advanced search found ${enrichedGames.length} games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to perform advanced search'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getSearchSuggestions(String partialQuery) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (partialQuery.length < 2) {
+        return const Right([]);
+      }
+
+      print('💡 GameRepository: Getting search suggestions for: "$partialQuery"');
+
+      final suggestions = await igdbDataSource.getSearchSuggestions(partialQuery);
+
+      print('✅ GameRepository: Found ${suggestions.length} search suggestions');
+      return Right(suggestions);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get search suggestions'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getRecentSearches(String userId, {int limit = 10}) async {
+    try {
+      print('📝 GameRepository: Getting recent searches for user: $userId');
+
+      // Get recent search queries from Supabase
+      final recentQueries = await supabaseDataSource.getRecentSearchQueries(userId, limit: limit);
+
+      if (recentQueries.isEmpty) {
+        return const Right([]);
+      }
+
+      // For now, return games from the most recent search
+      // In a full implementation, you might store actual game IDs
+      final mostRecentQuery = recentQueries.first;
+      final searchResult = await searchGames(mostRecentQuery, limit, 0);
+
+      return searchResult;
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get recent searches'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveSearchQuery(String userId, String query) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('💾 GameRepository: Saving search query for user: $userId');
+
+      await supabaseDataSource.saveSearchQuery(userId, query);
+
+      print('✅ GameRepository: Search query saved successfully');
+      return const Right(null);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to save search query'));
+    }
+  }
+
+  // ==========================================
+  // PHASE 3 - ENHANCED USER COLLECTIONS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserWishlistWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('❤️ GameRepository: Getting filtered wishlist for user: $userId');
+      print('📊 GameRepository: Filters active: ${filters.hasFilters}');
+
+      // Get wishlist data from Supabase with basic filters
+      final wishlistData = await supabaseDataSource.getUserWishlistWithFilters(
+        userId: userId,
+        filters: filters,
+        limit: limit * 2, // Get more to handle post-filtering
+        offset: offset,
+      );
+
+      if (wishlistData.isEmpty) {
+        return const Right([]);
+      }
+
+      // Extract game IDs
+      final gameIds = wishlistData.map((item) => item['game_id'] as int).toList();
+
+      // Get full game data from IGDB
+      final games = await igdbDataSource.getGamesByIds(gameIds);
+
+      // Apply complex filters that require IGDB data
+      var filteredGames = _applyComplexFilters(games, filters);
+
+      // Apply sorting that requires IGDB data
+      filteredGames = _applySorting(filteredGames, filters.sortBy, filters.sortOrder);
+
+      // Apply final pagination after filtering
+      final paginatedGames = filteredGames.skip(offset).take(limit).toList();
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(paginatedGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} filtered wishlist games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get filtered wishlist'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRatedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('⭐ GameRepository: Getting filtered rated games for user: $userId');
+
+      // Get rated games data from Supabase
+      final ratedData = await supabaseDataSource.getUserRatedGamesWithFilters(
+        userId: userId,
+        filters: filters,
+        limit: limit * 2,
+        offset: offset,
+      );
+
+      if (ratedData.isEmpty) {
+        return const Right([]);
+      }
+
+      // Extract game IDs and user ratings
+      final gameIds = ratedData.map((item) => item['game_id'] as int).toList();
+      final userRatings = <int, double>{};
+      for (final item in ratedData) {
+        userRatings[item['game_id'] as int] = (item['rating'] as num).toDouble();
+      }
+
+      // Get full game data from IGDB
+      final games = await igdbDataSource.getGamesByIds(gameIds);
+
+      // Apply complex filters
+      var filteredGames = _applyComplexFilters(games, filters);
+
+      // Apply user rating filters
+      if (filters.hasUserRatingFilter) {
+        filteredGames = filteredGames.where((game) {
+          final userRating = userRatings[game.id];
+          if (userRating == null) return false;
+
+          if (filters.minUserRating != null && userRating < filters.minUserRating!) {
+            return false;
+          }
+          if (filters.maxUserRating != null && userRating > filters.maxUserRating!) {
+            return false;
+          }
+          return true;
+        }).toList();
+      }
+
+      // Apply sorting
+      filteredGames = _applySorting(filteredGames, filters.sortBy, filters.sortOrder, userRatings);
+
+      // Apply pagination
+      final paginatedGames = filteredGames.skip(offset).take(limit).toList();
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(paginatedGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} filtered rated games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get filtered rated games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRecommendedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('👍 GameRepository: Getting filtered recommended games for user: $userId');
+
+      // Get recommended games data from Supabase
+      final recommendedData = await supabaseDataSource.getUserRecommendedGamesWithFilters(
+        userId: userId,
+        filters: filters,
+        limit: limit * 2,
+        offset: offset,
+      );
+
+      if (recommendedData.isEmpty) {
+        return const Right([]);
+      }
+
+      // Extract game IDs
+      final gameIds = recommendedData.map((item) => item['game_id'] as int).toList();
+
+      // Get full game data from IGDB
+      final games = await igdbDataSource.getGamesByIds(gameIds);
+
+      // Apply complex filters and sorting
+      var filteredGames = _applyComplexFilters(games, filters);
+      filteredGames = _applySorting(filteredGames, filters.sortBy, filters.sortOrder);
+
+      // Apply pagination
+      final paginatedGames = filteredGames.skip(offset).take(limit).toList();
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(paginatedGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} filtered recommended games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get filtered recommended games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserCollectionSummary>> getUserCollectionSummary({
+    required String userId,
+    required UserCollectionType collectionType,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📊 GameRepository: Getting collection summary for ${collectionType.displayName}');
+
+      // Get statistics from Supabase
+      final stats = await supabaseDataSource.getUserCollectionStatistics(
+        userId: userId,
+        collectionType: collectionType,
+      );
+
+      // Build collection summary
+      final summary = UserCollectionSummary(
+        type: collectionType,
+        totalCount: stats['total_count'] ?? 0,
+        averageRating: (stats['average_rating'] as num?)?.toDouble(),
+        averageGameRating: (stats['average_game_rating'] as num?)?.toDouble(),
+        genreBreakdown: Map<String, int>.from(stats['genre_breakdown'] ?? {}),
+        platformBreakdown: Map<String, int>.from(stats['platform_breakdown'] ?? {}),
+        yearBreakdown: Map<int, int>.from(stats['year_breakdown'] ?? {}),
+        recentlyAddedCount: stats['recently_added_count'] ?? 0,
+        lastUpdated: DateTime.tryParse(stats['last_updated'] ?? ''),
+      );
+
+      print('✅ GameRepository: Collection summary loaded');
+      return Right(summary);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get collection summary'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<UserCollectionType, List<Game>>>> getAllUserCollections({
+    required String userId,
+    int limitPerCollection = 10,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🏠 GameRepository: Getting all user collections overview');
+
+      // Execute all collection requests concurrently
+      final results = await Future.wait([
+        getUserWishlist(GetUserWishlistParams(
+          userId: userId,
+          limit: limitPerCollection,
+          offset: 0,
+        )),
+        getUserRated(GetUserRatedParams(
+          userId: userId,
+          limit: limitPerCollection,
+          offset: 0,
+        )),
+        getUserRecommendations(GetUserRecommendationsParams(
+          userId: userId,
+          limit: limitPerCollection,
+          offset: 0,
+        )),
+        getUserTopThreeGames(userId),
+      ]);
+
+      // Check if any request failed
+      for (final result in results) {
+        if (result.isLeft()) {
+          return result.fold(
+                (failure) => Left(failure),
+                (data) => throw Exception('Unexpected success'),
+          );
+        }
+      }
+
+      // Extract successful results
+      final wishlist = results[0].fold((l) => <Game>[], (r) => r as List<Game>);
+      final rated = results[1].fold((l) => <Game>[], (r) => r as List<Game>);
+      final recommended = results[2].fold((l) => <Game>[], (r) => r as List<Game>);
+      final topThree = results[3].fold((l) => <Game>[], (r) => r as List<Game>);
+
+      final collections = {
+        UserCollectionType.wishlist: wishlist,
+        UserCollectionType.rated: rated,
+        UserCollectionType.recommended: recommended,
+        UserCollectionType.topThree: topThree,
+      };
+
+      print('✅ GameRepository: All user collections loaded');
+      return Right(collections);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get all user collections'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getUserGamingStatistics(String userId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📈 GameRepository: Getting gaming statistics for user: $userId');
+
+      final stats = await supabaseDataSource.getUserGamingStatistics(userId);
+
+      print('✅ GameRepository: Gaming statistics loaded');
+      return Right(stats);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get gaming statistics'));
+    }
+  }
+
+  // ==========================================
+  // HELPER METHODS FOR FILTERING & SORTING
+  // ==========================================
+
+  /// Apply complex filters that require IGDB game data
+  List<Game> _applyComplexFilters(List<Game> games, UserCollectionFilters filters) {
+    var filteredGames = games;
+
+    // Genre filter
+    if (filters.hasGenreFilter) {
+      filteredGames = filteredGames.where((game) {
+        return game.genres.any((genre) => filters.genreIds.contains(genre.id));
+      }).toList();
+    }
+
+    // Platform filter
+    if (filters.hasPlatformFilter) {
+      filteredGames = filteredGames.where((game) {
+        return game.platforms.any((platform) => filters.platformIds.contains(platform.id));
+      }).toList();
+    }
+
+    // Game rating filter
+    if (filters.hasGameRatingFilter) {
+      filteredGames = filteredGames.where((game) {
+        final rating = game.totalRating;
+        if (rating == null) return false;
+
+        if (filters.minRating != null && rating < filters.minRating!) {
+          return false;
+        }
+        if (filters.maxRating != null && rating > filters.maxRating!) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
+
+    // Release date filter
+    if (filters.hasReleaseDateFilter) {
+      filteredGames = filteredGames.where((game) {
+        final releaseDate = game.firstReleaseDate;
+        if (releaseDate == null) return false;
+
+        if (filters.releaseDateFrom != null && releaseDate.isBefore(filters.releaseDateFrom!)) {
+          return false;
+        }
+        if (filters.releaseDateTo != null && releaseDate.isAfter(filters.releaseDateTo!)) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
+
+    return filteredGames;
+  }
+
+  /// Apply sorting to games list
+  List<Game> _applySorting(
+      List<Game> games,
+      UserCollectionSortBy sortBy,
+      SortOrder sortOrder,
+      [Map<int, double>? userRatings]
+      ) {
+    final sortedGames = [...games];
+
+    switch (sortBy) {
+      case UserCollectionSortBy.name:
+      case UserCollectionSortBy.alphabetical:
+        sortedGames.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case UserCollectionSortBy.rating:
+        if (userRatings != null) {
+          sortedGames.sort((a, b) {
+            final ratingA = userRatings[a.id] ?? 0.0;
+            final ratingB = userRatings[b.id] ?? 0.0;
+            return ratingA.compareTo(ratingB);
+          });
+        }
+        break;
+      case UserCollectionSortBy.gameRating:
+        sortedGames.sort((a, b) {
+          final ratingA = a.totalRating ?? 0.0;
+          final ratingB = b.totalRating ?? 0.0;
+          return ratingA.compareTo(ratingB);
+        });
+        break;
+      case UserCollectionSortBy.releaseDate:
+        sortedGames.sort((a, b) {
+          final dateA = a.firstReleaseDate ?? DateTime(1970);
+          final dateB = b.firstReleaseDate ?? DateTime(1970);
+          return dateA.compareTo(dateB);
+        });
+        break;
+      case UserCollectionSortBy.popularity:
+        sortedGames.sort((a, b) {
+          final popularityA = a.hypes ?? 0;
+          final popularityB = b.hypes ?? 0;
+          return popularityA.compareTo(popularityB);
+        });
+        break;
+      default:
+      // Default sorting by name
+        sortedGames.sort((a, b) => a.name.compareTo(b.name));
+        break;
+    }
+
+    // Apply sort order
+    if (sortOrder == SortOrder.descending) {
+      return sortedGames.reversed.toList();
+    }
+
+    return sortedGames;
+  }
+
+  // ==========================================
+  // BATCH OPERATIONS
+  // ==========================================
+
+  @override
+  Future<Either<Failure, void>> batchAddToWishlist({
+    required String userId,
+    required List<int> gameIds,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('❤️ GameRepository: Batch adding ${gameIds.length} games to wishlist');
+
+      await supabaseDataSource.batchAddToWishlist(userId, gameIds);
+
+      // Clear relevant caches
+      for (final gameId in gameIds) {
+        await localDataSource.clearCachedGameDetails(gameId);
+      }
+
+      print('✅ GameRepository: Batch wishlist operation completed');
+      return const Right(null);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to batch add to wishlist'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> batchRateGames({
+    required String userId,
+    required Map<int, double> gameRatings,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('⭐ GameRepository: Batch rating ${gameRatings.length} games');
+
+      await supabaseDataSource.batchRateGames(userId, gameRatings);
+
+      // Clear relevant caches
+      for (final gameId in gameRatings.keys) {
+        await localDataSource.clearCachedGameDetails(gameId);
+      }
+
+      print('✅ GameRepository: Batch rating operation completed');
+      return const Right(null);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to batch rate games'));
+    }
+  }
+
+  // ==========================================
+  // PHASE 4 - GAME DETAIL ENHANCEMENTS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Character>>> getGameCharacters(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎭 GameRepository: Getting characters for game: $gameId');
+
+      final characters = await igdbDataSource.getCharactersForGames([gameId]);
+
+      print('✅ GameRepository: Found ${characters.length} characters');
+      return Right(characters);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game characters'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Event>>> getGameEvents(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎪 GameRepository: Getting events for game: $gameId');
+
+      final events = await igdbDataSource.getEventsByGames([gameId]);
+
+      print('✅ GameRepository: Found ${events.length} events');
+      return Right(events);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game events'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<GameVideo>>> getGameVideos(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎥 GameRepository: Getting videos for game: $gameId');
+
+      final videos = await igdbDataSource.getGameVideos(gameIds: [gameId]);
+
+      print('✅ GameRepository: Found ${videos.length} videos');
+      return Right(videos);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game videos'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Screenshot>>> getGameScreenshots(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📸 GameRepository: Getting screenshots for game: $gameId');
+
+      final screenshots = await igdbDataSource.getScreenshots(gameIds: [gameId]);
+
+      print('✅ GameRepository: Found ${screenshots.length} screenshots');
+      return Right(screenshots);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game screenshots'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Artwork>>> getGameArtwork(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎨 GameRepository: Getting artwork for game: $gameId');
+
+      final artworks = await igdbDataSource.getArtworks(gameIds: [gameId]);
+
+      print('✅ GameRepository: Found ${artworks.length} artworks');
+      return Right(artworks);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game artwork'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, GameMediaCollection>> getGameMediaCollection(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📱 GameRepository: Getting complete media collection for game: $gameId');
+
+      // Execute all media requests concurrently for better performance
+      final results = await Future.wait([
+        igdbDataSource.getGameVideos(gameIds: [gameId]),
+        igdbDataSource.getScreenshots(gameIds: [gameId]),
+        igdbDataSource.getArtworks(gameIds: [gameId]),
+      ]);
+
+      final videos = results[0] as List<GameVideo>;
+      final screenshots = results[1] as List<Screenshot>;
+      final artworks = results[2] as List<Artwork>;
+
+      final mediaCollection = GameMediaCollection(
+        gameId: gameId,
+        videos: videos,
+        screenshots: screenshots,
+        artworks: artworks,
+      );
+
+      print('✅ GameRepository: Media collection loaded - ${mediaCollection.totalMediaCount} total items');
+      return Right(mediaCollection);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game media collection'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Game>> getEnhancedGameDetails({
+    required int gameId,
+    String? userId,
+    bool includeCharacters = true,
+    bool includeEvents = true,
+    bool includeMedia = true,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting enhanced game details for: $gameId');
+      print('🔍 GameRepository: Include - Characters: $includeCharacters, Events: $includeEvents, Media: $includeMedia');
+
+      // Start with complete game details
+      final gameResult = await getCompleteGameDetails(gameId, userId);
+      if (gameResult.isLeft()) {
+        return gameResult;
+      }
+
+      final game = gameResult.fold((l) => throw Exception('Unexpected failure'), (r) => r);
+
+      // Collect additional requests based on flags
+      final futures = <Future>[];
+
+      if (includeCharacters) {
+        futures.add(igdbDataSource.getCharactersForGames([gameId]));
+      }
+
+      if (includeEvents) {
+        futures.add(igdbDataSource.getEventsByGames([gameId]));
+      }
+
+      if (includeMedia) {
+        futures.addAll([
+          igdbDataSource.getGameVideos(gameIds: [gameId]),
+          igdbDataSource.getScreenshots(gameIds: [gameId]),
+          igdbDataSource.getArtworks(gameIds: [gameId]),
+        ]);
+      }
+
+      // Execute all additional requests concurrently
+      final results = futures.isNotEmpty ? await Future.wait(futures) : [];
+
+      // Parse results based on what was requested
+      int resultIndex = 0;
+      List<Character> characters = [];
+      List<Event> events = [];
+      List<GameVideo> videos = [];
+      List<Screenshot> screenshots = [];
+      List<Artwork> artworks = [];
+
+      if (includeCharacters) {
+        characters = results[resultIndex++] as List<Character>;
+      }
+
+      if (includeEvents) {
+        events = results[resultIndex++] as List<Event>;
+      }
+
+      if (includeMedia) {
+        videos = results[resultIndex++] as List<GameVideo>;
+        screenshots = results[resultIndex++] as List<Screenshot>;
+        artworks = results[resultIndex++] as List<Artwork>;
+      }
+
+      // Create enhanced game with additional data
+      final enhancedGame = game.copyWith(
+        characters: characters,
+        events: events,
+        videos: videos,
+        screenshots: screenshots,
+        artworks: artworks,
+      );
+
+      print('✅ GameRepository: Enhanced game details loaded');
+      print('📊 GameRepository: ${characters.length} characters, ${events.length} events, ${videos.length + screenshots.length + artworks.length} media items');
+
+      return Right(enhancedGame);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get enhanced game details'));
+    }
+  }
+
+  // ==========================================
+  // CHARACTER DISCOVERY & SEARCH
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Character>>> searchCharacters(String query) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🔍 GameRepository: Searching characters for: "$query"');
+
+      final characters = await igdbDataSource.searchCharacters(query);
+
+      print('✅ GameRepository: Found ${characters.length} characters');
+      return Right(characters);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to search characters'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Character>>> getPopularCharacters({int limit = 20}) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('⭐ GameRepository: Getting popular characters (limit: $limit)');
+
+      final characters = await igdbDataSource.getPopularCharacters(limit: limit);
+
+      print('✅ GameRepository: Found ${characters.length} popular characters');
+      return Right(characters);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get popular characters'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Character>>> getCharactersByGender(CharacterGender gender) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('👤 GameRepository: Getting ${gender.displayName} characters');
+
+      // Convert enum to IGDB enum
+      final igdbGender = CharacterGenderEnum.values[gender.value];
+      final characters = await igdbDataSource.getCharactersByGender(igdbGender);
+
+      print('✅ GameRepository: Found ${characters.length} ${gender.displayName} characters');
+      return Right(characters);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get characters by gender'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Character>>> getCharactersBySpecies(CharacterSpecies species) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🧬 GameRepository: Getting ${species.displayName} characters');
+
+      // Convert enum to IGDB enum
+      final igdbSpecies = CharacterSpeciesEnum.values[species.value - 1]; // IGDB starts at 1
+      final characters = await igdbDataSource.getCharactersBySpecies(igdbSpecies);
+
+      print('✅ GameRepository: Found ${characters.length} ${species.displayName} characters');
+      return Right(characters);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get characters by species'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Character>> getCharacterDetails(int characterId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎭 GameRepository: Getting character details for: $characterId');
+
+      final characters = await igdbDataSource.getCharacters(ids: [characterId]);
+
+      if (characters.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Character not found'));
+      }
+
+      print('✅ GameRepository: Character details loaded');
+      return Right(characters.first);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get character details'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByCharacter(int characterId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting games for character: $characterId');
+
+      // First get character to extract game IDs
+      final character = await getCharacterDetails(characterId);
+      if (character.isLeft()) {
+        return character.fold((failure) => Left(failure), (char) => throw Exception('Unexpected success'));
+      }
+
+      final characterData = character.fold((l) => throw Exception('Unexpected failure'), (r) => r);
+      final gameIds = characterData.gameIds;
+
+      if (gameIds.isEmpty) {
+        return const Right([]);
+      }
+
+      // Get full game data
+      final games = await igdbDataSource.getGamesByIds(gameIds);
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for character');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by character'));
+    }
+  }
+
+  // ==========================================
+  // EVENT DISCOVERY
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Event>>> searchEvents(String query) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🔍 GameRepository: Searching events for: "$query"');
+
+      final events = await igdbDataSource.searchEvents(query);
+
+      print('✅ GameRepository: Found ${events.length} events');
+      return Right(events);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to search events'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Event>> getEventDetails(int eventId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎪 GameRepository: Getting event details for: $eventId');
+
+      final event = await igdbDataSource.getEventById(eventId);
+
+      if (event == null) {
+        return const Left(NotFoundFailure(message: 'Event not found'));
+      }
+
+      print('✅ GameRepository: Event details loaded');
+      return Right(event);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get event details'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getEventGames(int eventId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting games for event: $eventId');
+
+      // First get event to extract game IDs
+      final event = await getEventDetails(eventId);
+      if (event.isLeft()) {
+        return event.fold((failure) => Left(failure), (evt) => throw Exception('Unexpected success'));
+      }
+
+      final eventData = event.fold((l) => throw Exception('Unexpected failure'), (r) => r);
+      final gameIds = eventData.gameIds;
+
+      if (gameIds.isEmpty) {
+        return const Right([]);
+      }
+
+      // Get full game data
+      final games = await igdbDataSource.getGamesByIds(gameIds);
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} games for event');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get event games'));
+    }
+  }
+
+  // ==========================================
+  // MEDIA MANAGEMENT
+  // ==========================================
+
+  @override
+  Future<Either<Failure, GameVideo>> getVideoDetails(int videoId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎥 GameRepository: Getting video details for: $videoId');
+
+      final videos = await igdbDataSource.getGameVideos(ids: [videoId]);
+
+      if (videos.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Video not found'));
+      }
+
+      print('✅ GameRepository: Video details loaded');
+      return Right(videos.first);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get video details'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Screenshot>> getScreenshotDetails(int screenshotId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📸 GameRepository: Getting screenshot details for: $screenshotId');
+
+      final screenshots = await igdbDataSource.getScreenshots(ids: [screenshotId]);
+
+      if (screenshots.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Screenshot not found'));
+      }
+
+      print('✅ GameRepository: Screenshot details loaded');
+      return Right(screenshots.first);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get screenshot details'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Artwork>> getArtworkDetails(int artworkId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎨 GameRepository: Getting artwork details for: $artworkId');
+
+      final artworks = await igdbDataSource.getArtworks(ids: [artworkId]);
+
+      if (artworks.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Artwork not found'));
+      }
+
+      print('✅ GameRepository: Artwork details loaded');
+      return Right(artworks.first);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get artwork details'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<int, GameMediaCollection>>> getBatchGameMedia(List<int> gameIds) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (gameIds.isEmpty) {
+        return const Right({});
+      }
+
+      print('📱 GameRepository: Getting batch media for ${gameIds.length} games');
+
+      // Get media for all games concurrently
+      final results = await Future.wait([
+        igdbDataSource.getGameVideos(gameIds: gameIds),
+        igdbDataSource.getScreenshots(gameIds: gameIds),
+        igdbDataSource.getArtworks(gameIds: gameIds),
+      ]);
+
+      final allVideos = results[0] as List<GameVideo>;
+      final allScreenshots = results[1] as List<Screenshot>;
+      final allArtworks = results[2] as List<Artwork>;
+
+      // Group media by game ID
+      final mediaCollections = <int, GameMediaCollection>{};
+
+      for (final gameId in gameIds) {
+        final gameVideos = allVideos.where((v) => v.gameId == gameId).toList();
+        final gameScreenshots = allScreenshots.where((s) => s.gameId == gameId).toList();
+        final gameArtworks = allArtworks.where((a) => a.gameId == gameId).toList();
+
+        mediaCollections[gameId] = GameMediaCollection(
+          gameId: gameId,
+          videos: gameVideos,
+          screenshots: gameScreenshots,
+          artworks: gameArtworks,
+        );
+      }
+
+      print('✅ GameRepository: Batch media loaded for ${mediaCollections.length} games');
+      return Right(mediaCollections);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get batch game media'));
+    }
+  }
+
+  // ==========================================
+  // PHASE 5 - ADVANCED FEATURES & RECOMMENDATIONS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<Either<Failure, List<Game>>> getPersonalizedRecommendations({
+    required String userId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎯 GameRepository: Getting personalized recommendations for user: $userId');
+
+      // Get user's gaming profile and preferences
+      final userProfile = await supabaseDataSource.getUserGamingProfile(userId);
+
+      // Get user's rated games to understand preferences
+      final ratedGameIds = await supabaseDataSource.getUserRatedIds(userId);
+      final wishlistIds = await supabaseDataSource.getUserWishlistIds(userId);
+
+      // Generate recommendations using multiple signals
+      final recommendations = await _generateSmartRecommendations(
+        userId: userId,
+        userProfile: userProfile,
+        ratedGameIds: ratedGameIds,
+        wishlistIds: wishlistIds,
+        limit: limit * 2, // Get more to filter and rank
+      );
+
+      // Apply pagination
+      final paginatedRecommendations = recommendations.skip(offset).take(limit).toList();
+
+      // Enrich with user data
+      final enrichedRecommendations = await _enrichGamesWithUserData(paginatedRecommendations);
+
+      print('✅ GameRepository: Generated ${enrichedRecommendations.length} personalized recommendations');
+      return Right(enrichedRecommendations);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get personalized recommendations'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getTrendingGames({
+    int limit = 20,
+    int offset = 0,
+    Duration? timeWindow,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      final window = timeWindow ?? const Duration(days: 7);
+      print('🔥 GameRepository: Getting trending games (${window.inDays} days window)');
+
+      // Get games that are trending based on multiple signals
+      final trendingGames = await igdbDataSource.getTrendingGames(
+        timeWindow: window,
+        limit: limit,
+        offset: offset,
+      );
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(trendingGames);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} trending games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get trending games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getAIRecommendations({
+    required String userId,
+    int limit = 20,
+    List<RecommendationSignal> signals = const [
+      RecommendationSignal.ratings,
+      RecommendationSignal.wishlist,
+      RecommendationSignal.genres,
+      RecommendationSignal.platforms,
+      RecommendationSignal.playtime,
+    ],
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🤖 GameRepository: Getting AI recommendations for user: $userId');
+      print('📊 GameRepository: Using signals: ${signals.map((s) => s.displayName).join(', ')}');
+
+      // Collect data for each signal
+      final signalData = <RecommendationSignal, dynamic>{};
+
+      for (final signal in signals) {
+        switch (signal) {
+          case RecommendationSignal.ratings:
+            signalData[signal] = await supabaseDataSource.getUserRatingPatterns(userId);
+            break;
+          case RecommendationSignal.wishlist:
+            signalData[signal] = await supabaseDataSource.getUserWishlistPatterns(userId);
+            break;
+          case RecommendationSignal.genres:
+            signalData[signal] = await supabaseDataSource.getUserGenrePreferences(userId);
+            break;
+          case RecommendationSignal.platforms:
+            signalData[signal] = await supabaseDataSource.getUserPlatformStatistics(userId);
+            break;
+          case RecommendationSignal.friends:
+            signalData[signal] = await supabaseDataSource.getFriendsActivity(userId);
+            break;
+          case RecommendationSignal.community:
+            signalData[signal] = await supabaseDataSource.getCommunityTrends();
+            break;
+          default:
+            continue;
+        }
+      }
+
+      // Generate AI-powered recommendations
+      final recommendations = await _generateAIRecommendations(
+        userId: userId,
+        signalData: signalData,
+        limit: limit,
+      );
+
+      // Enrich with user data
+      final enrichedRecommendations = await _enrichGamesWithUserData(recommendations);
+
+      print('✅ GameRepository: Generated ${enrichedRecommendations.length} AI recommendations');
+      return Right(enrichedRecommendations);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get AI recommendations'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByMood({
+    required GameMood mood,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('😊 GameRepository: Getting ${mood.displayName} games');
+
+      // Map mood to search criteria
+      final searchCriteria = _getMoodSearchCriteria(mood);
+
+      // Get games matching mood criteria
+      final games = await igdbDataSource.getGamesByMoodCriteria(
+        criteria: searchCriteria,
+        limit: limit,
+        offset: offset,
+      );
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} ${mood.displayName} games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by mood'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<GenreTrend>>> getGenreTrends({
+    Duration? timeWindow,
+    int limit = 20,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      final window = timeWindow ?? const Duration(days: 30);
+      print('📈 GameRepository: Getting genre trends (${window.inDays} days window)');
+
+      // Get genre trends from analytics
+      final trends = await supabaseDataSource.getGenreTrendAnalytics(
+        timeWindow: window,
+        limit: limit,
+      );
+
+      // Convert to GenreTrend entities
+      final genreTrends = trends.map((trendData) => GenreTrend(
+        genreId: trendData['genre_id'] ?? 0,
+        genreName: trendData['genre_name'] ?? 'Unknown',
+        trendScore: (trendData['trend_score'] as num?)?.toDouble() ?? 0.0,
+        growthRate: (trendData['growth_rate'] as num?)?.toDouble() ?? 0.0,
+        gameCount: trendData['game_count'] ?? 0,
+        averageRating: (trendData['average_rating'] as num?)?.toDouble() ?? 0.0,
+        calculatedAt: DateTime.tryParse(trendData['calculated_at'] ?? ''),
+      )).toList();
+
+      print('✅ GameRepository: Analyzed ${genreTrends.length} genre trends');
+      return Right(genreTrends);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get genre trends'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getHiddenGems({
+    int limit = 20,
+    double minRating = 80.0,
+    int maxHypes = 100,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('💎 GameRepository: Finding hidden gems (rating≥$minRating, hypes≤$maxHypes)');
+
+      // Get games with high ratings but low visibility
+      final hiddenGems = await igdbDataSource.getHiddenGems(
+        minRating: minRating,
+        maxHypes: maxHypes,
+        limit: limit,
+      );
+
+      // Enrich with user data
+      final enrichedGems = await _enrichGamesWithUserData(hiddenGems);
+
+      print('✅ GameRepository: Found ${enrichedGems.length} hidden gems');
+      return Right(enrichedGems);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get hidden gems'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getSeasonalRecommendations({
+    required Season season,
+    int limit = 20,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🍂 GameRepository: Getting ${season.displayName} recommendations');
+
+      // Map season to game characteristics
+      final seasonalCriteria = _getSeasonalCriteria(season);
+
+      // Get games matching seasonal themes
+      final seasonalGames = await igdbDataSource.getGamesBySeasonalCriteria(
+        criteria: seasonalCriteria,
+        limit: limit,
+      );
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(seasonalGames);
+
+      print('✅ GameRepository: Found ${enrichedGames.length} ${season.displayName} recommendations');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get seasonal recommendations'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesToPlayNext({
+    required String userId,
+    int limit = 10,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('▶️ GameRepository: Getting games to play next for user: $userId');
+
+      // Get user's current gaming context
+      final userContext = await supabaseDataSource.getUserGamingContext(userId);
+
+      // Generate contextual recommendations
+      final nextGames = await _generateNextPlayRecommendations(
+        userId: userId,
+        userContext: userContext,
+        limit: limit,
+      );
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(nextGames);
+
+      print('✅ GameRepository: Generated ${enrichedGames.length} games to play next');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games to play next'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getUserGamingPatterns(String userId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📊 GameRepository: Analyzing gaming patterns for user: $userId');
+
+      // Get comprehensive gaming patterns
+      final patterns = await supabaseDataSource.getUserGamingPatternAnalysis(userId);
+
+      print('✅ GameRepository: Gaming patterns analyzed');
+      return Right(patterns);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get gaming patterns'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DiscoveryChallenge>>> getDiscoveryChallenges(String userId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎯 GameRepository: Getting discovery challenges for user: $userId');
+
+      // Generate personalized discovery challenges
+      final challenges = await _generateDiscoveryChallenges(userId);
+
+      print('✅ GameRepository: Generated ${challenges.length} discovery challenges');
+      return Right(challenges);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get discovery challenges'));
+    }
+  }
+
+  // ==========================================
+  // PHASE 5 HELPER METHODS
+  // ==========================================
+
+  /// Generate smart recommendations using multiple signals
+  Future<List<Game>> _generateSmartRecommendations({
+    required String userId,
+    required Map<String, dynamic> userProfile,
+    required List<int> ratedGameIds,
+    required List<int> wishlistIds,
+    int limit = 40,
+  }) async {
+    final recommendations = <Game>[];
+
+    // 1. Genre-based recommendations (40%)
+    final genreRecommendations = await _getGenreBasedRecommendations(
+      userProfile: userProfile,
+      limit: (limit * 0.4).round(),
+    );
+    recommendations.addAll(genreRecommendations);
+
+    // 2. Similar games recommendations (30%)
+    final similarRecommendations = await _getSimilarGameRecommendations(
+      ratedGameIds: ratedGameIds,
+      limit: (limit * 0.3).round(),
+    );
+    recommendations.addAll(similarRecommendations);
+
+    // 3. Platform-based recommendations (20%)
+    final platformRecommendations = await _getPlatformBasedRecommendations(
+      userProfile: userProfile,
+      limit: (limit * 0.2).round(),
+    );
+    recommendations.addAll(platformRecommendations);
+
+    // 4. Trending games (10%)
+    final trendingRecommendations = await igdbDataSource.getTrendingGames(
+      timeWindow: const Duration(days: 7),
+      limit: (limit * 0.1).round(),
+      offset: 0,
+    );
+    recommendations.addAll(trendingRecommendations);
+
+    // Remove duplicates and games user already has
+    final uniqueRecommendations = recommendations.where((game) {
+      return !ratedGameIds.contains(game.id) && !wishlistIds.contains(game.id);
+    }).toSet().toList();
+
+    // Sort by recommendation score (could implement scoring algorithm)
+    uniqueRecommendations.shuffle(); // Simple randomization for now
+
+    return uniqueRecommendations.take(limit).toList();
+  }
+
+  /// Generate AI-powered recommendations using signal data
+  Future<List<Game>> _generateAIRecommendations({
+    required String userId,
+    required Map<RecommendationSignal, dynamic> signalData,
+    int limit = 20,
+  }) async {
+    // This would be where you integrate with AI/ML services
+    // For now, implementing rule-based recommendations
+
+    final recommendations = <Game>[];
+
+    // Weight each signal and combine recommendations
+    for (final entry in signalData.entries) {
+      final signal = entry.key;
+      final data = entry.value;
+
+      switch (signal) {
+        case RecommendationSignal.genres:
+          final genreGames = await _getGamesFromGenrePreferences(data, limit ~/ signalData.length);
+          recommendations.addAll(genreGames);
+          break;
+        case RecommendationSignal.ratings:
+          final ratingGames = await _getGamesFromRatingPatterns(data, limit ~/ signalData.length);
+          recommendations.addAll(ratingGames);
+          break;
+        default:
+          continue;
+      }
+    }
+
+    return recommendations.take(limit).toList();
+  }
+
+  /// Get search criteria for different moods
+  Map<String, dynamic> _getMoodSearchCriteria(GameMood mood) {
+    switch (mood) {
+      case GameMood.actionPacked:
+        return {
+          'genres': [4, 5], // Action, Adventure
+          'keywords': ['fast-paced', 'action', 'combat'],
+          'themes': [1], // Action theme
+        };
+      case GameMood.relaxing:
+        return {
+          'genres': [13, 15], // Simulation, Strategy
+          'keywords': ['relaxing', 'peaceful', 'meditative'],
+          'themes': [17], // Non-violence
+        };
+      case GameMood.storyRich:
+        return {
+          'genres': [12, 14], // RPG, Adventure
+          'keywords': ['story', 'narrative', 'cinematic'],
+          'themes': [38], // Open World
+        };
+      default:
+        return {};
+    }
+  }
+
+  /// Get seasonal criteria for game recommendations
+  Map<String, dynamic> _getSeasonalCriteria(Season season) {
+    switch (season) {
+      case Season.spring:
+        return {
+          'themes': [17, 38], // Non-violence, Open World
+          'keywords': ['adventure', 'exploration', 'nature'],
+        };
+      case Season.summer:
+        return {
+          'genres': [4, 5, 10], // Action, Adventure, Racing
+          'keywords': ['adventure', 'outdoor', 'sports'],
+        };
+      case Season.autumn:
+        return {
+          'genres': [12, 31], // RPG, Adventure
+          'keywords': ['story', 'atmospheric', 'cozy'],
+        };
+      case Season.winter:
+        return {
+          'genres': [13, 15, 12], // Simulation, Strategy, RPG
+          'keywords': ['long-session', 'immersive', 'story'],
+        };
+    }
+  }
+
+  /// Generate discovery challenges based on user's gaming profile
+  Future<List<DiscoveryChallenge>> _generateDiscoveryChallenges(String userId) async {
+    final challenges = <DiscoveryChallenge>[];
+
+    // Get user's gaming profile to identify gaps
+    final userProfile = await supabaseDataSource.getUserGamingProfile(userId);
+    final userGenres = userProfile['favorite_genres'] as List<int>? ?? [];
+    final userPlatforms = userProfile['used_platforms'] as List<int>? ?? [];
+
+    // Genre exploration challenge
+    final allGenres = await igdbDataSource.getAllGenres();
+    final unexploredGenres = allGenres.where((genre) => !userGenres.contains(genre.id)).toList();
+
+    if (unexploredGenres.isNotEmpty) {
+      final randomGenre = unexploredGenres.first;
+      challenges.add(DiscoveryChallenge(
+        id: 'explore_${randomGenre.slug}',
+        title: 'Explore ${randomGenre.name}',
+        description: 'Try 3 highly-rated ${randomGenre.name} games',
+        type: DiscoveryChallengeType.exploreGenre,
+        requirements: {'genre_id': randomGenre.id, 'game_count': 3, 'min_rating': 75.0},
+        recommendedGameIds: [], // Would be populated with actual recommendations
+        rewardPoints: 100,
+        expiresAt: DateTime.now().add(const Duration(days: 30)),
+      ));
+    }
+
+    return challenges;
+  }
+
+  /// Helper methods for different recommendation strategies
+  Future<List<Game>> _getGenreBasedRecommendations({
+    required Map<String, dynamic> userProfile,
+    int limit = 10,
+  }) async {
+    final favoriteGenres = userProfile['favorite_genres'] as List<int>? ?? [];
+    if (favoriteGenres.isEmpty) return [];
+
+    return await igdbDataSource.getGamesByGenres(
+      genreIds: favoriteGenres,
+      limit: limit,
+      offset: 0,
+      sortBy: 'total_rating',
+      sortOrder: 'desc',
+    );
+  }
+
+  Future<List<Game>> _getSimilarGameRecommendations({
+    required List<int> ratedGameIds,
+    int limit = 10,
+  }) async {
+    final similarGames = <Game>[];
+
+    for (final gameId in ratedGameIds.take(5)) { // Limit to top 5 rated games
+      final similar = await igdbDataSource.getSimilarGames(gameId);
+      similarGames.addAll(similar);
+    }
+
+    return similarGames.take(limit).toList();
+  }
+
+  Future<List<Game>> _getPlatformBasedRecommendations({
+    required Map<String, dynamic> userProfile,
+    int limit = 10,
+  }) async {
+    final preferredPlatforms = userProfile['preferred_platforms'] as List<int>? ?? [];
+    if (preferredPlatforms.isEmpty) return [];
+
+    return await igdbDataSource.getGamesByPlatforms(
+      platformIds: preferredPlatforms,
+      limit: limit,
+      offset: 0,
+      sortBy: 'total_rating',
+      sortOrder: 'desc',
+    );
+  }
+
+  Future<List<Game>> _generateNextPlayRecommendations({
+    required String userId,
+    required Map<String, dynamic> userContext,
+    int limit = 10,
+  }) async {
+    // Analyze user's gaming context and suggest appropriate next games
+    final lastPlayedGenres = userContext['recent_genres'] as List<int>? ?? [];
+    final currentMood = userContext['suggested_mood'] as String? ?? 'balanced';
+
+    // Generate contextual recommendations based on recent activity
+    return await _getContextualRecommendations(
+      genres: lastPlayedGenres,
+      mood: currentMood,
+      limit: limit,
+    );
+  }
+
+  Future<List<Game>> _getContextualRecommendations({
+    required List<int> genres,
+    required String mood,
+    int limit = 10,
+  }) async {
+    // Implementation would analyze context and return appropriate games
+    return [];
+  }
+
+  Future<List<Game>> _getGamesFromGenrePreferences(dynamic data, int limit) async {
+    // Extract genre preferences and get games
+    return [];
+  }
+
+  Future<List<Game>> _getGamesFromRatingPatterns(dynamic data, int limit) async {
+    // Analyze rating patterns and suggest similar games
+    return [];
   }
 }

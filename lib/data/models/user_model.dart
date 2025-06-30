@@ -1,5 +1,6 @@
-// data/models/user_model.dart
-import '../../domain/entities/user.dart';
+import '../../domain/entities/user/user.dart';
+import '../../domain/entities/user/user_top_three.dart';
+import '../../domain/entities/user/user_gaming_activity.dart';
 
 class UserModel extends User {
   const UserModel({
@@ -10,47 +11,30 @@ class UserModel extends User {
     super.bio,
     super.country,
     required super.createdAt,
-    super.wishlistGameIds = const [],
-    super.recommendedGameIds = const [],
-    super.gameRatings = const {},
-    super.topThreeGames = const [],
-    super.followingIds = const [],
-    super.followerIds = const [],
-    super.totalGamesRated = 0,
+    super.updatedAt,
+    super.totalGamesRated,
+    super.totalGamesWishlisted,
+    super.totalGamesRecommended,
+    super.averageRating,
+    super.followersCount,
+    super.followingCount,
+    super.isFollowing,
+    super.isFollowedBy,
+    super.isProfilePublic,
+    super.showWishlist,
+    super.showRatedGames,
+    super.showRecommendedGames,
+    super.showTopThree,
+    super.topThree,
+    super.wishlistGameIds,
+    super.ratedGameIds,
+    super.recommendedGameIds,
+    super.lastActiveAt,
+    super.activitySummary,
   });
 
-  // Create UserModel from Supabase profile data
-  factory UserModel.fromSupabase(
-      Map<String, dynamic> profileData, {
-        List<int> wishlistIds = const [],
-        List<int> recommendedIds = const [],
-        Map<int, double> ratings = const {},
-        List<String> followerIds = const [],
-        List<String> followingIds = const [],
-        List<int> topThreeGames = const [],
-      }) {
-    return UserModel(
-      id: profileData['id'] as String,
-      username: profileData['username'] as String? ?? '',
-      email: profileData['email'] as String? ?? '',
-      avatarUrl: profileData['avatar_url'] as String?,
-      bio: profileData['bio'] as String?,
-      country: profileData['country'] as String?,
-      createdAt: profileData['created_at'] != null
-          ? DateTime.parse(profileData['created_at'] as String)
-          : DateTime.now(),
-      wishlistGameIds: wishlistIds,
-      recommendedGameIds: recommendedIds,
-      gameRatings: ratings,
-      topThreeGames: topThreeGames,
-      followingIds: followingIds,
-      followerIds: followerIds,
-      totalGamesRated: ratings.length,
-    );
-  }
-
-  // Create UserModel from JSON (for caching)
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  // Convert from Supabase JSON to UserModel
+  factory UserModel.fromJson(Map<String, dynamic> json, {String? currentUserId}) {
     return UserModel(
       id: json['id'] as String,
       username: json['username'] as String,
@@ -59,32 +43,58 @@ class UserModel extends User {
       bio: json['bio'] as String?,
       country: json['country'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      wishlistGameIds: (json['wishlist_game_ids'] as List<dynamic>?)
-          ?.map((id) => id as int)
-          .toList() ??
-          [],
-      recommendedGameIds: (json['recommended_game_ids'] as List<dynamic>?)
-          ?.map((id) => id as int)
-          .toList() ??
-          [],
-      gameRatings: _parseGameRatings(json['game_ratings']),
-      topThreeGames: (json['top_three_games'] as List<dynamic>?)
-          ?.map((id) => id as int)
-          .toList() ??
-          [],
-      followingIds: (json['following_ids'] as List<dynamic>?)
-          ?.map((id) => id as String)
-          .toList() ??
-          [],
-      followerIds: (json['follower_ids'] as List<dynamic>?)
-          ?.map((id) => id as String)
-          .toList() ??
-          [],
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
+
+      // Gaming stats
       totalGamesRated: json['total_games_rated'] as int? ?? 0,
+      totalGamesWishlisted: json['total_games_wishlisted'] as int? ?? 0,
+      totalGamesRecommended: json['total_games_recommended'] as int? ?? 0,
+      averageRating: (json['average_rating'] as num?)?.toDouble(),
+
+      // Social stats
+      followersCount: json['followers_count'] as int? ?? 0,
+      followingCount: json['following_count'] as int? ?? 0,
+      isFollowing: json['is_following'] as bool? ?? false,
+      isFollowedBy: json['is_followed_by'] as bool? ?? false,
+
+      // Privacy settings
+      isProfilePublic: json['is_profile_public'] as bool? ?? true,
+      showWishlist: json['show_wishlist'] as bool? ?? false,
+      showRatedGames: json['show_rated_games'] as bool? ?? true,
+      showRecommendedGames: json['show_recommended_games'] as bool? ?? true,
+      showTopThree: json['show_top_three'] as bool? ?? true,
+
+      // Top three games
+      topThree: UserTopThree(
+        firstGameId: json['top_game_1'] as int?,
+        secondGameId: json['top_game_2'] as int?,
+        thirdGameId: json['top_game_3'] as int?,
+      ),
+
+      // Game IDs (only for current user)
+      wishlistGameIds: currentUserId == json['id']
+          ? List<int>.from(json['wishlist_game_ids'] ?? [])
+          : [],
+      ratedGameIds: currentUserId == json['id']
+          ? List<int>.from(json['rated_game_ids'] ?? [])
+          : [],
+      recommendedGameIds: currentUserId == json['id']
+          ? List<int>.from(json['recommended_game_ids'] ?? [])
+          : [],
+
+      // Activity
+      lastActiveAt: json['last_active_at'] != null
+          ? DateTime.parse(json['last_active_at'] as String)
+          : null,
+      activitySummary: json['activity_summary'] != null
+          ? UserGamingActivityModel.fromJson(json['activity_summary'])
+          : null,
     );
   }
 
-  // Convert to JSON (for caching)
+  // Convert UserModel to JSON for Supabase
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -94,105 +104,150 @@ class UserModel extends User {
       'bio': bio,
       'country': country,
       'created_at': createdAt.toIso8601String(),
-      'wishlist_game_ids': wishlistGameIds,
-      'recommended_game_ids': recommendedGameIds,
-      'game_ratings': _gameRatingsToJson(),
-      'top_three_games': topThreeGames,
-      'following_ids': followingIds,
-      'follower_ids': followerIds,
+      'updated_at': updatedAt?.toIso8601String(),
       'total_games_rated': totalGamesRated,
+      'total_games_wishlisted': totalGamesWishlisted,
+      'total_games_recommended': totalGamesRecommended,
+      'average_rating': averageRating,
+      'followers_count': followersCount,
+      'following_count': followingCount,
+      'is_profile_public': isProfilePublic,
+      'show_wishlist': showWishlist,
+      'show_rated_games': showRatedGames,
+      'show_recommended_games': showRecommendedGames,
+      'show_top_three': showTopThree,
+      'top_game_1': topThree.firstGameId,
+      'top_game_2': topThree.secondGameId,
+      'top_game_3': topThree.thirdGameId,
+      'last_active_at': lastActiveAt?.toIso8601String(),
     };
   }
 
-  // Convert to Supabase format for updates
-  Map<String, dynamic> toSupabaseUpdate() {
-    final Map<String, dynamic> data = {};
-
-    if (username.isNotEmpty) data['username'] = username;
-    if (bio != null) data['bio'] = bio;
-    if (avatarUrl != null) data['avatar_url'] = avatarUrl;
-    if (country != null) data['country'] = country;
-
-    return data;
-  }
-
-  // Helper method to parse game ratings from JSON
-  static Map<int, double> _parseGameRatings(dynamic ratingsData) {
-    if (ratingsData is Map<String, dynamic>) {
-      return ratingsData.map((key, value) => MapEntry(
-        int.parse(key),
-        (value as num).toDouble(),
-      ));
-    }
-    return {};
-  }
-
-  // Helper method to convert game ratings to JSON
-  Map<String, dynamic> _gameRatingsToJson() {
-    return gameRatings.map((key, value) => MapEntry(key.toString(), value));
-  }
-
-  // Create a copy with updated fields
-  UserModel copyWith({
-    String? id,
-    String? username,
-    String? email,
-    String? avatarUrl,
-    String? bio,
-    String? country,
-    DateTime? createdAt,
-    List<int>? wishlistGameIds,
-    List<int>? recommendedGameIds,
-    Map<int, double>? gameRatings,
-    List<int>? topThreeGames,
-    List<String>? followingIds,
-    List<String>? followerIds,
-    int? totalGamesRated,
+  // Factory method for creating current user from auth
+  factory UserModel.fromAuth({
+    required String id,
+    required String email,
+    required String username,
   }) {
     return UserModel(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      bio: bio ?? this.bio,
-      country: country ?? this.country,
-      createdAt: createdAt ?? this.createdAt,
-      wishlistGameIds: wishlistGameIds ?? this.wishlistGameIds,
-      recommendedGameIds: recommendedGameIds ?? this.recommendedGameIds,
-      gameRatings: gameRatings ?? this.gameRatings,
-      topThreeGames: topThreeGames ?? this.topThreeGames,
-      followingIds: followingIds ?? this.followingIds,
-      followerIds: followerIds ?? this.followerIds,
-      totalGamesRated: totalGamesRated ?? this.totalGamesRated,
+      id: id,
+      username: username,
+      email: email,
+      createdAt: DateTime.now(),
     );
   }
 
-  // Helper getters for UI
-  bool get hasAvatar => avatarUrl != null && avatarUrl!.isNotEmpty;
-  bool get hasBio => bio != null && bio!.isNotEmpty;
-  bool get hasCountry => country != null && country!.isNotEmpty;
+  // Create UserModel from User entity
+  factory UserModel.fromEntity(User user) {
+    return UserModel(
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      country: user.country,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      totalGamesRated: user.totalGamesRated,
+      totalGamesWishlisted: user.totalGamesWishlisted,
+      totalGamesRecommended: user.totalGamesRecommended,
+      averageRating: user.averageRating,
+      followersCount: user.followersCount,
+      followingCount: user.followingCount,
+      isFollowing: user.isFollowing,
+      isFollowedBy: user.isFollowedBy,
+      isProfilePublic: user.isProfilePublic,
+      showWishlist: user.showWishlist,
+      showRatedGames: user.showRatedGames,
+      showRecommendedGames: user.showRecommendedGames,
+      showTopThree: user.showTopThree,
+      topThree: user.topThree,
+      wishlistGameIds: user.wishlistGameIds,
+      ratedGameIds: user.ratedGameIds,
+      recommendedGameIds: user.recommendedGameIds,
+      lastActiveAt: user.lastActiveAt,
+      activitySummary: user.activitySummary,
+    );
+  }
 
-  String get displayName => username.isNotEmpty ? username : email;
-  String get initials => username.isNotEmpty
-      ? username.substring(0, 1).toUpperCase()
-      : email.substring(0, 1).toUpperCase();
+  // Convert to User entity
+  User toEntity() {
+    return User(
+      id: id,
+      username: username,
+      email: email,
+      avatarUrl: avatarUrl,
+      bio: bio,
+      country: country,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      totalGamesRated: totalGamesRated,
+      totalGamesWishlisted: totalGamesWishlisted,
+      totalGamesRecommended: totalGamesRecommended,
+      averageRating: averageRating,
+      followersCount: followersCount,
+      followingCount: followingCount,
+      isFollowing: isFollowing,
+      isFollowedBy: isFollowedBy,
+      isProfilePublic: isProfilePublic,
+      showWishlist: showWishlist,
+      showRatedGames: showRatedGames,
+      showRecommendedGames: showRecommendedGames,
+      showTopThree: showTopThree,
+      topThree: topThree,
+      wishlistGameIds: wishlistGameIds,
+      ratedGameIds: ratedGameIds,
+      recommendedGameIds: recommendedGameIds,
+      lastActiveAt: lastActiveAt,
+      activitySummary: activitySummary,
+    );
+  }
+}
 
-  int get followersCount => followerIds.length;
-  int get followingCount => followingIds.length;
-  int get wishlistCount => wishlistGameIds.length;
-  int get recommendedCount => recommendedGameIds.length;
+// ==========================================
 
-  bool isFollowing(String userId) => followingIds.contains(userId);
-  bool isFollowedBy(String userId) => followerIds.contains(userId);
-  bool hasGameInWishlist(int gameId) => wishlistGameIds.contains(gameId);
-  bool hasGameRecommended(int gameId) => recommendedGameIds.contains(gameId);
-  bool hasRatedGame(int gameId) => gameRatings.containsKey(gameId);
+// lib/data/models/user_gaming_activity_model.dart
+class UserGamingActivityModel extends UserGamingActivity {
+  const UserGamingActivityModel({
+    super.gamesRatedThisMonth,
+    super.gamesAddedToWishlistThisMonth,
+    super.gamesRecommendedThisMonth,
+    super.genreBreakdown,
+    super.platformBreakdown,
+    super.lastRatedGame,
+    super.lastAddedToWishlist,
+    super.lastRecommendedGame,
+  });
 
-  double? getGameRating(int gameId) => gameRatings[gameId];
+  factory UserGamingActivityModel.fromJson(Map<String, dynamic> json) {
+    return UserGamingActivityModel(
+      gamesRatedThisMonth: json['games_rated_this_month'] as int? ?? 0,
+      gamesAddedToWishlistThisMonth: json['games_added_to_wishlist_this_month'] as int? ?? 0,
+      gamesRecommendedThisMonth: json['games_recommended_this_month'] as int? ?? 0,
+      genreBreakdown: Map<String, int>.from(json['genre_breakdown'] ?? {}),
+      platformBreakdown: Map<String, int>.from(json['platform_breakdown'] ?? {}),
+      lastRatedGame: json['last_rated_game'] != null
+          ? DateTime.parse(json['last_rated_game'] as String)
+          : null,
+      lastAddedToWishlist: json['last_added_to_wishlist'] != null
+          ? DateTime.parse(json['last_added_to_wishlist'] as String)
+          : null,
+      lastRecommendedGame: json['last_recommended_game'] != null
+          ? DateTime.parse(json['last_recommended_game'] as String)
+          : null,
+    );
+  }
 
-  double get averageRating {
-    if (gameRatings.isEmpty) return 0.0;
-    final sum = gameRatings.values.reduce((a, b) => a + b);
-    return sum / gameRatings.length;
+  Map<String, dynamic> toJson() {
+    return {
+      'games_rated_this_month': gamesRatedThisMonth,
+      'games_added_to_wishlist_this_month': gamesAddedToWishlistThisMonth,
+      'games_recommended_this_month': gamesRecommendedThisMonth,
+      'genre_breakdown': genreBreakdown,
+      'platform_breakdown': platformBreakdown,
+      'last_rated_game': lastRatedGame?.toIso8601String(),
+      'last_added_to_wishlist': lastAddedToWishlist?.toIso8601String(),
+      'last_recommended_game': lastRecommendedGame?.toIso8601String(),
+    };
   }
 }

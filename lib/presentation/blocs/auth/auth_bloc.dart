@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/user.dart';
+import '../../../domain/entities/user/user.dart';
 import '../../../domain/usecases/auth/sign_in.dart';
 import '../../../domain/usecases/auth/sign_up.dart';
 import '../../../domain/usecases/auth/sign_out.dart';

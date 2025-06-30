@@ -4,10 +4,10 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
-import '../../domain/entities/user.dart' as domain;
+import '../../domain/entities/user/user.dart' as domain;
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/cache_datasource.dart';
-import '../datasources/remote/supabase_remote_datasource.dart';
+import '../datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../models/user_model.dart';
 import '../../main.dart';
 

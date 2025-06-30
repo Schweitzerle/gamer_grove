@@ -9,7 +9,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'data/datasources/local/cache_datasource.dart';
 import 'data/datasources/remote/igdb/idgb_remote_datasource.dart';
 import 'data/datasources/remote/igdb/igdb_remote_datasource_impl.dart';
-import 'data/datasources/remote/supabase_remote_datasource.dart';
+import 'data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import 'data/repositories/auth_repository_impl.dart';
 import 'data/repositories/game_repository_impl.dart';
 import 'data/repositories/user_repository_impl.dart';

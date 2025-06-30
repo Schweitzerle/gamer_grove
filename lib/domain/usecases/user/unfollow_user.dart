@@ -1,3 +1,5 @@
+// ==========================================
+
 // lib/domain/usecases/user/unfollow_user.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
@@ -14,10 +16,6 @@ class UnfollowUser extends UseCase<void, UnfollowUserParams> {
   Future<Either<Failure, void>> call(UnfollowUserParams params) async {
     if (params.currentUserId.isEmpty || params.targetUserId.isEmpty) {
       return const Left(ValidationFailure(message: 'User IDs cannot be empty'));
-    }
-
-    if (params.currentUserId == params.targetUserId) {
-      return const Left(ValidationFailure(message: 'Cannot unfollow yourself'));
     }
 
     return await repository.unfollowUser(
@@ -39,3 +37,4 @@ class UnfollowUserParams extends Equatable {
   @override
   List<Object> get props => [currentUserId, targetUserId];
 }
+

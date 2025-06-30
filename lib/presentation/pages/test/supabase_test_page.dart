@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/datasources/remote/supabase_remote_datasource.dart';
+import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../data/models/user_model.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';

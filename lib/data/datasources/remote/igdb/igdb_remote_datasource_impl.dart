@@ -13,6 +13,7 @@ import '../../../../domain/entities/popularity/popularity_primitive.dart';
 import '../../../../domain/entities/search/search.dart';
 
 // Models - Age Rating
+import '../../../../domain/entities/search/search_filters.dart';
 import '../../../models/ageRating/age_rating_category_model.dart';
 import '../../../models/ageRating/age_rating_model.dart';
 import '../../../models/ageRating/age_rating_organization.dart';
@@ -1728,11 +1729,6 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<GenreModel>> getAllGenres() async {
-    return await getGenres(limit: 500);
-  }
-
-  @override
   Future<List<Map<String, dynamic>>> getGenresWithGameCount({
     List<int>? genreIds,
     int limit = 50,
@@ -2924,9 +2920,6 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<SearchModel>> getSearchSuggestions(String partialQuery, {int limit = 10}) async => await search(query: partialQuery, limit: limit);
-
-  @override
   Future<List<SearchModel>> getTrendingSearches({int limit = 20}) async => [];
 
   @override
@@ -3343,5 +3336,252 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   body,
   (json) => GameModel.fromJson(json),
   );
+  }
+
+
+  @override
+  Future<List<GameModel>> searchGamesWithFilters({
+    required String query,
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final whereConditions = <String>[];
+
+    // Text search
+    if (query.isNotEmpty) {
+      whereConditions.add('name ~ *"$query"* | alternative_names.name ~ *"$query"*');
+    }
+
+    // Genre filter
+    if (filters.hasGenreFilter) {
+      whereConditions.add('genres = (${filters.genreIds.join(',')})');
+    }
+
+    // Platform filter
+    if (filters.hasPlatformFilter) {
+      whereConditions.add('platforms = (${filters.platformIds.join(',')})');
+    }
+
+    // Rating filter
+    if (filters.hasRatingFilter) {
+      if (filters.minRating != null) {
+        whereConditions.add('total_rating >= ${filters.minRating}');
+      }
+      if (filters.maxRating != null) {
+        whereConditions.add('total_rating <= ${filters.maxRating}');
+      }
+    }
+
+    // Release date filter
+    if (filters.hasDateFilter) {
+      if (filters.releaseDateFrom != null) {
+        final timestamp = (filters.releaseDateFrom!.millisecondsSinceEpoch / 1000).round();
+        whereConditions.add('first_release_date >= $timestamp');
+      }
+      if (filters.releaseDateTo != null) {
+        final timestamp = (filters.releaseDateTo!.millisecondsSinceEpoch / 1000).round();
+        whereConditions.add('first_release_date <= $timestamp');
+      }
+    }
+
+    // Game type filter (main games only, exclude DLCs, etc.)
+    if (filters.gameTypeIds.isNotEmpty) {
+      whereConditions.add('category = (${filters.gameTypeIds.join(',')})');
+    } else {
+      whereConditions.add('category = 0'); // Main games only by default
+    }
+
+    // Build where clause
+    final whereClause = whereConditions.isNotEmpty
+        ? 'where ${whereConditions.join(' & ')}'
+        : '';
+
+    // Build sort clause
+    final sortClause = 'sort ${filters.sortBy.igdbField} ${filters.sortOrder.value}';
+
+    final body = '''
+      $whereClause;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      $sortClause;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByGenres({
+    required List<int> genreIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  }) async {
+    if (genreIds.isEmpty) return [];
+
+    final genreIdsString = genreIds.join(',');
+    final body = '''
+      where genres = ($genreIdsString) & category = 0;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByPlatforms({
+    required List<int> platformIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  }) async {
+    if (platformIds.isEmpty) return [];
+
+    final platformIdsString = platformIds.join(',');
+    final body = '''
+      where platforms = ($platformIdsString) & category = 0;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByYearRange({
+    required int fromYear,
+    required int toYear,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'desc',
+  }) async {
+    final fromTimestamp = DateTime(fromYear, 1, 1).millisecondsSinceEpoch ~/ 1000;
+    final toTimestamp = DateTime(toYear, 12, 31).millisecondsSinceEpoch ~/ 1000;
+
+    final body = '''
+      where first_release_date >= $fromTimestamp & first_release_date <= $toTimestamp & category = 0;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByRatingRange({
+    required double minRating,
+    required double maxRating,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  }) async {
+    final body = '''
+      where total_rating >= $minRating & total_rating <= $maxRating & category = 0;
+      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GenreModel>> getAllGenres() async {
+    final body = '''
+      fields id, name, slug, checksum, created_at, updated_at, url;
+      sort name asc;
+      limit 100;
+    ''';
+
+    return await _makeRequest(
+      'genres',
+      body,
+          (json) => GenreModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<PlatformModel>> getAllPlatforms() async {
+    final body = '''
+      fields id, name, abbreviation, alternative_name, category, checksum, created_at, generation, platform_family, platform_logo, platform_type, slug, summary, updated_at, url, versions, websites;
+      sort name asc;
+      limit 200;
+    ''';
+
+    return await _makeRequest(
+      'platforms',
+      body,
+          (json) => PlatformModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getFilteredGames({
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    return await searchGamesWithFilters(
+      query: '', // No text search, only filtering
+      filters: filters,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  @override
+  Future<List<String>> getSearchSuggestions(String partialQuery) async {
+    if (partialQuery.length < 2) return [];
+
+    final body = '''
+      search "$partialQuery";
+      fields name;
+      limit 10;
+    ''';
+
+    try {
+      final games = await _makeRequest(
+        'games',
+        body,
+            (json) => GameModel.fromJson(json),
+      );
+
+      return games.map((game) => game.name).toList();
+    } catch (e) {
+      return [];
+    }
   }
 }

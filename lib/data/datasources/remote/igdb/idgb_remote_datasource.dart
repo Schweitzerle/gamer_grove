@@ -14,6 +14,7 @@ import '../../../../domain/entities/popularity/popularity_primitive.dart';
 import '../../../../domain/entities/search/search.dart';
 
 // Models - Age Rating
+import '../../../../domain/entities/search/search_filters.dart';
 import '../../../models/ageRating/age_rating_category_model.dart';
 import '../../../models/ageRating/age_rating_model.dart';
 import '../../../models/ageRating/age_rating_organization.dart';
@@ -445,8 +446,6 @@ abstract class IGDBRemoteDataSource {
   /// Search genres
   Future<List<GenreModel>> searchGenres(String query);
 
-  /// Get all genres
-  Future<List<GenreModel>> getAllGenres();
 
   /// Get genres with game count
   Future<List<Map<String, dynamic>>> getGenresWithGameCount({
@@ -1040,9 +1039,6 @@ abstract class IGDBRemoteDataSource {
     int limit = 50,
   });
 
-  /// Get search suggestions
-  Future<List<SearchModel>> getSearchSuggestions(String partialQuery, {int limit = 10});
-
   /// Get trending searches
   Future<List<SearchModel>> getTrendingSearches({int limit = 20});
 
@@ -1283,4 +1279,71 @@ abstract class IGDBRemoteDataSource {
   required DateTime fromDate,
   required DateTime toDate,
   });
+
+  // ==========================================
+  // PHASE 2 - ENHANCED SEARCH & FILTERING METHODS
+  // ==========================================
+
+  /// Enhanced search with comprehensive filtering
+  Future<List<GameModel>> searchGamesWithFilters({
+    required String query,
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  /// Get games by genres with sorting options
+  Future<List<GameModel>> getGamesByGenres({
+    required List<int> genreIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  });
+
+  /// Get games by platforms with sorting options
+  Future<List<GameModel>> getGamesByPlatforms({
+    required List<int> platformIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  });
+
+  /// Get games by release year range
+  Future<List<GameModel>> getGamesByYearRange({
+    required int fromYear,
+    required int toYear,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'desc',
+  });
+
+  /// Get games by rating range
+  Future<List<GameModel>> getGamesByRatingRange({
+    required double minRating,
+    required double maxRating,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  });
+
+  /// Get all genres
+  Future<List<GenreModel>> getAllGenres();
+
+  /// Get all platforms
+  Future<List<PlatformModel>> getAllPlatforms();
+
+  /// Advanced search with multiple filters
+  Future<List<GameModel>> getFilteredGames({
+    required SearchFilters filters,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  /// Get search suggestions
+  Future<List<String>> getSearchSuggestions(String partialQuery);
 }
+
