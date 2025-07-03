@@ -57,3 +57,9 @@ class NotFoundFailure extends Failure {
   });
 }
 
+class AuthorizationFailure extends Failure {
+  const AuthorizationFailure({
+    super.message = 'Not authorized to access this resource',
+    super.code,
+  });
+}

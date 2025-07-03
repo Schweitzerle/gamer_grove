@@ -1,5 +1,6 @@
 // lib/data/models/character_model.dart
 import '../../../domain/entities/character/character.dart';
+import '../../../domain/entities/character/character_species.dart';
 
 class CharacterModel extends Character {
   const CharacterModel({

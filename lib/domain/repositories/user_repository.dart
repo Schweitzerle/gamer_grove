@@ -135,7 +135,7 @@ abstract class UserRepository {
   });
 
   /// Get user's top three games as Game entities
-  Future<Either<Failure, List<Game>>> getUserTopThreeGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserTopThreeGames({
     required String userId,
   });
 
@@ -163,7 +163,7 @@ abstract class UserRepository {
   // ==========================================
 
   /// Get user's public rated games
-  Future<Either<Failure, List<Game>>> getUserPublicRatedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRatedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,
@@ -171,7 +171,7 @@ abstract class UserRepository {
   });
 
   /// Get user's public recommended games
-  Future<Either<Failure, List<Game>>> getUserPublicRecommendedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRecommendedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,

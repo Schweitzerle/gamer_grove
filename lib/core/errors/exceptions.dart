@@ -44,3 +44,13 @@ class ValidationException implements Exception {
     this.errors,
   });
 }
+
+class UnauthorizedException implements Exception {
+  final String message;
+  final String? code;
+
+  UnauthorizedException({
+    required this.message,
+    this.code,
+  });
+}

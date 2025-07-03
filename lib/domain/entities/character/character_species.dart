@@ -20,24 +20,31 @@ class CharacterSpecies extends Equatable {
   List<Object?> get props => [id, checksum, name, createdAt, updatedAt];
 }
 
-// ==========================================
+// Character Species Enum (DEPRECATED but still useful)
+enum CharacterSpeciesEnum {
+  human(1),
+  alien(2),
+  animal(3),
+  android(4),
+  unknown(5);
 
-// lib/domain/entities/character/character_species.dart
-enum CharacterSpecies {
-  human(1, 'Human'),
-  alien(2, 'Alien'),
-  animal(3, 'Animal'),
-  android(4, 'Android'),
-  unknown(5, 'Unknown');
-
-  const CharacterSpecies(this.value, this.displayName);
+  const CharacterSpeciesEnum(this.value);
   final int value;
-  final String displayName;
 
-  static CharacterSpecies fromValue(int value) {
+  static CharacterSpeciesEnum fromValue(int value) {
     return values.firstWhere(
           (species) => species.value == value,
       orElse: () => unknown,
     );
+  }
+
+  String get displayName {
+    switch (this) {
+      case human: return 'Human';
+      case alien: return 'Alien';
+      case animal: return 'Animal';
+      case android: return 'Android';
+      case unknown: return 'Unknown';
+    }
   }
 }

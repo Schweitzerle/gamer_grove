@@ -8,13 +8,13 @@ import '../../entities/game/game.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class GetUserPublicRatedGames extends UseCase<List<Game>, GetUserPublicGamesParams> {
+class GetUserPublicRatedGames extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
   final UserRepository repository;
 
   GetUserPublicRatedGames(this.repository);
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetUserPublicGamesParams params) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> call(GetUserPublicGamesParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -28,13 +28,13 @@ class GetUserPublicRatedGames extends UseCase<List<Game>, GetUserPublicGamesPara
   }
 }
 
-class GetUserPublicRecommendedGames extends UseCase<List<Game>, GetUserPublicGamesParams> {
+class GetUserPublicRecommendedGames extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
   final UserRepository repository;
 
   GetUserPublicRecommendedGames(this.repository);
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetUserPublicGamesParams params) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> call(GetUserPublicGamesParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }

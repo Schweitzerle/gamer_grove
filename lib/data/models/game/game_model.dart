@@ -1,5 +1,8 @@
 // lib/data/models/game_model.dart (VOLLSTÄNDIG ERWEITERT)
 import '../../../core/utils/date_formatter.dart';
+import '../../../domain/entities/artwork.dart';
+import '../../../domain/entities/character/character.dart';
+import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/game/game_status.dart';
 import '../../../domain/entities/game/game_type.dart';
@@ -7,6 +10,7 @@ import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../domain/entities/game/game_mode.dart';
 import '../../../domain/entities/involved_company.dart';
+import '../../../domain/entities/screenshot.dart';
 import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/game/game_video.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
@@ -15,6 +19,7 @@ import '../../../domain/entities/keyword.dart';
 import '../../../domain/entities/multiplayer_mode.dart';
 import '../../../domain/entities/player_perspective.dart';
 import '../../../domain/entities/franchise.dart';
+
 // FIX: Correct import path
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
@@ -23,8 +28,12 @@ import '../../../domain/entities/releaseDate/release_date.dart';
 import '../../../domain/entities/game/game_localization.dart';
 
 // Imports für Models
+import '../artwork_model.dart';
+import '../character/character_model.dart';
+import '../event/event_model.dart';
 import '../genre_model.dart';
 import '../platform/platform_model.dart';
+import '../screenshot_model.dart';
 import 'game_mode_model.dart';
 import '../involved_company_model.dart';
 import '../website/website_model.dart';
@@ -99,6 +108,8 @@ class GameModel extends Game {
     super.parentGame,
     super.alternativeNames,
     super.hypes,
+    super.characters,
+    super.events,
     // FIX: Remove these parameters if they don't exist in Game entity
     // super.isWishlisted,
     // super.isRecommended,
@@ -147,7 +158,8 @@ class GameModel extends Game {
       gameModes: _extractGameModes(json['game_modes']),
       themes: _extractThemes(json['themes']),
       keywords: _extractKeywords(json['keywords']),
-      playerPerspectives: _extractPlayerPerspectives(json['player_perspectives']),
+      playerPerspectives:
+          _extractPlayerPerspectives(json['player_perspectives']),
       tags: _extractTags(json['tags']),
 
       // Unternehmen
@@ -175,7 +187,8 @@ class GameModel extends Game {
       similarGames: _extractSimilarGames(json['similar_games']),
       dlcs: _extractDLCs(json['dlcs']),
       expansions: _extractExpansions(json['expansions']),
-      standaloneExpansions: _extractStandaloneExpansions(json['standalone_expansions']),
+      standaloneExpansions:
+          _extractStandaloneExpansions(json['standalone_expansions']),
       bundles: _extractBundles(json['bundles']),
       expandedGames: _extractExpandedGames(json['expanded_games']),
       forks: _extractForks(json['forks']),
@@ -189,6 +202,9 @@ class GameModel extends Game {
 
       // Community
       hypes: _parseInt(json['hypes']),
+
+      characters: _extractCharacters(json['characters']),
+      events: _extractEvents(json['events']),
     );
   }
 
@@ -262,15 +278,24 @@ class GameModel extends Game {
 
   static String _getGameStatusName(int id) {
     switch (id) {
-      case 0: return 'Released';
-      case 2: return 'Alpha';
-      case 3: return 'Beta';
-      case 4: return 'Early Access';
-      case 5: return 'Offline';
-      case 6: return 'Cancelled';
-      case 7: return 'Rumored';
-      case 8: return 'Delisted';
-      default: return 'Unknown';
+      case 0:
+        return 'Released';
+      case 2:
+        return 'Alpha';
+      case 3:
+        return 'Beta';
+      case 4:
+        return 'Early Access';
+      case 5:
+        return 'Offline';
+      case 6:
+        return 'Cancelled';
+      case 7:
+        return 'Rumored';
+      case 8:
+        return 'Delisted';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -299,25 +324,40 @@ class GameModel extends Game {
 
   static String _getGameTypeName(int id) {
     switch (id) {
-      case 0: return 'Main Game';
-      case 1: return 'DLC/Add-on';
-      case 2: return 'Expansion';
-      case 3: return 'Bundle';
-      case 4: return 'Standalone Expansion';
-      case 5: return 'Mod';
-      case 6: return 'Episode';
-      case 7: return 'Season';
-      case 8: return 'Remake';
-      case 9: return 'Remaster';
-      case 10: return 'Expanded Game';
-      case 11: return 'Port';
-      case 12: return 'Fork';
-      case 13: return 'Pack';
-      case 14: return 'Update';
-      default: return 'Unknown';
+      case 0:
+        return 'Main Game';
+      case 1:
+        return 'DLC/Add-on';
+      case 2:
+        return 'Expansion';
+      case 3:
+        return 'Bundle';
+      case 4:
+        return 'Standalone Expansion';
+      case 5:
+        return 'Mod';
+      case 6:
+        return 'Episode';
+      case 7:
+        return 'Season';
+      case 8:
+        return 'Remake';
+      case 9:
+        return 'Remaster';
+      case 10:
+        return 'Expanded Game';
+      case 11:
+        return 'Port';
+      case 12:
+        return 'Fork';
+      case 13:
+        return 'Pack';
+      case 14:
+        return 'Update';
+      default:
+        return 'Unknown';
     }
   }
-
 
   // ===== EXTRACTION METHODS =====
 
@@ -331,27 +371,43 @@ class GameModel extends Game {
     return null;
   }
 
-  static List<String> _extractScreenshots(dynamic screenshots) {
-    if (screenshots is List) {
-      return screenshots
-          .where((item) => item is Map && item['url'] is String)
-          .map((item) {
-        final url = item['url'] as String;
-        return url.startsWith('//') ? 'https:$url' : url;
-      })
+  static List<Character> _extractCharacters(dynamic characters) {
+    if (characters is List) {
+      return characters
+          .where((item) => item is Map)
+          .map((item) => CharacterModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
   }
 
-  static List<String> _extractArtworks(dynamic artworks) {
+  static List<Event> _extractEvents(dynamic events) {
+    if (events is List) {
+      return events
+          .where((item) => item is Map)
+          .map((item) => EventModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+// Korrigierte Screenshot Extraction:
+  static List<Screenshot> _extractScreenshots(dynamic screenshots) {
+    if (screenshots is List) {
+      return screenshots
+          .where((item) => item is Map)
+          .map((item) => ScreenshotModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+// Korrigierte Artwork Extraction:
+  static List<Artwork> _extractArtworks(dynamic artworks) {
     if (artworks is List) {
       return artworks
-          .where((item) => item is Map && item['url'] is String)
-          .map((item) {
-        final url = item['url'] as String;
-        return url.startsWith('//') ? 'https:$url' : url;
-      })
+          .where((item) => item is Map)
+          .map((item) => ArtworkModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -372,13 +428,13 @@ class GameModel extends Game {
       return genres
           .where((item) => item is Map && item['name'] is String)
           .map((item) {
-        try {
-          return GenreModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ GameModel: Failed to parse genre: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return GenreModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print('⚠️ GameModel: Failed to parse genre: $item - Error: $e');
+              return null;
+            }
+          })
           .where((genre) => genre != null)
           .cast<Genre>()
           .toList();
@@ -391,13 +447,14 @@ class GameModel extends Game {
       return platforms
           .where((item) => item is Map)
           .map((item) {
-        try {
-          return PlatformModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ GameModel: Failed to parse platform: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return PlatformModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print(
+                  '⚠️ GameModel: Failed to parse platform: $item - Error: $e');
+              return null;
+            }
+          })
           .where((platform) => platform != null)
           .cast<Platform>()
           .toList();
@@ -410,13 +467,14 @@ class GameModel extends Game {
       return gameModes
           .where((item) => item is Map && item['name'] is String)
           .map((item) {
-        try {
-          return GameModeModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ GameModel: Failed to parse game mode: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return GameModeModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print(
+                  '⚠️ GameModel: Failed to parse game mode: $item - Error: $e');
+              return null;
+            }
+          })
           .where((gameMode) => gameMode != null)
           .cast<GameMode>()
           .toList();
@@ -444,11 +502,13 @@ class GameModel extends Game {
     return [];
   }
 
-  static List<PlayerPerspective> _extractPlayerPerspectives(dynamic perspectives) {
+  static List<PlayerPerspective> _extractPlayerPerspectives(
+      dynamic perspectives) {
     if (perspectives is List) {
       return perspectives
           .where((item) => item is Map)
-          .map((item) => PlayerPerspectiveModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              PlayerPerspectiveModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -468,7 +528,8 @@ class GameModel extends Game {
     if (companies is List) {
       return companies
           .where((item) => item is Map)
-          .map((item) => InvolvedCompanyModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              InvolvedCompanyModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -498,7 +559,8 @@ class GameModel extends Game {
     if (external is List) {
       return external
           .where((item) => item is Map)
-          .map((item) => ExternalGameModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              ExternalGameModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -518,7 +580,8 @@ class GameModel extends Game {
     if (modes is List) {
       return modes
           .where((item) => item is Map)
-          .map((item) => MultiplayerModeModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              MultiplayerModeModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -528,17 +591,20 @@ class GameModel extends Game {
     if (supports is List) {
       return supports
           .where((item) => item is Map)
-          .map((item) => LanguageSupportModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              LanguageSupportModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
   }
 
-  static List<GameLocalization> _extractGameLocalizations(dynamic localizations) {
+  static List<GameLocalization> _extractGameLocalizations(
+      dynamic localizations) {
     if (localizations is List) {
       return localizations
           .where((item) => item is Map)
-          .map((item) => GameLocalizationModel.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              GameLocalizationModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -548,7 +614,8 @@ class GameModel extends Game {
     if (dates is List) {
       return dates
           .where((item) => item is Map)
-          .map((item) => ReleaseDateModel.fromJson(item as Map<String, dynamic>))
+          .map(
+              (item) => ReleaseDateModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     return [];
@@ -582,15 +649,28 @@ class GameModel extends Game {
   }
 
   // Verwandte Spiele Extraction Methods
-  static List<Game> _extractSimilarGames(dynamic games) => _extractGameList(games);
+  static List<Game> _extractSimilarGames(dynamic games) =>
+      _extractGameList(games);
+
   static List<Game> _extractDLCs(dynamic games) => _extractGameList(games);
-  static List<Game> _extractExpansions(dynamic games) => _extractGameList(games);
-  static List<Game> _extractStandaloneExpansions(dynamic games) => _extractGameList(games);
+
+  static List<Game> _extractExpansions(dynamic games) =>
+      _extractGameList(games);
+
+  static List<Game> _extractStandaloneExpansions(dynamic games) =>
+      _extractGameList(games);
+
   static List<Game> _extractBundles(dynamic games) => _extractGameList(games);
-  static List<Game> _extractExpandedGames(dynamic games) => _extractGameList(games);
+
+  static List<Game> _extractExpandedGames(dynamic games) =>
+      _extractGameList(games);
+
   static List<Game> _extractForks(dynamic games) => _extractGameList(games);
+
   static List<Game> _extractPorts(dynamic games) => _extractGameList(games);
+
   static List<Game> _extractRemakes(dynamic games) => _extractGameList(games);
+
   static List<Game> _extractRemasters(dynamic games) => _extractGameList(games);
 
   static List<Game> _extractGameList(dynamic games) {
@@ -646,16 +726,20 @@ class GameModel extends Game {
       'cover': coverUrl != null ? {'url': coverUrl} : null,
       'screenshots': screenshots.map((url) => {'url': url}).toList(),
       'artworks': artworks.map((url) => {'url': url}).toList(),
-      'genres': genres.map((genre) => {
-        'id': genre.id,
-        'name': genre.name,
-        'slug': genre.slug,
-      }).toList(),
-      'platforms': platforms.map((platform) => {
-        'id': platform.id,
-        'name': platform.name,
-        'abbreviation': platform.abbreviation,
-      }).toList(),
+      'genres': genres
+          .map((genre) => {
+                'id': genre.id,
+                'name': genre.name,
+                'slug': genre.slug,
+              })
+          .toList(),
+      'platforms': platforms
+          .map((platform) => {
+                'id': platform.id,
+                'name': platform.name,
+                'abbreviation': platform.abbreviation,
+              })
+          .toList(),
       'themes': themes.map((theme) => {'name': theme}).toList(),
       'hypes': hypes,
     };

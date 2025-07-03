@@ -9,7 +9,9 @@ import '../../entities/game/game.dart';
 import '../../entities/user/user_collection_sort_options.dart';
 import '../../entities/user/user_collection_summary.dart';
 import '../base_usecase.dart';
-import '../user_collections/get_user_wishlist_with_filter.dart';
+import '../user_collections/get_all_user_collections.dart';
+import '../user_collections/get_user_collection_summary.dart';
+import '../user_collections/get_user_gaming_statistics.dart';
 
 class GetGrovePageData extends UseCase<GrovePageData, GetGrovePageDataParams> {
   final GetAllUserCollections getAllUserCollections;

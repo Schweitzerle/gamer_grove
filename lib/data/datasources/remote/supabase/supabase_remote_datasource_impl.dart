@@ -1,12 +1,12 @@
-// ==========================================
-// IMPLEMENTATION
-// ==========================================
+// lib/data/datasources/remote/supabase/supabase_remote_datasource_impl.dart - EXTENDED VERSION
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../../core/errors/exceptions.dart';
-import '../../../../domain/entities/game/game.dart';
+import '../../../../domain/entities/game/game_sort_options.dart';
+import '../../../../domain/entities/user/user_collection_sort_options.dart';
 import '../../../../domain/entities/user/user_gaming_activity.dart';
 import '../../../../domain/entities/user/user_relationship.dart';
+import '../../../../domain/entities/user/user_collection_filters.dart';
 import '../../../models/user_model.dart';
 
 class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
@@ -15,7 +15,1067 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   SupabaseRemoteDataSourceImpl({required this.client});
 
   // ==========================================
-  // CORE USER PROFILE METHODS
+  // GAME COLLECTIONS - BASIC METHODS
+  // ==========================================
+
+  @override
+  Future<List<int>> getUserWishlistIds(String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id')
+          .eq('user_id', userId)
+          .eq('is_wishlisted', true)
+          .order('wishlisted_at', ascending: false);
+
+      return response.map<int>((item) => item['game_id'] as int).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get wishlist IDs');
+    }
+  }
+
+  @override
+  Future<List<int>> getUserRecommendedIds(String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id')
+          .eq('user_id', userId)
+          .eq('is_recommended', true)
+          .order('recommended_at', ascending: false);
+
+      return response.map<int>((item) => item['game_id'] as int).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get recommended IDs');
+    }
+  }
+
+  @override
+  Future<List<int>> getUserRatedIds(String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id')
+          .eq('user_id', userId)
+          .eq('is_rated', true)
+          .order('rated_at', ascending: false);
+
+      return response.map<int>((item) => item['game_id'] as int).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get rated IDs');
+    }
+  }
+
+
+  @override
+  Future<Map<String, dynamic>?> getUserGameData(String userId, int gameId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      return response;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get user game data');
+    }
+  }
+
+  @override
+  Future<Map<int, Map<String, dynamic>>> getBatchUserGameData(List<int> gameIds, String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('*')
+          .eq('user_id', userId)
+          .inFilter('game_id', gameIds);
+
+      final Map<int, Map<String, dynamic>> result = {};
+      for (final item in response) {
+        result[item['game_id'] as int] = item;
+      }
+
+      return result;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get batch user game data');
+    }
+  }
+
+  // ==========================================
+  // GAME ACTIONS
+  // ==========================================
+
+  @override
+  Future<void> toggleWishlist(int gameId, String userId) async {
+    try {
+      // Check if game is already in wishlist
+      final existing = await client
+          .from('user_games')
+          .select('is_wishlisted')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (existing != null) {
+        // Update existing record
+        final newWishlistStatus = !(existing['is_wishlisted'] as bool? ?? false);
+        await client
+            .from('user_games')
+            .update({
+          'is_wishlisted': newWishlistStatus,
+          'wishlisted_at': newWishlistStatus ? DateTime.now().toIso8601String() : null,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+      } else {
+        // Insert new record
+        await client
+            .from('user_games')
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'is_wishlisted': true,
+          'wishlisted_at': DateTime.now().toIso8601String(),
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to toggle wishlist');
+    }
+  }
+
+  @override
+  Future<void> toggleRecommended(int gameId, String userId) async {
+    try {
+      // Check if game is already recommended
+      final existing = await client
+          .from('user_games')
+          .select('is_recommended')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (existing != null) {
+        // Update existing record
+        final newRecommendStatus = !(existing['is_recommended'] as bool? ?? false);
+        await client
+            .from('user_games')
+            .update({
+          'is_recommended': newRecommendStatus,
+          'recommended_at': newRecommendStatus ? DateTime.now().toIso8601String() : null,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+      } else {
+        // Insert new record
+        await client
+            .from('user_games')
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'is_recommended': true,
+          'recommended_at': DateTime.now().toIso8601String(),
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to toggle recommended');
+    }
+  }
+
+  @override
+  Future<void> rateGame(int gameId, String userId, double rating) async {
+    try {
+      // Check if game is already rated
+      final existing = await client
+          .from('user_games')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (existing != null) {
+        // Update existing record
+        await client
+            .from('user_games')
+            .update({
+          'rating': rating,
+          'is_rated': true,
+          'rated_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+      } else {
+        // Insert new record
+        await client
+            .from('user_games')
+            .insert({
+          'user_id': userId,
+          'game_id': gameId,
+          'rating': rating,
+          'is_rated': true,
+          'rated_at': DateTime.now().toIso8601String(),
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to rate game');
+    }
+  }
+
+  // ==========================================
+  // ENHANCED COLLECTIONS WITH FILTERS
+  // ==========================================
+
+  // Korrigierte Versionen der problematischen Funktionen
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserWishlistWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      // Verwenden Sie 'dynamic' anstatt 'PostgrestFilterBuilder'
+      dynamic query = client
+          .from('user_games')
+          .select('game_id, wishlisted_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_wishlisted', true);
+
+      // Apply date filters
+      if (filters.hasReleaseDateFilter) {
+        if (filters.releaseDateFrom != null) {
+          query = query.gte('wishlisted_at', filters.releaseDateFrom!.toIso8601String());
+        }
+        if (filters.releaseDateTo != null) {
+          query = query.lte('wishlisted_at', filters.releaseDateTo!.toIso8601String());
+        }
+      }
+
+      // Apply sorting
+      switch (filters.sortBy) {
+        case UserCollectionSortBy.dateAdded:
+          query = query.order('wishlisted_at', ascending: filters.sortOrder == SortOrder.ascending);
+          break;
+        case UserCollectionSortBy.alphabetical:
+        case UserCollectionSortBy.name:
+        // Note: Game name sorting would need to be done after fetching game data
+          query = query.order('wishlisted_at', ascending: false);
+          break;
+        default:
+          query = query.order('wishlisted_at', ascending: false);
+          break;
+      }
+
+      final response = await query.range(offset, offset + limit - 1);
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get wishlist with filters');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserRatedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      dynamic query = client
+          .from('user_games')
+          .select('game_id, rating, rated_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_rated', true);
+
+      // Apply user rating filters
+      if (filters.hasUserRatingFilter) {
+        if (filters.minUserRating != null) {
+          query = query.gte('rating', filters.minUserRating!);
+        }
+        if (filters.maxUserRating != null) {
+          query = query.lte('rating', filters.maxUserRating!);
+        }
+      }
+
+      // Apply date filters
+      if (filters.hasReleaseDateFilter) {
+        if (filters.releaseDateFrom != null) {
+          query = query.gte('rated_at', filters.releaseDateFrom!.toIso8601String());
+        }
+        if (filters.releaseDateTo != null) {
+          query = query.lte('rated_at', filters.releaseDateTo!.toIso8601String());
+        }
+      }
+
+      // Apply sorting
+      switch (filters.sortBy) {
+        case UserCollectionSortBy.rating:
+          query = query.order('rating', ascending: filters.sortOrder == SortOrder.ascending);
+          break;
+        case UserCollectionSortBy.dateAdded:
+          query = query.order('rated_at', ascending: filters.sortOrder == SortOrder.ascending);
+          break;
+        default:
+          query = query.order('rated_at', ascending: false);
+          break;
+      }
+
+      final response = await query.range(offset, offset + limit - 1);
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get rated games with filters');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserRecommendedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      dynamic query = client
+          .from('user_games')
+          .select('game_id, recommended_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_recommended', true);
+
+      // Apply date filters
+      if (filters.hasReleaseDateFilter) {
+        if (filters.releaseDateFrom != null) {
+          query = query.gte('recommended_at', filters.releaseDateFrom!.toIso8601String());
+        }
+        if (filters.releaseDateTo != null) {
+          query = query.lte('recommended_at', filters.releaseDateTo!.toIso8601String());
+        }
+      }
+
+      // Apply sorting
+      switch (filters.sortBy) {
+        case UserCollectionSortBy.dateAdded:
+          query = query.order('recommended_at', ascending: filters.sortOrder == SortOrder.ascending);
+          break;
+        default:
+          query = query.order('recommended_at', ascending: false);
+          break;
+      }
+
+      final response = await query.range(offset, offset + limit - 1);
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get recommended games with filters');
+    }
+  }
+  
+
+  @override
+  Future<Map<String, dynamic>> getUserCollectionStatistics({
+    required String userId,
+    required UserCollectionType collectionType,
+  }) async {
+    try {
+      String condition;
+      switch (collectionType) {
+        case UserCollectionType.wishlist:
+          condition = 'is_wishlisted.eq.true';
+          break;
+        case UserCollectionType.rated:
+          condition = 'is_rated.eq.true';
+          break;
+        case UserCollectionType.recommended:
+          condition = 'is_recommended.eq.true';
+          break;
+        case UserCollectionType.topThree:
+        // Handle top three separately
+          final topThreeResponse = await client
+              .from('user_top_three')
+              .select('game_id')
+              .eq('user_id', userId);
+
+          return {
+            'total_count': topThreeResponse.length,
+            'average_rating': null,
+            'average_game_rating': null,
+            'genre_breakdown': <String, int>{},
+            'platform_breakdown': <String, int>{},
+            'year_breakdown': <int, int>{},
+            'recently_added_count': 0,
+            'last_updated': DateTime.now().toIso8601String(),
+          };
+      }
+
+      final response = await client.rpc('get_collection_statistics', params: {
+        'user_id': userId,
+        'collection_type': collectionType.name,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get collection statistics');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserGamingStatistics(String userId) async {
+    try {
+      final response = await client.rpc('get_user_gaming_statistics', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get gaming statistics');
+    }
+  }
+
+  // ==========================================
+  // BATCH OPERATIONS
+  // ==========================================
+
+  @override
+  Future<void> batchAddToWishlist(String userId, List<int> gameIds) async {
+    try {
+      final insertData = gameIds.map((gameId) => {
+        'user_id': userId,
+        'game_id': gameId,
+        'is_wishlisted': true,
+        'wishlisted_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }).toList();
+
+      await client.from('user_games').upsert(insertData);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to batch add to wishlist');
+    }
+  }
+
+  @override
+  Future<void> batchRateGames(String userId, Map<int, double> gameRatings) async {
+    try {
+      final insertData = gameRatings.entries.map((entry) => {
+        'user_id': userId,
+        'game_id': entry.key,
+        'rating': entry.value,
+        'is_rated': true,
+        'rated_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }).toList();
+
+      await client.from('user_games').upsert(insertData);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to batch rate games');
+    }
+  }
+
+  @override
+  Future<void> batchRemoveFromWishlist(String userId, List<int> gameIds) async {
+    try {
+      await client
+          .from('user_games')
+          .update({
+        'is_wishlisted': false,
+        'wishlisted_at': null,
+        'updated_at': DateTime.now().toIso8601String(),
+      })
+          .eq('user_id', userId)
+          .inFilter('game_id', gameIds);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to batch remove from wishlist');
+    }
+  }
+
+  @override
+  Future<void> moveGamesBetweenCollections({
+    required String userId,
+    required List<int> gameIds,
+    required UserCollectionType fromCollection,
+    required UserCollectionType toCollection,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // Remove from source collection
+      switch (fromCollection) {
+        case UserCollectionType.wishlist:
+          updateData['is_wishlisted'] = false;
+          updateData['wishlisted_at'] = null;
+          break;
+        case UserCollectionType.recommended:
+          updateData['is_recommended'] = false;
+          updateData['recommended_at'] = null;
+          break;
+        default:
+          break;
+      }
+
+      // Add to destination collection
+      switch (toCollection) {
+        case UserCollectionType.wishlist:
+          updateData['is_wishlisted'] = true;
+          updateData['wishlisted_at'] = DateTime.now().toIso8601String();
+          break;
+        case UserCollectionType.recommended:
+          updateData['is_recommended'] = true;
+          updateData['recommended_at'] = DateTime.now().toIso8601String();
+          break;
+        default:
+          break;
+      }
+
+      await client
+          .from('user_games')
+          .update(updateData)
+          .eq('user_id', userId)
+          .inFilter('game_id', gameIds);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to move games between collections');
+    }
+  }
+
+  // ==========================================
+  // USER ACTIVITY & ANALYTICS
+  // ==========================================
+
+  @override
+  Future<List<Map<String, dynamic>>> getRecentlyAddedToCollections({
+    required String userId,
+    required DateTime sinceDate,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id, created_at, is_wishlisted, is_rated, is_recommended')
+          .eq('user_id', userId)
+          .or('is_wishlisted.eq.true,is_rated.eq.true,is_recommended.eq.true')
+          .gte('created_at', sinceDate.toIso8601String())
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get recently added games');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserTopGenres(String userId, {int limit = 10}) async {
+    try {
+      final response = await client.rpc('get_user_top_genres', params: {
+        'user_id': userId,
+        'limit_count': limit,
+      });
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get top genres');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserActivityTimeline({
+    required String userId,
+    required DateTime fromDate,
+    required DateTime toDate,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await client
+          .from('user_activity_log')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('created_at', fromDate.toIso8601String())
+          .lte('created_at', toDate.toIso8601String())
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get activity timeline');
+    }
+  }
+
+  @override
+  Future<Map<String, double>> getUserGenrePreferences(String userId) async {
+    try {
+      final response = await client.rpc('get_user_genre_preferences', params: {
+        'user_id': userId,
+      });
+
+      return Map<String, double>.from(response);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get genre preferences');
+    }
+  }
+
+  @override
+  Future<Map<String, int>> getUserPlatformStatistics(String userId) async {
+    try {
+      final response = await client.rpc('get_user_platform_statistics', params: {
+        'user_id': userId,
+      });
+
+      return Map<String, int>.from(response);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get platform statistics');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserRatingAnalytics(String userId) async {
+    try {
+      final response = await client.rpc('get_user_rating_analytics', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get rating analytics');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserGamingPatternAnalysis(String userId) async {
+    try {
+      final response = await client.rpc('get_user_gaming_pattern_analysis', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get gaming pattern analysis');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserGamingProfile(String userId) async {
+    try {
+      final response = await client.rpc('get_user_gaming_profile', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get gaming profile');
+    }
+  }
+
+  // ==========================================
+  // RECOMMENDATION SUPPORT
+  // ==========================================
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserHighlyRatedGames(String userId, {double minRating = 8.0}) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id, rating, rated_at')
+          .eq('user_id', userId)
+          .eq('is_rated', true)
+          .gte('rating', minRating)
+          .order('rating', ascending: false);
+
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get highly rated games');
+    }
+  }
+
+  @override
+  Future<dynamic> getUserWishlistPatterns(String userId) async {
+    try {
+      final response = await client.rpc('get_user_wishlist_patterns', params: {
+        'user_id': userId,
+      });
+
+      return response;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get wishlist patterns');
+    }
+  }
+
+  @override
+  Future<dynamic> getUserRatingPatterns(String userId) async {
+    try {
+      final response = await client.rpc('get_user_rating_patterns', params: {
+        'user_id': userId,
+      });
+
+      return response;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get rating patterns');
+    }
+  }
+
+  @override
+  Future<dynamic> getFriendsActivity(String userId) async {
+    try {
+      final response = await client.rpc('get_friends_activity', params: {
+        'user_id': userId,
+      });
+
+      return response;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get friends activity');
+    }
+  }
+
+  @override
+  Future<dynamic> getCommunityTrends() async {
+    try {
+      final response = await client.rpc('get_community_trends');
+
+      return response;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get community trends');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserGamingContext(String userId) async {
+    try {
+      final response = await client.rpc('get_user_gaming_context', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get gaming context');
+    }
+  }
+
+  @override
+  Future<List<int>> getAllUserGameIds(String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id')
+          .eq('user_id', userId)
+          .or('is_wishlisted.eq.true,is_rated.eq.true,is_recommended.eq.true');
+
+      return response.map<int>((item) => item['game_id'] as int).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get all user game IDs');
+    }
+  }
+
+  // ==========================================
+  // SOCIAL FEATURES
+  // ==========================================
+
+  @override
+  Future<List<String>> getUserFriends(String userId) async {
+    try {
+      final response = await client
+          .from('user_follows')
+          .select('followed_id')
+          .eq('follower_id', userId);
+
+      return response.map<String>((item) => item['followed_id'] as String).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get user friends');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFriendsRecentActivity({
+    required List<String> friendIds,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await client
+          .from('user_activity_log')
+          .select('*')
+          .inFilter('user_id', friendIds)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get friends activity');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFriendsRecommendedGames({
+    required List<String> friendIds,
+    required String excludeUserId,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id, user_id, recommended_at')
+          .inFilter('user_id', friendIds)
+          .eq('is_recommended', true)
+          .order('recommended_at', ascending: false)
+          .limit(limit);
+
+      return response.cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get friends recommended games');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCommunityFavoritesByGenres({
+    required List<int> genreIds,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await client.rpc('get_community_favorites_by_genres', params: {
+        'genre_ids': genreIds,
+        'limit_count': limit,
+      });
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get community favorites');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> findSimilarUsers(String userId, {int limit = 10}) async {
+    try {
+      final response = await client.rpc('find_similar_users', params: {
+        'user_id': userId,
+        'limit_count': limit,
+      });
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to find similar users');
+    }
+  }
+
+  // ==========================================
+  // ANALYTICS & TRENDS
+  // ==========================================
+
+  @override
+  Future<List<Map<String, dynamic>>> getGenreTrendAnalytics({
+    required Duration timeWindow,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await client.rpc('get_genre_trend_analytics', params: {
+        'time_window_days': timeWindow.inDays,
+        'limit_count': limit,
+      });
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get genre trend analytics');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPlatformTrendAnalytics({
+    required Duration timeWindow,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await client.rpc('get_platform_trend_analytics', params: {
+        'time_window_days': timeWindow.inDays,
+        'limit_count': limit,
+      });
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get platform trend analytics');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getIndustryTrendAnalytics({required Duration timeWindow}) async {
+    try {
+      final response = await client.rpc('get_industry_trend_analytics', params: {
+        'time_window_days': timeWindow.inDays,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get industry trend analytics');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPersonalizedInsights(String userId) async {
+    try {
+      final response = await client.rpc('get_personalized_insights', params: {
+        'user_id': userId,
+      });
+
+      return response as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get personalized insights');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getGenreEvolutionTrends() async {
+    try {
+      final response = await client.rpc('get_genre_evolution_trends');
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get genre evolution trends');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPlatformAdoptionTrends() async {
+    try {
+      final response = await client.rpc('get_platform_adoption_trends');
+
+      return (response as List).cast<Map<String, dynamic>>();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get platform adoption trends');
+    }
+  }
+
+  // ==========================================
+  // SEARCH SUPPORT
+  // ==========================================
+
+  @override
+  Future<List<String>> getRecentSearchQueries(String userId, {int limit = 10}) async {
+    try {
+      final response = await client
+          .from('user_search_history')
+          .select('query')
+          .eq('user_id', userId)
+          .order('searched_at', ascending: false)
+          .limit(limit);
+
+      return response.map<String>((item) => item['query'] as String).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get recent search queries');
+    }
+  }
+
+  @override
+  Future<void> saveSearchQuery(String userId, String query) async {
+    try {
+      await client.from('user_search_history').insert({
+        'user_id': userId,
+        'query': query,
+        'searched_at': DateTime.now().toIso8601String(),
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to save search query');
+    }
+  }
+
+  // ==========================================
+  // EXISTING IMPLEMENTATIONS FROM PREVIOUS VERSION
   // ==========================================
 
   @override
@@ -563,62 +1623,29 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw ValidationException(message: 'Must provide exactly 3 games');
       }
 
+      // Delete existing top three
       await client
-          .from('users')
-          .update({
-        'top_game_1': gameIds[0],
-        'top_game_2': gameIds[1],
-        'top_game_3': gameIds[2],
-        'updated_at': DateTime.now().toIso8601String(),
-      })
-          .eq('id', userId);
+          .from('user_top_three')
+          .delete()
+          .eq('user_id', userId);
+
+      // Insert new top three
+      final insertData = gameIds.asMap().entries.map((entry) => {
+        'user_id': userId,
+        'game_id': entry.value,
+        'position': entry.key + 1,
+        'created_at': DateTime.now().toIso8601String(),
+      }).toList();
+
+      await client
+          .from('user_top_three')
+          .insert(insertData);
 
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
     } catch (e) {
       if (e is AuthException || e is ValidationException) rethrow;
       throw ServerException(message: 'Failed to update top three games');
-    }
-  }
-
-  @override
-  Future<List<Game>> getUserTopThreeGames({
-    required String userId,
-  }) async {
-    try {
-      final userResponse = await client
-          .from('users')
-          .select('top_game_1, top_game_2, top_game_3, show_top_three, is_profile_public')
-          .eq('id', userId)
-          .single();
-
-      final currentUser = client.auth.currentUser;
-      final canView = userResponse['is_profile_public'] == true ||
-          (currentUser?.id == userId);
-
-      if (!canView || userResponse['show_top_three'] != true) {
-        throw UnauthorizedException(message: 'Cannot view top three games');
-      }
-
-      final gameIds = [
-        userResponse['top_game_1'],
-        userResponse['top_game_2'],
-        userResponse['top_game_3'],
-      ].where((id) => id != null).cast<int>().toList();
-
-      if (gameIds.isEmpty) {
-        return [];
-      }
-
-      // Here you would fetch game details from IGDB or your games table
-      // For now, return empty list or mock games
-      return [];
-
-    } on PostgrestException catch (e) {
-      throw ServerException(message: e.message);
-    } catch (e) {
-      if (e is UnauthorizedException) rethrow;
-      throw ServerException(message: 'Failed to get top three games');
     }
   }
 
@@ -638,15 +1665,14 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw ValidationException(message: 'Position must be 1, 2, or 3');
       }
 
-      final columnName = 'top_game_$position';
-
       await client
-          .from('users')
-          .update({
-        columnName: gameId,
-        'updated_at': DateTime.now().toIso8601String(),
-      })
-          .eq('id', userId);
+          .from('user_top_three')
+          .upsert({
+        'user_id': userId,
+        'game_id': gameId,
+        'position': position,
+        'created_at': DateTime.now().toIso8601String(),
+      });
 
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
@@ -671,15 +1697,11 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw ValidationException(message: 'Position must be 1, 2, or 3');
       }
 
-      final columnName = 'top_game_$position';
-
       await client
-          .from('users')
-          .update({
-        columnName: null,
-        'updated_at': DateTime.now().toIso8601String(),
-      })
-          .eq('id', userId);
+          .from('user_top_three')
+          .delete()
+          .eq('user_id', userId)
+          .eq('position', position);
 
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
@@ -700,21 +1722,23 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         throw AuthException(message: 'Unauthorized to update top three');
       }
 
-      final updateData = <String, dynamic>{
-        'updated_at': DateTime.now().toIso8601String(),
-      };
+      // Delete existing top three
+      await client
+          .from('user_top_three')
+          .delete()
+          .eq('user_id', userId);
 
-      for (final entry in positionToGameId.entries) {
-        if (entry.key < 1 || entry.key > 3) {
-          throw ValidationException(message: 'Invalid position: ${entry.key}');
-        }
-        updateData['top_game_${entry.key}'] = entry.value;
-      }
+      // Insert new arrangement
+      final insertData = positionToGameId.entries.map((entry) => {
+        'user_id': userId,
+        'game_id': entry.value,
+        'position': entry.key,
+        'created_at': DateTime.now().toIso8601String(),
+      }).toList();
 
       await client
-          .from('users')
-          .update(updateData)
-          .eq('id', userId);
+          .from('user_top_three')
+          .insert(insertData);
 
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
@@ -729,86 +1753,19 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<Game>> getUserPublicRatedGames({
-    required String userId,
-    String? currentUserId,
-    int limit = 20,
-    int offset = 0,
-  }) async {
+  Future<List<Map<String, dynamic>>> getUserTopThreeGames({required String userId}) async {
     try {
-      // Check if user allows viewing rated games
-      final userResponse = await client
-          .from('users')
-          .select('show_rated_games, is_profile_public')
-          .eq('id', userId)
-          .single();
-
-      final canView = userResponse['is_profile_public'] == true ||
-          (currentUserId == userId);
-
-      if (!canView || userResponse['show_rated_games'] != true) {
-        throw UnauthorizedException(message: 'Cannot view rated games');
-      }
-
       final response = await client
-          .from('user_games')
-          .select('game_id, rating, rated_at')
+          .from('user_top_three')
+          .select('game_id, position')
           .eq('user_id', userId)
-          .eq('is_rated', true)
-          .order('rated_at', ascending: false)
-          .range(offset, offset + limit - 1);
+          .order('position', ascending: true);
 
-      // Here you would fetch game details from IGDB
-      // For now, return empty list
-      return [];
-
+      return response.cast<Map<String, dynamic>>();
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
     } catch (e) {
-      if (e is UnauthorizedException) rethrow;
-      throw ServerException(message: 'Failed to get rated games');
-    }
-  }
-
-  @override
-  Future<List<Game>> getUserPublicRecommendedGames({
-    required String userId,
-    String? currentUserId,
-    int limit = 20,
-    int offset = 0,
-  }) async {
-    try {
-      // Check if user allows viewing recommended games
-      final userResponse = await client
-          .from('users')
-          .select('show_recommended_games, is_profile_public')
-          .eq('id', userId)
-          .single();
-
-      final canView = userResponse['is_profile_public'] == true ||
-          (currentUserId == userId);
-
-      if (!canView || userResponse['show_recommended_games'] != true) {
-        throw UnauthorizedException(message: 'Cannot view recommended games');
-      }
-
-      final response = await client
-          .from('user_games')
-          .select('game_id, recommended_at')
-          .eq('user_id', userId)
-          .eq('is_recommended', true)
-          .order('recommended_at', ascending: false)
-          .range(offset, offset + limit - 1);
-
-      // Here you would fetch game details from IGDB
-      // For now, return empty list
-      return [];
-
-    } on PostgrestException catch (e) {
-      throw ServerException(message: e.message);
-    } catch (e) {
-      if (e is UnauthorizedException) rethrow;
-      throw ServerException(message: 'Failed to get recommended games');
+      throw ServerException(message: 'Failed to get top three games');
     }
   }
 
@@ -1356,7 +2313,7 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   }
 
   // ==========================================
-  // AUTH RELATED (existing methods from your current implementation)
+  // AUTH RELATED
   // ==========================================
 
   @override
@@ -1433,6 +2390,339 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
       return await getCurrentUserProfile();
     } catch (e) {
       return null;
+    }
+  }
+
+// Implementierung der fehlenden getUserPublicRatedGames und getUserPublicRecommendedGames Methoden
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserPublicRatedGames({
+    required String userId,
+    String? currentUserId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      // Überprüfung der Berechtigung und Privacy-Einstellungen
+      final userResponse = await client
+          .from('users')
+          .select('show_rated_games, is_profile_public')
+          .eq('id', userId)
+          .single();
+
+      // Kann der aktuelle Benutzer das Profil einsehen?
+      final canViewProfile = userResponse['is_profile_public'] == true ||
+          (currentUserId == userId);
+
+      if (!canViewProfile) {
+        throw UnauthorizedException(message: 'Cannot view user profile');
+      }
+
+      // Hat der Benutzer seine bewerteten Spiele öffentlich gemacht?
+      final showRatedGames = userResponse['show_rated_games'] as bool? ?? false;
+
+      if (!showRatedGames && currentUserId != userId) {
+        throw UnauthorizedException(message: 'User has disabled public access to rated games');
+      }
+
+      // Abrufen der bewerteten Spiele
+      final response = await client
+          .from('user_games')
+          .select('game_id, rating, rated_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_rated', true)
+          .order('rated_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response.cast<Map<String, dynamic>>();
+
+    } on PostgrestException catch (e) {
+      if (e.code == '23503') { // Foreign key violation - user not found
+        throw ValidationException(message: 'User not found');
+      }
+      throw ServerException(message: e.message);
+    } catch (e) {
+      if (e is UnauthorizedException || e is ValidationException) rethrow;
+      throw ServerException(message: 'Failed to get user public rated games');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserPublicRecommendedGames({
+    required String userId,
+    String? currentUserId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      // Überprüfung der Berechtigung und Privacy-Einstellungen
+      final userResponse = await client
+          .from('users')
+          .select('show_recommended_games, is_profile_public')
+          .eq('id', userId)
+          .single();
+
+      // Kann der aktuelle Benutzer das Profil einsehen?
+      final canViewProfile = userResponse['is_profile_public'] == true ||
+          (currentUserId == userId);
+
+      if (!canViewProfile) {
+        throw UnauthorizedException(message: 'Cannot view user profile');
+      }
+
+      // Hat der Benutzer seine empfohlenen Spiele öffentlich gemacht?
+      final showRecommendedGames = userResponse['show_recommended_games'] as bool? ?? false;
+
+      if (!showRecommendedGames && currentUserId != userId) {
+        throw UnauthorizedException(message: 'User has disabled public access to recommended games');
+      }
+
+      // Abrufen der empfohlenen Spiele
+      final response = await client
+          .from('user_games')
+          .select('game_id, recommended_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_recommended', true)
+          .order('recommended_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response.cast<Map<String, dynamic>>();
+
+    } on PostgrestException catch (e) {
+      if (e.code == '23503') { // Foreign key violation - user not found
+        throw ValidationException(message: 'User not found');
+      }
+      throw ServerException(message: e.message);
+    } catch (e) {
+      if (e is UnauthorizedException || e is ValidationException) rethrow;
+      throw ServerException(message: 'Failed to get user public recommended games');
+    }
+  }
+
+// ==========================================
+// HELPER METHODEN FÜR PRIVACY CHECKS
+// ==========================================
+
+  /// Hilfsmethode um zu überprüfen, ob ein Benutzer eine bestimmte Sammlung einsehen kann
+  Future<bool> _canViewUserCollection({
+    required String userId,
+    required String collectionType,
+    String? currentUserId,
+  }) async {
+    try {
+      final userResponse = await client
+          .from('users')
+          .select('is_profile_public, $collectionType')
+          .eq('id', userId)
+          .single();
+
+      // Eigenes Profil kann immer eingesehen werden
+      if (currentUserId == userId) return true;
+
+      // Profil muss öffentlich sein
+      final isProfilePublic = userResponse['is_profile_public'] as bool? ?? false;
+      if (!isProfilePublic) return false;
+
+      // Sammlung muss öffentlich freigegeben sein
+      final isCollectionPublic = userResponse[collectionType] as bool? ?? false;
+      return isCollectionPublic;
+
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Erweiterte Methode die zusätzliche Metadaten zurückgibt
+  Future<Map<String, dynamic>> getUserPublicRatedGamesWithMetadata({
+    required String userId,
+    String? currentUserId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      // Privacy-Check
+      final canView = await _canViewUserCollection(
+        userId: userId,
+        collectionType: 'show_rated_games',
+        currentUserId: currentUserId,
+      );
+
+      if (!canView) {
+        throw UnauthorizedException(message: 'Cannot view rated games');
+      }
+
+      // Haupt-Query
+      final response = await client
+          .from('user_games')
+          .select('game_id, rating, rated_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_rated', true)
+          .order('rated_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      // Zusätzliche Metadaten abrufen
+      final statsResponse = await client
+          .from('users')
+          .select('total_games_rated, average_rating')
+          .eq('id', userId)
+          .single();
+
+      return {
+        'games': response.cast<Map<String, dynamic>>(),
+        'metadata': {
+          'total_count': statsResponse['total_games_rated'] ?? 0,
+          'average_rating': statsResponse['average_rating'],
+          'has_more': response.length == limit,
+          'offset': offset,
+          'limit': limit,
+        },
+      };
+
+    } catch (e) {
+      if (e is UnauthorizedException) rethrow;
+      throw ServerException(message: 'Failed to get rated games with metadata');
+    }
+  }
+
+  /// Erweiterte Methode für empfohlene Spiele mit Metadaten
+  Future<Map<String, dynamic>> getUserPublicRecommendedGamesWithMetadata({
+    required String userId,
+    String? currentUserId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      // Privacy-Check
+      final canView = await _canViewUserCollection(
+        userId: userId,
+        collectionType: 'show_recommended_games',
+        currentUserId: currentUserId,
+      );
+
+      if (!canView) {
+        throw UnauthorizedException(message: 'Cannot view recommended games');
+      }
+
+      // Haupt-Query
+      final response = await client
+          .from('user_games')
+          .select('game_id, recommended_at, created_at, updated_at')
+          .eq('user_id', userId)
+          .eq('is_recommended', true)
+          .order('recommended_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      // Zusätzliche Metadaten abrufen
+      final statsResponse = await client
+          .from('users')
+          .select('total_games_recommended')
+          .eq('id', userId)
+          .single();
+
+      return {
+        'games': response.cast<Map<String, dynamic>>(),
+        'metadata': {
+          'total_count': statsResponse['total_games_recommended'] ?? 0,
+          'has_more': response.length == limit,
+          'offset': offset,
+          'limit': limit,
+        },
+      };
+
+    } catch (e) {
+      if (e is UnauthorizedException) rethrow;
+      throw ServerException(message: 'Failed to get recommended games with metadata');
+    }
+  }
+
+// ==========================================
+// BATCH-ABRUF FÜR MEHRERE SAMMLUNGEN
+// ==========================================
+
+  /// Ruft alle öffentlichen Sammlungen eines Benutzers auf einmal ab
+  Future<Map<String, dynamic>> getAllUserPublicCollections({
+    required String userId,
+    String? currentUserId,
+    int limit = 10,
+  }) async {
+    try {
+      // Überprüfe Profil-Zugang
+      final userResponse = await client
+          .from('users')
+          .select('''
+          is_profile_public,
+          show_rated_games,
+          show_recommended_games,
+          show_top_three,
+          total_games_rated,
+          total_games_recommended
+        ''')
+          .eq('id', userId)
+          .single();
+
+      final canViewProfile = userResponse['is_profile_public'] == true ||
+          (currentUserId == userId);
+
+      if (!canViewProfile) {
+        throw UnauthorizedException(message: 'Cannot view user profile');
+      }
+
+      final result = <String, dynamic>{
+        'permissions': {
+          'can_view_rated': userResponse['show_rated_games'] == true || currentUserId == userId,
+          'can_view_recommended': userResponse['show_recommended_games'] == true || currentUserId == userId,
+          'can_view_top_three': userResponse['show_top_three'] == true || currentUserId == userId,
+        },
+      };
+
+      // Abrufen der bewerteten Spiele (wenn erlaubt)
+      if (result['permissions']['can_view_rated']) {
+        final ratedGames = await client
+            .from('user_games')
+            .select('game_id, rating, rated_at')
+            .eq('user_id', userId)
+            .eq('is_rated', true)
+            .order('rated_at', ascending: false)
+            .limit(limit);
+
+        result['rated_games'] = {
+          'games': ratedGames.cast<Map<String, dynamic>>(),
+          'total_count': userResponse['total_games_rated'] ?? 0,
+        };
+      }
+
+      // Abrufen der empfohlenen Spiele (wenn erlaubt)
+      if (result['permissions']['can_view_recommended']) {
+        final recommendedGames = await client
+            .from('user_games')
+            .select('game_id, recommended_at')
+            .eq('user_id', userId)
+            .eq('is_recommended', true)
+            .order('recommended_at', ascending: false)
+            .limit(limit);
+
+        result['recommended_games'] = {
+          'games': recommendedGames.cast<Map<String, dynamic>>(),
+          'total_count': userResponse['total_games_recommended'] ?? 0,
+        };
+      }
+
+      // Abrufen der Top-Drei (wenn erlaubt)
+      if (result['permissions']['can_view_top_three']) {
+        final topThreeGames = await client
+            .from('user_top_three')
+            .select('game_id, position')
+            .eq('user_id', userId)
+            .order('position', ascending: true);
+
+        result['top_three_games'] = topThreeGames.cast<Map<String, dynamic>>();
+      }
+
+      return result;
+
+    } catch (e) {
+      if (e is UnauthorizedException) rethrow;
+      throw ServerException(message: 'Failed to get user public collections');
     }
   }
 }

@@ -2,17 +2,24 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
+import '../../entities/game/game.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class GetUserTopThreeGames implements UseCase<List<int>, GetUserTopThreeGamesParams> {
+class GetUserTopThreeGames extends UseCase<List<Map<String, dynamic>>, GetUserTopThreeGamesParams> {
   final UserRepository repository;
 
   GetUserTopThreeGames(this.repository);
 
   @override
-  Future<Either<Failure, List<int>>> call(GetUserTopThreeGamesParams params) async {
-    return await repository.getUserTopThreeGames(params.userId);
+  Future<Either<Failure, List<Map<String, dynamic>>>> call(GetUserTopThreeGamesParams params) async {
+    if (params.userId.isEmpty) {
+      return const Left(ValidationFailure(message: 'User ID cannot be empty'));
+    }
+
+    return await repository.getUserTopThreeGames(
+      userId: params.userId,
+    );
   }
 }
 

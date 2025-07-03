@@ -1,8 +1,12 @@
 // lib/domain/entities/game.dart (VOLLSTÄNDIG ERWEITERT)
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
+import '../character/character.dart';
 import '../collection/collection.dart';
+import '../event/event.dart';
 import '../genre.dart';
 import '../platform/platform.dart';
+import '../screenshot.dart';
 import '../website/website_type.dart';
 import 'game_mode.dart';
 import '../involved_company.dart';
@@ -87,8 +91,8 @@ class Game extends Equatable {
 
   // ===== MEDIEN =====
   final String? coverUrl;
-  final List<String> screenshots;
-  final List<String> artworks;
+  final List<Screenshot> screenshots;
+  final List<Artwork> artworks;
   final List<GameVideo> videos;
 
   // ===== KATEGORISIERUNG =====
@@ -128,6 +132,9 @@ class Game extends Equatable {
   final double? userRating;
   final bool isInTopThree;
   final int? topThreePosition;
+
+  final List<Character> characters;
+  final List<Event> events;
 
   const Game({
     required this.id,
@@ -197,6 +204,8 @@ class Game extends Equatable {
     this.userRating,
     this.isInTopThree = false,
     this.topThreePosition,
+    this.characters = const [],
+    this.events = const [],
   });
 
   // ===== COMPUTED PROPERTIES =====
@@ -416,8 +425,8 @@ class Game extends Equatable {
     String? versionTitle,
     Game? versionParent,
     String? coverUrl,
-    List<String>? screenshots,
-    List<String>? artworks,
+    List<Screenshot>? screenshots,
+    List<Artwork>? artworks,
     List<GameVideo>? videos,
     List<Genre>? genres,
     List<Platform>? platforms,
@@ -455,6 +464,8 @@ class Game extends Equatable {
     double? userRating,
     bool? isInTopThree,
     int? topThreePosition,
+    List<Character>? characters,
+    List<Event>? events,
   }) {
     return Game(
       id: id ?? this.id,
@@ -519,6 +530,8 @@ class Game extends Equatable {
       userRating: userRating ?? this.userRating,
       isInTopThree: isInTopThree ?? this.isInTopThree,
       topThreePosition: topThreePosition ?? this.topThreePosition,
+      characters: characters ?? this.characters,
+      events: events ?? this.events,
     );
   }
 
@@ -563,8 +576,8 @@ class Game extends Equatable {
   /// Aktualisiert nur Medien-Daten
   Game copyWithMedia({
     String? coverUrl,
-    List<String>? screenshots,
-    List<String>? artworks,
+    List<Screenshot>? screenshots,
+    List<Artwork>? artworks,
     List<GameVideo>? videos,
   }) {
     return copyWith(
@@ -644,5 +657,7 @@ class Game extends Equatable {
         gameLocalizations,
         parentGame,
         childGames,
+    characters,
+    events,
       ];
 }

@@ -173,13 +173,21 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<domain.User?> get authStateChanges {
-    return remoteDataSource.authStateChanges.asyncMap((authState) async {
+    return supabase.auth.onAuthStateChange.asyncMap((authState) async {
       if (authState.session != null) {
-        final user = await remoteDataSource.getCurrentUser();
-        if (user != null) {
-          await localDataSource.cacheUser(user);
+        try {
+          final user = await remoteDataSource.getCurrentUser();
+          if (user != null) {
+            await localDataSource.cacheUser(user);
+            return user;
+          }
+        } catch (e) {
+          print(
+              '⚠️ AuthRepository: Failed to get user during auth state change: $e');
         }
-        return user;
+      } else {
+        // User signed out, clear cache
+        await localDataSource.clearCache();
       }
       return null;
     });

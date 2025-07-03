@@ -1,8 +1,10 @@
-// lib/data/datasources/remote/supabase_remote_datasource.dart - ENHANCED VERSION
+// lib/data/datasources/remote/supabase/supabase_remote_datasource.dart - EXTENDED VERSION
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../domain/entities/game/game.dart';
 import '../../../../domain/entities/user/user_gaming_activity.dart';
 import '../../../../domain/entities/user/user_relationship.dart';
+import '../../../../domain/entities/user/user_collection_filters.dart';
+import '../../../../domain/entities/user/user_collection_sort_options.dart';
 import '../../../models/user_model.dart';
 
 abstract class SupabaseRemoteDataSource {
@@ -27,6 +29,151 @@ abstract class SupabaseRemoteDataSource {
     required String userId,
     required String imageData,
   });
+
+  // ==========================================
+  // GAME COLLECTIONS - BASIC METHODS
+  // ==========================================
+
+  Future<List<int>> getUserWishlistIds(String userId);
+  Future<List<int>> getUserRecommendedIds(String userId);
+  Future<List<int>> getUserRatedIds(String userId);
+  Future<Map<String, dynamic>?> getUserGameData(String userId, int gameId);
+  Future<Map<int, Map<String, dynamic>>> getBatchUserGameData(List<int> gameIds, String userId);
+
+  // ==========================================
+  // GAME ACTIONS
+  // ==========================================
+
+  Future<void> toggleWishlist(int gameId, String userId);
+  Future<void> toggleRecommended(int gameId, String userId);
+  Future<void> rateGame(int gameId, String userId, double rating);
+
+  // ==========================================
+  // ENHANCED COLLECTIONS WITH FILTERS
+  // ==========================================
+
+  Future<List<Map<String, dynamic>>> getUserWishlistWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  Future<List<Map<String, dynamic>>> getUserRatedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  Future<List<Map<String, dynamic>>> getUserRecommendedGamesWithFilters({
+    required String userId,
+    required UserCollectionFilters filters,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  Future<Map<String, dynamic>> getUserCollectionStatistics({
+    required String userId,
+    required UserCollectionType collectionType,
+  });
+
+  Future<Map<String, dynamic>> getUserGamingStatistics(String userId);
+
+  // ==========================================
+  // BATCH OPERATIONS
+  // ==========================================
+
+  Future<void> batchAddToWishlist(String userId, List<int> gameIds);
+  Future<void> batchRateGames(String userId, Map<int, double> gameRatings);
+  Future<void> batchRemoveFromWishlist(String userId, List<int> gameIds);
+  Future<void> moveGamesBetweenCollections({
+    required String userId,
+    required List<int> gameIds,
+    required UserCollectionType fromCollection,
+    required UserCollectionType toCollection,
+  });
+
+  // ==========================================
+  // USER ACTIVITY & ANALYTICS
+  // ==========================================
+
+  Future<List<Map<String, dynamic>>> getRecentlyAddedToCollections({
+    required String userId,
+    required DateTime sinceDate,
+    int limit = 50,
+  });
+
+  Future<List<Map<String, dynamic>>> getUserTopGenres(String userId, {int limit = 10});
+  Future<List<Map<String, dynamic>>> getUserActivityTimeline({
+    required String userId,
+    required DateTime fromDate,
+    required DateTime toDate,
+    int limit = 50,
+  });
+
+  Future<Map<String, double>> getUserGenrePreferences(String userId);
+  Future<Map<String, int>> getUserPlatformStatistics(String userId);
+  Future<Map<String, dynamic>> getUserRatingAnalytics(String userId);
+  Future<Map<String, dynamic>> getUserGamingPatternAnalysis(String userId);
+  Future<Map<String, dynamic>> getUserGamingProfile(String userId);
+
+  // ==========================================
+  // RECOMMENDATION SUPPORT
+  // ==========================================
+
+  Future<List<Map<String, dynamic>>> getUserHighlyRatedGames(String userId, {double minRating = 8.0});
+  Future<dynamic> getUserWishlistPatterns(String userId);
+  Future<dynamic> getUserRatingPatterns(String userId);
+  Future<dynamic> getFriendsActivity(String userId);
+  Future<dynamic> getCommunityTrends();
+  Future<Map<String, dynamic>> getUserGamingContext(String userId);
+  Future<List<int>> getAllUserGameIds(String userId);
+
+  // ==========================================
+  // SOCIAL FEATURES
+  // ==========================================
+
+  Future<List<String>> getUserFriends(String userId);
+  Future<List<Map<String, dynamic>>> getFriendsRecentActivity({
+    required List<String> friendIds,
+    int limit = 50,
+    int offset = 0,
+  });
+  Future<List<Map<String, dynamic>>> getFriendsRecommendedGames({
+    required List<String> friendIds,
+    required String excludeUserId,
+    int limit = 20,
+  });
+  Future<List<Map<String, dynamic>>> getCommunityFavoritesByGenres({
+    required List<int> genreIds,
+    int limit = 20,
+  });
+  Future<List<Map<String, dynamic>>> findSimilarUsers(String userId, {int limit = 10});
+
+  // ==========================================
+  // ANALYTICS & TRENDS
+  // ==========================================
+
+  Future<List<Map<String, dynamic>>> getGenreTrendAnalytics({
+    required Duration timeWindow,
+    int limit = 20,
+  });
+  Future<List<Map<String, dynamic>>> getPlatformTrendAnalytics({
+    required Duration timeWindow,
+    int limit = 20,
+  });
+  Future<Map<String, dynamic>> getIndustryTrendAnalytics({required Duration timeWindow});
+  Future<Map<String, dynamic>> getPersonalizedInsights(String userId);
+  Future<List<Map<String, dynamic>>> getGenreEvolutionTrends();
+  Future<List<Map<String, dynamic>>> getPlatformAdoptionTrends();
+
+  // ==========================================
+  // SEARCH SUPPORT
+  // ==========================================
+
+  Future<List<String>> getRecentSearchQueries(String userId, {int limit = 10});
+  Future<void> saveSearchQuery(String userId, String query);
 
   // ==========================================
   // SOCIAL FEATURES - FOLLOW SYSTEM
@@ -99,7 +246,7 @@ abstract class SupabaseRemoteDataSource {
     required String userId,
     required List<int> gameIds,
   });
-  Future<List<Game>> getUserTopThreeGames({
+  Future<List<Map<String, dynamic>>> getUserTopThreeGames({
     required String userId,
   });
   Future<void> setTopThreeGameAtPosition({
@@ -120,18 +267,21 @@ abstract class SupabaseRemoteDataSource {
   // USER GAME COLLECTIONS (PUBLIC VISIBILITY)
   // ==========================================
 
-  Future<List<Game>> getUserPublicRatedGames({
+  Future<List<Map<String, dynamic>>> getUserPublicRatedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,
     int offset = 0,
   });
-  Future<List<Game>> getUserPublicRecommendedGames({
+
+// ÄNDERN: Von Future<List<Game>> zu Future<List<Map<String, dynamic>>>
+  Future<List<Map<String, dynamic>>> getUserPublicRecommendedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,
     int offset = 0,
   });
+
   Future<Map<String, dynamic>> getUserPublicCollections({
     required String userId,
     String? currentUserId,
@@ -240,7 +390,7 @@ abstract class SupabaseRemoteDataSource {
   Future<void> reactivateUserAccount(String userId);
 
   // ==========================================
-  // AUTH RELATED (existing methods)
+  // AUTH RELATED
   // ==========================================
 
   Future<UserModel> signIn(String email, String password);
@@ -248,4 +398,3 @@ abstract class SupabaseRemoteDataSource {
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
 }
-

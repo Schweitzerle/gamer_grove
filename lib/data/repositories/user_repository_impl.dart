@@ -422,7 +422,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getUserTopThreeGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserTopThreeGames({
     required String userId,
   }) async {
     try {
@@ -512,7 +512,7 @@ class UserRepositoryImpl implements UserRepository {
   // ==========================================
 
   @override
-  Future<Either<Failure, List<Game>>> getUserPublicRatedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRatedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,
@@ -536,7 +536,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<Game>>> getUserPublicRecommendedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRecommendedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,

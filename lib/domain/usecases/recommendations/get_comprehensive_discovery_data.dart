@@ -38,41 +38,40 @@ class GetComprehensiveDiscoveryData extends UseCase<DiscoveryPageData, GetCompre
   @override
   Future<Either<Failure, DiscoveryPageData>> call(GetComprehensiveDiscoveryDataParams params) async {
     try {
-      // Execute all discovery requests concurrently
-      final results = await Future.wait([
-        if (params.userId != null) ...[
-          getPersonalizedRecommendations(GetPersonalizedRecommendationsParams(
-            userId: params.userId!,
-            limit: 10,
-          )),
-          getDiscoveryChallenges(GetDiscoveryChallengesParams(userId: params.userId!)),
-        ] else ...[
-          Future.value(const Right(<Game>[])),
-          Future.value(const Right(<DiscoveryChallenge>[])),
-        ],
-        getTrendingGames(GetTrendingGamesParams.lastWeek(limit: 15)),
-        getGenreTrends(GetGenreTrendsParams.lastMonth(limit: 10)),
-        getHiddenGems(const GetHiddenGemsParams(limit: 12)),
-        getSeasonalRecommendations(GetSeasonalRecommendationsParams.current(limit: 10)),
-      ]);
+      // Method 1: Sequential execution (simpler, no casting issues)
 
-      // Check if any request failed
-      for (final result in results) {
-        if (result.isLeft()) {
-          return result.fold(
-                (failure) => Left(failure),
-                (data) => throw Exception('Unexpected success in fold'),
-          );
-        }
+      // Get personalized recommendations
+      List<Game> personalizedRecommendations = [];
+      if (params.userId != null) {
+        final result = await getPersonalizedRecommendations(GetPersonalizedRecommendationsParams(
+          userId: params.userId!,
+          limit: 10,
+        ));
+        personalizedRecommendations = result.fold((l) => <Game>[], (r) => r);
       }
 
-      // Extract successful results
-      final personalizedRecommendations = results[0].fold((l) => <Game>[], (r) => r as List<Game>);
-      final discoveryChallenges = results[1].fold((l) => <DiscoveryChallenge>[], (r) => r as List<DiscoveryChallenge>);
-      final trendingGames = results[2].fold((l) => <Game>[], (r) => r as List<Game>);
-      final genreTrends = results[3].fold((l) => <GenreTrend>[], (r) => r as List<GenreTrend>);
-      final hiddenGems = results[4].fold((l) => <Game>[], (r) => r as List<Game>);
-      final seasonalRecommendations = results[5].fold((l) => <Game>[], (r) => r as List<Game>);
+      // Get discovery challenges
+      List<DiscoveryChallenge> discoveryChallenges = [];
+      if (params.userId != null) {
+        final result = await getDiscoveryChallenges(GetDiscoveryChallengesParams(userId: params.userId!));
+        discoveryChallenges = result.fold((l) => <DiscoveryChallenge>[], (r) => r);
+      }
+
+      // Get trending games
+      final trendingResult = await getTrendingGames(GetTrendingGamesParams.lastWeek(limit: 15));
+      final trendingGames = trendingResult.fold((l) => <Game>[], (r) => r);
+
+      // Get genre trends
+      final genreTrendsResult = await getGenreTrends(GetGenreTrendsParams.lastMonth(limit: 10));
+      final genreTrends = genreTrendsResult.fold((l) => <GenreTrend>[], (r) => r);
+
+      // Get hidden gems
+      final hiddenGemsResult = await getHiddenGems(const GetHiddenGemsParams(limit: 12));
+      final hiddenGems = hiddenGemsResult.fold((l) => <Game>[], (r) => r);
+
+      // Get seasonal recommendations
+      final seasonalResult = await getSeasonalRecommendations(GetSeasonalRecommendationsParams.current(limit: 10));
+      final seasonalRecommendations = seasonalResult.fold((l) => <Game>[], (r) => r);
 
       return Right(DiscoveryPageData(
         personalizedRecommendations: personalizedRecommendations,

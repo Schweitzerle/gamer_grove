@@ -6,6 +6,8 @@ import '../../../../core/errors/exceptions.dart';
 
 // Domain Entities
 import '../../../../domain/entities/character/character.dart';
+import '../../../../domain/entities/character/character_gender.dart';
+import '../../../../domain/entities/character/character_species.dart';
 import '../../../../domain/entities/company/company_website.dart';
 import '../../../../domain/entities/externalGame/external_game.dart';
 import '../../../../domain/entities/platform/platform.dart';

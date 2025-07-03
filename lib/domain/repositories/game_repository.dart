@@ -409,10 +409,10 @@ abstract class GameRepository {
   Future<Either<Failure, List<Character>>> getPopularCharacters({int limit = 20});
 
   /// Get characters by gender
-  Future<Either<Failure, List<Character>>> getCharactersByGender(CharacterGender gender);
+  Future<Either<Failure, List<Character>>> getCharactersByGender(CharacterGenderEnum gender);
 
   /// Get characters by species
-  Future<Either<Failure, List<Character>>> getCharactersBySpecies(CharacterSpecies species);
+  Future<Either<Failure, List<Character>>> getCharactersBySpecies(CharacterSpeciesEnum species);
 
   /// Get character details by ID
   Future<Either<Failure, Character>> getCharacterDetails(int characterId);

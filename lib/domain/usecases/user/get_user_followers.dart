@@ -17,15 +17,49 @@ class GetUserFollowers extends UseCase<List<User>, GetUserFollowersParams> {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserFollowers(params.userId);
+    if (params.limit <= 0) {
+      return const Left(ValidationFailure(message: 'Limit must be greater than 0'));
+    }
+
+    if (params.offset < 0) {
+      return const Left(ValidationFailure(message: 'Offset cannot be negative'));
+    }
+
+    return await repository.getUserFollowers(
+      userId: params.userId,
+      limit: params.limit,
+      offset: params.offset,
+    );
   }
 }
 
 class GetUserFollowersParams extends Equatable {
   final String userId;
+  final String? currentUserId; // For social context (which followers you also follow)
+  final int limit;
+  final int offset;
 
-  const GetUserFollowersParams({required this.userId});
+  const GetUserFollowersParams({
+    required this.userId,
+    this.currentUserId,
+    this.limit = 20,
+    this.offset = 0,
+  });
+
+  // Convenience constructors
+  GetUserFollowersParams.firstPage({
+    required this.userId,
+    this.currentUserId,
+    this.limit = 20,
+  }) : offset = 0;
+
+  GetUserFollowersParams.nextPage({
+    required this.userId,
+    this.currentUserId,
+    required int currentCount,
+    this.limit = 20,
+  }) : offset = currentCount;
 
   @override
-  List<Object> get props => [userId];
+  List<Object?> get props => [userId, currentUserId, limit, offset];
 }

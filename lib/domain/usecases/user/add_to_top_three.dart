@@ -5,67 +5,98 @@ import '../../../core/errors/failures.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class AddToTopThree implements UseCase<void, AddToTopThreeParams> {
+class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
   final UserRepository repository;
 
   AddToTopThree(this.repository);
 
   @override
   Future<Either<Failure, void>> call(AddToTopThreeParams params) async {
+    // Validation
+    if (params.userId.isEmpty) {
+      return const Left(ValidationFailure(message: 'User ID cannot be empty'));
+    }
+
+    if (params.position != null && (params.position! < 1 || params.position! > 3)) {
+      return const Left(ValidationFailure(message: 'Position must be 1, 2, or 3'));
+    }
+
     try {
-      // Get current top three
-      final currentTopThreeResult = await repository.getUserTopThreeGames(params.userId);
+      // If specific position is provided, use the setTopThreeGameAtPosition method
+      if (params.position != null) {
+        return await repository.setTopThreeGameAtPosition(
+          userId: params.userId,
+          position: params.position!,
+          gameId: params.gameId,
+        );
+      }
 
-      return currentTopThreeResult.fold(
+      // If no position specified, find first available slot
+      // Get current top three data as Map<String, dynamic>
+      final currentTopThreeResult = await repository.getUserTopThreeGames(
+        userId: params.userId,
+      );
+
+      return await currentTopThreeResult.fold(
             (failure) => Left(failure),
-            (currentTopThree) async {
-          // Create new list with the game at the specified position
-          List<int> newTopThree = List.from(currentTopThree);
+            (currentTopThreeData) async {
+          // Check if game already exists in top three
+          bool gameAlreadyExists = false;
 
-          // Remove the game if it already exists
-          newTopThree.remove(params.gameId);
-
-          // If position is specified, insert at that position
-          if (params.position != null && params.position! > 0 && params.position! <= 3) {
-            // Ensure list has enough space
-            while (newTopThree.length < params.position!) {
-              newTopThree.add(0); // Use 0 as placeholder
-            }
-
-            // Insert at the specified position (converting from 1-based to 0-based)
-            newTopThree.insert(params.position! - 1, params.gameId);
-
-            // Keep only the first 3 items
-            if (newTopThree.length > 3) {
-              newTopThree = newTopThree.take(3).toList();
-            }
-          } else {
-            // No position specified, add to the end
-            newTopThree.add(params.gameId);
-
-            // Keep only the first 3 items
-            if (newTopThree.length > 3) {
-              newTopThree = newTopThree.take(3).toList();
+          // currentTopThreeData is List<Map<String, dynamic>>
+          // Check each entry for the game_id
+          for (var entry in currentTopThreeData) {
+            if (entry['game_id'] == params.gameId) {
+              gameAlreadyExists = true;
+              break;
             }
           }
 
-          // Remove any 0 placeholders
-          newTopThree = newTopThree.where((id) => id != 0).toList();
+          if (gameAlreadyExists) {
+            return const Left(ValidationFailure(
+              message: 'Game is already in your top three',
+            ));
+          }
 
-          // Update the top three
-          return await repository.updateUserTopThreeGames(params.userId, newTopThree);
+          // Find first available position (1, 2, or 3)
+          // Create a set of occupied positions
+          Set<int> occupiedPositions = currentTopThreeData
+              .map((entry) => entry['position'] as int)
+              .toSet();
+
+          int? availablePosition;
+          for (int pos = 1; pos <= 3; pos++) {
+            if (!occupiedPositions.contains(pos)) {
+              availablePosition = pos;
+              break;
+            }
+          }
+
+          if (availablePosition == null) {
+            return const Left(ValidationFailure(
+              message: 'Top three is full. Please specify a position to replace.',
+            ));
+          }
+
+          // Add to the available position
+          return await repository.setTopThreeGameAtPosition(
+            userId: params.userId,
+            position: availablePosition,
+            gameId: params.gameId,
+          );
         },
       );
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Failed to add game to top three: $e'));
     }
   }
 }
 
+
 class AddToTopThreeParams extends Equatable {
   final int gameId;
   final String userId;
-  final int? position; // 1, 2, or 3
+  final int? position; // 1, 2, or 3 - if null, finds first available slot
 
   const AddToTopThreeParams({
     required this.gameId,

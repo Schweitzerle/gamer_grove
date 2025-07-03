@@ -8,6 +8,9 @@ import '../../../core/errors/failures.dart';
 import '../../entities/genre.dart';
 import '../../entities/platform/platform.dart';
 import '../base_usecase.dart';
+import '../game/get_all_genres.dart';
+import '../game/get_all_platforms.dart';
+import '../game/get_search_suggestions.dart';
 import '../game/search_games_with_filter.dart';
 
 class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataParams> {
@@ -24,30 +27,22 @@ class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataP
   @override
   Future<Either<Failure, SearchScreenData>> call(GetSearchScreenDataParams params) async {
     try {
-      // Execute concurrent requests for better performance
-      final results = await Future.wait([
-        getAllGenres(),
-        getAllPlatforms(),
-        if (params.partialQuery?.isNotEmpty == true)
-          getSearchSuggestions(GetSearchSuggestionsParams(partialQuery: params.partialQuery!))
-        else
-          Future.value(const Right(<String>[])),
-      ]);
+      // Get all genres
+      final genresResult = await getAllGenres();
+      final genres = genresResult.fold((l) => <Genre>[], (r) => r);
 
-      // Check if any request failed
-      for (final result in results) {
-        if (result.isLeft()) {
-          return result.fold(
-                (failure) => Left(failure),
-                (data) => throw Exception('Unexpected success in fold'),
-          );
-        }
+      // Get all platforms
+      final platformsResult = await getAllPlatforms();
+      final platforms = platformsResult.fold((l) => <Platform>[], (r) => r);
+
+      // Get search suggestions if partial query exists
+      List<String> suggestions = [];
+      if (params.partialQuery?.isNotEmpty == true) {
+        final suggestionsResult = await getSearchSuggestions(
+            GetSearchSuggestionsParams(partialQuery: params.partialQuery!)
+        );
+        suggestions = suggestionsResult.fold((l) => <String>[], (r) => r);
       }
-
-      // Extract successful results
-      final genres = results[0].fold((l) => <Genre>[], (r) => r as List<Genre>);
-      final platforms = results[1].fold((l) => <Platform>[], (r) => r as List<Platform>);
-      final suggestions = results[2].fold((l) => <String>[], (r) => r as List<String>);
 
       return Right(SearchScreenData(
         genres: genres,
