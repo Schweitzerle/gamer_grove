@@ -36,6 +36,8 @@ import '../datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../models/game/game_model.dart';
+
 class GameRepositoryImpl implements GameRepository {
   final IGDBRemoteDataSource igdbDataSource;
   final SupabaseRemoteDataSource supabaseDataSource;
@@ -2190,7 +2192,7 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   /// Apply complex filters that require IGDB game data
-  List<Game> _applyComplexFilters(List<Game> games, UserCollectionFilters filters) {
+  List<GameModel> _applyComplexFilters(List<GameModel> games, UserCollectionFilters filters) {
     var filteredGames = games;
 
     // Genre filter
@@ -2243,8 +2245,8 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   /// Apply sorting to games list
-  List<Game> _applySorting(
-      List<Game> games,
+  List<GameModel> _applySorting(
+      List<GameModel> games,
       UserCollectionSortBy sortBy,
       SortOrder sortOrder,
       [Map<int, double>? userRatings]
@@ -3029,9 +3031,8 @@ class GameRepositoryImpl implements GameRepository {
       // Get highly rated games in preferred genres released since the date
       final missedGames = await igdbDataSource.getGamesByGenresAndDateRange(
         genreIds: preferredGenres,
-        fromDate: sinceDate,
-        toDate: DateTime.now(),
-        minRating: 80.0,
+        startDate: sinceDate,
+        endDate: DateTime.now(),
         limit: limit * 2,
       );
 
@@ -3131,14 +3132,14 @@ class GameRepositoryImpl implements GameRepository {
 
       // Get franchise completion games
       for (final franchiseId in franchiseIds.toSet()) {
-        final franchiseGames = await igdbDataSource.getGamesByFranchise(franchiseId);
+        final franchiseGames = await igdbDataSource.getGamesByFranchise(franchiseId: franchiseId);
         final missing = franchiseGames.where((game) => !userGameIds.contains(game.id));
         missingGames.addAll(missing);
       }
 
       // Get collection completion games
       for (final collectionId in collectionIds.toSet()) {
-        final collectionGames = await igdbDataSource.getGamesByCollection(collectionId);
+        final collectionGames = await igdbDataSource.getGamesByCollection(collectionId: collectionId);
         final missing = collectionGames.where((game) => !userGameIds.contains(game.id));
         missingGames.addAll(missing);
       }
@@ -3345,9 +3346,11 @@ class GameRepositoryImpl implements GameRepository {
       // Map mood to search criteria
       final searchCriteria = _getMoodSearchCriteria(mood);
 
-      // Get games matching mood criteria
+      // Use the new advanced mood criteria method
       final games = await igdbDataSource.getGamesByMoodCriteria(
-        criteria: searchCriteria,
+        genreIds: searchCriteria['genres']?.cast<int>(),
+        keywords: searchCriteria['keywords']?.cast<String>(),
+        themeIds: searchCriteria['themes']?.cast<int>(),
         limit: limit,
         offset: offset,
       );
@@ -3380,9 +3383,11 @@ class GameRepositoryImpl implements GameRepository {
       // Map season to game characteristics
       final seasonalCriteria = _getSeasonalCriteria(season);
 
-      // Get games matching seasonal themes
+      // Use the new advanced seasonal criteria method
       final seasonalGames = await igdbDataSource.getGamesBySeasonalCriteria(
-        criteria: seasonalCriteria,
+        genreIds: seasonalCriteria['genres']?.cast<int>(),
+        keywords: seasonalCriteria['keywords']?.cast<String>(),
+        themeIds: seasonalCriteria['themes']?.cast<int>(),
         limit: limit,
       );
 
@@ -3398,6 +3403,7 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: 'Failed to get seasonal recommendations'));
     }
   }
+
 
   // ==========================================
   // SOCIAL & COMMUNITY FEATURES
@@ -3876,8 +3882,6 @@ class GameRepositoryImpl implements GameRepository {
 
       // Get games known for good achievement systems
       final achievementGames = await igdbDataSource.getGamesWithAchievements(
-        genreIds: preferredGenres,
-        minRating: 75.0,
         limit: limit,
       );
 
@@ -4095,23 +4099,37 @@ class GameRepositoryImpl implements GameRepository {
     switch (season) {
       case Season.spring:
         return {
-          'themes': [17, 38], // Non-violence, Open World
-          'keywords': ['adventure', 'exploration', 'nature'],
+          'genres': [13, 31], // Simulation, Adventure
+          'themes': [27, 17], // Non-violence, Fantasy
+          'keywords': ['adventure', 'exploration', 'nature', 'peaceful', 'colorful'],
         };
+
       case Season.summer:
         return {
-          'genres': [4, 5, 10], // Action, Adventure, Racing
-          'keywords': ['adventure', 'outdoor', 'sports'],
+          'genres': [4, 5, 14, 32], // Fighting, Shooter, Sport, Racing
+          'themes': [39], // Multiplayer
+          'keywords': ['action', 'adventure', 'outdoor', 'sports', 'multiplayer', 'fun'],
         };
+
       case Season.autumn:
         return {
-          'genres': [12, 31], // RPG, Adventure
-          'keywords': ['story', 'atmospheric', 'cozy'],
+          'genres': [12, 31, 9], // RPG, Adventure, Puzzle
+          'themes': [19, 20, 17], // Horror, Thriller, Fantasy
+          'keywords': ['story', 'atmospheric', 'cozy', 'mystery', 'dark', 'narrative'],
         };
+
       case Season.winter:
         return {
-          'genres': [13, 15, 12], // Simulation, Strategy, RPG
-          'keywords': ['long-session', 'immersive', 'story'],
+          'genres': [13, 15, 12, 16], // Simulation, Strategy, RPG, Turn-based Strategy
+          'themes': [17, 38], // Fantasy, Open World
+          'keywords': ['long-session', 'immersive', 'story', 'strategic', 'deep', 'complex'],
+        };
+
+      default:
+        return {
+          'genres': [],
+          'themes': [],
+          'keywords': [],
         };
     }
   }

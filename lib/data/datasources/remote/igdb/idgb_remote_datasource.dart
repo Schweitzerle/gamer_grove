@@ -1101,7 +1101,7 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get trending games
-  Future<List<PopularityPrimitiveModel>> getTrendingGames({
+  Future<List<GameModel>> getTrendingGames({
     int limit = 20,
     Duration? timeWindow,
   });
@@ -1347,5 +1347,92 @@ abstract class IGDBRemoteDataSource {
 
   /// Get search suggestions
   Future<List<String>> getSearchSuggestions(String partialQuery);
+
+  // Ergänzungen für IGDBRemoteDataSource Interface (idgb_remote_datasource.dart)
+
+  // ==========================================
+  // DISCOVERY & ADVANCED FILTERING METHODS
+  // ==========================================
+
+  /// Get games by genres and date range
+  Future<List<GameModel>> getGamesByGenresAndDateRange({
+    required List<int> genreIds,
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'popularity',
+    String sortOrder = 'desc',
+  });
+
+  /// Get games by franchise
+  Future<List<GameModel>> getGamesByFranchise({
+    required int franchiseId,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'asc',
+  });
+
+  /// Get games by collection
+  Future<List<GameModel>> getGamesByCollection({
+    required int collectionId,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'asc',
+  });
+
+  /// Get trending games by genre
+  Future<List<GameModel>> getTrendingGamesByGenre({
+    required int genreId,
+    int limit = 20,
+    Duration? timeWindow,
+  });
+
+  /// Get trending games by platform
+  Future<List<GameModel>> getTrendingGamesByPlatform({
+    required int platformId,
+    int limit = 20,
+    Duration? timeWindow,
+  });
+
+  /// Get rising games (games gaining popularity quickly)
+  Future<List<GameModel>> getRisingGames({
+    int limit = 20,
+    Duration? timeWindow,
+  });
+
+  /// Get hidden gems (great games with low visibility)
+  Future<List<GameModel>> getHiddenGems({
+    int limit = 20,
+    double minRating = 80.0,
+    int maxHypes = 100,
+  });
+
+  /// Get games by mood criteria
+  Future<List<GameModel>> getGamesByMoodCriteria({
+    List<int>? genreIds,
+    List<String>? keywords,
+    List<int>? themeIds,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  /// Get games by seasonal criteria
+  Future<List<GameModel>> getGamesBySeasonalCriteria({
+    List<int>? genreIds,
+    List<String>? keywords,
+    List<int>? themeIds,
+    int limit = 20,
+    int offset = 0,
+  });
+
+  /// Get games with achievements/unlockables
+  Future<List<GameModel>> getGamesWithAchievements({
+    int limit = 20,
+    int offset = 0,
+    bool hasAchievements = true,
+  });
 }
 

@@ -3012,8 +3012,31 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<PopularityPrimitiveModel>> getTrendingGames({int limit = 20, Duration? timeWindow}) async => await getTopPopularGames(limit: limit);
+  Future<List<GameModel>> getTrendingGames({
+    int limit = 20,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final days = timeWindow?.inDays ?? 7;
+      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
 
+      final body = '''
+      where category = 0 & 
+            first_release_date >= $timestamp &
+            total_rating_count >= 5 &
+            follows >= 3;
+      fields $_completeGameFields;
+      sort follows desc;
+      limit $limit;
+    ''';
+
+      print('🔥 IGDB: Getting trending games (${days}d window)');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get trending games error: $e');
+      return [];
+    }
+  }
   @override
   Future<List<PopularityPrimitiveModel>> getRecentPopularityUpdates({int limit = 50, Duration? timeWindow}) async => await getPopularityPrimitives(limit: limit);
 
@@ -3584,6 +3607,360 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       return games.map((game) => game.name).toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  // Ergänzungen für IGDBRemoteDataSourceImpl (igdb_remote_datasource_impl.dart)
+
+  // ==========================================
+  // DISCOVERY & ADVANCED FILTERING METHODS IMPLEMENTATION
+  // ==========================================
+
+  @override
+  Future<List<GameModel>> getGamesByGenresAndDateRange({
+    required List<int> genreIds,
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'popularity',
+    String sortOrder = 'desc',
+  }) async {
+    try {
+      final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
+      final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
+      final genresString = genreIds.join(',');
+
+      final sortField = _mapSortField(sortBy);
+      final order = sortOrder == 'desc' ? 'desc' : 'asc';
+
+      final body = '''
+        where genres = ($genresString) & 
+              first_release_date >= $startTimestamp & 
+              first_release_date <= $endTimestamp &
+              category = 0;
+        fields $_completeGameFields;
+        sort $sortField $order;
+        limit $limit;
+        offset $offset;
+      ''';
+
+      print('🎮 IGDB: Getting games by genres [$genresString] and date range [${startDate.toIso8601String()}-${endDate.toIso8601String()}]');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games by genres and date range error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByFranchise({
+    required int franchiseId,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'asc',
+  }) async {
+    try {
+      final sortField = _mapSortField(sortBy);
+      final order = sortOrder == 'desc' ? 'desc' : 'asc';
+
+      final body = '''
+        where franchise = $franchiseId & category = 0;
+        fields $_completeGameFields;
+        sort $sortField $order;
+        limit $limit;
+        offset $offset;
+      ''';
+
+      print('🎮 IGDB: Getting games by franchise: $franchiseId');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games by franchise error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByCollection({
+    required int collectionId,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'first_release_date',
+    String sortOrder = 'asc',
+  }) async {
+    try {
+      final sortField = _mapSortField(sortBy);
+      final order = sortOrder == 'desc' ? 'desc' : 'asc';
+
+      final body = '''
+        where collection = $collectionId & category = 0;
+        fields $_completeGameFields;
+        sort $sortField $order;
+        limit $limit;
+        offset $offset;
+      ''';
+
+      print('🎮 IGDB: Getting games by collection: $collectionId');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games by collection error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getTrendingGamesByGenre({
+    required int genreId,
+    int limit = 20,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final days = timeWindow?.inDays ?? 30;
+      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+
+      final body = '''
+        where genres = ($genreId) & 
+              first_release_date >= $timestamp &
+              category = 0 &
+              total_rating_count >= 10;
+        fields $_completeGameFields;
+        sort follows desc;
+        limit $limit;
+      ''';
+
+      print('🔥 IGDB: Getting trending games by genre: $genreId (${days}d window)');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get trending games by genre error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getTrendingGamesByPlatform({
+    required int platformId,
+    int limit = 20,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final days = timeWindow?.inDays ?? 30;
+      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+
+      final body = '''
+        where platforms = ($platformId) & 
+              first_release_date >= $timestamp &
+              category = 0 &
+              total_rating_count >= 5;
+        fields $_completeGameFields;
+        sort follows desc;
+        limit $limit;
+      ''';
+
+      print('🔥 IGDB: Getting trending games by platform: $platformId (${days}d window)');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get trending games by platform error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getRisingGames({
+    int limit = 20,
+    Duration? timeWindow,
+  }) async {
+    try {
+      final days = timeWindow?.inDays ?? 7;
+      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+
+      final body = '''
+        where first_release_date >= $timestamp &
+              category = 0 &
+              follows >= 5 &
+              total_rating_count >= 3;
+        fields $_completeGameFields;
+        sort follows desc;
+        limit $limit;
+      ''';
+
+      print('📈 IGDB: Getting rising games (${days}d window)');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get rising games error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getHiddenGems({
+    int limit = 20,
+    double minRating = 80.0,
+    int maxHypes = 100,
+  }) async {
+    try {
+      final body = '''
+        where total_rating >= $minRating &
+              follows <= $maxHypes &
+              category = 0 &
+              total_rating_count >= 10;
+        fields $_completeGameFields;
+        sort total_rating desc;
+        limit $limit;
+      ''';
+
+      print('💎 IGDB: Getting hidden gems (rating >= $minRating, hypes <= $maxHypes)');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get hidden gems error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesByMoodCriteria({
+    List<int>? genreIds,
+    List<String>? keywords,
+    List<int>? themeIds,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      List<String> whereParts = ['category = 0'];
+
+      // Add genre filter
+      if (genreIds != null && genreIds.isNotEmpty) {
+        final genresString = genreIds.join(',');
+        whereParts.add('genres = ($genresString)');
+      }
+
+      // Add theme filter
+      if (themeIds != null && themeIds.isNotEmpty) {
+        final themesString = themeIds.join(',');
+        whereParts.add('themes = ($themesString)');
+      }
+
+      // Add keyword search (using game summary/storyline)
+      if (keywords != null && keywords.isNotEmpty) {
+        final keywordSearch = keywords.join(' ');
+        whereParts.add('(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
+      }
+
+      final whereClause = whereParts.join(' & ');
+
+      final body = '''
+      where $whereClause;
+      fields $_completeGameFields;
+      sort total_rating desc;
+      limit $limit;
+      offset $offset;
+    ''';
+
+      print('🎯 IGDB: Getting games by advanced mood criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games by advanced mood criteria error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesBySeasonalCriteria({
+    List<int>? genreIds,
+    List<String>? keywords,
+    List<int>? themeIds,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      List<String> whereParts = ['category = 0'];
+
+      // Add genre filter
+      if (genreIds != null && genreIds.isNotEmpty) {
+        final genresString = genreIds.join(',');
+        whereParts.add('genres = ($genresString)');
+      }
+
+      // Add theme filter
+      if (themeIds != null && themeIds.isNotEmpty) {
+        final themesString = themeIds.join(',');
+        whereParts.add('themes = ($themesString)');
+      }
+
+      // Add keyword search (using game summary/storyline)
+      if (keywords != null && keywords.isNotEmpty) {
+        final keywordSearch = keywords.join(' ');
+        whereParts.add('(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
+      }
+
+      final whereClause = whereParts.join(' & ');
+
+      final body = '''
+      where $whereClause;
+      fields $_completeGameFields;
+      sort total_rating desc;
+      limit $limit;
+      offset $offset;
+    ''';
+
+      print('🌿 IGDB: Getting games by advanced seasonal criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games by advanced seasonal criteria error: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<GameModel>> getGamesWithAchievements({
+    int limit = 20,
+    int offset = 0,
+    bool hasAchievements = true,
+  }) async {
+    try {
+      // IGDB doesn't have a direct achievements field, but we can use external games
+      // to find games with Steam achievements or other platform achievements
+      String whereClause = hasAchievements
+          ? 'category = 0 & external_games != null'
+          : 'category = 0';
+
+      final body = '''
+        where $whereClause;
+        fields $_completeGameFields;
+        sort total_rating desc;
+        limit $limit;
+        offset $offset;
+      ''';
+
+      print('🏆 IGDB: Getting games with achievements: $hasAchievements');
+      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+    } catch (e) {
+      print('💥 IGDB: Get games with achievements error: $e');
+      return [];
+    }
+  }
+
+  // ==========================================
+  // HELPER METHODS
+  // ==========================================
+
+  /// Map sort field names to IGDB field names
+  String _mapSortField(String sortBy) {
+    switch (sortBy.toLowerCase()) {
+      case 'popularity':
+        return 'follows';
+      case 'rating':
+        return 'total_rating';
+      case 'release_date':
+      case 'releasedate':
+        return 'first_release_date';
+      case 'name':
+      case 'title':
+        return 'name';
+      case 'hypes':
+        return 'hypes';
+      default:
+        return 'total_rating'; // Default fallback
     }
   }
 }
