@@ -1325,7 +1325,6 @@ class GameRepositoryImpl implements GameRepository {
       // Get statistics from Supabase
       final stats = await supabaseDataSource.getUserCollectionStatistics(
         userId: userId,
-        collectionType: collectionType,
       );
 
       // Build collection summary

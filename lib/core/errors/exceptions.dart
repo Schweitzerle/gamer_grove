@@ -54,3 +54,16 @@ class UnauthorizedException implements Exception {
     this.code,
   });
 }
+
+class NotFoundException implements Exception {
+  final String message;
+  final String? code;
+
+  NotFoundException({
+    required this.message,
+    this.code,
+  });
+
+  @override
+  String toString() => 'NotFoundException: $message';
+}
