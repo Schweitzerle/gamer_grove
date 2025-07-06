@@ -214,9 +214,9 @@ class UserGamingActivityModel extends UserGamingActivity {
     super.gamesRecommendedThisMonth,
     super.genreBreakdown,
     super.platformBreakdown,
-    super.lastRatedGame,
-    super.lastAddedToWishlist,
-    super.lastRecommendedGame,
+    super.lastRatedGameId,
+    super.lastAddedToWishlistId,
+    super.lastRecommendedGameId,
   });
 
   factory UserGamingActivityModel.fromJson(Map<String, dynamic> json) {
@@ -226,15 +226,9 @@ class UserGamingActivityModel extends UserGamingActivity {
       gamesRecommendedThisMonth: json['games_recommended_this_month'] as int? ?? 0,
       genreBreakdown: Map<String, int>.from(json['genre_breakdown'] ?? {}),
       platformBreakdown: Map<String, int>.from(json['platform_breakdown'] ?? {}),
-      lastRatedGame: json['last_rated_game'] != null
-          ? DateTime.parse(json['last_rated_game'] as String)
-          : null,
-      lastAddedToWishlist: json['last_added_to_wishlist'] != null
-          ? DateTime.parse(json['last_added_to_wishlist'] as String)
-          : null,
-      lastRecommendedGame: json['last_recommended_game'] != null
-          ? DateTime.parse(json['last_recommended_game'] as String)
-          : null,
+      lastRatedGameId: json['last_rated_game'] as int? ?? 0,
+      lastAddedToWishlistId: json['last_added_to_wishlist'] as int? ?? 0,
+      lastRecommendedGameId: json['last_recommended_game'] as int? ?? 0
     );
   }
 
@@ -245,9 +239,9 @@ class UserGamingActivityModel extends UserGamingActivity {
       'games_recommended_this_month': gamesRecommendedThisMonth,
       'genre_breakdown': genreBreakdown,
       'platform_breakdown': platformBreakdown,
-      'last_rated_game': lastRatedGame?.toIso8601String(),
-      'last_added_to_wishlist': lastAddedToWishlist?.toIso8601String(),
-      'last_recommended_game': lastRecommendedGame?.toIso8601String(),
+      'last_rated_game': lastRatedGameId,
+      'last_added_to_wishlist': lastAddedToWishlistId,
+      'last_recommended_game': lastRecommendedGameId,
     };
   }
 }

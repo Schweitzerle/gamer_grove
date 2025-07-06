@@ -37,7 +37,7 @@ class UserRepositoryImpl implements UserRepository {
       if (currentUserId != null && userId == currentUserId) {
         final cachedUser = await localDataSource.getCachedUser();
         if (cachedUser != null) {
-          return Right(cachedUser);
+          return Right(cachedUser.toEntity());
         }
       }
       return const Left(NetworkFailure());
@@ -51,7 +51,7 @@ class UserRepositoryImpl implements UserRepository {
         await localDataSource.cacheUser(user);
       }
 
-      return Right(user);
+      return Right(user.toEntity());
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -64,7 +64,7 @@ class UserRepositoryImpl implements UserRepository {
     if (!await networkInfo.isConnected) {
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
-        return Right(cachedUser);
+        return Right(cachedUser.toEntity());
       }
       return const Left(NetworkFailure());
     }
@@ -72,7 +72,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final user = await remoteDataSource.getCurrentUserProfile();
       await localDataSource.cacheUser(user);
-      return Right(user);
+      return Right(user.toEntity());
     } on AuthException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on ServerException catch (e) {
@@ -117,7 +117,7 @@ class UserRepositoryImpl implements UserRepository {
         await localDataSource.cacheUser(updatedUser);
       }
 
-      return Right(updatedUser);
+      return Right(updatedUser.toEntity());
     } on ValidationException catch (e) {
       return Left(ValidationFailure(message: e.message));
     } on ServerException catch (e) {
