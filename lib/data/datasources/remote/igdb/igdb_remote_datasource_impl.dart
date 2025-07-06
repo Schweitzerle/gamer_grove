@@ -121,6 +121,7 @@ import '../../../models/involved_company_model.dart';
 
 // Abstract DataSource
 import 'idgb_remote_datasource.dart';
+import 'igdb_isolated_client.dart';
 
 /// Implementation of IGDBRemoteDataSource
 ///
@@ -136,7 +137,6 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   IGDBRemoteDataSourceImpl({http.Client? client})
       : client = client ?? http.Client();
 
-
   // ==========================================
   // CORE FIELDS DEFINITIONS
   // ==========================================
@@ -144,7 +144,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   static const String _basicGameFields = '''
     id, name, summary, storyline, category, status, first_release_date,
     total_rating, total_rating_count, rating, rating_count,
-    aggregated_rating, aggregated_rating_count, follows
+    aggregated_rating, aggregated_rating_count, follows;
   ''';
 
   static const String _completeGameFields = '''
@@ -157,7 +157,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     game_modes.id, game_modes.name, game_modes.slug,
     keywords.id, keywords.name, keywords.slug,
     platforms.id, platforms.name, platforms.abbreviation, platforms.category,
-    release_dates.id, release_dates.date, release_dates.human, release_dates.platform.name, release_dates.region.name,
+    release_dates.id, release_dates.date, release_dates.human, release_dates.platform.name, release_dates.*,
     involved_companies.id, involved_companies.developer, involved_companies.publisher, involved_companies.company.name,
     alternative_names.id, alternative_names.name, alternative_names.comment,
     websites.id, websites.category, websites.trusted, websites.url,
@@ -170,104 +170,26 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     multiplayer_modes.id, multiplayer_modes.campaigncoop, multiplayer_modes.dropin, multiplayer_modes.lancoop,
     player_perspectives.id, player_perspectives.name, player_perspectives.slug,
     game_engines.id, game_engines.name, game_engines.slug,
-    language_supports.id, language_supports.language.name, language_supports.language_support_type.name
+    language_supports.id, language_supports.language.name, language_supports.language_support_type.name;
   ''';
-
-  // ==========================================
-  // AUTHENTICATION & HEADERS
-  // ==========================================
-
-  // Token Management (wie in der bestehenden Implementation)
-  Future<Map<String, String>> get _headers async {
-    await _ensureValidToken();
-    return {
-      'Client-ID': ApiConstants.igdbClientId,
-      'Authorization': 'Bearer $_accessToken',
-      'Content-Type': 'text/plain',
-      'Accept': 'application/json',
-    };
-  }
-
-  Future<void> _ensureValidToken() async {
-    if (_accessToken == null ||
-        _tokenExpiry == null ||
-        DateTime.now().isAfter(_tokenExpiry!)) {
-      await _refreshToken();
-    }
-  }
-
-  Future<void> _refreshToken() async {
-    try {
-      final response = await client.post(
-        Uri.parse('https://id.twitch.tv/oauth2/token'),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'client_id': ApiConstants.igdbClientId,
-          'client_secret': ApiConstants.igdbClientSecret,
-          'grant_type': 'client_credentials',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _accessToken = data['access_token'];
-        final expiresIn = data['expires_in'] as int;
-        _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn - 60));
-      } else {
-        throw ServerException(
-          message: 'Failed to refresh token: ${response.body}',
-          statusCode: response.statusCode,
-        );
-      }
-    } catch (e) {
-      throw ServerException(message: 'Token refresh failed: $e');
-    }
-  }
-
 
   // ==========================================
   // CORE HTTP METHODS
   // ==========================================
 
+  // In IGDBRemoteDataSourceImpl
   Future<List<T>> _makeRequest<T>(
-      String endpoint,
-      String body,
-      T Function(Map<String, dynamic>) fromJson,
-      ) async {
+    String endpoint,
+    String body,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
     try {
-      final headers = await _headers;
-      final url = '${ApiConstants.igdbBaseUrl}$endpoint';
+      // Verwende den isolierten Client anstatt den injizierten
+      final jsonList =
+          await IsolatedIGDBClient.instance.makeIGDBRequest(endpoint, body);
 
-      print('📡 IGDB: Making request to $endpoint');
-      print('📤 IGDB: Request body: $body');
-
-      final response = await client
-          .post(
-        Uri.parse(url),
-        headers: headers,
-        body: body.trim(),
-      )
-          .timeout(
-        ApiConstants.connectionTimeout,
-        onTimeout: () {
-          throw ServerException(message: 'Request timeout');
-        },
-      );
-
-      print('📨 IGDB: Response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        if (response.body.isEmpty) {
-          print('⚠️ IGDB: Empty response body');
-          return [];
-        }
-
-        try {
-          final List<dynamic> jsonList = json.decode(response.body);
-          print('✅ IGDB: Successfully parsed ${jsonList.length} items');
-
-          final items = jsonList
-              .map((json) {
+      final items = jsonList
+          .map((json) {
             try {
               return fromJson(json);
             } catch (e) {
@@ -275,34 +197,12 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
               return null;
             }
           })
-              .where((item) => item != null)
-              .cast<T>()
-              .toList();
+          .where((item) => item != null)
+          .cast<T>()
+          .toList();
 
-          print('🎯 IGDB: Successfully converted ${items.length} items');
-          return items;
-        } catch (e) {
-          print('💥 IGDB: JSON parsing error: $e');
-          throw ServerException(message: 'Failed to parse response: $e');
-        }
-      } else {
-        print('❌ IGDB: Request failed with status ${response.statusCode}');
-        print('📄 IGDB: Error response: ${response.body}');
-
-        String errorMessage = 'Request failed';
-        if (response.statusCode == 401) {
-          errorMessage = 'Authentication failed. Please check API credentials.';
-        } else if (response.statusCode == 429) {
-          errorMessage = 'Rate limit exceeded. Please try again later.';
-        } else if (response.statusCode >= 500) {
-          errorMessage = 'IGDB server error. Please try again later.';
-        }
-
-        throw ServerException(
-          message: errorMessage,
-          statusCode: response.statusCode,
-        );
-      }
+      print('🎯 IGDB: Successfully converted ${items.length} items');
+      return items;
     } catch (e) {
       print('💥 IGDB: Request error: $e');
       if (e is ServerException) rethrow;
@@ -310,27 +210,12 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     }
   }
 
+  // In IGDBRemoteDataSourceImpl
   Future<http.Response> _makeRawRequest(String endpoint, String body) async {
     try {
-      final headers = await _headers;
-      final url = '${ApiConstants.igdbBaseUrl}$endpoint';
-
-      final response = await client
-          .post(
-        Uri.parse(url),
-        headers: headers,
-        body: body.trim(),
-      )
-          .timeout(ApiConstants.connectionTimeout);
-
-      if (response.statusCode != 200) {
-        throw ServerException(
-          message: 'Request failed: ${response.body}',
-          statusCode: response.statusCode,
-        );
-      }
-
-      return response;
+      // Verwende den isolierten Client
+      return await IsolatedIGDBClient.instance
+          .makeIGDBRawRequest(endpoint, body);
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException(message: 'Network error: $e');
@@ -342,7 +227,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<GameModel>> searchGames(String query, int limit, int offset) async {
+  Future<List<GameModel>> searchGames(
+      String query, int limit, int offset) async {
     final body = '''
       search "$query";
       fields $_completeGameFields;
@@ -353,7 +239,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -368,7 +254,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final games = await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
 
     if (games.isEmpty) {
@@ -396,7 +282,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -414,7 +300,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -432,12 +318,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<GameModel>> getGamesByStatus(int statusId, {int limit = 20, int offset = 0}) async {
+  Future<List<GameModel>> getGamesByStatus(int statusId,
+      {int limit = 20, int offset = 0}) async {
     final body = '''
       where status = $statusId;
       fields $_completeGameFields;
@@ -448,12 +335,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<GameModel>> getGamesByType(int typeId, {int limit = 20, int offset = 0}) async {
+  Future<List<GameModel>> getGamesByType(int typeId,
+      {int limit = 20, int offset = 0}) async {
     final body = '''
       where category = $typeId;
       fields $_completeGameFields;
@@ -464,7 +352,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -479,7 +367,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -494,7 +382,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -509,7 +397,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -520,10 +408,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     try {
       final sortField = {
-        'hastily': 'hastily',
-        'normally': 'normally',
-        'completely': 'completely',
-      }[sortBy] ?? 'normally';
+            'hastily': 'hastily',
+            'normally': 'normally',
+            'completely': 'completely',
+          }[sortBy] ??
+          'normally';
 
       final body = '''
         where game_time_to_beats.$sortField != null;
@@ -595,7 +484,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'artworks',
       body,
-          (json) => ArtworkModel.fromJson(json),
+      (json) => ArtworkModel.fromJson(json),
     );
   }
 
@@ -642,7 +531,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'covers',
       body,
-          (json) => CoverModel.fromJson(json),
+      (json) => CoverModel.fromJson(json),
     );
   }
 
@@ -690,7 +579,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'screenshots',
       body,
-          (json) => ScreenshotModel.fromJson(json),
+      (json) => ScreenshotModel.fromJson(json),
     );
   }
 
@@ -701,7 +590,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<ScreenshotModel>> getScreenshotsByGameIds(List<int> gameIds) async {
+  Future<List<ScreenshotModel>> getScreenshotsByGameIds(
+      List<int> gameIds) async {
     return await getScreenshots(gameIds: gameIds);
   }
 
@@ -723,12 +613,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_videos',
       body,
-          (json) => GameVideoModel.fromJson(json),
+      (json) => GameVideoModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search}) async {
+  Future<List<GameEngineModel>> getGameEngines(
+      {List<int>? ids, String? search}) async {
     String body;
 
     if (ids != null && ids.isNotEmpty) {
@@ -754,7 +645,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_engines',
       body,
-          (json) => GameEngineModel.fromJson(json),
+      (json) => GameEngineModel.fromJson(json),
     );
   }
 
@@ -782,7 +673,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_engine_logos',
       body,
-          (json) => GameEngineLogoModel.fromJson(json),
+      (json) => GameEngineLogoModel.fromJson(json),
     );
   }
 
@@ -793,7 +684,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<MultiplayerModeModel>> getMultiplayerModes(List<int> gameIds) async {
+  Future<List<MultiplayerModeModel>> getMultiplayerModes(
+      List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
 
     final gameIdsString = gameIds.join(',');
@@ -806,12 +698,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'multiplayer_modes',
       body,
-          (json) => MultiplayerModeModel.fromJson(json),
+      (json) => MultiplayerModeModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<PlayerPerspectiveModel>> getPlayerPerspectives({List<int>? ids}) async {
+  Future<List<PlayerPerspectiveModel>> getPlayerPerspectives(
+      {List<int>? ids}) async {
     String body;
 
     if (ids != null && ids.isNotEmpty) {
@@ -831,12 +724,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'player_perspectives',
       body,
-          (json) => PlayerPerspectiveModel.fromJson(json),
+      (json) => PlayerPerspectiveModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<LanguageSupportModel>> getLanguageSupports(List<int> gameIds) async {
+  Future<List<LanguageSupportModel>> getLanguageSupports(
+      List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
 
     final gameIdsString = gameIds.join(',');
@@ -849,7 +743,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'language_supports',
       body,
-          (json) => LanguageSupportModel.fromJson(json),
+      (json) => LanguageSupportModel.fromJson(json),
     );
   }
 
@@ -885,7 +779,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_localizations',
       body,
-          (json) => GameLocalizationModel.fromJson(json),
+      (json) => GameLocalizationModel.fromJson(json),
     );
   }
 
@@ -896,7 +790,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<GameLocalizationModel>> getGameLocalizationsByGameIds(List<int> gameIds) async {
+  Future<List<GameLocalizationModel>> getGameLocalizationsByGameIds(
+      List<int> gameIds) async {
     return await getGameLocalizations(gameIds: gameIds);
   }
 
@@ -925,7 +820,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_statuses',
       body,
-          (json) => GameStatusModel.fromJson(json),
+      (json) => GameStatusModel.fromJson(json),
     );
   }
 
@@ -956,7 +851,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_categories',
       body,
-          (json) => GameTypeModel.fromJson(json),
+      (json) => GameTypeModel.fromJson(json),
     );
   }
 
@@ -997,7 +892,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_time_to_beats',
       body,
-          (json) => GameTimeToBeatModel.fromJson(json),
+      (json) => GameTimeToBeatModel.fromJson(json),
     );
   }
 
@@ -1041,7 +936,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_versions',
       body,
-          (json) => GameVersionModel.fromJson(json),
+      (json) => GameVersionModel.fromJson(json),
     );
   }
 
@@ -1086,7 +981,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_version_features',
       body,
-          (json) => GameVersionFeatureModel.fromJson(json),
+      (json) => GameVersionFeatureModel.fromJson(json),
     );
   }
 
@@ -1097,7 +992,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(String category) async {
+  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(
+      String category) async {
     return await getGameVersionFeatures(category: category);
   }
 
@@ -1140,17 +1036,19 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_version_feature_values',
       body,
-          (json) => GameVersionFeatureValueModel.fromJson(json),
+      (json) => GameVersionFeatureValueModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByGame(int gameId) async {
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByGame(
+      int gameId) async {
     return await getGameVersionFeatureValues(gameIds: [gameId]);
   }
 
   @override
-  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(int featureId) async {
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(
+      int featureId) async {
     return await getGameVersionFeatureValues(featureIds: [featureId]);
   }
 
@@ -1164,7 +1062,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
     try {
       final detailed = await getAlternativeNamesDetailed(gameIds);
-      return detailed.map((alt) => alt.name ?? '').where((name) => name.isNotEmpty).toList();
+      return detailed
+          .map((alt) => alt.name ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
     } catch (e) {
       print('💥 IGDB: Get alternative names error: $e');
       return [];
@@ -1172,7 +1073,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<AlternativeNameModel>> getAlternativeNamesDetailed(List<int> gameIds) async {
+  Future<List<AlternativeNameModel>> getAlternativeNamesDetailed(
+      List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
 
     final gameIdsString = gameIds.join(',');
@@ -1185,7 +1087,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'alternative_names',
       body,
-          (json) => AlternativeNameModel.fromJson(json),
+      (json) => AlternativeNameModel.fromJson(json),
     );
   }
 
@@ -1202,7 +1104,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       final altNames = await _makeRequest(
         'alternative_names',
         altNameBody,
-            (json) => AlternativeNameModel.fromJson(json),
+        (json) => AlternativeNameModel.fromJson(json),
       );
 
       if (altNames.isEmpty) return [];
@@ -1236,10 +1138,12 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     bool includeFamilyInfo = false,
   }) async {
     String body;
-    String fields = 'id, abbreviation, alternative_name, category, checksum, created_at, generation, name, platform_logo, slug, summary, updated_at, url, versions';
+    String fields =
+        'id, abbreviation, alternative_name, category, checksum, created_at, generation, name, platform_logo, slug, summary, updated_at, url, versions';
 
     if (includeFamilyInfo) {
-      fields += ', platform_family.id, platform_family.name, platform_family.slug';
+      fields +=
+          ', platform_family.id, platform_family.name, platform_family.slug';
     }
 
     if (ids != null && ids.isNotEmpty) {
@@ -1273,12 +1177,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platforms',
       body,
-          (json) => PlatformModel.fromJson(json),
+      (json) => PlatformModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<PlatformModel>> getPlatformsByCategory(PlatformCategoryEnum category) async {
+  Future<List<PlatformModel>> getPlatformsByCategory(
+      PlatformCategoryEnum category) async {
     return await getPlatforms(category: category);
   }
 
@@ -1294,7 +1199,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platforms',
       body,
-          (json) => PlatformModel.fromJson(json),
+      (json) => PlatformModel.fromJson(json),
     );
   }
 
@@ -1311,7 +1216,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<PlatformFamilyModel>> getPlatformFamilies({List<int>? ids}) async {
+  Future<List<PlatformFamilyModel>> getPlatformFamilies(
+      {List<int>? ids}) async {
     String body;
 
     if (ids != null && ids.isNotEmpty) {
@@ -1332,7 +1238,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_families',
       body,
-          (json) => PlatformFamilyModel.fromJson(json),
+      (json) => PlatformFamilyModel.fromJson(json),
     );
   }
 
@@ -1358,7 +1264,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_types',
       body,
-          (json) => PlatformTypeModel.fromJson(json),
+      (json) => PlatformTypeModel.fromJson(json),
     );
   }
 
@@ -1376,7 +1282,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_logos',
       body,
-          (json) => PlatformLogoModel.fromJson(json),
+      (json) => PlatformLogoModel.fromJson(json),
     );
   }
 
@@ -1419,7 +1325,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(int platformId) async {
+  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(
+      int platformId) async {
     try {
       final body = '''
         where id = $platformId;
@@ -1451,7 +1358,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     bool includeReleaseDates = false,
   }) async {
     String body;
-    String fields = 'id, checksum, connectivity, cpu, graphics, main_manufacturer, media, memory, name, os, output, platform, platform_logo, platform_version_release_dates, resolutions, slug, sound, storage, summary, url';
+    String fields =
+        'id, checksum, connectivity, cpu, graphics, main_manufacturer, media, memory, name, os, output, platform, platform_logo, platform_version_release_dates, resolutions, slug, sound, storage, summary, url';
 
     if (includeReleaseDates) {
       fields += ', platform_version_release_dates.*';
@@ -1480,7 +1388,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_versions',
       body,
-          (json) => PlatformVersionModel.fromJson(json),
+      (json) => PlatformVersionModel.fromJson(json),
     );
   }
 
@@ -1491,12 +1399,14 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(int platformId) async {
+  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(
+      int platformId) async {
     return await getPlatformVersions(platformId: platformId);
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(List<int> versionIds) async {
+  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(
+      List<int> versionIds) async {
     try {
       if (versionIds.isEmpty) return [];
 
@@ -1517,7 +1427,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getPlatformVersionHistory(int platformId) async {
+  Future<List<Map<String, dynamic>>> getPlatformVersionHistory(
+      int platformId) async {
     try {
       final body = '''
         where platform = $platformId;
@@ -1566,12 +1477,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_version_companies',
       body,
-          (json) => PlatformVersionCompanyModel.fromJson(json),
+      (json) => PlatformVersionCompanyModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(List<int> versionIds) async {
+  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(
+      List<int> versionIds) async {
     return await getPlatformVersionCompanies(versionIds: versionIds);
   }
 
@@ -1611,12 +1523,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_version_release_dates',
       body,
-          (json) => PlatformVersionReleaseDateModel.fromJson(json),
+      (json) => PlatformVersionReleaseDateModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(List<int> versionIds) async {
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(
+      List<int> versionIds) async {
     return await getPlatformVersionReleaseDates(versionIds: versionIds);
   }
 
@@ -1651,17 +1564,19 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_websites',
       body,
-          (json) => PlatformWebsiteModel.fromJson(json),
+      (json) => PlatformWebsiteModel.fromJson(json),
     );
   }
 
   @override
-  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(List<int> platformIds) async {
+  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(
+      List<int> platformIds) async {
     return await getPlatformWebsites(platformIds: platformIds);
   }
 
   @override
-  Future<List<PlatformWebsiteModel>> getPlatformWebsitesByType(int typeId) async {
+  Future<List<PlatformWebsiteModel>> getPlatformWebsitesByType(
+      int typeId) async {
     final body = '''
       where category = $typeId;
       fields id, category, checksum, trusted, url;
@@ -1671,7 +1586,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platform_websites',
       body,
-          (json) => PlatformWebsiteModel.fromJson(json),
+      (json) => PlatformWebsiteModel.fromJson(json),
     );
   }
 
@@ -1711,7 +1626,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'genres',
       body,
-          (json) => GenreModel.fromJson(json),
+      (json) => GenreModel.fromJson(json),
     );
   }
 
@@ -1739,10 +1654,12 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       // This would require a complex query with game counting
       // For now, return basic genre data
       final genres = await getGenres(ids: genreIds, limit: limit);
-      return genres.map((genre) => {
-        'genre': genre.toJson(),
-        'game_count': 0, // Would need separate calculation
-      }).toList();
+      return genres
+          .map((genre) => {
+                'genre': genre.toJson(),
+                'game_count': 0, // Would need separate calculation
+              })
+          .toList();
     } catch (e) {
       print('💥 IGDB: Get genres with game count error: $e');
       return [];
@@ -1797,7 +1714,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'themes',
       body,
-          (json) => ThemeModel.fromJson(json),
+      (json) => ThemeModel.fromJson(json),
     );
   }
 
@@ -1863,7 +1780,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'game_modes',
       body,
-          (json) => GameModeModel.fromJson(json),
+      (json) => GameModeModel.fromJson(json),
     );
   }
 
@@ -1901,24 +1818,31 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<KeywordModel>> getKeywords({List<int>? ids, String? search, int limit = 100}) async {
+  Future<List<KeywordModel>> getKeywords(
+      {List<int>? ids, String? search, int limit = 100}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, created_at, name, slug, updated_at, url; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, created_at, name, slug, updated_at, url; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, created_at, name, slug, updated_at, url; limit $limit;';
+      body =
+          'search "$search"; fields id, checksum, created_at, name, slug, updated_at, url; limit $limit;';
     } else {
-      body = 'fields id, checksum, created_at, name, slug, updated_at, url; sort name asc; limit $limit;';
+      body =
+          'fields id, checksum, created_at, name, slug, updated_at, url; sort name asc; limit $limit;';
     }
-    return await _makeRequest('keywords', body, (json) => KeywordModel.fromJson(json));
+    return await _makeRequest(
+        'keywords', body, (json) => KeywordModel.fromJson(json));
   }
 
   @override
-  Future<List<KeywordModel>> searchKeywords(String query) async => await getKeywords(search: query);
+  Future<List<KeywordModel>> searchKeywords(String query) async =>
+      await getKeywords(search: query);
 
   @override
-  Future<List<KeywordModel>> getTrendingKeywords() async => await getKeywords(limit: 20);
+  Future<List<KeywordModel>> getTrendingKeywords() async =>
+      await getKeywords(limit: 20);
 
   @override
   Future<List<KeywordModel>> getKeywordsForGames(List<int> gameIds) async {
@@ -1927,7 +1851,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<KeywordModel>> getSimilarKeywords(String keywordName) async => await searchKeywords(keywordName);
+  Future<List<KeywordModel>> getSimilarKeywords(String keywordName) async =>
+      await searchKeywords(keywordName);
 
   @override
   Future<List<KeywordModel>> getKeywordsByCategory(String category) async => [];
@@ -1944,10 +1869,12 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<KeywordModel>> getRandomKeywords({int limit = 20}) async => await getKeywords(limit: limit);
+  Future<List<KeywordModel>> getRandomKeywords({int limit = 20}) async =>
+      await getKeywords(limit: limit);
 
   @override
-  Future<List<GameModel>> searchGamesByKeywords(List<String> keywordNames) async {
+  Future<List<GameModel>> searchGamesByKeywords(
+      List<String> keywordNames) async {
     // Complex implementation would search by keywords first, then games
     return [];
   }
@@ -1957,45 +1884,60 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<CharacterModel>> getCharacters({List<int>? ids, String? search, int limit = 50}) async {
+  Future<List<CharacterModel>> getCharacters(
+      {List<int>? ids, String? search, int limit = 50}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit $limit;';
+      body =
+          'search "$search"; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit $limit;';
     } else {
-      body = 'fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit $limit;';
+      body =
+          'fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit $limit;';
     }
-    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+    return await _makeRequest(
+        'characters', body, (json) => CharacterModel.fromJson(json));
   }
 
   @override
-  Future<List<CharacterModel>> searchCharacters(String query) async => await getCharacters(search: query);
+  Future<List<CharacterModel>> searchCharacters(String query) async =>
+      await getCharacters(search: query);
 
   @override
   Future<List<CharacterModel>> getCharactersForGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where games = ($gameIdsString); fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 100;';
-    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+    final body =
+        'where games = ($gameIdsString); fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 100;';
+    return await _makeRequest(
+        'characters', body, (json) => CharacterModel.fromJson(json));
   }
 
   @override
-  Future<List<CharacterModel>> getPopularCharacters({int limit = 20}) async => await getCharacters(limit: limit);
+  Future<List<CharacterModel>> getPopularCharacters({int limit = 20}) async =>
+      await getCharacters(limit: limit);
 
   @override
-  Future<List<CharacterModel>> getCharactersByGender(CharacterGenderEnum gender) async {
+  Future<List<CharacterModel>> getCharactersByGender(
+      CharacterGenderEnum gender) async {
     final genderValue = gender.index + 1;
-    final body = 'where gender = $genderValue; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 50;';
-    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+    final body =
+        'where gender = $genderValue; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 50;';
+    return await _makeRequest(
+        'characters', body, (json) => CharacterModel.fromJson(json));
   }
 
   @override
-  Future<List<CharacterModel>> getCharactersBySpecies(CharacterSpeciesEnum species) async {
+  Future<List<CharacterModel>> getCharactersBySpecies(
+      CharacterSpeciesEnum species) async {
     final speciesValue = species.index + 1;
-    final body = 'where species = $speciesValue; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 50;';
-    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+    final body =
+        'where species = $speciesValue; fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 50;';
+    return await _makeRequest(
+        'characters', body, (json) => CharacterModel.fromJson(json));
   }
 
   @override
@@ -2010,41 +1952,52 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CharacterModel>> getRandomCharacters({int limit = 10}) async => await getCharacters(limit: limit);
+  Future<List<CharacterModel>> getRandomCharacters({int limit = 10}) async =>
+      await getCharacters(limit: limit);
 
   @override
-  Future<List<CharacterGenderModel>> getCharacterGenders({List<int>? ids}) async {
+  Future<List<CharacterGenderModel>> getCharacterGenders(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 10;';
-    return await _makeRequest('character_genders', body, (json) => CharacterGenderModel.fromJson(json));
+    return await _makeRequest('character_genders', body,
+        (json) => CharacterGenderModel.fromJson(json));
   }
 
   @override
-  Future<List<CharacterSpeciesModel>> getCharacterSpecies({List<int>? ids}) async {
+  Future<List<CharacterSpeciesModel>> getCharacterSpecies(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 20;';
-    return await _makeRequest('character_species', body, (json) => CharacterSpeciesModel.fromJson(json));
+    return await _makeRequest('character_species', body,
+        (json) => CharacterSpeciesModel.fromJson(json));
   }
 
   @override
-  Future<List<CharacterMugShotModel>> getCharacterMugShots(List<int> mugShotIds) async {
+  Future<List<CharacterMugShotModel>> getCharacterMugShots(
+      List<int> mugShotIds) async {
     if (mugShotIds.isEmpty) return [];
     final idsString = mugShotIds.join(',');
-    final body = 'where id = ($idsString); fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit ${mugShotIds.length};';
-    return await _makeRequest('character_mug_shots', body, (json) => CharacterMugShotModel.fromJson(json));
+    final body =
+        'where id = ($idsString); fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit ${mugShotIds.length};';
+    return await _makeRequest('character_mug_shots', body,
+        (json) => CharacterMugShotModel.fromJson(json));
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCompleteCharacterData({List<int>? characterIds, String? search, int limit = 20}) async {
+  Future<List<Map<String, dynamic>>> getCompleteCharacterData(
+      {List<int>? characterIds, String? search, int limit = 20}) async {
     try {
       String body;
       if (characterIds != null && characterIds.isNotEmpty) {
         final idsString = characterIds.join(',');
-        body = 'where id = ($idsString); fields *, mug_shot.*, games.name; limit ${characterIds.length};';
+        body =
+            'where id = ($idsString); fields *, mug_shot.*, games.name; limit ${characterIds.length};';
       } else if (search != null) {
-        body = 'search "$search"; fields *, mug_shot.*, games.name; limit $limit;';
+        body =
+            'search "$search"; fields *, mug_shot.*, games.name; limit $limit;';
       } else {
         body = 'fields *, mug_shot.*, games.name; limit $limit;';
       }
@@ -2065,20 +2018,25 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<CompanyModel>> getCompanies({List<int>? ids, String? search, int limit = 50}) async {
+  Future<List<CompanyModel>> getCompanies(
+      {List<int>? ids, String? search, int limit = 50}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
       // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
-      body = 'where id = ($idsString); fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit ${ids.length};';
     } else if (search != null) {
       // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
-      body = 'search "$search"; fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit $limit;';
+      body =
+          'search "$search"; fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit $limit;';
     } else {
       // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
-      body = 'fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; sort name asc; limit $limit;';
+      body =
+          'fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; sort name asc; limit $limit;';
     }
-    return await _makeRequest('companies', body, (json) => CompanyModel.fromJson(json));
+    return await _makeRequest(
+        'companies', body, (json) => CompanyModel.fromJson(json));
   }
 
   @override
@@ -2088,21 +2046,29 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CompanyModel>> searchCompanies(String query, {int limit = 20}) async => await getCompanies(search: query, limit: limit);
+  Future<List<CompanyModel>> searchCompanies(String query,
+          {int limit = 20}) async =>
+      await getCompanies(search: query, limit: limit);
 
   @override
-  Future<List<CompanyModel>> getPopularCompanies({int limit = 50}) async => await getCompanies(limit: limit);
+  Future<List<CompanyModel>> getPopularCompanies({int limit = 50}) async =>
+      await getCompanies(limit: limit);
 
   @override
-  Future<List<CompanyModel>> getCompaniesByDevelopedGames(List<int> gameIds) async => [];
+  Future<List<CompanyModel>> getCompaniesByDevelopedGames(
+          List<int> gameIds) async =>
+      [];
 
   @override
-  Future<List<CompanyModel>> getCompaniesByPublishedGames(List<int> gameIds) async => [];
+  Future<List<CompanyModel>> getCompaniesByPublishedGames(
+          List<int> gameIds) async =>
+      [];
 
   @override
   Future<Map<String, dynamic>> getCompleteCompanyData(int companyId) async {
     try {
-      final body = 'where id = $companyId; fields *, logo.*, websites.*; limit 1;';
+      final body =
+          'where id = $companyId; fields *, logo.*, websites.*; limit 1;';
       final response = await _makeRawRequest('companies', body);
       final List<dynamic> data = json.decode(response.body);
       return data.isNotEmpty ? data.first : {};
@@ -2116,11 +2082,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<CompanyModel>> getCompanyHierarchy(int companyId) async => [];
 
   @override
-  Future<List<CompanyLogoModel>> getCompanyLogos({List<int>? ids, int limit = 50}) async {
+  Future<List<CompanyLogoModel>> getCompanyLogos(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit ${ids.length};'
         : 'fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit $limit;';
-    return await _makeRequest('company_logos', body, (json) => CompanyLogoModel.fromJson(json));
+    return await _makeRequest(
+        'company_logos', body, (json) => CompanyLogoModel.fromJson(json));
   }
 
   @override
@@ -2130,11 +2098,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CompanyStatusModel>> getCompanyStatuses({List<int>? ids, int limit = 50}) async {
+  Future<List<CompanyStatusModel>> getCompanyStatuses(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit $limit;';
-    return await _makeRequest('company_statuses', body, (json) => CompanyStatusModel.fromJson(json));
+    return await _makeRequest(
+        'company_statuses', body, (json) => CompanyStatusModel.fromJson(json));
   }
 
   @override
@@ -2144,11 +2114,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CompanyWebsiteModel>> getCompanyWebsites({List<int>? ids, int limit = 50}) async {
+  Future<List<CompanyWebsiteModel>> getCompanyWebsites(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit $limit;';
-    return await _makeRequest('company_websites', body, (json) => CompanyWebsiteModel.fromJson(json));
+    return await _makeRequest(
+        'company_websites', body, (json) => CompanyWebsiteModel.fromJson(json));
   }
 
   @override
@@ -2158,10 +2130,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<CompanyWebsiteModel>> getCompanyWebsitesByCategory(CompanyWebsiteCategory category, {int limit = 50}) async {
+  Future<List<CompanyWebsiteModel>> getCompanyWebsitesByCategory(
+      CompanyWebsiteCategory category,
+      {int limit = 50}) async {
     final categoryValue = category.index + 1;
     final body = 'where category = $categoryValue; fields *; limit $limit;';
-    return await _makeRequest('company_websites', body, (json) => CompanyWebsiteModel.fromJson(json));
+    return await _makeRequest(
+        'company_websites', body, (json) => CompanyWebsiteModel.fromJson(json));
   }
 
   // ==========================================
@@ -2172,19 +2147,27 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<ExternalGameModel>> getExternalGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where game = ($gameIdsString); fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit 200;';
-    return await _makeRequest('external_games', body, (json) => ExternalGameModel.fromJson(json));
+    final body =
+        'where game = ($gameIdsString); fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit 200;';
+    return await _makeRequest(
+        'external_games', body, (json) => ExternalGameModel.fromJson(json));
   }
 
   @override
-  Future<List<ExternalGameModel>> getExternalGamesByStore(ExternalGameCategoryEnum store, {int limit = 100}) async {
+  Future<List<ExternalGameModel>> getExternalGamesByStore(
+      ExternalGameCategoryEnum store,
+      {int limit = 100}) async {
     final storeValue = store.index + 1;
-    final body = 'where category = $storeValue; fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit $limit;';
-    return await _makeRequest('external_games', body, (json) => ExternalGameModel.fromJson(json));
+    final body =
+        'where category = $storeValue; fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit $limit;';
+    return await _makeRequest(
+        'external_games', body, (json) => ExternalGameModel.fromJson(json));
   }
 
   @override
-  Future<Map<int, List<ExternalGameModel>>> getStoreLinksForGames(List<int> gameIds, {List<ExternalGameCategoryEnum>? preferredStores}) async {
+  Future<Map<int, List<ExternalGameModel>>> getStoreLinksForGames(
+      List<int> gameIds,
+      {List<ExternalGameCategoryEnum>? preferredStores}) async {
     final externalGames = await getExternalGames(gameIds);
     final Map<int, List<ExternalGameModel>> result = {};
     for (final game in externalGames) {
@@ -2197,17 +2180,21 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<ExternalGameModel>> getMainStoreLinks(List<int> gameIds) async => await getExternalGames(gameIds);
+  Future<List<ExternalGameModel>> getMainStoreLinks(List<int> gameIds) async =>
+      await getExternalGames(gameIds);
 
   @override
   Future<List<ExternalGameModel>> getSteamLinks(List<int> gameIds) async {
     // Steam category is typically 1
     final allExternalGames = await getExternalGames(gameIds);
-    return allExternalGames.where((game) => game.categoryEnum == ExternalGameCategoryEnum.steam).toList();
+    return allExternalGames
+        .where((game) => game.categoryEnum == ExternalGameCategoryEnum.steam)
+        .toList();
   }
 
   @override
-  Future<Map<String, List<ExternalGameModel>>> getExternalGamesByMedia(List<int> gameIds) async {
+  Future<Map<String, List<ExternalGameModel>>> getExternalGamesByMedia(
+      List<int> gameIds) async {
     final externalGames = await getExternalGames(gameIds);
     final Map<String, List<ExternalGameModel>> result = {};
     for (final game in externalGames) {
@@ -2218,7 +2205,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<ExternalGameModel?> getBestStoreLink(int gameId, {List<ExternalGameCategoryEnum>? preferredStores}) async {
+  Future<ExternalGameModel?> getBestStoreLink(int gameId,
+      {List<ExternalGameCategoryEnum>? preferredStores}) async {
     final externalGames = await getExternalGames([gameId]);
     if (externalGames.isEmpty) return null;
 
@@ -2238,31 +2226,38 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<List<ExternalGameModel>> searchExternalGamesByUid(String uid) async {
-    final body = 'where uid = "$uid"; fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit 50;';
-    return await _makeRequest('external_games', body, (json) => ExternalGameModel.fromJson(json));
+    final body =
+        'where uid = "$uid"; fields id, category, checksum, countries, created_at, game, media, name, platform, uid, updated_at, url, year; limit 50;';
+    return await _makeRequest(
+        'external_games', body, (json) => ExternalGameModel.fromJson(json));
   }
 
   @override
   Future<List<Map<String, dynamic>>> getPopularStores() async => [];
 
   @override
-  Future<List<ExternalGameSourceModel>> getExternalGameSources({List<int>? ids}) async {
+  Future<List<ExternalGameSourceModel>> getExternalGameSources(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 50;';
-    return await _makeRequest('external_game_sources', body, (json) => ExternalGameSourceModel.fromJson(json));
+    return await _makeRequest('external_game_sources', body,
+        (json) => ExternalGameSourceModel.fromJson(json));
   }
 
   @override
-  Future<List<GameReleaseFormatModel>> getGameReleaseFormats({List<int>? ids}) async {
+  Future<List<GameReleaseFormatModel>> getGameReleaseFormats(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 50;';
-    return await _makeRequest('game_release_formats', body, (json) => GameReleaseFormatModel.fromJson(json));
+    return await _makeRequest('game_release_formats', body,
+        (json) => GameReleaseFormatModel.fromJson(json));
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCompleteExternalGameData(List<int> gameIds) async {
+  Future<List<Map<String, dynamic>>> getCompleteExternalGameData(
+      List<int> gameIds) async {
     try {
       if (gameIds.isEmpty) return [];
       final gameIdsString = gameIds.join(',');
@@ -2281,44 +2276,59 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<CollectionModel>> getCollections({List<int>? ids, String? search, int limit = 100}) async {
+  Future<List<CollectionModel>> getCollections(
+      {List<int>? ids, String? search, int limit = 100}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, created_at, games, name, slug, updated_at, url; limit $limit;';
+      body =
+          'search "$search"; fields id, checksum, created_at, games, name, slug, updated_at, url; limit $limit;';
     } else {
-      body = 'fields id, checksum, created_at, games, name, slug, updated_at, url; sort name asc; limit $limit;';
+      body =
+          'fields id, checksum, created_at, games, name, slug, updated_at, url; sort name asc; limit $limit;';
     }
-    return await _makeRequest('collections', body, (json) => CollectionModel.fromJson(json));
+    return await _makeRequest(
+        'collections', body, (json) => CollectionModel.fromJson(json));
   }
 
   @override
-  Future<List<CollectionModel>> searchCollections(String query) async => await getCollections(search: query);
+  Future<List<CollectionModel>> searchCollections(String query) async =>
+      await getCollections(search: query);
 
   @override
-  Future<List<CollectionModel>> getCollectionsForGames(List<int> gameIds) async {
+  Future<List<CollectionModel>> getCollectionsForGames(
+      List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where games = ($gameIdsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit 100;';
-    return await _makeRequest('collections', body, (json) => CollectionModel.fromJson(json));
+    final body =
+        'where games = ($gameIdsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit 100;';
+    return await _makeRequest(
+        'collections', body, (json) => CollectionModel.fromJson(json));
   }
 
   @override
-  Future<List<CollectionModel>> getPopularCollections({int limit = 20}) async => await getCollections(limit: limit);
+  Future<List<CollectionModel>> getPopularCollections({int limit = 20}) async =>
+      await getCollections(limit: limit);
 
   @override
   Future<List<CollectionModel>> getCollectionsByType(int typeId) async {
-    final body = 'where type = $typeId; fields id, checksum, created_at, games, name, slug, updated_at, url; limit 50;';
-    return await _makeRequest('collections', body, (json) => CollectionModel.fromJson(json));
+    final body =
+        'where type = $typeId; fields id, checksum, created_at, games, name, slug, updated_at, url; limit 50;';
+    return await _makeRequest(
+        'collections', body, (json) => CollectionModel.fromJson(json));
   }
 
   @override
-  Future<List<CollectionModel>> getParentCollections({int limit = 50}) async => await getCollections(limit: limit);
+  Future<List<CollectionModel>> getParentCollections({int limit = 50}) async =>
+      await getCollections(limit: limit);
 
   @override
-  Future<List<CollectionModel>> getChildCollections(int parentCollectionId) async => [];
+  Future<List<CollectionModel>> getChildCollections(
+          int parentCollectionId) async =>
+      [];
 
   @override
   Future<CollectionModel?> getCollectionByName(String name) async {
@@ -2337,11 +2347,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 20;';
-    return await _makeRequest('collection_types', body, (json) => CollectionTypeModel.fromJson(json));
+    return await _makeRequest(
+        'collection_types', body, (json) => CollectionTypeModel.fromJson(json));
   }
 
   @override
-  Future<List<CollectionMembershipModel>> getCollectionMemberships({int? collectionId, int? gameId, List<int>? ids}) async {
+  Future<List<CollectionMembershipModel>> getCollectionMemberships(
+      {int? collectionId, int? gameId, List<int>? ids}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       body = 'where id = (${ids.join(',')}); fields *; limit ${ids.length};';
@@ -2352,32 +2364,41 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     } else {
       body = 'fields *; limit 100;';
     }
-    return await _makeRequest('collection_memberships', body, (json) => CollectionMembershipModel.fromJson(json));
+    return await _makeRequest('collection_memberships', body,
+        (json) => CollectionMembershipModel.fromJson(json));
   }
 
   @override
-  Future<List<CollectionRelationModel>> getCollectionRelations({int? parentCollectionId, int? childCollectionId, List<int>? ids}) async {
+  Future<List<CollectionRelationModel>> getCollectionRelations(
+      {int? parentCollectionId, int? childCollectionId, List<int>? ids}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       body = 'where id = (${ids.join(',')}); fields *; limit ${ids.length};';
     } else if (parentCollectionId != null) {
-      body = 'where parent_collection = $parentCollectionId; fields *; limit 50;';
+      body =
+          'where parent_collection = $parentCollectionId; fields *; limit 50;';
     } else if (childCollectionId != null) {
       body = 'where child_collection = $childCollectionId; fields *; limit 50;';
     } else {
       body = 'fields *; limit 100;';
     }
-    return await _makeRequest('collection_relations', body, (json) => CollectionRelationModel.fromJson(json));
+    return await _makeRequest('collection_relations', body,
+        (json) => CollectionRelationModel.fromJson(json));
   }
 
   @override
-  Future<Map<String, dynamic>> getCollectionHierarchy(int collectionId) async => {};
+  Future<Map<String, dynamic>> getCollectionHierarchy(int collectionId) async =>
+      {};
 
   @override
-  Future<List<Map<String, dynamic>>> getCompleteCollectionData({List<int>? collectionIds, String? search, int limit = 20}) async => [];
+  Future<List<Map<String, dynamic>>> getCompleteCollectionData(
+          {List<int>? collectionIds, String? search, int limit = 20}) async =>
+      [];
 
   @override
-  Future<List<Map<String, dynamic>>> getFamousGameSeries({int limit = 20}) async => [];
+  Future<List<Map<String, dynamic>>> getFamousGameSeries(
+          {int limit = 20}) async =>
+      [];
 
   @override
   Future<Map<String, dynamic>> getCollectionStatistics() async => {};
@@ -2387,38 +2408,49 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<FranchiseModel>> getFranchises({List<int>? ids, String? search, int limit = 100}) async {
+  Future<List<FranchiseModel>> getFranchises(
+      {List<int>? ids, String? search, int limit = 100}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, created_at, games, name, slug, updated_at, url; limit $limit;';
+      body =
+          'search "$search"; fields id, checksum, created_at, games, name, slug, updated_at, url; limit $limit;';
     } else {
-      body = 'fields id, checksum, created_at, games, name, slug, updated_at, url; sort name asc; limit $limit;';
+      body =
+          'fields id, checksum, created_at, games, name, slug, updated_at, url; sort name asc; limit $limit;';
     }
-    return await _makeRequest('franchises', body, (json) => FranchiseModel.fromJson(json));
+    return await _makeRequest(
+        'franchises', body, (json) => FranchiseModel.fromJson(json));
   }
 
   @override
-  Future<List<FranchiseModel>> searchFranchises(String query) async => await getFranchises(search: query);
+  Future<List<FranchiseModel>> searchFranchises(String query) async =>
+      await getFranchises(search: query);
 
   @override
   Future<List<FranchiseModel>> getFranchisesForGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where games = ($gameIdsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit 100;';
-    return await _makeRequest('franchises', body, (json) => FranchiseModel.fromJson(json));
+    final body =
+        'where games = ($gameIdsString); fields id, checksum, created_at, games, name, slug, updated_at, url; limit 100;';
+    return await _makeRequest(
+        'franchises', body, (json) => FranchiseModel.fromJson(json));
   }
 
   @override
-  Future<List<FranchiseModel>> getPopularFranchises({int limit = 20}) async => await getFranchises(limit: limit);
+  Future<List<FranchiseModel>> getPopularFranchises({int limit = 20}) async =>
+      await getFranchises(limit: limit);
 
   @override
-  Future<List<FranchiseModel>> getMajorFranchises({int limit = 20}) async => await getFranchises(limit: limit);
+  Future<List<FranchiseModel>> getMajorFranchises({int limit = 20}) async =>
+      await getFranchises(limit: limit);
 
   @override
-  Future<List<FranchiseModel>> getTrendingFranchises() async => await getFranchises(limit: 20);
+  Future<List<FranchiseModel>> getTrendingFranchises() async =>
+      await getFranchises(limit: 20);
 
   @override
   Future<FranchiseModel?> getFranchiseByName(String name) async {
@@ -2433,19 +2465,28 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<FranchiseModel>> getRandomFranchises({int limit = 10}) async => await getFranchises(limit: limit);
+  Future<List<FranchiseModel>> getRandomFranchises({int limit = 10}) async =>
+      await getFranchises(limit: limit);
 
   @override
-  Future<List<FranchiseModel>> getSimilarFranchises(int franchiseId, {int limit = 10}) async => [];
+  Future<List<FranchiseModel>> getSimilarFranchises(int franchiseId,
+          {int limit = 10}) async =>
+      [];
 
   @override
-  Future<List<Map<String, dynamic>>> getFranchisesWithGames({List<int>? franchiseIds, String? search, int limit = 20, int maxGamesPerFranchise = 10}) async => [];
+  Future<List<Map<String, dynamic>>> getFranchisesWithGames(
+          {List<int>? franchiseIds,
+          String? search,
+          int limit = 20,
+          int maxGamesPerFranchise = 10}) async =>
+      [];
 
   @override
   Future<Map<String, dynamic>> getFranchiseStatistics() async => {};
 
   @override
-  Future<Map<String, dynamic>> getFranchiseTimeline(int franchiseId) async => {};
+  Future<Map<String, dynamic>> getFranchiseTimeline(int franchiseId) async =>
+      {};
 
   // ==========================================
   // AGE RATING METHODS
@@ -2455,20 +2496,25 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where id = $gameIdsString; fields id, category, checksum, content_descriptions, organization.*, rating, rating_category, rating_content_descriptions, rating_cover_url, synopsis; limit 200;';
-    return await _makeRequest('age_ratings', body, (json) => AgeRatingModel.fromJson(json));
+    final body =
+        'where id = $gameIdsString; fields id, category, checksum, content_descriptions, organization.*, rating, rating_category, rating_content_descriptions, rating_cover_url, synopsis; limit 200;';
+    return await _makeRequest(
+        'age_ratings', body, (json) => AgeRatingModel.fromJson(json));
   }
 
   @override
-  Future<List<AgeRatingOrganizationModel>> getAgeRatingOrganizations({List<int>? ids}) async {
+  Future<List<AgeRatingOrganizationModel>> getAgeRatingOrganizations(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields *; limit ${ids.length};'
         : 'fields *; limit 20;';
-    return await _makeRequest('age_rating_organizations', body, (json) => AgeRatingOrganizationModel.fromJson(json));
+    return await _makeRequest('age_rating_organizations', body,
+        (json) => AgeRatingOrganizationModel.fromJson(json));
   }
 
   @override
-  Future<List<AgeRatingCategoryModel>> getAgeRatingCategories({List<int>? ids, int? organizationId}) async {
+  Future<List<AgeRatingCategoryModel>> getAgeRatingCategories(
+      {List<int>? ids, int? organizationId}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       body = 'where id = (${ids.join(',')}); fields *; limit ${ids.length};';
@@ -2477,15 +2523,18 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     } else {
       body = 'fields *; limit 50;';
     }
-    return await _makeRequest('age_rating_categories', body, (json) => AgeRatingCategoryModel.fromJson(json));
+    return await _makeRequest('age_rating_categories', body,
+        (json) => AgeRatingCategoryModel.fromJson(json));
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCompleteAgeRatings(List<int> gameIds) async {
+  Future<List<Map<String, dynamic>>> getCompleteAgeRatings(
+      List<int> gameIds) async {
     try {
       if (gameIds.isEmpty) return [];
       final gameIdsString = gameIds.join(',');
-      final body = 'where game = ($gameIdsString); fields *, content_descriptions.*; limit 200;';
+      final body =
+          'where game = ($gameIdsString); fields *, content_descriptions.*; limit 200;';
       final response = await _makeRawRequest('age_ratings', body);
       final List<dynamic> data = json.decode(response.body);
       return data.cast<Map<String, dynamic>>();
@@ -2506,7 +2555,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     int limit = 50,
   }) async {
     String body;
-    const fields = 'id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos';
+    const fields =
+        'id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos';
 
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
@@ -2517,7 +2567,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       body = 'fields $fields; sort start_time desc; limit $limit;';
     }
 
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
@@ -2527,27 +2578,34 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<EventModel>> searchEvents(String query, {int limit = 20}) async => await getEvents(search: query, limit: limit);
+  Future<List<EventModel>> searchEvents(String query, {int limit = 20}) async =>
+      await getEvents(search: query, limit: limit);
 
   @override
   Future<List<EventModel>> getUpcomingEvents({int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body = 'where start_time > $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    final body =
+        'where start_time > $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
   Future<List<EventModel>> getLiveEvents({int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body = 'where start_time <= $now & end_time >= $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit $limit;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    final body =
+        'where start_time <= $now & end_time >= $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit $limit;';
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
   Future<List<EventModel>> getPastEvents({int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body = 'where end_time < $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort end_time desc; limit $limit;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    final body =
+        'where end_time < $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort end_time desc; limit $limit;';
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
@@ -2560,7 +2618,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     if (startDate != null && endDate != null) {
       final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
       final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
-      whereClause = 'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
+      whereClause =
+          'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
     } else if (startDate != null) {
       final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
       whereClause = 'where start_time >= $startTimestamp;';
@@ -2569,24 +2628,30 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       whereClause = 'where start_time <= $endTimestamp;';
     }
 
-    final body = '$whereClause fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    final body =
+        '$whereClause fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
   Future<List<EventModel>> getEventsByGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where games = ($gameIdsString); fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit 100;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    final body =
+        'where games = ($gameIdsString); fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit 100;';
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   @override
-  Future<List<EventLogoModel>> getEventLogos({List<int>? ids, int limit = 50}) async {
+  Future<List<EventLogoModel>> getEventLogos(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit ${ids.length};'
         : 'fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit $limit;';
-    return await _makeRequest('event_logos', body, (json) => EventLogoModel.fromJson(json));
+    return await _makeRequest(
+        'event_logos', body, (json) => EventLogoModel.fromJson(json));
   }
 
   @override
@@ -2597,17 +2662,21 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<EventLogoModel?> getEventLogoByEventId(int eventId) async {
-    final body = 'where event = $eventId; fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit 1;';
-    final logos = await _makeRequest('event_logos', body, (json) => EventLogoModel.fromJson(json));
+    final body =
+        'where event = $eventId; fields id, alpha_channel, animated, checksum, height, image_id, url, width; limit 1;';
+    final logos = await _makeRequest(
+        'event_logos', body, (json) => EventLogoModel.fromJson(json));
     return logos.isNotEmpty ? logos.first : null;
   }
 
   @override
-  Future<List<EventNetworkModel>> getEventNetworks({List<int>? ids, int limit = 50}) async {
+  Future<List<EventNetworkModel>> getEventNetworks(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, checksum, event, network_type, url; limit ${ids.length};'
         : 'fields id, checksum, event, network_type, url; limit $limit;';
-    return await _makeRequest('event_networks', body, (json) => EventNetworkModel.fromJson(json));
+    return await _makeRequest(
+        'event_networks', body, (json) => EventNetworkModel.fromJson(json));
   }
 
   @override
@@ -2618,28 +2687,36 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<List<EventNetworkModel>> getEventNetworksByEventId(int eventId) async {
-    final body = 'where event = $eventId; fields id, checksum, event, network_type, url; limit 50;';
-    return await _makeRequest('event_networks', body, (json) => EventNetworkModel.fromJson(json));
+    final body =
+        'where event = $eventId; fields id, checksum, event, network_type, url; limit 50;';
+    return await _makeRequest(
+        'event_networks', body, (json) => EventNetworkModel.fromJson(json));
   }
 
   @override
-  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(int networkTypeId) async {
-    final body = 'where network_type = $networkTypeId; fields id, checksum, event, network_type, url; limit 100;';
-    return await _makeRequest('event_networks', body, (json) => EventNetworkModel.fromJson(json));
+  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(
+      int networkTypeId) async {
+    final body =
+        'where network_type = $networkTypeId; fields id, checksum, event, network_type, url; limit 100;';
+    return await _makeRequest(
+        'event_networks', body, (json) => EventNetworkModel.fromJson(json));
   }
 
   @override
-  Future<List<NetworkTypeModel>> getNetworkTypes({List<int>? ids, String? search, int limit = 50}) async {
+  Future<List<NetworkTypeModel>> getNetworkTypes(
+      {List<int>? ids, String? search, int limit = 50}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, name, url; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, name, url; limit ${ids.length};';
     } else if (search != null) {
       body = 'search "$search"; fields id, checksum, name, url; limit $limit;';
     } else {
       body = 'fields id, checksum, name, url; sort name asc; limit $limit;';
     }
-    return await _makeRequest('network_types', body, (json) => NetworkTypeModel.fromJson(json));
+    return await _makeRequest(
+        'network_types', body, (json) => NetworkTypeModel.fromJson(json));
   }
 
   @override
@@ -2649,12 +2726,15 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<NetworkTypeModel>> searchNetworkTypes(String query, {int limit = 20}) async => await getNetworkTypes(search: query, limit: limit);
+  Future<List<NetworkTypeModel>> searchNetworkTypes(String query,
+          {int limit = 20}) async =>
+      await getNetworkTypes(search: query, limit: limit);
 
   @override
   Future<Map<String, dynamic>> getCompleteEventData(int eventId) async {
     try {
-      final body = 'where id = $eventId; fields *, event_logo.*, event_networks.*, games.name; limit 1;';
+      final body =
+          'where id = $eventId; fields *, event_logo.*, event_networks.*, games.name; limit 1;';
       final response = await _makeRawRequest('events', body);
       final List<dynamic> data = json.decode(response.body);
       return data.isNotEmpty ? data.first : {};
@@ -2665,13 +2745,16 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<EventModel>> getEventsWithGamesAndNetworks({bool includeLogos = true, int limit = 50}) async {
-    String fields = 'id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, live_stream_url, event_networks.*, games.name';
+  Future<List<EventModel>> getEventsWithGamesAndNetworks(
+      {bool includeLogos = true, int limit = 50}) async {
+    String fields =
+        'id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, live_stream_url, event_networks.*, games.name';
     if (includeLogos) {
       fields += ', event_logo.*';
     }
     final body = 'fields $fields; sort start_time desc; limit $limit;';
-    return await _makeRequest('events', body, (json) => EventModel.fromJson(json));
+    return await _makeRequest(
+        'events', body, (json) => EventModel.fromJson(json));
   }
 
   // ==========================================
@@ -2679,11 +2762,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<ReleaseDateModel>> getReleaseDates({List<int>? ids, int limit = 50}) async {
+  Future<List<ReleaseDateModel>> getReleaseDates(
+      {List<int>? ids, int limit = 50}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit ${ids.length};'
         : 'fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit $limit;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
@@ -2694,26 +2779,35 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<List<ReleaseDateModel>> getReleaseDatesByGame(int gameId) async {
-    final body = 'where game = $gameId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 50;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where game = $gameId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 50;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
-  Future<List<ReleaseDateModel>> getReleaseDatesByPlatform(int platformId) async {
-    final body = 'where platform = $platformId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+  Future<List<ReleaseDateModel>> getReleaseDatesByPlatform(
+      int platformId) async {
+    final body =
+        'where platform = $platformId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
   Future<List<ReleaseDateModel>> getReleaseDatesByRegion(int regionId) async {
-    final body = 'where region = $regionId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where region = $regionId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
   Future<List<ReleaseDateModel>> getReleaseDatesByStatus(int statusId) async {
-    final body = 'where status = $statusId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where status = $statusId; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; limit 100;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
@@ -2735,23 +2829,30 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       whereClause = 'where date <= $endTimestamp;';
     }
 
-    final body = '$whereClause fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit $limit;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        '$whereClause fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit $limit;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
-  Future<List<ReleaseDateModel>> getUpcomingReleaseDates({int limit = 50}) async {
+  Future<List<ReleaseDateModel>> getUpcomingReleaseDates(
+      {int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body = 'where date > $now; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit $limit;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where date > $now; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit $limit;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
   Future<List<ReleaseDateModel>> getRecentReleaseDates({int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final thirtyDaysAgo = now - (30 * 24 * 60 * 60);
-    final body = 'where date >= $thirtyDaysAgo & date <= $now; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date desc; limit $limit;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where date >= $thirtyDaysAgo & date <= $now; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date desc; limit $limit;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
@@ -2759,7 +2860,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
-    return await getReleaseDatesByDateRange(startDate: startOfDay, endDate: endOfDay);
+    return await getReleaseDatesByDateRange(
+        startDate: startOfDay, endDate: endOfDay);
   }
 
   @override
@@ -2767,7 +2869,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     final endOfWeek = startOfWeek.add(const Duration(days: 7));
-    return await getReleaseDatesByDateRange(startDate: startOfWeek, endDate: endOfWeek);
+    return await getReleaseDatesByDateRange(
+        startDate: startOfWeek, endDate: endOfWeek);
   }
 
   @override
@@ -2775,36 +2878,47 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 1);
-    return await getReleaseDatesByDateRange(startDate: startOfMonth, endDate: endOfMonth);
+    return await getReleaseDatesByDateRange(
+        startDate: startOfMonth, endDate: endOfMonth);
   }
 
   @override
-  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year, {int limit = 100}) async {
+  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year,
+      {int limit = 100}) async {
     final startOfYear = DateTime(year, 1, 1);
     final endOfYear = DateTime(year + 1, 1, 1);
-    return await getReleaseDatesByDateRange(startDate: startOfYear, endDate: endOfYear, limit: limit);
+    return await getReleaseDatesByDateRange(
+        startDate: startOfYear, endDate: endOfYear, limit: limit);
   }
 
   @override
-  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(int year, int quarter, {int limit = 50}) async {
+  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(
+      int year, int quarter,
+      {int limit = 50}) async {
     final startMonth = (quarter - 1) * 3 + 1;
     final startOfQuarter = DateTime(year, startMonth, 1);
     final endOfQuarter = DateTime(year, startMonth + 3, 1);
-    return await getReleaseDatesByDateRange(startDate: startOfQuarter, endDate: endOfQuarter, limit: limit);
+    return await getReleaseDatesByDateRange(
+        startDate: startOfQuarter, endDate: endOfQuarter, limit: limit);
   }
 
   @override
-  Future<List<ReleaseDateRegionModel>> getReleaseDateRegions({List<int>? ids, String? search, int limit = 50}) async {
+  Future<List<ReleaseDateRegionModel>> getReleaseDateRegions(
+      {List<int>? ids, String? search, int limit = 50}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, category, checksum, created_at, identifier, name, updated_at; limit $limit;';
+      body =
+          'search "$search"; fields id, category, checksum, created_at, identifier, name, updated_at; limit $limit;';
     } else {
-      body = 'fields id, category, checksum, created_at, identifier, name, updated_at; sort name asc; limit $limit;';
+      body =
+          'fields id, category, checksum, created_at, identifier, name, updated_at; sort name asc; limit $limit;';
     }
-    return await _makeRequest('release_date_regions', body, (json) => ReleaseDateRegionModel.fromJson(json));
+    return await _makeRequest('release_date_regions', body,
+        (json) => ReleaseDateRegionModel.fromJson(json));
   }
 
   @override
@@ -2814,20 +2928,27 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query, {int limit = 20}) async => await getReleaseDateRegions(search: query, limit: limit);
+  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query,
+          {int limit = 20}) async =>
+      await getReleaseDateRegions(search: query, limit: limit);
 
   @override
-  Future<List<ReleaseDateStatusModel>> getReleaseDateStatuses({List<int>? ids, String? search, int limit = 50}) async {
+  Future<List<ReleaseDateStatusModel>> getReleaseDateStatuses(
+      {List<int>? ids, String? search, int limit = 50}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, created_at, description, name, updated_at; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, created_at, description, name, updated_at; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, created_at, description, name, updated_at; limit $limit;';
+      body =
+          'search "$search"; fields id, checksum, created_at, description, name, updated_at; limit $limit;';
     } else {
-      body = 'fields id, checksum, created_at, description, name, updated_at; sort name asc; limit $limit;';
+      body =
+          'fields id, checksum, created_at, description, name, updated_at; sort name asc; limit $limit;';
     }
-    return await _makeRequest('release_date_statuses', body, (json) => ReleaseDateStatusModel.fromJson(json));
+    return await _makeRequest('release_date_statuses', body,
+        (json) => ReleaseDateStatusModel.fromJson(json));
   }
 
   @override
@@ -2837,12 +2958,16 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query, {int limit = 20}) async => await getReleaseDateStatuses(search: query, limit: limit);
+  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query,
+          {int limit = 20}) async =>
+      await getReleaseDateStatuses(search: query, limit: limit);
 
   @override
-  Future<Map<String, dynamic>> getCompleteReleaseDateData(int releaseDateId) async {
+  Future<Map<String, dynamic>> getCompleteReleaseDateData(
+      int releaseDateId) async {
     try {
-      final body = 'where id = $releaseDateId; fields *, game.name, platform.name, region.name, status.name; limit 1;';
+      final body =
+          'where id = $releaseDateId; fields *, game.name, platform.name, region.name, status.name; limit 1;';
       final response = await _makeRawRequest('release_dates', body);
       final List<dynamic> data = json.decode(response.body);
       return data.isNotEmpty ? data.first : {};
@@ -2853,33 +2978,44 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<ReleaseDateModel>> getReleaseDatesWithRegionsAndStatuses({int limit = 50}) async {
-    final body = 'fields id, category, checksum, created_at, date, game, human, m, platform.name, region.name, status.name, updated_at, y; limit $limit;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+  Future<List<ReleaseDateModel>> getReleaseDatesWithRegionsAndStatuses(
+      {int limit = 50}) async {
+    final body =
+        'fields id, category, checksum, created_at, date, game, human, m, platform.name, region.name, status.name, updated_at, y; limit $limit;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
-  Future<List<ReleaseDateModel>> getGameReleaseDatesWithDetails(int gameId) async {
-    final body = 'where game = $gameId; fields id, category, checksum, created_at, date, game, human, m, platform.name, region.name, status.name, updated_at, y; limit 50;';
-    return await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+  Future<List<ReleaseDateModel>> getGameReleaseDatesWithDetails(
+      int gameId) async {
+    final body =
+        'where game = $gameId; fields id, category, checksum, created_at, date, game, human, m, platform.name, region.name, status.name, updated_at, y; limit 50;';
+    return await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
   }
 
   @override
   Future<ReleaseDateModel?> getEarliestReleaseDate(int gameId) async {
-    final body = 'where game = $gameId & date != null; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit 1;';
-    final dates = await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where game = $gameId & date != null; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date asc; limit 1;';
+    final dates = await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
     return dates.isNotEmpty ? dates.first : null;
   }
 
   @override
   Future<ReleaseDateModel?> getLatestReleaseDate(int gameId) async {
-    final body = 'where game = $gameId & date != null; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date desc; limit 1;';
-    final dates = await _makeRequest('release_dates', body, (json) => ReleaseDateModel.fromJson(json));
+    final body =
+        'where game = $gameId & date != null; fields id, category, checksum, created_at, date, game, human, m, platform, region, status, updated_at, y; sort date desc; limit 1;';
+    final dates = await _makeRequest(
+        'release_dates', body, (json) => ReleaseDateModel.fromJson(json));
     return dates.isNotEmpty ? dates.first : null;
   }
 
   @override
-  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(int gameId) async {
+  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(
+      int gameId) async {
     final dates = await getReleaseDatesByGame(gameId);
     final Map<String, List<ReleaseDateModel>> result = {};
     for (final date in dates) {
@@ -2902,15 +3038,20 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body;
     if (resultType != null) {
       final typeValue = resultType.index + 1;
-      body = 'search "$query"; where result_type = $typeValue; fields id, alternative_name, character, collection, company, game, person, platform, result_type, theme; limit $limit;';
+      body =
+          'search "$query"; where result_type = $typeValue; fields id, alternative_name, character, collection, company, game, person, platform, result_type, theme; limit $limit;';
     } else {
-      body = 'search "$query"; fields id, alternative_name, character, collection, company, game, person, platform, result_type, theme; limit $limit;';
+      body =
+          'search "$query"; fields id, alternative_name, character, collection, company, game, person, platform, result_type, theme; limit $limit;';
     }
-    return await _makeRequest('search', body, (json) => SearchModel.fromJson(json));
+    return await _makeRequest(
+        'search', body, (json) => SearchModel.fromJson(json));
   }
 
   @override
-  Future<List<SearchModel>> searchGlobal(String query, {int limit = 50}) async => await search(query: query, limit: limit);
+  Future<List<SearchModel>> searchGlobal(String query,
+          {int limit = 50}) async =>
+      await search(query: query, limit: limit);
 
   @override
   Future<List<SearchModel>> searchWithFilters({
@@ -2931,7 +3072,9 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<SearchModel>> getPopularSearches({int limit = 20}) async => [];
 
   @override
-  Future<List<SearchModel>> autocompleteSearch(String partialQuery, {int limit = 10}) async => await search(query: partialQuery, limit: limit);
+  Future<List<SearchModel>> autocompleteSearch(String partialQuery,
+          {int limit = 10}) async =>
+      await search(query: partialQuery, limit: limit);
 
   @override
   Future<List<String>> getSearchHistory() async => [];
@@ -2943,10 +3086,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<Map<String, dynamic>> getSearchAnalytics() async => {};
 
   @override
-  Future<List<Map<String, dynamic>>> getSearchStatistics({DateTime? startDate, DateTime? endDate}) async => [];
+  Future<List<Map<String, dynamic>>> getSearchStatistics(
+          {DateTime? startDate, DateTime? endDate}) async =>
+      [];
 
   @override
-  Future<Map<String, dynamic>> getCompleteSearchResults(String query, {int limit = 50}) async {
+  Future<Map<String, dynamic>> getCompleteSearchResults(String query,
+      {int limit = 50}) async {
     try {
       final searchResults = await search(query: query, limit: limit);
       return {
@@ -2975,18 +3121,24 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, game_id, popularity_source, popularity_type, value; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, game_id, popularity_source, popularity_type, value; limit ${ids.length};';
     } else if (gameId != null) {
-      body = 'where game_id = $gameId; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
+      body =
+          'where game_id = $gameId; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
     } else if (popularityTypeId != null) {
-      body = 'where popularity_type = $popularityTypeId; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
+      body =
+          'where popularity_type = $popularityTypeId; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
     } else if (source != null) {
       final sourceValue = source.index + 1;
-      body = 'where popularity_source = $sourceValue; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
+      body =
+          'where popularity_source = $sourceValue; fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
     } else {
-      body = 'fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
+      body =
+          'fields id, checksum, game_id, popularity_source, popularity_type, value; limit $limit;';
     }
-    return await _makeRequest('popularity_primitives', body, (json) => PopularityPrimitiveModel.fromJson(json));
+    return await _makeRequest('popularity_primitives', body,
+        (json) => PopularityPrimitiveModel.fromJson(json));
   }
 
   @override
@@ -2996,13 +3148,19 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<PopularityPrimitiveModel>> getGamePopularityMetrics(int gameId) async => await getPopularityPrimitives(gameId: gameId);
+  Future<List<PopularityPrimitiveModel>> getGamePopularityMetrics(
+          int gameId) async =>
+      await getPopularityPrimitives(gameId: gameId);
 
   @override
-  Future<List<PopularityPrimitiveModel>> getPopularityByType(int popularityTypeId) async => await getPopularityPrimitives(popularityTypeId: popularityTypeId);
+  Future<List<PopularityPrimitiveModel>> getPopularityByType(
+          int popularityTypeId) async =>
+      await getPopularityPrimitives(popularityTypeId: popularityTypeId);
 
   @override
-  Future<List<PopularityPrimitiveModel>> getPopularityBySource(PopularitySourceEnum source) async => await getPopularityPrimitives(source: source);
+  Future<List<PopularityPrimitiveModel>> getPopularityBySource(
+          PopularitySourceEnum source) async =>
+      await getPopularityPrimitives(source: source);
 
   @override
   Future<List<PopularityPrimitiveModel>> getTopPopularGames({
@@ -3010,8 +3168,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     PopularitySourceEnum? source,
     int? popularityTypeId,
   }) async {
-    final body = 'fields id, checksum, game_id, popularity_source, popularity_type, value; sort value desc; limit $limit;';
-    return await _makeRequest('popularity_primitives', body, (json) => PopularityPrimitiveModel.fromJson(json));
+    final body =
+        'fields id, checksum, game_id, popularity_source, popularity_type, value; sort value desc; limit $limit;';
+    return await _makeRequest('popularity_primitives', body,
+        (json) => PopularityPrimitiveModel.fromJson(json));
   }
 
   @override
@@ -3021,7 +3181,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     try {
       final days = timeWindow?.inDays ?? 7;
-      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+      final timestamp = (DateTime.now()
+                  .subtract(Duration(days: days))
+                  .millisecondsSinceEpoch /
+              1000)
+          .round();
 
       final body = '''
       where category = 0 & 
@@ -3034,14 +3198,18 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     ''';
 
       print('🔥 IGDB: Getting trending games (${days}d window)');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get trending games error: $e');
       return [];
     }
   }
+
   @override
-  Future<List<PopularityPrimitiveModel>> getRecentPopularityUpdates({int limit = 50, Duration? timeWindow}) async => await getPopularityPrimitives(limit: limit);
+  Future<List<PopularityPrimitiveModel>> getRecentPopularityUpdates(
+          {int limit = 50, Duration? timeWindow}) async =>
+      await getPopularityPrimitives(limit: limit);
 
   @override
   Future<List<PopularityTypeModel>> getPopularityTypes({
@@ -3053,13 +3221,15 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, name; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, name; limit ${ids.length};';
     } else if (search != null) {
       body = 'search "$search"; fields id, checksum, name; limit $limit;';
     } else {
       body = 'fields id, checksum, name; sort name asc; limit $limit;';
     }
-    return await _makeRequest('popularity_types', body, (json) => PopularityTypeModel.fromJson(json));
+    return await _makeRequest(
+        'popularity_types', body, (json) => PopularityTypeModel.fromJson(json));
   }
 
   @override
@@ -3069,29 +3239,41 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<PopularityTypeModel>> searchPopularityTypes(String query, {int limit = 20}) async => await getPopularityTypes(search: query, limit: limit);
+  Future<List<PopularityTypeModel>> searchPopularityTypes(String query,
+          {int limit = 20}) async =>
+      await getPopularityTypes(search: query, limit: limit);
 
   @override
-  Future<List<PopularityTypeModel>> getPopularityTypesBySource(PopularitySourceEnum source) async => await getPopularityTypes();
+  Future<List<PopularityTypeModel>> getPopularityTypesBySource(
+          PopularitySourceEnum source) async =>
+      await getPopularityTypes();
 
   @override
-  Future<Map<String, dynamic>> getGamePopularityAnalysis(int gameId) async => {};
+  Future<Map<String, dynamic>> getGamePopularityAnalysis(int gameId) async =>
+      {};
 
   @override
-  Future<Map<String, dynamic>> getPopularityTrends({int? gameId, Duration? timeWindow, PopularitySourceEnum? source}) async => {};
+  Future<Map<String, dynamic>> getPopularityTrends(
+          {int? gameId,
+          Duration? timeWindow,
+          PopularitySourceEnum? source}) async =>
+      {};
 
   @override
   Future<List<Map<String, dynamic>>> getPopularityLeaderboard({
     PopularitySourceEnum? source,
     int? popularityTypeId,
     int limit = 100,
-  }) async => [];
+  }) async =>
+      [];
 
   @override
   Future<Map<String, dynamic>> getPopularityStatistics(int gameId) async => {};
 
   @override
-  Future<List<PopularityPrimitiveModel>> getPopularityChanges({int? gameId, Duration? timeWindow, int limit = 50}) async => [];
+  Future<List<PopularityPrimitiveModel>> getPopularityChanges(
+          {int? gameId, Duration? timeWindow, int limit = 50}) async =>
+      [];
 
   // ==========================================
   // WEBSITE METHODS
@@ -3101,8 +3283,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<WebsiteModel>> getWebsites(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where game = ($gameIdsString); fields id, category, checksum, game, trusted, url; limit 200;';
-    return await _makeRequest('websites', body, (json) => WebsiteModel.fromJson(json));
+    final body =
+        'where game = ($gameIdsString); fields id, category, checksum, game, trusted, url; limit 200;';
+    return await _makeRequest(
+        'websites', body, (json) => WebsiteModel.fromJson(json));
   }
 
   @override
@@ -3110,7 +3294,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, checksum, type, created_at, updated_at; limit ${ids.length};'
         : 'fields id, checksum, type, created_at, updated_at; sort type asc; limit 50;';
-    return await _makeRequest('website_types', body, (json) => WebsiteTypeModel.fromJson(json));
+    return await _makeRequest(
+        'website_types', body, (json) => WebsiteTypeModel.fromJson(json));
   }
 
   @override
@@ -3124,17 +3309,22 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<LanguageModel>> getLanguages({List<int>? ids, String? search}) async {
+  Future<List<LanguageModel>> getLanguages(
+      {List<int>? ids, String? search}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, checksum, created_at, locale, name, native_name, updated_at; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, checksum, created_at, locale, name, native_name, updated_at; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, checksum, created_at, locale, name, native_name, updated_at; limit 50;';
+      body =
+          'search "$search"; fields id, checksum, created_at, locale, name, native_name, updated_at; limit 50;';
     } else {
-      body = 'fields id, checksum, created_at, locale, name, native_name, updated_at; sort name asc; limit 100;';
+      body =
+          'fields id, checksum, created_at, locale, name, native_name, updated_at; sort name asc; limit 100;';
     }
-    return await _makeRequest('languages', body, (json) => LanguageModel.fromJson(json));
+    return await _makeRequest(
+        'languages', body, (json) => LanguageModel.fromJson(json));
   }
 
   @override
@@ -3147,16 +3337,20 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<LanguageModel>> getLanguagesByLocale(List<String> locales) async {
     if (locales.isEmpty) return [];
     final localesString = locales.map((l) => '"$l"').join(',');
-    final body = 'where locale = ($localesString); fields id, checksum, created_at, locale, name, native_name, updated_at; limit ${locales.length};';
-    return await _makeRequest('languages', body, (json) => LanguageModel.fromJson(json));
+    final body =
+        'where locale = ($localesString); fields id, checksum, created_at, locale, name, native_name, updated_at; limit ${locales.length};';
+    return await _makeRequest(
+        'languages', body, (json) => LanguageModel.fromJson(json));
   }
 
   @override
-  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes({List<int>? ids}) async {
+  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes(
+      {List<int>? ids}) async {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, checksum, created_at, name, updated_at; limit ${ids.length};'
         : 'fields id, checksum, created_at, name, updated_at; sort name asc; limit 20;';
-    return await _makeRequest('language_support_types', body, (json) => LanguageSupportTypeModel.fromJson(json));
+    return await _makeRequest('language_support_types', body,
+        (json) => LanguageSupportTypeModel.fromJson(json));
   }
 
   @override
@@ -3170,17 +3364,22 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<RegionModel>> getRegions({List<int>? ids, String? category}) async {
+  Future<List<RegionModel>> getRegions(
+      {List<int>? ids, String? category}) async {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${ids.length};';
+      body =
+          'where id = ($idsString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${ids.length};';
     } else if (category != null) {
-      body = 'where category = "$category"; fields id, category, checksum, created_at, identifier, name, updated_at; limit 100;';
+      body =
+          'where category = "$category"; fields id, category, checksum, created_at, identifier, name, updated_at; limit 100;';
     } else {
-      body = 'fields id, category, checksum, created_at, identifier, name, updated_at; sort name asc; limit 100;';
+      body =
+          'fields id, category, checksum, created_at, identifier, name, updated_at; sort name asc; limit 100;';
     }
-    return await _makeRequest('regions', body, (json) => RegionModel.fromJson(json));
+    return await _makeRequest(
+        'regions', body, (json) => RegionModel.fromJson(json));
   }
 
   @override
@@ -3190,18 +3389,23 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<RegionModel>> getRegionsByIdentifiers(List<String> identifiers) async {
+  Future<List<RegionModel>> getRegionsByIdentifiers(
+      List<String> identifiers) async {
     if (identifiers.isEmpty) return [];
     final identifiersString = identifiers.map((i) => '"$i"').join(',');
-    final body = 'where identifier = ($identifiersString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${identifiers.length};';
-    return await _makeRequest('regions', body, (json) => RegionModel.fromJson(json));
+    final body =
+        'where identifier = ($identifiersString); fields id, category, checksum, created_at, identifier, name, updated_at; limit ${identifiers.length};';
+    return await _makeRequest(
+        'regions', body, (json) => RegionModel.fromJson(json));
   }
 
   @override
-  Future<List<RegionModel>> getLocaleRegions() async => await getRegions(category: 'locale');
+  Future<List<RegionModel>> getLocaleRegions() async =>
+      await getRegions(category: 'locale');
 
   @override
-  Future<List<RegionModel>> getContinentRegions() async => await getRegions(category: 'continent');
+  Future<List<RegionModel>> getContinentRegions() async =>
+      await getRegions(category: 'continent');
 
   // ==========================================
   // DATE FORMAT METHODS
@@ -3212,7 +3416,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body = ids != null && ids.isNotEmpty
         ? 'where id = (${ids.join(',')}); fields id, checksum, format, created_at, updated_at; limit ${ids.length};'
         : 'fields id, checksum, format, created_at, updated_at; limit 20;';
-    return await _makeRequest('date_formats', body, (json) => DateFormatModel.fromJson(json));
+    return await _makeRequest(
+        'date_formats', body, (json) => DateFormatModel.fromJson(json));
   }
 
   @override
@@ -3262,9 +3467,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       }
     }
 
-    body = '$whereClause; fields id, checksum, company, created_at, developer, game, porting, publisher, supporting, updated_at; limit $limit;';
+    body =
+        '$whereClause; fields id, checksum, company, created_at, developer, game, porting, publisher, supporting, updated_at; limit $limit;';
 
-    return await _makeRequest('involved_companies', body, (json) => InvolvedCompanyModel.fromJson(json));
+    return await _makeRequest('involved_companies', body,
+        (json) => InvolvedCompanyModel.fromJson(json));
   }
 
   @override
@@ -3274,22 +3481,34 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }
 
   @override
-  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByGame(int gameId) async => await getInvolvedCompanies(gameIds: [gameId]);
+  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByGame(
+          int gameId) async =>
+      await getInvolvedCompanies(gameIds: [gameId]);
 
   @override
-  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByCompany(int companyId) async => await getInvolvedCompanies(companyIds: [companyId]);
+  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByCompany(
+          int companyId) async =>
+      await getInvolvedCompanies(companyIds: [companyId]);
 
   @override
-  Future<List<InvolvedCompanyModel>> getDevelopersForGames(List<int> gameIds) async => await getInvolvedCompanies(gameIds: gameIds, developer: true);
+  Future<List<InvolvedCompanyModel>> getDevelopersForGames(
+          List<int> gameIds) async =>
+      await getInvolvedCompanies(gameIds: gameIds, developer: true);
 
   @override
-  Future<List<InvolvedCompanyModel>> getPublishersForGames(List<int> gameIds) async => await getInvolvedCompanies(gameIds: gameIds, publisher: true);
+  Future<List<InvolvedCompanyModel>> getPublishersForGames(
+          List<int> gameIds) async =>
+      await getInvolvedCompanies(gameIds: gameIds, publisher: true);
 
   @override
-  Future<List<InvolvedCompanyModel>> getPortingCompaniesForGames(List<int> gameIds) async => await getInvolvedCompanies(gameIds: gameIds, porting: true);
+  Future<List<InvolvedCompanyModel>> getPortingCompaniesForGames(
+          List<int> gameIds) async =>
+      await getInvolvedCompanies(gameIds: gameIds, porting: true);
 
   @override
-  Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(List<int> gameIds) async => await getInvolvedCompanies(gameIds: gameIds, supporting: true);
+  Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(
+          List<int> gameIds) async =>
+      await getInvolvedCompanies(gameIds: gameIds, supporting: true);
 
   // ==========================================
   // PHASE 1 - HOME SCREEN DATA METHODS IMPLEMENTATION
@@ -3297,11 +3516,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   @override
   Future<List<GameModel>> getGamesSortedByRating({
-  int limit = 20,
-  int offset = 0,
-  double minRating = 70.0,
+    int limit = 20,
+    int offset = 0,
+    double minRating = 70.0,
   }) async {
-  final body = '''
+    final body = '''
       where total_rating >= $minRating & total_rating_count >= 10;
       fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
       sort total_rating desc;
@@ -3309,23 +3528,23 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       offset $offset;
     ''';
 
-  return await _makeRequest(
-  'games',
-  body,
-  (json) => GameModel.fromJson(json),
-  );
+    return await _makeRequest(
+      'games',
+      body,
+      (json) => GameModel.fromJson(json),
+    );
   }
 
   @override
   Future<List<GameModel>> getGamesSortedByReleaseDate({
-  int limit = 20,
-  int offset = 0,
-  int maxDaysOld = 365,
+    int limit = 20,
+    int offset = 0,
+    int maxDaysOld = 365,
   }) async {
-  final cutoffDate = DateTime.now().subtract(Duration(days: maxDaysOld));
-  final cutoffTimestamp = (cutoffDate.millisecondsSinceEpoch / 1000).round();
+    final cutoffDate = DateTime.now().subtract(Duration(days: maxDaysOld));
+    final cutoffTimestamp = (cutoffDate.millisecondsSinceEpoch / 1000).round();
 
-  final body = '''
+    final body = '''
       where first_release_date >= $cutoffTimestamp & category = 0;
       fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
       sort first_release_date desc;
@@ -3333,39 +3552,38 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       offset $offset;
     ''';
 
-  return await _makeRequest(
-  'games',
-  body,
-  (json) => GameModel.fromJson(json),
-  );
+    return await _makeRequest(
+      'games',
+      body,
+      (json) => GameModel.fromJson(json),
+    );
   }
 
   @override
   Future<List<GameModel>> getGamesByReleaseDateRange({
-  required List<int> gameIds,
-  required DateTime fromDate,
-  required DateTime toDate,
+    required List<int> gameIds,
+    required DateTime fromDate,
+    required DateTime toDate,
   }) async {
-  if (gameIds.isEmpty) return [];
+    if (gameIds.isEmpty) return [];
 
-  final fromTimestamp = (fromDate.millisecondsSinceEpoch / 1000).round();
-  final toTimestamp = (toDate.millisecondsSinceEpoch / 1000).round();
-  final gameIdsString = gameIds.join(',');
+    final fromTimestamp = (fromDate.millisecondsSinceEpoch / 1000).round();
+    final toTimestamp = (toDate.millisecondsSinceEpoch / 1000).round();
+    final gameIdsString = gameIds.join(',');
 
-  final body = '''
+    final body = '''
       where id = ($gameIdsString) & first_release_date >= $fromTimestamp & first_release_date <= $toTimestamp;
       fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
       sort first_release_date desc;
       limit ${gameIds.length};
     ''';
 
-  return await _makeRequest(
-  'games',
-  body,
-  (json) => GameModel.fromJson(json),
-  );
+    return await _makeRequest(
+      'games',
+      body,
+      (json) => GameModel.fromJson(json),
+    );
   }
-
 
   @override
   Future<List<GameModel>> searchGamesWithFilters({
@@ -3378,7 +3596,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
     // Text search
     if (query.isNotEmpty) {
-      whereConditions.add('name ~ *"$query"* | alternative_names.name ~ *"$query"*');
+      whereConditions
+          .add('name ~ *"$query"* | alternative_names.name ~ *"$query"*');
     }
 
     // Genre filter
@@ -3404,11 +3623,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     // Release date filter
     if (filters.hasDateFilter) {
       if (filters.releaseDateFrom != null) {
-        final timestamp = (filters.releaseDateFrom!.millisecondsSinceEpoch / 1000).round();
+        final timestamp =
+            (filters.releaseDateFrom!.millisecondsSinceEpoch / 1000).round();
         whereConditions.add('first_release_date >= $timestamp');
       }
       if (filters.releaseDateTo != null) {
-        final timestamp = (filters.releaseDateTo!.millisecondsSinceEpoch / 1000).round();
+        final timestamp =
+            (filters.releaseDateTo!.millisecondsSinceEpoch / 1000).round();
         whereConditions.add('first_release_date <= $timestamp');
       }
     }
@@ -3426,7 +3647,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         : '';
 
     // Build sort clause
-    final sortClause = 'sort ${filters.sortBy.igdbField} ${filters.sortOrder.value}';
+    final sortClause =
+        'sort ${filters.sortBy.igdbField} ${filters.sortOrder.value}';
 
     final body = '''
       $whereClause;
@@ -3439,7 +3661,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3465,7 +3687,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3491,7 +3713,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3504,7 +3726,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String sortBy = 'first_release_date',
     String sortOrder = 'desc',
   }) async {
-    final fromTimestamp = DateTime(fromYear, 1, 1).millisecondsSinceEpoch ~/ 1000;
+    final fromTimestamp =
+        DateTime(fromYear, 1, 1).millisecondsSinceEpoch ~/ 1000;
     final toTimestamp = DateTime(toYear, 12, 31).millisecondsSinceEpoch ~/ 1000;
 
     final body = '''
@@ -3518,7 +3741,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3542,7 +3765,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3557,7 +3780,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'genres',
       body,
-          (json) => GenreModel.fromJson(json),
+      (json) => GenreModel.fromJson(json),
     );
   }
 
@@ -3572,7 +3795,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'platforms',
       body,
-          (json) => PlatformModel.fromJson(json),
+      (json) => PlatformModel.fromJson(json),
     );
   }
 
@@ -3604,7 +3827,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       final games = await _makeRequest(
         'games',
         body,
-            (json) => GameModel.fromJson(json),
+        (json) => GameModel.fromJson(json),
       );
 
       return games.map((game) => game.name).toList();
@@ -3648,8 +3871,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         offset $offset;
       ''';
 
-      print('🎮 IGDB: Getting games by genres [$genresString] and date range [${startDate.toIso8601String()}-${endDate.toIso8601String()}]');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '🎮 IGDB: Getting games by genres [$genresString] and date range [${startDate.toIso8601String()}-${endDate.toIso8601String()}]');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games by genres and date range error: $e');
       return [];
@@ -3677,7 +3902,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       ''';
 
       print('🎮 IGDB: Getting games by franchise: $franchiseId');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games by franchise error: $e');
       return [];
@@ -3705,7 +3931,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       ''';
 
       print('🎮 IGDB: Getting games by collection: $collectionId');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games by collection error: $e');
       return [];
@@ -3720,7 +3947,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     try {
       final days = timeWindow?.inDays ?? 30;
-      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+      final timestamp = (DateTime.now()
+                  .subtract(Duration(days: days))
+                  .millisecondsSinceEpoch /
+              1000)
+          .round();
 
       final body = '''
         where genres = ($genreId) & 
@@ -3732,8 +3963,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         limit $limit;
       ''';
 
-      print('🔥 IGDB: Getting trending games by genre: $genreId (${days}d window)');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '🔥 IGDB: Getting trending games by genre: $genreId (${days}d window)');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get trending games by genre error: $e');
       return [];
@@ -3748,7 +3981,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     try {
       final days = timeWindow?.inDays ?? 30;
-      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+      final timestamp = (DateTime.now()
+                  .subtract(Duration(days: days))
+                  .millisecondsSinceEpoch /
+              1000)
+          .round();
 
       final body = '''
         where platforms = ($platformId) & 
@@ -3760,8 +3997,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         limit $limit;
       ''';
 
-      print('🔥 IGDB: Getting trending games by platform: $platformId (${days}d window)');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '🔥 IGDB: Getting trending games by platform: $platformId (${days}d window)');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get trending games by platform error: $e');
       return [];
@@ -3775,7 +4014,11 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     try {
       final days = timeWindow?.inDays ?? 7;
-      final timestamp = (DateTime.now().subtract(Duration(days: days)).millisecondsSinceEpoch / 1000).round();
+      final timestamp = (DateTime.now()
+                  .subtract(Duration(days: days))
+                  .millisecondsSinceEpoch /
+              1000)
+          .round();
 
       final body = '''
         where first_release_date >= $timestamp &
@@ -3788,7 +4031,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       ''';
 
       print('📈 IGDB: Getting rising games (${days}d window)');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get rising games error: $e');
       return [];
@@ -3812,8 +4056,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         limit $limit;
       ''';
 
-      print('💎 IGDB: Getting hidden gems (rating >= $minRating, hypes <= $maxHypes)');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '💎 IGDB: Getting hidden gems (rating >= $minRating, hypes <= $maxHypes)');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get hidden gems error: $e');
       return [];
@@ -3846,7 +4092,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       // Add keyword search (using game summary/storyline)
       if (keywords != null && keywords.isNotEmpty) {
         final keywordSearch = keywords.join(' ');
-        whereParts.add('(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
+        whereParts.add(
+            '(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
       }
 
       final whereClause = whereParts.join(' & ');
@@ -3859,8 +4106,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       offset $offset;
     ''';
 
-      print('🎯 IGDB: Getting games by advanced mood criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '🎯 IGDB: Getting games by advanced mood criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games by advanced mood criteria error: $e');
       return [];
@@ -3893,7 +4142,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       // Add keyword search (using game summary/storyline)
       if (keywords != null && keywords.isNotEmpty) {
         final keywordSearch = keywords.join(' ');
-        whereParts.add('(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
+        whereParts.add(
+            '(summary ~ *"$keywordSearch"* | storyline ~ *"$keywordSearch"*)');
       }
 
       final whereClause = whereParts.join(' & ');
@@ -3906,8 +4156,10 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       offset $offset;
     ''';
 
-      print('🌿 IGDB: Getting games by advanced seasonal criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      print(
+          '🌿 IGDB: Getting games by advanced seasonal criteria - Genres: $genreIds, Themes: $themeIds, Keywords: $keywords');
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games by advanced seasonal criteria error: $e');
       return [];
@@ -3936,7 +4188,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       ''';
 
       print('🏆 IGDB: Getting games with achievements: $hasAchievements');
-      return await _makeRequest('games', body, (json) => GameModel.fromJson(json));
+      return await _makeRequest(
+          'games', body, (json) => GameModel.fromJson(json));
     } catch (e) {
       print('💥 IGDB: Get games with achievements error: $e');
       return [];

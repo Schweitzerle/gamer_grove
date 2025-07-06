@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Import all your classes here
 import 'data/datasources/local/cache_datasource.dart';
@@ -63,6 +64,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => Connectivity());
+
+  sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
   // Core
   print('🔨 DI: Registering core dependencies...');
