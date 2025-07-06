@@ -1,5 +1,6 @@
-// lib/domain/entities/platform.dart
+// lib/domain/entities/platform.dart (Erweiterte Version - Optional)
 import 'package:equatable/equatable.dart';
+import 'platform_logo.dart';
 
 // Platform Category Enum (DEPRECATED but still useful)
 enum PlatformCategoryEnum {
@@ -55,6 +56,9 @@ class Platform extends Equatable {
   // DEPRECATED field but still useful
   final PlatformCategoryEnum? categoryEnum;
 
+  // NEW: Optional full objects (when API returns them)
+  final PlatformLogo? platformLogo;
+
   const Platform({
     required this.id,
     required this.checksum,
@@ -73,6 +77,7 @@ class Platform extends Equatable {
     this.createdAt,
     this.updatedAt,
     this.categoryEnum,
+    this.platformLogo, // NEW
   });
 
   String get displayName => abbreviation ?? name;
@@ -81,6 +86,9 @@ class Platform extends Equatable {
   bool get isPortable => categoryEnum == PlatformCategoryEnum.portableConsole;
   bool get isPC => categoryEnum == PlatformCategoryEnum.computer;
   bool get isArcade => categoryEnum == PlatformCategoryEnum.arcade;
+
+  // NEW: Helper getter for logo URL
+  String? get logoUrl => platformLogo?.thumbUrl;
 
   @override
   List<Object?> get props => [
@@ -101,5 +109,6 @@ class Platform extends Equatable {
     createdAt,
     updatedAt,
     categoryEnum,
+    platformLogo, // NEW
   ];
 }

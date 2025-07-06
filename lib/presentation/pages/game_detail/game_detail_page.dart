@@ -30,6 +30,7 @@ import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
 import '../../widgets/top_three_dialog.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class GameDetailPage extends StatefulWidget {
   final int gameId;
@@ -378,7 +379,7 @@ class _GameDetailPageState extends State<GameDetailPage>
                 const SizedBox(height: 8),
                 ...game.websites.map((website) => _buildLinkTile(
                   title: _getWebsiteName(website.category),
-                  icon: _getWebsiteIcon(website.category),
+                  icon: _getWebsiteIcon(website),
                   onTap: () => _launchUrl(website.url),
                 )),
                 const SizedBox(height: 16),
@@ -404,7 +405,7 @@ class _GameDetailPageState extends State<GameDetailPage>
 
   Widget _buildLinkTile({
     required String title,
-    required IconData icon,
+    required Widget icon,
     required VoidCallback onTap,
   }) {
     return Card(
@@ -412,7 +413,7 @@ class _GameDetailPageState extends State<GameDetailPage>
       elevation: 0,
       color: Theme.of(context).colorScheme.surface,
       child: ListTile(
-        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        leading: icon,
         title: Text(title),
         trailing: const Icon(Icons.open_in_new, size: 18),
         onTap: onTap,
@@ -483,45 +484,84 @@ class _GameDetailPageState extends State<GameDetailPage>
     }
   }
 
-  IconData _getWebsiteIcon(WebsiteCategory category) {
-    switch (category) {
+  Widget _getWebsiteIcon(Website website) {
+    IconData iconData;
+    Color iconColor;
+    switch (website.category) {
       case WebsiteCategory.official:
-        return Icons.language;
+        iconData = Icons.public;
+        iconColor = Color(0xFF07355A);
+        break;
       case WebsiteCategory.wikia:
+        iconData = FontAwesomeIcons.wikipediaW;
+        iconColor = Color(0xFF939598);
+        break;
       case WebsiteCategory.wikipedia:
-        return Icons.menu_book; // FIXED: menu_book statt menu*book
+        iconData = FontAwesomeIcons.wikipediaW;
+        iconColor = Color(0xFFc7c8ca);
+        break;
       case WebsiteCategory.facebook:
-        return Icons.facebook;
+        iconData = FontAwesomeIcons.facebook;
+        iconColor = Color(0xFF1877f2);
+        break;
       case WebsiteCategory.twitter:
-        return Icons.alternate_email;
-      case WebsiteCategory.instagram:
-        return Icons.camera_alt;
-      case WebsiteCategory.youtube:
-        return Icons.play_circle_fill;
+        iconData = FontAwesomeIcons.twitter;
+        iconColor = Color(0xFF1da1f2);
+        break;
       case WebsiteCategory.twitch:
-        return Icons.live_tv;
-      case WebsiteCategory.reddit:
-        return Icons.forum;
-      case WebsiteCategory.discord:
-        return Icons.chat;
-      case WebsiteCategory.steam:
-        return Icons.games;
-      case WebsiteCategory.epicgames:
-        return Icons.rocket_launch;
-      case WebsiteCategory.gog:
-        return Icons.shopping_bag;
-      case WebsiteCategory.itch:
-        return Icons.videogame_asset;
+        iconData = FontAwesomeIcons.twitch;
+        iconColor = Color(0xFF9146ff);
+        break;
+      case WebsiteCategory.instagram:
+        iconData = FontAwesomeIcons.instagram;
+        iconColor = Color(0xFFc13584);
+        break;
+      case WebsiteCategory.youtube:
+        iconData = FontAwesomeIcons.youtube;
+        iconColor = Color(0xFFff0000);
+        break;
       case WebsiteCategory.iphone:
+        iconData = FontAwesomeIcons.apple;
+        iconColor = Color(0xFF000000);
+        break;
       case WebsiteCategory.ipad:
-        return Icons.phone_iphone;
+        iconData = FontAwesomeIcons.apple;
+        iconColor = Color(0xFF000000);
+        break;
       case WebsiteCategory.android:
-        return Icons.android;
-      case WebsiteCategory.bluesky:
-        return Icons.cloud;
+        iconData = FontAwesomeIcons.android;
+        iconColor = Color(0xFFa4c639);
+        break;
+      case WebsiteCategory.steam:
+        iconData = FontAwesomeIcons.steam;
+        iconColor = Color(0xFF00adee);
+        break;
+      case WebsiteCategory.reddit:
+        iconData = FontAwesomeIcons.reddit;
+        iconColor = Color(0xFFff4500);
+        break;
+      case WebsiteCategory.itch:
+        iconData = FontAwesomeIcons.itchIo;
+        iconColor = Color(0xFFfa5c5c);
+        break;
+      case WebsiteCategory.epicgames:
+        iconData = FontAwesomeIcons.earlybirds;
+        iconColor = Color(0xFF242424);
+        break;
+      case WebsiteCategory.gog:
+        iconData = FontAwesomeIcons.galacticRepublic;
+        iconColor = Color(0xFF7cb4dc);
+        break;
+      case WebsiteCategory.discord:
+        iconData = FontAwesomeIcons.discord;
+        iconColor = Color(0xFF5865f2);
+        break;
       default:
-        return Icons.link;
+        iconData = Icons.link;
+        iconColor = Color(0xFF07355A);
     }
+
+    return Icon(iconData, color: iconColor,);
   }
 
   Color _getWebsiteColor(WebsiteCategory category) {

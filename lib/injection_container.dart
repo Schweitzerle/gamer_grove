@@ -28,7 +28,9 @@ import 'domain/usecases/game/get_complete_game_details.dart';
 import 'domain/usecases/game/get_game_companies.dart';
 import 'domain/usecases/game/get_game_dlcs.dart';
 import 'domain/usecases/game/get_game_expansions.dart';
+import 'domain/usecases/game/get_latest_games.dart';
 import 'domain/usecases/game/get_similar_games.dart';
+import 'domain/usecases/game/get_top_rated_games.dart';
 import 'domain/usecases/game/get_user_top_three.dart';
 import 'domain/usecases/game/search_games.dart';
 import 'domain/usecases/game/get_game_details.dart';
@@ -129,6 +131,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetGameDetails(sl()));
   sl.registerLazySingleton(() => GetPopularGames(sl()));
   sl.registerLazySingleton(() => GetUpcomingGames(sl()));
+  sl.registerLazySingleton(() => GetLatestGames(sl()));
+  sl.registerLazySingleton(() => GetTopRatedGames(sl()));
   sl.registerLazySingleton(() => GetUserWishlist(sl()));
   sl.registerLazySingleton(() => GetUserRecommendations(sl()));
   sl.registerLazySingleton(() => RateGame(sl()));
@@ -181,7 +185,7 @@ Future<void> init() async {
           getUpcomingGames: sl(),
           getUserWishlist: sl(),
           getUserRecommendations: sl(),
-          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(),
+          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(), getTopRatedGames: sl(), getLatestGames: sl(),
         ),
   );
   print('✅ DI: Dependency injection setup complete!');

@@ -57,9 +57,14 @@ class AgeRatingChip extends StatelessWidget {
     required this.rating,
   });
 
+  // Bessere Lösung mit Fallback für fehlende Organization:
+
   @override
   Widget build(BuildContext context) {
-    final ratingStyle = _getRatingStyle(rating.organization!);
+    // FIX: Verwende Fallback wenn organization null ist
+    final ratingStyle = rating.organization != null
+        ? _getRatingStyle(rating.organization!)
+        : _getDefaultRatingStyle(); // Fallback style
 
     return GestureDetector(
       onTap: () => _showRatingDetails(context, rating),
@@ -99,6 +104,15 @@ class AgeRatingChip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+// Füge diese Fallback-Methode hinzu:
+  _RatingStyle _getDefaultRatingStyle() {
+    return _RatingStyle(
+      color: Colors.grey,
+      icon: Icons.help_outline,
+      organizationName: 'Unknown',
     );
   }
 

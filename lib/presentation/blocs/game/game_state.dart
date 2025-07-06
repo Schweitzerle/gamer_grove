@@ -108,6 +108,66 @@ class UpcomingGamesLoaded extends GameState {
   List<Object> get props => [games, hasReachedMax, isLoadingMore];
 }
 
+// Latest Games States
+class LatestGamesLoading extends GameState {}
+
+class LatestGamesLoaded extends GameState {
+  final List<Game> games;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const LatestGamesLoaded({
+    required this.games,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  LatestGamesLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return LatestGamesLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax, isLoadingMore];
+}
+
+// Popular Games States
+class TopRatedGamesLoading extends GameState {}
+
+class TopRatedGamesLoaded extends GameState {
+  final List<Game> games;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const TopRatedGamesLoaded({
+    required this.games,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  TopRatedGamesLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return TopRatedGamesLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax, isLoadingMore];
+}
+
 // Wishlist States
 class UserWishlistLoading extends GameState {}
 
@@ -283,7 +343,6 @@ class GameDetailsWithUserDataLoaded extends GameState {
   ];
 }
 
-// 1. Füge diese States zu deiner game_state.dart hinzu:
 
 // Home Page States
 class HomePageLoading extends GameState {}
@@ -291,12 +350,16 @@ class HomePageLoading extends GameState {}
 class HomePageLoaded extends GameState {
   final List<Game> popularGames;
   final List<Game> upcomingGames;
+  final List<Game> latestGames;
+  final List<Game> topRatedGames;
   final List<Game>? userWishlist;
   final List<Game>? userRecommendations;
 
   const HomePageLoaded({
     required this.popularGames,
     required this.upcomingGames,
+    required this.latestGames,
+    required this.topRatedGames,
     this.userWishlist,
     this.userRecommendations,
   });
@@ -305,12 +368,16 @@ class HomePageLoaded extends GameState {
   HomePageLoaded copyWith({
     List<Game>? popularGames,
     List<Game>? upcomingGames,
+    List<Game>? latestGames,
+    List<Game>? topRatedGames,
     List<Game>? userWishlist,
     List<Game>? userRecommendations,
   }) {
     return HomePageLoaded(
       popularGames: popularGames ?? this.popularGames,
       upcomingGames: upcomingGames ?? this.upcomingGames,
+      latestGames: latestGames ?? this.latestGames,
+      topRatedGames: topRatedGames ?? this.topRatedGames,
       userWishlist: userWishlist ?? this.userWishlist,
       userRecommendations: userRecommendations ?? this.userRecommendations,
     );
@@ -320,6 +387,8 @@ class HomePageLoaded extends GameState {
   List<Object?> get props => [
     popularGames,
     upcomingGames,
+    latestGames,
+    topRatedGames,
     userWishlist,
     userRecommendations,
   ];

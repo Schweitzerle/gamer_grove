@@ -22,8 +22,8 @@ class PlatformTrend extends Equatable {
     this.calculatedAt,
   });
 
-  bool get isGrowing => adoptionRate > 5.0;
-  bool get isTrending => trendScore > 70.0;
+  bool get isGrowing => adoptionRate > 5;
+  bool get isTrending => trendScore > 70;
 
   @override
   List<Object?> get props => [

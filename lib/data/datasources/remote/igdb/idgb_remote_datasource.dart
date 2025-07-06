@@ -27,6 +27,7 @@ import '../../../models/alternative_name_model.dart';
 // Models - Artwork & Visual
 import '../../../models/artwork_model.dart';
 import '../../../models/cover_model.dart';
+import '../../../models/language/language_support_model.dart';
 import '../../../models/screenshot_model.dart';
 
 // Models - Character
@@ -86,7 +87,6 @@ import '../../../models/theme_model.dart';
 // Models - Language
 import '../../../models/language/language_support_type_model.dart';
 import '../../../models/language/lanuage_model.dart';
-import '../../../models/language_support_model.dart';
 
 // Models - Multiplayer & Perspectives
 import '../../../models/multiplayer_mode_model.dart';
@@ -144,6 +144,9 @@ abstract class IGDBRemoteDataSource {
 
   /// Get upcoming games with pagination
   Future<List<GameModel>> getUpcomingGames(int limit, int offset);
+
+  /// Get latest games with pagination
+  Future<List<GameModel>> getLatestGames(int limit, int offset);
 
   /// Get games by their IDs
   Future<List<GameModel>> getGamesByIds(List<int> gameIds);
@@ -1262,10 +1265,10 @@ abstract class IGDBRemoteDataSource {
   // ==========================================
 
   /// Get games sorted by rating (highest first)
-  Future<List<GameModel>> getGamesSortedByRating({
+  Future<List<GameModel>> getTopRatedGames({
   int limit = 20,
   int offset = 0,
-  double minRating = 70.0, // Minimum rating to include
+  double minRating = 70, // Minimum rating to include
   });
 
   /// Get games sorted by release date (newest first)

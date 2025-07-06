@@ -5,10 +5,12 @@
 // lib/presentation/pages/game_detail/widgets/dlc_expansion_section.dart
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/navigations.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../domain/entities/game/game.dart';
+import '../../../widgets/game_card.dart';
 import '../game_detail_page.dart';
 
 class DLCExpansionSection extends StatelessWidget {
@@ -44,7 +46,7 @@ class DLCExpansionSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-            ...expansions.map((expansion) => _buildContentTile(context, expansion, 'Expansion')),
+            buildHorizontalGameList(expansions),
             const SizedBox(height: AppConstants.paddingMedium),
           ],
 
@@ -56,62 +58,30 @@ class DLCExpansionSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-            ...dlcs.map((dlc) => _buildContentTile(context, dlc, 'DLC')),
+            buildHorizontalGameList(dlcs)
           ],
         ],
       ),
     );
   }
 
-  Widget _buildContentTile(BuildContext context, Game content, String type) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: CachedImageWidget(
-            imageUrl: ImageUtils.getSmallImageUrl(content.coverUrl),
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
+  Widget buildHorizontalGameList(List<Game> games) {
+    return SizedBox(
+      height: 280,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingMedium,
         ),
-        title: Text(content.name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(type),
-            if (content.firstReleaseDate != null)
-              Text(DateFormatter.formatShortDate(content.firstReleaseDate!)),
-          ],
-        ),
-        trailing: content.rating != null
-            ? Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.star, size: 16, color: Colors.amber),
-              const SizedBox(width: 4),
-              Text(
-                content.rating!.toStringAsFixed(1),
-                style: const TextStyle(
-                  color: Colors.amber,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        )
-            : null,
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => GameDetailPage(gameId: content.id),
+        itemCount: games.length,
+        itemBuilder: (context, index) {
+          final game = games[index];
+          return Container(
+            width: 160,
+            margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+            child: GameCard(
+                game: game,
+                onTap: () => Navigations.navigateToGameDetail(game.id, context)
             ),
           );
         },

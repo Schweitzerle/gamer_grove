@@ -23,25 +23,43 @@ class PlatformModel extends Platform {
   });
 
   factory PlatformModel.fromJson(Map<String, dynamic> json) {
-    return PlatformModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
-      abbreviation: json['abbreviation'],
-      alternativeName: json['alternative_name'],
-      generation: json['generation'],
-      platformFamilyId: json['platform_family'],
-      platformLogoId: json['platform_logo'],
-      platformTypeId: json['platform_type'],
-      slug: json['slug'],
-      summary: json['summary'],
-      url: json['url'],
-      versionIds: _parseIdList(json['versions']),
-      websiteIds: _parseIdList(json['websites']),
-      createdAt: _parseDateTime(json['created_at']),
-      updatedAt: _parseDateTime(json['updated_at']),
-      categoryEnum: _parseCategoryEnum(json['category']),
-    );
+    try {
+      return PlatformModel(
+        id: json['id'] ?? 0,
+        checksum: json['checksum'] ?? '',
+        name: json['name'] ?? '',
+        abbreviation: json['abbreviation'],
+        alternativeName: json['alternative_name'],
+        generation: json['generation'],
+        platformFamilyId: _parseReferenceId(json['platform_family']),
+        // FIX: Handle platform_logo as either ID or full object
+        platformLogoId: _parseReferenceId(json['platform_logo']),
+        // FIX: Handle platform_type as either ID or full object
+        platformTypeId: _parseReferenceId(json['platform_type']),
+        slug: json['slug'],
+        summary: json['summary'],
+        url: json['url'],
+        versionIds: _parseIdList(json['versions']),
+        websiteIds: _parseIdList(json['websites']),
+        createdAt: _parseDateTime(json['created_at']),
+        updatedAt: _parseDateTime(json['updated_at']),
+        categoryEnum: _parseCategoryEnum(json['category']),
+      );
+    } catch (e) {
+      print('❌ PlatformModel.fromJson failed: $e');
+      print('📄 JSON data: $json');
+      rethrow;
+    }
+  }
+
+  // NEW: Helper method to extract ID from either int or object
+  static int? _parseReferenceId(dynamic data) {
+    if (data is int) {
+      return data;
+    } else if (data is Map && data['id'] is int) {
+      return data['id'];
+    }
+    return null;
   }
 
   static List<int> _parseIdList(dynamic data) {

@@ -32,6 +32,8 @@ class IsolatedIGDBClient {
 
       request.body = body.trim();
 
+      print('🔧 IGDB: Request body: ${request.body}');
+
       final streamedResponse = await _httpClient.send(request);
       final response = await http.Response.fromStream(streamedResponse);
 

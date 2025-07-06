@@ -7,6 +7,7 @@ import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/game/game_status.dart';
 import '../../../domain/entities/game/game_type.dart';
 import '../../../domain/entities/genre.dart';
+import '../../../domain/entities/language/language_support.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../domain/entities/game/game_mode.dart';
 import '../../../domain/entities/involved_company.dart';
@@ -23,7 +24,6 @@ import '../../../domain/entities/franchise.dart';
 // FIX: Correct import path
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
-import '../../../domain/entities/language_support.dart';
 import '../../../domain/entities/releaseDate/release_date.dart';
 import '../../../domain/entities/game/game_localization.dart';
 
@@ -32,6 +32,7 @@ import '../artwork_model.dart';
 import '../character/character_model.dart';
 import '../event/event_model.dart';
 import '../genre_model.dart';
+import '../language/language_support_model.dart';
 import '../platform/platform_model.dart';
 import '../screenshot_model.dart';
 import 'game_mode_model.dart';
@@ -46,7 +47,6 @@ import '../player_perspective_model.dart';
 import '../franchise_model.dart';
 import '../collection_model.dart';
 import '../externalGame/external_game_model.dart';
-import '../language_support_model.dart';
 import '../release_date/release_date_model.dart';
 import 'game_localization_model.dart';
 

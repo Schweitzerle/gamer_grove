@@ -26,6 +26,7 @@ import '../../../models/alternative_name_model.dart';
 // Models - Artwork & Visual
 import '../../../models/artwork_model.dart';
 import '../../../models/cover_model.dart';
+import '../../../models/language/language_support_model.dart';
 import '../../../models/screenshot_model.dart';
 
 // Models - Character
@@ -85,7 +86,6 @@ import '../../../models/theme_model.dart';
 // Models - Language
 import '../../../models/language/language_support_type_model.dart';
 import '../../../models/language/lanuage_model.dart';
-import '../../../models/language_support_model.dart';
 
 // Models - Multiplayer & Perspectives
 import '../../../models/multiplayer_mode_model.dart';
@@ -148,29 +148,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   ''';
 
   static const String _completeGameFields = '''
-    $_basicGameFields,
-    cover.id, cover.url, cover.image_id,
-    artworks.id, artworks.url, artworks.image_id,
-    screenshots.id, screenshots.url, screenshots.image_id,
-    genres.id, genres.name, genres.slug,
-    themes.id, themes.name, themes.slug,
-    game_modes.id, game_modes.name, game_modes.slug,
-    keywords.id, keywords.name, keywords.slug,
-    platforms.id, platforms.name, platforms.abbreviation, platforms.category,
-    release_dates.id, release_dates.date, release_dates.human, release_dates.platform.name, release_dates.*,
-    involved_companies.id, involved_companies.developer, involved_companies.publisher, involved_companies.company.name,
-    alternative_names.id, alternative_names.name, alternative_names.comment,
-    websites.id, websites.category, websites.trusted, websites.url,
-    videos.id, videos.video_id, videos.name,
-    similar_games, dlcs, expansions, standalone_expansions,
-    version_parent, version_title, parent_game, collection.name,
-    franchise.id, franchise.name, franchise.slug,
-    age_ratings.id, age_ratings.category, age_ratings.rating, age_ratings.content_descriptions,
-    external_games.id, external_games.category, external_games.uid, external_games.url,
-    multiplayer_modes.id, multiplayer_modes.campaigncoop, multiplayer_modes.dropin, multiplayer_modes.lancoop,
-    player_perspectives.id, player_perspectives.name, player_perspectives.slug,
-    game_engines.id, game_engines.name, game_engines.slug,
-    language_supports.id, language_supports.language.name, language_supports.language_support_type.name;
+     name, cover.*, age_ratings.*, age_ratings.organization.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, bundles.cover.*, category, collection.*, collection.games.*, collection.games.cover.*, collections.*, dlcs.*, dlcs.cover.*, expanded_games.*, expanded_games.cover.*, expansions.*, expansions.cover.*, external_games.*, first_release_date, follows, forks.*, forks.cover.*, franchise.*, franchises.*, franchises.games.*, franchises.games.cover.*, game_engines.*, game_engines.logo.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, involved_companies.company.*, involved_companies.company.logo.*, keywords.*, language_supports.*, language_supports.language.*, language_supports.language_support_type.*, multiplayer_modes.*, parent_game.*, parent_game.cover.*, platforms.*, platforms.platform_logo.*, player_perspectives.*, ports.*, ports.cover.*, rating, rating_count, release_dates.*, remakes.*, remakes.cover.*, remasters.*, remasters.cover.*, screenshots.*, similar_games.*, similar_games.cover.*, slug, standalone_expansions.*, standalone_expansions.cover.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_parent.cover.*, version_title, videos.*, websites.*
   ''';
 
   // ==========================================
@@ -179,35 +157,56 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   // In IGDBRemoteDataSourceImpl
   Future<List<T>> _makeRequest<T>(
-    String endpoint,
-    String body,
-    T Function(Map<String, dynamic>) fromJson,
-  ) async {
+      String endpoint,
+      String body,
+      T Function(Map<String, dynamic>) fromJson,
+      ) async {
     try {
-      // Verwende den isolierten Client anstatt den injizierten
-      final jsonList =
-          await IsolatedIGDBClient.instance.makeIGDBRequest(endpoint, body);
+      final jsonList = await IsolatedIGDBClient.instance.makeIGDBRequest(endpoint, body);
 
-      final items = jsonList
-          .map((json) {
-            try {
-              return fromJson(json);
-            } catch (e) {
-              print('⚠️ IGDB: Failed to parse item: $e');
-              return null;
-            }
-          })
-          .where((item) => item != null)
-          .cast<T>()
-          .toList();
+      final items = <T>[];
+      for (int i = 0; i < jsonList.length; i++) {
+        final json = jsonList[i];
+        try {
+          final item = fromJson(json);
+          items.add(item);
+        } catch (e, stackTrace) {
+          print('❌ IGDB: Failed to parse item #$i in endpoint "$endpoint"');
+          print('📄 Raw JSON: ${jsonEncode(json)}');
+          print('🔍 Error: $e');
+          print('📍 Stack trace: $stackTrace');
 
-      print('🎯 IGDB: Successfully converted ${items.length} items');
+          // Analysiere die Datentypen der problematischen Felder
+          _analyzeJsonTypes(json, endpoint, i);
+
+          // Weiter mit nächstem Item
+          continue;
+        }
+      }
+
+      print('✅ IGDB: Successfully parsed ${items.length}/${jsonList.length} items from $endpoint');
       return items;
     } catch (e) {
-      print('💥 IGDB: Request error: $e');
-      if (e is ServerException) rethrow;
-      throw ServerException(message: 'Network error: $e');
+      print('❌ IGDB: Network error for $endpoint: $e');
+      throw ServerException(message: e.toString());
     }
+  }
+
+  void _analyzeJsonTypes(Map<String, dynamic> json, String endpoint, int index) {
+    print('\n🔍 ANALYZING JSON TYPES for $endpoint item #$index:');
+
+    json.forEach((key, value) {
+      final type = value.runtimeType.toString();
+      if (value is Map) {
+        print('  $key: $type with keys: ${(value as Map).keys.join(", ")}');
+      } else if (value is List && value.isNotEmpty) {
+        final firstItemType = value.first.runtimeType.toString();
+        print('  $key: List<$firstItemType> (${value.length} items)');
+      } else {
+        print('  $key: $type = $value');
+      }
+    });
+    print('--- END ANALYSIS ---\n');
   }
 
   // In IGDBRemoteDataSourceImpl
@@ -272,7 +271,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   @override
   Future<List<GameModel>> getPopularGames(int limit, int offset) async {
     final body = '''
-      where total_rating_count > 10 & first_release_date != null;
+      where total_rating_count > 20 & total_rating_count < 50 & first_release_date != null;
       fields $_completeGameFields;
       sort total_rating desc;
       limit $limit;
@@ -301,6 +300,24 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       'games',
       body,
       (json) => GameModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModel>> getLatestGames(int limit, int offset) async {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final body = '''
+      where first_release_date < $now;
+      fields $_completeGameFields;
+      sort first_release_date desc;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
     );
   }
 
@@ -3515,14 +3532,14 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   @override
-  Future<List<GameModel>> getGamesSortedByRating({
+  Future<List<GameModel>> getTopRatedGames({
     int limit = 20,
     int offset = 0,
-    double minRating = 70.0,
+    double minRating = 70,
   }) async {
     final body = '''
-      where total_rating >= $minRating & total_rating_count >= 10;
-      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      where total_rating >= 70 & total_rating_count >= 100;
+      fields $_completeGameFields;
       sort total_rating desc;
       limit $limit;
       offset $offset;

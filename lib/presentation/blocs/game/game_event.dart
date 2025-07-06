@@ -114,6 +114,33 @@ class LoadUpcomingGamesEvent extends GameEvent {
   List<Object> get props => [limit, offset];
 }
 
+class LoadLatestGamesEvent extends GameEvent {
+  final int limit;
+  final int offset;
+
+  const LoadLatestGamesEvent({
+    this.limit = 20,
+    this.offset = 0,
+  });
+
+  @override
+  List<Object> get props => [limit, offset];
+}
+
+class LoadTopRatedGamesEvent extends GameEvent {
+  final int limit;
+  final int offset;
+
+  const LoadTopRatedGamesEvent({
+    this.limit = 20,
+    this.offset = 0,
+  });
+
+  @override
+  List<Object> get props => [limit, offset];
+}
+
+
 class LoadUserRatedEvent extends GameEvent {
   final String userId;
 

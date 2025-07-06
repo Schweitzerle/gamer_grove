@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
@@ -11,6 +12,7 @@ import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/game/get_complete_game_details.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
 import '../../../domain/usecases/game/get_game_expansions.dart';
+import '../../../domain/usecases/game/get_latest_games.dart';
 import '../../../domain/usecases/game/get_similar_games.dart';
 import '../../../domain/usecases/game/get_user_top_three.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
@@ -39,6 +41,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final AddToTopThree addToTopThree;
   final GetPopularGames getPopularGames;
   final GetUpcomingGames getUpcomingGames;
+  final GetLatestGames getLatestGames;
+  final GetTopRatedGames getTopRatedGames;
   final GetUserWishlist getUserWishlist;
   final GetUserRecommendations getUserRecommendations;
   final GetUserTopThreeGames getUserTopThreeGames;
@@ -58,6 +62,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.addToTopThree,
     required this.getPopularGames,
     required this.getUpcomingGames,
+    required this.getLatestGames,
+    required this.getTopRatedGames,
     required this.getUserWishlist,
     required this.getUserRecommendations,
     required this.getUserTopThreeGames,
@@ -87,6 +93,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // Home page events
     on<LoadPopularGamesEvent>(_onLoadPopularGames);
     on<LoadUpcomingGamesEvent>(_onLoadUpcomingGames);
+    on<LoadTopRatedGamesEvent>(_onLoadTopRatedGames);
 
     // User-specific events
     on<LoadUserWishlistEvent>(_onLoadUserWishlist);
@@ -258,6 +265,48 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       },
     );
   }
+
+
+  // Load Popular Games
+  Future<void> _onLoadTopRatedGames(LoadTopRatedGamesEvent event,
+      Emitter<GameState> emit,) async {
+    if (event.offset == 0) {
+      emit(TopRatedGamesLoading());
+    } else if (state is TopRatedGamesLoaded) {
+      final currentState = state as TopRatedGamesLoaded;
+      emit(currentState.copyWith(isLoadingMore: true));
+    }
+
+    final result = await getTopRatedGames(
+      GetTopRatedGamesParams(
+        limit: event.limit,
+        offset: event.offset,
+      ),
+    );
+
+    result.fold(
+          (failure) => emit(GameError(failure.message)),
+          (games) {
+        if (event.offset == 0) {
+          // Initial load
+          emit(TopRatedGamesLoaded(
+            games: games,
+            hasReachedMax: games.length < event.limit,
+          ));
+        } else if (state is TopRatedGamesLoaded) {
+          // Load more
+          final currentState = state as TopRatedGamesLoaded;
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)
+              ..addAll(games),
+            hasReachedMax: games.length < event.limit,
+            isLoadingMore: false,
+          ));
+        }
+      },
+    );
+  }
+
 
   // Load User Wishlist
   Future<void> _onLoadUserWishlist(LoadUserWishlistEvent event,
@@ -705,6 +754,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final results = await Future.wait([
         getPopularGames(const GetPopularGamesParams(limit: 10)),
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
+        getLatestGames(const GetLatestGamesParams(limit: 10)),
+        getTopRatedGames(const GetTopRatedGamesParams(limit: 10)),
         if (event.userId != null) ...[
           getUserWishlist(GetUserWishlistParams(userId: event.userId!, limit: 20, offset: 0)),
           getUserRecommendations(GetUserRecommendationsParams(userId: event.userId!, limit: 20, offset: 0)),
@@ -714,17 +765,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // Extract results
       final popularGames = results[0].fold((l) => <Game>[], (r) => r);
       final upcomingGames = results[1].fold((l) => <Game>[], (r) => r);
+      final latestGames = results[2].fold((l) => <Game>[], (r) => r);
+      final topRatedGames = results[3].fold((l) => <Game>[], (r) => r);
       final userWishlist = event.userId != null && results.length > 2
-          ? results[2].fold((l) => <Game>[], (r) => r)
+          ? results[4].fold((l) => <Game>[], (r) => r)
           : <Game>[];
       final userRecommendations = event.userId != null && results.length > 3
-          ? results[3].fold((l) => <Game>[], (r) => r)
+          ? results[5].fold((l) => <Game>[], (r) => r)
           : <Game>[];
 
       // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
         final enrichedPopular = await _enrichGamesWithUserData(popularGames, event.userId!);
         final enrichedUpcoming = await _enrichGamesWithUserData(upcomingGames, event.userId!);
+        final enrichLatest = await _enrichGamesWithUserData(latestGames, event.userId!);
+        final enrichedTopRated = await _enrichGamesWithUserData(topRatedGames, event.userId!);
         // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
         final enrichedWishlist = userWishlist.isNotEmpty
             ? await _enrichGamesWithUserData(userWishlist, event.userId!)
@@ -736,13 +791,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         emit(HomePageLoaded(
           popularGames: enrichedPopular,
           upcomingGames: enrichedUpcoming,
+          latestGames: enrichLatest,
+          topRatedGames: enrichedTopRated,
           userWishlist: enrichedWishlist,
-          userRecommendations: enrichedRecommendations,
-        ));
+          userRecommendations: enrichedRecommendations,));
       } else {
         emit(HomePageLoaded(
           popularGames: popularGames,
           upcomingGames: upcomingGames,
+          latestGames: latestGames,
+          topRatedGames: topRatedGames,
         ));
       }
     } catch (e) {

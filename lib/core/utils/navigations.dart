@@ -6,7 +6,6 @@ import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/game/game_bloc.dart';
 import '../../presentation/pages/game_detail/game_detail_page.dart';
-import '../../presentation/pages/game_detail/game_detail_pageSafety.dart';
 import '../../presentation/pages/test/igdb_test_page.dart';
 import '../../presentation/pages/test/supabase_test_page.dart';
 
@@ -36,10 +35,25 @@ class Navigations {
     );
   }
 
+  static void navigateToTopRatedGames(BuildContext context) {
+    // TODO: Implement navigation to full popular games list
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Popular games list coming soon!')),
+    );
+  }
+
+
   static void navigateToUpcomingGames(BuildContext context) {
     // TODO: Implement navigation to full upcoming games list
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Upcoming games list coming soon!')),
+    );
+  }
+
+  static void navigateToLatestReleases(BuildContext context) {
+    // TODO: Implement navigation to full upcoming games list
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Latest games list coming soon!')),
     );
   }
 

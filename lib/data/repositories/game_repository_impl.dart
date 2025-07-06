@@ -267,6 +267,31 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, List<Game>>> getLatestGames(int limit, int offset) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📅 GameRepository: Getting latest games (limit: $limit, offset: $offset)');
+
+      // Use enhanced latest games method
+      final latestGames = await igdbDataSource.getLatestGames(limit, offset);
+
+      // Enrich with user data
+      final enrichedGames = await _enrichGamesWithUserData(latestGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} latest games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load latest games'));
+    }
+  }
+
   // ==========================================
   // ENHANCED COMPANY & CONTENT METHODS
   // ==========================================
@@ -643,11 +668,12 @@ class GameRepositoryImpl implements GameRepository {
       print('⭐ GameRepository: Getting top rated games (limit: $limit, offset: $offset)');
 
       // Get games sorted by total_rating, excluding those without ratings
-      final topRatedGames = await igdbDataSource.getGamesSortedByRating(
+      final topRatedGames = await igdbDataSource.getTopRatedGames(
           limit: limit,
           offset: offset
       );
 
+      print('TopRatedGames: ${topRatedGames.length}');
       // Enrich with user data
       final enrichedGames = await _enrichGamesWithUserData(topRatedGames);
 

@@ -72,6 +72,8 @@ abstract class GameRepository {
   /// Get upcoming games with pagination
   Future<Either<Failure, List<Game>>> getUpcomingGames(int limit, int offset);
 
+  Future<Either<Failure, List<Game>>> getLatestGames(int limit, int offset);
+
   // ==========================================
   // ENHANCED COMPANY & CONTENT METHODS
   // ==========================================

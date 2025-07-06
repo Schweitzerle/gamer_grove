@@ -18,19 +18,62 @@ class MultiplayerModeModel extends MultiplayerMode {
   });
 
   factory MultiplayerModeModel.fromJson(Map<String, dynamic> json) {
-    return MultiplayerModeModel(
-      id: json['id'] ?? 0,
-      campaignCoop: json['campaigncoop'] ?? false,
-      dropin: json['dropin'] ?? false,
-      lancoop: json['lancoop'] ?? false,
-      offlineCoop: json['offlinecoop'] ?? false,
-      offlineCoopMax: json['offlinecoopmax'] ?? false,
-      offlineMax: json['offlinemax'] ?? false,
-      onlineCoop: json['onlinecoop'] ?? false,
-      onlineCoopMax: json['onlinecoopmax'] ?? false,
-      onlineMax: json['onlinemax'] ?? false,
-      splitscreen: json['splitscreen'] ?? false,
-      splitscreenOnline: json['splitscreenonline'] ?? false,
-    );
+    try {
+      return MultiplayerModeModel(
+        id: _parseInt(json['id']) ?? 0,
+        // Boolean fields - parse safely
+        campaignCoop: _parseBool(json['campaigncoop']),
+        dropin: _parseBool(json['dropin']),
+        lancoop: _parseBool(json['lancoop']),
+        offlineCoop: _parseBool(json['offlinecoop']),
+        onlineCoop: _parseBool(json['onlinecoop']),
+        splitscreen: _parseBool(json['splitscreen']),
+        splitscreenOnline: _parseBool(json['splitscreenonline']),
+
+        // FIX: Integer fields - parse as int, not bool
+        offlineCoopMax: _parseInt(json['offlinecoopmax']) ?? 0,
+        offlineMax: _parseInt(json['offlinemax']) ?? 0,
+        onlineCoopMax: _parseInt(json['onlinecoopmax']) ?? 0,
+        onlineMax: _parseInt(json['onlinemax']) ?? 0,
+      );
+    } catch (e, stackTrace) {
+      print('❌ MultiplayerModeModel.fromJson failed: $e');
+      print('📄 JSON data: $json');
+      print('📍 Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  // === SAFE PARSING HELPERS ===
+  static int? _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    if (value is bool) return value ? 1 : 0; // Handle bool -> int conversion
+    return null;
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value != 0;
+    if (value is String) return value.toLowerCase() == 'true' || value == '1';
+    return false;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'campaigncoop': campaignCoop,
+      'dropin': dropin,
+      'lancoop': lancoop,
+      'offlinecoop': offlineCoop,
+      'offlinecoopmax': offlineCoopMax,
+      'offlinemax': offlineMax,
+      'onlinecoop': onlineCoop,
+      'onlinecoopmax': onlineCoopMax,
+      'onlinemax': onlineMax,
+      'splitscreen': splitscreen,
+      'splitscreenonline': splitscreenOnline,
+    };
   }
 }

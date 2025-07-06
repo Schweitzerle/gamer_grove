@@ -5,6 +5,7 @@ import '../character/character.dart';
 import '../collection/collection.dart';
 import '../event/event.dart';
 import '../genre.dart';
+import '../language/language_support.dart';
 import '../platform/platform.dart';
 import '../screenshot.dart';
 import '../website/website_type.dart';
@@ -22,7 +23,6 @@ import '../multiplayer_mode.dart';
 import '../player_perspective.dart';
 import '../franchise.dart';
 import '../externalGame/external_game.dart';
-import '../language_support.dart';
 import '../releaseDate/release_date.dart';
 import 'game_localization.dart';
 
