@@ -1,4 +1,4 @@
-// ===== RELEASE DATE MODEL (UPDATED TO IGDB API SPEC) =====
+// ===== RELEASE DATE MODEL (FIXED FOR COMPLETE FIELDS) =====
 // lib/data/models/release_date/release_date_model.dart
 import '../../../domain/entities/releaseDate/release_date.dart';
 
@@ -31,14 +31,25 @@ class ReleaseDateModel extends ReleaseDate {
       human: json['human'],
       month: json['m'],
       year: json['y'],
-      gameId: json['game'],
-      platformId: json['platform'],
-      dateFormatId: json['date_format'],
-      releaseRegionId: json['release_region'],
-      statusId: json['status'],
+      // Fixed: Handle both ID and expanded object
+      gameId: _extractId(json['game']),
+      platformId: _extractId(json['platform']),
+      dateFormatId: _extractId(json['date_format']),
+      releaseRegionId: _extractId(json['release_region']),
+      statusId: _extractId(json['status']),
       categoryEnum: _parseCategoryEnum(json['category']),
       regionEnum: _parseRegionEnum(json['region']),
     );
+  }
+
+  /// Extract ID from either int or Map<String, dynamic>
+  static int? _extractId(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is Map<String, dynamic>) {
+      return value['id'] as int?;
+    }
+    return null;
   }
 
   static DateTime? _parseDateTime(dynamic date) {
@@ -181,4 +192,3 @@ class ReleaseDateModel extends ReleaseDate {
     );
   }
 }
-

@@ -1,6 +1,7 @@
 // lib/data/models/external_game_model.dart
 
 import '../../../domain/entities/externalGame/external_game.dart';
+import '../../../core/utils/json_helpers.dart';
 
 class ExternalGameModel extends ExternalGame {
   const ExternalGameModel({
@@ -28,14 +29,15 @@ class ExternalGameModel extends ExternalGame {
       name: json['name'] ?? '',
       uid: json['uid'] ?? '',
       countries: _parseCountries(json['countries']),
-      externalGameSourceId: json['external_game_source'],
-      gameId: json['game'],
-      gameReleaseFormatId: json['game_release_format'],
-      platformId: json['platform'],
+      // Fixed: Handle both ID and expanded object
+      externalGameSourceId: JsonHelpers.extractId(json['external_game_source']),
+      gameId: JsonHelpers.extractId(json['game']),
+      gameReleaseFormatId: JsonHelpers.extractId(json['game_release_format']),
+      platformId: JsonHelpers.extractId(json['platform']),
       url: json['url'],
       year: json['year'],
-      createdAt: _parseDateTime(json['created_at']),
-      updatedAt: _parseDateTime(json['updated_at']),
+      createdAt: JsonHelpers.parseDateTime(json['created_at']),
+      updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
       categoryEnum: _parseCategoryEnum(json['category']),
       mediaEnum: _parseMediaEnum(json['media']),
     );
@@ -49,15 +51,6 @@ class ExternalGameModel extends ExternalGame {
           .toList();
     }
     return [];
-  }
-
-  static DateTime? _parseDateTime(dynamic date) {
-    if (date is String) {
-      return DateTime.tryParse(date);
-    } else if (date is int) {
-      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
-    }
-    return null;
   }
 
   static ExternalGameCategoryEnum? _parseCategoryEnum(dynamic category) {
@@ -92,5 +85,85 @@ class ExternalGameModel extends ExternalGame {
       'category': categoryEnum?.value,
       'media': mediaEnum?.value,
     };
+  }
+
+  // Helper methods to extract expanded data if available
+
+  /// Get platform name from expanded data (if available)
+  String? get platformName {
+    // This would be available if you store the expanded object
+    // For now, just return null since we only store the ID
+    return null;
+  }
+
+  /// Get external game source name from expanded data (if available)
+  String? get sourceName {
+    // This would be available if you store the expanded object
+    // For now, just return null since we only store the ID
+    return null;
+  }
+
+  /// Get game release format name from expanded data (if available)
+  String? get formatName {
+    // This would be available if you store the expanded object
+    // For now, just return null since we only store the ID
+    return null;
+  }
+
+  /// Alternative constructor that can handle expanded objects and store them
+  factory ExternalGameModel.fromJsonWithExpanded(Map<String, dynamic> json) {
+    return ExternalGameModelExpanded.fromJson(json);
+  }
+}
+
+/// Extended version that can store expanded reference data
+class ExternalGameModelExpanded extends ExternalGameModel {
+  final String? platformName;
+  final String? sourceName;
+  final String? formatName;
+
+  const ExternalGameModelExpanded({
+    required super.id,
+    required super.checksum,
+    required super.name,
+    required super.uid,
+    super.countries,
+    super.externalGameSourceId,
+    super.gameId,
+    super.gameReleaseFormatId,
+    super.platformId,
+    super.url,
+    super.year,
+    super.createdAt,
+    super.updatedAt,
+    super.categoryEnum,
+    super.mediaEnum,
+    this.platformName,
+    this.sourceName,
+    this.formatName,
+  });
+
+  factory ExternalGameModelExpanded.fromJson(Map<String, dynamic> json) {
+    return ExternalGameModelExpanded(
+      id: json['id'] ?? 0,
+      checksum: json['checksum'] ?? '',
+      name: json['name'] ?? '',
+      uid: json['uid'] ?? '',
+      countries: ExternalGameModel._parseCountries(json['countries']),
+      externalGameSourceId: JsonHelpers.extractId(json['external_game_source']),
+      gameId: JsonHelpers.extractId(json['game']),
+      gameReleaseFormatId: JsonHelpers.extractId(json['game_release_format']),
+      platformId: JsonHelpers.extractId(json['platform']),
+      url: json['url'],
+      year: json['year'],
+      createdAt: JsonHelpers.parseDateTime(json['created_at']),
+      updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
+      categoryEnum: ExternalGameModel._parseCategoryEnum(json['category']),
+      mediaEnum: ExternalGameModel._parseMediaEnum(json['media']),
+      // Extract expanded data
+      platformName: JsonHelpers.extractNested<String>(json, 'platform.name'),
+      sourceName: JsonHelpers.extractNested<String>(json, 'external_game_source.name'),
+      formatName: JsonHelpers.extractNested<String>(json, 'game_release_format.format'),
+    );
   }
 }

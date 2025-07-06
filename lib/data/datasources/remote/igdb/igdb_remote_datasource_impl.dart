@@ -142,14 +142,105 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   // ==========================================
 
   static const String _basicGameFields = '''
-    id, name, summary, storyline, category, status, first_release_date,
-    total_rating, total_rating_count, rating, rating_count,
-    aggregated_rating, aggregated_rating_count, follows;
+    id, name, first_release_date, 
+  cover.id, cover.url, cover.image_id,
+  total_rating, aggregated_rating,
+  genres.*, status
   ''';
 
   static const String _completeGameFields = '''
-     name, cover.*, age_ratings.*, age_ratings.organization.*, aggregated_rating, aggregated_rating_count, alternative_names.*, artworks.*, bundles.*, bundles.cover.*, category, collection.*, collection.games.*, collection.games.cover.*, collections.*, dlcs.*, dlcs.cover.*, expanded_games.*, expanded_games.cover.*, expansions.*, expansions.cover.*, external_games.*, first_release_date, follows, forks.*, forks.cover.*, franchise.*, franchises.*, franchises.games.*, franchises.games.cover.*, game_engines.*, game_engines.logo.*, game_localizations.*, game_modes.*, genres.*, hypes, involved_companies.*, involved_companies.company.*, involved_companies.company.logo.*, keywords.*, language_supports.*, language_supports.language.*, language_supports.language_support_type.*, multiplayer_modes.*, parent_game.*, parent_game.cover.*, platforms.*, platforms.platform_logo.*, player_perspectives.*, ports.*, ports.cover.*, rating, rating_count, release_dates.*, remakes.*, remakes.cover.*, remasters.*, remasters.cover.*, screenshots.*, similar_games.*, similar_games.cover.*, slug, standalone_expansions.*, standalone_expansions.cover.*, status, storyline, summary, tags, themes.*, total_rating, total_rating_count, updated_at, url, version_parent.*, version_parent.cover.*, version_title, videos.*, websites.*
-  ''';
+  id, name, summary, storyline, category, status, first_release_date,
+  total_rating, total_rating_count, rating, rating_count,
+  aggregated_rating, aggregated_rating_count, follows, hypes,
+  slug, url, version_title, updated_at, created_at, checksum,
+  
+  cover.id, cover.url, cover.image_id, cover.width, cover.height, cover.alpha_channel, cover.animated, cover.checksum,
+  artworks.id, artworks.url, artworks.image_id, artworks.width, artworks.height, artworks.alpha_channel, artworks.animated, artworks.checksum,
+  screenshots.id, screenshots.url, screenshots.image_id, screenshots.width, screenshots.height, screenshots.alpha_channel, screenshots.animated, screenshots.checksum,
+  videos.id, videos.video_id, videos.name, videos.checksum,
+  
+  age_ratings.id, age_ratings.category, age_ratings.rating, age_ratings.checksum, age_ratings.synopsis,
+  age_ratings.content_descriptions.id, age_ratings.content_descriptions.category, age_ratings.content_descriptions.description,
+  age_ratings.rating_cover_url,
+  
+  genres.id, genres.name, genres.slug, genres.url, genres.checksum, genres.created_at, genres.updated_at,
+  themes.id, themes.name, themes.slug, themes.url, themes.checksum, themes.created_at, themes.updated_at,
+  keywords.id, keywords.name, keywords.slug, keywords.url, keywords.checksum, keywords.created_at, keywords.updated_at,
+  game_modes.id, game_modes.name, game_modes.slug, game_modes.url, game_modes.checksum, game_modes.created_at, game_modes.updated_at,
+  player_perspectives.id, player_perspectives.name, player_perspectives.slug, player_perspectives.url, player_perspectives.checksum, player_perspectives.created_at, player_perspectives.updated_at,
+  
+  platforms.id, platforms.name, platforms.abbreviation, platforms.category, platforms.checksum, platforms.created_at, platforms.updated_at, platforms.slug, platforms.url,
+  platforms.platform_logo.id, platforms.platform_logo.url, platforms.platform_logo.image_id, platforms.platform_logo.width, platforms.platform_logo.height,
+  release_dates.id, release_dates.date, release_dates.human, release_dates.m, release_dates.y, release_dates.category, release_dates.region, release_dates.checksum, release_dates.created_at, release_dates.updated_at,
+  release_dates.platform.id, release_dates.platform.name, release_dates.platform.abbreviation,
+  release_dates.status.id, release_dates.status.name, release_dates.status.description,
+  
+  involved_companies.id, involved_companies.developer, involved_companies.publisher, involved_companies.porting, involved_companies.supporting, involved_companies.checksum, involved_companies.created_at, involved_companies.updated_at,
+  involved_companies.company.id, involved_companies.company.name, involved_companies.company.slug, involved_companies.company.url, involved_companies.company.description, involved_companies.company.country, involved_companies.company.start_date, involved_companies.company.checksum, involved_companies.company.created_at, involved_companies.company.updated_at,
+  involved_companies.company.logo.id, involved_companies.company.logo.url, involved_companies.company.logo.image_id, involved_companies.company.logo.width, involved_companies.company.logo.height,
+  involved_companies.company.websites.id, involved_companies.company.websites.category, involved_companies.company.websites.trusted, involved_companies.company.websites.url,
+  
+  game_engines.id, game_engines.name, game_engines.slug, game_engines.description, game_engines.url, game_engines.checksum, game_engines.created_at, game_engines.updated_at,
+  game_engines.logo.id, game_engines.logo.url, game_engines.logo.image_id, game_engines.logo.width, game_engines.logo.height, game_engines.logo.alpha_channel, game_engines.logo.animated,
+  game_engines.companies.id, game_engines.companies.name,
+  game_engines.platforms.id, game_engines.platforms.name,
+  game_localizations.id, game_localizations.name, game_localizations.checksum, game_localizations.created_at, game_localizations.updated_at,
+  game_localizations.cover.id, game_localizations.cover.url, game_localizations.cover.image_id,
+  game_localizations.region.id, game_localizations.region.name, game_localizations.region.identifier, game_localizations.region.category,
+  language_supports.id, language_supports.checksum, language_supports.created_at, language_supports.updated_at,
+  language_supports.language.id, language_supports.language.name, language_supports.language.native_name, language_supports.language.locale,
+  language_supports.language_support_type.id, language_supports.language_support_type.name,
+  
+  multiplayer_modes.id, multiplayer_modes.campaigncoop, multiplayer_modes.dropin, multiplayer_modes.lancoop, multiplayer_modes.offlinecoop, multiplayer_modes.onlinecoop, multiplayer_modes.onlinecoopmax, multiplayer_modes.onlinemax, multiplayer_modes.splitscreen, multiplayer_modes.splitscreenonline, multiplayer_modes.checksum,
+  multiplayer_modes.platform.id, multiplayer_modes.platform.name,
+  
+  bundles.id, bundles.name, bundles.category, bundles.status, bundles.first_release_date,
+  bundles.cover.id, bundles.cover.url, bundles.cover.image_id,
+  dlcs.id, dlcs.name, dlcs.category, dlcs.status, dlcs.first_release_date,
+  dlcs.cover.id, dlcs.cover.url, dlcs.cover.image_id,
+  expansions.id, expansions.name, expansions.category, expansions.status, expansions.first_release_date,
+  expansions.cover.id, expansions.cover.url, expansions.cover.image_id,
+  expanded_games.id, expanded_games.name, expanded_games.category, expanded_games.status, expanded_games.first_release_date,
+  expanded_games.cover.id, expanded_games.cover.url, expanded_games.cover.image_id,
+  standalone_expansions.id, standalone_expansions.name, standalone_expansions.category, standalone_expansions.status, standalone_expansions.first_release_date,
+  standalone_expansions.cover.id, standalone_expansions.cover.url, standalone_expansions.cover.image_id,
+  remakes.id, remakes.name, remakes.category, remakes.status, remakes.first_release_date,
+  remakes.cover.id, remakes.cover.url, remakes.cover.image_id,
+  remasters.id, remasters.name, remasters.category, remasters.status, remasters.first_release_date,
+  remasters.cover.id, remasters.cover.url, remasters.cover.image_id,
+  ports.id, ports.name, ports.category, ports.status, ports.first_release_date,
+  ports.cover.id, ports.cover.url, ports.cover.image_id,
+  forks.id, forks.name, forks.category, forks.status, forks.first_release_date,
+  forks.cover.id, forks.cover.url, forks.cover.image_id,
+  similar_games.id, similar_games.name, similar_games.category, similar_games.status, similar_games.first_release_date,
+  similar_games.cover.id, similar_games.cover.url, similar_games.cover.image_id,
+  
+  parent_game.id, parent_game.name, parent_game.category, parent_game.status, parent_game.first_release_date,
+  parent_game.cover.id, parent_game.cover.url, parent_game.cover.image_id,
+  version_parent.id, version_parent.name, version_parent.category, version_parent.status, version_parent.first_release_date,
+  version_parent.cover.id, version_parent.cover.url, version_parent.cover.image_id,
+  
+  franchise.id, franchise.name, franchise.slug, franchise.url, franchise.checksum, franchise.created_at, franchise.updated_at,
+  franchise.games.id, franchise.games.name, franchise.games.first_release_date,
+  franchise.games.cover.id, franchise.games.cover.url, franchise.games.cover.image_id,
+  franchises.id, franchises.name, franchises.slug, franchises.url, franchises.checksum, franchises.created_at, franchises.updated_at,
+  franchises.games.id, franchises.games.name, franchises.games.first_release_date,
+  franchises.games.cover.id, franchises.games.cover.url, franchises.games.cover.image_id,
+  collection.id, collection.name, collection.slug, collection.url, collection.type, collection.checksum, collection.created_at, collection.updated_at,
+  collection.games.id, collection.games.name, collection.games.first_release_date,
+  collection.games.cover.id, collection.games.cover.url, collection.games.cover.image_id,
+  collections.id, collections.name, collections.slug, collections.url, collections.type, collections.checksum, collections.created_at, collections.updated_at,
+  
+  alternative_names.id, alternative_names.name, alternative_names.comment, alternative_names.checksum,
+  
+  external_games.id, external_games.category, external_games.uid, external_games.url, external_games.name, external_games.year, external_games.media, external_games.countries, external_games.checksum, external_games.created_at, external_games.updated_at,
+  external_games.platform.id, external_games.platform.name,
+  external_games.external_game_source.id, external_games.external_game_source.name,
+  external_games.game_release_format.id, external_games.game_release_format.format,
+  
+  websites.id, websites.category, websites.trusted, websites.url, websites.checksum,
+  websites.type.id, websites.type.type,
+    tags  ''';
 
   // ==========================================
   // CORE HTTP METHODS
@@ -157,12 +248,13 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
 
   // In IGDBRemoteDataSourceImpl
   Future<List<T>> _makeRequest<T>(
-      String endpoint,
-      String body,
-      T Function(Map<String, dynamic>) fromJson,
-      ) async {
+    String endpoint,
+    String body,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
     try {
-      final jsonList = await IsolatedIGDBClient.instance.makeIGDBRequest(endpoint, body);
+      final jsonList =
+          await IsolatedIGDBClient.instance.makeIGDBRequest(endpoint, body);
 
       final items = <T>[];
       for (int i = 0; i < jsonList.length; i++) {
@@ -184,7 +276,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
         }
       }
 
-      print('✅ IGDB: Successfully parsed ${items.length}/${jsonList.length} items from $endpoint');
+      print(
+          '✅ IGDB: Successfully parsed ${items.length}/${jsonList.length} items from $endpoint');
       return items;
     } catch (e) {
       print('❌ IGDB: Network error for $endpoint: $e');
@@ -192,7 +285,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     }
   }
 
-  void _analyzeJsonTypes(Map<String, dynamic> json, String endpoint, int index) {
+  void _analyzeJsonTypes(
+      Map<String, dynamic> json, String endpoint, int index) {
     print('\n🔍 ANALYZING JSON TYPES for $endpoint item #$index:');
 
     json.forEach((key, value) {
@@ -230,7 +324,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
       String query, int limit, int offset) async {
     final body = '''
       search "$query";
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       limit $limit;
       offset $offset;
     ''';
@@ -272,7 +366,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<GameModel>> getPopularGames(int limit, int offset) async {
     final body = '''
       where total_rating_count > 20 & total_rating_count < 50 & first_release_date != null;
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       sort total_rating desc;
       limit $limit;
       offset $offset;
@@ -290,7 +384,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final body = '''
       where first_release_date > $now;
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       sort first_release_date asc;
       limit $limit;
       offset $offset;
@@ -308,7 +402,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final body = '''
       where first_release_date < $now;
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       sort first_release_date desc;
       limit $limit;
       offset $offset;
@@ -317,7 +411,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -328,7 +422,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     final idsString = gameIds.join(',');
     final body = '''
       where id = ($idsString);
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       limit ${gameIds.length};
     ''';
 
@@ -3539,7 +3633,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   }) async {
     final body = '''
       where total_rating >= 70 & total_rating_count >= 100;
-      fields $_completeGameFields;
+      fields $_basicGameFields;
       sort total_rating desc;
       limit $limit;
       offset $offset;
