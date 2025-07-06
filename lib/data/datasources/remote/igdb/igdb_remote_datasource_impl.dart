@@ -170,7 +170,9 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   player_perspectives.id, player_perspectives.name, player_perspectives.slug, player_perspectives.url, player_perspectives.checksum, player_perspectives.created_at, player_perspectives.updated_at,
   
   platforms.id, platforms.name, platforms.abbreviation, platforms.category, platforms.checksum, platforms.created_at, platforms.updated_at, platforms.slug, platforms.url,
-  platforms.platform_logo.id, platforms.platform_logo.url, platforms.platform_logo.image_id, platforms.platform_logo.width, platforms.platform_logo.height,
+  platforms.platform_logo.id, platforms.platform_logo.url, platforms.platform_logo.image_id, platforms.platform_logo.width, platforms.platform_logo.height, platforms.platform_logo.alpha_channel,
+platforms.platform_logo.animated,
+platforms.platform_logo.checksum, 
   release_dates.id, release_dates.date, release_dates.human, release_dates.m, release_dates.y, release_dates.category, release_dates.region, release_dates.checksum, release_dates.created_at, release_dates.updated_at,
   release_dates.platform.id, release_dates.platform.name, release_dates.platform.abbreviation,
   release_dates.status.id, release_dates.status.name, release_dates.status.description,
@@ -366,7 +368,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<GameModel>> getPopularGames(int limit, int offset) async {
     final body = '''
       where total_rating_count > 20 & total_rating_count < 50 & first_release_date != null;
-      fields $_basicGameFields;
+      fields $_completeGameFields;
       sort total_rating desc;
       limit $limit;
       offset $offset;

@@ -1,8 +1,8 @@
 // ==================================================
-// GAME DETAILS SECTIONS - SEPARATE WIDGETS
+// UPDATED GAME DETAILS ACCORDION - MIT GAME INFO SECTION
 // ==================================================
 
-// lib/presentation/pages/game_detail/widgets/sections/game_details_accordion.dart
+// lib/presentation/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game/game.dart';
@@ -15,6 +15,7 @@ import 'game_features_section.dart';
 import 'age_ratings_section.dart';
 import 'keywords_section.dart';
 import 'statistics_section.dart';
+import 'game_info_section.dart'; // ✅ NEW IMPORT
 
 class GameDetailsAccordion extends StatelessWidget {
   final Game game;
@@ -35,12 +36,20 @@ class GameDetailsAccordion extends StatelessWidget {
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: Column(
             children: [
+              // ✅ NEW: Game Information Section (Top Priority)
+              if (_hasGameInfo(game))
+                AccordionTile(
+                  title: 'Game Information',
+                  icon: Icons.info,
+                  child: GameInfoSection(game: game),
+                ),
+
               // Platforms & Release Info
               if (game.platforms.isNotEmpty)
                 AccordionTile(
                   title: 'Platforms & Release',
                   icon: Icons.devices,
-                  child: PlatformSection(game: game),
+                  child: PlatformReleaseSection(game: game),
                 ),
 
               // Genres & Categories
@@ -96,18 +105,20 @@ class GameDetailsAccordion extends StatelessWidget {
     );
   }
 
+  // ✅ NEW: Check if Game Info section should be shown
+  bool _hasGameInfo(Game game) {
+    return game.gameType != null ||
+        game.gameStatus != null ||
+        (game.versionTitle != null && game.versionTitle!.isNotEmpty) ||
+        game.alternativeNames.isNotEmpty ||
+        game.gameEngines.isNotEmpty ||
+        (game.url != null && game.url!.isNotEmpty);
+  }
+
+  // Existing method
   bool _hasGameFeatures(Game game) {
     return game.gameModes.isNotEmpty ||
         game.playerPerspectives.isNotEmpty ||
         game.hasMultiplayer;
   }
 }
-
-
-
-
-
-
-
-
-

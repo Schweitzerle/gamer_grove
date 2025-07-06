@@ -1,75 +1,53 @@
-// lib/domain/entities/platform.dart (Erweiterte Version - Optional)
+// ==================================================
+// FIXED PLATFORM ENTITY - MIT LOGO SUPPORT
+// ==================================================
+
+// lib/domain/entities/platform/platform.dart
 import 'package:equatable/equatable.dart';
-import 'platform_logo.dart';
+import 'platform_logo.dart'; // Import für PlatformLogo
 
-// Platform Category Enum (DEPRECATED but still useful)
 enum PlatformCategoryEnum {
-  console(1),
-  arcade(2),
-  platform(3),
-  operatingSystem(4),
-  portableConsole(5),
-  computer(6),
-  unknown(0);
-
-  const PlatformCategoryEnum(this.value);
-  final int value;
-
-  static PlatformCategoryEnum fromValue(int value) {
-    return values.firstWhere(
-          (category) => category.value == value,
-      orElse: () => unknown,
-    );
-  }
-
-  String get displayName {
-    switch (this) {
-      case console: return 'Console';
-      case arcade: return 'Arcade';
-      case platform: return 'Platform';
-      case operatingSystem: return 'Operating System';
-      case portableConsole: return 'Portable Console';
-      case computer: return 'Computer';
-      case unknown: return 'Unknown';
-    }
-  }
+  console,
+  arcade,
+  platform,
+  operatingSystem,
+  portableConsole,
+  computer,
 }
 
 class Platform extends Equatable {
   final int id;
   final String checksum;
+  final String name;
   final String? abbreviation;
   final String? alternativeName;
   final int? generation;
-  final String name;
   final int? platformFamilyId;
   final int? platformLogoId;
+  final PlatformLogo? logo; // ✅ NEU: Logo-Objekt hinzugefügt
   final int? platformTypeId;
-  final String? slug;
+  final String slug;
   final String? summary;
   final String? url;
   final List<int> versionIds;
   final List<int> websiteIds;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
-  // DEPRECATED field but still useful
   final PlatformCategoryEnum? categoryEnum;
-
-  // NEW: Optional full objects (when API returns them)
-  final PlatformLogo? platformLogo;
+  final dynamic category; // Keep for backward compatibility
 
   const Platform({
     required this.id,
     required this.checksum,
     required this.name,
+    required this.slug,
     this.abbreviation,
     this.alternativeName,
     this.generation,
     this.platformFamilyId,
     this.platformLogoId,
+    this.logo, // ✅ NEU
     this.platformTypeId,
-    this.slug,
     this.summary,
     this.url,
     this.versionIds = const [],
@@ -77,29 +55,77 @@ class Platform extends Equatable {
     this.createdAt,
     this.updatedAt,
     this.categoryEnum,
-    this.platformLogo, // NEW
+    this.category,
   });
 
-  String get displayName => abbreviation ?? name;
+  // ✅ LOGO URL GETTERS
+  String? get logoUrl {
+    if (logo?.url != null) {
+      // Fix IGDB URLs (add https: if missing)
+      final url = logo!.url!;
+      if (url.startsWith('//')) {
+        return 'https:$url';
+      }
+      return url;
+    }
+    return null;
+  }
 
+  String? get logoThumbUrl => logo?.thumbUrl;
+  String? get logoMedUrl => logo?.logoMedUrl;
+  String? get logoMed2xUrl => logo?.logoMed2xUrl;
+  String? get logoMicroUrl => logo?.microUrl;
+
+  // ✅ CATEGORY HELPERS
+  String get categoryName {
+    if (categoryEnum != null) {
+      switch (categoryEnum!) {
+        case PlatformCategoryEnum.console:
+          return 'Console';
+        case PlatformCategoryEnum.arcade:
+          return 'Arcade';
+        case PlatformCategoryEnum.platform:
+          return 'Platform';
+        case PlatformCategoryEnum.operatingSystem:
+          return 'Operating System';
+        case PlatformCategoryEnum.portableConsole:
+          return 'Handheld';
+        case PlatformCategoryEnum.computer:
+          return 'Computer';
+      }
+    }
+
+    // Fallback for dynamic category
+    if (category != null) {
+      final categoryStr = category.toString().toLowerCase();
+      if (categoryStr.contains('console')) return 'Console';
+      if (categoryStr.contains('arcade')) return 'Arcade';
+      if (categoryStr.contains('operating')) return 'Operating System';
+      if (categoryStr.contains('portable')) return 'Handheld';
+      if (categoryStr.contains('computer')) return 'Computer';
+    }
+
+    return 'Platform';
+  }
+
+  // ✅ CONVENIENCE GETTERS
+  bool get hasLogo => logo != null;
   bool get isConsole => categoryEnum == PlatformCategoryEnum.console;
-  bool get isPortable => categoryEnum == PlatformCategoryEnum.portableConsole;
-  bool get isPC => categoryEnum == PlatformCategoryEnum.computer;
-  bool get isArcade => categoryEnum == PlatformCategoryEnum.arcade;
-
-  // NEW: Helper getter for logo URL
-  String? get logoUrl => platformLogo?.thumbUrl;
+  bool get isPC => categoryEnum == PlatformCategoryEnum.operatingSystem ||
+      categoryEnum == PlatformCategoryEnum.computer;
+  bool get isHandheld => categoryEnum == PlatformCategoryEnum.portableConsole;
 
   @override
   List<Object?> get props => [
     id,
     checksum,
+    name,
     abbreviation,
     alternativeName,
     generation,
-    name,
     platformFamilyId,
     platformLogoId,
+    logo, // ✅ NEU
     platformTypeId,
     slug,
     summary,
@@ -109,6 +135,7 @@ class Platform extends Equatable {
     createdAt,
     updatedAt,
     categoryEnum,
-    platformLogo, // NEW
+    category,
   ];
 }
+
