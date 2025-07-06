@@ -1,4 +1,5 @@
-// lib/data/models/age_rating_organization_model.dart
+// ===== UPDATED AGE RATING ORGANIZATION MODEL =====
+// lib/data/models/ageRating/age_rating_organization_model.dart
 import '../../../domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingOrganizationModel extends AgeRatingOrganization {

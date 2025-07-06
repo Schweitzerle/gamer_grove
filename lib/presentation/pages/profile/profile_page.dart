@@ -72,7 +72,7 @@ class ProfilePage extends StatelessWidget {
                       Text('User ID: ${user.id}'),
                       Text('Created: ${user.createdAt}'),
                       Text('Wishlisted Games: ${user.wishlistGameIds.length}'),
-                      Text('Rated Games: ${user.gameRatings.length}'),
+                      Text('Rated Games: ${user.ratedGameIds.length}'),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         onPressed: () {

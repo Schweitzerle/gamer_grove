@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
+import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/game/get_complete_game_details.dart';
@@ -350,7 +351,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 );
 
                 // Get top three position separately
-                final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(event.userId!);
+                final topThreeData = await supabaseDataSource.getUserTopThreeGames( userId: event.userId!,);
 
                 // Find position for current game
                 int? gamePosition;
@@ -673,10 +674,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
     return result.fold(
           (failure) => <int>[],
-          (topThreeIds) => topThreeIds,
+          (topThreeData) {
+        // ✅ FIX: Extract game IDs and sort by position
+        final List<int> gameIds = [];
+
+        // Sort by position first
+        topThreeData.sort((a, b) =>
+            (a['position'] as int).compareTo(b['position'] as int));
+
+        // Extract game IDs in correct order
+        for (final item in topThreeData) {
+          final gameId = item['game_id'] as int;
+          gameIds.add(gameId);
+        }
+
+        return gameIds;
+      },
     );
   }
-
   // 4. Aktualisierte _onLoadHomePageData Methode:
 
   Future<void> _onLoadHomePageData(
@@ -811,7 +826,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       final userGameDataList = await Future.wait(futures);
 
-      final topThreeData = await supabaseDataSource.getTopThreeGamesWithPosition(userId);
+      final topThreeData = await supabaseDataSource.getUserTopThreeGames(userId: userId);
       final topThreeMap = <int, int>{};
       for (var entry in topThreeData) {
         topThreeMap[entry['game_id'] as int] = entry['position'] as int;

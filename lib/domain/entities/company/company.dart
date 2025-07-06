@@ -1,6 +1,7 @@
-// ===== COMPANY ENTITY (UPDATED) =====
+// ===== COMPANY ENTITY (UPDATED WITH LOGO URL) =====
 // lib/domain/entities/company/company.dart
 import 'package:equatable/equatable.dart';
+import 'company_logo.dart'; // Import für CompanyLogo
 
 enum CompanyChangeDateCategory {
   yyyymmdd(0),
@@ -44,6 +45,7 @@ class Company extends Equatable {
 
   // Company data
   final int? logoId;
+  final CompanyLogo? logo; // NEU: Direktes Logo Objekt
   final int? statusId;
   final DateTime? startDate;
   final CompanyChangeDateCategory? startDateCategory; // DEPRECATED
@@ -70,6 +72,7 @@ class Company extends Equatable {
     this.changedCompanyId,
     this.parentId,
     this.logoId,
+    this.logo, // NEU
     this.statusId,
     this.startDate,
     this.startDateCategory,
@@ -80,7 +83,7 @@ class Company extends Equatable {
   });
 
   // Helper getters
-  bool get hasLogo => logoId != null;
+  bool get hasLogo => logo != null || logoId != null;
   bool get hasParent => parentId != null;
   bool get hasStatus => statusId != null;
   bool get hasWebsites => websiteIds.isNotEmpty;
@@ -93,6 +96,13 @@ class Company extends Equatable {
   bool get isDeveloper => developedGameIds.isNotEmpty;
   bool get isPublisher => publishedGameIds.isNotEmpty;
   bool get isDeveloperAndPublisher => isDeveloper && isPublisher;
+
+  // NEU: Logo URL getters
+  String? get logoUrl => logo?.logoMedUrl;
+  String? get logoThumbUrl => logo?.thumbUrl;
+  String? get logoMedUrl => logo?.logoMedUrl;
+  String? get logoMed2xUrl => logo?.logoMed2xUrl;
+  String? get logoMicroUrl => logo?.microUrl;
 
   @override
   List<Object?> get props => [
@@ -111,6 +121,7 @@ class Company extends Equatable {
     changedCompanyId,
     parentId,
     logoId,
+    logo, // NEU
     statusId,
     startDate,
     startDateCategory,
@@ -120,4 +131,3 @@ class Company extends Equatable {
     websiteIds,
   ];
 }
-

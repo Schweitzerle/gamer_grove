@@ -1,5 +1,9 @@
-// lib/data/models/age_rating_model.dart
+// ===== UPDATED AGE RATING MODEL =====
+// lib/data/models/ageRating/age_rating_model.dart
 import '../../../domain/entities/ageRating/age_rating.dart';
+import '../../../domain/entities/ageRating/age_rating_organization.dart';
+import 'age_rating_category_model.dart';
+import 'age_rating_organization.dart';
 
 class AgeRatingModel extends AgeRating {
   const AgeRatingModel({
@@ -7,6 +11,7 @@ class AgeRatingModel extends AgeRating {
     required super.checksum,
     super.contentDescriptions,
     super.organizationId,
+    super.organization, // NEU
     super.ratingCategoryId,
     super.ratingContentDescriptions,
     super.ratingCoverUrl,
@@ -20,14 +25,38 @@ class AgeRatingModel extends AgeRating {
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       contentDescriptions: _parseIdList(json['content_descriptions']),
-      organizationId: json['organization'],
+      organizationId: _parseOrganizationId(json['organization']),
+      organization: _parseOrganization(json['organization']), // NEU
       ratingCategoryId: json['rating_category'],
       ratingContentDescriptions: _parseIdList(json['rating_content_descriptions']),
       ratingCoverUrl: json['rating_cover_url'],
       synopsis: json['synopsis'],
-      categoryEnum: _parseCategoryEnum(json['category']),
-      ratingEnum: _parseRatingEnum(json['rating']),
+      categoryEnum: _parseCategory(json['category']),
+      ratingEnum: _parseRating(json['rating']),
     );
+  }
+
+  // NEU: Parse organization data
+  static int? _parseOrganizationId(dynamic orgData) {
+    if (orgData is int) {
+      return orgData;
+    } else if (orgData is Map<String, dynamic>) {
+      return orgData['id'];
+    }
+    return null;
+  }
+
+  // NEU: Parse organization object
+  static AgeRatingOrganization? _parseOrganization(dynamic orgData) {
+    if (orgData is Map<String, dynamic>) {
+      try {
+        return AgeRatingOrganizationModel.fromJson(orgData);
+      } catch (e) {
+        print('Error parsing age rating organization: $e');
+        return null;
+      }
+    }
+    return null;
   }
 
   static List<int> _parseIdList(dynamic data) {
@@ -40,14 +69,14 @@ class AgeRatingModel extends AgeRating {
     return [];
   }
 
-  static AgeRatingCategoryEnum? _parseCategoryEnum(dynamic category) {
+  static AgeRatingCategoryEnum? _parseCategory(dynamic category) {
     if (category is int) {
       return AgeRatingCategoryEnum.fromValue(category);
     }
     return null;
   }
 
-  static AgeRatingRatingEnum? _parseRatingEnum(dynamic rating) {
+  static AgeRatingRatingEnum? _parseRating(dynamic rating) {
     if (rating is int) {
       return AgeRatingRatingEnum.fromValue(rating);
     }
@@ -64,6 +93,9 @@ class AgeRatingModel extends AgeRating {
       'rating_content_descriptions': ratingContentDescriptions,
       'rating_cover_url': ratingCoverUrl,
       'synopsis': synopsis,
+      'category': categoryEnum?.value,
+      'rating': ratingEnum?.value,
     };
   }
 }
+

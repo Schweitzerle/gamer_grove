@@ -19,6 +19,31 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   // AUTH METHODS (OPTIMIZED)
   // ==========================================
 
+
+  @override
+  Future<Map<int, double>> getUserRatings(String userId) async {
+    try {
+      final response = await client
+          .from('user_games')
+          .select('game_id, rating')
+          .eq('user_id', userId)
+          .eq('is_rated', true);
+
+      final Map<int, double> ratings = {};
+      for (final item in response) {
+        final gameId = item['game_id'] as int;
+        final rating = (item['rating'] as num).toDouble();
+        ratings[gameId] = rating;
+      }
+
+      return ratings;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Failed to get user ratings');
+    }
+  }
+
   @override
   Future<UserModel> signIn(String email, String password) async {
     try {

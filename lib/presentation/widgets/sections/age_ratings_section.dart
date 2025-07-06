@@ -59,7 +59,7 @@ class AgeRatingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ratingStyle = _getRatingStyle(rating.organization);
+    final ratingStyle = _getRatingStyle(rating.organization!);
 
     return GestureDetector(
       onTap: () => _showRatingDetails(context, rating),
@@ -112,57 +112,55 @@ class AgeRatingChip extends StatelessWidget {
     }
   }
 
-  /// Gibt Styling-Informationen für eine Organisation zurück
   _RatingStyle _getRatingStyle(AgeRatingOrganization organization) {
-    switch (organization) {
-      case AgeRatingOrganization.esrb:
-        return _RatingStyle(
-          color: Colors.blue,
-          icon: Icons.flag,
-          organizationName: 'ESRB',
-        );
-      case AgeRatingOrganization.pegi:
-        return _RatingStyle(
-          color: Colors.green,
-          icon: Icons.euro,
-          organizationName: 'PEGI',
-        );
-      case AgeRatingOrganization.cero:
-        return _RatingStyle(
-          color: Colors.red,
-          icon: Icons.location_on,
-          organizationName: 'CERO',
-        );
-      case AgeRatingOrganization.usk:
-        return _RatingStyle(
-          color: Colors.orange,
-          icon: Icons.shield,
-          organizationName: 'USK',
-        );
-      case AgeRatingOrganization.grac:
-        return _RatingStyle(
-          color: Colors.purple,
-          icon: Icons.star,
-          organizationName: 'GRAC',
-        );
-      case AgeRatingOrganization.classInd:
-        return _RatingStyle(
-          color: Colors.teal,
-          icon: Icons.info,
-          organizationName: 'CLASS IND',
-        );
-      case AgeRatingOrganization.acb:
-        return _RatingStyle(
-          color: Colors.indigo,
-          icon: Icons.public,
-          organizationName: 'ACB',
-        );
-      default:
-        return _RatingStyle(
-          color: Colors.grey,
-          icon: Icons.help,
-          organizationName: 'UNKNOWN',
-        );
+    if (organization.esrb) {
+      return _RatingStyle(
+        color: Colors.blue,
+        icon: Icons.flag,
+        organizationName: 'ESRB',
+      );
+    } else if (organization.pegi) {
+      return _RatingStyle(
+        color: Colors.green,
+        icon: Icons.euro,
+        organizationName: 'PEGI',
+      );
+    } else if (organization.cero) {
+      return _RatingStyle(
+        color: Colors.red,
+        icon: Icons.location_on,
+        organizationName: 'CERO',
+      );
+    } else if (organization.usk) {
+      return _RatingStyle(
+        color: Colors.orange,
+        icon: Icons.shield,
+        organizationName: 'USK',
+      );
+    } else if (organization.grac) {
+      return _RatingStyle(
+        color: Colors.purple,
+        icon: Icons.star,
+        organizationName: 'GRAC',
+      );
+    } else if (organization.classInd) {
+      return _RatingStyle(
+        color: Colors.teal,
+        icon: Icons.info,
+        organizationName: 'CLASS IND',
+      );
+    } else if (organization.acb) {
+      return _RatingStyle(
+        color: Colors.indigo,
+        icon: Icons.public,
+        organizationName: 'ACB',
+      );
+    } else {
+      return _RatingStyle(
+        color: Colors.grey,
+        icon: Icons.help,
+        organizationName: organization.name.toUpperCase(),
+      );
     }
   }
 }
@@ -194,7 +192,7 @@ class AgeRatingDetailsDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(_getRatingIcon(rating.organization)),
+          Icon(_getRatingIcon(rating.organization!)),
           const SizedBox(width: 8),
           Text(rating.displayName),
         ],
@@ -232,7 +230,7 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                 children: rating.contentDescriptions.map((desc) =>
                     Chip(
                       label: Text(
-                        desc,
+                        desc.toString(),
                         style: const TextStyle(fontSize: 12),
                       ),
                       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -275,15 +273,22 @@ class AgeRatingDetailsDialog extends StatelessWidget {
   }
 
   IconData _getRatingIcon(AgeRatingOrganization organization) {
-    switch (organization) {
-      case AgeRatingOrganization.esrb: return Icons.flag;
-      case AgeRatingOrganization.pegi: return Icons.euro;
-      case AgeRatingOrganization.cero: return Icons.location_on;
-      case AgeRatingOrganization.usk: return Icons.shield;
-      case AgeRatingOrganization.grac: return Icons.star;
-      case AgeRatingOrganization.classInd: return Icons.info;
-      case AgeRatingOrganization.acb: return Icons.public;
-      default: return Icons.help;
+    if (organization.esrb) {
+      return Icons.flag;
+    } else if (organization.pegi) {
+      return Icons.euro;
+    } else if (organization.cero) {
+      return Icons.location_on;
+    } else if (organization.usk) {
+      return Icons.shield;
+    } else if (organization.grac) {
+      return Icons.star;
+    } else if (organization.classInd) {
+      return Icons.info;
+    } else if (organization.acb) {
+      return Icons.public;
+    } else {
+      return Icons.help;
     }
   }
 }
@@ -346,7 +351,7 @@ class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
                   ...availableOrganizations.map((org) =>
                       DropdownMenuItem<AgeRatingOrganization?>(
                         value: org,
-                        child: Text(org.name.toUpperCase()),
+                        child: Text(org!.name.toUpperCase()),
                       ),
                   ),
                 ],

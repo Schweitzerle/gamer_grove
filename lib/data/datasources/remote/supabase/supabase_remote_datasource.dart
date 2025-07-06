@@ -11,6 +11,9 @@ abstract class SupabaseRemoteDataSource {
   // AUTH METHODS (CORE - OPTIMIZED)
   // ==========================================
 
+  /// Get user's ratings as Map<gameId, rating>
+  Future<Map<int, double>> getUserRatings(String userId);
+
   /// Sign in with email and password
   Future<UserModel> signIn(String email, String password);
 

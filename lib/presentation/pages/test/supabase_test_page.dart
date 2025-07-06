@@ -154,9 +154,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               Text('Email: ${_currentUserProfile?.email ?? "Unknown"}'),
               Text('Bio: ${_currentUserProfile?.bio ?? "No bio"}'),
               Text('Wishlist Count: ${_currentUserProfile?.wishlistGameIds.length ?? 0}'),
-              Text('Rated Games: ${_currentUserProfile?.gameRatings.length ?? 0}'),
-              Text('Following: ${_currentUserProfile?.followingIds.length ?? 0}'),
-              Text('Followers: ${_currentUserProfile?.followerIds.length ?? 0}'),
+              Text('Rated Games: ${_currentUserProfile?.ratedGameIds.length ?? 0}'),
+              Text('Following: ${_currentUserProfile?.followingCount ?? 0}'),
+              Text('Followers: ${_currentUserProfile?.followersCount ?? 0}'),
             ] else ...[
               const Text('No user logged in'),
             ],
@@ -548,7 +548,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
         updates['bio'] = _bioController.text;
       }
 
-      final updatedProfile = await _supabaseDataSource.updateUserProfile(_currentUserId!, updates);
+      final updatedProfile = await _supabaseDataSource.updateUserProfile(userId: _currentUserId!);
       setState(() {
         _currentUserProfile = updatedProfile;
       });
@@ -685,7 +685,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final users = await _supabaseDataSource.searchUsers(query);
+      final users = await _supabaseDataSource.searchUsers(query: query);
       setState(() {
         _searchResults = users;
       });
@@ -710,7 +710,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.followUser(_currentUserId!, targetId);
+      await _supabaseDataSource.followUser(currentUserId: _currentUserId!, targetUserId: targetId);
       _addTestResult('✅ Successfully followed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to follow user: $e');
@@ -729,7 +729,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.unfollowUser(_currentUserId!, targetId);
+      await _supabaseDataSource.unfollowUser(currentUserId: _currentUserId!, targetUserId: targetId);
       _addTestResult('✅ Successfully unfollowed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to unfollow user: $e');
@@ -742,7 +742,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final followers = await _supabaseDataSource.getUserFollowers(_currentUserId!);
+      final followers = await _supabaseDataSource.getUserFollowers(userId: _currentUserId!);
       _addTestResult('✅ Followers retrieved: ${followers.length}');
       if (followers.isNotEmpty) {
         _addTestResult('   IDs: ${followers.take(3).join(", ")}${followers.length > 3 ? "..." : ""}');
@@ -758,7 +758,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final following = await _supabaseDataSource.getUserFollowing(_currentUserId!);
+      final following = await _supabaseDataSource.getUserFollowing(userId: _currentUserId!);
       _addTestResult('✅ Following retrieved: ${following.length}');
       if (following.isNotEmpty) {
         _addTestResult('   IDs: ${following.take(3).join(", ")}${following.length > 3 ? "..." : ""}');
@@ -797,7 +797,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
       }
 
       setState(() => _isLoading = true);
-      await _supabaseDataSource.updateTopThreeGames(_currentUserId!, uniqueGameIds);
+      await _supabaseDataSource.updateTopThreeGames(userId: _currentUserId!, gameIds: uniqueGameIds);
       _addTestResult('✅ Top games updated: ${uniqueGameIds.join(", ")}');
     } catch (e) {
       _addTestResult('❌ Failed to update top games: $e');
@@ -810,7 +810,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final topGames = await _supabaseDataSource.getTopThreeGamesWithPosition(_currentUserId!);
+      final topGames = await _supabaseDataSource.getUserTopThreeGames(userId: _currentUserId!);
       _addTestResult('✅ Top games retrieved: ${topGames.length}');
       if (topGames.isNotEmpty) {
         _addTestResult('   Game IDs: ${topGames.join(", ")}');

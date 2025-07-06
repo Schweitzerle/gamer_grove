@@ -2069,11 +2069,14 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
     String body;
     if (ids != null && ids.isNotEmpty) {
       final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit ${ids.length};';
+      // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
+      body = 'where id = ($idsString); fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit ${ids.length};';
     } else if (search != null) {
-      body = 'search "$search"; fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit $limit;';
+      // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
+      body = 'search "$search"; fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; limit $limit;';
     } else {
-      body = 'fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; sort name asc; limit $limit;';
+      // UPDATED: Jetzt mit logo.* für vollständige Logo-Daten
+      body = 'fields id, change_date, change_date_category, changed_company_id, checksum, country, created_at, description, developed, logo.*, name, parent, published, slug, start_date, start_date_category, updated_at, url, websites; sort name asc; limit $limit;';
     }
     return await _makeRequest('companies', body, (json) => CompanyModel.fromJson(json));
   }
@@ -2452,7 +2455,7 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
     final gameIdsString = gameIds.join(',');
-    final body = 'where game = ($gameIdsString); fields id, category, checksum, content_descriptions, game, rating, rating_cover_url, synopsis; limit 200;';
+    final body = 'where id = $gameIdsString; fields id, category, checksum, content_descriptions, organization.*, rating, rating_category, rating_content_descriptions, rating_cover_url, synopsis; limit 200;';
     return await _makeRequest('age_ratings', body, (json) => AgeRatingModel.fromJson(json));
   }
 

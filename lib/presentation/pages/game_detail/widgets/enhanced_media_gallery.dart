@@ -9,7 +9,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../domain/entities/game/game.dart';
-import '../../../../domain/entities/game_video.dart';
+import '../../../../domain/entities/game/game_video.dart';
 import '../../allVideosGrid/all_videos_grid.dart';
 import '../../all_images_grid/all_images_grid.dart';
 import '../../full_screen_image_viewer/full_screen_image_viewer.dart';
@@ -61,12 +61,14 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
     if (widget.game.screenshots.isNotEmpty) {
       tabs.add(Tab(text: 'Screenshots (${widget.game.screenshots.length})'));
-      tabViews.add(_buildStaggeredImageGrid(widget.game.screenshots, 'screenshot'));
+      final screenshotUrls = widget.game.screenshots.map((screenshot) => screenshot.hdUrl).toList();
+      tabViews.add(_buildStaggeredImageGrid(screenshotUrls, 'screenshot'));
     }
 
     if (widget.game.artworks.isNotEmpty) {
       tabs.add(Tab(text: 'Artworks (${widget.game.artworks.length})'));
-      tabViews.add(_buildStaggeredImageGrid(widget.game.artworks, 'artwork'));
+      final artworkUrls = widget.game.artworks.map((artwork) => artwork.hdUrl).toList();
+      tabViews.add(_buildStaggeredImageGrid(artworkUrls, 'artwork'));
     }
 
     if (widget.game.videos.isNotEmpty) {

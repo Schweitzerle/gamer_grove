@@ -22,7 +22,7 @@ import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
-import '../../../domain/entities/game_video.dart';
+import '../../../domain/entities/website/website_type.dart';
 import '../../../domain/usecases/game/toggle_wishlist.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../injection_container.dart';
@@ -393,7 +393,7 @@ class _GameDetailPageState extends State<GameDetailPage>
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...game.externalGames.map((external) => _buildStoreTile(external)),
+                ...game.externalGames.map((external) => _buildStoreTile(context, external)),
               ],
             ],
           ),
@@ -420,25 +420,26 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildStoreTile(ExternalGame external) {
+  // ===== FIXED STORE TILE WIDGET =====
+  Widget _buildStoreTile(BuildContext context, ExternalGame external) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: Theme.of(context).colorScheme.surface,
       child: ListTile(
         leading: Icon(
-          _getStoreIcon(external.category),
-          color: _getStoreColor(external.category),
+          _getStoreIcon(external.categoryEnum), // FIXED: categoryEnum statt category
+          color: _getStoreColor(context, external.categoryEnum), // FIXED: context + categoryEnum
         ),
-        title: Text(_getStoreName(external.category)),
-        subtitle: external.uid != null ? Text('ID: ${external.uid}') : null,
+        title: Text(_getStoreName(external.categoryEnum)), // FIXED: categoryEnum
+        subtitle: external.uid.isNotEmpty ? Text('ID: ${external.uid}') : null,
         trailing: const Icon(Icons.open_in_new, size: 18),
-        onTap: external.url != null ? () => _launchUrl(external.url!) : null,
+        onTap: external.storeUrl != null ? () => _launchUrl(external.storeUrl!) : null, // FIXED: storeUrl
       ),
     );
   }
 
-
+// ===== WEBSITE HELPER METHODS (FIXED) =====
   String _getWebsiteName(WebsiteCategory category) {
     switch (category) {
       case WebsiteCategory.official:
@@ -461,6 +462,22 @@ class _GameDetailPageState extends State<GameDetailPage>
         return 'Reddit';
       case WebsiteCategory.discord:
         return 'Discord';
+      case WebsiteCategory.steam:
+        return 'Steam';
+      case WebsiteCategory.epicgames:
+        return 'Epic Games';
+      case WebsiteCategory.gog:
+        return 'GOG';
+      case WebsiteCategory.itch:
+        return 'itch.io';
+      case WebsiteCategory.iphone:
+        return 'App Store (iPhone)';
+      case WebsiteCategory.ipad:
+        return 'App Store (iPad)';
+      case WebsiteCategory.android:
+        return 'Google Play';
+      case WebsiteCategory.bluesky:
+        return 'Bluesky';
       default:
         return 'Website';
     }
@@ -472,76 +489,188 @@ class _GameDetailPageState extends State<GameDetailPage>
         return Icons.language;
       case WebsiteCategory.wikia:
       case WebsiteCategory.wikipedia:
-        return Icons.menu_book;
+        return Icons.menu_book; // FIXED: menu_book statt menu*book
       case WebsiteCategory.facebook:
+        return Icons.facebook;
       case WebsiteCategory.twitter:
+        return Icons.alternate_email;
       case WebsiteCategory.instagram:
-        return Icons.people;
+        return Icons.camera_alt;
       case WebsiteCategory.youtube:
+        return Icons.play_circle_fill;
       case WebsiteCategory.twitch:
-        return Icons.video_library;
+        return Icons.live_tv;
       case WebsiteCategory.reddit:
         return Icons.forum;
       case WebsiteCategory.discord:
         return Icons.chat;
+      case WebsiteCategory.steam:
+        return Icons.games;
+      case WebsiteCategory.epicgames:
+        return Icons.rocket_launch;
+      case WebsiteCategory.gog:
+        return Icons.shopping_bag;
+      case WebsiteCategory.itch:
+        return Icons.videogame_asset;
+      case WebsiteCategory.iphone:
+      case WebsiteCategory.ipad:
+        return Icons.phone_iphone;
+      case WebsiteCategory.android:
+        return Icons.android;
+      case WebsiteCategory.bluesky:
+        return Icons.cloud;
       default:
         return Icons.link;
     }
   }
 
-  String _getStoreName(ExternalGameCategory category) {
+  Color _getWebsiteColor(WebsiteCategory category) {
     switch (category) {
-      case ExternalGameCategory.steam:
-        return 'Steam';
-      case ExternalGameCategory.gog:
-        return 'GOG';
-      case ExternalGameCategory.epicGames:
-        return 'Epic Games';
-      case ExternalGameCategory.playstation:
-        return 'PlayStation Store';
-      case ExternalGameCategory.xbox:
-        return 'Xbox Store';
-      case ExternalGameCategory.nintendo:
-        return 'Nintendo eShop';
+      case WebsiteCategory.official:
+        return Colors.blue;
+      case WebsiteCategory.wikia:
+      case WebsiteCategory.wikipedia:
+        return Colors.orange;
+      case WebsiteCategory.facebook:
+        return const Color(0xFF1877F2);
+      case WebsiteCategory.twitter:
+        return Colors.black;
+      case WebsiteCategory.instagram:
+        return const Color(0xFFE4405F);
+      case WebsiteCategory.youtube:
+        return const Color(0xFFFF0000);
+      case WebsiteCategory.twitch:
+        return const Color(0xFF9146FF);
+      case WebsiteCategory.reddit:
+        return const Color(0xFFFF4500);
+      case WebsiteCategory.discord:
+        return const Color(0xFF5865F2);
+      case WebsiteCategory.steam:
+        return const Color(0xFF1B2838);
+      case WebsiteCategory.epicgames:
+        return const Color(0xFF0078F2);
+      case WebsiteCategory.gog:
+        return const Color(0xFF8A2BE2);
+      case WebsiteCategory.itch:
+        return const Color(0xFFFA5C5C);
+      case WebsiteCategory.iphone:
+      case WebsiteCategory.ipad:
+        return const Color(0xFF007AFF);
+      case WebsiteCategory.android:
+        return const Color(0xFF3DDC84);
+      case WebsiteCategory.bluesky:
+        return const Color(0xFF0085FF);
       default:
-        return 'Store';
+        return Colors.grey;
     }
   }
 
-  IconData _getStoreIcon(ExternalGameCategory category) {
+// ===== STORE HELPER METHODS (FIXED) =====
+  String _getStoreName(ExternalGameCategoryEnum? category) { // FIXED: Parameter type
+    if (category == null) return 'Store';
+
     switch (category) {
-      case ExternalGameCategory.steam:
+      case ExternalGameCategoryEnum.steam: // FIXED: Correct enum reference
+        return 'Steam';
+      case ExternalGameCategoryEnum.gog:
+        return 'GOG';
+      case ExternalGameCategoryEnum.epicGameStore: // FIXED: epicGameStore statt epicGames
+        return 'Epic Games Store';
+      case ExternalGameCategoryEnum.playstationStoreUs: // FIXED: Correct enum name
+        return 'PlayStation Store';
+      case ExternalGameCategoryEnum.xboxMarketplace: // FIXED: Correct enum name
+        return 'Xbox Marketplace';
+      case ExternalGameCategoryEnum.microsoft:
+        return 'Microsoft Store';
+      case ExternalGameCategoryEnum.apple:
+        return 'App Store';
+      case ExternalGameCategoryEnum.android:
+        return 'Google Play';
+      case ExternalGameCategoryEnum.itchIo:
+        return 'itch.io';
+      case ExternalGameCategoryEnum.amazonLuna:
+        return 'Amazon Luna';
+      case ExternalGameCategoryEnum.oculus:
+        return 'Oculus Store';
+      case ExternalGameCategoryEnum.twitch:
+        return 'Twitch';
+      case ExternalGameCategoryEnum.youtube:
+        return 'YouTube';
+      default:
+        return category.displayName; // Fallback auf built-in displayName
+    }
+  }
+
+  IconData _getStoreIcon(ExternalGameCategoryEnum? category) {
+    if (category == null) return Icons.store;
+
+    switch (category) {
+      case ExternalGameCategoryEnum.steam:
         return Icons.games;
-      case ExternalGameCategory.gog:
-      case ExternalGameCategory.epicGames:
+      case ExternalGameCategoryEnum.gog:
         return Icons.shopping_bag;
-      case ExternalGameCategory.playstation:
-      case ExternalGameCategory.xbox:
-      case ExternalGameCategory.nintendo:
+      case ExternalGameCategoryEnum.epicGameStore:
+        return Icons.rocket_launch;
+      case ExternalGameCategoryEnum.playstationStoreUs:
         return Icons.sports_esports;
+      case ExternalGameCategoryEnum.xboxMarketplace:
+        return Icons.gamepad;
+      case ExternalGameCategoryEnum.microsoft:
+        return Icons.window;
+      case ExternalGameCategoryEnum.apple:
+        return Icons.phone_iphone;
+      case ExternalGameCategoryEnum.android:
+        return Icons.android;
+      case ExternalGameCategoryEnum.itchIo:
+        return Icons.videogame_asset;
+      case ExternalGameCategoryEnum.amazonLuna:
+        return Icons.cloud_queue;
+      case ExternalGameCategoryEnum.oculus:
+        return Icons.view_in_ar;
+      case ExternalGameCategoryEnum.twitch:
+        return Icons.live_tv;
+      case ExternalGameCategoryEnum.youtube:
+        return Icons.play_circle_fill;
       default:
         return Icons.store;
     }
   }
 
-  Color _getStoreColor(ExternalGameCategory category) {
+  Color _getStoreColor(BuildContext context, ExternalGameCategoryEnum? category) { // FIXED: context parameter
+    if (category == null) return Theme.of(context).colorScheme.primary;
+
     switch (category) {
-      case ExternalGameCategory.steam:
-        return Colors.blue;
-      case ExternalGameCategory.gog:
-        return Colors.purple;
-      case ExternalGameCategory.epicGames:
-        return Colors.grey;
-      case ExternalGameCategory.playstation:
-        return Colors.blue.shade900;
-      case ExternalGameCategory.xbox:
-        return Colors.green;
-      case ExternalGameCategory.nintendo:
-        return Colors.red;
+      case ExternalGameCategoryEnum.steam:
+        return const Color(0xFF1B2838);
+      case ExternalGameCategoryEnum.gog:
+        return const Color(0xFF8A2BE2);
+      case ExternalGameCategoryEnum.epicGameStore:
+        return const Color(0xFF0078F2);
+      case ExternalGameCategoryEnum.playstationStoreUs:
+        return const Color(0xFF0070D1);
+      case ExternalGameCategoryEnum.xboxMarketplace:
+        return const Color(0xFF107C10);
+      case ExternalGameCategoryEnum.microsoft:
+        return const Color(0xFF00BCF2);
+      case ExternalGameCategoryEnum.apple:
+        return const Color(0xFF007AFF);
+      case ExternalGameCategoryEnum.android:
+        return const Color(0xFF3DDC84);
+      case ExternalGameCategoryEnum.itchIo:
+        return const Color(0xFFFA5C5C);
+      case ExternalGameCategoryEnum.amazonLuna:
+        return const Color(0xFFFF9900);
+      case ExternalGameCategoryEnum.oculus:
+        return const Color(0xFF1C1E20);
+      case ExternalGameCategoryEnum.twitch:
+        return const Color(0xFF9146FF);
+      case ExternalGameCategoryEnum.youtube:
+        return const Color(0xFFFF0000);
       default:
         return Theme.of(context).colorScheme.primary;
     }
   }
+
 
   void _showLoginRequiredSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -686,4 +815,3 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 }
 
-//TODO: media section for images and videos not working (images from old detailscreen version) and media gallery like show 5 images and then click on all and get to a new screen, same for videos

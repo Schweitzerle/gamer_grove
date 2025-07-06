@@ -8,7 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/game_video.dart';
+import '../../../../domain/entities/game/game_video.dart';
 import '../../imageGallery/image_gallery_page.dart';
 
 class MediaGallery extends StatelessWidget {

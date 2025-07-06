@@ -1,5 +1,5 @@
 // ==================================================
-// EXTERNAL LINKS SECTION - HORIZONTAL VERSION
+// EXTERNAL LINKS SECTION - HORIZONTAL VERSION (FIXED)
 // ==================================================
 
 // lib/presentation/pages/game_detail/widgets/sections/external_links_section.dart
@@ -221,7 +221,7 @@ class WebsiteInfo {
 }
 
 // ==================================================
-// STORE LINKS SECTION
+// STORE LINKS SECTION (FIXED)
 // ==================================================
 
 class StoreLinksSection extends StatelessWidget {
@@ -262,7 +262,8 @@ class StoreLinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final storeInfo = _getStoreInfo(store.category);
+    // FIXED: Verwende categoryEnum statt category
+    final storeInfo = _getStoreInfo(store.categoryEnum);
 
     return Container(
       width: 120,
@@ -278,7 +279,8 @@ class StoreLinkCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: store.url != null ? () => _launchUrl(store.url!) : null,
+          // FIXED: Verwende storeUrl getter statt direkten url
+          onTap: store.storeUrl != null ? () => _launchUrl(store.storeUrl!) : null,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
@@ -321,22 +323,41 @@ class StoreLinkCard extends StatelessWidget {
     );
   }
 
-  StoreInfo _getStoreInfo(ExternalGameCategory category) {
+  // FIXED: Parameter type changed to ExternalGameCategoryEnum?
+  StoreInfo _getStoreInfo(ExternalGameCategoryEnum? category) {
+    if (category == null) {
+      return StoreInfo('Store', Icons.store, Colors.grey);
+    }
+
     switch (category) {
-      case ExternalGameCategory.steam:
+      case ExternalGameCategoryEnum.steam: // FIXED: Correct enum reference
         return StoreInfo('Steam', Icons.games, const Color(0xFF1B2838));
-      case ExternalGameCategory.gog:
+      case ExternalGameCategoryEnum.gog:
         return StoreInfo('GOG', Icons.shopping_bag, const Color(0xFF8A2BE2));
-      case ExternalGameCategory.epicGames:
+      case ExternalGameCategoryEnum.epicGameStore:
         return StoreInfo('Epic', Icons.rocket_launch, const Color(0xFF0078F2));
-      case ExternalGameCategory.playstation:
+      case ExternalGameCategoryEnum.playstationStoreUs:
         return StoreInfo('PlayStation', Icons.sports_esports, const Color(0xFF0070D1));
-      case ExternalGameCategory.xbox:
+      case ExternalGameCategoryEnum.xboxMarketplace:
         return StoreInfo('Xbox', Icons.gamepad, const Color(0xFF107C10));
-      case ExternalGameCategory.nintendo:
-        return StoreInfo('Nintendo', Icons.videogame_asset, const Color(0xFFE60012));
+      case ExternalGameCategoryEnum.microsoft:
+        return StoreInfo('Microsoft', Icons.window, const Color(0xFF00BCF2));
+      case ExternalGameCategoryEnum.apple:
+        return StoreInfo('App Store', Icons.phone_iphone, const Color(0xFF007AFF));
+      case ExternalGameCategoryEnum.android:
+        return StoreInfo('Google Play', Icons.android, const Color(0xFF3DDC84));
+      case ExternalGameCategoryEnum.itchIo:
+        return StoreInfo('itch.io', Icons.videogame_asset, const Color(0xFFFA5C5C));
+      case ExternalGameCategoryEnum.amazonLuna:
+        return StoreInfo('Luna', Icons.cloud_queue, const Color(0xFFFF9900));
+      case ExternalGameCategoryEnum.oculus:
+        return StoreInfo('Oculus', Icons.view_in_ar, const Color(0xFF1C1E20));
+      case ExternalGameCategoryEnum.twitch:
+        return StoreInfo('Twitch', Icons.live_tv, const Color(0xFF9146FF));
+      case ExternalGameCategoryEnum.youtube:
+        return StoreInfo('YouTube', Icons.play_circle_fill, const Color(0xFFFF0000));
       default:
-        return StoreInfo('Store', Icons.store, Colors.grey);
+        return StoreInfo(category.displayName, Icons.store, Colors.grey);
     }
   }
 
@@ -345,6 +366,7 @@ class StoreLinkCard extends StatelessWidget {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (e) {
       // Handle error silently or show snackbar
+      print('Could not launch $url: $e');
     }
   }
 }

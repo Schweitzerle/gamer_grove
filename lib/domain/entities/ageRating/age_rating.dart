@@ -1,5 +1,7 @@
-// lib/domain/entities/age_rating.dart
+// ===== UPDATED AGE RATING ENTITY =====
+// lib/domain/entities/ageRating/age_rating.dart
 import 'package:equatable/equatable.dart';
+import 'age_rating_organization.dart'; // Import für AgeRatingOrganization
 
 // Age Rating Category Enum (DEPRECATED but still used)
 enum AgeRatingCategoryEnum {
@@ -116,6 +118,7 @@ class AgeRating extends Equatable {
   final String checksum;
   final List<int> contentDescriptions;
   final int? organizationId;
+  final AgeRatingOrganization? organization; // NEU: Direktes Organization Objekt
   final int? ratingCategoryId;
   final List<int> ratingContentDescriptions;
   final String? ratingCoverUrl;
@@ -130,6 +133,7 @@ class AgeRating extends Equatable {
     required this.checksum,
     this.contentDescriptions = const [],
     this.organizationId,
+    this.organization, // NEU
     this.ratingCategoryId,
     this.ratingContentDescriptions = const [],
     this.ratingCoverUrl,
@@ -145,12 +149,24 @@ class AgeRating extends Equatable {
     return 'Unknown Rating';
   }
 
+  // NEU: Helper getters für Rating-Organisationen
+  bool get isESRB => organization?.isESRB ?? (categoryEnum == AgeRatingCategoryEnum.esrb);
+  bool get isPEGI => organization?.isPEGI ?? (categoryEnum == AgeRatingCategoryEnum.pegi);
+  bool get isUSK => organization?.isUSK ?? (categoryEnum == AgeRatingCategoryEnum.usk);
+  bool get isCERO => organization?.isCERO ?? (categoryEnum == AgeRatingCategoryEnum.cero);
+  bool get isGRAC => organization?.isGRAC ?? (categoryEnum == AgeRatingCategoryEnum.grac);
+  bool get isClassInd => organization?.isClassInd ?? (categoryEnum == AgeRatingCategoryEnum.classInd);
+  bool get isACB => organization?.isACB ?? (categoryEnum == AgeRatingCategoryEnum.acb);
+
+  String get organizationName => organization?.name ?? categoryEnum?.name ?? 'Unknown';
+
   @override
   List<Object?> get props => [
     id,
     checksum,
     contentDescriptions,
     organizationId,
+    organization, // NEU
     ratingCategoryId,
     ratingContentDescriptions,
     ratingCoverUrl,
@@ -159,3 +175,4 @@ class AgeRating extends Equatable {
     ratingEnum,
   ];
 }
+
