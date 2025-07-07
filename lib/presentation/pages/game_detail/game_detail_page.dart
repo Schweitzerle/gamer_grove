@@ -261,54 +261,26 @@ class _GameDetailPageState extends State<GameDetailPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: AppConstants.paddingLarge),
-            // Quick Info Cards
-            _buildCommunityInfoSection(game),
 
-            _buildUserInfoSection(game),
+            // Game Details Accordion
+            _buildGameDetailsAccordion(game),
 
-            // Game Description with expandable storyline
-            if (game.summary != null) _buildEnhancedDescriptionSection(game),
+            FranchiseCollectionsSection(game: game), // Franchises&Collections
+            ContentDLCSection(game: game),           // 🟢 DLCs & Content
+            VersionsRemakesSection(game: game),      // 🔵 Versions & Remakes
+            SimilarRelatedSection(game: game),       // 🟣 Similar & Related
 
             // Media Gallery with Tabs
             if (game.screenshots.isNotEmpty ||
                 game.videos.isNotEmpty ||
                 game.artworks.isNotEmpty)
               _buildEnhancedMediaGallery(game),
-
-            // Game Details Accordion
-            _buildGameDetailsAccordion(game),
-
-            FranchiseCollectionsSection(game: game),
-
-            ContentDLCSection(game: game),           // 🟢 DLCs & Content
-            VersionsRemakesSection(game: game),      // 🔵 Versions & Remakes
-            SimilarRelatedSection(game: game),       // 🟣 Similar & Related
-
-            const SizedBox(height: 100), // Space for bottom navigation
+            const SizedBox(height: 20), // Space for bottom navigation
           ],
         ),
       ),
     );
   }
-
-  Widget _buildEnhancedDescriptionSection(Game game) {
-    return GameDescriptionSection(game: game);
-  }
-
-  Widget _buildCommunityInfoSection(Game game) {
-    return CommunityInfoSection(game: game);
-  }
-
-  Widget _buildUserInfoSection(Game game) {
-    return UserStatesSection(
-      game: game,
-      onRatePressed: () => _showRatingDialog(game),
-      onToggleWishlist: () => _toggleWishlist(game),
-      onToggleRecommend: () => _toggleRecommend(game),
-      onAddToTopThree: () => _showTopThreeDialog(game),
-    );
-  }
-
 
 
   Widget _buildEnhancedMediaGallery(Game game) {

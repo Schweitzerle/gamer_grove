@@ -163,6 +163,8 @@ class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   age_ratings.content_descriptions.id, age_ratings.content_descriptions.category, age_ratings.content_descriptions.description,
   age_ratings.rating_cover_url,
   
+   game_type.*, game_status.*,
+  
   genres.id, genres.name, genres.slug, genres.url, genres.checksum, genres.created_at, genres.updated_at,
   themes.id, themes.name, themes.slug, themes.url, themes.checksum, themes.created_at, themes.updated_at,
   keywords.id, keywords.name, keywords.slug, keywords.url, keywords.checksum, keywords.created_at, keywords.updated_at,

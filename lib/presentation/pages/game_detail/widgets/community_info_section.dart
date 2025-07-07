@@ -1,112 +1,36 @@
 // ==================================================
-// ENHANCED COMMUNITY INFO SECTION - ERWEITERTE VERSION
+// UPDATED GAME DETAILS ACCORDION - MIT COMMUNITY INFO INTEGRATION
 // ==================================================
 
-// lib/presentation/pages/game_detail/widgets/enhanced_community_info_section.dart
-import 'package:flex_color_scheme/flex_color_scheme.dart';
+// lib/presentation/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/date_formatter.dart';
+import '../../../../../core/utils/date_formatter.dart';
 import '../../../../domain/entities/game/game.dart';
 
-class CommunityInfoSection extends StatefulWidget {
+
+class CommunityInfoContent extends StatelessWidget {
   final Game game;
 
-  const CommunityInfoSection({
+  const CommunityInfoContent({
     super.key,
     required this.game,
   });
 
   @override
-  State<CommunityInfoSection> createState() => _CommunityInfoSectionState();
-}
-
-class _CommunityInfoSectionState extends State<CommunityInfoSection> {
-  bool _isExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Card(
-        elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-        child: Column(
-          children: [
-            // ✅ Accordion Header
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => setState(() => _isExpanded = !_isExpanded),
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                  child: Row(
-                    children: [
-                      // Icon & Title
-                      Icon(
-                        Icons.public,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Community & Ratings',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ✅ RATINGS SECTION
+        if (_hasAnyRating()) ...[
+          _buildRatingsSection(context),
+          if (_hasOtherInfo()) const SizedBox(height: 20),
+        ],
 
-                      const Spacer(),
-
-                      // Enhanced Info Preview (when collapsed)
-                      if (!_isExpanded) _buildEnhancedInfoPreview(),
-
-                      const SizedBox(width: 8),
-
-                      // Expand/Collapse Icon
-                      AnimatedRotation(
-                        turns: _isExpanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 200),
-                        child: const Icon(Icons.keyboard_arrow_down),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // ✅ Expandable Content
-            AnimatedCrossFade(
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppConstants.paddingMedium,
-                  0,
-                  AppConstants.paddingMedium,
-                  AppConstants.paddingMedium,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ✅ RATINGS SECTION
-                    if (_hasAnyRating()) ...[
-                      _buildRatingsSection(context),
-                      if (_hasOtherInfo()) const SizedBox(height: 20),
-                    ],
-
-                    // ✅ COMMUNITY ENGAGEMENT SECTION
-                    if (_hasOtherInfo()) _buildCommunitySection(context),
-                  ],
-                ),
-              ),
-              crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 200),
-            ),
-          ],
-        ),
-      ),
+        // ✅ COMMUNITY ENGAGEMENT SECTION
+        if (_hasOtherInfo()) _buildCommunitySection(context),
+      ],
     );
   }
 
@@ -138,49 +62,49 @@ class _CommunityInfoSectionState extends State<CommunityInfoSection> {
         Row(
           children: [
             // ✅ TOTAL RATING (Combined IGDB + Critics)
-            if (widget.game.totalRating != null)
+            if (game.totalRating != null)
               Expanded(
                 child: _buildRatingCard(
                   context,
                   title: 'Overall',
-                  rating: widget.game.totalRating!,
-                  count: widget.game.totalRatingCount,
+                  rating: game.totalRating!,
+                  count: game.totalRatingCount,
                   icon: Icons.star_rounded,
-                  color: ColorScales.getRatingColor(widget.game.totalRating!),
+                  color: ColorScales.getRatingColor(game.totalRating!),
                   subtitle: 'Combined Score',
                 ),
               ),
 
-            if (widget.game.totalRating != null && _hasOtherRatings())
+            if (game.totalRating != null && _hasOtherRatings())
               const SizedBox(width: 8),
 
             // ✅ IGDB USER RATING
-            if (widget.game.rating != null)
+            if (game.rating != null)
               Expanded(
                 child: _buildRatingCard(
                   context,
                   title: 'IGDB Users',
-                  rating: widget.game.rating!,
-                  count: widget.game.ratingCount,
+                  rating: game.rating!,
+                  count: game.ratingCount,
                   icon: Icons.people,
-                  color: ColorScales.getRatingColor(widget.game.rating!),
+                  color: ColorScales.getRatingColor(game.rating!),
                   subtitle: 'User Score',
                 ),
               ),
 
-            if (widget.game.rating != null && widget.game.aggregatedRating != null)
+            if (game.rating != null && game.aggregatedRating != null)
               const SizedBox(width: 8),
 
             // ✅ CRITICS RATING
-            if (widget.game.aggregatedRating != null)
+            if (game.aggregatedRating != null)
               Expanded(
                 child: _buildRatingCard(
                   context,
                   title: 'Critics',
-                  rating: widget.game.aggregatedRating!,
-                  count: widget.game.aggregatedRatingCount,
+                  rating: game.aggregatedRating!,
+                  count: game.aggregatedRatingCount,
                   icon: Icons.rate_review,
-                  color: ColorScales.getRatingColor(widget.game.aggregatedRating!),
+                  color: ColorScales.getRatingColor(game.aggregatedRating!),
                   subtitle: 'Critic Score',
                 ),
               ),
@@ -218,28 +142,28 @@ class _CommunityInfoSectionState extends State<CommunityInfoSection> {
         Row(
           children: [
             // ✅ HYPES (Pre-release interest)
-            if (widget.game.hypes != null && widget.game.hypes! > 0)
+            if (game.hypes != null && game.hypes! > 0)
               Expanded(
                 child: _buildInfoCard(
                   context,
                   icon: Icons.favorite,
                   label: 'Pre-Release Hype',
-                  value: _formatNumber(widget.game.hypes!),
+                  value: _formatNumber(game.hypes!),
                   color: Colors.pink,
                 ),
               ),
 
-            if (widget.game.hypes != null && widget.game.hypes! > 0 && widget.game.firstReleaseDate != null)
+            if (game.hypes != null && game.hypes! > 0 && game.firstReleaseDate != null)
               const SizedBox(width: 8),
 
             // ✅ RELEASE DATE
-            if (widget.game.firstReleaseDate != null)
+            if (game.firstReleaseDate != null)
               Expanded(
                 child: _buildInfoCard(
                   context,
                   icon: Icons.calendar_today,
                   label: 'Release Date',
-                  value: DateFormatter.formatShortDate(widget.game.firstReleaseDate!),
+                  value: DateFormatter.formatShortDate(game.firstReleaseDate!),
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -389,56 +313,24 @@ class _CommunityInfoSectionState extends State<CommunityInfoSection> {
     );
   }
 
-  // ✅ ENHANCED INFO PREVIEW (collapsed state)
-  Widget _buildEnhancedInfoPreview() {
-    List<String> info = [];
-
-    // Show highest priority rating
-    if (widget.game.totalRating != null) {
-      info.add('⭐${widget.game.totalRating!.toStringAsFixed(1)}');
-    } else if (widget.game.rating != null) {
-      info.add('⭐${widget.game.rating!.toStringAsFixed(1)}');
-    } else if (widget.game.aggregatedRating != null) {
-      info.add('⭐${widget.game.aggregatedRating!.toStringAsFixed(1)}');
-    }
-
-    // Add hypes if significant
-    if (widget.game.hypes != null && widget.game.hypes! > 0) {
-      info.add('❤️${_formatNumber(widget.game.hypes!)}');
-    }
-
-    // Add release date
-    if (widget.game.firstReleaseDate != null) {
-      info.add('📅${DateFormatter.formatYearOnly(widget.game.firstReleaseDate!)}');
-    }
-
-    return Text(
-      info.join(' • '),
-      style: TextStyle(
-        fontSize: 10,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-      ),
-    );
-  }
-
   // ✅ HELPER METHODS
   bool _hasAnyRating() {
-    return widget.game.totalRating != null ||
-        widget.game.rating != null ||
-        widget.game.aggregatedRating != null;
+    return game.totalRating != null ||
+        game.rating != null ||
+        game.aggregatedRating != null;
   }
 
   bool _hasOtherRatings() {
     int ratingCount = 0;
-    if (widget.game.totalRating != null) ratingCount++;
-    if (widget.game.rating != null) ratingCount++;
-    if (widget.game.aggregatedRating != null) ratingCount++;
+    if (game.totalRating != null) ratingCount++;
+    if (game.rating != null) ratingCount++;
+    if (game.aggregatedRating != null) ratingCount++;
     return ratingCount > 1;
   }
 
   bool _hasOtherInfo() {
-    return (widget.game.hypes != null && widget.game.hypes! > 0) ||
-        widget.game.firstReleaseDate != null;
+    return (game.hypes != null && game.hypes! > 0) ||
+        game.firstReleaseDate != null;
   }
 
   String _formatNumber(int number) {
