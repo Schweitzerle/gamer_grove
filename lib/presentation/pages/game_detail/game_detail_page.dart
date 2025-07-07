@@ -17,6 +17,7 @@ import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
+import '../../widgets/sections/character_section.dart';
 import '../../widgets/sections/content_dlc_section.dart';
 import '../../widgets/sections/franchise_collection_section.dart';
 import '../../widgets/top_three_dialog.dart';
@@ -136,7 +137,7 @@ class _GameDetailPageState extends State<GameDetailPage>
             if (state is GameDetailsLoaded) {
               final game = state.game;
               _initializeMediaTabs(game);
-
+              _logGameDetailsData(game);
               return Scaffold(
                 body: CustomScrollView(
                   controller: _scrollController,
@@ -153,6 +154,58 @@ class _GameDetailPageState extends State<GameDetailPage>
         ),
       ),
     );
+  }
+
+  // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
+
+  void _logGameDetailsData(Game game) {
+    print('\n=== 🎮 ENHANCED GAME DETAILS LOADED ===');
+    print('🎯 Game: ${game.name} (ID: ${game.id})');
+
+    // 🆕 UPDATED: Characters data with detailed image info
+    if (game.characters != null && game.characters!.isNotEmpty) {
+      print('\n👥 CHARACTERS (${game.characters!.length}): ✅ CHARACTERS SECTION WILL SHOW');
+      print('   📱 UI: Container with Card elevation, preview of 4 characters');
+      print('   🔗 Navigation: Tap "View All" → CharactersScreen with filter/sort');
+
+      for (var i = 0; i < game.characters!.length && i < 5; i++) {
+        final char = game.characters![i];
+        print('  • ${char.name} (ID: ${char.id})');
+
+        // 🆕 NEW: Log image information
+        if (char.hasImage) {
+          print('    🖼️ Image: ✅ Has mugShotImageId: ${char.mugShotImageId}');
+          print('    🔗 URL: ${char.imageUrl}');
+          print('    📏 Sizes Available: thumb, micro, medium, large');
+        } else if (char.hasMugShot) {
+          print('    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShotId} but no imageId (needs separate fetch)');
+        } else {
+          print('    🖼️ Image: ❌ No image data available');
+        }
+
+        if (char.description != null) {
+          print('    📝 Description: ${char.description!.length > 50 ? '${char.description!.substring(0, 50)}...' : char.description}');
+        }
+      }
+
+      if (game.characters!.length > 5) {
+        print('  ... and ${game.characters!.length - 5} more characters');
+      }
+
+      // 🆕 NEW: Summary of image availability
+      final charactersWithImages = game.characters!.where((c) => c.hasImage).length;
+      final charactersWithMugShotIds = game.characters!.where((c) => c.hasMugShot).length;
+
+      print('\n📊 CHARACTER IMAGE SUMMARY:');
+      print('   ✅ With Images: $charactersWithImages/${game.characters!.length}');
+      print('   🔗 With MugShot IDs: $charactersWithMugShotIds/${game.characters!.length}');
+      print('   📱 UI Ready: ${charactersWithImages > 0 ? 'YES - Images will display' : 'PARTIAL - Fallback icons will show'}');
+
+    } else {
+      print('\n👥 CHARACTERS: None found ❌ Characters section hidden');
+    }
+
+    print('=== END GAME DETAILS LOG ===\n');
   }
 
   Widget _buildSliverAppBar(Game game) {
@@ -263,7 +316,9 @@ class _GameDetailPageState extends State<GameDetailPage>
             const SizedBox(height: AppConstants.paddingLarge),
 
             // Game Details Accordion
-            _buildGameDetailsAccordion(game),
+            _buildGameDetailsAccordion(game,),
+
+            CharactersSection(game: game),
 
             FranchiseCollectionsSection(game: game), // Franchises&Collections
             ContentDLCSection(game: game),           // 🟢 DLCs & Content
@@ -292,147 +347,5 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
 
-
-  void _showLoginRequiredSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please login to use this feature'),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _toggleWishlist(Game game) {
-    if (_currentUserId != null) {
-      _gameBloc.add(
-        ToggleWishlistEvent(
-          gameId: game.id,
-          userId: _currentUserId!,
-        ),
-      );
-    }
-  }
-
-  void _toggleRecommend(Game game) {
-    if (_currentUserId != null) {
-      _gameBloc.add(
-        ToggleRecommendEvent(
-          gameId: game.id,
-          userId: _currentUserId!,
-        ),
-      );
-    }
-  }
-
-  void _showTopThreeDialog(Game game) {
-    if (_currentUserId == null) {
-      _showLoginRequiredSnackBar();
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => TopThreeDialog(
-        game: game,
-        onPositionSelected: (position) {
-          _addToTopThree(game.id, position);
-        },
-      ),
-    );
-  }
-
-  void _showRatingDialog(Game game) {
-    if (_currentUserId == null) {
-      _showLoginRequiredSnackBar();
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => RatingDialog(
-        gameName: game.name,
-        currentRating: game.userRating,
-        onRatingSubmitted: (rating) {
-          _rateGame(game.id, rating);
-        },
-      ),
-    );
-  }
-
-  void _rateGame(int gameId, double rating) {
-    if (_currentUserId == null) return;
-
-    _gameBloc.add(RateGameEvent(
-      gameId: gameId,
-      userId: _currentUserId!,
-      rating: rating,
-    ));
-
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Game rated ${rating.toStringAsFixed(1)}/10'),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-
-  void _addToTopThree(int gameId, int position) {
-    if (_currentUserId == null) return;
-
-    _gameBloc.add(AddToTopThreeEvent(
-      gameId: gameId,
-      userId: _currentUserId!,
-      position: position,
-    ));
-
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Added to Top 3 at position $position'),
-        backgroundColor: Colors.amber,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-
-  void _showFullScreenImage(String imageUrl) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-          ),
-          body: Center(
-            child: InteractiveViewer(
-              child: CachedImageWidget(
-                imageUrl: ImageUtils.getLargeImageUrl(imageUrl),
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $url')),
-        );
-      }
-    }
-  }
 }
 

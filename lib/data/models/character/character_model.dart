@@ -1,7 +1,8 @@
-// lib/data/models/character_model.dart
+// lib/data/models/character/character_model.dart - UPDATED VERSION
 import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/character/character_gender.dart';
 import '../../../domain/entities/character/character_species.dart';
+import '../../../domain/entities/game/game.dart';
 
 class CharacterModel extends Character {
   const CharacterModel({
@@ -21,6 +22,8 @@ class CharacterModel extends Character {
     super.updatedAt,
     super.genderEnum,
     super.speciesEnum,
+    super.mugShotImageId, // 🆕 ADD this
+    super.games, // 🆕 ADD this
   });
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
@@ -41,9 +44,58 @@ class CharacterModel extends Character {
       updatedAt: _parseDateTime(json['updated_at']),
       genderEnum: _parseGenderEnum(json['gender']),
       speciesEnum: _parseSpeciesEnum(json['species']),
+      // 🆕 NEW: Extract image ID from nested mug_shot object
+      mugShotImageId: _extractMugShotImageId(json['mug_shot']),
     );
   }
 
+  // 🆕 NEW: Extract imageId from mug_shot data
+  static String? _extractMugShotImageId(dynamic mugShotData) {
+    if (mugShotData == null) return null;
+
+    // If mug_shot is an object with image_id
+    if (mugShotData is Map<String, dynamic>) {
+      return mugShotData['image_id']?.toString();
+    }
+
+    // If mug_shot is just an ID (int), we'll need to fetch it separately
+    // This will be handled in the repository level
+    return null;
+  }
+
+  // 🆕 NEW: Factory method when we have separate mugShot data and games
+  factory CharacterModel.fromJsonWithMugShot(
+      Map<String, dynamic> characterJson,
+      Map<String, dynamic>? mugShotJson, {
+        List<Game>? games, // 🆕 ADD this parameter
+      }) {
+    final character = CharacterModel.fromJson(characterJson);
+
+    final mugShotImageId = mugShotJson?['image_id']?.toString();
+
+    return CharacterModel(
+      id: character.id,
+      checksum: character.checksum,
+      name: character.name,
+      akas: character.akas,
+      characterGenderId: character.characterGenderId,
+      characterSpeciesId: character.characterSpeciesId,
+      countryName: character.countryName,
+      description: character.description,
+      gameIds: character.gameIds,
+      mugShotId: character.mugShotId,
+      slug: character.slug,
+      url: character.url,
+      createdAt: character.createdAt,
+      updatedAt: character.updatedAt,
+      genderEnum: character.genderEnum,
+      speciesEnum: character.speciesEnum,
+      mugShotImageId: mugShotImageId, // 🆕 Set the actual image ID
+      games: games, // 🆕 Set the actual games
+    );
+  }
+
+  // Existing helper methods (unchanged)
   static List<String> _parseStringList(dynamic data) {
     if (data is List) {
       return data
@@ -105,6 +157,7 @@ class CharacterModel extends Character {
       'updated_at': updatedAt?.toIso8601String(),
       'gender': genderEnum?.value,
       'species': speciesEnum?.value,
+      // Note: mugShotImageId is derived, not stored directly in JSON
     };
   }
 }

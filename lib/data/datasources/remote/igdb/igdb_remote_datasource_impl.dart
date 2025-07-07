@@ -2013,14 +2013,138 @@ platforms.platform_logo.checksum,
   Future<List<CharacterModel>> searchCharacters(String query) async =>
       await getCharacters(search: query);
 
+  // lib/data/datasources/remote/igdb/igdb_remote_datasource_impl.dart - UPDATE
+
+// 🔄 UPDATE the existing getCharactersForGames method:
   @override
   Future<List<CharacterModel>> getCharactersForGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
+
     final gameIdsString = gameIds.join(',');
-    final body =
-        'where games = ($gameIdsString); fields id, checksum, country_name, created_at, description, games, gender, mug_shot, name, slug, species, updated_at, url; limit 100;';
-    return await _makeRequest(
-        'characters', body, (json) => CharacterModel.fromJson(json));
+
+    // 🆕 UPDATED: Include mug_shot.* to get image data
+    final body = '''
+    where games = ($gameIdsString); 
+    fields id, checksum, country_name, created_at, description, games, gender, 
+           mug_shot.*, name, slug, species, updated_at, url; 
+    limit 100;
+  ''';
+
+    print('🎭 IGDB: Loading characters for games with images...');
+
+    try {
+      final response = await _makeRawRequest('characters', body);
+      final List<dynamic> data = json.decode(response.body);
+
+      final characters = <CharacterModel>[];
+      for (final item in data) {
+        final character = _parseCharacterWithMugShot(item);
+        if (character != null) {
+          characters.add(character);
+        }
+      }
+
+      print('✅ IGDB: Loaded ${characters.length} characters with image data');
+      return characters;
+
+    } catch (e) {
+      print('❌ IGDB: Error loading characters with images: $e');
+      // Fallback to simple characters without images
+      return await _getCharactersSimple(gameIds);
+    }
+  }
+
+// 🆕 ADD this method to parse characters with mugshot data:
+  CharacterModel? _parseCharacterWithMugShot(Map<String, dynamic> data) {
+    try {
+      // Extract mugshot image ID if available
+      String? mugShotImageId;
+      final mugShotData = data['mug_shot'];
+
+      if (mugShotData is Map<String, dynamic>) {
+        mugShotImageId = mugShotData['image_id']?.toString();
+      }
+
+      return CharacterModel(
+        id: data['id'] ?? 0,
+        checksum: data['checksum'] ?? '',
+        name: data['name'] ?? '',
+        akas: _parseStringList(data['akas']),
+        characterGenderId: data['character_gender'],
+        characterSpeciesId: data['character_species'],
+        countryName: data['country_name'],
+        description: data['description'],
+        gameIds: _parseIdList(data['games']),
+        mugShotId: mugShotData is Map ? mugShotData['id'] : data['mug_shot'],
+        slug: data['slug'],
+        url: data['url'],
+        createdAt: _parseDateTime(data['created_at']),
+        updatedAt: _parseDateTime(data['updated_at']),
+        genderEnum: _parseGenderEnum(data['gender']),
+        speciesEnum: _parseSpeciesEnum(data['species']),
+        mugShotImageId: mugShotImageId, // 🆕 The image ID for URL construction!
+      );
+    } catch (e) {
+      print('❌ IGDB: Error parsing character with mugshot: $e');
+      return null;
+    }
+  }
+
+// 🆕 ADD fallback method for simple characters (without images):
+  Future<List<CharacterModel>> _getCharactersSimple(List<int> gameIds) async {
+    final gameIdsString = gameIds.join(',');
+    final body = '''
+    where games = ($gameIdsString); 
+    fields id, checksum, country_name, created_at, description, games, gender, 
+           mug_shot, name, slug, species, updated_at, url; 
+    limit 100;
+  ''';
+
+    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+  }
+
+// 🆕 ADD helper methods if they don't exist:
+  List<String> _parseStringList(dynamic data) {
+    if (data is List) {
+      return data
+          .where((item) => item is String)
+          .map((item) => item.toString())
+          .toList();
+    }
+    return [];
+  }
+
+  List<int> _parseIdList(dynamic data) {
+    if (data is List) {
+      return data
+          .where((item) => item is int || (item is Map && item['id'] is int))
+          .map((item) => item is int ? item : item['id'] as int)
+          .toList();
+    }
+    return [];
+  }
+
+  DateTime? _parseDateTime(dynamic date) {
+    if (date is String) {
+      return DateTime.tryParse(date);
+    } else if (date is int) {
+      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
+    }
+    return null;
+  }
+
+  CharacterGenderEnum? _parseGenderEnum(dynamic gender) {
+    if (gender is int) {
+      return CharacterGenderEnum.fromValue(gender);
+    }
+    return null;
+  }
+
+  CharacterSpeciesEnum? _parseSpeciesEnum(dynamic species) {
+    if (species is int) {
+      return CharacterSpeciesEnum.fromValue(species);
+    }
+    return null;
   }
 
   @override

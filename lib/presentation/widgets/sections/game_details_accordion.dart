@@ -1,5 +1,5 @@
 // ==================================================
-// GROUPED GAME DETAILS ACCORDION - Organisiert in logische Kategorien
+// SIMPLIFIED GAME DETAILS ACCORDION - Without Callbacks
 // ==================================================
 
 // lib/presentation/widgets/sections/game_details_accordion.dart
@@ -24,18 +24,10 @@ import 'game_info_section.dart';
 
 class GameDetailsAccordion extends StatelessWidget {
   final Game game;
-  final VoidCallback? onRatePressed;
-  final VoidCallback? onToggleWishlist;
-  final VoidCallback? onToggleRecommend;
-  final VoidCallback? onAddToTopThree;
 
   const GameDetailsAccordion({
     super.key,
     required this.game,
-    this.onRatePressed,
-    this.onToggleWishlist,
-    this.onToggleRecommend,
-    this.onAddToTopThree,
   });
 
   @override
@@ -52,20 +44,13 @@ class GameDetailsAccordion extends StatelessWidget {
             icon: Icons.person_outline,
             color: Theme.of(context).colorScheme.primary,
             children: [
-              // Your Activity
-              if (_hasUserStates())
-                EnhancedAccordionTile(
-                  title: 'Your Activity',
-                  icon: Icons.person,
-                  preview: _buildUserStatesPreview(context, game),
-                  child: UserStatesContent(
-                    game: game,
-                    onRatePressed: onRatePressed,
-                    onToggleWishlist: onToggleWishlist,
-                    onToggleRecommend: onToggleRecommend,
-                    onAddToTopThree: onAddToTopThree,
-                  ),
-                ),
+              // Your Activity - Always show, no callback needed
+              EnhancedAccordionTile(
+                title: 'Your Activity',
+                icon: Icons.person,
+                preview: _buildUserStatesPreview(context, game),
+                child: UserStatesContent(game: game), // ✅ Simplified - no callbacks needed
+              ),
 
               // Community & Ratings
               if (_hasCommunityInfo(game))
@@ -185,7 +170,7 @@ class GameDetailsAccordion extends StatelessWidget {
     );
   }
 
-  // ✅ ACCORDION GROUP BUILDER
+  // ✅ ACCORDION GROUP BUILDER (unchanged)
   Widget _buildAccordionGroup(
       BuildContext context, {
         required String title,
@@ -277,11 +262,7 @@ class GameDetailsAccordion extends StatelessWidget {
     );
   }
 
-  // ✅ HELPER METHODS - Check if sections should be shown
-  bool _hasUserStates() {
-    return true; // Always show user activity section
-  }
-
+  // ✅ HELPER METHODS - Check if sections should be shown (unchanged)
   bool _hasGameInfo(Game game) {
     return game.gameType != null ||
         game.gameStatus != null ||
@@ -309,7 +290,7 @@ class GameDetailsAccordion extends StatelessWidget {
         game.hasMultiplayer;
   }
 
-  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state
+  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state (unchanged)
   Widget _buildUserStatesPreview(BuildContext context, Game game) {
     List<String> activeStates = [];
 
@@ -642,7 +623,7 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 }
 
-// ✅ Enhanced Accordion Tile (keep the enhanced version from previous implementation)
+// ✅ Enhanced Accordion Tile (unchanged)
 class EnhancedAccordionTile extends StatefulWidget {
   final String title;
   final IconData icon;

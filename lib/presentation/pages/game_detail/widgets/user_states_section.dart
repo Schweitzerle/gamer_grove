@@ -1,29 +1,27 @@
 // ==================================================
-// USER STATES CONTENT - Simplified for Accordion
+// ENHANCED USER STATES CONTENT - With Integrated Functions
 // ==================================================
 
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 
 import '../../../../domain/entities/game/game.dart';
+import '../../../blocs/auth/auth_bloc.dart';
+import '../../../blocs/game/game_bloc.dart';
+import '../../../widgets/rating_dialog.dart';
+import '../../../widgets/top_three_dialog.dart';
 
 class UserStatesContent extends StatelessWidget {
   final Game game;
-  final VoidCallback? onRatePressed;
-  final VoidCallback? onToggleWishlist;
-  final VoidCallback? onToggleRecommend;
-  final VoidCallback? onAddToTopThree;
 
   const UserStatesContent({
     super.key,
     required this.game,
-    this.onRatePressed,
-    this.onToggleWishlist,
-    this.onToggleRecommend,
-    this.onAddToTopThree,
   });
 
   @override
@@ -46,7 +44,7 @@ class UserStatesContent extends StatelessWidget {
                     ? ColorScales.getRatingColor(game.userRating! * 10)
                     : Colors.grey,
                 isActive: game.userRating != null,
-                onTap: onRatePressed,
+                onTap: () => _showRatingDialog(context),
               ),
             ),
 
@@ -61,7 +59,7 @@ class UserStatesContent extends StatelessWidget {
                 value: game.isWishlisted == true ? 'Added' : 'Add',
                 color: game.isWishlisted == true ? Colors.red : Colors.grey,
                 isActive: game.isWishlisted == true,
-                onTap: onToggleWishlist,
+                onTap: () => _toggleWishlist(context),
               ),
             ),
           ],
@@ -81,7 +79,7 @@ class UserStatesContent extends StatelessWidget {
                 value: game.isRecommended == true ? 'Recommended' : 'Recommend',
                 color: game.isRecommended == true ? Colors.green : Colors.grey,
                 isActive: game.isRecommended == true,
-                onTap: onToggleRecommend,
+                onTap: () => _toggleRecommend(context),
               ),
             ),
 
@@ -100,7 +98,7 @@ class UserStatesContent extends StatelessWidget {
                     ? ColorScales.getTopThreeColor(game.topThreePosition ?? 1)
                     : Colors.grey,
                 isActive: game.isInTopThree == true,
-                onTap: onAddToTopThree,
+                onTap: () => _showTopThreeDialog(context),
               ),
             ),
           ],
@@ -109,7 +107,158 @@ class UserStatesContent extends StatelessWidget {
     );
   }
 
-  // ✅ Medium-sized Info Card
+  // ✅ INTEGRATED FUNCTIONS
+
+  String? _getCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated) {
+      return authState.user.id;
+    }
+    return null;
+  }
+
+  void _showLoginRequiredSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please log in to use this feature'),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _toggleWishlist(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      _showLoginRequiredSnackBar(context);
+      return;
+    }
+
+    final gameBloc = context.read<GameBloc>();
+    gameBloc.add(
+      ToggleWishlistEvent(
+        gameId: game.id,
+        userId: userId,
+      ),
+    );
+
+    HapticFeedback.lightImpact();
+
+    // Show feedback
+    final isCurrentlyWishlisted = game.isWishlisted == true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            isCurrentlyWishlisted
+                ? 'Removed from wishlist'
+                : 'Added to wishlist'
+        ),
+        backgroundColor: isCurrentlyWishlisted ? Colors.grey : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _toggleRecommend(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      _showLoginRequiredSnackBar(context);
+      return;
+    }
+
+    final gameBloc = context.read<GameBloc>();
+    gameBloc.add(
+      ToggleRecommendEvent(
+        gameId: game.id,
+        userId: userId,
+      ),
+    );
+
+    HapticFeedback.lightImpact();
+
+    // Show feedback
+    final isCurrentlyRecommended = game.isRecommended == true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            isCurrentlyRecommended
+                ? 'Recommendation removed'
+                : 'Game recommended'
+        ),
+        backgroundColor: isCurrentlyRecommended ? Colors.grey : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showTopThreeDialog(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      _showLoginRequiredSnackBar(context);
+      return;
+    }
+
+    // ✅ GameBloc VOR dem Dialog holen
+    final gameBloc = context.read<GameBloc>();
+
+    showDialog(
+      context: context,
+      builder: (context) => TopThreeDialog(
+        game: game,
+        onPositionSelected: (position) {
+          _addToTopThree(gameBloc, userId, position);
+        },
+      ),
+    );
+  }
+
+  void _showRatingDialog(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      _showLoginRequiredSnackBar(context);
+      return;
+    }
+
+    // ✅ GameBloc VOR dem Dialog holen
+    final gameBloc = context.read<GameBloc>();
+
+    showDialog(
+      context: context,
+      builder: (context) => RatingDialog(
+        gameName: game.name,
+        currentRating: game.userRating,
+        onRatingSubmitted: (rating) {
+          _rateGame(gameBloc, userId, rating);
+        },
+      ),
+    );
+  }
+
+  void _rateGame(GameBloc gameBloc, String userId, double rating) {
+    gameBloc.add(RateGameEvent(
+      gameId: game.id,
+      userId: userId,
+      rating: rating,
+    ));
+
+    HapticFeedback.lightImpact();
+    // Note: SnackBar wird im Parent Context angezeigt, nicht im Dialog Context
+  }
+
+  void _addToTopThree(GameBloc gameBloc, String userId, int position) {
+    gameBloc.add(AddToTopThreeEvent(
+      gameId: game.id,
+      userId: userId,
+      position: position,
+    ));
+
+    HapticFeedback.lightImpact();
+    // Note: SnackBar wird im Parent Context angezeigt, nicht im Dialog Context
+  }
+
+  // ✅ Medium-sized Info Card (unchanged)
   Widget _buildMediumInfoCard(
       BuildContext context, {
         required IconData icon,

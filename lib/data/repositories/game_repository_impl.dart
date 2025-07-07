@@ -36,6 +36,7 @@ import '../datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../models/character/character_model.dart';
 import '../models/game/game_model.dart';
 
 class GameRepositoryImpl implements GameRepository {
@@ -1516,6 +1517,9 @@ class GameRepositoryImpl implements GameRepository {
   // PHASE 4 - GAME DETAIL ENHANCEMENTS IMPLEMENTATION
   // ==========================================
 
+  // lib/data/repositories/game_repository_impl.dart - ENHANCED CHARACTER METHODS
+
+// 🔄 UPDATE the existing getGameCharacters method to load with games:
   @override
   Future<Either<Failure, List<Character>>> getGameCharacters(int gameId) async {
     try {
@@ -1523,12 +1527,35 @@ class GameRepositoryImpl implements GameRepository {
         return const Left(NetworkFailure());
       }
 
-      print('🎭 GameRepository: Getting characters for game: $gameId');
+      print('🎭 GameRepository: Getting characters for game: $gameId with images and games');
 
-      final characters = await igdbDataSource.getCharactersForGames([gameId]);
+      // Load characters for this game
+      final characterData = await igdbDataSource.getCompleteCharacterData();
 
-      print('✅ GameRepository: Found ${characters.length} characters');
-      return Right(characters);
+      // Filter by gameId and extract Characters with image data
+      final charactersWithImageData = <Character>[];
+
+      for (final data in characterData) {
+        final gameIds = data['games'] as List<dynamic>? ?? [];
+        final containsGame = gameIds.any((game) {
+          if (game is int) return game == gameId;
+          if (game is Map && game['id'] is int) return game['id'] == gameId;
+          return false;
+        });
+
+        if (containsGame) {
+          final character = _parseCompleteCharacterData(data);
+          if (character != null) {
+            charactersWithImageData.add(character);
+          }
+        }
+      }
+
+      // 🆕 NEW: Now enrich characters with their games
+      final enrichedCharacters = await _enrichCharactersWithGames(charactersWithImageData);
+
+      print('✅ GameRepository: Found ${enrichedCharacters.length} characters with image data and games');
+      return Right(enrichedCharacters);
 
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -1536,6 +1563,157 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: 'Failed to get game characters'));
     }
   }
+
+// 🆕 ADD this method to get character details with games:
+  @override
+  Future<Either<Failure, Character>> getCharacterDetails(int characterId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎭 GameRepository: Getting character details: $characterId with games');
+
+      // Get character data with images
+      final characterData = await igdbDataSource.getCompleteCharacterData(
+        characterIds: [characterId],
+      );
+
+      if (characterData.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Character not found'));
+      }
+
+      final character = _parseCompleteCharacterData(characterData.first);
+      if (character == null) {
+        return const Left(ServerFailure(message: 'Failed to parse character data'));
+      }
+
+      // 🆕 NEW: Enrich with games
+      final enrichedCharacters = await _enrichCharactersWithGames([character]);
+      final enrichedCharacter = enrichedCharacters.first;
+
+      print('✅ GameRepository: Character details loaded with ${enrichedCharacter.loadedGameCount} games');
+      return Right(enrichedCharacter);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get character details'));
+    }
+  }
+
+// 🆕 ADD this helper method to enrich characters with their games:
+  Future<List<Character>> _enrichCharactersWithGames(List<Character> characters) async {
+    final enrichedCharacters = <Character>[];
+
+    for (final character in characters) {
+      if (character.gameIds.isNotEmpty) {
+        try {
+          print('🎮 Loading ${character.gameIds.length} games for character: ${character.name}');
+
+          // Get games for this character
+          final games = await igdbDataSource.getGamesByIds(character.gameIds);
+
+          // Create enriched character with games
+          final enrichedCharacter = character.copyWith(games: games);
+          enrichedCharacters.add(enrichedCharacter);
+
+          print('✅ Loaded ${games.length} games for character: ${character.name}');
+        } catch (e) {
+          print('⚠️ Failed to load games for character ${character.name}: $e');
+          // Add character without games on error
+          enrichedCharacters.add(character);
+        }
+      } else {
+        // Character has no games
+        enrichedCharacters.add(character);
+      }
+    }
+
+    return enrichedCharacters;
+  }
+
+// Keep existing _parseCompleteCharacterData method unchanged...
+  Character? _parseCompleteCharacterData(Map<String, dynamic> data) {
+    try {
+      // Extract mugshot image ID from nested data
+      String? mugShotImageId;
+      final mugShotData = data['mug_shot'];
+      if (mugShotData is Map<String, dynamic>) {
+        mugShotImageId = mugShotData['image_id']?.toString();
+      }
+
+      // Create character with image data (games will be added later)
+      return CharacterModel(
+        id: data['id'] ?? 0,
+        checksum: data['checksum'] ?? '',
+        name: data['name'] ?? '',
+        akas: _parseStringList(data['akas']),
+        characterGenderId: data['character_gender'],
+        characterSpeciesId: data['character_species'],
+        countryName: data['country_name'],
+        description: data['description'],
+        gameIds: _parseIdList(data['games']),
+        mugShotId: data['mug_shot'] is Map ? data['mug_shot']['id'] : data['mug_shot'],
+        slug: data['slug'],
+        url: data['url'],
+        createdAt: _parseDateTime(data['created_at']),
+        updatedAt: _parseDateTime(data['updated_at']),
+        genderEnum: _parseGenderEnum(data['gender']),
+        speciesEnum: _parseSpeciesEnum(data['species']),
+        mugShotImageId: mugShotImageId, // 🆕 This is the key!
+        // games: null, // Will be populated by _enrichCharactersWithGames
+      );
+    } catch (e) {
+      print('❌ GameRepository: Error parsing character data: $e');
+      return null;
+    }
+  }
+
+// Keep existing helper methods unchanged...
+  List<String> _parseStringList(dynamic data) {
+    if (data is List) {
+      return data
+          .where((item) => item is String)
+          .map((item) => item.toString())
+          .toList();
+    }
+    return [];
+  }
+
+  List<int> _parseIdList(dynamic data) {
+    if (data is List) {
+      return data
+          .where((item) => item is int || (item is Map && item['id'] is int))
+          .map((item) => item is int ? item : item['id'] as int)
+          .toList();
+    }
+    return [];
+  }
+
+  DateTime? _parseDateTime(dynamic date) {
+    if (date is String) {
+      return DateTime.tryParse(date);
+    } else if (date is int) {
+      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
+    }
+    return null;
+  }
+
+  CharacterGenderEnum? _parseGenderEnum(dynamic gender) {
+    if (gender is int) {
+      return CharacterGenderEnum.fromValue(gender);
+    }
+    return null;
+  }
+
+  CharacterSpeciesEnum? _parseSpeciesEnum(dynamic species) {
+    if (species is int) {
+      return CharacterSpeciesEnum.fromValue(species);
+    }
+    return null;
+  }
+
 
   @override
   Future<Either<Failure, List<Event>>> getGameEvents(int gameId) async {
@@ -1839,30 +2017,6 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Character>> getCharacterDetails(int characterId) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎭 GameRepository: Getting character details for: $characterId');
-
-      final characters = await igdbDataSource.getCharacters(ids: [characterId]);
-
-      if (characters.isEmpty) {
-        return const Left(NotFoundFailure(message: 'Character not found'));
-      }
-
-      print('✅ GameRepository: Character details loaded');
-      return Right(characters.first);
-
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get character details'));
-    }
-  }
 
   @override
   Future<Either<Failure, List<Game>>> getGamesByCharacter(int characterId) async {

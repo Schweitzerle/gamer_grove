@@ -17,6 +17,8 @@ import '../../../domain/usecases/game/get_game_expansions.dart';
 import '../../../domain/usecases/game/get_latest_games.dart';
 import '../../../domain/usecases/game/get_similar_games.dart';
 import '../../../domain/usecases/game/get_user_top_three.dart';
+import '../../../domain/usecases/game_details/get_complete_game_details_page_data.dart';
+import '../../../domain/usecases/game_details/get_enhanced_game_details.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
 import '../../../domain/usecases/game/get_game_details.dart';
@@ -51,10 +53,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetUserTopThreeGames getUserTopThreeGames;
   final GetUserTopThree getUserTopThree;
   final GetUserRated getUserRated;
-  final GetCompleteGameDetails getCompleteGameDetails;
   final GetSimilarGames getSimilarGames;
   final GetGameDLCs getGameDLCs;
   final GetGameExpansions getGameExpansions;
+  final GetEnhancedGameDetails getEnhancedGameDetails;
+  final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
 
   GameBloc({
     required this.searchGames,
@@ -72,10 +75,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getUserTopThreeGames,
     required this.getUserTopThree,
     required this.getUserRated,
-    required this.getCompleteGameDetails,
     required this.getSimilarGames,
     required this.getGameDLCs,
     required this.getGameExpansions,
+    required this.getEnhancedGameDetails,
+    required this.getCompleteGameDetailPageData,
   }) : super(GameInitial()) {
     // Search events
     on<SearchGamesEvent>(
@@ -92,6 +96,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<ToggleRecommendEvent>(_onToggleRecommend);
     on<AddToTopThreeEvent>(_onAddToTopThree);
     on<GetGameDetailsWithUserDataEvent>(_onGetGameDetailsWithUserData);
+    on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
 
     // Home page events
     on<LoadPopularGamesEvent>(_onLoadPopularGames);
@@ -106,7 +111,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
     on<LoadGrovePageDataEvent>(_onLoadGrovePageData);
 
-    on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
     on<GetSimilarGamesEvent>(_onGetSimilarGames);
     on<GetGameDLCsEvent>(_onGetGameDLCs);
     on<GetGameExpansionsEvent>(_onGetGameExpansions);
@@ -972,6 +976,69 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   Future<void> _onGetCompleteGameDetails(
+      GetCompleteGameDetailsEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    if (emit.isDone) return;
+
+    emit(GameDetailsLoading());
+
+    try {
+      print('🎮 GameBloc: Loading ENHANCED game details with characters & events...');
+      print('📋 GameBloc: gameId = ${event.gameId}, userId = ${event.userId}');
+
+      // 🆕 Use GetEnhancedGameDetails instead of GetCompleteGameDetails
+      final result = await getEnhancedGameDetails(
+        GetEnhancedGameDetailsParams.fullDetails(
+          gameId: event.gameId,
+          userId: event.userId,
+        ),
+      );
+
+      await result.fold(
+            (failure) async {
+          if (!emit.isDone) {
+            print('❌ GameBloc: Failed to load enhanced game details: ${failure.message}');
+            emit(GameError(_mapFailureToMessage(failure)));
+          }
+        },
+            (game) async {
+          print('✅ GameBloc: Enhanced game details loaded successfully!');
+          print('📊 GameBloc: Characters: ${game.characters?.length ?? 0}');
+          print('📊 GameBloc: Events: ${game.events?.length ?? 0}');
+
+          // Add user data enrichment if userId provided
+          if (event.userId != null && !emit.isDone) {
+            try {
+              print('🔄 GameBloc: Enriching with user data...');
+              final enrichedMainGames = await _enrichGamesWithUserData([game], event.userId!);
+              Game enrichedGame = enrichedMainGames[0];
+
+              enrichedGame = await _enrichGameWithAllNestedUserData(enrichedGame, event.userId!);
+
+              if (!emit.isDone) {
+                emit(GameDetailsLoaded(enrichedGame));
+              }
+            } catch (e) {
+              print('❌ GameBloc: Failed to enrich with user data: $e');
+              if (!emit.isDone) {
+                emit(GameDetailsLoaded(game)); // Fallback without user data
+              }
+            }
+          } else if (!emit.isDone) {
+            emit(GameDetailsLoaded(game));
+          }
+        },
+      );
+    } catch (e) {
+      print('❌ GameBloc: Exception in _onGetCompleteGameDetails: $e');
+      if (!emit.isDone) {
+        emit(GameError('Failed to load game details: $e'));
+      }
+    }
+  }
+
+  /*Future<void> _onGetCompleteGameDetails(
     GetCompleteGameDetailsEvent event,
     Emitter<GameState> emit,
   ) async {
@@ -1030,6 +1097,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
     }
   }
+   */
 
 // 🆕 NEW: Helper method to enrich ALL nested games (simplified)
   Future<Game> _enrichGameWithAllNestedUserData(

@@ -40,6 +40,8 @@ import 'domain/usecases/game/get_user_wishlist.dart';
 import 'domain/usecases/game/get_user_recommendations.dart';
 import 'domain/usecases/game/rate_game.dart';
 import 'domain/usecases/game/toggle_wishlist.dart';
+import 'domain/usecases/game_details/get_complete_game_details_page_data.dart';
+import 'domain/usecases/game_details/get_enhanced_game_details.dart';
 import 'domain/usecases/user/follow_user.dart';
 import 'domain/usecases/user/get_user_followers.dart';
 import 'domain/usecases/user/get_user_following.dart';
@@ -158,6 +160,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddToTopThree(sl()));
   sl.registerLazySingleton(() => GetUserTopThreeGames(sl()));
 
+  sl.registerLazySingleton(() => GetEnhancedGameDetails(sl()));
+  sl.registerLazySingleton(() => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
+
+
   // BLoCs
   print('🧠 DI: Registering BLoCs...');
   sl.registerFactory(
@@ -173,7 +179,8 @@ Future<void> init() async {
         () => GameBloc(
           searchGames: sl(),
           getGameDetails: sl(),
-          getCompleteGameDetails: sl(), // NEW
+          getEnhancedGameDetails: sl(), // 🆕 ADD this
+          getCompleteGameDetailPageData: sl(), //
           getSimilarGames: sl(), // NEW
           getGameDLCs: sl(), // NEW
           getGameExpansions: sl(), // NEW
