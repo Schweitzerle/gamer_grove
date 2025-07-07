@@ -2,36 +2,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/community_info_section.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/dlc_expansion_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_description_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/media_gallery.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/similar_games_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website/website.dart';
-import '../../../domain/entities/ageRating/age_rating.dart';
-import '../../../domain/entities/website/website_type.dart';
-import '../../../domain/usecases/game/toggle_wishlist.dart';
-import '../../../domain/usecases/user/add_to_top_three.dart';
 import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
+import '../../widgets/sections/content_dlc_section.dart';
 import '../../widgets/sections/franchise_collection_section.dart';
 import '../../widgets/top_three_dialog.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class GameDetailPage extends StatefulWidget {
   final int gameId;
@@ -292,16 +280,9 @@ class _GameDetailPageState extends State<GameDetailPage>
 
             FranchiseCollectionsSection(game: game),
 
-            // Similar Games
-            if (game.similarGames.isNotEmpty)
-              SimilarGamesSection(games: game.similarGames),
-
-            // DLCs & Expansions
-            if (game.dlcs.isNotEmpty || game.expansions.isNotEmpty)
-              DLCExpansionSection(
-                dlcs: game.dlcs,
-                expansions: game.expansions,
-              ),
+            ContentDLCSection(game: game),           // 🟢 DLCs & Content
+            VersionsRemakesSection(game: game),      // 🔵 Versions & Remakes
+            SimilarRelatedSection(game: game),       // 🟣 Similar & Related
 
             const SizedBox(height: 100), // Space for bottom navigation
           ],
