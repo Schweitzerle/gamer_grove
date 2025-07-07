@@ -1,6 +1,8 @@
 // lib/presentation/widgets/wishlist_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // 🆕 ADD: Für BlocProvider
 import '../../../core/utils/navigations.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../sections/base_game_section.dart';
 
@@ -22,7 +24,33 @@ class WishlistSection extends BaseGameSection {
 
   @override
   void onViewAllPressed(BuildContext context) {
-    Navigations.navigateToWishlist(context);
+    // 🆕 State vom GameBloc abrufen
+    final gameBloc = context.read<GameBloc>();
+    final currentState = gameBloc.state;
+
+    List<Game> wishlistGames = [];
+
+    // Games aus dem aktuellen State extrahieren
+    if (currentState is UserWishlistLoaded) {
+      wishlistGames = currentState.games;
+    } else if (currentState is GrovePageLoaded) {
+      wishlistGames = currentState.userWishlist;
+    } else if (currentState is HomePageLoaded && currentState.userWishlist != null) {
+      wishlistGames = currentState.userWishlist!;
+    }
+
+    // Navigation mit den gefundenen Games
+    if (wishlistGames.isNotEmpty) {
+      Navigations.navigateToUserWishlist(context, wishlistGames);
+    } else {
+      // Fallback: Lade Wishlist zuerst
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Loading wishlist...')),
+      );
+      if (currentUserId != null && this.gameBloc != null) {
+        this.gameBloc!.add(LoadUserWishlistEvent(currentUserId!));
+      }
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
-// lib/domain/entities/collection.dart
+// lib/domain/entities/collection/collection.dart
 import 'package:equatable/equatable.dart';
+import '../game/game.dart'; // 🆕 Add this import
 
 class Collection extends Equatable {
   final int id;
@@ -14,6 +15,9 @@ class Collection extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  // 🆕 NEW: Add games property for UI display
+  final List<Game>? games; // Populated when fetched for UI
+
   const Collection({
     required this.id,
     required this.checksum,
@@ -26,6 +30,7 @@ class Collection extends Equatable {
     this.typeId,
     this.createdAt,
     this.updatedAt,
+    this.games, // 🆕 Add this parameter
   });
 
   // Helper getters
@@ -53,5 +58,6 @@ class Collection extends Equatable {
     typeId,
     createdAt,
     updatedAt,
+    games, // 🆕 Add this to props
   ];
 }

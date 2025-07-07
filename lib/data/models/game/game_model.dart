@@ -30,6 +30,7 @@ import '../../../domain/entities/game/game_localization.dart';
 // Imports für Models
 import '../artwork_model.dart';
 import '../character/character_model.dart';
+import '../collection/collection_model.dart';
 import '../event/event_model.dart';
 import '../genre_model.dart';
 import '../language/language_support_model.dart';
@@ -45,7 +46,6 @@ import '../keyword_model.dart';
 import '../multiplayer_mode_model.dart';
 import '../player_perspective_model.dart';
 import '../franchise_model.dart';
-import '../collection_model.dart';
 import '../externalGame/external_game_model.dart';
 import '../release_date/release_date_model.dart';
 import 'game_localization_model.dart';
@@ -630,6 +630,7 @@ class GameModel extends Game {
 
   static List<Franchise> _extractFranchises(dynamic franchises) {
     if (franchises is List) {
+      print(franchises.length);
       return franchises
           .where((item) => item is Map)
           .map((item) => FranchiseModel.fromJson(item as Map<String, dynamic>))
@@ -640,6 +641,7 @@ class GameModel extends Game {
 
   static List<Collection> _extractCollections(dynamic collections) {
     if (collections is List) {
+      print(collections.length);
       return collections
           .where((item) => item is Map)
           .map((item) => CollectionModel.fromJson(item as Map<String, dynamic>))

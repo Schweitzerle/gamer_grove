@@ -29,6 +29,7 @@ import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
+import '../../widgets/sections/franchise_collection_section.dart';
 import '../../widgets/top_three_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -92,6 +93,7 @@ class _GameDetailPageState extends State<GameDetailPage>
       gameId: widget.gameId,
       userId: _currentUserId,
     ));
+
   }
 
   void _initializeMediaTabs(Game game) {
@@ -288,6 +290,7 @@ class _GameDetailPageState extends State<GameDetailPage>
             // Game Details Accordion
             _buildGameDetailsAccordion(game),
 
+            FranchiseCollectionsSection(game: game),
 
             // Similar Games
             if (game.similarGames.isNotEmpty)

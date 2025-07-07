@@ -26,6 +26,7 @@ import '../../../models/alternative_name_model.dart';
 
 // Models - Artwork & Visual
 import '../../../models/artwork_model.dart';
+import '../../../models/collection/collection_model.dart';
 import '../../../models/cover_model.dart';
 import '../../../models/language/language_support_model.dart';
 import '../../../models/screenshot_model.dart';
@@ -40,7 +41,6 @@ import '../../../models/character/character_species_model.dart';
 import '../../../models/collection/collection_membership_model.dart';
 import '../../../models/collection/collection_relation_model.dart';
 import '../../../models/collection/collection_type_model.dart';
-import '../../../models/collection_model.dart';
 
 // Models - Company
 import '../../../models/company/company_model.dart';

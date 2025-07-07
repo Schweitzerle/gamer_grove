@@ -64,7 +64,7 @@ class HeaderSection extends StatelessWidget {
         const SizedBox(width: AppConstants.paddingMedium),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: onWishlistPressed ?? () => _navigateToWishlist(context),
+            onPressed: () {},
             icon: const Icon(Icons.favorite_outline),
             label: const Text('My Wishlist'),
           ),
@@ -100,9 +100,6 @@ class HeaderSection extends StatelessWidget {
     Navigations.navigateToSearch(context);
   }
 
-  void _navigateToWishlist(BuildContext context) {
-    Navigations.navigateToWishlist(context);
-  }
 
   void _navigateToSupabaseTest(BuildContext context) {
     Navigations.navigateToSupabaseTest(context);

@@ -7,6 +7,8 @@ import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
+import '../../../domain/entities/collection/collection.dart';
+import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/game/get_complete_game_details.dart';
@@ -979,9 +981,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           // ✅ User-Daten im BLoC hinzufügen (wie bei Home/Grove)
           if (event.userId != null && !emit.isDone) {
             try {
-              final enrichedGames = await _enrichGamesWithUserData([game], event.userId!);
+              // 🔧 FIX 1: Main game enrichen
+              print('🔄 Enriching main game...');
+              final enrichedMainGames = await _enrichGamesWithUserData([game], event.userId!);
+              Game enrichedGame = enrichedMainGames[0];
+
+              // 🔧 FIX 2: DANN nested games enrichen (mit dem enriched main game!)
+              print('🔄 Enriching nested games...');
+              enrichedGame = await _enrichGameWithAllNestedUserData(enrichedGame, event.userId!);
+
               if (!emit.isDone) {
-                emit(GameDetailsLoaded(enrichedGames.first));
+                // 🔧 FIX 3: Das final enriched game emiten
+                emit(GameDetailsLoaded(enrichedGame));
               }
             } catch (e) {
               print('❌ Failed to enrich game with user data: $e');
@@ -1000,6 +1011,167 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
     }
   }
+
+// 🆕 NEW: Helper method to enrich ALL nested games (simplified)
+  Future<Game> _enrichGameWithAllNestedUserData(Game game, String userId) async {
+    try {
+      // 1. 🎮 SIMILAR GAMES (einfach wie immer)
+      List<Game> enrichedSimilarGames = game.similarGames;
+      if (game.similarGames.isNotEmpty) {
+        print('🔄 Enriching similar games...');
+        enrichedSimilarGames = await _enrichGamesWithUserData(game.similarGames, userId);
+      }
+
+      // 2. 📦 DLC GAMES (einfach wie immer)
+      List<Game> enrichedDLCs = game.dlcs;
+      if (game.dlcs.isNotEmpty) {
+        print('🔄 Enriching DLC games...');
+        enrichedDLCs = await _enrichGamesWithUserData(game.dlcs, userId);
+      }
+
+      // 3. 🎯 EXPANSION GAMES (einfach wie immer)
+      List<Game> enrichedExpansions = game.expansions;
+      if (game.expansions.isNotEmpty) {
+        print('🔄 Enriching expansion games...');
+        enrichedExpansions = await _enrichGamesWithUserData(game.expansions, userId);
+      }
+
+      // 4. 🏆 STANDALONE EXPANSIONS (einfach wie immer)
+      List<Game> enrichedStandaloneExpansions = game.standaloneExpansions;
+      if (game.standaloneExpansions.isNotEmpty) {
+        print('🔄 Enriching standalone expansion games...');
+        enrichedStandaloneExpansions = await _enrichGamesWithUserData(game.standaloneExpansions, userId);
+      }
+
+      // 5. 📦 BUNDLES (einfach wie immer)
+      List<Game> enrichedBundles = game.bundles;
+      if (game.bundles.isNotEmpty) {
+        print('🔄 Enriching bundle games...');
+        enrichedBundles = await _enrichGamesWithUserData(game.bundles, userId);
+      }
+
+      // 6. 🔧 REMAKES (einfach wie immer)
+      List<Game> enrichedRemakes = game.remakes;
+      if (game.remakes.isNotEmpty) {
+        print('🔄 Enriching remake games...');
+        enrichedRemakes = await _enrichGamesWithUserData(game.remakes, userId);
+      }
+
+      // 7. ✨ REMASTERS (einfach wie immer)
+      List<Game> enrichedRemasters = game.remasters;
+      if (game.remasters.isNotEmpty) {
+        print('🔄 Enriching remaster games...');
+        enrichedRemasters = await _enrichGamesWithUserData(game.remasters, userId);
+      }
+
+      // 8. 🌟 MAIN FRANCHISE (einfach - neue Franchise mit enriched games)
+      Franchise? enrichedMainFranchise = game.mainFranchise;
+      if (game.mainFranchise?.games != null && game.mainFranchise!.games!.isNotEmpty) {
+        print('🔄 Enriching main franchise games...');
+        final enrichedFranchiseGames = await _enrichGamesWithUserData(
+            game.mainFranchise!.games!,
+            userId
+        );
+
+        // Neue Franchise mit enriched games erstellen
+        enrichedMainFranchise = Franchise(
+          id: game.mainFranchise!.id,
+          checksum: game.mainFranchise!.checksum,
+          name: game.mainFranchise!.name,
+          slug: game.mainFranchise!.slug,
+          url: game.mainFranchise!.url,
+          gameIds: game.mainFranchise!.gameIds,
+          createdAt: game.mainFranchise!.createdAt,
+          updatedAt: game.mainFranchise!.updatedAt,
+          games: enrichedFranchiseGames, // 🎯 Enriched games!
+        );
+      }
+
+      // 9. 🌳 OTHER FRANCHISES (einfach - neue Franchises mit enriched games)
+      List<Franchise> enrichedFranchises = game.franchises;
+      if (game.franchises.isNotEmpty) {
+        print('🔄 Enriching other franchise games...');
+        enrichedFranchises = [];
+
+        for (final franchise in game.franchises) {
+          if (franchise.games != null && franchise.games!.isNotEmpty) {
+            final enrichedGames = await _enrichGamesWithUserData(franchise.games!, userId);
+
+            // Neue Franchise mit enriched games erstellen
+            enrichedFranchises.add(Franchise(
+              id: franchise.id,
+              checksum: franchise.checksum,
+              name: franchise.name,
+              slug: franchise.slug,
+              url: franchise.url,
+              gameIds: franchise.gameIds,
+              createdAt: franchise.createdAt,
+              updatedAt: franchise.updatedAt,
+              games: enrichedGames, // 🎯 Enriched games!
+            ));
+          } else {
+            enrichedFranchises.add(franchise); // Unchanged if no games
+          }
+        }
+      }
+
+      // 10. 📚 COLLECTIONS (einfach - neue Collections mit enriched games)
+      List<Collection> enrichedCollections = game.collections;
+      if (game.collections.isNotEmpty) {
+        print('🔄 Enriching collection games...');
+        enrichedCollections = [];
+
+        for (final collection in game.collections) {
+          if (collection.games != null && collection.games!.isNotEmpty) {
+            final enrichedGames = await _enrichGamesWithUserData(collection.games!, userId);
+
+            // Neue Collection mit enriched games erstellen
+            enrichedCollections.add(Collection(
+              id: collection.id,
+              checksum: collection.checksum,
+              name: collection.name,
+              slug: collection.slug,
+              url: collection.url,
+              asChildRelationIds: collection.asChildRelationIds,
+              asParentRelationIds: collection.asParentRelationIds,
+              gameIds: collection.gameIds,
+              typeId: collection.typeId,
+              createdAt: collection.createdAt,
+              updatedAt: collection.updatedAt,
+              games: enrichedGames, // 🎯 Enriched games!
+            ));
+          } else {
+            enrichedCollections.add(collection); // Unchanged if no games
+          }
+        }
+      }
+
+      // 🎯 FINAL: Game mit allen enriched Listen erstellen
+      final enrichedGame = game.copyWith(
+        // Direct game lists (wie immer)
+        similarGames: enrichedSimilarGames,
+        dlcs: enrichedDLCs,
+        expansions: enrichedExpansions,
+        standaloneExpansions: enrichedStandaloneExpansions,
+        bundles: enrichedBundles,
+        remakes: enrichedRemakes,
+        remasters: enrichedRemasters,
+
+        // Franchise & Collection objects (neu erstellt)
+        mainFranchise: enrichedMainFranchise,
+        franchises: enrichedFranchises,
+        collections: enrichedCollections,
+      );
+
+      print('✅ Successfully enriched all nested games with user data');
+      return enrichedGame;
+
+    } catch (e) {
+      print('❌ Error enriching nested games: $e');
+      return game; // Return original game if enrichment fails
+    }
+  }
+
 
   Future<void> _onGetSimilarGames(
       GetSimilarGamesEvent event,

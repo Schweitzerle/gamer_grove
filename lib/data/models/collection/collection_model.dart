@@ -1,6 +1,8 @@
 // lib/data/models/collection_model.dart
 
 
+import 'package:gamer_grove/core/utils/json_helpers.dart';
+
 import '../../../domain/entities/collection/collection.dart';
 
 class CollectionModel extends Collection {
@@ -16,6 +18,7 @@ class CollectionModel extends Collection {
     super.typeId,
     super.createdAt,
     super.updatedAt,
+    super.games
   });
 
   factory CollectionModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +34,7 @@ class CollectionModel extends Collection {
       typeId: json['type'],
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
+      games: JsonHelpers.extractGameList(json['games'])
     );
   }
 

@@ -25,6 +25,7 @@ import '../../../models/alternative_name_model.dart';
 
 // Models - Artwork & Visual
 import '../../../models/artwork_model.dart';
+import '../../../models/collection/collection_model.dart';
 import '../../../models/cover_model.dart';
 import '../../../models/language/language_support_model.dart';
 import '../../../models/screenshot_model.dart';
@@ -39,7 +40,6 @@ import '../../../models/character/character_species_model.dart';
 import '../../../models/collection/collection_membership_model.dart';
 import '../../../models/collection/collection_relation_model.dart';
 import '../../../models/collection/collection_type_model.dart';
-import '../../../models/collection_model.dart';
 
 // Models - Company
 import '../../../models/company/company_model.dart';
@@ -222,16 +222,8 @@ platforms.platform_logo.checksum,
   version_parent.id, version_parent.name, version_parent.category, version_parent.status, version_parent.first_release_date,
   version_parent.cover.id, version_parent.cover.url, version_parent.cover.image_id,
   
-  franchise.id, franchise.name, franchise.slug, franchise.url, franchise.checksum, franchise.created_at, franchise.updated_at,
-  franchise.games.id, franchise.games.name, franchise.games.first_release_date,
-  franchise.games.cover.id, franchise.games.cover.url, franchise.games.cover.image_id,
-  franchises.id, franchises.name, franchises.slug, franchises.url, franchises.checksum, franchises.created_at, franchises.updated_at,
-  franchises.games.id, franchises.games.name, franchises.games.first_release_date,
-  franchises.games.cover.id, franchises.games.cover.url, franchises.games.cover.image_id,
-  collection.id, collection.name, collection.slug, collection.url, collection.type, collection.checksum, collection.created_at, collection.updated_at,
-  collection.games.id, collection.games.name, collection.games.first_release_date,
-  collection.games.cover.id, collection.games.cover.url, collection.games.cover.image_id,
-  collections.id, collections.name, collections.slug, collections.url, collections.type, collections.checksum, collections.created_at, collections.updated_at,
+  franchises.*, franchises.games.cover.*,  franchises.games.id, franchises.games.name, franchises.games.first_release_date, franchises.games.total_rating, franchises.games.genres.*,
+  collections.*,collections.games.cover.*,  collections.games.id, collections.games.name, collections.games.first_release_date,collections.games.total_rating, collections.games.genres.*,
   
   alternative_names.id, alternative_names.name, alternative_names.comment, alternative_names.checksum,
   

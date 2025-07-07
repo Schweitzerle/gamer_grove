@@ -1,4 +1,5 @@
 // presentation/widgets/game_card.dart
+import 'dart:ui'; // 🆕 NEW: For BackdropFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
@@ -12,11 +13,13 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 class GameCard extends StatelessWidget {
   final Game game;
   final VoidCallback onTap;
+  final bool blurRated; // 🆕 NEW: Blur rated games feature
 
   const GameCard({
     super.key,
     required this.game,
     required this.onTap,
+    this.blurRated = false,
   });
 
   @override
@@ -29,24 +32,19 @@ class GameCard extends StatelessWidget {
           HapticFeedback.lightImpact();
           onTap();
         },
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Main Content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Cover Image Section with Overlay Info
-                Expanded(
-                  flex: 4,
-                  child: _buildCoverSection(context),
-                ),
+            // Cover Image Section with Overlay Info
+            Expanded(
+              flex: 4,
+              child: _buildCoverSection(context),
+            ),
 
-                // Bottom Info Section
-                Expanded(
-                  flex: 2,
-                  child: _buildInfoSection(context),
-                ),
-              ],
+            // Bottom Info Section
+            Expanded(
+              flex: 2,
+              child: _buildInfoSection(context),
             ),
           ],
         ),
@@ -55,6 +53,9 @@ class GameCard extends StatelessWidget {
   }
 
   Widget _buildCoverSection(BuildContext context) {
+    final isRated = _isGameRated();
+    final shouldBlurCover = blurRated && isRated;
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -68,8 +69,32 @@ class GameCard extends StatelessWidget {
           ),
         ),
 
+        // 🆕 Blur Filter for rated games (simple overlay)
+        if (shouldBlurCover)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
         // Community Rating (bottom left)
-        if (game.rating != null)
+        if (game.totalRating != null)
           Positioned(
             bottom: 8,
             left: 8,
@@ -80,6 +105,8 @@ class GameCard extends StatelessWidget {
               isUserRating: false,
             ),
           ),
+
+        // User Rating (bottom right)
         if (game.userRating != null)
           Positioned(
             bottom: 8,
@@ -87,7 +114,7 @@ class GameCard extends StatelessWidget {
             child: _buildRatingChip(
               context,
               icon: Icons.star,
-              rating: game.userRating! * 10 ,
+              rating: game.userRating! * 10,
               isUserRating: true,
             ),
           ),
@@ -108,8 +135,8 @@ class GameCard extends StatelessWidget {
               child: Text(
                 game.name,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -128,17 +155,17 @@ class GameCard extends StatelessWidget {
                   Text(
                     DateFormatter.formatYearOnly(game.firstReleaseDate!),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   if (game.genres.isNotEmpty) ...[
                     Text(
                       ' • ',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color:
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ],
@@ -149,10 +176,10 @@ class GameCard extends StatelessWidget {
                     child: Text(
                       game.genres.take(2).map((g) => g.name).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                          ),
+                        color:
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -172,11 +199,11 @@ class GameCard extends StatelessWidget {
   }
 
   Widget _buildRatingChip(
-    BuildContext context, {
-    required IconData icon,
-    required double rating,
-    required bool isUserRating,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required double rating,
+        required bool isUserRating,
+      }) {
     final ratingColor = ColorScales.getRatingColor(rating);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -200,10 +227,10 @@ class GameCard extends StatelessWidget {
           Text(
             rating.toStringAsFixed(1),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: ratingColor.onColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
-                ),
+              color: ratingColor.onColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -237,11 +264,11 @@ class GameCard extends StatelessWidget {
   }
 
   Widget _buildStateIcon(
-    BuildContext context, {
-    required IconData icon,
-    required Color color,
-    required double size,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required Color color,
+        required double size,
+      }) {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -260,7 +287,6 @@ class GameCard extends StatelessWidget {
     );
   }
 
-
   Widget _buildTopThreeCrown(BuildContext context) {
     final position = game.topThreePosition ?? 1;
     final crownColor = ColorScales.getTopThreeColor(position);
@@ -270,7 +296,7 @@ class GameCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: crownColor,
-          borderRadius: const BorderRadius.all(Radius.circular(12),),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           boxShadow: [
             BoxShadow(
               color: crownColor.withValues(alpha: 0.4),
@@ -292,10 +318,10 @@ class GameCard extends StatelessWidget {
             Text(
               '#$position',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: crownColor.onColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
+                color: crownColor.onColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
           ],
         ),
@@ -303,10 +329,11 @@ class GameCard extends StatelessWidget {
     );
   }
 
-
-
+  // 🆕 NEW: Helper method to check if game is rated
+  bool _isGameRated() {
+    return game.userRating != null && game.userRating! > 0;
+  }
 }
-
 
 // Shimmer Loading Version
 class GameCardShimmer extends StatelessWidget {

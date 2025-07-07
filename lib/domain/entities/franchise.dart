@@ -1,5 +1,6 @@
 // lib/domain/entities/franchise.dart
 import 'package:equatable/equatable.dart';
+import 'game/game.dart'; // 🆕 Add this import
 
 class Franchise extends Equatable {
   final int id;
@@ -11,6 +12,9 @@ class Franchise extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  // 🆕 NEW: Add games property for UI display
+  final List<Game>? games; // Populated when fetched for UI
+
   const Franchise({
     required this.id,
     required this.checksum,
@@ -20,6 +24,7 @@ class Franchise extends Equatable {
     this.gameIds = const [],
     this.createdAt,
     this.updatedAt,
+    this.games, // 🆕 Add this parameter
   });
 
   // Helper getters
@@ -40,5 +45,6 @@ class Franchise extends Equatable {
     gameIds,
     createdAt,
     updatedAt,
+    games, // 🆕 Add this to props
   ];
 }

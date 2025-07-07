@@ -1,6 +1,9 @@
 // ===== UNIVERSAL JSON PARSING HELPERS =====
 // lib/core/utils/json_helpers.dart
 
+import '../../data/models/game/game_model.dart';
+import '../../domain/entities/game/game.dart';
+
 /// Universal JSON parsing utilities for handling both basic and expanded IGDB API responses
 ///
 /// Handles the difference between:
@@ -372,5 +375,15 @@ class JsonHelpers {
   /// Parse IGDB date (Unix timestamp to DateTime)
   static DateTime? parseIGDBDate(dynamic value) {
     return parseDateTime(value);
+  }
+
+  static List<Game> extractGameList(dynamic games) {
+    if (games is List) {
+      return games
+          .where((item) => item is Map)
+          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
   }
 }
