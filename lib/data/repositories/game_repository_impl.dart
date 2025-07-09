@@ -1716,27 +1716,6 @@ class GameRepositoryImpl implements GameRepository {
 
 
   @override
-  Future<Either<Failure, List<Event>>> getGameEvents(int gameId) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎪 GameRepository: Getting events for game: $gameId');
-
-      final events = await igdbDataSource.getEventsByGames([gameId]);
-
-      print('✅ GameRepository: Found ${events.length} events');
-      return Right(events);
-
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game events'));
-    }
-  }
-
-  @override
   Future<Either<Failure, List<GameVideo>>> getGameVideos(int gameId) async {
     try {
       if (!await networkInfo.isConnected) {
@@ -1836,94 +1815,6 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Game>> getEnhancedGameDetails({
-    required int gameId,
-    String? userId,
-    bool includeCharacters = true,
-    bool includeEvents = true,
-    bool includeMedia = true,
-  }) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎮 GameRepository: Getting enhanced game details for: $gameId');
-      print('🔍 GameRepository: Include - Characters: $includeCharacters, Events: $includeEvents, Media: $includeMedia');
-
-      // Start with complete game details
-      final gameResult = await getCompleteGameDetails(gameId, userId);
-      if (gameResult.isLeft()) {
-        return gameResult;
-      }
-
-      final game = gameResult.fold((l) => throw Exception('Unexpected failure'), (r) => r);
-
-      // Collect additional requests based on flags
-      final futures = <Future>[];
-
-      if (includeCharacters) {
-        futures.add(igdbDataSource.getCharactersForGames([gameId]));
-      }
-
-      if (includeEvents) {
-        futures.add(igdbDataSource.getEventsByGames([gameId]));
-      }
-
-      if (includeMedia) {
-        futures.addAll([
-          igdbDataSource.getGameVideos([gameId]),
-          igdbDataSource.getScreenshots(gameIds: [gameId]),
-          igdbDataSource.getArtworks(gameIds: [gameId]),
-        ]);
-      }
-
-      // Execute all additional requests concurrently
-      final results = futures.isNotEmpty ? await Future.wait(futures) : [];
-
-      // Parse results based on what was requested
-      int resultIndex = 0;
-      List<Character> characters = [];
-      List<Event> events = [];
-      List<GameVideo> videos = [];
-      List<Screenshot> screenshots = [];
-      List<Artwork> artworks = [];
-
-      if (includeCharacters) {
-        characters = results[resultIndex++] as List<Character>;
-      }
-
-      if (includeEvents) {
-        events = results[resultIndex++] as List<Event>;
-      }
-
-      if (includeMedia) {
-        videos = results[resultIndex++] as List<GameVideo>;
-        screenshots = results[resultIndex++] as List<Screenshot>;
-        artworks = results[resultIndex++] as List<Artwork>;
-      }
-
-      // Create enhanced game with additional data
-      final enhancedGame = game.copyWith(
-        characters: characters,
-        events: events,
-        videos: videos,
-        screenshots: screenshots,
-        artworks: artworks,
-      );
-
-      print('✅ GameRepository: Enhanced game details loaded');
-      print('📊 GameRepository: ${characters.length} characters, ${events.length} events, ${videos.length + screenshots.length + artworks.length} media items');
-
-      return Right(enhancedGame);
-
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get enhanced game details'));
-    }
-  }
 
   // ==========================================
   // CHARACTER DISCOVERY & SEARCH
@@ -4454,4 +4345,124 @@ class GameRepositoryImpl implements GameRepository {
     return [];
   }
 
+  @override
+  Future<Either<Failure, List<Event>>> getGameEvents(int gameId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎪 GameRepository: Getting events for game: $gameId');
+
+      // Use enhanced method for complete event data
+      final events = await igdbDataSource.getEventsByGamesWithCompleteData([gameId]);
+
+      print('✅ GameRepository: Found ${events.length} events with complete data');
+      print('📊 GameRepository: Events have logos: ${events.where((e) => e.hasLogoObject).length}');
+      print('📊 GameRepository: Events have networks: ${events.where((e) => e.hasNetworkObjects).length}');
+      print('📊 GameRepository: Events have games: ${events.where((e) => e.hasGameObjects).length}');
+
+      return Right(events);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get game events'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Game>> getEnhancedGameDetails({
+    required int gameId,
+    String? userId,
+    bool includeCharacters = true,
+    bool includeEvents = true,
+    bool includeMedia = true,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting enhanced game details for: $gameId');
+
+      // Get basic game details first
+      final gameResult = await getGameDetails(gameId);
+      if (gameResult.isLeft()) {
+        return gameResult;
+      }
+
+      final game = gameResult.fold((l) => throw Exception('Unexpected failure'), (r) => r);
+
+      // Prepare futures for concurrent loading
+      List<Future> futures = [];
+
+      if (includeCharacters) {
+        futures.add(igdbDataSource.getCharactersForGames([gameId]));
+      }
+
+      if (includeEvents) {
+        // Use enhanced method for complete event data
+        futures.add(igdbDataSource.getEventsByGamesWithCompleteData([gameId]));
+      }
+
+      if (includeMedia) {
+        futures.add(igdbDataSource.getGameVideos([gameId]));
+        futures.add(igdbDataSource.getScreenshots(gameIds: [gameId]));
+        futures.add(igdbDataSource.getArtworks(gameIds: [gameId]));
+      }
+
+      // Execute all requests concurrently
+      final results = futures.isNotEmpty ? await Future.wait(futures) : [];
+
+      // Parse results
+      int resultIndex = 0;
+      List<Character> characters = [];
+      List<Event> events = [];
+      List<GameVideo> videos = [];
+      List<Screenshot> screenshots = [];
+      List<Artwork> artworks = [];
+
+      if (includeCharacters) {
+        characters = results[resultIndex++] as List<Character>;
+      }
+
+      if (includeEvents) {
+        events = results[resultIndex++] as List<Event>;
+      }
+
+      if (includeMedia) {
+        videos = results[resultIndex++] as List<GameVideo>;
+        screenshots = results[resultIndex++] as List<Screenshot>;
+        artworks = results[resultIndex++] as List<Artwork>;
+      }
+
+      // Create enhanced game with additional data
+      final enhancedGame = game.copyWith(
+        characters: characters,
+        events: events,
+        videos: videos,
+        screenshots: screenshots,
+        artworks: artworks,
+      );
+
+      print('✅ GameRepository: Enhanced game details loaded');
+      print('📊 GameRepository: ${characters.length} characters, ${events.length} events, ${videos.length + screenshots.length + artworks.length} media items');
+
+      // Print event details for debugging
+      if (events.isNotEmpty) {
+        print('📊 GameRepository: Event details:');
+        for (final event in events) {
+          print('  - ${event.name}: ${event.games.length} games, ${event.eventNetworks.length} networks');
+        }
+      }
+
+      return Right(enhancedGame);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get enhanced game details'));
+    }
+  }
 }

@@ -19,6 +19,7 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/rating_dialog.dart';
 import '../../widgets/sections/character_section.dart';
 import '../../widgets/sections/content_dlc_section.dart';
+import '../../widgets/sections/events_section.dart';
 import '../../widgets/sections/franchise_collection_section.dart';
 import '../../widgets/top_three_dialog.dart';
 
@@ -319,6 +320,15 @@ class _GameDetailPageState extends State<GameDetailPage>
             _buildGameDetailsAccordion(game,),
 
             CharactersSection(game: game),
+
+            // 🆕 EVENTS SECTION (NEW!)
+            if (game.events.isNotEmpty)
+              EventsSection(
+                game: game,
+                currentUserId: _currentUserId,
+                showViewAll: true,
+                maxDisplayedEvents: 6,
+              ),
 
             FranchiseCollectionsSection(game: game), // Franchises&Collections
             ContentDLCSection(game: game),           // 🟢 DLCs & Content

@@ -1,5 +1,8 @@
-// ===== NETWORK TYPE MODEL =====
-// lib/data/models/event/network_type_model.dart
+// ==================================================
+// ENHANCED NETWORK TYPE MODEL
+// ==================================================
+
+// lib/data/models/event/network_type_model.dart (ENHANCED)
 import '../../../domain/entities/event/network_type.dart';
 
 class NetworkTypeModel extends NetworkType {
@@ -14,13 +17,25 @@ class NetworkTypeModel extends NetworkType {
 
   factory NetworkTypeModel.fromJson(Map<String, dynamic> json) {
     return NetworkTypeModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
+      id: _parseId(json['id']),
+      checksum: _parseString(json['checksum']) ?? '',
+      name: _parseString(json['name']) ?? 'Unknown Network',
       eventNetworkIds: _parseIdList(json['event_networks']),
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
+  }
+
+  // Helper parsing methods
+  static int _parseId(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static String? _parseString(dynamic value) {
+    if (value is String && value.isNotEmpty) return value;
+    return null;
   }
 
   static List<int> _parseIdList(dynamic data) {
@@ -42,6 +57,7 @@ class NetworkTypeModel extends NetworkType {
     return null;
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,15 +1,15 @@
-// ==========================================
+// ==================================================
 
 // lib/domain/usecases/events/get_event_details.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
 import '../../entities/event/event.dart';
-import '../../repositories/game_repository.dart';
+import '../../repositories/event_repository.dart';
 import '../base_usecase.dart';
 
 class GetEventDetails extends UseCase<Event, GetEventDetailsParams> {
-  final GameRepository repository;
+  final EventRepository repository;
 
   GetEventDetails(this.repository);
 
@@ -31,3 +31,5 @@ class GetEventDetailsParams extends Equatable {
   @override
   List<Object> get props => [eventId];
 }
+
+

@@ -1,5 +1,8 @@
-// ===== EVENT LOGO MODEL =====
-// lib/data/models/event/event_logo_model.dart
+// ==================================================
+// ENHANCED EVENT LOGO MODEL
+// ==================================================
+
+// lib/data/models/event/event_logo_model.dart (ENHANCED)
 import '../../../domain/entities/event/event_logo.dart';
 
 class EventLogoModel extends EventLogo {
@@ -19,18 +22,43 @@ class EventLogoModel extends EventLogo {
 
   factory EventLogoModel.fromJson(Map<String, dynamic> json) {
     return EventLogoModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      imageId: json['image_id'] ?? '',
-      height: json['height'] ?? 0,
-      width: json['width'] ?? 0,
-      alphaChannel: json['alpha_channel'] ?? false,
-      animated: json['animated'] ?? false,
-      eventId: json['event'],
-      url: json['url'],
+      id: _parseId(json['id']),
+      checksum: _parseString(json['checksum']) ?? '',
+      imageId: _parseString(json['image_id']) ?? '',
+      height: _parseInt(json['height']) ?? 0,
+      width: _parseInt(json['width']) ?? 0,
+      alphaChannel: _parseBool(json['alpha_channel']),
+      animated: _parseBool(json['animated']),
+      eventId: _parseId(json['event']),
+      url: _parseString(json['url']),
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
+  }
+
+  // Helper parsing methods
+  static int _parseId(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static String? _parseString(dynamic value) {
+    if (value is String && value.isNotEmpty) return value;
+    return null;
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.toLowerCase() == 'true';
+    if (value is int) return value == 1;
+    return false;
   }
 
   static DateTime? _parseDateTime(dynamic date) {
@@ -42,6 +70,7 @@ class EventLogoModel extends EventLogo {
     return null;
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

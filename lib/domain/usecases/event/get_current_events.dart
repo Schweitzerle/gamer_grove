@@ -1,6 +1,6 @@
-// ==========================================
+// ==================================================
 
-// lib/domain/usecases/event/get_current_events.dart
+// lib/domain/usecases/events/get_current_events.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
@@ -27,3 +27,4 @@ class GetCurrentEventsParams extends Equatable {
   @override
   List<Object> get props => [limit];
 }
+

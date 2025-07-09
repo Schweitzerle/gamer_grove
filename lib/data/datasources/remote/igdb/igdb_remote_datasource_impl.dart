@@ -2779,101 +2779,7 @@ platforms.platform_logo.checksum,
   // EVENT METHODS
   // ==========================================
 
-  @override
-  Future<List<EventModel>> getEvents({
-    List<int>? ids,
-    String? search,
-    int limit = 50,
-  }) async {
-    String body;
-    const fields =
-        'id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos';
 
-    if (ids != null && ids.isNotEmpty) {
-      final idsString = ids.join(',');
-      body = 'where id = ($idsString); fields $fields; limit ${ids.length};';
-    } else if (search != null) {
-      body = 'search "$search"; fields $fields; limit $limit;';
-    } else {
-      body = 'fields $fields; sort start_time desc; limit $limit;';
-    }
-
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
-
-  @override
-  Future<EventModel?> getEventById(int id) async {
-    final events = await getEvents(ids: [id]);
-    return events.isNotEmpty ? events.first : null;
-  }
-
-  @override
-  Future<List<EventModel>> searchEvents(String query, {int limit = 20}) async =>
-      await getEvents(search: query, limit: limit);
-
-  @override
-  Future<List<EventModel>> getUpcomingEvents({int limit = 50}) async {
-    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body =
-        'where start_time > $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
-
-  @override
-  Future<List<EventModel>> getLiveEvents({int limit = 50}) async {
-    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body =
-        'where start_time <= $now & end_time >= $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit $limit;';
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
-
-  @override
-  Future<List<EventModel>> getPastEvents({int limit = 50}) async {
-    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
-    final body =
-        'where end_time < $now; fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort end_time desc; limit $limit;';
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
-
-  @override
-  Future<List<EventModel>> getEventsByDateRange({
-    DateTime? startDate,
-    DateTime? endDate,
-    int limit = 50,
-  }) async {
-    String whereClause = '';
-    if (startDate != null && endDate != null) {
-      final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
-      final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
-      whereClause =
-          'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
-    } else if (startDate != null) {
-      final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
-      whereClause = 'where start_time >= $startTimestamp;';
-    } else if (endDate != null) {
-      final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
-      whereClause = 'where start_time <= $endTimestamp;';
-    }
-
-    final body =
-        '$whereClause fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; sort start_time asc; limit $limit;';
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
-
-  @override
-  Future<List<EventModel>> getEventsByGames(List<int> gameIds) async {
-    if (gameIds.isEmpty) return [];
-    final gameIdsString = gameIds.join(',');
-    final body =
-        'where games = ($gameIdsString); fields id, checksum, name, description, slug, created_at, updated_at, start_time, end_time, time_zone, event_logo, live_stream_url, event_networks, games, videos; limit 100;';
-    return await _makeRequest(
-        'events', body, (json) => EventModel.fromJson(json));
-  }
 
   @override
   Future<List<EventLogoModel>> getEventLogos(
@@ -2961,19 +2867,6 @@ platforms.platform_logo.checksum,
           {int limit = 20}) async =>
       await getNetworkTypes(search: query, limit: limit);
 
-  @override
-  Future<Map<String, dynamic>> getCompleteEventData(int eventId) async {
-    try {
-      final body =
-          'where id = $eventId; fields *, event_logo.*, event_networks.*, games.name; limit 1;';
-      final response = await _makeRawRequest('events', body);
-      final List<dynamic> data = json.decode(response.body);
-      return data.isNotEmpty ? data.first : {};
-    } catch (e) {
-      print('💥 IGDB: Get complete event data error: $e');
-      return {};
-    }
-  }
 
   @override
   Future<List<EventModel>> getEventsWithGamesAndNetworks(
@@ -4450,4 +4343,414 @@ platforms.platform_logo.checksum,
         return 'total_rating'; // Default fallback
     }
   }
+
+
+  // ==========================================
+  // ENHANCED EVENT METHODS WITH FULL OBJECT LOADING
+  // ==========================================
+
+  /// Get events with complete object data (enhanced)
+  @override
+  Future<List<EventModel>> getEventsWithCompleteData({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    String body;
+
+    if (ids != null && ids.isNotEmpty) {
+      final idsString = ids.join(',');
+      body = '''
+        where id = ($idsString); 
+        fields id, checksum, name, description, slug, created_at, updated_at, 
+               start_time, end_time, time_zone, live_stream_url,
+               event_logo.*, 
+               event_networks.*, event_networks.network_type.*,
+               games.id, games.name, games.slug, games.summary, games.cover.url,
+               games.first_release_date, games.total_rating, games.platforms.name,
+               videos.id, videos.name, videos.video_id, videos.checksum;
+        limit ${ids.length};
+      ''';
+    } else if (search != null) {
+      body = '''
+        search "$search"; 
+        fields id, checksum, name, description, slug, created_at, updated_at, 
+               start_time, end_time, time_zone, live_stream_url,
+               event_logo.*, 
+               event_networks.*, event_networks.network_type.*,
+               games.id, games.name, games.slug, games.summary, games.cover.url,
+               games.first_release_date, games.total_rating, games.platforms.name,
+               videos.id, videos.name, videos.video_id, videos.checksum;
+        limit $limit;
+      ''';
+    } else {
+      body = '''
+        fields id, checksum, name, description, slug, created_at, updated_at, 
+               start_time, end_time, time_zone, live_stream_url,
+               event_logo.*, 
+               event_networks.*, event_networks.network_type.*,
+               games.id, games.name, games.slug, games.summary, games.cover.url,
+               games.first_release_date, games.total_rating, games.platforms.name,
+               videos.id, videos.name, videos.video_id, videos.checksum;
+        sort start_time desc; 
+        limit $limit;
+      ''';
+    }
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Get event by ID with complete data (enhanced)
+  @override
+  Future<EventModel?> getEventByIdWithCompleteData(int id) async {
+    final events = await getEventsWithCompleteData(ids: [id]);
+    return events.isNotEmpty ? events.first : null;
+  }
+
+  /// Get events by games with complete data (enhanced)
+  @override
+  Future<List<EventModel>> getEventsByGamesWithCompleteData(List<int> gameIds) async {
+    if (gameIds.isEmpty) return [];
+
+    final gameIdsString = gameIds.join(',');
+    final body = '''
+      where games = ($gameIdsString); 
+      fields id, checksum, name, description, slug, created_at, updated_at, 
+             start_time, end_time, time_zone, live_stream_url,
+             event_logo.*, 
+             event_networks.*, event_networks.network_type.*,
+             games.id, games.name, games.slug, games.summary, games.cover.url,
+             games.first_release_date, games.total_rating, games.platforms.name,
+             videos.id, videos.name, videos.video_id, videos.checksum;
+      sort start_time desc; 
+      limit 100;
+    ''';
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Get upcoming events with complete data (enhanced)
+  @override
+  Future<List<EventModel>> getUpcomingEventsWithCompleteData({int limit = 50}) async {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final body = '''
+      where start_time > $now; 
+      fields id, checksum, name, description, slug, created_at, updated_at, 
+             start_time, end_time, time_zone, live_stream_url,
+             event_logo.*, 
+             event_networks.*, event_networks.network_type.*,
+             games.id, games.name, games.slug, games.summary, games.cover.url,
+             games.first_release_date, games.total_rating, games.platforms.name,
+             videos.id, videos.name, videos.video_id, videos.checksum;
+      sort start_time asc; 
+      limit $limit;
+    ''';
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Get live events with complete data (enhanced)
+  @override
+  Future<List<EventModel>> getLiveEventsWithCompleteData({int limit = 50}) async {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final body = '''
+      where start_time <= $now & end_time >= $now; 
+      fields id, checksum, name, description, slug, created_at, updated_at, 
+             start_time, end_time, time_zone, live_stream_url,
+             event_logo.*, 
+             event_networks.*, event_networks.network_type.*,
+             games.id, games.name, games.slug, games.summary, games.cover.url,
+             games.first_release_date, games.total_rating, games.platforms.name,
+             videos.id, videos.name, videos.video_id, videos.checksum;
+      limit $limit;
+    ''';
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Get past events with complete data (enhanced)
+  @override
+  Future<List<EventModel>> getPastEventsWithCompleteData({int limit = 50}) async {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final body = '''
+      where end_time < $now; 
+      fields id, checksum, name, description, slug, created_at, updated_at, 
+             start_time, end_time, time_zone, live_stream_url,
+             event_logo.*, 
+             event_networks.*, event_networks.network_type.*,
+             games.id, games.name, games.slug, games.summary, games.cover.url,
+             games.first_release_date, games.total_rating, games.platforms.name,
+             videos.id, videos.name, videos.video_id, videos.checksum;
+      sort end_time desc; 
+      limit $limit;
+    ''';
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Get events by date range with complete data (enhanced)
+  @override
+  Future<List<EventModel>> getEventsByDateRangeWithCompleteData({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  }) async {
+    String whereClause = '';
+
+    if (startDate != null && endDate != null) {
+      final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
+      final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
+      whereClause = 'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
+    } else if (startDate != null) {
+      final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
+      whereClause = 'where start_time >= $startTimestamp;';
+    } else if (endDate != null) {
+      final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
+      whereClause = 'where start_time <= $endTimestamp;';
+    }
+
+    final body = '''
+      $whereClause
+      fields id, checksum, name, description, slug, created_at, updated_at, 
+             start_time, end_time, time_zone, live_stream_url,
+             event_logo.*, 
+             event_networks.*, event_networks.network_type.*,
+             games.id, games.name, games.slug, games.summary, games.cover.url,
+             games.first_release_date, games.total_rating, games.platforms.name,
+             videos.id, videos.name, videos.video_id, videos.checksum;
+      sort start_time asc; 
+      limit $limit;
+    ''';
+
+    return await _makeRequest(
+      'events',
+      body,
+          (json) => EventModel.fromJson(json),
+    );
+  }
+
+  /// Search events with complete data (enhanced)
+  @override
+  Future<List<EventModel>> searchEventsWithCompleteData(String query, {int limit = 20}) async {
+    return await getEventsWithCompleteData(search: query, limit: limit);
+  }
+
+  // ==========================================
+  // BACKWARD COMPATIBILITY METHODS
+  // ==========================================
+
+  /// Get events (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getEvents({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  }) async {
+    // Use enhanced method for better data
+    return await getEventsWithCompleteData(ids: ids, search: search, limit: limit);
+  }
+
+  /// Get event by ID (legacy method - now uses complete data)
+  @override
+  Future<EventModel?> getEventById(int id) async {
+    return await getEventByIdWithCompleteData(id);
+  }
+
+  /// Get events by games (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getEventsByGames(List<int> gameIds) async {
+    return await getEventsByGamesWithCompleteData(gameIds);
+  }
+
+  /// Get upcoming events (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getUpcomingEvents({int limit = 50}) async {
+    return await getUpcomingEventsWithCompleteData(limit: limit);
+  }
+
+  /// Get live events (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getLiveEvents({int limit = 50}) async {
+    return await getLiveEventsWithCompleteData(limit: limit);
+  }
+
+  /// Get past events (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getPastEvents({int limit = 50}) async {
+    return await getPastEventsWithCompleteData(limit: limit);
+  }
+
+  /// Get events by date range (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> getEventsByDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  }) async {
+    return await getEventsByDateRangeWithCompleteData(
+      startDate: startDate,
+      endDate: endDate,
+      limit: limit,
+    );
+  }
+
+  /// Search events (legacy method - now uses complete data)
+  @override
+  Future<List<EventModel>> searchEvents(String query, {int limit = 20}) async {
+    return await searchEventsWithCompleteData(query, limit: limit);
+  }
+
+  // ==========================================
+  // GAME INTEGRATION METHODS
+  // ==========================================
+
+  /// Get games with their events (for GameModel integration)
+  @override
+  Future<List<GameModel>> getGamesWithEvents(List<int> gameIds) async {
+    if (gameIds.isEmpty) return [];
+
+    final gameIdsString = gameIds.join(',');
+    final body = '''
+      where id = ($gameIdsString); 
+      fields id, name, slug, summary, cover.url, first_release_date, total_rating,
+             platforms.name, platforms.abbreviation,
+             genres.name, genres.slug,
+             events.id, events.name, events.description, events.slug,
+             events.start_time, events.end_time, events.time_zone,
+             events.live_stream_url,
+             events.event_logo.*,
+             events.event_networks.*, events.event_networks.network_type.*,
+             events.games.id, events.games.name, events.games.slug,
+             events.videos.id, events.videos.name, events.videos.video_id;
+      limit ${gameIds.length};
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
+  // ==========================================
+  // HELPER METHODS FOR COMPLETE DATA LOADING
+  // ==========================================
+
+  /// Get complete event data with all relationships
+  @override
+  Future<Map<String, dynamic>> getCompleteEventData(int eventId) async {
+    try {
+      final body = '''
+        where id = $eventId; 
+        fields *,
+               event_logo.*,
+               event_networks.*, event_networks.network_type.*,
+               games.*, games.cover.*, games.screenshots.*, games.platforms.*,
+               games.genres.*, games.themes.*, games.involved_companies.*,
+               games.age_ratings.*, games.websites.*,
+               videos.*, videos.checksum;
+        limit 1;
+      ''';
+
+      final response = await _makeRequest(
+        'events',
+        body,
+            (json) => json,
+      );
+
+      return response.isNotEmpty ? response.first : {};
+    } catch (e) {
+      print('⚠️ IGDBRemoteDataSource: Failed to get complete event data: $e');
+      return {};
+    }
+  }
+
+  /// Preload event relationships for better performance
+  @override
+  Future<void> preloadEventRelationships(List<int> eventIds) async {
+    if (eventIds.isEmpty) return;
+
+    try {
+      // Preload event logos
+      await _preloadEventLogos(eventIds);
+
+      // Preload event networks
+      await _preloadEventNetworks(eventIds);
+
+      // Preload featured games
+      await _preloadEventGames(eventIds);
+
+      // Preload event videos
+      await _preloadEventVideos(eventIds);
+
+      print('✅ IGDBRemoteDataSource: Preloaded relationships for ${eventIds.length} events');
+    } catch (e) {
+      print('⚠️ IGDBRemoteDataSource: Failed to preload event relationships: $e');
+    }
+  }
+
+  Future<void> _preloadEventLogos(List<int> eventIds) async {
+    final eventIdsString = eventIds.join(',');
+    final body = '''
+      where event = ($eventIdsString); 
+      fields id, image_id, url, width, height, alpha_channel, animated, event;
+      limit 100;
+    ''';
+
+    await _makeRequest(
+      'event_logos',
+      body,
+          (json) => EventLogoModel.fromJson(json),
+    );
+  }
+
+  Future<void> _preloadEventNetworks(List<int> eventIds) async {
+    final eventIdsString = eventIds.join(',');
+    final body = '''
+      where event = ($eventIdsString); 
+      fields id, url, checksum, event, network_type.*, created_at, updated_at;
+      limit 200;
+    ''';
+
+    await _makeRequest(
+      'event_networks',
+      body,
+          (json) => EventNetworkModel.fromJson(json),
+    );
+  }
+
+  Future<void> _preloadEventGames(List<int> eventIds) async {
+    // This would require finding games that are featured in these events
+    // Implementation depends on how IGDB structures the relationship
+    print('🔄 IGDBRemoteDataSource: Preloading event games for ${eventIds.length} events');
+  }
+
+  Future<void> _preloadEventVideos(List<int> eventIds) async {
+    // This would require finding videos that are associated with these events
+    // Implementation depends on how IGDB structures the relationship
+    print('🔄 IGDBRemoteDataSource: Preloading event videos for ${eventIds.length} events');
+  }
+
 }
+
+

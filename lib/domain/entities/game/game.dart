@@ -402,6 +402,11 @@ class Game extends Equatable {
       pp.name.toLowerCase().contains('bird') ||
       pp.name.toLowerCase().contains('isometric'));
 
+  bool get hasEvents => events.isNotEmpty;
+  int get eventsCount => events.length;
+  bool get hasLiveEvents => events.any((event) => event.isLive);
+  bool get hasUpcomingEvents => events.any((event) => event.isUpcoming);
+
   Game copyWith({
     int? id,
     String? name,

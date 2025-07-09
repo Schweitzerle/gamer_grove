@@ -262,3 +262,118 @@ class LoadGameWithUserDataEvent extends GameEvent {
   List<Object?> get props => [gameId, userId];
 }
 
+// ============================================================================
+// NEW EVENTS for "View All" functionality
+// ============================================================================
+
+// Add these events to your game_event.dart file:
+
+/// Load complete franchise games (for "View All" screens)
+class LoadCompleteFranchiseGamesEvent extends GameEvent {
+  final int franchiseId;
+  final String franchiseName;
+  final String? userId;
+
+  const LoadCompleteFranchiseGamesEvent({
+    required this.franchiseId,
+    required this.franchiseName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [franchiseId, franchiseName, userId];
+}
+
+/// Load complete collection games (for "View All" screens)
+class LoadCompleteCollectionGamesEvent extends GameEvent {
+  final int collectionId;
+  final String collectionName;
+  final String? userId;
+
+  const LoadCompleteCollectionGamesEvent({
+    required this.collectionId,
+    required this.collectionName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [collectionId, collectionName, userId];
+}
+
+/// Load complete similar games (for "View All" screens)
+class LoadCompleteSimilarGamesEvent extends GameEvent {
+  final int gameId;
+  final String gameName;
+  final String? userId;
+
+  const LoadCompleteSimilarGamesEvent({
+    required this.gameId,
+    required this.gameName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, gameName, userId];
+}
+
+/// Load complete game series (DLCs + Expansions + Remakes, etc.)
+class LoadCompleteGameSeriesEvent extends GameEvent {
+  final int gameId;
+  final String gameName;
+  final String? userId;
+
+  const LoadCompleteGameSeriesEvent({
+    required this.gameId,
+    required this.gameName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [gameId, gameName, userId];
+}
+
+
+
+// Add these handler methods to your GameBloc class:
+
+/// Load complete franchise games (all games, not limited)
+
+
+// ============================================================================
+// USAGE EXAMPLES for Navigation
+// ============================================================================
+
+/*
+// In your UI components, use these events like this:
+
+// Navigate to complete franchise games
+void _navigateToCompleteFranchiseGames(Franchise franchise) {
+  context.read<GameBloc>().add(LoadCompleteFranchiseGamesEvent(
+    franchiseId: franchise.id,
+    franchiseName: franchise.name,
+    userId: _currentUserId,
+  ));
+
+  // Navigate to AllGamesPage and listen for CompleteFranchiseGamesLoaded state
+  Navigator.push(context, MaterialPageRoute(
+    builder: (context) => BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        if (state is CompleteFranchiseGamesLoaded) {
+          return AllGamesPage(
+            title: state.franchiseName,
+            subtitle: '${state.games.length} games',
+            games: state.games,
+          );
+        } else if (state is GameLoading) {
+          return LoadingPage();
+        } else if (state is GameError) {
+          return ErrorPage(message: state.message);
+        }
+        return LoadingPage();
+      },
+    ),
+  ));
+}
+
+// Similar for collections, similar games, etc.
+*/

@@ -34,6 +34,10 @@ abstract class EventRepository {
 
   /// Get event details by ID
   Future<Either<Failure, Event>> getEventDetails(int eventId);
+
+  /// Search events by query
+  Future<Either<Failure, List<Event>>> searchEvents(String query);
+
 }
 
 

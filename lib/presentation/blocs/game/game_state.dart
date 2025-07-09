@@ -461,3 +461,74 @@ class GameExpansionsLoaded extends GameState {
   List<Object> get props => [expansions];
 }
 
+
+// ============================================================================
+// NEW STATES for "View All" functionality
+// ============================================================================
+
+// Add these states to your game_state.dart file:
+
+/// Complete franchise games loaded (for "View All" screens)
+class CompleteFranchiseGamesLoaded extends GameState {
+  final int franchiseId;
+  final String franchiseName;
+  final List<Game> games;
+
+  const CompleteFranchiseGamesLoaded({
+    required this.franchiseId,
+    required this.franchiseName,
+    required this.games,
+  });
+
+  @override
+  List<Object> get props => [franchiseId, franchiseName, games];
+}
+
+/// Complete collection games loaded (for "View All" screens)
+class CompleteCollectionGamesLoaded extends GameState {
+  final int collectionId;
+  final String collectionName;
+  final List<Game> games;
+
+  const CompleteCollectionGamesLoaded({
+    required this.collectionId,
+    required this.collectionName,
+    required this.games,
+  });
+
+  @override
+  List<Object> get props => [collectionId, collectionName, games];
+}
+
+/// Complete similar games loaded (for "View All" screens)
+class CompleteSimilarGamesLoaded extends GameState {
+  final int gameId;
+  final String gameName;
+  final List<Game> games;
+
+  const CompleteSimilarGamesLoaded({
+    required this.gameId,
+    required this.gameName,
+    required this.games,
+  });
+
+  @override
+  List<Object> get props => [gameId, gameName, games];
+}
+
+/// Complete game series loaded (for "View All" screens)
+class CompleteGameSeriesLoaded extends GameState {
+  final int gameId;
+  final String gameName;
+  final Map<String, List<Game>> gamesByCategory; // "dlcs", "expansions", etc.
+
+  const CompleteGameSeriesLoaded({
+    required this.gameId,
+    required this.gameName,
+    required this.gamesByCategory,
+  });
+
+  @override
+  List<Object> get props => [gameId, gameName, gamesByCategory];
+}
+

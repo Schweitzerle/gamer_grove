@@ -1,15 +1,15 @@
-// ==========================================
+// ==================================================
 
 // lib/domain/usecases/events/search_events.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
 import '../../entities/event/event.dart';
-import '../../repositories/game_repository.dart';
+import '../../repositories/event_repository.dart';
 import '../base_usecase.dart';
 
 class SearchEvents extends UseCase<List<Event>, SearchEventsParams> {
-  final GameRepository repository;
+  final EventRepository repository;
 
   SearchEvents(this.repository);
 
@@ -31,4 +31,3 @@ class SearchEventsParams extends Equatable {
   @override
   List<Object> get props => [query];
 }
-

@@ -1,5 +1,6 @@
 // lib/injection_container.dart
 import 'package:gamer_grove/domain/usecases/game/getUserRated.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +14,11 @@ import 'data/datasources/remote/igdb/igdb_remote_datasource_impl.dart';
 import 'data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import 'data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
 import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/event_repository_impl.dart';
 import 'data/repositories/game_repository_impl.dart';
 import 'data/repositories/user_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
+import 'domain/repositories/event_repository.dart';
 import 'domain/repositories/game_repository.dart';
 import 'domain/repositories/user_repository.dart';
 import 'domain/usecases/auth/get_current_user.dart';
@@ -24,6 +27,14 @@ import 'domain/usecases/auth/sign_in.dart';
 import 'domain/usecases/auth/sign_up.dart';
 import 'domain/usecases/auth/sign_out.dart';
 import 'domain/usecases/auth/update_password.dart';
+import 'domain/usecases/event/get_complete_event_details.dart';
+import 'domain/usecases/event/get_current_events.dart';
+import 'domain/usecases/event/get_event_details.dart';
+import 'domain/usecases/event/get_events_by_date_range.dart';
+import 'domain/usecases/event/get_events_by_games.dart';
+import 'domain/usecases/event/get_game_events.dart';
+import 'domain/usecases/event/get_upcoming_events.dart';
+import 'domain/usecases/event/search_events.dart';
 import 'domain/usecases/game/get_complete_game_details.dart';
 import 'domain/usecases/game/get_game_companies.dart';
 import 'domain/usecases/game/get_game_dlcs.dart';
@@ -118,6 +129,15 @@ Future<void> init() async {
     ),
   );
 
+  // Repository
+  sl.registerLazySingleton<EventRepository>(
+        () => EventRepositoryImpl(
+      igdbDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+
   // Use cases - Auth
   print('🔐 DI: Registering auth use cases...');
   sl.registerLazySingleton(() => SignIn(sl()));
@@ -163,6 +183,20 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetEnhancedGameDetails(sl()));
   sl.registerLazySingleton(() => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
 
+  // Use Cases Event
+  sl.registerLazySingleton(() => GetEventDetails(sl()));
+  sl.registerLazySingleton(() => GetCurrentEvents(sl()));
+  sl.registerLazySingleton(() => GetUpcomingEvents(sl()));
+  sl.registerLazySingleton(() => SearchEvents(sl()));
+  sl.registerLazySingleton(() => GetEventsByDateRange(sl()));
+  sl.registerLazySingleton(() => GetEventsByGames(sl()));
+  sl.registerLazySingleton(() => GetGameEvents(sl()));
+  sl.registerLazySingleton(() => GetCompleteEventDetails(
+    eventRepository: sl(),
+    gameRepository: sl(),
+  ));
+
+
 
   // BLoCs
   print('🧠 DI: Registering BLoCs...');
@@ -194,6 +228,19 @@ Future<void> init() async {
           getUserRecommendations: sl(),
           getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(), getTopRatedGames: sl(), getLatestGames: sl(),
         ),
+  );
+
+  // Bloc
+  sl.registerFactory(
+        () => EventBloc(
+      getEventDetails: sl(),
+      getCurrentEvents: sl(),
+      getUpcomingEvents: sl(),
+      searchEvents: sl(),
+      getEventsByDateRange: sl(),
+      getEventsByGames: sl(),
+      getCompleteEventDetails: sl(),
+    ),
   );
   print('✅ DI: Dependency injection setup complete!');
 }

@@ -114,6 +114,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GetSimilarGamesEvent>(_onGetSimilarGames);
     on<GetGameDLCsEvent>(_onGetGameDLCs);
     on<GetGameExpansionsEvent>(_onGetGameExpansions);
+
+    on<LoadCompleteFranchiseGamesEvent>(_onLoadCompleteFranchiseGames);
+    on<LoadCompleteCollectionGamesEvent>(_onLoadCompleteCollectionGames);
+    on<LoadCompleteSimilarGamesEvent>(_onLoadCompleteSimilarGames);
+    on<LoadCompleteGameSeriesEvent>(_onLoadCompleteGameSeries);
   }
 
   // Debounce transformer for search
@@ -1099,86 +1104,96 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
    */
 
-// 🆕 NEW: Helper method to enrich ALL nested games (simplified)
-  Future<Game> _enrichGameWithAllNestedUserData(
-      Game game, String userId) async {
+  Future<Game> _enrichGameWithAllNestedUserData(Game game, String userId) async {
     try {
-      // 1. 🎮 SIMILAR GAMES (einfach wie immer)
+      // ✅ CONSTANTS for Detail View Limits
+      const int DETAIL_VIEW_LIMIT = 12; // Max games to show in detail view
+      const int FRANCHISE_LIMIT = 10;   // Max franchise games in detail
+      const int COLLECTION_LIMIT = 8;   // Max collection games in detail
+
+      print('🎯 Starting optimized nested game enrichment with limits...');
+
+      // 1. ⭐ SIMILAR GAMES (limit to 12)
       List<Game> enrichedSimilarGames = game.similarGames;
       if (game.similarGames.isNotEmpty) {
-        print('🔄 Enriching similar games...');
-        enrichedSimilarGames =
-            await _enrichGamesWithUserData(game.similarGames, userId);
+        print('🔄 Enriching similar games (${game.similarGames.length} → max $DETAIL_VIEW_LIMIT)...');
+        final limitedSimilarGames = game.similarGames.take(DETAIL_VIEW_LIMIT).toList();
+        enrichedSimilarGames = await _enrichGamesWithUserData(limitedSimilarGames, userId);
       }
 
-      // 2. 📦 DLC GAMES (einfach wie immer)
+      // 2. 🎮 DLCs (limit to 12)
       List<Game> enrichedDLCs = game.dlcs;
       if (game.dlcs.isNotEmpty) {
-        print('🔄 Enriching DLC games...');
-        enrichedDLCs = await _enrichGamesWithUserData(game.dlcs, userId);
+        print('🔄 Enriching DLCs (${game.dlcs.length} → max $DETAIL_VIEW_LIMIT)...');
+        final limitedDLCs = game.dlcs.take(DETAIL_VIEW_LIMIT).toList();
+        enrichedDLCs = await _enrichGamesWithUserData(limitedDLCs, userId);
       }
 
-      // 3. 🎯 EXPANSION GAMES (einfach wie immer)
+      // 3. 📦 EXPANSIONS (limit to 12)
       List<Game> enrichedExpansions = game.expansions;
       if (game.expansions.isNotEmpty) {
-        print('🔄 Enriching expansion games...');
-        enrichedExpansions =
-            await _enrichGamesWithUserData(game.expansions, userId);
+        print('🔄 Enriching expansions (${game.expansions.length} → max $DETAIL_VIEW_LIMIT)...');
+        final limitedExpansions = game.expansions.take(DETAIL_VIEW_LIMIT).toList();
+        enrichedExpansions = await _enrichGamesWithUserData(limitedExpansions, userId);
       }
 
-      // 4. 🏆 STANDALONE EXPANSIONS (einfach wie immer)
+      // 4. 🆕 STANDALONE EXPANSIONS (limit to 10)
       List<Game> enrichedStandaloneExpansions = game.standaloneExpansions;
       if (game.standaloneExpansions.isNotEmpty) {
-        print('🔄 Enriching standalone expansion games...');
-        enrichedStandaloneExpansions =
-            await _enrichGamesWithUserData(game.standaloneExpansions, userId);
+        print('🔄 Enriching standalone expansions (${game.standaloneExpansions.length} → max 10)...');
+        final limitedStandaloneExpansions = game.standaloneExpansions.take(10).toList();
+        enrichedStandaloneExpansions = await _enrichGamesWithUserData(limitedStandaloneExpansions, userId);
       }
 
-      // 5. 📦 BUNDLES (einfach wie immer)
+      // 5. 📦 BUNDLES (limit to 8)
       List<Game> enrichedBundles = game.bundles;
       if (game.bundles.isNotEmpty) {
-        print('🔄 Enriching bundle games...');
-        enrichedBundles = await _enrichGamesWithUserData(game.bundles, userId);
+        print('🔄 Enriching bundles (${game.bundles.length} → max 8)...');
+        final limitedBundles = game.bundles.take(8).toList();
+        enrichedBundles = await _enrichGamesWithUserData(limitedBundles, userId);
       }
 
-      // 6. 🔧 REMAKES (einfach wie immer)
+      // 6. 🔄 REMAKES (limit to 10)
       List<Game> enrichedRemakes = game.remakes;
       if (game.remakes.isNotEmpty) {
-        print('🔄 Enriching remake games...');
-        enrichedRemakes = await _enrichGamesWithUserData(game.remakes, userId);
+        print('🔄 Enriching remakes (${game.remakes.length} → max 10)...');
+        final limitedRemakes = game.remakes.take(10).toList();
+        enrichedRemakes = await _enrichGamesWithUserData(limitedRemakes, userId);
       }
 
-      // 7. ✨ REMASTERS (einfach wie immer)
+      // 7. ✨ REMASTERS (limit to 10)
       List<Game> enrichedRemasters = game.remasters;
       if (game.remasters.isNotEmpty) {
-        print('🔄 Enriching remaster games...');
-        enrichedRemasters =
-            await _enrichGamesWithUserData(game.remasters, userId);
+        print('🔄 Enriching remasters (${game.remasters.length} → max 10)...');
+        final limitedRemasters = game.remasters.take(10).toList();
+        enrichedRemasters = await _enrichGamesWithUserData(limitedRemasters, userId);
       }
 
-      // 8. 🔌 PORTS (neu)
+      // 8. 🎯 PORTS (limit to 10)
       List<Game> enrichedPorts = game.ports;
       if (game.ports.isNotEmpty) {
-        print('🔄 Enriching port games...');
-        enrichedPorts = await _enrichGamesWithUserData(game.ports, userId);
+        print('🔄 Enriching ports (${game.ports.length} → max 10)...');
+        final limitedPorts = game.ports.take(10).toList();
+        enrichedPorts = await _enrichGamesWithUserData(limitedPorts, userId);
       }
 
-      // 9. 🍴 FORKS (neu)
+      // 9. 🔱 FORKS (limit to 8)
       List<Game> enrichedForks = game.forks;
       if (game.forks.isNotEmpty) {
-        print('🔄 Enriching fork games...');
-        enrichedForks = await _enrichGamesWithUserData(game.forks, userId);
+        print('🔄 Enriching forks (${game.forks.length} → max 8)...');
+        final limitedForks = game.forks.take(8).toList();
+        enrichedForks = await _enrichGamesWithUserData(limitedForks, userId);
       }
 
-      // 10. 📈 EXPANDED GAMES (neu)
+      // 10. 📈 EXPANDED GAMES (limit to 8)
       List<Game> enrichedExpandedGames = game.expandedGames;
       if (game.expandedGames.isNotEmpty) {
-        print('🔄 Enriching expanded games...');
-        enrichedExpandedGames =
-            await _enrichGamesWithUserData(game.expandedGames, userId);
+        print('🔄 Enriching expanded games (${game.expandedGames.length} → max 8)...');
+        final limitedExpandedGames = game.expandedGames.take(8).toList();
+        enrichedExpandedGames = await _enrichGamesWithUserData(limitedExpandedGames, userId);
       }
 
-      // 11. 👨‍👩‍👧‍👦 PARENT GAME (neu - einzelnes Game in Liste verpacken!)
+      // 11. 👨‍👩‍👧‍👦 PARENT GAME (single game, always enrich)
       Game? enrichedParentGame = game.parentGame;
       if (game.parentGame != null) {
         print('🔄 Enriching parent game...');
@@ -1186,29 +1201,33 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         enrichedParentGame = enrichedParentGames.isNotEmpty ? enrichedParentGames.first : null;
       }
 
-      // 8. 🌟 MAIN FRANCHISE (einfach - neue Franchise mit enriched games)
+      // 12. 🌟 MAIN FRANCHISE (⚡ CRITICAL: Limit to franchise limit!)
       Franchise? enrichedMainFranchise = game.mainFranchise;
-      if (game.mainFranchise?.games != null &&
-          game.mainFranchise!.games!.isNotEmpty) {
-        print('🔄 Enriching main franchise games...');
-        final enrichedFranchiseGames =
-            await _enrichGamesWithUserData(game.mainFranchise!.games!, userId);
+      if (game.mainFranchise?.games != null && game.mainFranchise!.games!.isNotEmpty) {
+        final totalFranchiseGames = game.mainFranchise!.games!.length;
+        print('🔄 Enriching main franchise games ($totalFranchiseGames → max $FRANCHISE_LIMIT)...');
 
-        // Neue Franchise mit enriched games erstellen
+        // ⚡ LIMIT: Only take first X games for detail view
+        final limitedFranchiseGames = game.mainFranchise!.games!.take(FRANCHISE_LIMIT).toList();
+        final enrichedFranchiseGames = await _enrichGamesWithUserData(limitedFranchiseGames, userId);
+
+        // Create new Franchise with limited enriched games
         enrichedMainFranchise = Franchise(
           id: game.mainFranchise!.id,
           checksum: game.mainFranchise!.checksum,
           name: game.mainFranchise!.name,
           slug: game.mainFranchise!.slug,
           url: game.mainFranchise!.url,
-          gameIds: game.mainFranchise!.gameIds,
+          gameIds: game.mainFranchise!.gameIds, // Keep full IDs for "View All"
           createdAt: game.mainFranchise!.createdAt,
           updatedAt: game.mainFranchise!.updatedAt,
-          games: enrichedFranchiseGames, // 🎯 Enriched games!
+          games: enrichedFranchiseGames, // ⚡ Limited enriched games!
         );
+
+        print('✅ Main franchise limited from $totalFranchiseGames to ${enrichedFranchiseGames.length} games');
       }
 
-      // 9. 🌳 OTHER FRANCHISES (einfach - neue Franchises mit enriched games)
+      // 13. 🌳 OTHER FRANCHISES (⚡ CRITICAL: Limit each franchise!)
       List<Franchise> enrichedFranchises = game.franchises;
       if (game.franchises.isNotEmpty) {
         print('🔄 Enriching other franchise games...');
@@ -1216,20 +1235,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
         for (final franchise in game.franchises) {
           if (franchise.games != null && franchise.games!.isNotEmpty) {
-            final enrichedGames =
-                await _enrichGamesWithUserData(franchise.games!, userId);
+            final totalGames = franchise.games!.length;
+            print('   → ${franchise.name}: $totalGames → max $FRANCHISE_LIMIT games');
 
-            // Neue Franchise mit enriched games erstellen
+            // ⚡ LIMIT: Only take first X games per franchise
+            final limitedGames = franchise.games!.take(FRANCHISE_LIMIT).toList();
+            final enrichedGames = await _enrichGamesWithUserData(limitedGames, userId);
+
+            // Create new Franchise with limited enriched games
             enrichedFranchises.add(Franchise(
               id: franchise.id,
               checksum: franchise.checksum,
               name: franchise.name,
               slug: franchise.slug,
               url: franchise.url,
-              gameIds: franchise.gameIds,
+              gameIds: franchise.gameIds, // Keep full IDs for "View All"
               createdAt: franchise.createdAt,
               updatedAt: franchise.updatedAt,
-              games: enrichedGames, // 🎯 Enriched games!
+              games: enrichedGames, // ⚡ Limited enriched games!
             ));
           } else {
             enrichedFranchises.add(franchise); // Unchanged if no games
@@ -1237,7 +1260,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       }
 
-      // 10. 📚 COLLECTIONS (einfach - neue Collections mit enriched games)
+      // 14. 📚 COLLECTIONS (⚡ CRITICAL: Limit each collection!)
       List<Collection> enrichedCollections = game.collections;
       if (game.collections.isNotEmpty) {
         print('🔄 Enriching collection games...');
@@ -1245,23 +1268,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
         for (final collection in game.collections) {
           if (collection.games != null && collection.games!.isNotEmpty) {
-            final enrichedGames =
-                await _enrichGamesWithUserData(collection.games!, userId);
+            final totalGames = collection.games!.length;
+            print('   → ${collection.name}: $totalGames → max $COLLECTION_LIMIT games');
 
-            // Neue Collection mit enriched games erstellen
+            // ⚡ LIMIT: Only take first X games per collection
+            final limitedGames = collection.games!.take(COLLECTION_LIMIT).toList();
+            final enrichedGames = await _enrichGamesWithUserData(limitedGames, userId);
+
+            // Create new Collection with limited enriched games
             enrichedCollections.add(Collection(
               id: collection.id,
               checksum: collection.checksum,
               name: collection.name,
               slug: collection.slug,
               url: collection.url,
-              asChildRelationIds: collection.asChildRelationIds,
-              asParentRelationIds: collection.asParentRelationIds,
-              gameIds: collection.gameIds,
-              typeId: collection.typeId,
+              gameIds: collection.gameIds, // Keep full IDs for "View All"
               createdAt: collection.createdAt,
               updatedAt: collection.updatedAt,
-              games: enrichedGames, // 🎯 Enriched games!
+              games: enrichedGames, // ⚡ Limited enriched games!
             ));
           } else {
             enrichedCollections.add(collection); // Unchanged if no games
@@ -1269,9 +1293,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       }
 
-      // 🎯 FINAL: Game mit allen enriched Listen erstellen
+      // ✅ FINAL: Create game with all limited enriched lists
       final enrichedGame = game.copyWith(
-        // Direct game lists (wie immer)
+        // Direct game lists (all limited)
         similarGames: enrichedSimilarGames,
         dlcs: enrichedDLCs,
         expansions: enrichedExpansions,
@@ -1283,19 +1307,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         forks: enrichedForks,
         expandedGames: enrichedExpandedGames,
         parentGame: enrichedParentGame,
-        // Franchise & Collection objects (neu erstellt)
+        // Franchise & Collection objects (with limited games)
         mainFranchise: enrichedMainFranchise,
         franchises: enrichedFranchises,
         collections: enrichedCollections,
       );
 
-      print('✅ Successfully enriched all nested games with user data');
+      print('✅ Successfully enriched nested games with OPTIMIZED LIMITS');
+      print('📊 Performance: Loaded limited games instead of full lists');
       return enrichedGame;
     } catch (e) {
       print('❌ Error enriching nested games: $e');
       return game; // Return original game if enrichment fails
     }
   }
+
 
   Future<void> _onGetSimilarGames(
     GetSimilarGamesEvent event,
@@ -1384,6 +1410,171 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return 'Cache error occurred';
       default:
         return 'An unexpected error occurred';
+    }
+  }
+
+  Future<void> _onLoadCompleteFranchiseGames(
+      LoadCompleteFranchiseGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('🌟 Loading complete franchise games for ${event.franchiseName}...');
+
+      // TODO: Implement repository method to get all franchise games
+      // For now, using placeholder - replace with your actual implementation
+
+      // Example implementation:
+      /*
+    final result = await gameRepository.getGamesByFranchise(
+      franchiseId: event.franchiseId,
+      // No limit - get ALL games
+    );
+
+    await result.fold(
+      (failure) async => emit(GameError(_mapFailureToMessage(failure))),
+      (games) async {
+        // Enrich with user data if userId provided
+        List<Game> enrichedGames = games;
+        if (event.userId != null) {
+          enrichedGames = await _enrichGamesWithUserData(games, event.userId!);
+        }
+
+        emit(CompleteFranchiseGamesLoaded(
+          franchiseId: event.franchiseId,
+          franchiseName: event.franchiseName,
+          games: enrichedGames,
+        ));
+      },
+    );
+    */
+
+      // Placeholder - replace with actual implementation
+      emit(CompleteFranchiseGamesLoaded(
+        franchiseId: event.franchiseId,
+        franchiseName: event.franchiseName,
+        games: [], // TODO: Load actual games
+      ));
+
+    } catch (e) {
+      emit(GameError('Failed to load complete franchise games: $e'));
+    }
+  }
+
+  /// Load complete collection games (all games, not limited)
+  Future<void> _onLoadCompleteCollectionGames(
+      LoadCompleteCollectionGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('📚 Loading complete collection games for ${event.collectionName}...');
+
+      // TODO: Implement repository method to get all collection games
+      // Similar to franchise implementation above
+
+      // Placeholder - replace with actual implementation
+      emit(CompleteCollectionGamesLoaded(
+        collectionId: event.collectionId,
+        collectionName: event.collectionName,
+        games: [], // TODO: Load actual games
+      ));
+
+    } catch (e) {
+      emit(GameError('Failed to load complete collection games: $e'));
+    }
+  }
+
+  /// Load complete similar games (all similar games, not limited)
+  Future<void> _onLoadCompleteSimilarGames(
+      LoadCompleteSimilarGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('⭐ Loading complete similar games for ${event.gameName}...');
+
+      // Use existing getSimilarGames but without limit
+      final result = await getSimilarGames(event.gameId);
+
+      await result.fold(
+            (failure) async => emit(GameError(_mapFailureToMessage(failure))),
+            (games) async {
+          // Enrich with user data if userId provided
+          List<Game> enrichedGames = games;
+          if (event.userId != null) {
+            enrichedGames = await _enrichGamesWithUserData(games, event.userId!);
+          }
+
+          emit(CompleteSimilarGamesLoaded(
+            gameId: event.gameId,
+            gameName: event.gameName,
+            games: enrichedGames,
+          ));
+        },
+      );
+    } catch (e) {
+      emit(GameError('Failed to load complete similar games: $e'));
+    }
+  }
+
+  /// Load complete game series (DLCs, Expansions, Remakes, etc.)
+  Future<void> _onLoadCompleteGameSeries(
+      LoadCompleteGameSeriesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('🎮 Loading complete game series for ${event.gameName}...');
+
+      // Load all related games using existing use cases
+      final futures = await Future.wait([
+        getGameDLCs(event.gameId),
+        getGameExpansions(event.gameId),
+        // Add more as needed: getGameRemakes, getGamePorts, etc.
+      ]);
+
+      final dlcsResult = futures[0];
+      final expansionsResult = futures[1];
+
+      Map<String, List<Game>> gamesByCategory = {};
+
+      // Process DLCs
+      dlcsResult.fold(
+            (failure) => print('Failed to load DLCs: $failure'),
+            (dlcs) => gamesByCategory['dlcs'] = dlcs,
+      );
+
+      // Process Expansions
+      expansionsResult.fold(
+            (failure) => print('Failed to load expansions: $failure'),
+            (expansions) => gamesByCategory['expansions'] = expansions,
+      );
+
+      // Enrich all games with user data if userId provided
+      if (event.userId != null) {
+        final Map<String, List<Game>> enrichedGamesByCategory = {};
+
+        for (final entry in gamesByCategory.entries) {
+          final enrichedGames = await _enrichGamesWithUserData(entry.value, event.userId!);
+          enrichedGamesByCategory[entry.key] = enrichedGames;
+        }
+
+        gamesByCategory = enrichedGamesByCategory;
+      }
+
+      emit(CompleteGameSeriesLoaded(
+        gameId: event.gameId,
+        gameName: event.gameName,
+        gamesByCategory: gamesByCategory,
+      ));
+
+    } catch (e) {
+      emit(GameError('Failed to load complete game series: $e'));
     }
   }
 }

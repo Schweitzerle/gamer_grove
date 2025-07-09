@@ -913,9 +913,6 @@ abstract class IGDBRemoteDataSource {
   /// Search network types
   Future<List<NetworkTypeModel>> searchNetworkTypes(String query, {int limit = 20});
 
-  /// Get complete event data
-  Future<Map<String, dynamic>> getCompleteEventData(int eventId);
-
   /// Get events with games and networks
   Future<List<EventModel>> getEventsWithGamesAndNetworks({
     bool includeLogos = true,
@@ -1437,5 +1434,46 @@ abstract class IGDBRemoteDataSource {
     int offset = 0,
     bool hasAchievements = true,
   });
+
+  /// Get events with complete object data
+  Future<List<EventModel>> getEventsWithCompleteData({
+    List<int>? ids,
+    String? search,
+    int limit = 50,
+  });
+
+  /// Get event by ID with complete data
+  Future<EventModel?> getEventByIdWithCompleteData(int id);
+
+  /// Get events by games with complete data
+  Future<List<EventModel>> getEventsByGamesWithCompleteData(List<int> gameIds);
+
+  /// Get upcoming events with complete data
+  Future<List<EventModel>> getUpcomingEventsWithCompleteData({int limit = 50});
+
+  /// Get live events with complete data
+  Future<List<EventModel>> getLiveEventsWithCompleteData({int limit = 50});
+
+  /// Get past events with complete data
+  Future<List<EventModel>> getPastEventsWithCompleteData({int limit = 50});
+
+  /// Get events by date range with complete data
+  Future<List<EventModel>> getEventsByDateRangeWithCompleteData({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  });
+
+  /// Search events with complete data
+  Future<List<EventModel>> searchEventsWithCompleteData(String query, {int limit = 20});
+
+  /// Get games with their events
+  Future<List<GameModel>> getGamesWithEvents(List<int> gameIds);
+
+  /// Get complete event data with all relationships
+  Future<Map<String, dynamic>> getCompleteEventData(int eventId);
+
+  /// Preload event relationships for better performance
+  Future<void> preloadEventRelationships(List<int> eventIds);
 }
 
