@@ -177,6 +177,7 @@ class FranchiseCollectionsSection extends StatelessWidget {
     );
   }
 
+
   Widget _buildTabView(BuildContext context, SeriesItem item) {
     return Padding(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),

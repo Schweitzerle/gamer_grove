@@ -4465,4 +4465,58 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: 'Failed to get enhanced game details'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Game>>> getCompleteFranchiseGames(int franchiseId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🏢 GameRepository: Getting complete franchise games for ID: $franchiseId');
+
+      // Lade ALLE Franchise-Spiele ohne Limit
+      final franchiseGames = await igdbDataSource.getGamesByFranchise(
+        franchiseId: franchiseId,
+        limit: 100000,  // Kein Limit = alle Spiele
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(franchiseGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} franchise games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load franchise games'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getCompleteCollectionGames(int collectionId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('📚 GameRepository: Getting complete collection games for ID: $collectionId');
+
+      // Lade ALLE Collection-Spiele ohne Limit
+      final collectionGames = await igdbDataSource.getGamesByCollection(
+        collectionId: collectionId,
+        limit: 100000,  // Kein Limit = alle Spiele
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(collectionGames);
+
+      print('✅ GameRepository: Loaded ${enrichedGames.length} collection games');
+      return Right(enrichedGames);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to load collection games'));
+    }
+  }
 }
