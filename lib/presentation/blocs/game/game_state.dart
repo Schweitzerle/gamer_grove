@@ -532,3 +532,33 @@ class CompleteGameSeriesLoaded extends GameState {
   List<Object> get props => [gameId, gameName, gamesByCategory];
 }
 
+// ⚡ NEUE STATES
+class FranchiseGamesPreviewLoaded extends GameState {
+  final int franchiseId;
+  final String franchiseName;
+  final List<GameModel> games;
+
+  const FranchiseGamesPreviewLoaded({
+    required this.franchiseId,
+    required this.franchiseName,
+    required this.games,
+  });
+
+  @override
+  List<Object> get props => [franchiseId, franchiseName, games];
+}
+
+class CollectionGamesPreviewLoaded extends GameState {
+  final int collectionId;
+  final String collectionName;
+  final List<GameModel> games;
+
+  const CollectionGamesPreviewLoaded({
+    required this.collectionId,
+    required this.collectionName,
+    required this.games,
+  });
+
+  @override
+  List<Object> get props => [collectionId, collectionName, games];
+}

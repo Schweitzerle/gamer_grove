@@ -334,46 +334,59 @@ class LoadCompleteGameSeriesEvent extends GameEvent {
 
 
 
-// Add these handler methods to your GameBloc class:
+// ⚡ NEUE EVENTS
+class LoadFranchiseGamesPreviewEvent extends GameEvent {
+  final int franchiseId;
+  final String franchiseName;
 
-/// Load complete franchise games (all games, not limited)
+  const LoadFranchiseGamesPreviewEvent({
+    required this.franchiseId,
+    required this.franchiseName,
+  });
 
-
-// ============================================================================
-// USAGE EXAMPLES for Navigation
-// ============================================================================
-
-/*
-// In your UI components, use these events like this:
-
-// Navigate to complete franchise games
-void _navigateToCompleteFranchiseGames(Franchise franchise) {
-  context.read<GameBloc>().add(LoadCompleteFranchiseGamesEvent(
-    franchiseId: franchise.id,
-    franchiseName: franchise.name,
-    userId: _currentUserId,
-  ));
-
-  // Navigate to AllGamesPage and listen for CompleteFranchiseGamesLoaded state
-  Navigator.push(context, MaterialPageRoute(
-    builder: (context) => BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        if (state is CompleteFranchiseGamesLoaded) {
-          return AllGamesPage(
-            title: state.franchiseName,
-            subtitle: '${state.games.length} games',
-            games: state.games,
-          );
-        } else if (state is GameLoading) {
-          return LoadingPage();
-        } else if (state is GameError) {
-          return ErrorPage(message: state.message);
-        }
-        return LoadingPage();
-      },
-    ),
-  ));
+  @override
+  List<Object> get props => [franchiseId, franchiseName];
 }
 
-// Similar for collections, similar games, etc.
-*/
+class LoadCollectionGamesPreviewEvent extends GameEvent {
+  final int collectionId;
+  final String collectionName;
+
+  const LoadCollectionGamesPreviewEvent({
+    required this.collectionId,
+    required this.collectionName,
+  });
+
+  @override
+  List<Object> get props => [collectionId, collectionName];
+}
+
+class LoadAllFranchiseGamesEvent extends GameEvent {
+  final int franchiseId;
+  final String franchiseName;
+  final String? userId;
+
+  const LoadAllFranchiseGamesEvent({
+    required this.franchiseId,
+    required this.franchiseName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [franchiseId, franchiseName, userId];
+}
+
+class LoadAllCollectionGamesEvent extends GameEvent {
+  final int collectionId;
+  final String collectionName;
+  final String? userId;
+
+  const LoadAllCollectionGamesEvent({
+    required this.collectionId,
+    required this.collectionName,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [collectionId, collectionName, userId];
+}

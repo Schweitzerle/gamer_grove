@@ -7,6 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
+import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
@@ -1387,3 +1388,4 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 }
+
