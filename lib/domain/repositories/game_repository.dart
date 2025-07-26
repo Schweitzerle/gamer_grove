@@ -38,26 +38,20 @@ abstract class GameRepository {
   // ==========================================
 
   /// Search for games by query with pagination
-  Future<Either<Failure, List<Game>>> searchGames(
-      String query,
+  Future<Either<Failure, List<Game>>> searchGames(String query,
       int limit,
-      int offset
-      );
+      int offset);
 
   /// Get basic game details by ID
   Future<Either<Failure, Game>> getGameDetails(int gameId);
 
   /// Get complete game details with all related data
-  Future<Either<Failure, Game>> getCompleteGameDetails(
-      int gameId,
-      String? userId
-      );
+  Future<Either<Failure, Game>> getCompleteGameDetails(int gameId,
+      String? userId);
 
   /// Get game details enriched with user-specific data
-  Future<Either<Failure, Game>> getGameDetailsWithUserData(
-      int gameId,
-      String? userId
-      );
+  Future<Either<Failure, Game>> getGameDetailsWithUserData(int gameId,
+      String? userId);
 
   /// Get multiple games by their IDs (batch operation)
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds);
@@ -108,25 +102,19 @@ abstract class GameRepository {
   // ==========================================
 
   /// Get user's wishlist games with pagination
-  Future<Either<Failure, List<Game>>> getUserWishlist(
-      String userId,
+  Future<Either<Failure, List<Game>>> getUserWishlist(String userId,
       int limit,
-      int offset
-      );
+      int offset);
 
   /// Get user's recommended games with pagination
-  Future<Either<Failure, List<Game>>> getUserRecommendations(
-      String userId,
+  Future<Either<Failure, List<Game>>> getUserRecommendations(String userId,
       int limit,
-      int offset
-      );
+      int offset);
 
   /// Get user's rated games with pagination
-  Future<Either<Failure, List<Game>>> getUserRated(
-      String userId,
+  Future<Either<Failure, List<Game>>> getUserRated(String userId,
       int limit,
-      int offset
-      );
+      int offset);
 
   /// Get user's top three favorite games
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
@@ -136,11 +124,9 @@ abstract class GameRepository {
   // ==========================================
 
   /// Rate a game (0-10 scale)
-  Future<Either<Failure, void>> rateGame(
-      int gameId,
+  Future<Either<Failure, void>> rateGame(int gameId,
       String userId,
-      double rating
-      );
+      double rating);
 
   /// Toggle game in user's wishlist
   Future<Either<Failure, void>> toggleWishlist(int gameId, String userId);
@@ -160,10 +146,8 @@ abstract class GameRepository {
 
   /// Get wishlist items that were recently released (last month)
   /// or are releasing soon (next 2 weeks)
-  Future<Either<Failure, List<Game>>> getWishlistRecentReleases(
-  String userId,
-  {DateTime? fromDate, DateTime? toDate}
-  );
+  Future<Either<Failure, List<Game>>> getWishlistRecentReleases(String userId,
+      {DateTime? fromDate, DateTime? toDate});
 
   // ==========================================
   // PHASE 2 - ENHANCED SEARCH & FILTERING
@@ -241,10 +225,12 @@ abstract class GameRepository {
   // ==========================================
 
   /// Get search suggestions based on partial query
-  Future<Either<Failure, List<String>>> getSearchSuggestions(String partialQuery);
+  Future<Either<Failure, List<String>>> getSearchSuggestions(
+      String partialQuery);
 
   /// Get recently searched games for user
-  Future<Either<Failure, List<Game>>> getRecentSearches(String userId, {int limit = 10});
+  Future<Either<Failure, List<Game>>> getRecentSearches(String userId,
+      {int limit = 10});
 
   /// Save search query for user (for recent searches)
   Future<Either<Failure, void>> saveSearchQuery(String userId, String query);
@@ -284,29 +270,36 @@ abstract class GameRepository {
   });
 
   /// Get user's gaming statistics across all collections
-  Future<Either<Failure, Map<String, dynamic>>> getUserGamingStatistics(String userId);
+  Future<Either<Failure, Map<String, dynamic>>> getUserGamingStatistics(
+      String userId);
 
   /// Get user's genre preferences based on their collections
-  Future<Either<Failure, Map<String, double>>> getUserGenrePreferences(String userId);
+  Future<Either<Failure, Map<String, double>>> getUserGenrePreferences(
+      String userId);
 
   /// Get user's platform usage statistics
-  Future<Either<Failure, Map<String, int>>> getUserPlatformStatistics(String userId);
+  Future<Either<Failure, Map<String, int>>> getUserPlatformStatistics(
+      String userId);
 
   /// Get user's rating patterns and analytics
-  Future<Either<Failure, Map<String, dynamic>>> getUserRatingAnalytics(String userId);
+  Future<Either<Failure, Map<String, dynamic>>> getUserRatingAnalytics(
+      String userId);
 
   // ==========================================
   // ENHANCED COLLECTION MANAGEMENT
   // ==========================================
 
   /// Get all user collections data in one call (for Grove page overview)
-  Future<Either<Failure, Map<UserCollectionType, List<Game>>>> getAllUserCollections({
+  Future<Either<Failure,
+      Map<UserCollectionType, List<Game>>>> getAllUserCollections({
     required String userId,
     int limitPerCollection = 10,
   });
 
   /// Get user collection summaries for all collection types
-  Future<Either<Failure, Map<UserCollectionType, UserCollectionSummary>>> getAllUserCollectionSummaries(String userId);
+  Future<Either<Failure,
+      Map<UserCollectionType,
+          UserCollectionSummary>>> getAllUserCollectionSummaries(String userId);
 
   /// Search within user's collections
   Future<Either<Failure, List<Game>>> searchUserCollections({
@@ -389,7 +382,8 @@ abstract class GameRepository {
   Future<Either<Failure, List<Artwork>>> getGameArtwork(int gameId);
 
   /// Get complete game media (videos, screenshots, artwork) in one call
-  Future<Either<Failure, GameMediaCollection>> getGameMediaCollection(int gameId);
+  Future<Either<Failure, GameMediaCollection>> getGameMediaCollection(
+      int gameId);
 
   /// Get game details with all extended content (characters, events, media)
   Future<Either<Failure, Game>> getEnhancedGameDetails({
@@ -408,13 +402,16 @@ abstract class GameRepository {
   Future<Either<Failure, List<Character>>> searchCharacters(String query);
 
   /// Get popular characters
-  Future<Either<Failure, List<Character>>> getPopularCharacters({int limit = 20});
+  Future<Either<Failure, List<Character>>> getPopularCharacters(
+      {int limit = 20});
 
   /// Get characters by gender
-  Future<Either<Failure, List<Character>>> getCharactersByGender(CharacterGenderEnum gender);
+  Future<Either<Failure, List<Character>>> getCharactersByGender(
+      CharacterGenderEnum gender);
 
   /// Get characters by species
-  Future<Either<Failure, List<Character>>> getCharactersBySpecies(CharacterSpeciesEnum species);
+  Future<Either<Failure, List<Character>>> getCharactersBySpecies(
+      CharacterSpeciesEnum species);
 
   /// Get character details by ID
   Future<Either<Failure, Character>> getCharacterDetails(int characterId);
@@ -435,217 +432,5 @@ abstract class GameRepository {
   /// Get all games featured in an event
   Future<Either<Failure, List<Game>>> getEventGames(int eventId);
 
-  // ==========================================
-  // MEDIA MANAGEMENT
-  // ==========================================
-
-  /// Get video by ID with details
-  Future<Either<Failure, GameVideo>> getVideoDetails(int videoId);
-
-  /// Get screenshot by ID with details
-  Future<Either<Failure, Screenshot>> getScreenshotDetails(int screenshotId);
-
-  /// Get artwork by ID with details
-  Future<Either<Failure, Artwork>> getArtworkDetails(int artworkId);
-
-  /// Get related media for multiple games (batch operation)
-  Future<Either<Failure, Map<int, GameMediaCollection>>> getBatchGameMedia(List<int> gameIds);
-
-  // ==========================================
-  // PHASE 5 - ADVANCED FEATURES & RECOMMENDATIONS
-  // ==========================================
-
-  /// Get personalized game recommendations for user based on their preferences
-  Future<Either<Failure, List<Game>>> getPersonalizedRecommendations({
-    required String userId,
-    int limit = 20,
-    int offset = 0,
-  });
-
-  /// Get trending games based on popularity, ratings, and activity
-  Future<Either<Failure, List<Game>>> getTrendingGames({
-    int limit = 20,
-    int offset = 0,
-    Duration? timeWindow, // e.g., last 7 days, last 30 days
-  });
-
-  /// Get games trending in specific genres
-  Future<Either<Failure, List<Game>>> getTrendingGamesByGenre({
-    required int genreId,
-    int limit = 20,
-    Duration? timeWindow,
-  });
-
-  /// Get games trending on specific platforms
-  Future<Either<Failure, List<Game>>> getTrendingGamesByPlatform({
-    required int platformId,
-    int limit = 20,
-    Duration? timeWindow,
-  });
-
-  /// Get recommended games based on user's rated games
-  Future<Either<Failure, List<Game>>> getRecommendationsBasedOnRated({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get recommended games based on user's wishlist
-  Future<Either<Failure, List<Game>>> getRecommendationsBasedOnWishlist({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get games similar to user's top-rated games
-  Future<Either<Failure, List<Game>>> getSimilarToTopRated({
-    required String userId,
-    int limit = 20,
-  });
-
-  // ==========================================
-  // ADVANCED DISCOVERY & ANALYTICS
-  // ==========================================
-
-  /// Get genre trends and analytics
-  Future<Either<Failure, List<GenreTrend>>> getGenreTrends({
-    Duration? timeWindow,
-    int limit = 20,
-  });
-
-  /// Get platform trends and analytics
-  Future<Either<Failure, List<PlatformTrend>>> getPlatformTrends({
-    Duration? timeWindow,
-    int limit = 20,
-  });
-
-  /// Get rising games (games gaining popularity quickly)
-  Future<Either<Failure, List<Game>>> getRisingGames({
-    int limit = 20,
-    Duration? timeWindow,
-  });
-
-  /// Get hidden gems (great games with low visibility)
-  Future<Either<Failure, List<Game>>> getHiddenGems({
-    int limit = 20,
-    double minRating = 80.0,
-    int maxHypes = 100,
-  });
-
-  /// Get games by mood/theme (action-packed, relaxing, story-rich, etc.)
-  Future<Either<Failure, List<Game>>> getGamesByMood({
-    required GameMood mood,
-    int limit = 20,
-    int offset = 0,
-  });
-
-  /// Get seasonal game recommendations
-  Future<Either<Failure, List<Game>>> getSeasonalRecommendations({
-    required Season season,
-    int limit = 20,
-  });
-
-  // ==========================================
-  // SOCIAL & COMMUNITY FEATURES
-  // ==========================================
-
-  /// Get games that friends are playing/rating
-  Future<Either<Failure, List<Game>>> getFriendsActivity({
-    required String userId,
-    int limit = 20,
-    int offset = 0,
-  });
-
-  /// Get games recommended by friends
-  Future<Either<Failure, List<Game>>> getFriendsRecommendations({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get community favorites in user's preferred genres
-  Future<Either<Failure, List<Game>>> getCommunityFavoritesByGenre({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get what's popular among similar users
-  Future<Either<Failure, List<Game>>> getSimilarUsersGames({
-    required String userId,
-    int limit = 20,
-  });
-
-  // ==========================================
-  // ADVANCED RECOMMENDATION ALGORITHMS
-  // ==========================================
-
-  /// Get AI-powered recommendations using multiple signals
-  Future<Either<Failure, List<Game>>> getAIRecommendations({
-    required String userId,
-    int limit = 20,
-    List<RecommendationSignal> signals = const [
-      RecommendationSignal.ratings,
-      RecommendationSignal.wishlist,
-      RecommendationSignal.genres,
-      RecommendationSignal.platforms,
-      RecommendationSignal.playtime,
-    ],
-  });
-
-  /// Get games you might have missed (based on release date and preferences)
-  Future<Either<Failure, List<Game>>> getGamesMightHaveMissed({
-    required String userId,
-    DateTime? sinceDate,
-    int limit = 20,
-  });
-
-  /// Get games completing your collection (series, franchises)
-  Future<Either<Failure, List<Game>>> getCollectionCompletionGames({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get games to play next (based on current activity and preferences)
-  Future<Either<Failure, List<Game>>> getGamesToPlayNext({
-    required String userId,
-    int limit = 10,
-  });
-
-  // ==========================================
-  // ADVANCED ANALYTICS & INSIGHTS
-  // ==========================================
-
-  /// Get gaming industry trends and insights
-  Future<Either<Failure, Map<String, dynamic>>> getIndustryTrends({
-    Duration? timeWindow,
-  });
-
-  /// Get user's gaming pattern analysis
-  Future<Either<Failure, Map<String, dynamic>>> getUserGamingPatterns(String userId);
-
-  /// Get personalized gaming insights
-  Future<Either<Failure, Map<String, dynamic>>> getPersonalizedInsights(String userId);
-
-  /// Get genre evolution trends (how genres are changing over time)
-  Future<Either<Failure, List<Map<String, dynamic>>>> getGenreEvolutionTrends();
-
-  /// Get platform adoption trends
-  Future<Either<Failure, List<Map<String, dynamic>>>> getPlatformAdoptionTrends();
-
-  // ==========================================
-  // DISCOVERY CHALLENGES & GAMIFICATION
-  // ==========================================
-
-  /// Get discovery challenges for user (explore new genres, try different platforms)
-  Future<Either<Failure, List<DiscoveryChallenge>>> getDiscoveryChallenges(String userId);
-
-  /// Get achievement recommendations (games to complete achievements)
-  Future<Either<Failure, List<Game>>> getAchievementRecommendations({
-    required String userId,
-    int limit = 20,
-  });
-
-  /// Get diversity recommendations (encourage trying different game types)
-  Future<Either<Failure, List<Game>>> getDiversityRecommendations({
-    required String userId,
-    int limit = 20,
-  });
 }
 
