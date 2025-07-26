@@ -4,6 +4,9 @@
 
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
+import '../../../domain/entities/event/event.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../../domain/usecases/event/get_complete_event_details.dart';
 import '../../../domain/usecases/event/get_current_events.dart';
 import '../../../domain/usecases/event/get_event_details.dart';
@@ -11,6 +14,7 @@ import '../../../domain/usecases/event/get_events_by_date_range.dart';
 import '../../../domain/usecases/event/get_events_by_games.dart';
 import '../../../domain/usecases/event/get_upcoming_events.dart';
 import '../../../domain/usecases/event/search_events.dart';
+import '../../../injection_container.dart';
 import 'event_event.dart';
 import 'event_state.dart';
 
@@ -40,12 +44,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<GetEventsByGamesEvent>(_onGetEventsByGames);
     on<GetCompleteEventDetailsEvent>(_onGetCompleteEventDetails);
     on<ClearEventsEvent>(_onClearEvents);
+    on<GetEventDetailsWithUserDataEvent>(_onGetEventDetailsWithUserData);
+    on<GetCompleteEventDetailsWithUserDataEvent>(
+        _onGetCompleteEventDetailsWithUserData);
   }
 
   Future<void> _onGetEventDetails(
-      GetEventDetailsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetEventDetailsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getEventDetails(
@@ -53,15 +60,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (eventDetails) => emit(EventDetailsLoaded(event: eventDetails)),
+      (failure) => emit(EventError(message: failure.message)),
+      (eventDetails) => emit(EventDetailsLoaded(event: eventDetails)),
     );
   }
 
   Future<void> _onGetCurrentEvents(
-      GetCurrentEventsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetCurrentEventsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getCurrentEvents(
@@ -69,15 +76,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (events) => emit(CurrentEventsLoaded(events: events)),
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(CurrentEventsLoaded(events: events)),
     );
   }
 
   Future<void> _onGetUpcomingEvents(
-      GetUpcomingEventsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetUpcomingEventsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getUpcomingEvents(
@@ -85,15 +92,15 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (events) => emit(UpcomingEventsLoaded(events: events)),
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(UpcomingEventsLoaded(events: events)),
     );
   }
 
   Future<void> _onSearchEvents(
-      SearchEventsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    SearchEventsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await searchEvents(
@@ -101,8 +108,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (events) => emit(EventsSearchLoaded(
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(EventsSearchLoaded(
         events: events,
         query: event.query,
       )),
@@ -110,9 +117,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   }
 
   Future<void> _onGetEventsByDateRange(
-      GetEventsByDateRangeEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetEventsByDateRangeEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getEventsByDateRange(
@@ -124,8 +131,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (events) => emit(EventsByDateRangeLoaded(
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(EventsByDateRangeLoaded(
         events: events,
         startDate: event.startDate,
         endDate: event.endDate,
@@ -134,9 +141,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   }
 
   Future<void> _onGetEventsByGames(
-      GetEventsByGamesEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetEventsByGamesEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getEventsByGames(
@@ -144,8 +151,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (events) => emit(EventsByGamesLoaded(
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(EventsByGamesLoaded(
         events: events,
         gameIds: event.gameIds,
       )),
@@ -153,9 +160,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   }
 
   Future<void> _onGetCompleteEventDetails(
-      GetCompleteEventDetailsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    GetCompleteEventDetailsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventLoading());
 
     final result = await getCompleteEventDetails(
@@ -166,15 +173,188 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-          (failure) => emit(EventError(message: failure.message)),
-          (eventDetails) => emit(CompleteEventDetailsLoaded(eventDetails: eventDetails)),
+      (failure) => emit(EventError(message: failure.message)),
+      (eventDetails) =>
+          emit(CompleteEventDetailsLoaded(eventDetails: eventDetails)),
     );
   }
 
   Future<void> _onClearEvents(
-      ClearEventsEvent event,
-      Emitter<EventState> emit,
-      ) async {
+    ClearEventsEvent event,
+    Emitter<EventState> emit,
+  ) async {
     emit(EventInitial());
+  }
+
+  // 🆕 NEW: Handler für Event Details mit User Data
+  Future<void> _onGetEventDetailsWithUserData(
+    GetEventDetailsWithUserDataEvent event,
+    Emitter<EventState> emit,
+  ) async {
+    emit(EventLoading());
+
+    final result = await getEventDetails(
+      GetEventDetailsParams(eventId: event.eventId),
+    );
+
+    await result.fold(
+      (failure) async {
+        emit(EventError(message: failure.message));
+      },
+      (eventDetails) async {
+// Event Games enrichen wenn User eingeloggt
+        if (event.userId != null && eventDetails.games.isNotEmpty) {
+          try {
+            final enrichedEvent =
+                await _enrichEventWithUserData(eventDetails, event.userId!);
+            emit(EventDetailsLoaded(event: enrichedEvent));
+          } catch (e) {
+            print('❌ EventBloc: Failed to enrich event games: $e');
+            emit(EventDetailsLoaded(event: eventDetails)); // Fallback
+          }
+        } else {
+          emit(EventDetailsLoaded(event: eventDetails));
+        }
+      },
+    );
+  }
+
+// 🆕 NEW: Handler für Complete Event Details mit User Data
+  Future<void> _onGetCompleteEventDetailsWithUserData(
+    GetCompleteEventDetailsWithUserDataEvent event,
+    Emitter<EventState> emit,
+  ) async {
+    emit(EventLoading());
+
+    final result = await getCompleteEventDetails(
+      GetCompleteEventDetailsParams(
+        eventId: event.eventId,
+        includeGames: event.includeGames,
+      ),
+    );
+
+    await result.fold(
+      (failure) async {
+        emit(EventError(message: failure.message));
+      },
+      (eventDetails) async {
+// Event Games enrichen wenn User eingeloggt
+        if (event.userId != null && eventDetails.event.games.isNotEmpty) {
+          try {
+            final enrichedEvent = await _enrichEventWithUserData(
+                eventDetails.event, event.userId!);
+            final enrichedEventDetails =
+                eventDetails.copyWith(event: enrichedEvent);
+            emit(
+                CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails));
+          } catch (e) {
+            print('❌ EventBloc: Failed to enrich event games: $e');
+            emit(CompleteEventDetailsLoaded(
+                eventDetails: eventDetails)); // Fallback
+          }
+        } else {
+          emit(CompleteEventDetailsLoaded(eventDetails: eventDetails));
+        }
+      },
+    );
+  }
+
+// 🆕 NEW: Helper Methode für Event Game Enrichment
+  Future<Event> _enrichEventWithUserData(Event event, String userId) async {
+    if (event.games.isEmpty) return event;
+
+    print(
+        '🎉 EventBloc: Enriching ${event.games.length} event games with user data...');
+
+    try {
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+
+// Get user data for event games (limit to first 10 for performance)
+      final gamesToEnrich = event.games.take(10).toList();
+      final futures = gamesToEnrich
+          .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
+          .toList();
+
+      final userGameDataList = await Future.wait(futures);
+
+// Get top three data
+      final topThreeData =
+          await supabaseDataSource.getUserTopThreeGames(userId: userId);
+      final topThreeMap = <int, int>{};
+      for (var entry in topThreeData) {
+        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
+      }
+
+// Create enriched games
+      final enrichedGames = <Game>[];
+
+// Enriched games (first 10)
+      for (int i = 0; i < gamesToEnrich.length; i++) {
+        final game = gamesToEnrich[i];
+        final userGameData = userGameDataList[i];
+
+        if (userGameData != null) {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: userGameData['is_wishlisted'] ?? false,
+            isRecommended: userGameData['is_recommended'] ?? false,
+            userRating: userGameData['rating']?.toDouble(),
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
+          ));
+        } else {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: false,
+            isRecommended: false,
+            userRating: null,
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
+          ));
+        }
+      }
+
+// Add remaining games (not enriched)
+      if (event.games.length > 10) {
+        final remainingGames = event.games.skip(10);
+        for (final game in remainingGames) {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: false,
+            isRecommended: false,
+            userRating: null,
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
+          ));
+        }
+      }
+
+// Create new Event with enriched games
+      final enrichedEvent = Event(
+        id: event.id,
+        checksum: event.checksum,
+        name: event.name,
+        slug: event.slug,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
+        startTime: event.startTime,
+        endTime: event.endTime,
+        timeZone: event.timeZone,
+        description: event.description,
+        eventLogo: event.eventLogo,
+        eventLogoId: event.eventLogoId,
+        liveStreamUrl: event.liveStreamUrl,
+        eventNetworks: event.eventNetworks,
+        eventNetworkIds: event.eventNetworkIds,
+        games: enrichedGames,
+        // 🎯 Enriched games!
+        gameIds: event.gameIds,
+        videos: event.videos,
+        videoIds: event.videoIds,
+      );
+
+      print('✅ EventBloc: Enriched ${enrichedGames.length} event games');
+      return enrichedEvent;
+    } catch (e) {
+      print('❌ EventBloc: Error enriching event games: $e');
+      return event; // Return original event if enrichment fails
+    }
   }
 }

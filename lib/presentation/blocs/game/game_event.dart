@@ -272,34 +272,37 @@ class LoadGameWithUserDataEvent extends GameEvent {
 class LoadCompleteFranchiseGamesEvent extends GameEvent {
   final int franchiseId;
   final String franchiseName;
+  final List<Game> games; // ✅ Games direkt übergeben, nicht laden
   final String? userId;
 
   const LoadCompleteFranchiseGamesEvent({
     required this.franchiseId,
     required this.franchiseName,
+    required this.games, // ✅ Bereits vorhandene Games
     this.userId,
   });
 
   @override
-  List<Object?> get props => [franchiseId, franchiseName, userId];
+  List<Object?> get props => [franchiseId, franchiseName, games, userId];
 }
 
 /// Load complete collection games (for "View All" screens)
 class LoadCompleteCollectionGamesEvent extends GameEvent {
   final int collectionId;
   final String collectionName;
+  final List<Game> games; // ✅ Games direkt übergeben
   final String? userId;
 
   const LoadCompleteCollectionGamesEvent({
     required this.collectionId,
     required this.collectionName,
+    required this.games, // ✅ Bereits vorhandene Games
     this.userId,
   });
 
   @override
-  List<Object?> get props => [collectionId, collectionName, userId];
+  List<Object?> get props => [collectionId, collectionName, games, userId];
 }
-
 /// Load complete similar games (for "View All" screens)
 class LoadCompleteSimilarGamesEvent extends GameEvent {
   final int gameId;

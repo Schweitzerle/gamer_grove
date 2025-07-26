@@ -177,7 +177,6 @@ class FranchiseCollectionsSection extends StatelessWidget {
     );
   }
 
-
   Widget _buildTabView(BuildContext context, SeriesItem item) {
     return Padding(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -307,12 +306,12 @@ class FranchiseCollectionsSection extends StatelessWidget {
   // Helper methods to get games from franchises/collections
   List<Game> _getFranchiseGames(Franchise franchise) {
     if (franchise.games == null) return [];
-    return franchise.games!.take(5).toList();
+    return franchise.games!.take(10).toList();
   }
 
   List<Game> _getCollectionGames(Collection collection) {
     if (collection.games == null) return [];
-    return collection.games!.take(5).toList();
+    return collection.games!.take(10).toList();
   }
 
   // Navigation methods
@@ -323,21 +322,14 @@ class FranchiseCollectionsSection extends StatelessWidget {
       Navigations.navigateToCollectionGames(context, item.collection!);
     }
   }
-
-  void _navigateToFranchiseDetail(BuildContext context, Franchise franchise) {
-    Navigations.navigateToFranchiseGames(context, franchise);
-  }
-
-  void _navigateToCollectionDetail(BuildContext context, Collection collection) {
-    Navigations.navigateToCollectionGames(context, collection);
-  }
 }
 
 // Helper classes
 enum SeriesType {
   mainFranchise,
   franchise,
-  collection;
+  collection,
+  eventGames;
 
   String get displayName {
     switch (this) {
@@ -347,6 +339,8 @@ enum SeriesType {
         return 'Franchise';
       case SeriesType.collection:
         return 'Collection';
+      case SeriesType.eventGames:
+        return 'Event Games';
     }
   }
 }

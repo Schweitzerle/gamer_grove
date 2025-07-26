@@ -15,6 +15,7 @@ import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../widgets/game_card.dart';
 import '../../widgets/accordion_tile.dart';
+import '../../widgets/sections/franchise_collection_section.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final Event event;
@@ -33,6 +34,20 @@ class EventDetailScreen extends StatefulWidget {
 }
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
+
+  SeriesItem _createEventGamesSeriesItem() {
+    return SeriesItem(
+      type: SeriesType.eventGames, // Verwende collection type für events
+      title: '${widget.event.name} - Featured Games',
+      games: _getEventGames(widget.event), // Die Games aus dem Event
+      totalCount: widget.event.games.length,
+      accentColor: _getEventStatusColor(), // Verwende Event Status Farbe
+      icon: Icons.videogame_asset, // Gaming Icon
+      franchise: null,
+      collection: null, // Kein echtes Collection Objekt
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +70,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                   // Featured Games (now with actual Game objects!)
                   if (widget.event.hasGameObjects)
-                    _buildFeaturedGamesCard(context),
+                    _buildTabView(context, _createEventGamesSeriesItem()),
 
                   const SizedBox(height: 16),
 
@@ -63,11 +78,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   if (widget.event.hasNetworkObjects)
                     _buildEventNetworksCard(context),
 
-                  // Featured Games Section
-                  if (widget.showGames &&
-                      widget.featuredGames != null &&
-                      widget.featuredGames!.isNotEmpty)
-                    _buildFeaturedGamesCard(context),
 
                   const SizedBox(height: AppConstants.paddingMedium),
 
@@ -85,6 +95,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ],
       ),
     );
+  }
+
+  List<Game> _getEventGames(Event event) {
+    if (event.games.isEmpty) return [];
+    return event.games.take(10).toList();
   }
 
   Widget _buildEventHero() {
@@ -156,7 +171,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 12),
 
                     // Event Logo (if available)
-                    if (widget.event.eventLogoId != null)
+                    if (widget.event.hasLogo)
                       Container(
                         width: 80,
                         height: 80,
@@ -670,17 +685,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  void _showAllGames() {
-    if (widget.featuredGames != null) {
-      Navigations.navigateToLocalAllGames(
-        context,
-        title: '${widget.event.name} Games',
-        subtitle: 'Games featured at this event',
-        games: widget.featuredGames!,
-        showFilters: true,
-      );
-    }
-  }
 
   Future<void> _launchUrl(String url) async {
     try {
@@ -699,43 +703,130 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  Widget _buildFeaturedGamesCard(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Featured Games',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+
+  Widget _buildTabView(BuildContext context, SeriesItem item) {
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Series Info Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: item.accentColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  item.icon,
+                  color: item.accentColor,
+                  size: 20,
+                ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: item.type == SeriesType.mainFranchise
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${item.type.displayName} • ${item.totalCount} games',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: item.accentColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // View All Button
+              if (item.totalCount > 10)
+                TextButton.icon(
+                  onPressed: () => _navigateToSeries(context, item),
+                  icon: Icon(Icons.arrow_forward, size: 16, color: item.accentColor),
+                  label: Text(
+                    'View All',
+                    style: TextStyle(color: item.accentColor),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: AppConstants.paddingMedium),
+
+          // Games List (normale Größe wieder!)
+          SizedBox(
+            height: 280, // Feste Höhe wie in base_game_section.dart - nicht stretched!
+            child: item.games.isNotEmpty
+                ? _buildGamesList(item.games)
+                : _buildNoGamesPlaceholder(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToSeries(BuildContext context, SeriesItem item) {
+    Navigations.navigateToEventGames(context, item, widget.event);
+  }
+
+
+  Widget _buildGamesList(List<Game> games) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.zero,
+      itemCount: games.length,
+      itemBuilder: (context, index) {
+        final game = games[index];
+        return Container(
+          width: 160, // Zurück zur normalen Größe! 🎉
+          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          child: GameCard(
+            game: game,
+            onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNoGamesPlaceholder(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.games,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 32,
             ),
             const SizedBox(height: 8),
             Text(
-              '${widget.event.games.length} games featured at this event',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-
-            // Horizontal Game List
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.event.games.length,
-                itemBuilder: (context, index) {
-                  final game = widget.event.games[index];
-                  return Container(
-                    width: 140,
-                    margin: const EdgeInsets.only(right: 12),
-                    child: GameCard(
-                      game: game,
-                      onTap: () => Navigations.navigateToGameDetail(game.id, context),
-                    ),
-                  );
-                },
+              'Games loading...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

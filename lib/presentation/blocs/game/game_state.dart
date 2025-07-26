@@ -473,15 +473,19 @@ class CompleteFranchiseGamesLoaded extends GameState {
   final int franchiseId;
   final String franchiseName;
   final List<Game> games;
+  final bool hasMore;
+  final int currentPage;
 
   const CompleteFranchiseGamesLoaded({
     required this.franchiseId,
     required this.franchiseName,
     required this.games,
+    this.hasMore = false,
+    this.currentPage = 0,
   });
 
   @override
-  List<Object> get props => [franchiseId, franchiseName, games];
+  List<Object> get props => [franchiseId, franchiseName, games, hasMore, currentPage];
 }
 
 /// Complete collection games loaded (for "View All" screens)
@@ -489,15 +493,19 @@ class CompleteCollectionGamesLoaded extends GameState {
   final int collectionId;
   final String collectionName;
   final List<Game> games;
+  final bool hasMore;
+  final int currentPage;
 
   const CompleteCollectionGamesLoaded({
     required this.collectionId,
     required this.collectionName,
     required this.games,
+    this.hasMore = false,
+    this.currentPage = 0,
   });
 
   @override
-  List<Object> get props => [collectionId, collectionName, games];
+  List<Object> get props => [collectionId, collectionName, games, hasMore, currentPage];
 }
 
 /// Complete similar games loaded (for "View All" screens)

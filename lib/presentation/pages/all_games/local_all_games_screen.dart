@@ -1,42 +1,68 @@
-// lib/presentation/pages/all_games/local_all_games_screen.dart
+// lib/presentation/pages/all_games/enriched_all_games_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/navigations.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
+import '../../../injection_container.dart';
+import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 
-class LocalAllGamesScreen extends StatefulWidget {
+enum SortOption {
+  nameAZ,
+  nameZA,
+  ratingHigh,
+  ratingLow,
+  releaseDateNew,
+  releaseDateOld,
+}
+
+enum RatingFilter {
+  all,
+  rated,
+  unrated,
+  highRated, // > 7.0
+}
+
+class EnrichedAllGamesScreen extends StatefulWidget {
   final String title;
   final String? subtitle;
-  final List<Game> games;
+  final List<Game> games; // Alle Games (non-enriched)
+  final String? userId;
   final bool showFilters;
   final bool showSearch;
-  final bool blurRated; // 🆕 NEW: Blur rated games feature
+  final bool blurRated;
   final bool showViewToggle;
 
-  const LocalAllGamesScreen({
+  const EnrichedAllGamesScreen({
     super.key,
     required this.title,
     this.subtitle,
     required this.games,
+    this.userId,
     this.showFilters = true,
     this.showSearch = true,
-    this.blurRated = false, // Default: no blur
+    this.blurRated = false,
     this.showViewToggle = true,
   });
 
   @override
-  State<LocalAllGamesScreen> createState() => _LocalAllGamesScreenState();
+  State<EnrichedAllGamesScreen> createState() => _EnrichedAllGamesScreenState();
 }
 
-class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
+class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
+  // Controllers
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+
   // State variables
+  List<Game> _allGames = [];
   List<Game> _filteredGames = [];
   String _searchQuery = '';
   bool _isGridView = true;
-  bool _blurRatedGames = true; // 🆕 NEW: Toggle for blur feature
+  bool _blurRatedGames = false;
 
   // Filter states
   List<Genre> _selectedGenres = [];
@@ -44,382 +70,162 @@ class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
   int? _selectedMinYear;
   int? _selectedMaxYear;
   RatingFilter _ratingFilter = RatingFilter.all;
-
-  // Sort states
   SortOption _sortOption = SortOption.nameAZ;
+
+  // Enrichment progress
+  bool _isEnriching = false;
+  int _enrichmentProgress = 0;
+  int _totalGames = 0;
+  String _enrichmentStatus = '';
 
   @override
   void initState() {
     super.initState();
-    _filteredGames = List.from(widget.games);
-    _blurRatedGames = false; // 🔧 FIX: Always start with blur OFF
-    _applyFiltersAndSort();
-  }
+    _blurRatedGames = widget.blurRated;
+    _totalGames = widget.games.length;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (widget.subtitle != null)
-              Text(
-                widget.subtitle!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          // Blur Toggle (nur zeigen wenn blurRated Feature aktiviert ist)
-          if (widget.blurRated)
-            IconButton(
-              icon: Icon(_blurRatedGames ? Icons.blur_off : Icons.blur_on),
-              onPressed: () {
-                setState(() {
-                  _blurRatedGames = !_blurRatedGames;
-                });
-              },
-              tooltip: _blurRatedGames ? 'Hide Rating Status' : 'Show Rating Status',
-            ),
-
-          // View Toggle
-          if (widget.showViewToggle)
-            IconButton(
-              icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-              onPressed: () {
-                setState(() {
-                  _isGridView = !_isGridView;
-                });
-              },
-              tooltip: _isGridView ? 'List View' : 'Grid View',
-            ),
-
-          // Filter/Sort Menu
-          if (widget.showFilters)
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.tune),
-              tooltip: 'Filter & Sort',
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'filter',
-                  child: Row(
-                    children: [
-                      Icon(Icons.filter_alt, size: 18),
-                      SizedBox(width: 8),
-                      Text('Filters'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'sort',
-                  child: Row(
-                    children: [
-                      Icon(Icons.sort, size: 18),
-                      SizedBox(width: 8),
-                      Text('Sort'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'reset',
-                  child: Row(
-                    children: [
-                      Icon(Icons.clear, size: 18),
-                      SizedBox(width: 8),
-                      Text('Reset All'),
-                    ],
-                  ),
-                ),
-              ],
-              onSelected: (value) {
-                switch (value) {
-                  case 'filter':
-                    _showFilterDialog();
-                    break;
-                  case 'sort':
-                    _showSortDialog();
-                    break;
-                  case 'reset':
-                    _resetFilters();
-                    break;
-                }
-              },
-            ),
-        ],
-      ),
-
-      body: Column(
-        children: [
-          // Search Bar
-          if (widget.showSearch)
-            _buildSearchBar(),
-
-          // Stats Bar
-          _buildStatsBar(),
-
-          // Games Grid/List
-          Expanded(
-            child: _filteredGames.isEmpty
-                ? _buildEmptyState()
-                : _buildGamesList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search games...',
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value.toLowerCase();
-            _applyFiltersAndSort();
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatsBar() {
-    final ratedCount = _filteredGames.where((game) => _isGameRated(game)).length;
-    final unratedCount = _filteredGames.length - ratedCount;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.paddingMedium,
-        vertical: AppConstants.paddingSmall,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '${_filteredGames.length} games',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          if (widget.blurRated) ...[
-            const SizedBox(width: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$ratedCount rated',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.green[700],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$unratedCount to rate',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.orange[700],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-
-          const Spacer(),
-
-          // Active Filter Indicators
-          if (_hasActiveFilters())
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.filter_alt,
-                    size: 14,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Filtered',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGamesList() {
-    if (_isGridView) {
-      return GridView.builder(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: _getCrossAxisCount(),
-          crossAxisSpacing: AppConstants.paddingSmall,
-          mainAxisSpacing: AppConstants.paddingSmall,
-          childAspectRatio: 0.7, // Same as GameCard aspect ratio
-        ),
-        itemCount: _filteredGames.length,
-        itemBuilder: (context, index) {
-          final game = _filteredGames[index];
-          return _buildGameItem(game);
-        },
-      );
+    if (widget.userId != null && widget.games.isNotEmpty) {
+      _enrichAllGames();
     } else {
-      return ListView.builder(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        itemCount: _filteredGames.length,
-        itemBuilder: (context, index) {
-          final game = _filteredGames[index];
-          return Container(
-            height: 120,
-            margin: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
-            child: _buildGameItem(game, isListView: true),
-          );
-        },
-      );
+      // No user or no games - use games as-is
+      _allGames = List.from(widget.games);
+      _applyFiltersAndSort();
     }
   }
 
-  Widget _buildGameItem(Game game, {bool isListView = false}) {
-    // 🎯 Simple: Use GameCard's built-in blur feature with toggle
-    return GameCard(
-      game: game,
-      onTap: () => Navigations.navigateToGameDetail(game.id, context),
-      blurRated: widget.blurRated && _blurRatedGames, // Only blur if both widget setting and toggle are enabled
-    );
+  Future<void> _enrichAllGames() async {
+    if (widget.userId == null || widget.games.isEmpty) return;
+
+    setState(() {
+      _isEnriching = true;
+      _enrichmentProgress = 0;
+      _enrichmentStatus = 'Preparing to enrich ${_totalGames} games...';
+    });
+
+    try {
+      print('🔄 Starting to enrich ${_totalGames} games with user data...');
+
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+
+      // Load Top Three data once for all games
+      setState(() {
+        _enrichmentStatus = 'Loading your top games...';
+      });
+
+      final topThreeData = await supabaseDataSource.getUserTopThreeGames(userId: widget.userId!);
+      final topThreeMap = <int, int>{};
+      for (var entry in topThreeData) {
+        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
+      }
+
+      // Process games in batches for better performance and progress updates
+      const int batchSize = 20;
+      final List<Game> enrichedGames = [];
+
+      for (int i = 0; i < widget.games.length; i += batchSize) {
+        final int endIndex = (i + batchSize < widget.games.length) ? i + batchSize : widget.games.length;
+        final List<Game> batch = widget.games.sublist(i, endIndex);
+
+        setState(() {
+          _enrichmentProgress = i;
+          _enrichmentStatus = 'Enriching games ${i + 1}-${endIndex} of ${_totalGames}...';
+        });
+
+        // Enrich this batch
+        final List<Game> enrichedBatch = await _enrichGamesBatch(batch, widget.userId!, topThreeMap);
+        enrichedGames.addAll(enrichedBatch);
+
+        // Small delay to allow UI updates
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+
+      setState(() {
+        _isEnriching = false;
+        _allGames = enrichedGames;
+        _enrichmentProgress = _totalGames;
+        _enrichmentStatus = 'Completed! ${_totalGames} games enriched.';
+      });
+
+      print('✅ Successfully enriched ${enrichedGames.length} games');
+      _applyFiltersAndSort();
+
+    } catch (e) {
+      print('❌ Error enriching games: $e');
+      setState(() {
+        _isEnriching = false;
+        _allGames = List.from(widget.games); // Fallback to non-enriched
+        _enrichmentStatus = 'Enrichment failed, showing games without user data.';
+      });
+      _applyFiltersAndSort();
+    }
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No games found',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try adjusting your filters or search',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _resetFilters,
-            icon: const Icon(Icons.clear),
-            label: const Text('Reset Filters'),
-          ),
-        ],
-      ),
-    );
-  }
+  Future<List<Game>> _enrichGamesBatch(
+      List<Game> games,
+      String userId,
+      Map<int, int> topThreeMap,
+      ) async {
+    try {
+      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
 
-  // Helper methods
-  bool _isGameRated(Game game) {
-    return game.userRating != null && game.userRating! > 0;
-  }
+      // Get user game data for this batch
+      final futures = games
+          .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
+          .toList();
 
-  int _getCrossAxisCount() {
-    final width = MediaQuery.of(context).size.width;
-    if (width > 1200) return 4;
-    if (width > 800) return 3;
-    return 2;
-  }
+      final userGameDataList = await Future.wait(futures);
 
-  bool _hasActiveFilters() {
-    return _selectedGenres.isNotEmpty ||
-        _selectedPlatforms.isNotEmpty ||
-        _selectedMinYear != null ||
-        _selectedMaxYear != null ||
-        _ratingFilter != RatingFilter.all ||
-        _searchQuery.isNotEmpty;
+      // Create enriched games
+      final enrichedGames = <Game>[];
+      for (int i = 0; i < games.length; i++) {
+        final game = games[i];
+        final userGameData = userGameDataList[i];
+
+        if (userGameData != null) {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: userGameData['is_wishlisted'] ?? false,
+            isRecommended: userGameData['is_recommended'] ?? false,
+            userRating: userGameData['rating']?.toDouble(),
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
+          ));
+        } else {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: false,
+            isRecommended: false,
+            userRating: null,
+            isInTopThree: topThreeMap.containsKey(game.id),
+            topThreePosition: topThreeMap[game.id],
+          ));
+        }
+      }
+
+      return enrichedGames;
+    } catch (e) {
+      print('❌ Error enriching batch: $e');
+      return games; // Return original games if enrichment fails
+    }
   }
 
   void _applyFiltersAndSort() {
-    List<Game> filtered = List.from(widget.games);
+    List<Game> filtered = List.from(_allGames);
 
-    // Apply search
+    // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((game) {
-        return game.name.toLowerCase().contains(_searchQuery) ||
-            game.summary?.toLowerCase().contains(_searchQuery) == true;
-      }).toList();
+      filtered = filtered.where((game) =>
+          game.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
     }
 
     // Apply genre filter
     if (_selectedGenres.isNotEmpty) {
-      filtered = filtered.where((game) {
-        return game.genres.any((genre) =>
-            _selectedGenres.any((selected) => selected.id == genre.id)
-        );
-      }).toList();
+      filtered = filtered.where((game) =>
+          game.genres.any((genre) => _selectedGenres.contains(genre))).toList();
     }
 
     // Apply platform filter
     if (_selectedPlatforms.isNotEmpty) {
-      filtered = filtered.where((game) {
-        return game.platforms.any((platform) =>
-            _selectedPlatforms.any((selected) => selected.id == platform.id)
-        );
-      }).toList();
+      filtered = filtered.where((game) =>
+          game.platforms.any((platform) => _selectedPlatforms.contains(platform))).toList();
     }
 
     // Apply year filter
@@ -427,19 +233,22 @@ class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
       filtered = filtered.where((game) {
         if (game.firstReleaseDate == null) return false;
         final year = game.firstReleaseDate!.year;
-        if (_selectedMinYear != null && year < _selectedMinYear!) return false;
-        if (_selectedMaxYear != null && year > _selectedMaxYear!) return false;
-        return true;
+        return (_selectedMinYear == null || year >= _selectedMinYear!) &&
+            (_selectedMaxYear == null || year <= _selectedMaxYear!);
       }).toList();
     }
 
     // Apply rating filter
     switch (_ratingFilter) {
       case RatingFilter.rated:
-        filtered = filtered.where((game) => _isGameRated(game)).toList();
+        filtered = filtered.where((game) => game.userRating != null).toList();
         break;
       case RatingFilter.unrated:
-        filtered = filtered.where((game) => !_isGameRated(game)).toList();
+        filtered = filtered.where((game) => game.userRating == null).toList();
+        break;
+      case RatingFilter.highRated:
+        filtered = filtered.where((game) =>
+        game.userRating != null && game.userRating! >= 7.0).toList();
         break;
       case RatingFilter.all:
         break;
@@ -453,7 +262,21 @@ class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
       case SortOption.nameZA:
         filtered.sort((a, b) => b.name.compareTo(a.name));
         break;
-      case SortOption.releaseDateNewest:
+      case SortOption.ratingHigh:
+        filtered.sort((a, b) {
+          final aRating = a.aggregatedRating ?? 0;
+          final bRating = b.aggregatedRating ?? 0;
+          return bRating.compareTo(aRating);
+        });
+        break;
+      case SortOption.ratingLow:
+        filtered.sort((a, b) {
+          final aRating = a.aggregatedRating ?? 0;
+          final bRating = b.aggregatedRating ?? 0;
+          return aRating.compareTo(bRating);
+        });
+        break;
+      case SortOption.releaseDateNew:
         filtered.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) return 0;
           if (a.firstReleaseDate == null) return 1;
@@ -461,33 +284,12 @@ class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
           return b.firstReleaseDate!.compareTo(a.firstReleaseDate!);
         });
         break;
-      case SortOption.releaseDateOldest:
+      case SortOption.releaseDateOld:
         filtered.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) return 0;
           if (a.firstReleaseDate == null) return 1;
           if (b.firstReleaseDate == null) return -1;
           return a.firstReleaseDate!.compareTo(b.firstReleaseDate!);
-        });
-        break;
-      case SortOption.ratingHighest:
-        filtered.sort((a, b) {
-          final aRating = a.totalRating ?? 0;
-          final bRating = b.totalRating ?? 0;
-          return bRating.compareTo(aRating);
-        });
-        break;
-      case SortOption.ratingLowest:
-        filtered.sort((a, b) {
-          final aRating = a.totalRating ?? 0;
-          final bRating = b.totalRating ?? 0;
-          return aRating.compareTo(bRating);
-        });
-        break;
-      case SortOption.userRatingHighest:
-        filtered.sort((a, b) {
-          final aRating = a.userRating ?? 0;
-          final bRating = b.userRating ?? 0;
-          return bRating.compareTo(aRating);
         });
         break;
     }
@@ -497,106 +299,365 @@ class _LocalAllGamesScreenState extends State<LocalAllGamesScreen> {
     });
   }
 
-  void _resetFilters() {
-    setState(() {
-      _searchQuery = '';
-      _selectedGenres.clear();
-      _selectedPlatforms.clear();
-      _selectedMinYear = null;
-      _selectedMaxYear = null;
-      _ratingFilter = RatingFilter.all;
-      _sortOption = SortOption.nameAZ;
-      _applyFiltersAndSort();
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
-  void _showFilterDialog() {
-    // TODO: Implement filter dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filters'),
-        content: const Text('Filter dialog coming soon...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _isEnriching ? _buildEnrichmentProgress() : _buildGamesList(),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (widget.subtitle != null)
+            Text(
+              widget.subtitle!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+        ],
+      ),
+      actions: _isEnriching ? [] : [
+        // Blur Toggle
+        if (widget.blurRated)
+          IconButton(
+            icon: Icon(_blurRatedGames ? Icons.blur_off : Icons.blur_on),
+            onPressed: () {
+              setState(() {
+                _blurRatedGames = !_blurRatedGames;
+              });
+            },
+            tooltip: _blurRatedGames ? 'Show ratings' : 'Blur ratings',
+          ),
+
+        // View Toggle
+        if (widget.showViewToggle)
+          IconButton(
+            icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
+            onPressed: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
+            tooltip: _isGridView ? 'List view' : 'Grid view',
+          ),
+
+        // Filters
+        if (widget.showFilters)
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFiltersDialog,
+            tooltip: 'Filters',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEnrichmentProgress() {
+    final double progress = _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.all(AppConstants.paddingLarge),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Circular progress indicator
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 8,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${(_enrichmentProgress / _totalGames * 100).toInt()}%',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      '$_enrichmentProgress/$_totalGames',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Status text
+          Text(
+            _enrichmentStatus,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Secondary info
+          Text(
+            'Loading your personal game data...',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Linear progress bar
+          Container(
+            width: double.infinity,
+            height: 8,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showSortDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sort Options'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: SortOption.values.map((option) {
-            return RadioListTile<SortOption>(
-              title: Text(option.displayName),
-              value: option,
-              groupValue: _sortOption,
-              onChanged: (value) {
-                setState(() {
-                  _sortOption = value!;
-                  _applyFiltersAndSort();
-                });
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+  Widget _buildGamesList() {
+    return Column(
+      children: [
+        // Search bar
+        if (widget.showSearch) _buildSearchBar(),
+
+        // Games count
+        _buildGamesCount(),
+
+        // Games list/grid
+        Expanded(
+          child: _filteredGames.isEmpty
+              ? _buildEmptyState()
+              : _isGridView
+              ? _buildGridView()
+              : _buildListView(),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search games...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _searchQuery = '';
+              });
+              _applyFiltersAndSort();
+            },
+          )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+          ),
+        ),
+        onChanged: (query) {
+          setState(() {
+            _searchQuery = query;
+          });
+          _applyFiltersAndSort();
+        },
       ),
     );
   }
-}
 
-// Enums
-enum RatingFilter {
-  all,
-  rated,
-  unrated;
-
-  String get displayName {
-    switch (this) {
-      case RatingFilter.all:
-        return 'All Games';
-      case RatingFilter.rated:
-        return 'Rated Only';
-      case RatingFilter.unrated:
-        return 'Unrated Only';
-    }
+  Widget _buildGamesCount() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.paddingMedium,
+        vertical: AppConstants.paddingSmall,
+      ),
+      child: Row(
+        children: [
+          Text(
+            '${_filteredGames.length} of ${_allGames.length} games',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const Spacer(),
+          if (widget.showFilters)
+            TextButton.icon(
+              onPressed: _showSortDialog,
+              icon: const Icon(Icons.sort, size: 16),
+              label: Text(_getSortOptionName(_sortOption)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+            ),
+        ],
+      ),
+    );
   }
-}
 
-enum SortOption {
-  nameAZ,
-  nameZA,
-  releaseDateNewest,
-  releaseDateOldest,
-  ratingHighest,
-  ratingLowest,
-  userRatingHighest;
+  Widget _buildGridView() {
+    return GridView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: AppConstants.paddingMedium,
+        mainAxisSpacing: AppConstants.paddingMedium,
+      ),
+      itemCount: _filteredGames.length,
+      itemBuilder: (context, index) {
+        final game = _filteredGames[index];
+        return GameCard(
+          game: game,
+          blurRated: _blurRatedGames && game.userRating != null,
+          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+        );
+      },
+    );
+  }
 
-  String get displayName {
-    switch (this) {
+  Widget _buildListView() {
+    return ListView.separated(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      itemCount: _filteredGames.length,
+      separatorBuilder: (context, index) => const SizedBox(height: AppConstants.paddingSmall),
+      itemBuilder: (context, index) {
+        final game = _filteredGames[index];
+        return GameCard(
+          game: game,
+          blurRated: _blurRatedGames && game.userRating != null,
+          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.games,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No games found',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your filters or search terms.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFiltersDialog() {
+    // TODO: Implement filters dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Filters dialog - TODO')),
+    );
+  }
+
+  void _showSortDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Sort by'),
+        children: SortOption.values.map((option) =>
+            SimpleDialogOption(
+              onPressed: () {
+                setState(() {
+                  _sortOption = option;
+                });
+                Navigator.of(context).pop();
+                _applyFiltersAndSort();
+              },
+              child: Text(_getSortOptionName(option)),
+            ),
+        ).toList(),
+      ),
+    );
+  }
+
+  String _getSortOptionName(SortOption option) {
+    switch (option) {
       case SortOption.nameAZ:
-        return 'Name (A-Z)';
+        return 'Name A-Z';
       case SortOption.nameZA:
-        return 'Name (Z-A)';
-      case SortOption.releaseDateNewest:
-        return 'Release Date (Newest)';
-      case SortOption.releaseDateOldest:
-        return 'Release Date (Oldest)';
-      case SortOption.ratingHighest:
-        return 'Rating (Highest)';
-      case SortOption.ratingLowest:
-        return 'Rating (Lowest)';
-      case SortOption.userRatingHighest:
-        return 'My Rating (Highest)';
+        return 'Name Z-A';
+      case SortOption.ratingHigh:
+        return 'Rating High-Low';
+      case SortOption.ratingLow:
+        return 'Rating Low-High';
+      case SortOption.releaseDateNew:
+        return 'Release Date New-Old';
+      case SortOption.releaseDateOld:
+        return 'Release Date Old-New';
     }
   }
 }

@@ -9,8 +9,10 @@ import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dar
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
+import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/repositories/game_repository.dart';
 import '../../../domain/usecases/game/getUserRated.dart';
 import '../../../domain/usecases/game/get_complete_game_details.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
@@ -59,6 +61,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetGameExpansions getGameExpansions;
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
+  final GameRepository gameRepository;
+
 
   GameBloc({
     required this.searchGames,
@@ -81,6 +85,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getGameExpansions,
     required this.getEnhancedGameDetails,
     required this.getCompleteGameDetailPageData,
+    required this.gameRepository,
   }) : super(GameInitial()) {
     // Search events
     on<SearchGamesEvent>(
@@ -115,6 +120,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GetSimilarGamesEvent>(_onGetSimilarGames);
     on<GetGameDLCsEvent>(_onGetGameDLCs);
     on<GetGameExpansionsEvent>(_onGetGameExpansions);
+    on<LoadCompleteFranchiseGamesEvent>(_onLoadCompleteFranchiseGames);
+    on<LoadCompleteCollectionGamesEvent>(_onLoadCompleteCollectionGames);
   }
 
   // Debounce transformer for search
@@ -381,7 +388,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-  // Komplette _onGetGameDetailsWithUserData Methode für game_bloc.dart
 
   Future<void> _onGetGameDetailsWithUserData(
     GetGameDetailsWithUserDataEvent event,
@@ -794,19 +800,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
         final enrichedPopular =
-            await _enrichGamesWithUserData(popularGames, event.userId!);
+            await enrichGamesWithUserData(popularGames, event.userId!);
         final enrichedUpcoming =
-            await _enrichGamesWithUserData(upcomingGames, event.userId!);
+            await enrichGamesWithUserData(upcomingGames, event.userId!);
         final enrichLatest =
-            await _enrichGamesWithUserData(latestGames, event.userId!);
+            await enrichGamesWithUserData(latestGames, event.userId!);
         final enrichedTopRated =
-            await _enrichGamesWithUserData(topRatedGames, event.userId!);
+            await enrichGamesWithUserData(topRatedGames, event.userId!);
         // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
         final enrichedWishlist = userWishlist.isNotEmpty
-            ? await _enrichGamesWithUserData(userWishlist, event.userId!)
+            ? await enrichGamesWithUserData(userWishlist, event.userId!)
             : <Game>[];
         final enrichedRecommendations = userRecommendations.isNotEmpty
-            ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
+            ? await enrichGamesWithUserData(userRecommendations, event.userId!)
             : <Game>[];
 
         emit(HomePageLoaded(
@@ -867,16 +873,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Games mit User Data anreichern
       final enrichedRated = userRated.isNotEmpty
-          ? await _enrichGamesWithUserData(userRated, event.userId!)
+          ? await enrichGamesWithUserData(userRated, event.userId!)
           : <Game>[];
       final enrichedWishlist = userWishlist.isNotEmpty
-          ? await _enrichGamesWithUserData(userWishlist, event.userId!)
+          ? await enrichGamesWithUserData(userWishlist, event.userId!)
           : <Game>[];
       final enrichedRecommendations = userRecommendations.isNotEmpty
-          ? await _enrichGamesWithUserData(userRecommendations, event.userId!)
+          ? await enrichGamesWithUserData(userRecommendations, event.userId!)
           : <Game>[];
       final enrichedTopThree = userTopThree.isNotEmpty
-          ? await _enrichGamesWithUserData(userTopThree, event.userId!)
+          ? await enrichGamesWithUserData(userTopThree, event.userId!)
           : <Game>[];
 
       // ✅ State emittieren (das fehlte!)
@@ -892,22 +898,30 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-  Future<List<Game>> _enrichGamesWithUserData(
-      List<Game> games, String? userId) async {
+  // 🆕 UPDATED: Limit Parameter hinzugefügt
+  Future<List<Game>> enrichGamesWithUserData(
+      List<Game> games, String? userId, {int? enrichLimit}) async {
     if (userId == null || games.isEmpty) return games;
+
+    // Bestimme wie viele Games enriched werden sollen
+    final gamesToEnrich = enrichLimit != null && enrichLimit < games.length
+        ? games.take(enrichLimit).toList()
+        : games;
+
+    print('🔄 Enriching ${gamesToEnrich.length}/${games.length} games with user data (limit: $enrichLimit)');
 
     try {
       final supabaseDataSource = sl<SupabaseRemoteDataSource>();
 
-      // Hole alle User-Game Daten parallel
-      final futures = games
+      // Hole User-Game Daten nur für die ersten X Games (PERFORMANCE!)
+      final futures = gamesToEnrich
           .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
           .toList();
 
       final userGameDataList = await Future.wait(futures);
 
-      final topThreeData =
-          await supabaseDataSource.getUserTopThreeGames(userId: userId);
+      // Top Three einmal laden (für alle Games)
+      final topThreeData = await supabaseDataSource.getUserTopThreeGames(userId: userId);
       final topThreeMap = <int, int>{};
       for (var entry in topThreeData) {
         topThreeMap[entry['game_id'] as int] = entry['position'] as int;
@@ -915,8 +929,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Erstelle angereicherte Games Liste
       final enrichedGames = <Game>[];
-      for (int i = 0; i < games.length; i++) {
-        final game = games[i];
+
+      // Enriched Games (erste X)
+      for (int i = 0; i < gamesToEnrich.length; i++) {
+        final game = gamesToEnrich[i];
         final userGameData = userGameDataList[i];
 
         if (userGameData != null) {
@@ -932,7 +948,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             isWishlisted: false,
             isRecommended: false,
             userRating: null,
-            isInTopThree: false,
+            isInTopThree: topThreeMap.containsKey(game.id), // Top3 check auch für nicht-enriched
+            topThreePosition: topThreeMap[game.id],
+          ));
+        }
+      }
+
+      // Nicht-enriched Games (Rest) - nur mit TopThree Daten
+      if (enrichLimit != null && enrichLimit < games.length) {
+        final remainingGames = games.skip(enrichLimit);
+        for (final game in remainingGames) {
+          enrichedGames.add(game.copyWith(
+            isWishlisted: false, // Kein API Call = default false
+            isRecommended: false, // Kein API Call = default false
+            userRating: null, // Kein API Call = null
+            isInTopThree: topThreeMap.containsKey(game.id), // TopThree prüfen
+            topThreePosition: topThreeMap[game.id],
           ));
         }
       }
@@ -1012,7 +1043,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           if (event.userId != null && !emit.isDone) {
             try {
               print('🔄 GameBloc: Enriching with user data...');
-              final enrichedMainGames = await _enrichGamesWithUserData([game], event.userId!);
+              final enrichedMainGames = await enrichGamesWithUserData([game], event.userId!);
               Game enrichedGame = enrichedMainGames[0];
 
               enrichedGame = await _enrichGameWithAllNestedUserData(enrichedGame, event.userId!);
@@ -1100,102 +1131,59 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
    */
 
-// 🆕 NEW: Helper method to enrich ALL nested games (simplified)
-  Future<Game> _enrichGameWithAllNestedUserData(
-      Game game, String userId) async {
+// 🆕 UPDATED: Limits für Franchise/Collection
+  Future<Game> _enrichGameWithAllNestedUserData(Game game, String userId) async {
     try {
-      // 1. 🎮 SIMILAR GAMES (einfach wie immer)
+      // ⚡ PERFORMANCE LIMITS für große Listen
+      const int franchiseLimit = 10;  // Nur erste 10 Franchise Games enrichen
+      const int collectionLimit = 10; // Nur erste 10 Collection Games enrichen
+
+      // 1-7. Normale Listen (wie vorher, ohne Limit)
       List<Game> enrichedSimilarGames = game.similarGames;
       if (game.similarGames.isNotEmpty) {
-        print('🔄 Enriching similar games...');
-        enrichedSimilarGames =
-            await _enrichGamesWithUserData(game.similarGames, userId);
+        enrichedSimilarGames = await enrichGamesWithUserData(game.similarGames, userId);
       }
 
-      // 2. 📦 DLC GAMES (einfach wie immer)
       List<Game> enrichedDLCs = game.dlcs;
       if (game.dlcs.isNotEmpty) {
-        print('🔄 Enriching DLC games...');
-        enrichedDLCs = await _enrichGamesWithUserData(game.dlcs, userId);
+        enrichedDLCs = await enrichGamesWithUserData(game.dlcs, userId);
       }
 
-      // 3. 🎯 EXPANSION GAMES (einfach wie immer)
       List<Game> enrichedExpansions = game.expansions;
       if (game.expansions.isNotEmpty) {
-        print('🔄 Enriching expansion games...');
-        enrichedExpansions =
-            await _enrichGamesWithUserData(game.expansions, userId);
+        enrichedExpansions = await enrichGamesWithUserData(game.expansions, userId);
       }
 
-      // 4. 🏆 STANDALONE EXPANSIONS (einfach wie immer)
       List<Game> enrichedStandaloneExpansions = game.standaloneExpansions;
       if (game.standaloneExpansions.isNotEmpty) {
-        print('🔄 Enriching standalone expansion games...');
-        enrichedStandaloneExpansions =
-            await _enrichGamesWithUserData(game.standaloneExpansions, userId);
+        enrichedStandaloneExpansions = await enrichGamesWithUserData(game.standaloneExpansions, userId);
       }
 
-      // 5. 📦 BUNDLES (einfach wie immer)
       List<Game> enrichedBundles = game.bundles;
       if (game.bundles.isNotEmpty) {
-        print('🔄 Enriching bundle games...');
-        enrichedBundles = await _enrichGamesWithUserData(game.bundles, userId);
+        enrichedBundles = await enrichGamesWithUserData(game.bundles, userId);
       }
 
-      // 6. 🔧 REMAKES (einfach wie immer)
       List<Game> enrichedRemakes = game.remakes;
       if (game.remakes.isNotEmpty) {
-        print('🔄 Enriching remake games...');
-        enrichedRemakes = await _enrichGamesWithUserData(game.remakes, userId);
+        enrichedRemakes = await enrichGamesWithUserData(game.remakes, userId);
       }
 
-      // 7. ✨ REMASTERS (einfach wie immer)
       List<Game> enrichedRemasters = game.remasters;
       if (game.remasters.isNotEmpty) {
-        print('🔄 Enriching remaster games...');
-        enrichedRemasters =
-            await _enrichGamesWithUserData(game.remasters, userId);
+        enrichedRemasters = await enrichGamesWithUserData(game.remasters, userId);
       }
 
-      // 8. 🔌 PORTS (neu)
-      List<Game> enrichedPorts = game.ports;
-      if (game.ports.isNotEmpty) {
-        print('🔄 Enriching port games...');
-        enrichedPorts = await _enrichGamesWithUserData(game.ports, userId);
-      }
-
-      // 9. 🍴 FORKS (neu)
-      List<Game> enrichedForks = game.forks;
-      if (game.forks.isNotEmpty) {
-        print('🔄 Enriching fork games...');
-        enrichedForks = await _enrichGamesWithUserData(game.forks, userId);
-      }
-
-      // 10. 📈 EXPANDED GAMES (neu)
-      List<Game> enrichedExpandedGames = game.expandedGames;
-      if (game.expandedGames.isNotEmpty) {
-        print('🔄 Enriching expanded games...');
-        enrichedExpandedGames =
-            await _enrichGamesWithUserData(game.expandedGames, userId);
-      }
-
-      // 11. 👨‍👩‍👧‍👦 PARENT GAME (neu - einzelnes Game in Liste verpacken!)
-      Game? enrichedParentGame = game.parentGame;
-      if (game.parentGame != null) {
-        print('🔄 Enriching parent game...');
-        final enrichedParentGames = await _enrichGamesWithUserData([game.parentGame!], userId);
-        enrichedParentGame = enrichedParentGames.isNotEmpty ? enrichedParentGames.first : null;
-      }
-
-      // 8. 🌟 MAIN FRANCHISE (einfach - neue Franchise mit enriched games)
+      // 8. 🌟 MAIN FRANCHISE (🆕 MIT LIMIT!)
       Franchise? enrichedMainFranchise = game.mainFranchise;
-      if (game.mainFranchise?.games != null &&
-          game.mainFranchise!.games!.isNotEmpty) {
-        print('🔄 Enriching main franchise games...');
-        final enrichedFranchiseGames =
-            await _enrichGamesWithUserData(game.mainFranchise!.games!, userId);
+      if (game.mainFranchise?.games != null && game.mainFranchise!.games!.isNotEmpty) {
+        print('🔄 Enriching main franchise games (limit: $franchiseLimit)...');
+        final enrichedFranchiseGames = await enrichGamesWithUserData(
+            game.mainFranchise!.games!,
+            userId,
+            enrichLimit: franchiseLimit  // 🎯 NUR ERSTE 10!
+        );
 
-        // Neue Franchise mit enriched games erstellen
         enrichedMainFranchise = Franchise(
           id: game.mainFranchise!.id,
           checksum: game.mainFranchise!.checksum,
@@ -1205,22 +1193,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           gameIds: game.mainFranchise!.gameIds,
           createdAt: game.mainFranchise!.createdAt,
           updatedAt: game.mainFranchise!.updatedAt,
-          games: enrichedFranchiseGames, // 🎯 Enriched games!
+          games: enrichedFranchiseGames,
         );
       }
 
-      // 9. 🌳 OTHER FRANCHISES (einfach - neue Franchises mit enriched games)
+      // 9. 🌳 OTHER FRANCHISES (🆕 MIT LIMIT!)
       List<Franchise> enrichedFranchises = game.franchises;
       if (game.franchises.isNotEmpty) {
-        print('🔄 Enriching other franchise games...');
+        print('🔄 Enriching other franchise games (limit: $franchiseLimit)...');
         enrichedFranchises = [];
 
         for (final franchise in game.franchises) {
           if (franchise.games != null && franchise.games!.isNotEmpty) {
-            final enrichedGames =
-                await _enrichGamesWithUserData(franchise.games!, userId);
+            final enrichedGames = await enrichGamesWithUserData(
+                franchise.games!,
+                userId,
+                enrichLimit: franchiseLimit  // 🎯 NUR ERSTE 10!
+            );
 
-            // Neue Franchise mit enriched games erstellen
             enrichedFranchises.add(Franchise(
               id: franchise.id,
               checksum: franchise.checksum,
@@ -1230,26 +1220,28 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               gameIds: franchise.gameIds,
               createdAt: franchise.createdAt,
               updatedAt: franchise.updatedAt,
-              games: enrichedGames, // 🎯 Enriched games!
+              games: enrichedGames,
             ));
           } else {
-            enrichedFranchises.add(franchise); // Unchanged if no games
+            enrichedFranchises.add(franchise);
           }
         }
       }
 
-      // 10. 📚 COLLECTIONS (einfach - neue Collections mit enriched games)
+      // 10. 📚 COLLECTIONS (🆕 MIT LIMIT!)
       List<Collection> enrichedCollections = game.collections;
       if (game.collections.isNotEmpty) {
-        print('🔄 Enriching collection games...');
+        print('🔄 Enriching collection games (limit: $collectionLimit)...');
         enrichedCollections = [];
 
         for (final collection in game.collections) {
           if (collection.games != null && collection.games!.isNotEmpty) {
-            final enrichedGames =
-                await _enrichGamesWithUserData(collection.games!, userId);
+            final enrichedGames = await enrichGamesWithUserData(
+                collection.games!,
+                userId,
+                enrichLimit: collectionLimit  // 🎯 NUR ERSTE 10!
+            );
 
-            // Neue Collection mit enriched games erstellen
             enrichedCollections.add(Collection(
               id: collection.id,
               checksum: collection.checksum,
@@ -1262,17 +1254,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               typeId: collection.typeId,
               createdAt: collection.createdAt,
               updatedAt: collection.updatedAt,
-              games: enrichedGames, // 🎯 Enriched games!
+              games: enrichedGames,
             ));
           } else {
-            enrichedCollections.add(collection); // Unchanged if no games
+            enrichedCollections.add(collection);
           }
         }
       }
 
-      // 🎯 FINAL: Game mit allen enriched Listen erstellen
+      // Rest wie vorher...
       final enrichedGame = game.copyWith(
-        // Direct game lists (wie immer)
         similarGames: enrichedSimilarGames,
         dlcs: enrichedDLCs,
         expansions: enrichedExpansions,
@@ -1280,23 +1271,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         bundles: enrichedBundles,
         remakes: enrichedRemakes,
         remasters: enrichedRemasters,
-        ports: enrichedPorts,
-        forks: enrichedForks,
-        expandedGames: enrichedExpandedGames,
-        parentGame: enrichedParentGame,
-        // Franchise & Collection objects (neu erstellt)
         mainFranchise: enrichedMainFranchise,
         franchises: enrichedFranchises,
         collections: enrichedCollections,
       );
 
-      print('✅ Successfully enriched all nested games with user data');
+      print('✅ Successfully enriched nested games with limits (franchise: $franchiseLimit, collection: $collectionLimit)');
       return enrichedGame;
     } catch (e) {
       print('❌ Error enriching nested games: $e');
-      return game; // Return original game if enrichment fails
+      return game;
     }
   }
+
 
   Future<void> _onGetSimilarGames(
     GetSimilarGamesEvent event,
@@ -1385,6 +1372,57 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return 'Cache error occurred';
       default:
         return 'An unexpected error occurred';
+    }
+  }
+
+
+  /// Handler for complete franchise games - enriches existing games
+  Future<void> _onLoadCompleteFranchiseGames(
+      LoadCompleteFranchiseGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('🔄 Enriching ${event.games.length} franchise games with user data...');
+
+      // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
+      final enrichedGames = event.userId != null
+          ? await enrichGamesWithUserData(event.games, event.userId)
+          : event.games;
+
+      emit(CompleteFranchiseGamesLoaded(
+        franchiseId: event.franchiseId,
+        franchiseName: event.franchiseName,
+        games: enrichedGames,
+      ));
+    } catch (e) {
+      emit(GameError('Failed to enrich franchise games: $e'));
+    }
+  }
+
+  /// Handler for complete collection games - enriches existing games
+  Future<void> _onLoadCompleteCollectionGames(
+      LoadCompleteCollectionGamesEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    emit(GameDetailsLoading());
+
+    try {
+      print('🔄 Enriching ${event.games.length} collection games with user data...');
+
+      // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
+      final enrichedGames = event.userId != null
+          ? await enrichGamesWithUserData(event.games, event.userId)
+          : event.games;
+
+      emit(CompleteCollectionGamesLoaded(
+        collectionId: event.collectionId,
+        collectionName: event.collectionName,
+        games: enrichedGames,
+      ));
+    } catch (e) {
+      emit(GameError('Failed to enrich collection games: $e'));
     }
   }
 }

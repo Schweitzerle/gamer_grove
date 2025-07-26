@@ -226,7 +226,7 @@ Future<void> init() async {
           getUpcomingGames: sl(),
           getUserWishlist: sl(),
           getUserRecommendations: sl(),
-          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(), getTopRatedGames: sl(), getLatestGames: sl(),
+          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(), getTopRatedGames: sl(), getLatestGames: sl(), gameRepository: sl<GameRepository>(),
         ),
   );
 

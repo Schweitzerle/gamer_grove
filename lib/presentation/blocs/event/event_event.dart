@@ -92,3 +92,30 @@ class GetCompleteEventDetailsEvent extends EventEvent {
 // Clear events (for cleanup)
 class ClearEventsEvent extends EventEvent {}
 
+class GetEventDetailsWithUserDataEvent extends EventEvent {
+  final int eventId;
+  final String? userId;
+
+  const GetEventDetailsWithUserDataEvent({
+    required this.eventId,
+    this.userId,
+  });
+
+  @override
+  List<Object?> get props => [eventId, userId];
+}
+
+class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
+  final int eventId;
+  final String? userId;
+  final bool includeGames;
+
+  const GetCompleteEventDetailsWithUserDataEvent({
+    required this.eventId,
+    this.userId,
+    this.includeGames = true,
+  });
+
+  @override
+  List<Object?> get props => [eventId, userId, includeGames];
+}

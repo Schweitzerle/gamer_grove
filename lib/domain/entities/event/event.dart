@@ -64,7 +64,7 @@ class Event extends Equatable {
   // ENHANCED HELPER GETTERS
   // ==========================================
 
-  bool get hasLogo => eventLogo != null || eventLogoId != null;
+  bool get hasLogo => eventLogo != null && eventLogo!.bestUrl.isNotEmpty;
   bool get hasLogoObject => eventLogo != null;
   bool get hasLiveStream => liveStreamUrl != null && liveStreamUrl!.isNotEmpty;
   bool get hasNetworks => eventNetworks.isNotEmpty || eventNetworkIds.isNotEmpty;

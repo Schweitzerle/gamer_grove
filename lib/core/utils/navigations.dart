@@ -21,6 +21,7 @@ import '../../presentation/pages/all_games/local_all_games_screen.dart';
 import '../../domain/entities/game/game.dart';
 import '../../domain/entities/franchise.dart';
 import '../../domain/entities/collection/collection.dart';
+import '../../presentation/widgets/sections/franchise_collection_section.dart';
 import '../constants/app_constants.dart';
 
 class Navigations {
@@ -46,7 +47,7 @@ class Navigations {
   // 🆕 LOCAL ALL GAMES METHODS (mit bereits gefetchten Daten)
   // ==========================================
 
-  /// Generic method for local all games screen
+  /// Generic method for enriched all games screen (replaces LocalAllGamesScreen)
   static void navigateToLocalAllGames(
       BuildContext context, {
         required String title,
@@ -57,12 +58,15 @@ class Navigations {
         bool blurRated = false,
         bool showViewToggle = true,
       }) {
+    final userId = _getCurrentUserId(context);
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LocalAllGamesScreen(
+        builder: (context) => EnrichedAllGamesScreen(
           title: title,
           subtitle: subtitle,
-          games: games,
+          games: games, // Alle Games werden enriched
+          userId: userId,
           showFilters: showFilters,
           showSearch: showSearch,
           blurRated: blurRated,
@@ -81,9 +85,9 @@ class Navigations {
     navigateToLocalAllGames(
       context,
       title: franchise.name,
-      subtitle: franchise == franchise ? 'Main Franchise' : 'Franchise',
-      games: games,
-      blurRated: true, // Show rating status for franchises
+      subtitle: 'Franchise • ${games.length} games',
+      games: games, // ✅ Einfach alle Games übergeben
+      blurRated: true,
       showFilters: true,
     );
   }
@@ -97,13 +101,28 @@ class Navigations {
     navigateToLocalAllGames(
       context,
       title: collection.name,
-      subtitle: 'Collection',
-      games: games,
-      blurRated: true, // Show rating status for collections
+      subtitle: 'Collection • ${games.length} games',
+      games: games, // ✅ Einfach alle Games übergeben
+      blurRated: true,
       showFilters: true,
     );
   }
 
+  static void navigateToEventGames(BuildContext context, SeriesItem item, Event event) {
+    Navigations.navigateToLocalAllGames(
+      context,
+      title: item.title,
+      subtitle: 'Games featured at this event',
+      games: event.games,
+      showFilters: true,
+      blurRated: true,
+    );
+  }
+
+  static String? _getCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    return authState is Authenticated ? authState.user.id : null;
+  }
   /// Navigate to similar games list
   static void navigateToSimilarGames(
       BuildContext context,
@@ -336,19 +355,29 @@ class Navigations {
     );
   }
 
-  /// Navigate to event details screen
+  // Ersetze die Navigation mit User-aware Events:
   static void navigateToEventDetails(
       BuildContext context, {
         required int eventId,
         Game? game,
       }) {
+    // Get current user
+    final authState = context.read<AuthBloc>().state;
+    String? userId;
+    if (authState is Authenticated) {
+      userId = authState.user.id;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
               create: (context) => sl<EventBloc>()
-                ..add(GetEventDetailsEvent(eventId: eventId)),
+                ..add(GetCompleteEventDetailsWithUserDataEvent(
+                  eventId: eventId,
+                  userId: userId, // 🎯 User ID mitgeben!
+                )),
             ),
             BlocProvider.value(
               value: context.read<AuthBloc>(),
@@ -477,22 +506,6 @@ class Navigations {
   // 🎪 EVENT-SPECIFIC GAME NAVIGATION
   // ==========================================
 
-  /// Navigate to games featured at an event
-  static void navigateToEventGames(
-      BuildContext context, {
-        required Event event,
-        required List<Game> games,
-      }) {
-    navigateToLocalAllGames(
-      context,
-      title: '${event.name} Games',
-      subtitle: 'Games featured at this event',
-      games: games,
-      showFilters: true,
-      showSearch: true,
-      blurRated: true,
-    );
-  }
 
   /// Navigate to all games that have events
   static void navigateToGamesWithEvents(BuildContext context) {
@@ -543,45 +556,6 @@ class Navigations {
     );
   }
 
-  // ==========================================
-  // 🎪 EVENT UTILITY METHODS
-  // ==========================================
-
-  /// Show event quick actions bottom sheet
-  static void showEventQuickActions(
-      BuildContext context,
-      Event event, {
-        List<Game>? featuredGames,
-      }) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => EventQuickActionsSheet(
-        event: event,
-        featuredGames: featuredGames,
-      ),
-    );
-  }
-
-  /// Show event filter options
-  static void showEventFilterOptions(
-      BuildContext context, {
-        required Function(EventStatusFilter) onFilterChanged,
-        required EventStatusFilter currentFilter,
-      }) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => EventFilterSheet(
-        onFilterChanged: onFilterChanged,
-        currentFilter: currentFilter,
-      ),
-    );
-  }
 
   // ==========================================
   // 🎪 BULK EVENT OPERATIONS (for later)
@@ -601,188 +575,5 @@ class Navigations {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Event notifications settings coming soon!')),
     );
-  }
-}
-
-
-
-
-// ==================================================
-// EVENT QUICK ACTIONS SHEET
-// ==================================================
-
-class EventQuickActionsSheet extends StatelessWidget {
-  final Event event;
-  final List<Game>? featuredGames;
-
-  const EventQuickActionsSheet({
-    super.key,
-    required this.event,
-    this.featuredGames,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            event.name,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingMedium),
-
-          // View Details
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('View Details'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigations.navigateToEventDetailsWithEvent(
-                context,
-                event: event,
-                featuredGames: featuredGames,
-              );
-            },
-          ),
-
-          // Live Stream (if available)
-          if (event.hasLiveStream)
-            ListTile(
-              leading: const Icon(Icons.live_tv, color: Colors.red),
-              title: Text(event.isLive ? 'Watch Live' : 'View Stream'),
-              subtitle: event.isLive ? const Text('Currently live') : null,
-              onTap: () {
-                Navigator.pop(context);
-                Navigations.openEventLiveStream(context, event);
-              },
-            ),
-
-          // Featured Games (if available)
-          if (featuredGames != null && featuredGames!.isNotEmpty)
-            ListTile(
-              leading: const Icon(Icons.videogame_asset),
-              title: const Text('Featured Games'),
-              subtitle: Text('${featuredGames!.length} games'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigations.navigateToEventGames(
-                  context,
-                  event: event,
-                  games: featuredGames!,
-                );
-              },
-            ),
-
-          // Share Event
-          ListTile(
-            leading: const Icon(Icons.share),
-            title: const Text('Share Event'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigations.shareEvent(context, event);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ==================================================
-// EVENT FILTER SHEET
-// ==================================================
-
-class EventFilterSheet extends StatelessWidget {
-  final Function(EventStatusFilter) onFilterChanged;
-  final EventStatusFilter currentFilter;
-
-  const EventFilterSheet({
-    super.key,
-    required this.onFilterChanged,
-    required this.currentFilter,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Filter Events',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingMedium),
-
-          ...EventStatusFilter.values.map((filter) {
-            final isSelected = currentFilter == filter;
-            return ListTile(
-              leading: Icon(
-                _getFilterIcon(filter),
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-              ),
-              title: Text(
-                _getFilterLabel(filter),
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.w600 : null,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
-                ),
-              ),
-              trailing: isSelected
-                  ? Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.primary,
-              )
-                  : null,
-              onTap: () {
-                onFilterChanged(filter);
-                Navigator.pop(context);
-                HapticFeedback.lightImpact();
-              },
-            );
-          }).toList(),
-        ],
-      ),
-    );
-  }
-
-  String _getFilterLabel(EventStatusFilter filter) {
-    switch (filter) {
-      case EventStatusFilter.all:
-        return 'All Events';
-      case EventStatusFilter.live:
-        return 'Live Events';
-      case EventStatusFilter.upcoming:
-        return 'Upcoming Events';
-      case EventStatusFilter.past:
-        return 'Past Events';
-    }
-  }
-
-  IconData _getFilterIcon(EventStatusFilter filter) {
-    switch (filter) {
-      case EventStatusFilter.all:
-        return Icons.event;
-      case EventStatusFilter.live:
-        return Icons.circle;
-      case EventStatusFilter.upcoming:
-        return Icons.schedule;
-      case EventStatusFilter.past:
-        return Icons.history;
-    }
   }
 }
