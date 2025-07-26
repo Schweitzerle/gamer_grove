@@ -241,7 +241,7 @@ class ContentDLCSection extends StatelessWidget {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: true,
+            blurRated: false,
           ),
         );
       },
@@ -262,7 +262,7 @@ class ContentDLCSection extends StatelessWidget {
           title: '${game.name} ${tab.displayTitle}',
           subtitle: tab.subtitle,
           games: tab.games,
-          blurRated: true,
+          blurRated: false,
         );
         break;
     }
@@ -516,7 +516,7 @@ class VersionsRemakesSection extends StatelessWidget {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: true,
+            blurRated: false,
           ),
         );
       },
@@ -529,7 +529,7 @@ class VersionsRemakesSection extends StatelessWidget {
       title: '${game.name} ${tab.displayTitle}',
       subtitle: tab.subtitle,
       games: tab.games,
-      blurRated: true,
+      blurRated: false,
     );
   }
 }
@@ -759,7 +759,7 @@ class SimilarRelatedSection extends StatelessWidget {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: true,
+            blurRated: false,
           ),
         );
       },
@@ -775,7 +775,7 @@ class SimilarRelatedSection extends StatelessWidget {
         title: '${game.name} ${tab.displayTitle}',
         subtitle: tab.subtitle,
         games: tab.games,
-        blurRated: true,
+        blurRated: false,
       );
     }
   }

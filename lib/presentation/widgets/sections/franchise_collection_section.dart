@@ -21,7 +21,7 @@ class FranchiseCollectionsSection extends StatelessWidget {
     final seriesItems = <SeriesItem>[];
 
     // Add Main Franchise first (if exists)
-    if (game.mainFranchise != null) {
+    if (game.mainFranchise != null && game.mainFranchise!.hasGames) {
       seriesItems.add(SeriesItem(
         type: SeriesType.mainFranchise,
         title: game.mainFranchise!.name,
@@ -35,7 +35,8 @@ class FranchiseCollectionsSection extends StatelessWidget {
 
     // Add Other Franchises
     for (final franchise in game.franchises) {
-      seriesItems.add(SeriesItem(
+      if (franchise.hasGames) {
+        seriesItems.add(SeriesItem(
         type: SeriesType.franchise,
         title: franchise.name,
         games: _getFranchiseGames(franchise),
@@ -44,11 +45,13 @@ class FranchiseCollectionsSection extends StatelessWidget {
         accentColor: Colors.orange,
         icon: Icons.account_tree,
       ));
+      }
     }
 
     // Add Collections
     for (final collection in game.collections) {
-      seriesItems.add(SeriesItem(
+      if(collection.hasGames) {
+        seriesItems.add(SeriesItem(
         type: SeriesType.collection,
         title: collection.name,
         games: _getCollectionGames(collection),
@@ -57,6 +60,7 @@ class FranchiseCollectionsSection extends StatelessWidget {
         accentColor: Colors.blue,
         icon: Icons.collections,
       ));
+      }
     }
 
     if (seriesItems.isEmpty) {

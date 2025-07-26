@@ -1,3 +1,7 @@
+// ==================================================
+// CHARACTER USE CASE IMPLEMENTATION
+// ==================================================
+
 // lib/domain/usecases/characters/get_character_with_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
@@ -15,7 +19,9 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
   @override
   Future<Either<Failure, CharacterWithGames>> call(GetCharacterWithGamesParams params) async {
     try {
-      // Get character details
+      print('🎭 UseCase: Getting character details for ID: ${params.characterId}');
+
+      // Get character details (this should include enriched games from repository)
       final characterResult = await repository.getCharacterDetails(params.characterId);
       if (characterResult.isLeft()) {
         return characterResult.fold(
@@ -29,15 +35,22 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
             (r) => r,
       );
 
-      // Get games for this character if requested
-      List<Game> games = [];
-      if (params.includeGames && character.gameIds.isNotEmpty) {
+      print('✅ UseCase: Character loaded: ${character.name}');
+      print('🎮 UseCase: Character has ${character.loadedGameCount} games');
+
+      // The character should already have games loaded from repository
+      // But if not, we can load them manually
+      List<Game> games = character.games ?? [];
+
+      if (games.isEmpty && character.gameIds.isNotEmpty && params.includeGames) {
+        print('⚠️ UseCase: Character has no loaded games, loading manually...');
         final gamesResult = await repository.getGamesByIds(character.gameIds);
         if (gamesResult.isRight()) {
           games = gamesResult.fold(
                 (failure) => <Game>[],
                 (gamesList) => gamesList,
           );
+          print('✅ UseCase: Manually loaded ${games.length} games');
         }
       }
 
@@ -47,6 +60,7 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
       ));
 
     } catch (e) {
+      print('❌ UseCase: Error loading character: $e');
       return Left(ServerFailure(message: 'Failed to load character with games: $e'));
     }
   }
@@ -80,4 +94,3 @@ class CharacterWithGames extends Equatable {
   @override
   List<Object> get props => [character, games];
 }
-

@@ -10,8 +10,13 @@ import '../../blocs/event/event_bloc.dart';
 import '../../blocs/event/event_event.dart';
 import '../../blocs/event/event_state.dart';
 import '../../widgets/custom_shimmer.dart';
+import '../../widgets/live_loading_progress.dart';
 import 'event_details_screen.dart';
+// ==================================================
+// ENHANCED EVENT DETAIL PAGE WITH LIVE LOADING
+// ==================================================
 
+// Updated event_detail_page.dart snippet:
 class EventDetailPage extends StatefulWidget {
   final int eventId;
   final Game? game;
@@ -38,7 +43,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     return BlocBuilder<EventBloc, EventState>(
       builder: (context, state) {
         if (state is EventLoading) {
-          return _buildLoadingState();
+          return _buildLiveLoadingState();
         } else if (state is CompleteEventDetailsLoaded) {
           return EventDetailScreen(
             event: state.eventDetails.event,
@@ -55,27 +60,30 @@ class _EventDetailPageState extends State<EventDetailPage> {
           return _buildErrorState(state.message);
         }
 
-        return _buildLoadingState();
+        return _buildLiveLoadingState();
       },
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLiveLoadingState() {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomShimmer(
-              child: CircularProgressIndicator(),
-            ),
-            SizedBox(height: 16),
-            Text('Loading event details...'),
-          ],
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: LiveLoadingProgress(
+            title: 'Loading Event Details',
+            steps: EventLoadingSteps.eventDetails(context),
+            stepDuration: const Duration(milliseconds: 1200),
+          ),
         ),
       ),
     );

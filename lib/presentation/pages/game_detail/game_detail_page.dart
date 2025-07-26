@@ -8,6 +8,7 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_descript
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'; // ✅ Import Live Loading
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/image_utils.dart';
@@ -83,7 +84,6 @@ class _GameDetailPageState extends State<GameDetailPage>
       gameId: widget.gameId,
       userId: _currentUserId,
     ));
-
   }
 
   void _initializeMediaTabs(Game game) {
@@ -101,38 +101,22 @@ class _GameDetailPageState extends State<GameDetailPage>
   void dispose() {
     _scrollController.dispose();
     _mediaTabController.dispose();
-      super.dispose();
+    super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-        value: _gameBloc,
+      value: _gameBloc,
       child: Scaffold(
         body: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
             if (state is GameDetailsLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
+              return _buildLiveLoadingState(); // ✅ NEW: Live Loading
             }
 
             if (state is GameError) {
-              return Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Error: ${state.message}'),
-                      ElevatedButton(
-                        onPressed: _loadGameDetails,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return _buildErrorState(state.message); // ✅ Enhanced Error State
             }
 
             if (state is GameDetailsLoaded) {
@@ -150,15 +134,154 @@ class _GameDetailPageState extends State<GameDetailPage>
               );
             }
 
-            return const SizedBox.shrink();
+            return _buildLiveLoadingState(); // ✅ Default to Live Loading
           },
         ),
       ),
     );
   }
 
-  // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
+  // ✅ NEW: Live Loading State with Console-Style Progress
+  Widget _buildLiveLoadingState() {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: LiveLoadingProgress(
+            title: 'Loading Game Details',
+            steps: EventLoadingSteps.gameDetails(context),
+            stepDuration: const Duration(milliseconds: 1000), // ✅ Slightly faster for games
+          ),
+        ),
+      ),
+    );
+  }
 
+  // ✅ NEW: Enhanced Error State
+  Widget _buildErrorState(String message) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        title: Text(
+          'Game Details',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Error Icon with Theme Color
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Error Title
+              Text(
+                'Failed to Load Game',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Error Message
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
+                child: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontFamily: 'monospace', // ✅ Console-style for error messages
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Retry Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _loadGameDetails,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry Loading'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Go Back Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Go Back'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
   void _logGameDetailsData(Game game) {
     print('\n=== 🎮 ENHANCED GAME DETAILS LOADED ===');
     print('🎯 Game: ${game.name} (ID: ${game.id})');
@@ -201,7 +324,6 @@ class _GameDetailPageState extends State<GameDetailPage>
       print('   ✅ With Images: $charactersWithImages/${game.characters!.length}');
       print('   🔗 With MugShot IDs: $charactersWithMugShotIds/${game.characters!.length}');
       print('   📱 UI Ready: ${charactersWithImages > 0 ? 'YES - Images will display' : 'PARTIAL - Fallback icons will show'}');
-
     } else {
       print('\n👥 CHARACTERS: None found ❌ Characters section hidden');
     }
@@ -227,6 +349,8 @@ class _GameDetailPageState extends State<GameDetailPage>
             ? Text(
           game.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 1, // ✅ Same ellipsis fix as EventDetailScreen
+          overflow: TextOverflow.ellipsis,
         )
             : null,
       ),
@@ -305,7 +429,6 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-
   //Game Content
   Widget _buildGameContent(Game game) {
     return SliverToBoxAdapter(
@@ -317,17 +440,26 @@ class _GameDetailPageState extends State<GameDetailPage>
             const SizedBox(height: AppConstants.paddingLarge),
 
             // Game Details Accordion
-            _buildGameDetailsAccordion(game,),
+            _buildGameDetailsAccordion(game),
 
             CharactersSection(game: game),
 
             // 🆕 EVENTS SECTION (NEW!)
             if (game.events.isNotEmpty)
-              EventsSection(
-                game: game,
-                currentUserId: _currentUserId,
-                showViewAll: true,
-                maxDisplayedEvents: 6,
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingMedium,
+                ),
+                child: Card(
+                  elevation: 2,
+                  child: EventsSection(
+                    game: game,
+                    currentUserId: _currentUserId,
+                    showViewAll: true,
+                    maxDisplayedEvents: 6,
+                  ),
+                ),
               ),
 
             FranchiseCollectionsSection(game: game), // Franchises&Collections
@@ -347,7 +479,6 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-
   Widget _buildEnhancedMediaGallery(Game game) {
     return EnhancedMediaGallery(game: game);
   }
@@ -355,7 +486,4 @@ class _GameDetailPageState extends State<GameDetailPage>
   Widget _buildGameDetailsAccordion(Game game) {
     return GameDetailsAccordion(game: game);
   }
-
-
 }
-

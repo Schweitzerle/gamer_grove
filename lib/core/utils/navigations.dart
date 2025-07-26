@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../domain/entities/character/character.dart';
 import '../../domain/entities/event/event.dart';
 import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/event/event_bloc.dart';
 import '../../presentation/blocs/event/event_event.dart';
 import '../../presentation/blocs/game/game_bloc.dart';
+import '../../presentation/pages/character/character_detail_page.dart';
 import '../../presentation/pages/event/event_detail_page.dart';
 import '../../presentation/pages/event/event_details_screen.dart';
 import '../../presentation/pages/event/widgets/all_events_screen.dart';
@@ -87,7 +89,7 @@ class Navigations {
       title: franchise.name,
       subtitle: 'Franchise • ${games.length} games',
       games: games, // ✅ Einfach alle Games übergeben
-      blurRated: true,
+      blurRated: false,
       showFilters: true,
     );
   }
@@ -103,7 +105,7 @@ class Navigations {
       title: collection.name,
       subtitle: 'Collection • ${games.length} games',
       games: games, // ✅ Einfach alle Games übergeben
-      blurRated: true,
+      blurRated: false,
       showFilters: true,
     );
   }
@@ -115,7 +117,7 @@ class Navigations {
       subtitle: 'Games featured at this event',
       games: event.games,
       showFilters: true,
-      blurRated: true,
+      blurRated: false,
     );
   }
 
@@ -134,7 +136,7 @@ class Navigations {
       title: 'Similar to $gameName',
       subtitle: '${similarGames.length} similar games',
       games: similarGames,
-      blurRated: true,
+      blurRated: false,
       showFilters: false, // Simpler version for similar games
       showSearch: true,
     );
@@ -151,7 +153,7 @@ class Navigations {
       title: '$gameName DLCs',
       subtitle: '${dlcs.length} downloadable content',
       games: dlcs,
-      blurRated: true,
+      blurRated: false,
       showFilters: false,
     );
   }
@@ -167,7 +169,7 @@ class Navigations {
       title: '$gameName Expansions',
       subtitle: '${expansions.length} expansions',
       games: expansions,
-      blurRated: true,
+      blurRated: false,
       showFilters: false,
     );
   }
@@ -182,7 +184,7 @@ class Navigations {
       title: 'My Wishlist',
       subtitle: '${wishlistGames.length} games',
       games: wishlistGames,
-      blurRated: true, // Highlight which wishlist games are already rated
+      blurRated: false, // Highlight which wishlist games are already rated
       showFilters: true,
     );
   }
@@ -212,7 +214,7 @@ class Navigations {
       title: 'My Recommendations',
       subtitle: '${recommendedGames.length} games recommended',
       games: recommendedGames,
-      blurRated: true, // Show which recommendations are already rated
+      blurRated: false, // Show which recommendations are already rated
       showFilters: true,
     );
   }
@@ -387,6 +389,20 @@ class Navigations {
             eventId: eventId,
             game: game,
           ),
+        ),
+      ),
+    );
+  }
+
+  static void navigateToCharacterDetail(BuildContext context, int characterId, {Character? character}) {
+    print('🎭 Navigation: Opening character detail for ID: $characterId');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CharacterDetailPage(
+          characterId: characterId,
+          character: character,
         ),
       ),
     );

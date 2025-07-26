@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/presentation/pages/character/character_detail_page.dart';
 import '../../../../domain/entities/character/character.dart';
 import '../character_detail_screen.dart';
 
@@ -64,19 +66,20 @@ class CharacterCard extends StatelessWidget {
         width: double.infinity,
         child: character.hasImage
             ? CachedNetworkImage(
-          imageUrl: character.imageUrl!,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            color: Colors.grey.shade300,
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.purple,
-              ),
-            ),
-          ),
-          errorWidget: (context, url, error) => _buildFallbackImage(context),
-        )
+                imageUrl: character.imageUrl!,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey.shade300,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.purple,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) =>
+                    _buildFallbackImage(context),
+              )
             : _buildFallbackImage(context),
       ),
     );
@@ -105,9 +108,9 @@ class CharacterCard extends StatelessWidget {
           Text(
             character.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -117,9 +120,9 @@ class CharacterCard extends StatelessWidget {
               child: Text(
                 character.description!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontSize: 11,
-                ),
+                      color: Colors.grey.shade600,
+                      fontSize: 11,
+                    ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -141,9 +144,9 @@ class CharacterCard extends StatelessWidget {
                     child: Text(
                       character.displayGender,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                        fontSize: 10,
-                      ),
+                            color: Colors.grey.shade600,
+                            fontSize: 10,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -159,14 +162,6 @@ class CharacterCard extends StatelessWidget {
 
   // 🆕 NEW: Navigation method - goes directly to CharacterDetailScreen
   void _navigateToCharacterDetail(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CharacterDetailScreen(
-          character: character,
-          // Pass the games if character already has them loaded
-          characterGames: character.hasLoadedGames ? character.games : null,
-        ),
-      ),
-    );
+    Navigations.navigateToCharacterDetail(context, character.id);
   }
 }

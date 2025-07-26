@@ -1,68 +1,44 @@
-// lib/presentation/pages/characters/character_detail_screen.dart - FIXED VERSION
+
+// ==================================================
+// CHARACTER DETAIL SCREEN (NEW UI DESIGN)
+// ==================================================
+
+// lib/presentation/pages/character_detail/character_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/game/game.dart';
-import '../../../domain/repositories/game_repository.dart';
-import '../../../injection_container.dart';
-import 'widgets/character_info_card.dart';
-import 'widgets/character_description_section.dart';
-import 'widgets/character_games_section.dart';
-import 'widgets/character_details_accordion.dart';
+import '../../widgets/accordion_tile.dart';
+import '../../widgets/game_card.dart';
+import '../../../core/utils/navigations.dart';
 
 class CharacterDetailScreen extends StatefulWidget {
   final Character character;
-  final List<Game>? characterGames;
+  final List<Game> games;
 
   const CharacterDetailScreen({
     super.key,
     required this.character,
-    this.characterGames,
+    required this.games,
   });
 
   @override
   State<CharacterDetailScreen> createState() => _CharacterDetailScreenState();
 }
 
-class _CharacterDetailScreenState extends State<CharacterDetailScreen>
-    with TickerProviderStateMixin {
+class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
   late ScrollController _scrollController;
   bool _isHeaderCollapsed = false;
-
-  // Game loading state
-  List<Game>? _loadedGames;
-  bool _isLoadingGames = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    _loadedGames = widget.characterGames;
     _logCharacterData();
-
-    // Debug logging
-    print('🔧 DEBUG initState: _loadedGames is null: ${_loadedGames == null}');
-    print('🔧 DEBUG initState: character.hasGames: ${widget.character.hasGames}');
-    print('🔧 DEBUG initState: character.gameIds: ${widget.character.gameIds}');
-
-    // Load games if not provided and character has games
-    if (_loadedGames == null && widget.character.hasGames) {
-      print('🚀 DEBUG: Triggering _loadCharacterGames()...');
-      _loadCharacterGames();
-    } else {
-      print('❌ DEBUG: NOT triggering _loadCharacterGames() because:');
-      print('   - _loadedGames is null: ${_loadedGames == null}');
-      print('   - character.hasGames: ${widget.character.hasGames}');
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   void _onScroll() {
@@ -77,49 +53,21 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen>
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
+          // Character Hero Section (like Event/Game Detail)
           _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Character Info Card (floating)
-                CharacterInfoCard(
-                  key: ValueKey('info_${_loadedGames?.length ?? 0}'),
-                  character: widget.character,
-                  loadedGamesCount: _loadedGames?.length,
-                ),
-                const SizedBox(height: 20),
-
-                // Description Section
-                CharacterDescriptionSection(character: widget.character),
-                const SizedBox(height: 20),
-
-                // Character Games Section
-                if (widget.character.hasGames)
-                  Column(
-                    children: [
-                      CharacterGamesSection(
-                        key: ValueKey('games_${_loadedGames?.length ?? 0}'),
-                        character: widget.character,
-                        games: widget.character.hasLoadedGames
-                            ? widget.character.games
-                            : _loadedGames,
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-
-                // Character Details Accordion
-                CharacterDetailsAccordion(character: widget.character),
-                const SizedBox(height: 100), // Bottom padding
-              ],
-            ),
-          ),
+          // Character Content
+          _buildCharacterContent(),
         ],
       ),
     );
@@ -127,69 +75,45 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen>
 
   Widget _buildSliverAppBar() {
     return SliverAppBar(
-      expandedHeight: 300,
-      floating: false,
+      expandedHeight: 350,
       pinned: true,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      systemOverlayStyle: SystemUiOverlayStyle.light,
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Hero Image
+            _buildHeroImage(),
+            // Gradient Overlays (same as Event/Game)
+            _buildGradientOverlays(),
+            // Floating Character Card
+            _buildFloatingCharacterCard(),
+          ],
+        ),
         title: _isHeaderCollapsed
             ? Text(
           widget.character.name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                color: Colors.black54,
-                offset: Offset(0, 1),
-                blurRadius: 2,
-              ),
-            ],
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         )
             : null,
-        background: _buildHeroImage(),
-        collapseMode: CollapseMode.parallax,
       ),
     );
   }
 
   Widget _buildHeroImage() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Colors.black54,
-          ],
-        ),
-      ),
+    return Hero(
+      tag: 'character_hero_${widget.character.id}',
       child: widget.character.hasImage
-          ? CachedNetworkImage(
+          ? CachedImageWidget(
         imageUrl: widget.character.largeUrl ?? widget.character.imageUrl!,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.purple.withOpacity(0.1),
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.purple),
-          ),
-        ),
-        errorWidget: (context, url, error) => _buildFallbackHero(),
+        placeholder: _buildFallbackHero(),
       )
           : _buildFallbackHero(),
     );
@@ -208,30 +132,342 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen>
           ],
         ),
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person,
-              size: 80,
-              color: Colors.white.withOpacity(0.8),
+    );
+  }
+
+  Widget _buildGradientOverlays() {
+    return Stack(
+      children: [
+        // Horizontal Gradient
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              stops: const [0.0, 0.05, 0.95, 1.0],
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface,
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              widget.character.name,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.5),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4,
+          ),
+        ),
+        // Vertical Gradient
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0.0, 0.05, 0.8, 1.0],
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
+                Theme.of(context).colorScheme.surface.withValues(alpha: .8),
+                Theme.of(context).colorScheme.surface,
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFloatingCharacterCard() {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: Card(
+        elevation: 8,
+        shadowColor: Colors.black.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header Row
+              Row(
+                children: [
+                  // Character Avatar
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: Colors.purple.withOpacity(0.3),
+                        width: 2,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: widget.character.hasImage
+                          ? CachedImageWidget(
+                        imageUrl: widget.character.thumbUrl!,
+                        fit: BoxFit.cover,
+                      )
+                          : Container(
+                        color: Colors.purple.withOpacity(0.1),
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.purple,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Character Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Character Name
+                        Text(
+                          widget.character.name,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // Identity Info
+                        Row(
+                          children: [
+                            _buildIdentityChip(
+                              widget.character.displayGender,
+                              Colors.blue,
+                              Icons.person,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildIdentityChip(
+                              widget.character.displaySpecies,
+                              Colors.green,
+                              Icons.pets,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              textAlign: TextAlign.center,
+
+              const SizedBox(height: 12),
+
+              // Games Count
+              Row(
+                children: [
+                  Icon(
+                    Icons.videogame_asset,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${widget.games.length} games',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (widget.character.countryName != null)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.character.countryName!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIdentityChip(String text, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterContent() {
+    return SliverToBoxAdapter(
+      child: Container(
+        color: Theme.of(context).colorScheme.surface,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppConstants.paddingLarge), // Space for floating card
+
+            // Character Information Accordion
+            if (widget.character.hasDescription)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                child: _buildCharacterInfoAccordion(),
+              ),
+
+            const SizedBox(height: 16),
+
+            // Character Games Section
+            if (widget.games.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                child: _buildCharacterGamesSection(),
+              ),
+
+            const SizedBox(height: 16),
+
+            // Character Details Accordion
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+              child: _buildCharacterDetailsAccordion(),
+            ),
+
+            const SizedBox(height: 20), // Bottom spacing
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCharacterInfoAccordion() {
+    return Card(
+      elevation: 2,
+      child: AccordionTile(
+        title: 'Character Information',
+        icon: Icons.info_outline,
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.character.description!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCharacterGamesSection() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.videogame_asset,
+                    color: Colors.purple,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Featured Games',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Games featuring ${widget.character.name} • ${widget.games.length} games',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.purple,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: AppConstants.paddingMedium),
+
+            // Games List
+            SizedBox(
+              height: 280,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: widget.games.length,
+                itemBuilder: (context, index) {
+                  final game = widget.games[index];
+                  return Container(
+                    width: 160,
+                    margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+                    child: GameCard(
+                      game: game,
+                      onTap: () => Navigations.navigateToGameDetail(game.id, context),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -239,137 +475,127 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen>
     );
   }
 
-  void _loadCharacterGames() async {
-    print('🚀 _loadCharacterGames() STARTED');
-
-    setState(() {
-      _isLoadingGames = true;
-    });
-
-    try {
-      print('🎮 Loading games for character: ${widget.character.name}');
-      print('📋 Game IDs: ${widget.character.gameIds}');
-
-      // Use the existing repository method to load games
-      final gameRepository = sl<GameRepository>();
-      print('📡 Calling gameRepository.getGamesByIds...');
-      final result = await gameRepository.getGamesByIds(widget.character.gameIds);
-
-      result.fold(
-            (failure) {
-          print('❌ Error loading character games: ${failure.message}');
-          if (mounted) {
-            setState(() {
-              _isLoadingGames = false;
-            });
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to load games: ${failure.message}'),
-                backgroundColor: Colors.red,
+  Widget _buildCharacterDetailsAccordion() {
+    return Card(
+      elevation: 2,
+      child: Column(
+        children: [
+          // Identity Details
+          AccordionTile(
+            title: 'Identity & Details',
+            icon: Icons.person,
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Column(
+                children: [
+                  _buildDetailRow('Gender', widget.character.displayGender, Icons.person),
+                  _buildDetailRow('Species', widget.character.displaySpecies, Icons.pets),
+                  if (widget.character.countryName != null)
+                    _buildDetailRow('Country', widget.character.countryName!, Icons.location_on),
+                  if (widget.character.akas.isNotEmpty)
+                    _buildDetailRow(
+                      'Also Known As',
+                      widget.character.akas.join(', '),
+                      Icons.label,
+                    ),
+                ],
               ),
-            );
-          }
-        },
-            (games) {
-          print('✅ Successfully loaded ${games.length} games for character');
-          for (var game in games.take(3)) {
-            print('   • ${game.name}');
-          }
-          if (games.length > 3) {
-            print('   ... and ${games.length - 3} more games');
-          }
-
-          if (mounted) {
-            setState(() {
-              _isLoadingGames = false;
-              _loadedGames = games;
-            });
-
-            // Update log with loaded games
-            _logCharacterDataWithGames(games);
-          }
-        },
-      );
-    } catch (e) {
-      print('❌ Exception loading character games: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingGames = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load games: $e'),
-            backgroundColor: Colors.red,
+            ),
           ),
-        );
-      }
-    }
+
+          // Technical Details
+          AccordionTile(
+            title: 'Technical Information',
+            icon: Icons.code,
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Column(
+                children: [
+                  _buildTechnicalRow('Character ID', widget.character.id.toString()),
+                  if (widget.character.slug != null)
+                    _buildTechnicalRow('Slug', widget.character.slug!),
+                  _buildTechnicalRow('Games Count', widget.character.gameIds.length.toString()),
+                  _buildTechnicalRow('Checksum', widget.character.checksum),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTechnicalRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _logCharacterData() {
-    print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED ===');
+    print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED (BLOC) ===');
     print('🎯 Character: ${widget.character.name} (ID: ${widget.character.id})');
-
-    // Basic info
-    print('📝 Description: ${widget.character.hasDescription ? 'Available' : 'Not available'}');
-    print('🏷️ Alternative Names: ${widget.character.akas.length}');
-
-    // Identity
-    print('👤 Gender: ${widget.character.displayGender}');
-    print('🧬 Species: ${widget.character.displaySpecies}');
-    print('🌍 Country: ${widget.character.countryName ?? 'Unknown'}');
-
-    // Images
-    if (widget.character.hasImage) {
-      print('🖼️ Image: ✅ Available');
-      print('   🔗 URL: ${widget.character.imageUrl}');
-    } else {
-      print('🖼️ Image: ❌ Fallback gradient will be shown');
-    }
-
-    // Games
-    print('🎮 Game IDs: ${widget.character.gameIds.length}');
-    if (widget.character.hasLoadedGames) {
-      print('   📱 Loaded Games: ✅ ${widget.character.loadedGameCount}');
-      for (var i = 0; i < widget.character.games!.length && i < 3; i++) {
-        print('   • ${widget.character.games![i].name}');
-      }
-      if (widget.character.games!.length > 3) {
-        print('   ... and ${widget.character.games!.length - 3} more games');
-      }
-    } else if (_loadedGames != null) {
-      print('   📱 Manually Loaded Games: ✅ ${_loadedGames!.length}');
-      for (var i = 0; i < _loadedGames!.length && i < 3; i++) {
-        print('   • ${_loadedGames![i].name}');
-      }
-      if (_loadedGames!.length > 3) {
-        print('   ... and ${_loadedGames!.length - 3} more games');
-      }
-    } else {
-      print('   📱 Games Data: ${_isLoadingGames ? 'Loading...' : 'Will be loaded'}');
-      // Debug loading trigger
-      print('   🔧 Debug: _loadedGames == null: ${_loadedGames == null}');
-      print('   🔧 Debug: character.hasGames: ${widget.character.hasGames}');
-      print('   🔧 Debug: Will trigger _loadCharacterGames: ${_loadedGames == null && widget.character.hasGames}');
-    }
-
+    print('🎮 Games: ${widget.games.length} loaded');
+    print('🖼️ Image: ${widget.character.hasImage ? 'Available' : 'Fallback'}');
+    print('📝 Description: ${widget.character.hasDescription ? 'Available' : 'None'}');
     print('=== END CHARACTER DETAIL LOG ===\n');
-  }
-
-  // Log character data after games are loaded
-  void _logCharacterDataWithGames(List<Game> games) {
-    print('\n=== 🎮 CHARACTER GAMES LOADED ===');
-    print('🎯 Character: ${widget.character.name}');
-    print('✅ Successfully loaded ${games.length} games:');
-    for (var i = 0; i < games.length && i < 5; i++) {
-      print('   • ${games[i].name}');
-    }
-    if (games.length > 5) {
-      print('   ... and ${games.length - 5} more games');
-    }
-    print('📱 CharacterGamesSection will now display these games');
-    print('=== END GAMES LOADING LOG ===\n');
   }
 }

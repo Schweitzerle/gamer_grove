@@ -8,6 +8,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
+import '../../../../domain/entities/event/event.dart';
 import '../../../../domain/entities/game/game.dart';
 import '../../../../domain/entities/game/game_video.dart';
 import '../../allVideosGrid/all_videos_grid.dart';
@@ -16,11 +17,13 @@ import '../../full_screen_image_viewer/full_screen_image_viewer.dart';
 import '../../videoPlayer/video_player_screen.dart';
 
 class EnhancedMediaGallery extends StatefulWidget {
-  final Game game;
+  final Game? game;
+  final Event? event;
 
   const EnhancedMediaGallery({
     super.key,
-    required this.game,
+    this.game,
+    this.event,
   });
 
   @override
@@ -39,9 +42,15 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   void _initializeTabs() {
     int tabCount = 0;
-    if (widget.game.screenshots.isNotEmpty) tabCount++;
-    if (widget.game.videos.isNotEmpty) tabCount++;
-    if (widget.game.artworks.isNotEmpty) tabCount++;
+    if (widget.game != null) {
+      if (widget.game!.screenshots.isNotEmpty) tabCount++;
+      if (widget.game!.videos.isNotEmpty) tabCount++;
+      if (widget.game!.artworks.isNotEmpty) tabCount++;
+    }
+
+    if (widget.event != null) {
+      if (widget.event!.videos.isNotEmpty) tabCount++;
+    }
 
     if (tabCount > 0) {
       _tabController = TabController(length: tabCount, vsync: this);
@@ -59,21 +68,33 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
     final List<Tab> tabs = [];
     final List<Widget> tabViews = [];
 
-    if (widget.game.screenshots.isNotEmpty) {
-      tabs.add(Tab(text: 'Screenshots (${widget.game.screenshots.length})'));
-      final screenshotUrls = widget.game.screenshots.map((screenshot) => screenshot.hdUrl).toList();
-      tabViews.add(_buildStaggeredImageGrid(screenshotUrls, 'screenshot'));
+    if (widget.game != null) {
+      if (widget.game!.screenshots.isNotEmpty) {
+        tabs.add(Tab(text: 'Screenshots (${widget.game!.screenshots.length})'));
+        final screenshotUrls = widget.game!.screenshots
+            .map((screenshot) => screenshot.hdUrl)
+            .toList();
+        tabViews.add(_buildStaggeredImageGrid(screenshotUrls, 'screenshot'));
+      }
+
+      if (widget.game!.artworks.isNotEmpty) {
+        tabs.add(Tab(text: 'Artworks (${widget.game!.artworks.length})'));
+        final artworkUrls =
+            widget.game!.artworks.map((artwork) => artwork.hdUrl).toList();
+        tabViews.add(_buildStaggeredImageGrid(artworkUrls, 'artwork'));
+      }
+
+      if (widget.game!.videos.isNotEmpty) {
+        tabs.add(Tab(text: 'Videos (${widget.game!.videos.length})'));
+        tabViews.add(_buildVideosView(widget.game!.videos));
+      }
     }
 
-    if (widget.game.artworks.isNotEmpty) {
-      tabs.add(Tab(text: 'Artworks (${widget.game.artworks.length})'));
-      final artworkUrls = widget.game.artworks.map((artwork) => artwork.hdUrl).toList();
-      tabViews.add(_buildStaggeredImageGrid(artworkUrls, 'artwork'));
-    }
-
-    if (widget.game.videos.isNotEmpty) {
-      tabs.add(Tab(text: 'Videos (${widget.game.videos.length})'));
-      tabViews.add(_buildVideosView(widget.game.videos));
+    if(widget.event != null){
+      if (widget.event!.videos.isNotEmpty) {
+        tabs.add(Tab(text: 'Videos (${widget.event!.videos.length})'));
+        tabViews.add(_buildVideosView(widget.event!.videos));
+      }
     }
 
     if (tabs.isEmpty) return const SizedBox.shrink();
@@ -85,12 +106,12 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
         color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
         child: Column(
           children: [
-            if (tabs.length > 1) // Nur TabBar anzeigen wenn mehrere Tabs
               TabBar(
                 controller: _tabController,
                 tabs: tabs,
                 labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                unselectedLabelColor:
+                    Theme.of(context).colorScheme.onSurfaceVariant,
                 indicatorColor: Theme.of(context).colorScheme.primary,
                 indicatorWeight: 3,
                 isScrollable: true,
@@ -99,9 +120,9 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
               height: 320, // Optimierte Höhe
               child: tabs.length > 1
                   ? TabBarView(
-                controller: _tabController,
-                children: tabViews,
-              )
+                      controller: _tabController,
+                      children: tabViews,
+                    )
                   : tabViews.first,
             ),
           ],
@@ -132,12 +153,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
   }
 
   // ✅ Staggered Tiles erstellen
-  List<StaggeredGridTile> _buildStaggeredTiles(
-      List<String> displayImages,
-      List<String> allImages,
-      String type,
-      bool hasMore
-      ) {
+  List<StaggeredGridTile> _buildStaggeredTiles(List<String> displayImages,
+      List<String> allImages, String type, bool hasMore) {
     final tiles = <StaggeredGridTile>[];
 
     for (int i = 0; i < displayImages.length; i++) {
@@ -195,14 +212,14 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   // ✅ Einzelne Image Tile
   Widget _buildImageTile(
-      String imageUrl,
-      List<String> allImages,
-      int index,
-      String type, {
-        bool isLarge = false,
-        bool showSeeAll = false,
-        int? totalCount,
-      }) {
+    String imageUrl,
+    List<String> allImages,
+    int index,
+    String type, {
+    bool isLarge = false,
+    bool showSeeAll = false,
+    int? totalCount,
+  }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Material(
@@ -351,7 +368,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                             top: Radius.circular(12),
                           ),
                           child: CachedImageWidget(
-                            imageUrl: video.thumbnailUrl, // ✅ Verwendet den getter
+                            imageUrl: video.thumbnailUrl,
+                            // ✅ Verwendet den getter
                             fit: BoxFit.cover,
                             errorWidget: Container(
                               color: Colors.red.withOpacity(0.1),
@@ -414,8 +432,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                   child: Text(
                     video.title ?? 'YouTube Video ${index + 1}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -458,16 +476,16 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                 Text(
                   'See All Videos',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${allVideos.length} total',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -478,7 +496,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
   }
 
   // ✅ Navigation Methoden
-  void _showFullScreenViewer(List<String> images, int initialIndex, String type) {
+  void _showFullScreenViewer(
+      List<String> images, int initialIndex, String type) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, _) => FadeTransition(
@@ -528,8 +547,3 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
     );
   }
 }
-
-
-
-
-

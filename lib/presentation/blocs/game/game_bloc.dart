@@ -1174,6 +1174,32 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         enrichedRemasters = await enrichGamesWithUserData(game.remasters, userId);
       }
 
+      List<Game> enrichedPorts = game.ports;
+      if (game.ports.isNotEmpty) {
+        enrichedPorts = await enrichGamesWithUserData(game.ports, userId);
+      }
+
+      List<Game> enrichedExpandedGames = game.expandedGames;
+      if (game.expandedGames.isNotEmpty) {
+        enrichedExpandedGames = await enrichGamesWithUserData(game.expandedGames, userId);
+      }
+
+      List<Game> enrichedVersionParent = game.versionParent != null ? [game.versionParent!] : [];
+      if (game.versionParent != null) {
+        enrichedVersionParent = await enrichGamesWithUserData(game.versionParent != null ? [game.versionParent!] : [], userId);
+      }
+
+      List<Game> enrichedForks = game.forks;
+      if (game.forks.isNotEmpty) {
+        enrichedForks = await enrichGamesWithUserData(game.forks, userId);
+      }
+
+      List<Game> enrichedParentGames = game.parentGame != null ? [game.parentGame!] : [];
+      if (game.versionParent != null) {
+        enrichedParentGames = await enrichGamesWithUserData(game.parentGame != null ? [game.parentGame!] : [], userId);
+      }
+
+
       // 8. 🌟 MAIN FRANCHISE (🆕 MIT LIMIT!)
       Franchise? enrichedMainFranchise = game.mainFranchise;
       if (game.mainFranchise?.games != null && game.mainFranchise!.games!.isNotEmpty) {
@@ -1274,6 +1300,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         mainFranchise: enrichedMainFranchise,
         franchises: enrichedFranchises,
         collections: enrichedCollections,
+        ports: enrichedPorts,
+        expandedGames: enrichedExpandedGames,
+        versionParent: enrichedVersionParent.isNotEmpty ? enrichedVersionParent[0] : null,
+        forks: enrichedForks,
+        parentGame: enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null
       );
 
       print('✅ Successfully enriched nested games with limits (franchise: $franchiseLimit, collection: $collectionLimit)');

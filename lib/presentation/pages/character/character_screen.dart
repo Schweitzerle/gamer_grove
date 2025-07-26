@@ -271,8 +271,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
       MaterialPageRoute(
         builder: (context) => CharacterDetailScreen(
           character: character,
-          // TODO: Pass games data if available
-          characterGames: null,
+          games: [],
         ),
       ),
     );

@@ -70,6 +70,8 @@ class GetCompleteEventDetailsParams extends Equatable {
   List<Object> get props => [eventId, includeGames];
 }
 
+// Füge diese copyWith Methode zu deiner CompleteEventDetails Klasse hinzu
+
 class CompleteEventDetails extends Equatable {
   final Event event;
   final List<Game> featuredGames;
@@ -83,7 +85,17 @@ class CompleteEventDetails extends Equatable {
   bool get hasFeaturedGames => featuredGames.isNotEmpty;
   int get featuredGamesCount => featuredGames.length;
 
+
+  CompleteEventDetails copyWith({
+    Event? event,
+    List<Game>? featuredGames,
+  }) {
+    return CompleteEventDetails(
+      event: event ?? this.event,
+      featuredGames: featuredGames ?? this.featuredGames,
+    );
+  }
+
   @override
   List<Object> get props => [event, featuredGames];
 }
-

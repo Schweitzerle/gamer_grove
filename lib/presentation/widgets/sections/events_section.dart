@@ -108,17 +108,6 @@ class EventsSection extends StatelessWidget {
               },
             ),
           ),
-
-          // Event Status Summary
-          if (game.events.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(
-                top: AppConstants.paddingSmall,
-                left: AppConstants.paddingMedium,
-                right: AppConstants.paddingMedium,
-              ),
-              child: _buildEventStatusSummary(context),
-            ),
         ],
       ),
     );
@@ -138,88 +127,7 @@ class EventsSection extends StatelessWidget {
     }
   }
 
-  Widget _buildEventStatusSummary(BuildContext context) {
-    final liveCount = game.events.where((e) => e.isLive).length;
-    final upcomingCount = game.events.where((e) => e.isUpcoming).length;
-    final pastCount = game.events.where((e) => e.hasEnded).length;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (liveCount > 0) ...[
-            _buildStatusChip(
-              context,
-              'Live',
-              liveCount.toString(),
-              Colors.red,
-              Icons.circle,
-            ),
-            const SizedBox(width: 8),
-          ],
-          if (upcomingCount > 0) ...[
-            _buildStatusChip(
-              context,
-              'Upcoming',
-              upcomingCount.toString(),
-              Colors.orange,
-              Icons.schedule,
-            ),
-            const SizedBox(width: 8),
-          ],
-          if (pastCount > 0)
-            _buildStatusChip(
-              context,
-              'Past',
-              pastCount.toString(),
-              Colors.grey,
-              Icons.history,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(
-      BuildContext context,
-      String label,
-      String count,
-      Color color,
-      IconData icon,
-      ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            '$count $label',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _navigateToAllEvents(BuildContext context) {
     Navigations.navigateToAllEvents(

@@ -1,5 +1,6 @@
 // lib/injection_container.dart
 import 'package:gamer_grove/domain/usecases/game/getUserRated.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +28,7 @@ import 'domain/usecases/auth/sign_in.dart';
 import 'domain/usecases/auth/sign_up.dart';
 import 'domain/usecases/auth/sign_out.dart';
 import 'domain/usecases/auth/update_password.dart';
+import 'domain/usecases/characters/get_character_with_games.dart';
 import 'domain/usecases/event/get_complete_event_details.dart';
 import 'domain/usecases/event/get_current_events.dart';
 import 'domain/usecases/event/get_event_details.dart';
@@ -196,6 +198,8 @@ Future<void> init() async {
     gameRepository: sl(),
   ));
 
+  sl.registerLazySingleton(() => GetCharacterWithGames(sl()));
+
 
 
   // BLoCs
@@ -242,5 +246,12 @@ Future<void> init() async {
       getCompleteEventDetails: sl(),
     ),
   );
+
+  sl.registerFactory(
+        () => CharacterBloc(
+      getCharacterWithGames: sl(),
+    ),
+  );
+
   print('✅ DI: Dependency injection setup complete!');
 }
