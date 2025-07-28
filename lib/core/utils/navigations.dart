@@ -243,10 +243,17 @@ class Navigations {
     );
   }
 
-  static void navigateToRatedGames(BuildContext context) {
-    // TODO: Implement API-based rated games screen (öffentliche Listen)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Top rated games list coming soon!')),
+  static void navigateToRatedGames(
+      BuildContext context,
+      List<Game> ratedGames,
+      ) {
+    navigateToLocalAllGames(
+      context,
+      title: 'My Rated Games',
+      subtitle: '${ratedGames.length} games',
+      games: ratedGames,
+      blurRated: false, // Highlight which wishlist games are already rated
+      showFilters: true,
     );
   }
 
@@ -271,13 +278,20 @@ class Navigations {
     );
   }
 
-  static void navigateToRecommendations(BuildContext context) {
-    // TODO: Implement API-based global recommendations screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Global recommendations list coming soon!')),
+
+  static void navigateToRecommendations(
+      BuildContext context,
+      List<Game> recommendedGames,
+      ) {
+    navigateToLocalAllGames(
+      context,
+      title: 'My Recommendations',
+      subtitle: '${recommendedGames.length} games',
+      games: recommendedGames,
+      blurRated: false, // Highlight which recommended games are already rated
+      showFilters: true,
     );
   }
-
 
   static void navigateToSearch(BuildContext context) {
     // TODO: Implement API-based search results screen

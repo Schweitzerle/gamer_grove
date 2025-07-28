@@ -1,6 +1,8 @@
 // lib/presentation/widgets/recommendations_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/utils/navigations.dart';
+import '../../../domain/entities/game/game.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../sections/base_game_section.dart';
 
@@ -22,7 +24,30 @@ class RecommendationsSection extends BaseGameSection {
 
   @override
   void onViewAllPressed(BuildContext context) {
-    Navigations.navigateToRecommendations(context);
+    // 🆕 State vom GameBloc abrufen
+    final gameBloc = context.read<GameBloc>();
+    final currentState = gameBloc.state;
+
+    List<Game> recommendedGames = [];
+
+    // Games aus dem aktuellen State extrahieren
+    if (currentState is UserRecommendationsLoaded) {
+      recommendedGames = currentState.games;
+    } else if (currentState is GrovePageLoaded) {
+      recommendedGames = currentState.userRecommendations;
+    }
+
+    // Navigation mit den gefundenen Games
+    if (recommendedGames.isNotEmpty) {
+      Navigations.navigateToRecommendations(context, recommendedGames);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Loading recommended games...')),
+      );
+      if (currentUserId != null && this.gameBloc != null) {
+        this.gameBloc!.add(LoadUserRecommendationsEvent(currentUserId!));
+      }
+    }
   }
 
   @override

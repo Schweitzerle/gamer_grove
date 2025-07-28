@@ -1,5 +1,5 @@
 // presentation/widgets/game_card.dart
-import 'dart:ui'; // 🆕 NEW: For BackdropFilter
+import 'dart:ui'; // Für BackdropFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
@@ -13,205 +13,452 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 class GameCard extends StatelessWidget {
   final Game game;
   final VoidCallback onTap;
-  final bool blurRated; // 🆕 NEW: Blur rated games feature
+  final bool blurRated;
+  final double? width;
+  final double? height;
 
   const GameCard({
     super.key,
     required this.game,
     required this.onTap,
     this.blurRated = false,
+    this.width,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover Image Section with Overlay Info
-            Expanded(
-              flex: 4,
-              child: _buildCoverSection(context),
-            ),
-
-            // Bottom Info Section
-            Expanded(
-              flex: 2,
-              child: _buildInfoSection(context),
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Container(
+        width: width ?? 160,
+        height: height ?? 240,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background Cover Image (full card)
+              _buildBackgroundImage(context),
+
+              // Blur Filter für rated games
+              if (blurRated && _isGameRated()) _buildBlurOverlay(),
+
+              // Gradient Overlay
+              _buildGradientOverlay(),
+
+              // Content Overlay (noch weniger Höhe - nur für Titel und Genres)
+              _buildContentOverlay(context),
+
+              // Ratings und States Overlay
+              _buildRatingsOverlay(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCoverSection(BuildContext context) {
-    final isRated = _isGameRated();
-    final shouldBlurCover = blurRated && isRated;
+  Widget _buildBackgroundImage(BuildContext context) {
+    if (game.coverUrl != null && game.coverUrl!.isNotEmpty) {
+      return CachedImageWidget(
+        imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
+        fit: BoxFit.cover,
+      );
+    } else {
+      return _buildFallbackBackground(context);
+    }
+  }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Cover Image
-        CachedImageWidget(
-          imageUrl: ImageUtils.getMediumImageUrl(game.coverUrl),
-          fit: BoxFit.cover,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-          ),
+  Widget _buildFallbackBackground(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            Theme.of(context).colorScheme.primary.withOpacity(0.6),
+          ],
         ),
-
-        // 🆕 Blur Filter for rated games (simple overlay)
-        if (shouldBlurCover)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.1),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // Community Rating (bottom left)
-        if (game.totalRating != null)
-          Positioned(
-            bottom: 8,
-            left: 8,
-            child: _buildRatingChip(
-              context,
-              icon: Icons.star_outline,
-              rating: game.totalRating!,
-              isUserRating: false,
-            ),
-          ),
-
-        // User Rating (bottom right)
-        if (game.userRating != null)
-          Positioned(
-            bottom: 8,
-            right: 8,
-            child: _buildRatingChip(
-              context,
-              icon: Icons.star,
-              rating: game.userRating! * 10,
-              isUserRating: true,
-            ),
-          ),
-      ],
+      ),
+      child: Center(
+        child: Icon(
+          Icons.videogame_asset,
+          size: 48,
+          color: Colors.white.withOpacity(0.8),
+        ),
+      ),
     );
   }
 
-  Widget _buildInfoSection(BuildContext context) {
+  Widget _buildBlurOverlay() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+        child: Container(
+          color: Colors.black.withOpacity(0.1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientOverlay() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            Colors.transparent,
+            Colors.black.withOpacity(0.3),
+            Colors.black.withOpacity(0.8),
+          ],
+          stops: const [0.0, 0.4, 0.7, 1.0],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentOverlay(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Game Title
-          Expanded(
-            flex: 3,
-            child: FittedBox(
-              child: Text(
-                game.name,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          // Nur Game Title - viel mehr Platz
+          Text(
+            game.name,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 16,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
+                  color: Colors.black.withOpacity(0.7),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          // Release Date and Genres Row
-          Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                // Release Date
-                if (game.firstReleaseDate != null) ...[
-                  Text(
-                    DateFormatter.formatYearOnly(game.firstReleaseDate!),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (game.genres.isNotEmpty) ...[
-                    Text(
-                      ' • ',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-
-                // Genres
-                if (game.genres.isNotEmpty)
-                  Expanded(
-                    child: Text(
-                      game.genres.take(2).map((g) => g.name).join(', '),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
               ],
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: 0),
 
-          Expanded(
-              flex: 3,
-              child: _buildQuickStateIndicators(context))
+          // Release Date & Genres Row - mehr Platz
+          Row(
+            children: [
+              // Release Date
+              if (game.firstReleaseDate != null) ...[
+                Icon(
+                  Icons.calendar_today,
+                  size: 12,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  DateFormatter.formatYearOnly(game.firstReleaseDate!),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (game.genres.isNotEmpty) ...[
+                  Text(
+                    ' • ',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ],
+
+              // Genres
+              if (game.genres.isNotEmpty)
+                Expanded(
+                  child: Text(
+                    game.genres.take(2).map((g) => g.name).join(', '),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildRatingChip(
-      BuildContext context, {
-        required IconData icon,
-        required double rating,
-        required bool isUserRating,
-      }) {
-    final ratingColor = ColorScales.getRatingColor(rating);
+  Widget _buildRatingsOverlay(BuildContext context) {
+    return Stack(
+      children: [
+        // IGDB Rating (oben links)
+        if (game.totalRating != null)
+          Positioned(
+            top: 12,
+            left: 12,
+            child: _buildIGDBRatingCircle(context),
+          ),
+
+        // User Rating mit States (oben rechts)
+        if (game.userRating != null || _hasUserStates())
+          Positioned(
+            top: 12,
+            right: 12,
+            child: _buildUserDataCircle(context),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildIGDBRatingCircle(BuildContext context) {
+    final rating = game.totalRating! / 100; // 0-1 range für Progress
+    final color = ColorScales.getRatingColor(game.totalRating!);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
-        color: ratingColor.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(12),
+        shape: BoxShape.circle,
+        color: Colors.black.withOpacity(0.75),
         border: Border.all(
-          color: ratingColor.withValues(alpha: 0.3),
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Circular Progress
+          Positioned.fill(
+            child: CircularProgressIndicator(
+              value: rating,
+              strokeWidth: 3,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+
+          // Center Content
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.star_outline,
+                  size: 14,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  game.totalRating!.toStringAsFixed(0),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.7),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserDataCircle(BuildContext context) {
+    final hasUserRating = game.userRating != null;
+    final userStates = _getUserStates(context);
+
+    return Container(
+      constraints: const BoxConstraints(
+        minWidth: 44,
+        minHeight: 44,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        color: Colors.black.withOpacity(0.75),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // User Rating Circle (wenn vorhanden)
+          if (hasUserRating) _buildUserRatingSection(context),
+
+          // User States (darunter)
+          if (userStates.isNotEmpty) ...[
+            if (hasUserRating) const SizedBox(height: 6),
+            _buildUserStatesSection(context, userStates),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserRatingSection(BuildContext context) {
+    final rating = game.userRating! / 10; // 0-1 range
+    final displayRating = (game.userRating! * 10);
+    final color = ColorScales.getRatingColor(displayRating);
+
+    return Container(
+      width: 40,
+      height: 40,
+      margin: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.transparent,
+      ),
+      child: Stack(
+        children: [
+          // Circular Progress
+          Positioned.fill(
+            child: CircularProgressIndicator(
+              value: rating,
+              strokeWidth: 3,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+
+          // Center Content
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.star,
+                  size: 12,
+                  color: Colors.white,
+                ),
+                Text(
+                  displayRating.toStringAsFixed(0),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.7),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserStatesSection(BuildContext context, List<Widget> states) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: states
+            .map((state) => Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: state,
+        ))
+            .toList()
+          ..removeLast(), // Remove last padding
+      ),
+    );
+  }
+
+  List<Widget> _getUserStates(BuildContext context) {
+    final states = <Widget>[];
+
+    if (game.isWishlisted) {
+      states.add(_buildCompactStateIcon(
+        Icons.favorite,
+        Colors.red,
+      ));
+    }
+
+    if (game.isRecommended) {
+      states.add(_buildCompactStateIcon(
+        Icons.thumb_up,
+        Colors.green,
+      ));
+    }
+
+    if (game.isInTopThree) {
+      states.add(_buildTopThreeCompact(context));
+    }
+
+    return states;
+  }
+
+  Widget _buildCompactStateIcon(IconData icon, Color color) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withOpacity(0.2),
+        border: Border.all(
+          color: color.withOpacity(0.6),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        icon,
+        size: 12,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _buildTopThreeCompact(BuildContext context) {
+    final position = game.topThreePosition ?? 1;
+    final color = ColorScales.getTopThreeColor(position);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: color.withOpacity(0.6),
           width: 1,
         ),
       ),
@@ -219,17 +466,17 @@ class GameCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            icon,
-            size: 12,
-            color: ratingColor.onColor,
+            Icons.emoji_events,
+            size: 10,
+            color: color,
           ),
-          const SizedBox(width: 3),
+          const SizedBox(width: 2),
           Text(
-            rating.toStringAsFixed(1),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: ratingColor.onColor,
+            '#$position',
+            style: TextStyle(
+              color: color,
+              fontSize: 8,
               fontWeight: FontWeight.bold,
-              fontSize: 11,
             ),
           ),
         ],
@@ -237,178 +484,105 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStateIndicators(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        if (game.isWishlisted) ...[
-          _buildStateIcon(
-            context,
-            icon: Icons.favorite,
-            color: Colors.red,
-            size: 16,
-          ),
-        ],
-        if (game.isRecommended) ...[
-          _buildStateIcon(
-            context,
-            icon: Icons.thumb_up,
-            color: Colors.green,
-            size: 16,
-          ),
-        ],
-        if (game.isInTopThree ?? false) _buildTopThreeCrown(context),
-      ],
-    );
+  bool _hasUserStates() {
+    return game.isWishlisted ||
+        game.isRecommended ||
+        (game.isInTopThree ?? false);
   }
 
-  Widget _buildStateIcon(
-      BuildContext context, {
-        required IconData icon,
-        required Color color,
-        required double size,
-      }) {
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Icon(
-        icon,
-        size: size,
-        color: color,
-      ),
-    );
-  }
-
-  Widget _buildTopThreeCrown(BuildContext context) {
-    final position = game.topThreePosition ?? 1;
-    final crownColor = ColorScales.getTopThreeColor(position);
-
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: crownColor,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          boxShadow: [
-            BoxShadow(
-              color: crownColor.withValues(alpha: 0.4),
-              offset: const Offset(0, 2),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.emoji_events,
-              color: crownColor.onColor,
-              size: 16,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '#$position',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: crownColor.onColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🆕 NEW: Helper method to check if game is rated
+  // Helper method to check if game is rated
   bool _isGameRated() {
     return game.userRating != null && game.userRating! > 0;
   }
 }
 
-// Shimmer Loading Version
+// Shimmer Loading Version (angepasst an neues Design)
 class GameCardShimmer extends StatelessWidget {
-  const GameCardShimmer({super.key});
+  final double? width;
+  final double? height;
+
+  const GameCardShimmer({
+    super.key,
+    this.width,
+    this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Cover Image Shimmer
-          Expanded(
-            flex: 4,
-            child: Container(
-              width: double.infinity,
+    return Container(
+      width: width ?? 160,
+      height: height ?? 240,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).colorScheme.surfaceVariant,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Background shimmer
+            Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.surfaceVariant,
+                    Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          // Info Section Shimmer
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            // Content area shimmer
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              height: (height ?? 240) * 0.3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Rating chips shimmer
-                  Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 60,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ],
+                  // Title shimmer
+                  Container(
+                    width: double.infinity,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-
                   const SizedBox(height: 8),
 
-                  // Genres shimmer
+                  // Subtitle shimmer
                   Container(
-                    width: 80,
+                    width: 100,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+
+            // Rating shimmer (top right)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
