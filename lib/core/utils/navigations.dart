@@ -8,6 +8,7 @@ import '../../domain/entities/character/character.dart';
 import '../../domain/entities/event/event.dart';
 import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
+import '../../presentation/blocs/character/character_bloc.dart';
 import '../../presentation/blocs/event/event_bloc.dart';
 import '../../presentation/blocs/event/event_event.dart';
 import '../../presentation/blocs/game/game_bloc.dart';
@@ -396,13 +397,28 @@ class Navigations {
 
   static void navigateToCharacterDetail(BuildContext context, int characterId, {Character? character}) {
     print('🎭 Navigation: Opening character detail for ID: $characterId');
+    print('🎭 Navigation: Pre-loaded character: ${character?.name ?? "none"}');
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CharacterDetailPage(
-          characterId: characterId,
-          character: character,
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                print('🎭 Navigation: Creating CharacterBloc for ID: $characterId');
+                return sl<CharacterBloc>();
+              },
+            ),
+            // Include AuthBloc if needed for user-specific data
+            BlocProvider.value(
+              value: context.read<AuthBloc>(),
+            ),
+          ],
+          child: CharacterDetailPage(
+            characterId: characterId,
+            character: character,
+          ),
         ),
       ),
     );

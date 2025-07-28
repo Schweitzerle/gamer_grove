@@ -584,11 +584,9 @@ abstract class IGDBRemoteDataSource {
   Future<List<CharacterMugShotModel>> getCharacterMugShots(List<int> mugShotIds);
 
   /// Get complete character data
-  Future<List<Map<String, dynamic>>> getCompleteCharacterData({
-    List<int>? characterIds,
-    String? search,
-    int limit = 20,
-  });
+  Future<Map<String, dynamic>> getCompleteCharacterData(int characterId);
+
+
 
   // ==========================================
   // COMPANY METHODS

@@ -16,16 +16,26 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
 
   GetCharacterWithGames(this.repository);
 
+  // 🆕 USE CASE DEBUGGING ENHANCEMENT
+// ==========================================
+
+// Verbessere deine GetCharacterWithGames UseCase:
+
   @override
   Future<Either<Failure, CharacterWithGames>> call(GetCharacterWithGamesParams params) async {
     try {
       print('🎭 UseCase: Getting character details for ID: ${params.characterId}');
+      print('🎭 UseCase: Include games: ${params.includeGames}');
 
       // Get character details (this should include enriched games from repository)
       final characterResult = await repository.getCharacterDetails(params.characterId);
+
       if (characterResult.isLeft()) {
         return characterResult.fold(
-              (failure) => Left(failure),
+              (failure) {
+            print('❌ UseCase: Repository failed: ${failure.message}');
+            return Left(failure);
+          },
               (character) => throw Exception('Unexpected success'),
         );
       }
@@ -36,31 +46,44 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
       );
 
       print('✅ UseCase: Character loaded: ${character.name}');
-      print('🎮 UseCase: Character has ${character.loadedGameCount} games');
+      print('🎮 UseCase: Character has ${character.loadedGameCount} loaded games');
+      print('🔢 UseCase: Character has ${character.gameIds.length} game IDs');
 
       // The character should already have games loaded from repository
-      // But if not, we can load them manually
       List<Game> games = character.games ?? [];
 
       if (games.isEmpty && character.gameIds.isNotEmpty && params.includeGames) {
-        print('⚠️ UseCase: Character has no loaded games, loading manually...');
+        print('⚠️ UseCase: Character has no loaded games, attempting manual load...');
+        print('🔍 UseCase: Trying to load ${character.gameIds.length} games manually');
+
         final gamesResult = await repository.getGamesByIds(character.gameIds);
         if (gamesResult.isRight()) {
           games = gamesResult.fold(
-                (failure) => <Game>[],
-                (gamesList) => gamesList,
+                (failure) {
+              print('❌ UseCase: Manual game loading failed: ${failure.message}');
+              return <Game>[];
+            },
+                (gamesList) {
+              print('✅ UseCase: Manually loaded ${gamesList.length} games');
+              return gamesList;
+            },
           );
-          print('✅ UseCase: Manually loaded ${games.length} games');
+        } else {
+          print('❌ UseCase: Manual game loading returned error');
         }
       }
 
-      return Right(CharacterWithGames(
+      final result = CharacterWithGames(
         character: character,
         games: games,
-      ));
+      );
+
+      print('🎯 UseCase: Final result - ${result.character.name} with ${result.games.length} games');
+      return Right(result);
 
     } catch (e) {
-      print('❌ UseCase: Error loading character: $e');
+      print('❌ UseCase: Exception occurred: $e');
+      print('📍 UseCase: Exception type: ${e.runtimeType}');
       return Left(ServerFailure(message: 'Failed to load character with games: $e'));
     }
   }

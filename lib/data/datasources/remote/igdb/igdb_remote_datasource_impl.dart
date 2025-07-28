@@ -2218,26 +2218,25 @@ platforms.platform_logo.checksum,
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCompleteCharacterData(
-      {List<int>? characterIds, String? search, int limit = 20}) async {
+  Future<Map<String, dynamic>> getCompleteCharacterData(int characterId) async {
     try {
-      String body;
-      if (characterIds != null && characterIds.isNotEmpty) {
-        final idsString = characterIds.join(',');
-        body =
-            'where id = ($idsString); fields *, mug_shot.*, games.name; limit ${characterIds.length};';
-      } else if (search != null) {
-        body =
-            'search "$search"; fields *, mug_shot.*, games.name; limit $limit;';
-      } else {
-        body = 'fields *, mug_shot.*, games.name; limit $limit;';
-      }
-      final response = await _makeRawRequest('characters', body);
-      final List<dynamic> data = json.decode(response.body);
-      return data.cast<Map<String, dynamic>>();
+      final body = '''
+        where id = $characterId; 
+        fields *,
+               fields *, games.*, games.cover.*, games.screenshots.*, games.platforms.*, games.genres.*, games.themes.*, games.involved_companies.*, games.age_ratings.*, games.websites.*, mug_shot.*;
+        limit 1;
+      ''';
+
+      final response = await _makeRequest(
+        'characters',
+        body,
+            (json) => json,
+      );
+
+      return response.isNotEmpty ? response.first : {};
     } catch (e) {
-      print('💥 IGDB: Get complete character data error: $e');
-      return [];
+      print('⚠️ IGDBRemoteDataSource: Failed to get complete character data: $e');
+      return {};
     }
   }
 
