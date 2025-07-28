@@ -1,6 +1,7 @@
 // lib/presentation/widgets/sections/characters_section.dart
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/navigations.dart';
 import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../pages/character/character_screen.dart';
@@ -128,11 +129,7 @@ class CharactersSection extends StatelessWidget {
                   child: CharacterCard(
                     character: character,
                     width: 120,
-                    onTap: () => _navigateToCharactersScreen(
-                      context,
-                      characters,
-                      initialCharacter: character,
-                    ),
+                    onTap: () => _navigateToCharacterDetail(context, character),
                   ),
                 );
               },
@@ -141,6 +138,10 @@ class CharactersSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _navigateToCharacterDetail(BuildContext context, Character character) {
+    Navigations.navigateToCharacterDetail(context, character.id);
   }
 
   void _navigateToCharactersScreen(

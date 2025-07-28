@@ -1535,9 +1535,6 @@ class GameRepositoryImpl implements GameRepository {
   // PHASE 4 - GAME DETAIL ENHANCEMENTS IMPLEMENTATION
   // ==========================================
 
-  // lib/data/repositories/game_repository_impl.dart - ENHANCED CHARACTER METHODS
-
-// 🔄 UPDATE the existing getGameCharacters method to load with games:
   @override
   Future<Either<Failure, List<Character>>> getGameCharacters(int gameId) async {
     try {
@@ -1545,47 +1542,42 @@ class GameRepositoryImpl implements GameRepository {
         return const Left(NetworkFailure());
       }
 
-      print(
-          '🎭 GameRepository: Getting characters for game: $gameId with images and games');
+      print('🎭 GameRepository: Getting characters for game: $gameId');
 
-      // Load characters for this game
-      final characterData = await igdbDataSource.getCompleteCharacterData(gameId);
+      // 🔧 HAUPTFIX: Verwende die richtige Methode!
+      // ❌ FALSCH: final characterData = await igdbDataSource.getCompleteCharacterData(gameId);
+      // ✅ RICHTIG:
+      final characters = await igdbDataSource.getCharactersForGames([gameId]);
 
-      // Filter by gameId and extract Characters with image data
-      final charactersWithImageData = <Character>[];
+      print('📡 GameRepository: IGDB returned ${characters.length} characters');
 
-      for (final data in characterData) {
-        final gameIds = data['games'] as List<dynamic>? ?? [];
-        final containsGame = gameIds.any((game) {
-          if (game is int) return game == gameId;
-          if (game is Map && game['id'] is int) return game['id'] == gameId;
-          return false;
-        });
+      if (characters.isEmpty) {
+        print('ℹ️ GameRepository: No characters found for game: $gameId');
+        return const Right([]);
+      }
 
-        if (containsGame) {
-          final character = _parseCompleteCharacterData(data);
-          if (character != null) {
-            charactersWithImageData.add(character);
-          }
+      // Konvertiere zu Entities (ohne Enrichment erstmal)
+      final characterEntities = <Character>[];
+      for (final character in characters) {
+        try {
+          characterEntities.add(character as Character);
+        } catch (e) {
+          print('⚠️ GameRepository: Failed to convert character: $e');
+          continue;
         }
       }
 
-      // 🆕 NEW: Now enrich characters with their games
-      final enrichedCharacters =
-          await _enrichCharactersWithGames(charactersWithImageData);
+      print('✅ GameRepository: Successfully converted ${characterEntities.length} characters');
+      return Right(characterEntities);
 
-      print(
-          '✅ GameRepository: Found ${enrichedCharacters.length} characters with image data and games');
-      return Right(enrichedCharacters);
     } on ServerException catch (e) {
+      print('❌ GameRepository: ServerException: ${e.message}');
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game characters'));
+      print('❌ GameRepository: Generic error: $e');
+      return Left(ServerFailure(message: 'Failed to get game characters: $e'));
     }
   }
-
-// 🔧 FIXES FÜR CHARACTER DETAIL LOADING
-// Füge diese verbesserten Methoden in deine GameRepositoryImpl ein
 
 // ==========================================
 // 🆕 ENHANCED CHARACTER DETAIL METHOD
@@ -1601,40 +1593,44 @@ class GameRepositoryImpl implements GameRepository {
 
       print('🎭 GameRepository: Getting character details: $characterId');
 
-      // Get character data with images
+      // Das ist korrekt - für EINEN Character
       final characterData = await igdbDataSource.getCompleteCharacterData(characterId);
 
-      print('📡 GameRepository: IGDB returned ${characterData.length} character records');
-
       if (characterData.isEmpty) {
-        print('❌ GameRepository: No character data found for ID: $characterId');
         return const Left(NotFoundFailure(message: 'Character not found'));
       }
 
-      final characterMap = characterData;
-      print('🔍 GameRepository: Raw character data keys: ${characterMap.keys.toList()}');
-
-      final character = _parseCompleteCharacterData(characterMap);
+      final character = _parseCompleteCharacterData(characterData);
       if (character == null) {
-        print('❌ GameRepository: Failed to parse character data');
-        return const Left(ServerFailure(message: 'Failed to parse character data'));
+        return const Left(ServerFailure(message: 'Failed to parse character'));
       }
 
-      print('✅ GameRepository: Parsed character: ${character.name}');
-      print('🎮 GameRepository: Character has ${character.gameIds.length} game IDs: ${character.gameIds}');
-      print('🖼️ GameRepository: Character has image: ${character.hasImage}');
+      print('✅ GameRepository: Character loaded: ${character.name}');
+      return Right(character);
 
-      // 🆕 ENHANCED: Enrich with games with better error handling
-      final enrichedCharacter = await _enrichSingleCharacterWithGames(character);
-
-      print('🎮 GameRepository: Character enriched with ${enrichedCharacter.loadedGameCount} games');
-      return Right(enrichedCharacter);
-    } on ServerException catch (e) {
-      print('❌ GameRepository: ServerException: ${e.message}');
-      return Left(ServerFailure(message: e.message));
     } catch (e) {
-      print('❌ GameRepository: Generic error: $e');
-      return Left(ServerFailure(message: 'Failed to get character details: $e'));
+      return Left(ServerFailure(message: 'Character details failed: $e'));
+    }
+  }
+
+
+  Future<void> debugCharacterMethods(int gameId) async {
+    print('\n=== 🔍 CHARACTER DEBUG ===');
+
+    try {
+      // Test Multiple Characters
+      final charactersList = await igdbDataSource.getCharactersForGames([gameId]);
+      print('✅ getCharactersForGames: ${charactersList.length} characters');
+      print('📝 Type: ${charactersList.runtimeType}');
+
+      // Test Single Character
+      if (charactersList.isNotEmpty) {
+        final characterData = await igdbDataSource.getCompleteCharacterData(charactersList.first.id);
+        print('✅ getCompleteCharacterData: ${characterData.keys.length} fields');
+        print('📝 Type: ${characterData.runtimeType}');
+      }
+    } catch (e) {
+      print('❌ Debug failed: $e');
     }
   }
 

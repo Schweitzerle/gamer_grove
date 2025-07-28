@@ -15,10 +15,12 @@ abstract class CharacterEvent extends Equatable {
 class GetCharacterDetailsEvent extends CharacterEvent {
   final int characterId;
   final bool includeGames;
+  final String? userId; // 🆕
 
   const GetCharacterDetailsEvent({
     required this.characterId,
     this.includeGames = true,
+    this.userId, // 🆕
   });
 
   @override

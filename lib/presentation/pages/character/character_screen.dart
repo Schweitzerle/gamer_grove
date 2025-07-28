@@ -1,6 +1,7 @@
 // lib/presentation/pages/characters/characters_screen.dart
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_filter_bar.dart';
+import '../../../core/utils/navigations.dart';
 import '../../../domain/entities/character/character.dart';
 import 'character_detail_screen.dart';
 import 'widgets/character_card.dart';
@@ -265,16 +266,10 @@ class _CharactersScreenState extends State<CharactersScreen> {
     );
   }
 
-  void _showCharacterDetails(Character character) {
-    // 🆕 UPDATED: Navigate to full CharacterDetailScreen instead of bottom sheet
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CharacterDetailScreen(
-          character: character,
-          games: [],
-        ),
-      ),
-    );
+
+  // 🆕 NEW: Navigation method - goes directly to CharacterDetailScreen
+  void _navigateToCharacterDetail(BuildContext context, Character character) {
+    Navigations.navigateToCharacterDetail(context, character.id);
   }
 
 // 🔄 UPDATE the existing _onCharacterTapped method:
@@ -284,7 +279,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
     });
 
     // 🆕 UPDATED: Navigate to CharacterDetailScreen instead of bottom sheet
-    _showCharacterDetails(character);
+    _navigateToCharacterDetail(context, character);
   }
 
   void _scrollToCharacter(Character character) {

@@ -4,6 +4,7 @@
 
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/utils/game_enrichment_utils.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/game/game.dart';
@@ -259,74 +260,22 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
   }
 
-// 🆕 NEW: Helper Methode für Event Game Enrichment
   Future<Event> _enrichEventWithUserData(Event event, String userId) async {
     if (event.games.isEmpty) return event;
 
-    print(
-        '🎉 EventBloc: Enriching ${event.games.length} event games with user data...');
-
     try {
-      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
+      print('🎉 EventBloc: Using GameEnrichmentUtils for event games...');
 
-// Get user data for event games (limit to first 10 for performance)
-      final gamesToEnrich = event.games.take(10).toList();
-      final futures = gamesToEnrich
-          .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
-          .toList();
+      // 🆕 Verwende Utils statt eigene Implementierung
+      final enrichedGames = await GameEnrichmentUtils.enrichEventGames(
+        event.games,
+        userId,
+      );
 
-      final userGameDataList = await Future.wait(futures);
+      // 🆕 Debug Stats
+      GameEnrichmentUtils.printEnrichmentStats(enrichedGames, context: 'Event');
 
-// Get top three data
-      final topThreeData =
-          await supabaseDataSource.getUserTopThreeGames(userId: userId);
-      final topThreeMap = <int, int>{};
-      for (var entry in topThreeData) {
-        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
-      }
-
-// Create enriched games
-      final enrichedGames = <Game>[];
-
-// Enriched games (first 10)
-      for (int i = 0; i < gamesToEnrich.length; i++) {
-        final game = gamesToEnrich[i];
-        final userGameData = userGameDataList[i];
-
-        if (userGameData != null) {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: userGameData['is_wishlisted'] ?? false,
-            isRecommended: userGameData['is_recommended'] ?? false,
-            userRating: userGameData['rating']?.toDouble(),
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        } else {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: false,
-            isRecommended: false,
-            userRating: null,
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        }
-      }
-
-// Add remaining games (not enriched)
-      if (event.games.length > 10) {
-        final remainingGames = event.games.skip(10);
-        for (final game in remainingGames) {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: false,
-            isRecommended: false,
-            userRating: null,
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        }
-      }
-
-// Create new Event with enriched games
+      // Create new Event with enriched games
       final enrichedEvent = Event(
         id: event.id,
         checksum: event.checksum,
@@ -343,18 +292,18 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         liveStreamUrl: event.liveStreamUrl,
         eventNetworks: event.eventNetworks,
         eventNetworkIds: event.eventNetworkIds,
-        games: enrichedGames,
-        // 🎯 Enriched games!
+        games: enrichedGames, // 🎯 Enriched games!
         gameIds: event.gameIds,
         videos: event.videos,
         videoIds: event.videoIds,
       );
 
-      print('✅ EventBloc: Enriched ${enrichedGames.length} event games');
+      print('✅ EventBloc: Event enriched with ${enrichedGames.length} games');
       return enrichedEvent;
+
     } catch (e) {
       print('❌ EventBloc: Error enriching event games: $e');
-      return event; // Return original event if enrichment fails
+      return event;
     }
   }
 }

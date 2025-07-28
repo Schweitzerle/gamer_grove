@@ -4,6 +4,7 @@
 
 // lib/presentation/blocs/character/character_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/utils/game_enrichment_utils.dart' hide GetCharacterDetailsEvent;
 import '../../../domain/usecases/characters/get_character_with_games.dart';
 import 'character_event.dart';
 import 'character_state.dart';
@@ -31,12 +32,43 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       ),
     );
 
-    result.fold(
-          (failure) => emit(CharacterError(message: failure.message)),
-          (characterWithGames) => emit(CharacterDetailsLoaded(
-        character: characterWithGames.character,
-        games: characterWithGames.games,
-      )),
+    await result.fold(
+          (failure) async {
+        emit(CharacterError(message: failure.message));
+      },
+          (characterWithGames) async {
+        // 🔧 NEUE ENRICHMENT LOGIC mit Utils
+        if (event.userId != null && characterWithGames.games.isNotEmpty) {
+          try {
+            print('🎭 CharacterBloc: Enriching character games with GameEnrichmentUtils...');
+
+            // 🆕 Verwende die Utils statt eigene Implementierung
+            final enrichedGames = await GameEnrichmentUtils.enrichCharacterGames(
+              characterWithGames.games,
+              event.userId!,
+            );
+
+            // 🆕 Debug Stats
+            GameEnrichmentUtils.printEnrichmentStats(enrichedGames, context: 'Character');
+
+            emit(CharacterDetailsLoaded(
+              character: characterWithGames.character,
+              games: enrichedGames,
+            ));
+          } catch (e) {
+            print('❌ CharacterBloc: Failed to enrich games: $e');
+            emit(CharacterDetailsLoaded(
+              character: characterWithGames.character,
+              games: characterWithGames.games,
+            ));
+          }
+        } else {
+          emit(CharacterDetailsLoaded(
+            character: characterWithGames.character,
+            games: characterWithGames.games,
+          ));
+        }
+      },
     );
   }
 

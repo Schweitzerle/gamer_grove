@@ -2015,14 +2015,12 @@ platforms.platform_logo.checksum,
 
   // lib/data/datasources/remote/igdb/igdb_remote_datasource_impl.dart - UPDATE
 
-// 🔄 UPDATE the existing getCharactersForGames method:
   @override
   Future<List<CharacterModel>> getCharactersForGames(List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
 
     final gameIdsString = gameIds.join(',');
 
-    // 🆕 UPDATED: Include mug_shot.* to get image data
     final body = '''
     where games = ($gameIdsString); 
     fields id, checksum, country_name, created_at, description, games, gender, 
@@ -2030,7 +2028,7 @@ platforms.platform_logo.checksum,
     limit 100;
   ''';
 
-    print('🎭 IGDB: Loading characters for games with images...');
+    print('🎭 IGDB: Loading characters for games: $gameIds');
 
     try {
       final response = await _makeRawRequest('characters', body);
@@ -2046,13 +2044,13 @@ platforms.platform_logo.checksum,
 
       print('✅ IGDB: Loaded ${characters.length} characters with image data');
       return characters;
-
     } catch (e) {
       print('❌ IGDB: Error loading characters with images: $e');
       // Fallback to simple characters without images
       return await _getCharactersSimple(gameIds);
     }
   }
+
 
 // 🆕 ADD this method to parse characters with mugshot data:
   CharacterModel? _parseCharacterWithMugShot(Map<String, dynamic> data) {
@@ -2100,7 +2098,8 @@ platforms.platform_logo.checksum,
     limit 100;
   ''';
 
-    return await _makeRequest('characters', body, (json) => CharacterModel.fromJson(json));
+    return await _makeRequest(
+        'characters', body, (json) => CharacterModel.fromJson(json));
   }
 
 // 🆕 ADD helper methods if they don't exist:
@@ -2222,20 +2221,20 @@ platforms.platform_logo.checksum,
     try {
       final body = '''
         where id = $characterId; 
-        fields *,
-               fields *, games.*, games.cover.*, games.screenshots.*, games.platforms.*, games.genres.*, games.themes.*, games.involved_companies.*, games.age_ratings.*, games.websites.*, mug_shot.*;
+        fields *, games.*, games.cover.*, games.screenshots.*, games.platforms.*, games.genres.*, games.themes.*, games.involved_companies.*, games.age_ratings.*, games.websites.*, mug_shot.*;
         limit 1;
       ''';
 
       final response = await _makeRequest(
         'characters',
         body,
-            (json) => json,
+        (json) => json,
       );
 
       return response.isNotEmpty ? response.first : {};
     } catch (e) {
-      print('⚠️ IGDBRemoteDataSource: Failed to get complete character data: $e');
+      print(
+          '⚠️ IGDBRemoteDataSource: Failed to get complete character data: $e');
       return {};
     }
   }
@@ -2778,8 +2777,6 @@ platforms.platform_logo.checksum,
   // EVENT METHODS
   // ==========================================
 
-
-
   @override
   Future<List<EventLogoModel>> getEventLogos(
       {List<int>? ids, int limit = 50}) async {
@@ -2865,7 +2862,6 @@ platforms.platform_logo.checksum,
   Future<List<NetworkTypeModel>> searchNetworkTypes(String query,
           {int limit = 20}) async =>
       await getNetworkTypes(search: query, limit: limit);
-
 
   @override
   Future<List<EventModel>> getEventsWithGamesAndNetworks(
@@ -4343,7 +4339,6 @@ platforms.platform_logo.checksum,
     }
   }
 
-
   // ==========================================
   // ENHANCED EVENT METHODS WITH FULL OBJECT LOADING
   // ==========================================
@@ -4399,7 +4394,7 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
@@ -4412,7 +4407,8 @@ platforms.platform_logo.checksum,
 
   /// Get events by games with complete data (enhanced)
   @override
-  Future<List<EventModel>> getEventsByGamesWithCompleteData(List<int> gameIds) async {
+  Future<List<EventModel>> getEventsByGamesWithCompleteData(
+      List<int> gameIds) async {
     if (gameIds.isEmpty) return [];
 
     final gameIdsString = gameIds.join(',');
@@ -4432,13 +4428,14 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
   /// Get upcoming events with complete data (enhanced)
   @override
-  Future<List<EventModel>> getUpcomingEventsWithCompleteData({int limit = 50}) async {
+  Future<List<EventModel>> getUpcomingEventsWithCompleteData(
+      {int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final body = '''
       where start_time > $now; 
@@ -4456,13 +4453,14 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
   /// Get live events with complete data (enhanced)
   @override
-  Future<List<EventModel>> getLiveEventsWithCompleteData({int limit = 50}) async {
+  Future<List<EventModel>> getLiveEventsWithCompleteData(
+      {int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final body = '''
       where start_time <= $now & end_time >= $now; 
@@ -4479,13 +4477,14 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
   /// Get past events with complete data (enhanced)
   @override
-  Future<List<EventModel>> getPastEventsWithCompleteData({int limit = 50}) async {
+  Future<List<EventModel>> getPastEventsWithCompleteData(
+      {int limit = 50}) async {
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final body = '''
       where end_time < $now; 
@@ -4503,7 +4502,7 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
@@ -4519,7 +4518,8 @@ platforms.platform_logo.checksum,
     if (startDate != null && endDate != null) {
       final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
       final endTimestamp = (endDate.millisecondsSinceEpoch / 1000).round();
-      whereClause = 'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
+      whereClause =
+          'where start_time >= $startTimestamp & start_time <= $endTimestamp;';
     } else if (startDate != null) {
       final startTimestamp = (startDate.millisecondsSinceEpoch / 1000).round();
       whereClause = 'where start_time >= $startTimestamp;';
@@ -4544,13 +4544,14 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'events',
       body,
-          (json) => EventModel.fromJson(json),
+      (json) => EventModel.fromJson(json),
     );
   }
 
   /// Search events with complete data (enhanced)
   @override
-  Future<List<EventModel>> searchEventsWithCompleteData(String query, {int limit = 20}) async {
+  Future<List<EventModel>> searchEventsWithCompleteData(String query,
+      {int limit = 20}) async {
     return await getEventsWithCompleteData(search: query, limit: limit);
   }
 
@@ -4566,7 +4567,8 @@ platforms.platform_logo.checksum,
     int limit = 50,
   }) async {
     // Use enhanced method for better data
-    return await getEventsWithCompleteData(ids: ids, search: search, limit: limit);
+    return await getEventsWithCompleteData(
+        ids: ids, search: search, limit: limit);
   }
 
   /// Get event by ID (legacy method - now uses complete data)
@@ -4647,7 +4649,7 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
@@ -4674,7 +4676,7 @@ platforms.platform_logo.checksum,
       final response = await _makeRequest(
         'events',
         body,
-            (json) => json,
+        (json) => json,
       );
 
       return response.isNotEmpty ? response.first : {};
@@ -4702,9 +4704,11 @@ platforms.platform_logo.checksum,
       // Preload event videos
       await _preloadEventVideos(eventIds);
 
-      print('✅ IGDBRemoteDataSource: Preloaded relationships for ${eventIds.length} events');
+      print(
+          '✅ IGDBRemoteDataSource: Preloaded relationships for ${eventIds.length} events');
     } catch (e) {
-      print('⚠️ IGDBRemoteDataSource: Failed to preload event relationships: $e');
+      print(
+          '⚠️ IGDBRemoteDataSource: Failed to preload event relationships: $e');
     }
   }
 
@@ -4719,7 +4723,7 @@ platforms.platform_logo.checksum,
     await _makeRequest(
       'event_logos',
       body,
-          (json) => EventLogoModel.fromJson(json),
+      (json) => EventLogoModel.fromJson(json),
     );
   }
 
@@ -4734,22 +4738,21 @@ platforms.platform_logo.checksum,
     await _makeRequest(
       'event_networks',
       body,
-          (json) => EventNetworkModel.fromJson(json),
+      (json) => EventNetworkModel.fromJson(json),
     );
   }
 
   Future<void> _preloadEventGames(List<int> eventIds) async {
     // This would require finding games that are featured in these events
     // Implementation depends on how IGDB structures the relationship
-    print('🔄 IGDBRemoteDataSource: Preloading event games for ${eventIds.length} events');
+    print(
+        '🔄 IGDBRemoteDataSource: Preloading event games for ${eventIds.length} events');
   }
 
   Future<void> _preloadEventVideos(List<int> eventIds) async {
     // This would require finding videos that are associated with these events
     // Implementation depends on how IGDB structures the relationship
-    print('🔄 IGDBRemoteDataSource: Preloading event videos for ${eventIds.length} events');
+    print(
+        '🔄 IGDBRemoteDataSource: Preloading event videos for ${eventIds.length} events');
   }
-
 }
-
-

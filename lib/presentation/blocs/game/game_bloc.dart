@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
+import '../../../core/utils/game_enrichment_utils.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
 import '../../../data/models/game/game_model.dart';
@@ -898,81 +899,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-  // 🆕 UPDATED: Limit Parameter hinzugefügt
   Future<List<Game>> enrichGamesWithUserData(
-      List<Game> games, String? userId, {int? enrichLimit}) async {
-    if (userId == null || games.isEmpty) return games;
-
-    // Bestimme wie viele Games enriched werden sollen
-    final gamesToEnrich = enrichLimit != null && enrichLimit < games.length
-        ? games.take(enrichLimit).toList()
-        : games;
-
-    print('🔄 Enriching ${gamesToEnrich.length}/${games.length} games with user data (limit: $enrichLimit)');
-
-    try {
-      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
-
-      // Hole User-Game Daten nur für die ersten X Games (PERFORMANCE!)
-      final futures = gamesToEnrich
-          .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
-          .toList();
-
-      final userGameDataList = await Future.wait(futures);
-
-      // Top Three einmal laden (für alle Games)
-      final topThreeData = await supabaseDataSource.getUserTopThreeGames(userId: userId);
-      final topThreeMap = <int, int>{};
-      for (var entry in topThreeData) {
-        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
-      }
-
-      // Erstelle angereicherte Games Liste
-      final enrichedGames = <Game>[];
-
-      // Enriched Games (erste X)
-      for (int i = 0; i < gamesToEnrich.length; i++) {
-        final game = gamesToEnrich[i];
-        final userGameData = userGameDataList[i];
-
-        if (userGameData != null) {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: userGameData['is_wishlisted'] ?? false,
-            isRecommended: userGameData['is_recommended'] ?? false,
-            userRating: userGameData['rating']?.toDouble(),
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        } else {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: false,
-            isRecommended: false,
-            userRating: null,
-            isInTopThree: topThreeMap.containsKey(game.id), // Top3 check auch für nicht-enriched
-            topThreePosition: topThreeMap[game.id],
-          ));
-        }
-      }
-
-      // Nicht-enriched Games (Rest) - nur mit TopThree Daten
-      if (enrichLimit != null && enrichLimit < games.length) {
-        final remainingGames = games.skip(enrichLimit);
-        for (final game in remainingGames) {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: false, // Kein API Call = default false
-            isRecommended: false, // Kein API Call = default false
-            userRating: null, // Kein API Call = null
-            isInTopThree: topThreeMap.containsKey(game.id), // TopThree prüfen
-            topThreePosition: topThreeMap[game.id],
-          ));
-        }
-      }
-
-      return enrichedGames;
-    } catch (e) {
-      print('❌ GameBloc: Error enriching games with user data: $e');
-      return games; // Return original games if enrichment fails
-    }
+      List<Game> games,
+      String userId, {
+        int? enrichLimit,
+      }) async {
+    return await GameEnrichmentUtils.enrichGameDetailGames(
+      games,
+      userId,
+      limit: enrichLimit ?? 15,
+    );
   }
 
   void _updateGameInHomePageState(
@@ -1419,7 +1355,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
-          ? await enrichGamesWithUserData(event.games, event.userId)
+          ? await enrichGamesWithUserData(event.games, event.userId!)
           : event.games;
 
       emit(CompleteFranchiseGamesLoaded(
@@ -1444,7 +1380,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
-          ? await enrichGamesWithUserData(event.games, event.userId)
+          ? await enrichGamesWithUserData(event.games, event.userId!)
           : event.games;
 
       emit(CompleteCollectionGamesLoaded(

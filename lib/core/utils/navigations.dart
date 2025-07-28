@@ -122,6 +122,17 @@ class Navigations {
     );
   }
 
+  static void navigateToCharacterGames(BuildContext context, SeriesItem item, Character character) {
+    Navigations.navigateToLocalAllGames(
+      context,
+      title: item.title,
+      subtitle: 'Games ${character.name} is a part of',
+      games: character.games ?? [],
+      showFilters: true,
+      blurRated: false,
+    );
+  }
+
   static String? _getCurrentUserId(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
     return authState is Authenticated ? authState.user.id : null;
