@@ -1,25 +1,24 @@
-
 // ==================================================
-// CHARACTER DETAIL SCREEN (NEW UI DESIGN)
+// GAME ENGINE DETAIL SCREEN (ÜBERARBEITET)
 // ==================================================
 
-//TODO: alle daten noch schön darstellen
-
-// lib/presentation/pages/character_detail/character_detail_screen.dart
+// lib/presentation/pages/game_engine_detail/game_engine_detail_screen.dart
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
 import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../widgets/accordion_tile.dart';
 import '../../widgets/game_card.dart';
 import '../../../core/utils/navigations.dart';
 import '../../widgets/sections/franchise_collection_section.dart';
+import '../../widgets/sections/platform_section.dart';
+import '../game_detail/widgets/company_section.dart';
 
 class GameEngineDetailScreen extends StatefulWidget {
   final GameEngine gameEngine;
@@ -44,7 +43,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    _logCharacterData();
+    _logGameEngineData();
   }
 
   void _onScroll() {
@@ -64,25 +63,37 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     super.dispose();
   }
 
-
-  SeriesItem _createCharacterGamesSeriesItem() {
+  SeriesItem _createGameEngineGamesSeriesItem() {
     return SeriesItem(
       type: SeriesType.eventGames,
-      title: '${widget.gameEngine.name} - Featured Games',
-      games: _getEventGames(),
+      title: '${widget.gameEngine.name} - Games Built',
+      games: _getEngineGames(),
       totalCount: widget.games.length,
-      accentColor: _getEventStatusColor(),
-      icon: Icons.videogame_asset,
+      accentColor: _getEngineAccentColor(),
+      icon: Icons.precision_manufacturing,
       franchise: null,
       collection: null,
     );
   }
 
-  Color _getEventStatusColor() {
-    return Theme.of(context).cardColor.onColor;
+  Color _getEngineAccentColor() {
+    // Verschiedene Farben basierend auf Engine-Name
+    final engineName = widget.gameEngine.name.toLowerCase();
+    if (engineName.contains('unity')) {
+      return Colors.black;
+    } else if (engineName.contains('unreal')) {
+      return Colors.blue;
+    } else if (engineName.contains('godot')) {
+      return Colors.green;
+    } else if (engineName.contains('cryengine') || engineName.contains('cry')) {
+      return Colors.red;
+    } else if (engineName.contains('source')) {
+      return Colors.orange;
+    }
+    return Theme.of(context).colorScheme.primary;
   }
 
-  List<Game> _getEventGames() {
+  List<Game> _getEngineGames() {
     if (widget.games.isEmpty) return [];
     return widget.games.take(10).toList();
   }
@@ -93,10 +104,10 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // Character Hero Section (like Event/Game Detail)
+          // Game Engine Hero Section
           _buildSliverAppBar(),
-          // Character Content
-          _buildCharacterContent(),
+          // Game Engine Content
+          _buildGameEngineContent(),
         ],
       ),
     );
@@ -117,10 +128,10 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           children: [
             // Hero Image
             _buildHeroImage(),
-            // Gradient Overlays (same as Event/Game)
+            // Gradient Overlays
             _buildGradientOverlays(),
-            // Floating Character Card
-            _buildFloatingCharacterCard(),
+            // Floating Game Engine Card
+            _buildFloatingGameEngineCard(),
           ],
         ),
         title: _isHeaderCollapsed
@@ -137,10 +148,10 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
 
   Widget _buildHeroImage() {
     return Hero(
-      tag: 'character_hero_${widget.gameEngine.id}',
-      child: widget.gameEngine.hasLogo
+      tag: 'game_engine_hero_${widget.gameEngine.id}',
+      child: widget.gameEngine.hasLogo && widget.gameEngine.logoUrl != null
           ? CachedImageWidget(
-        imageUrl: widget.gameEngine.logoId!.toString(),
+        imageUrl: widget.gameEngine.logoUrl!,
         fit: BoxFit.cover,
         placeholder: _buildFallbackHero(),
       )
@@ -155,9 +166,9 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.purple.withOpacity(0.8),
-            Colors.deepPurple.withOpacity(0.6),
-            Colors.indigo.withOpacity(0.4),
+            _getEngineAccentColor().withOpacity(0.8),
+            _getEngineAccentColor().withOpacity(0.6),
+            _getEngineAccentColor().withOpacity(0.4),
           ],
         ),
       ),
@@ -203,7 +214,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     );
   }
 
-  Widget _buildFloatingCharacterCard() {
+  Widget _buildFloatingGameEngineCard() {
     return Positioned(
       bottom: 20,
       left: 20,
@@ -222,29 +233,29 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
               // Header Row
               Row(
                 children: [
-                  // Character Avatar
+                  // Game Engine Avatar
                   Container(
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: Colors.purple.withOpacity(0.3),
+                        color: _getEngineAccentColor().withOpacity(0.3),
                         width: 2,
                       ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(28),
-                      child: widget.gameEngine.hasLogo
+                      child: widget.gameEngine.hasLogo && widget.gameEngine.logoUrl != null
                           ? CachedImageWidget(
-                        imageUrl: widget.gameEngine.logoId.toString(),
+                        imageUrl: widget.gameEngine.logoUrl!,
                         fit: BoxFit.cover,
                       )
                           : Container(
-                        color: Colors.purple.withOpacity(0.1),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.purple,
+                        color: _getEngineAccentColor().withOpacity(0.1),
+                        child: Icon(
+                          Icons.precision_manufacturing,
+                          color: _getEngineAccentColor(),
                           size: 30,
                         ),
                       ),
@@ -253,12 +264,12 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Character Info
+                  // Game Engine Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Character Name
+                        // Engine Name
                         Text(
                           widget.gameEngine.name,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -270,64 +281,28 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
 
                         const SizedBox(height: 4),
 
-                        // Identity Info
+                        // Engine Info Chips
                         Row(
                           children: [
-                            _buildIdentityChip(
-                              widget.gameEngine.name!,
-                              Colors.blue,
-                              Icons.person,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildIdentityChip(
-                              widget.gameEngine.name!,
-                              Colors.green,
-                              Icons.pets,
-                            ),
+                            if (widget.gameEngine.hasCompanies)
+                              _buildInfoChip(
+                                '${widget.gameEngine.companyCount} ${widget.gameEngine.companyCount == 1 ? 'Company' : 'Companies'}',
+                                Colors.blue,
+                                Icons.business,
+                              ),
+                            if (widget.gameEngine.hasCompanies && widget.gameEngine.hasPlatforms)
+                              const SizedBox(width: 8),
+                            if (widget.gameEngine.hasPlatforms)
+                              _buildInfoChip(
+                                '${widget.gameEngine.platformCount} ${widget.gameEngine.platformCount == 1 ? 'Platform' : 'Platforms'}',
+                                Colors.green,
+                                Icons.devices,
+                              ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Games Count
-              Row(
-                children: [
-                  Icon(
-                    Icons.videogame_asset,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.games.length} games',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (widget.gameEngine.slug != null)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.gameEngine.slug!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
                 ],
               ),
             ],
@@ -337,7 +312,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     );
   }
 
-  Widget _buildIdentityChip(String text, Color color, IconData icon) {
+  Widget _buildInfoChip(String text, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -365,7 +340,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     );
   }
 
-  Widget _buildCharacterContent() {
+  Widget _buildGameEngineContent() {
     return SliverToBoxAdapter(
       child: Container(
         color: Theme.of(context).colorScheme.surface,
@@ -374,29 +349,53 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           children: [
             const SizedBox(height: AppConstants.paddingLarge), // Space for floating card
 
-            // Character Information Accordion
-            if (widget.gameEngine.name != null)
+            // Game Engine Information Accordion
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+              child: _buildGameEngineInformationAccordion(),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Companies Section
+            if (widget.gameEngine.hasCompanies)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                child: _buildCharacterInfoAccordion(),
+                child: GenericCompanySection(
+                  companies: widget.gameEngine.companies,
+                  title: 'Companies Using This Engine',
+                  showRoles: false,
+                )
               ),
 
             const SizedBox(height: 16),
 
-            // Character Games Section
+            // Platforms Section
+            if (widget.gameEngine.hasPlatforms)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                child: Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                    child: GenericPlatformSection(
+                      platforms: widget.gameEngine.platforms,
+                      title: 'Supported Platforms',
+                      showReleaseTimeline: false,
+                      showFirstReleaseInfo: false,
+                    ),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 16),
+
+            // Game Engine Games Section
             if (widget.games.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                child: _buildTabView(context, _createCharacterGamesSeriesItem()),
+                child: _buildTabView(context, _createGameEngineGamesSeriesItem()),
               ),
-
-            const SizedBox(height: 16),
-
-            // Character Details Accordion
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-              child: _buildCharacterDetailsAccordion(),
-            ),
 
             const SizedBox(height: 20), // Bottom spacing
           ],
@@ -405,24 +404,403 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     );
   }
 
-  Widget _buildCharacterInfoAccordion() {
+  Widget _buildGameEngineInformationAccordion() {
     return Card(
       elevation: 2,
-      child: AccordionTile(
-        title: 'Character Information',
-        icon: Icons.info_outline,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.gameEngine.name!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  height: 1.5,
+      child: Column(
+        children: [
+          // Game Engine Description Accordion
+          if (widget.gameEngine.hasDescription)
+            AccordionTile(
+              title: 'Engine Description',
+              icon: Icons.description,
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.gameEngine.description!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        height: 1.5,
+                      ),
+                    ),
+                    if (widget.gameEngine.hasUrl) ...[
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () => _launchUrl(widget.gameEngine.url!),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _getEngineAccentColor().withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _getEngineAccentColor().withOpacity(0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.open_in_new,
+                                size: 16,
+                                color: _getEngineAccentColor(),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Official Engine Website',
+                                style: TextStyle(
+                                  color: _getEngineAccentColor(),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
+            ),
+
+          // Game Engine Details Accordion
+          AccordionTile(
+            title: 'Engine Details',
+            icon: Icons.info_outline,
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Column(
+                children: [
+                  _buildDetailRow('Engine Name', widget.gameEngine.name, Icons.precision_manufacturing),
+                  if (widget.gameEngine.slug != null)
+                    _buildDetailRow('Slug', widget.gameEngine.slug!, Icons.link),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompaniesSection() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Header
+            Row(
+              children: [
+                Icon(
+                  Icons.business,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Companies Using This Engine',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${widget.gameEngine.companyCount}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Companies Horizontal List
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.gameEngine.companies.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index < widget.gameEngine.companies.length - 1 ? 12 : 0,
+                    ),
+                    child: _buildCompanyCard(widget.gameEngine.companies[index]),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompanyCard(Company company) {
+    return Container(
+      width: 100,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // TODO: Navigate to company details
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Company Logo
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: company.hasLogo
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedImageWidget(
+                        imageUrl: company.logoUrl!,
+                        fit: BoxFit.contain,
+                        errorWidget: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.business,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    )
+                        : Icon(
+                      Icons.business,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Company Name
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      Text(
+                        company.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformsSection() {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Header
+            Row(
+              children: [
+                Icon(
+                  Icons.devices,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Supported Platforms',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${widget.gameEngine.platformCount}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Platforms Horizontal List
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.gameEngine.platforms.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index < widget.gameEngine.platforms.length - 1 ? 12 : 0,
+                    ),
+                    child: _buildPlatformCard(widget.gameEngine.platforms[index]),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformCard(Platform platform) {
+    return Container(
+      width: 100,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // TODO: Navigate to platform details
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Platform Logo
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: platform.hasLogo
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedImageWidget(
+                        imageUrl: platform.logo!.logoMedUrl,
+                        fit: BoxFit.contain,
+                        errorWidget: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.videogame_asset,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    )
+                        : Icon(
+                      Icons.videogame_asset,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      size: 24,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Platform Name & Abbreviation
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      Text(
+                        platform.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (platform.abbreviation != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          platform.abbreviation!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -499,7 +877,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
 
             const SizedBox(height: AppConstants.paddingMedium),
 
-            // Games List (unverändert!)
+            // Games List
             SizedBox(
               height: 280,
               child: item.games.isNotEmpty
@@ -513,7 +891,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
   }
 
   void _navigateToSeries(BuildContext context, SeriesItem item) {
-    //Navigations.navigateToCharacterGames(context, item, widget.platform); TODO: Navigate to pagination listview
+    // TODO: Navigate to pagination listview for game engine games
   }
 
   Widget _buildGamesList(List<Game> games) {
@@ -549,7 +927,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.games,
+              Icons.videogame_asset,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: 32,
             ),
@@ -562,56 +940,6 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCharacterDetailsAccordion() {
-    return Card(
-      elevation: 2,
-      child: Column(
-        children: [
-          // Identity Details
-          AccordionTile(
-            title: 'Identity & Details',
-            icon: Icons.person,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildDetailRow('Gender', widget.gameEngine.name, Icons.person),
-                  _buildDetailRow('Species', widget.gameEngine.name, Icons.pets),
-                  if (widget.gameEngine.name != null)
-                    _buildDetailRow('Country', widget.gameEngine.name!, Icons.location_on),
-                  if (widget.gameEngine.name.isNotEmpty)
-                    _buildDetailRow(
-                      'Also Known As',
-                      widget.gameEngine.name,
-                      Icons.label,
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // Technical Details
-          AccordionTile(
-            title: 'Technical Information',
-            icon: Icons.code,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildTechnicalRow('Character ID', widget.gameEngine.id.toString()),
-                  if (widget.gameEngine.slug != null)
-                    _buildTechnicalRow('Slug', widget.gameEngine.slug!),
-                  _buildTechnicalRow('Games Count', widget.gameEngine.id.toString()), ///TODO: not game count
-                  _buildTechnicalRow('Checksum', widget.gameEngine.checksum),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -652,41 +980,32 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
     );
   }
 
-  Widget _buildTechnicalRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url')),
+        );
+      }
+    }
   }
 
-  void _logCharacterData() {
-    print('\n=== 🎭 Platform DETAIL SCREEN LOADED (BLOC) ===');
-    print('🎯 Platform: ${widget.gameEngine.name} (ID: ${widget.gameEngine.id})');
-    print('🎮 Games: ${widget.games.length} loaded');
-    print('🖼️ Image: ${widget.gameEngine.hasLogo ? 'Available' : 'Fallback'}');
-    print('📝 Description: ${widget.gameEngine.name != null ? 'Available' : 'None'}');
-    print('=== END CHARACTER DETAIL LOG ===\n');
+  void _logGameEngineData() {
+    print('\n=== ⚙️ GAME ENGINE DETAIL SCREEN LOADED ===');
+    print('🎯 Engine: ${widget.gameEngine.name} (ID: ${widget.gameEngine.id})');
+    print('🏢 Companies: ${widget.gameEngine.companyCount} using this engine');
+    print('🎮 Platforms: ${widget.gameEngine.platformCount} supported');
+    print('🎲 Games: ${widget.games.length} built with this engine');
+    print('🖼️ Logo: ${widget.gameEngine.hasLogo && widget.gameEngine.logoUrl != null ? 'Available' : 'Fallback'}');
+    print('📄 Description: ${widget.gameEngine.hasDescription ? 'Available' : 'None'}');
+    print('🔗 URL: ${widget.gameEngine.hasUrl ? widget.gameEngine.url : 'None'}');
+    print('🔑 Slug: ${widget.gameEngine.slug ?? 'None'}');
+    print('=== END GAME ENGINE DETAIL LOG ===\n');
   }
 }

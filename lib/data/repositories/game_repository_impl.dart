@@ -10,6 +10,7 @@ import '../../domain/entities/artwork.dart';
 import '../../domain/entities/character/character.dart';
 import '../../domain/entities/character/character_gender.dart';
 import '../../domain/entities/character/character_species.dart';
+import '../../domain/entities/company/company_logo.dart';
 import '../../domain/entities/event/event.dart';
 import '../../domain/entities/game/game.dart';
 import '../../domain/entities/ageRating/age_rating.dart';
@@ -35,7 +36,10 @@ import '../../../presentation/blocs/auth/auth_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../models/character/character_model.dart';
+import '../models/company/company_model_logo.dart';
+import '../models/game/game_engine_logo_model.dart';
 import '../models/game/game_model.dart';
+import '../models/platform/platform_logo_model.dart';
 import '../models/platform/platform_model.dart';
 
 class GameRepositoryImpl implements GameRepository {
@@ -3047,33 +3051,113 @@ class GameRepositoryImpl implements GameRepository {
 
   GameEngine? _parseCompleteGameEngineData(Map<String, dynamic> data) {
     try {
-      // Extract platform logo image ID from nested data
-      String? logoImageId;
-      final logoData = data['platform_logo'];
-      if (logoData is Map<String, dynamic>) {
-        logoImageId = logoData['image_id']?.toString();
-      }
+      print('🔧 Parsing complete GameEngine data: ${data['name']}');
 
-      // Parse platform logo
+      // ✅ PARSE GAME ENGINE LOGO OBJECT
       GameEngineLogo? logo;
+      final logoData = data['logo'];
       if (logoData is Map<String, dynamic>) {
-        logo = GameEngineLogo(
-          id: logoData['id'] ?? 0,
-          url: logoData['url'],
-          imageId: logoData['image_id']?.toString() ?? '',
-          width: logoData['width'],
-          height: logoData['height'],
-          alphaChannel: logoData['alpha_channel'],
-          animated: logoData['animated'] ?? false,
-          checksum: logoData['checksum'] ?? '',
-        );
+        try {
+          logo = GameEngineLogoModel.fromJson(logoData);
+          print('🔧 Engine Logo created: ${logo.logoMedUrl}');
+        } catch (e) {
+          print('❌ Error creating engine logo: $e');
+        }
       }
 
+      // ✅ PARSE COMPANIES
+      List<Company> companies = [];
+      if (data['companies'] is List) {
+        for (var companyData in data['companies']) {
+          if (companyData is Map<String, dynamic>) {
+            try {
+              // Enhanced company parsing with logo support
+              CompanyLogo? companyLogo;
+              if (companyData['logo'] is Map<String, dynamic>) {
+                companyLogo = CompanyLogoModel.fromJson(companyData['logo']);
+              }
 
-      // Create platform with parsed data
-      return GameEngineModel.fromJson(data);
+              final company = Company(
+                id: companyData['id'] ?? 0,
+                checksum: companyData['checksum'] ?? '',
+                name: companyData['name'] ?? '',
+                slug: companyData['slug'],
+                description: companyData['description'],
+                url: companyData['url'],
+                logo: companyLogo,
+                logoId: companyData['logo'] is Map ? companyData['logo']['id'] : companyData['logo'],
+                country: companyData['country'],
+                createdAt: _parseDateTime(companyData['created_at']),
+                updatedAt: _parseDateTime(companyData['updated_at']),
+              );
+              companies.add(company);
+            } catch (e) {
+              print('❌ Error parsing company: $e');
+            }
+          }
+        }
+      }
+
+      // ✅ PARSE PLATFORMS
+      List<Platform> platforms = [];
+      if (data['platforms'] is List) {
+        for (var platformData in data['platforms']) {
+          if (platformData is Map<String, dynamic>) {
+            try {
+              // Enhanced platform parsing with logo support
+              PlatformLogo? platformLogo;
+              if (platformData['platform_logo'] is Map<String, dynamic>) {
+                platformLogo = PlatformLogoModel.fromJson(platformData['platform_logo']);
+              }
+
+              final platform = Platform(
+                id: platformData['id'] ?? 0,
+                checksum: platformData['checksum'] ?? '',
+                name: platformData['name'] ?? '',
+                slug: platformData['slug'] ?? '',
+                abbreviation: platformData['abbreviation'],
+                alternativeName: platformData['alternative_name'],
+                generation: platformData['generation'],
+                logo: platformLogo,
+                platformLogoId: platformData['platform_logo'] is Map
+                    ? platformData['platform_logo']['id']
+                    : platformData['platform_logo'],
+                summary: platformData['summary'],
+                url: platformData['url'],
+                createdAt: _parseDateTime(platformData['created_at']),
+                updatedAt: _parseDateTime(platformData['updated_at']),
+              );
+              platforms.add(platform);
+            } catch (e) {
+              print('❌ Error parsing platform: $e');
+            }
+          }
+        }
+      }
+
+      // ✅ Create enhanced GameEngine with all objects
+      final gameEngine = GameEngine(
+        id: data['id'] ?? 0,
+        checksum: data['checksum'] ?? '',
+        name: data['name'] ?? '',
+        description: data['description'],
+        logoId: logoData is Map ? logoData['id'] : logoData,
+        logo: logo, // ✅ Logo-Objekt
+        slug: data['slug'],
+        url: data['url'],
+        companyIds: _parseIdList(data['companies']),
+        platformIds: _parseIdList(data['platforms']),
+        companies: companies, // ✅ Vollständige Company-Objekte
+        platforms: platforms, // ✅ Vollständige Platform-Objekte
+        createdAt: _parseDateTime(data['created_at']),
+        updatedAt: _parseDateTime(data['updated_at']),
+      );
+
+      print('✅ GameEngine parsed: ${gameEngine.name} with ${companies.length} companies and ${platforms.length} platforms');
+      return gameEngine;
+
     } catch (e) {
-      print('❌ GameRepository: Error parsing platform data: $e');
+      print('❌ GameRepository: Error parsing complete gameEngine data: $e');
       return null;
     }
   }

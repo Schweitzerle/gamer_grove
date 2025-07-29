@@ -1,8 +1,8 @@
 // ==================================================
-// FIXED PLATFORM & RELEASE SECTION - ROBUST GEGEN NULL-WERTE
+// GENERIC PLATFORM SECTION - WIEDERVERWENDBAR
 // ==================================================
 
-// lib/presentation/widgets/sections/fixed_platform_release_section.dart
+// lib/presentation/widgets/sections/generic_platform_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
@@ -13,39 +13,69 @@ import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../domain/entities/releaseDate/release_date.dart';
 
-class PlatformReleaseSection extends StatelessWidget {
-  final Game game;
+class GenericPlatformSection extends StatelessWidget {
+  // ✅ FLEXIBLE CONSTRUCTOR - Entweder Game oder Platform List
+  final Game? game;
+  final List<Platform>? platforms;
+  final String title;
+  final bool showReleaseTimeline;
+  final bool showFirstReleaseInfo;
 
-  const PlatformReleaseSection({
+  const GenericPlatformSection({
     super.key,
-    required this.game,
-  });
+    this.game,
+    this.platforms,
+    this.title = 'Available Platforms',
+    this.showReleaseTimeline = true,
+    this.showFirstReleaseInfo = true,
+  }) : assert(game != null || platforms != null, 'Either game or platforms must be provided');
+
+  // ✅ GETTER FÜR PLATFORM LIST
+  List<Platform> get _platforms {
+    if (game != null) {
+      return game!.platforms;
+    } else if (platforms != null) {
+      return platforms!;
+    }
+    return [];
+  }
+
+  // ✅ GETTER FÜR RELEASE DATES (nur wenn Game vorhanden)
+  List<ReleaseDate> get _releaseDates {
+    return game?.releaseDates ?? [];
+  }
+
+  // ✅ GETTER FÜR FIRST RELEASE DATE (nur wenn Game vorhanden)
+  DateTime? get _firstReleaseDate {
+    return game?.firstReleaseDate;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Debug Print
-    print(
-        '🔧 FixedPlatformReleaseSection: Building with ${game.platforms.length} platforms');
+    if (_platforms.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    // Group release dates by platform
-    final platformReleases = _groupReleasesByPlatform();
+    // Debug Print
+    print('🔧 GenericPlatformSection: Building with ${_platforms.length} platforms');
+
+    // Group release dates by platform (only if game is provided)
+    final platformReleases = game != null ? _groupReleasesByPlatform() : <int, List<ReleaseDate>>{};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ PLATFORM CARDS SECTION
-        if (game.platforms.isNotEmpty) ...[
-          _buildPlatformCardsSection(context, platformReleases),
-        ],
+        // ✅ PLATFORM CARDS SECTION (immer anzeigen)
+        _buildPlatformCardsSection(context, platformReleases),
 
-        // ✅ RELEASE TIMELINE SECTION
-        if (game.releaseDates.isNotEmpty) ...[
-          if (game.platforms.isNotEmpty) const SizedBox(height: 24),
+        // ✅ RELEASE TIMELINE SECTION (nur wenn Game und Release Dates vorhanden)
+        if (game != null && showReleaseTimeline && _releaseDates.isNotEmpty) ...[
+          const SizedBox(height: 24),
           _buildReleaseTimelineSection(context),
         ],
 
-        // ✅ FIRST RELEASE INFO
-        if (game.firstReleaseDate != null) ...[
+        // ✅ FIRST RELEASE INFO (nur wenn Game und First Release Date vorhanden)
+        if (game != null && showFirstReleaseInfo && _firstReleaseDate != null) ...[
           const SizedBox(height: 16),
           _buildFirstReleaseInfo(context),
         ],
@@ -56,8 +86,7 @@ class PlatformReleaseSection extends StatelessWidget {
   // ✅ PLATFORM CARDS SECTION
   Widget _buildPlatformCardsSection(
       BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
-    print(
-        '🔧 Building platform cards section with ${game.platforms.length} platforms');
+    print('🔧 Building platform cards section with ${_platforms.length} platforms');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,10 +101,10 @@ class PlatformReleaseSection extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Available Platforms',
+              title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -85,11 +114,11 @@ class PlatformReleaseSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '${game.platforms.length}',
+                '${_platforms.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -102,15 +131,14 @@ class PlatformReleaseSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            itemCount: game.platforms.length,
+            itemCount: _platforms.length,
             itemBuilder: (context, index) {
-              print(
-                  '🔧 Building platform card $index: ${game.platforms[index].name}');
-              final platform = game.platforms[index];
+              print('🔧 Building platform card $index: ${_platforms[index].name}');
+              final platform = _platforms[index];
               final releases = platformReleases[platform.id] ?? [];
               return Padding(
                 padding: EdgeInsets.only(
-                  right: index < game.platforms.length - 1 ? 12 : 0,
+                  right: index < _platforms.length - 1 ? 12 : 0,
                 ),
                 child: _buildPlatformCard(context, platform, releases),
               );
@@ -124,18 +152,16 @@ class PlatformReleaseSection extends StatelessWidget {
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
   Widget _buildPlatformCard(
       BuildContext context, Platform platform, List<ReleaseDate> releases) {
-    print(
-        '🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
+    print('🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
 
     final earliestRelease = releases.isNotEmpty
         ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
-                (b.date?.millisecondsSinceEpoch ?? 0)
-            ? a
-            : b)
+        (b.date?.millisecondsSinceEpoch ?? 0)
+        ? a
+        : b)
         : null;
 
     final platformColor = _getPlatformColor(platform.name);
-    final platformIcon = _getPlatformIcon(platform.name);
 
     return GestureDetector(
       onTap: () {
@@ -172,7 +198,7 @@ class PlatformReleaseSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: CachedImageWidget(
                   imageUrl: platform.logo!.logoMed2xUrl,
-                  fit: BoxFit.cover, // oder BoxFit.scaleDown
+                  fit: BoxFit.cover,
                   errorWidget: Icon(
                     _getPlatformIcon(platform.name),
                     color: platformColor,
@@ -193,9 +219,9 @@ class PlatformReleaseSection extends StatelessWidget {
             Text(
               _getSafePlatformName(platform),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: platformColor,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: platformColor,
+              ),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -222,8 +248,8 @@ class PlatformReleaseSection extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // Release Date (if available) - SAFE
-            if (earliestRelease?.date != null) ...[
+            // Release Date (if available and game context) - SAFE
+            if (game != null && earliestRelease?.date != null) ...[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
@@ -252,8 +278,8 @@ class PlatformReleaseSection extends StatelessWidget {
                   ],
                 ),
               ),
-            ] else ...[
-              // Fallback for no release date
+            ] else if (game != null) ...[
+              // Fallback for no release date (only in game context)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
@@ -268,10 +294,31 @@ class PlatformReleaseSection extends StatelessWidget {
                   ),
                 ),
               ),
+            ] else ...[
+              // For non-game context (e.g., Game Engine), show platform abbreviation
+              if (platform.abbreviation != null && platform.abbreviation!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: platformColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: platformColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    platform.abbreviation!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: platformColor,
+                    ),
+                  ),
+                ),
             ],
 
-            // Multiple regions indicator
-            if (releases.length > 1) ...[
+            // Multiple regions indicator (only in game context with releases)
+            if (game != null && releases.length > 1) ...[
               const SizedBox(height: 4),
               Text(
                 '${releases.length} releases',
@@ -288,12 +335,14 @@ class PlatformReleaseSection extends StatelessWidget {
     );
   }
 
-  // ✅ RELEASE TIMELINE SECTION
+  // ✅ RELEASE TIMELINE SECTION (nur für Game Context)
   Widget _buildReleaseTimelineSection(BuildContext context) {
+    if (game == null) return const SizedBox.shrink();
+
     // Group releases by date
     final releasesGrouped = <String, List<ReleaseDate>>{};
 
-    for (final release in game.releaseDates) {
+    for (final release in _releaseDates) {
       if (release.date != null) {
         final dateKey = DateFormatter.formatShortDate(release.date!);
         releasesGrouped[dateKey] = (releasesGrouped[dateKey] ?? [])
@@ -325,8 +374,8 @@ class PlatformReleaseSection extends StatelessWidget {
             Text(
               'Release Timeline',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -346,7 +395,7 @@ class PlatformReleaseSection extends StatelessWidget {
     );
   }
 
-  // ✅ TIMELINE ITEM
+  // ✅ TIMELINE ITEM (nur für Game Context)
   Widget _buildTimelineItem(
       BuildContext context, List<ReleaseDate> releases, bool isLast) {
     final firstRelease = releases.first;
@@ -388,9 +437,9 @@ class PlatformReleaseSection extends StatelessWidget {
                   firstRelease.human ??
                       DateFormatter.formatFullDate(firstRelease.date!),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
 
                 const SizedBox(height: 4),
@@ -453,8 +502,12 @@ class PlatformReleaseSection extends StatelessWidget {
     );
   }
 
-  // ✅ FIRST RELEASE INFO
+  // ✅ FIRST RELEASE INFO (nur für Game Context)
   Widget _buildFirstReleaseInfo(BuildContext context) {
+    if (game == null || _firstReleaseDate == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -486,16 +539,16 @@ class PlatformReleaseSection extends StatelessWidget {
                 Text(
                   'First Release',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  DateFormatter.formatFullDate(game.firstReleaseDate!),
+                  DateFormatter.formatFullDate(_firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -508,9 +561,11 @@ class PlatformReleaseSection extends StatelessWidget {
   // ✅ SAFE HELPER METHODS
 
   Map<int, List<ReleaseDate>> _groupReleasesByPlatform() {
+    if (game == null) return {};
+
     final Map<int, List<ReleaseDate>> grouped = {};
 
-    for (final release in game.releaseDates) {
+    for (final release in _releaseDates) {
       if (release.platformId != null) {
         grouped[release.platformId!] = (grouped[release.platformId!] ?? [])
           ..add(release);
@@ -527,7 +582,7 @@ class PlatformReleaseSection extends StatelessWidget {
     }
 
     try {
-      return game.platforms.firstWhere((p) => p.id == platformId);
+      return _platforms.firstWhere((p) => p.id == platformId);
     } catch (e) {
       return Platform(
           id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
@@ -549,7 +604,7 @@ class PlatformReleaseSection extends StatelessWidget {
 
       // Remove enum prefix if present
       final cleanCategory =
-          categoryStr.contains('.') ? categoryStr.split('.').last : categoryStr;
+      categoryStr.contains('.') ? categoryStr.split('.').last : categoryStr;
 
       switch (cleanCategory.toLowerCase()) {
         case 'console':
@@ -565,7 +620,6 @@ class PlatformReleaseSection extends StatelessWidget {
         default:
           return 'Platform';
       }
-      return 'Platform';
     } catch (e) {
       print('🔧 Error formatting platform category: $e');
       return 'Platform';
@@ -639,3 +693,33 @@ class PlatformReleaseSection extends StatelessWidget {
     return 'WW'; // Default fallback
   }
 }
+
+// ==================================================
+// USAGE EXAMPLES
+// ==================================================
+
+/*
+// 🎮 Für Game Detail Screen (mit Release Timeline):
+GenericPlatformSection(
+  game: game,
+  title: 'Available Platforms',
+  showReleaseTimeline: true,
+  showFirstReleaseInfo: true,
+)
+
+// ⚙️ Für Game Engine Detail Screen (nur Platform Cards):
+GenericPlatformSection(
+  platforms: gameEngine.platforms,
+  title: 'Supported Platforms',
+  showReleaseTimeline: false,
+  showFirstReleaseInfo: false,
+)
+
+// 🏢 Für Company Detail Screen (nur Platform Cards):
+GenericPlatformSection(
+  platforms: company.supportedPlatforms,
+  title: 'Company Platforms',
+  showReleaseTimeline: false,
+  showFirstReleaseInfo: false,
+)
+*/

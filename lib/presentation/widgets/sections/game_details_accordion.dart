@@ -105,7 +105,12 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Platforms & Release',
                   icon: Icons.devices,
                   preview: _buildPlatformsPreview(context, game),
-                  child: PlatformReleaseSection(game: game),
+                  child: GenericPlatformSection(
+                    game: game,
+                    title: 'Available Platforms',
+                    showReleaseTimeline: true,
+                    showFirstReleaseInfo: true,
+                  )
                 ),
 
               // Genres & Categories
@@ -152,7 +157,11 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Companies',
                   icon: Icons.business,
                   preview: _buildCompaniesPreview(context, game),
-                  child: CompanySection(companies: game.involvedCompanies),
+                  child: GenericCompanySection(
+                    involvedCompanies: game.involvedCompanies,
+                    title: 'Development & Publishing',
+                    showRoles: true,
+                  )
                 ),
 
               // External Links & Stores

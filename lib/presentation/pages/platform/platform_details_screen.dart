@@ -1,11 +1,8 @@
-
 // ==================================================
-// CHARACTER DETAIL SCREEN (NEW UI DESIGN)
+// PLATFORM DETAIL SCREEN (ÜBERARBEITET)
 // ==================================================
 
-//TODO: alle daten noch schön darstellen
-
-// lib/presentation/pages/character_detail/character_detail_screen.dart
+// lib/presentation/pages/platform_detail/platform_detail_screen.dart
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +10,6 @@ import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../widgets/accordion_tile.dart';
 import '../../widgets/game_card.dart';
@@ -43,7 +39,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    _logCharacterData();
+    _logPlatformData();
   }
 
   void _onScroll() {
@@ -63,25 +59,35 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     super.dispose();
   }
 
-
-  SeriesItem _createCharacterGamesSeriesItem() {
+  SeriesItem _createPlatformGamesSeriesItem() {
     return SeriesItem(
       type: SeriesType.eventGames,
-      title: '${widget.platform.name} - Featured Games',
-      games: _getEventGames(),
+      title: '${widget.platform.name} - Games Library',
+      games: _getPlatformGames(),
       totalCount: widget.games.length,
-      accentColor: _getEventStatusColor(),
+      accentColor: _getPlatformAccentColor(),
       icon: Icons.videogame_asset,
       franchise: null,
       collection: null,
     );
   }
 
-  Color _getEventStatusColor() {
-    return Theme.of(context).cardColor.onColor;
+  Color _getPlatformAccentColor() {
+    // Verschiedene Farben basierend auf Platform-Kategorie oder Name
+    final platformName = widget.platform.name.toLowerCase();
+    if (platformName.contains('playstation') || platformName.contains('ps')) {
+      return Colors.blue;
+    } else if (platformName.contains('xbox')) {
+      return Colors.green;
+    } else if (platformName.contains('nintendo') || platformName.contains('switch')) {
+      return Colors.red;
+    } else if (platformName.contains('pc') || platformName.contains('steam')) {
+      return Colors.purple;
+    }
+    return Theme.of(context).colorScheme.primary;
   }
 
-  List<Game> _getEventGames() {
+  List<Game> _getPlatformGames() {
     if (widget.games.isEmpty) return [];
     return widget.games.take(10).toList();
   }
@@ -92,10 +98,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // Character Hero Section (like Event/Game Detail)
+          // Platform Hero Section
           _buildSliverAppBar(),
-          // Character Content
-          _buildCharacterContent(),
+          // Platform Content
+          _buildPlatformContent(),
         ],
       ),
     );
@@ -116,10 +122,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           children: [
             // Hero Image
             _buildHeroImage(),
-            // Gradient Overlays (same as Event/Game)
+            // Gradient Overlays
             _buildGradientOverlays(),
-            // Floating Character Card
-            _buildFloatingCharacterCard(),
+            // Floating Platform Card
+            _buildFloatingPlatformCard(),
           ],
         ),
         title: _isHeaderCollapsed
@@ -136,7 +142,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
   Widget _buildHeroImage() {
     return Hero(
-      tag: 'character_hero_${widget.platform.id}',
+      tag: 'platform_hero_${widget.platform.id}',
       child: widget.platform.hasLogo
           ? CachedImageWidget(
         imageUrl: widget.platform.logo!.logoMed2xUrl,
@@ -154,9 +160,9 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.purple.withOpacity(0.8),
-            Colors.deepPurple.withOpacity(0.6),
-            Colors.indigo.withOpacity(0.4),
+            _getPlatformAccentColor().withOpacity(0.8),
+            _getPlatformAccentColor().withOpacity(0.6),
+            _getPlatformAccentColor().withOpacity(0.4),
           ],
         ),
       ),
@@ -202,7 +208,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildFloatingCharacterCard() {
+  Widget _buildFloatingPlatformCard() {
     return Positioned(
       bottom: 20,
       left: 20,
@@ -221,14 +227,14 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
               // Header Row
               Row(
                 children: [
-                  // Character Avatar
+                  // Platform Avatar
                   Container(
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: Colors.purple.withOpacity(0.3),
+                        color: _getPlatformAccentColor().withOpacity(0.3),
                         width: 2,
                       ),
                     ),
@@ -240,10 +246,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                         fit: BoxFit.cover,
                       )
                           : Container(
-                        color: Colors.purple.withOpacity(0.1),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.purple,
+                        color: _getPlatformAccentColor().withOpacity(0.1),
+                        child: Icon(
+                          Icons.videogame_asset,
+                          color: _getPlatformAccentColor(),
                           size: 30,
                         ),
                       ),
@@ -252,12 +258,12 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Character Info
+                  // Platform Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Character Name
+                        // Platform Name
                         Text(
                           widget.platform.name,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -269,20 +275,23 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
                         const SizedBox(height: 4),
 
-                        // Identity Info
+                        // Platform Info Chips
                         Row(
                           children: [
-                            _buildIdentityChip(
-                              widget.platform.alternativeName!,
-                              Colors.blue,
-                              Icons.person,
-                            ),
-                            const SizedBox(width: 8),
-                            _buildIdentityChip(
-                              widget.platform.abbreviation!,
-                              Colors.green,
-                              Icons.pets,
-                            ),
+                            if (widget.platform.abbreviation != null)
+                              _buildInfoChip(
+                                widget.platform.abbreviation!,
+                                _getPlatformAccentColor(),
+                                Icons.label,
+                              ),
+                            if (widget.platform.abbreviation != null && widget.platform.generation != null)
+                              const SizedBox(width: 8),
+                            if (widget.platform.generation != null)
+                              _buildInfoChip(
+                                'Gen ${widget.platform.generation}',
+                                Colors.orange,
+                                Icons.timeline,
+                              ),
                           ],
                         ),
                       ],
@@ -291,44 +300,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                 ],
               ),
 
-              const SizedBox(height: 12),
 
-              // Games Count
-              Row(
-                children: [
-                  Icon(
-                    Icons.videogame_asset,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.games.length} games',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (widget.platform.slug != null)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.platform.slug!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
             ],
           ),
         ),
@@ -336,7 +308,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildIdentityChip(String text, Color color, IconData icon) {
+  Widget _buildInfoChip(String text, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -364,7 +336,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildCharacterContent() {
+  Widget _buildPlatformContent() {
     return SliverToBoxAdapter(
       child: Container(
         color: Theme.of(context).colorScheme.surface,
@@ -373,29 +345,20 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           children: [
             const SizedBox(height: AppConstants.paddingLarge), // Space for floating card
 
-            // Character Information Accordion
-            if (widget.platform.summary != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                child: _buildCharacterInfoAccordion(),
-              ),
+            // Platform Information Accordion
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+              child: _buildPlatformInformationAccordion(),
+            ),
 
             const SizedBox(height: 16),
 
-            // Character Games Section
+            // Platform Games Section
             if (widget.games.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                child: _buildTabView(context, _createCharacterGamesSeriesItem()),
+                child: _buildTabView(context, _createPlatformGamesSeriesItem()),
               ),
-
-            const SizedBox(height: 16),
-
-            // Character Details Accordion
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-              child: _buildCharacterDetailsAccordion(),
-            ),
 
             const SizedBox(height: 20), // Bottom spacing
           ],
@@ -404,26 +367,93 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildCharacterInfoAccordion() {
+  Widget _buildPlatformInformationAccordion() {
     return Card(
       elevation: 2,
-      child: AccordionTile(
-        title: 'Character Information',
-        icon: Icons.info_outline,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.platform.summary!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  height: 1.5,
+      child: Column(
+        children: [
+          // Platform Description Accordion
+          if (widget.platform.summary != null)
+            AccordionTile(
+              title: 'Platform Description',
+              icon: Icons.description,
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.platform.summary!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        height: 1.5,
+                      ),
+                    ),
+                    if (widget.platform.url != null) ...[
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () => _launchUrl(widget.platform.url!),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _getPlatformAccentColor().withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _getPlatformAccentColor().withOpacity(0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.open_in_new,
+                                size: 16,
+                                color: _getPlatformAccentColor(),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Official Platform Page',
+                                style: TextStyle(
+                                  color: _getPlatformAccentColor(),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
+            ),
+
+          // Platform Details Accordion
+          AccordionTile(
+            title: 'Platform Details',
+            icon: Icons.info_outline,
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: Column(
+                children: [
+                  if (widget.platform.alternativeName != null)
+                    _buildDetailRow('Alternative Name', widget.platform.alternativeName!, Icons.label_important),
+                  if (widget.platform.abbreviation != null)
+                    _buildDetailRow('Abbreviation', widget.platform.abbreviation!, Icons.short_text),
+                  if (widget.platform.generation != null)
+                    _buildDetailRow('Generation', 'Generation ${widget.platform.generation}', Icons.timeline),
+                  if (widget.platform.platformTypeId != null)
+                    _buildDetailRow(
+                      'Platform Type',
+                      _getPlatformTypeDisplay(),
+                      Icons.category,
+                    ),
+                  if (widget.platform.slug != null)
+                    _buildDetailRow('Slug', widget.platform.slug!, Icons.link),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -498,7 +528,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
             const SizedBox(height: AppConstants.paddingMedium),
 
-            // Games List (unverändert!)
+            // Games List
             SizedBox(
               height: 280,
               child: item.games.isNotEmpty
@@ -512,7 +542,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
   }
 
   void _navigateToSeries(BuildContext context, SeriesItem item) {
-    //Navigations.navigateToCharacterGames(context, item, widget.platform); TODO: Navigate to pagination listview
+    // TODO: Navigate to pagination listview for platform games
   }
 
   Widget _buildGamesList(List<Game> games) {
@@ -548,7 +578,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.games,
+              Icons.videogame_asset,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: 32,
             ),
@@ -565,52 +595,33 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildCharacterDetailsAccordion() {
+  Widget _buildPlatformDetailsAccordion() {
     return Card(
       elevation: 2,
-      child: Column(
-        children: [
-          // Identity Details
-          AccordionTile(
-            title: 'Identity & Details',
-            icon: Icons.person,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildDetailRow('Gender', widget.platform.name, Icons.person),
-                  _buildDetailRow('Species', widget.platform.name, Icons.pets),
-                  if (widget.platform.name != null)
-                    _buildDetailRow('Country', widget.platform.name!, Icons.location_on),
-                  if (widget.platform.name.isNotEmpty)
-                    _buildDetailRow(
-                      'Also Known As',
-                      widget.platform.name,
-                      Icons.label,
-                    ),
-                ],
-              ),
-            ),
+      child: AccordionTile(
+        title: 'Platform Information',
+        icon: Icons.info,
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingMedium),
+          child: Column(
+            children: [
+              if (widget.platform.alternativeName != null)
+                _buildDetailRow('Alternative Name', widget.platform.alternativeName!, Icons.label_important),
+              if (widget.platform.abbreviation != null)
+                _buildDetailRow('Abbreviation', widget.platform.abbreviation!, Icons.short_text),
+              if (widget.platform.generation != null)
+                _buildDetailRow('Generation', 'Generation ${widget.platform.generation}', Icons.timeline),
+              if (widget.platform.platformTypeId != null)
+                _buildDetailRow(
+                  'Platform Type',
+                  _getPlatformTypeDisplay(),
+                  Icons.category,
+                ),
+              if (widget.platform.slug != null)
+                _buildDetailRow('Slug', widget.platform.slug!, Icons.link),
+            ],
           ),
-
-          // Technical Details
-          AccordionTile(
-            title: 'Technical Information',
-            icon: Icons.code,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildTechnicalRow('Character ID', widget.platform.id.toString()),
-                  if (widget.platform.slug != null)
-                    _buildTechnicalRow('Slug', widget.platform.slug!),
-                  _buildTechnicalRow('Games Count', widget.platform.id.toString()), ///TODO: not game count
-                  _buildTechnicalRow('Checksum', widget.platform.checksum),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -651,41 +662,41 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     );
   }
 
-  Widget _buildTechnicalRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  String _getPlatformTypeDisplay() {
+    if (widget.platform.platformTypeId != null) {
+      return 'Type ${widget.platform.platformTypeId}';
+    }
+    return 'Unknown Type';
   }
 
-  void _logCharacterData() {
-    print('\n=== 🎭 Platform DETAIL SCREEN LOADED (BLOC) ===');
+  Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url')),
+        );
+      }
+    }
+  }
+
+  void _logPlatformData() {
+    print('\n=== 🎮 PLATFORM DETAIL SCREEN LOADED ===');
     print('🎯 Platform: ${widget.platform.name} (ID: ${widget.platform.id})');
+    print('🔤 Abbreviation: ${widget.platform.abbreviation ?? 'None'}');
+    print('📝 Alternative Name: ${widget.platform.alternativeName ?? 'None'}');
+    print('📊 Generation: ${widget.platform.generation ?? 'Unknown'}');
     print('🎮 Games: ${widget.games.length} loaded');
-    print('🖼️ Image: ${widget.platform.hasLogo ? 'Available' : 'Fallback'}');
-    print('📝 Description: ${widget.platform.summary != null ? 'Available' : 'None'}');
-    print('=== END CHARACTER DETAIL LOG ===\n');
+    print('🖼️ Logo: ${widget.platform.hasLogo ? 'Available' : 'Fallback'}');
+    print('📄 Summary: ${widget.platform.summary != null ? 'Available' : 'None'}');
+    print('🔗 URL: ${widget.platform.url ?? 'None'}');
+    print('🏷️ Platform Type: ${_getPlatformTypeDisplay()}');
+    print('🔑 Slug: ${widget.platform.slug ?? 'None'}');
+    print('=== END PLATFORM DETAIL LOG ===\n');
   }
 }
