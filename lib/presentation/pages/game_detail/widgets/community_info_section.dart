@@ -213,7 +213,7 @@ class CommunityInfoContent extends StatelessWidget {
 
           // Rating Value
           Text(
-            '${rating.toStringAsFixed(1)}/10',
+            '${rating.toStringAsFixed(1)}/100',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,

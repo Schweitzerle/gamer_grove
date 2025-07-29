@@ -1,6 +1,7 @@
 // lib/domain/repositories/game_repository.dart
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import '../../core/errors/failures.dart';
 import '../entities/artwork.dart';
 import '../entities/character/character_gender.dart';
@@ -431,6 +432,21 @@ abstract class GameRepository {
 
   /// Get all games featured in an event
   Future<Either<Failure, List<Game>>> getEventGames(int eventId);
+
+  /// Get platform details by ID
+  Future<Either<Failure, Platform>> getPlatformDetails(int platformId);
+
+  Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId);
+
+  /// Get games by specific gameEngine
+  Future<Either<Failure, List<Game>>> getGamesByGameEngine({
+    required List<int> gameEngineIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.popularity,
+    SortOrder sortOrder = SortOrder.descending,
+  });
+
 
 }
 

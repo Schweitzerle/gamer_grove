@@ -7,6 +7,7 @@ enum GameSortBy {
   relevance('relevance'),
   name('name'),
   rating('total_rating'),
+  ratingCount('total_rating_count'),
   releaseDate('first_release_date'),
   popularity('hypes'),
   aggregatedRating('aggregated_rating'),
@@ -23,6 +24,7 @@ enum GameSortBy {
       case relevance: return 'Relevance';
       case name: return 'Name';
       case rating: return 'Rating';
+      case ratingCount: return 'Rating Count';
       case releaseDate: return 'Release Date';
       case popularity: return 'Popularity';
       case aggregatedRating: return 'Critic Rating';

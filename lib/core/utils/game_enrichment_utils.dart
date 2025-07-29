@@ -11,7 +11,6 @@ import '../../domain/entities/game/game.dart';
 import '../../injection_container.dart';
 
 class GameEnrichmentUtils {
-
   // ==========================================
   // HAUPT-ENRICHMENT METHODE
   // ==========================================
@@ -24,21 +23,23 @@ class GameEnrichmentUtils {
   /// [enableTopThree] - Whether to fetch and apply top three data
   /// [enableParallelRequests] - Whether to use parallel requests for better performance
   static Future<List<Game>> enrichGamesWithUserData(
-      List<Game> games,
-      String userId, {
-        int? enrichLimit,
-        bool enableTopThree = true,
-        bool enableParallelRequests = true,
-        bool enableLogging = true,
-      }) async {
+    List<Game> games,
+    String userId, {
+    int? enrichLimit,
+    bool enableTopThree = true,
+    bool enableParallelRequests = true,
+    bool enableLogging = true,
+  }) async {
     if (games.isEmpty) {
       if (enableLogging) print('🔄 GameEnrichment: No games to enrich');
       return games;
     }
 
-    final limit = enrichLimit ?? 10; // Default: Erste 10 Games vollständig enrichen
+    final limit =
+        enrichLimit ?? 10; // Default: Erste 10 Games vollständig enrichen
     if (enableLogging) {
-      print('🔄 GameEnrichment: Enriching ${games.length} games (limit: $limit) for user: $userId');
+      print(
+          '🔄 GameEnrichment: Enriching ${games.length} games (limit: $limit) for user: $userId');
     }
 
     try {
@@ -49,13 +50,16 @@ class GameEnrichmentUtils {
 
       // Schritt 2: User Game Data holen (parallel oder sequenziell)
       final userGameDataList = enableParallelRequests
-          ? await _getUserGameDataParallel(supabaseDataSource, userId, gamesToEnrich, enableLogging)
-          : await _getUserGameDataSequential(supabaseDataSource, userId, gamesToEnrich, enableLogging);
+          ? await _getUserGameDataParallel(
+              supabaseDataSource, userId, gamesToEnrich, enableLogging)
+          : await _getUserGameDataSequential(
+              supabaseDataSource, userId, gamesToEnrich, enableLogging);
 
       // Schritt 3: Top Three Data holen (optional)
       Map<int, int> topThreeMap = {};
       if (enableTopThree) {
-        topThreeMap = await _getTopThreeData(supabaseDataSource, userId, enableLogging);
+        topThreeMap =
+            await _getTopThreeData(supabaseDataSource, userId, enableLogging);
       }
 
       // Schritt 4: Enriched Games erstellen
@@ -89,19 +93,25 @@ class GameEnrichmentUtils {
       }
 
       if (enableLogging) {
-        final enrichedCount = enrichedGames.where((g) => g.isWishlisted != null).length;
-        print('✅ GameEnrichment: Successfully enriched $enrichedCount/${enrichedGames.length} games');
+        final enrichedCount =
+            enrichedGames.where((g) => g.isWishlisted != null).length;
+        print(
+            '✅ GameEnrichment: Successfully enriched $enrichedCount/${enrichedGames.length} games');
       }
 
       return enrichedGames;
-
     } catch (e) {
       if (enableLogging) {
         print('❌ GameEnrichment: Error enriching games: $e');
       }
 
       // Fallback: Games mit default values zurückgeben
-      return _createFallbackGames(games, enableTopThree ? await _getTopThreeData(sl<SupabaseRemoteDataSource>(), userId, false) : {});
+      return _createFallbackGames(
+          games,
+          enableTopThree
+              ? await _getTopThreeData(
+                  sl<SupabaseRemoteDataSource>(), userId, false)
+              : {});
     }
   }
 
@@ -111,10 +121,10 @@ class GameEnrichmentUtils {
 
   /// Enriches games specifically for Character context
   static Future<List<Game>> enrichCharacterGames(
-      List<Game> games,
-      String userId, {
-        int limit = 8, // Characters haben oft weniger Games
-      }) async {
+    List<Game> games,
+    String userId, {
+    int limit = 8, // Characters haben oft weniger Games
+  }) async {
     return await enrichGamesWithUserData(
       games,
       userId,
@@ -127,10 +137,10 @@ class GameEnrichmentUtils {
 
   /// Enriches games specifically for Event context
   static Future<List<Game>> enrichEventGames(
-      List<Game> games,
-      String userId, {
-        int limit = 10, // Events können viele Games haben
-      }) async {
+    List<Game> games,
+    String userId, {
+    int limit = 10, // Events können viele Games haben
+  }) async {
     return await enrichGamesWithUserData(
       games,
       userId,
@@ -143,9 +153,40 @@ class GameEnrichmentUtils {
 
   /// Enriches games for main Game Detail context (vollständig)
   static Future<List<Game>> enrichGameDetailGames(
+    List<Game> games,
+    String userId, {
+    int limit = 15, // Game Details brauchen mehr enriched data
+  }) async {
+    return await enrichGamesWithUserData(
+      games,
+      userId,
+      enrichLimit: limit,
+      enableTopThree: true,
+      enableParallelRequests: true,
+      enableLogging: true,
+    );
+  }
+
+  /// Enriches games for main Game Detail context (vollständig)
+  static Future<List<Game>> enrichPlatformGames(
+    List<Game> games,
+    String userId, {
+    int limit = 10,
+  }) async {
+    return await enrichGamesWithUserData(
+      games,
+      userId,
+      enrichLimit: limit,
+      enableTopThree: true,
+      enableParallelRequests: true,
+      enableLogging: true,
+    );
+  }
+
+  static Future<List<Game>> enrichGameEngineGames(
       List<Game> games,
       String userId, {
-        int limit = 15, // Game Details brauchen mehr enriched data
+        int limit = 10,
       }) async {
     return await enrichGamesWithUserData(
       games,
@@ -163,13 +204,14 @@ class GameEnrichmentUtils {
 
   /// Holt User Game Data parallel (schneller)
   static Future<List<Map<String, dynamic>?>> _getUserGameDataParallel(
-      SupabaseRemoteDataSource dataSource,
-      String userId,
-      List<Game> games,
-      bool enableLogging,
-      ) async {
+    SupabaseRemoteDataSource dataSource,
+    String userId,
+    List<Game> games,
+    bool enableLogging,
+  ) async {
     if (enableLogging) {
-      print('🔄 GameEnrichment: Fetching user data for ${games.length} games (parallel)');
+      print(
+          '🔄 GameEnrichment: Fetching user data for ${games.length} games (parallel)');
     }
 
     final futures = games
@@ -181,13 +223,14 @@ class GameEnrichmentUtils {
 
   /// Holt User Game Data sequenziell (langsamer aber stabiler)
   static Future<List<Map<String, dynamic>?>> _getUserGameDataSequential(
-      SupabaseRemoteDataSource dataSource,
-      String userId,
-      List<Game> games,
-      bool enableLogging,
-      ) async {
+    SupabaseRemoteDataSource dataSource,
+    String userId,
+    List<Game> games,
+    bool enableLogging,
+  ) async {
     if (enableLogging) {
-      print('🔄 GameEnrichment: Fetching user data for ${games.length} games (sequential)');
+      print(
+          '🔄 GameEnrichment: Fetching user data for ${games.length} games (sequential)');
     }
 
     final userGameDataList = <Map<String, dynamic>?>[];
@@ -198,7 +241,8 @@ class GameEnrichmentUtils {
         userGameDataList.add(userData);
       } catch (e) {
         if (enableLogging) {
-          print('⚠️ GameEnrichment: Failed to get data for game ${game.id}: $e');
+          print(
+              '⚠️ GameEnrichment: Failed to get data for game ${game.id}: $e');
         }
         userGameDataList.add(null);
       }
@@ -209,16 +253,17 @@ class GameEnrichmentUtils {
 
   /// Holt Top Three Data
   static Future<Map<int, int>> _getTopThreeData(
-      SupabaseRemoteDataSource dataSource,
-      String userId,
-      bool enableLogging,
-      ) async {
+    SupabaseRemoteDataSource dataSource,
+    String userId,
+    bool enableLogging,
+  ) async {
     try {
       if (enableLogging) {
         print('🔄 GameEnrichment: Fetching top three data');
       }
 
-      final topThreeData = await dataSource.getUserTopThreeGames(userId: userId);
+      final topThreeData =
+          await dataSource.getUserTopThreeGames(userId: userId);
       final topThreeMap = <int, int>{};
 
       for (var entry in topThreeData) {
@@ -242,11 +287,11 @@ class GameEnrichmentUtils {
 
   /// Erstellt vollständig enriched Game
   static Game _createEnrichedGame(
-      Game game,
-      Map<String, dynamic>? userGameData,
-      Map<int, int> topThreeMap,
-      bool enableLogging,
-      ) {
+    Game game,
+    Map<String, dynamic>? userGameData,
+    Map<int, int> topThreeMap,
+    bool enableLogging,
+  ) {
     final isWishlisted = userGameData?['is_wishlisted'] ?? false;
     final isRecommended = userGameData?['is_recommended'] ?? false;
     final userRating = userGameData?['rating']?.toDouble();
@@ -254,7 +299,8 @@ class GameEnrichmentUtils {
     final topThreePosition = topThreeMap[game.id];
 
     if (enableLogging && userGameData != null) {
-      print('🎮 GameEnrichment: ${game.name} - W:$isWishlisted R:$isRecommended Rating:$userRating TopThree:$isInTopThree');
+      print(
+          '🎮 GameEnrichment: ${game.name} - W:$isWishlisted R:$isRecommended Rating:$userRating TopThree:$isInTopThree');
     }
 
     return game.copyWith(
@@ -268,11 +314,12 @@ class GameEnrichmentUtils {
 
   /// Erstellt teilweise enriched Game (nur Top Three)
   static Game _createPartiallyEnrichedGame(
-      Game game,
-      Map<int, int> topThreeMap,
-      ) {
+    Game game,
+    Map<int, int> topThreeMap,
+  ) {
     return game.copyWith(
-      isWishlisted: false, // Default values für non-enriched
+      isWishlisted: false,
+      // Default values für non-enriched
       isRecommended: false,
       userRating: null,
       isInTopThree: topThreeMap.containsKey(game.id),
@@ -282,16 +329,18 @@ class GameEnrichmentUtils {
 
   /// Erstellt Fallback Games bei Fehlern
   static List<Game> _createFallbackGames(
-      List<Game> games,
-      Map<int, int> topThreeMap,
-      ) {
-    return games.map((game) => game.copyWith(
-      isWishlisted: false,
-      isRecommended: false,
-      userRating: null,
-      isInTopThree: topThreeMap.containsKey(game.id),
-      topThreePosition: topThreeMap[game.id],
-    )).toList();
+    List<Game> games,
+    Map<int, int> topThreeMap,
+  ) {
+    return games
+        .map((game) => game.copyWith(
+              isWishlisted: false,
+              isRecommended: false,
+              userRating: null,
+              isInTopThree: topThreeMap.containsKey(game.id),
+              topThreePosition: topThreeMap[game.id],
+            ))
+        .toList();
   }
 
   // ==========================================
@@ -325,4 +374,3 @@ class GameEnrichmentUtils {
     print('   Rated: $ratedCount, Top Three: $topThreeCount');
   }
 }
-

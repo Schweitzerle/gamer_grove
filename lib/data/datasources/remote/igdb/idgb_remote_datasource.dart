@@ -225,6 +225,17 @@ abstract class IGDBRemoteDataSource {
   /// Get game videos
   Future<List<GameVideoModel>> getGameVideos(List<int> gameIds);
 
+  Future<Map<String, dynamic>> getCompleteGameEngineData(int gameEngineId);
+
+  /// Get games by gameEngine with sorting options
+  Future<List<GameModel>> getGamesByGameEngines({
+    required List<int> gameEngineIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  });
+
   /// Get game engines
   Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search});
 

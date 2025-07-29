@@ -4,8 +4,10 @@
 
 // lib/presentation/widgets/sections/fixed_platform_release_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/navigations.dart';
 import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/platform/platform.dart';
@@ -22,7 +24,8 @@ class PlatformReleaseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Debug Print
-    print('🔧 FixedPlatformReleaseSection: Building with ${game.platforms.length} platforms');
+    print(
+        '🔧 FixedPlatformReleaseSection: Building with ${game.platforms.length} platforms');
 
     // Group release dates by platform
     final platformReleases = _groupReleasesByPlatform();
@@ -51,8 +54,10 @@ class PlatformReleaseSection extends StatelessWidget {
   }
 
   // ✅ PLATFORM CARDS SECTION
-  Widget _buildPlatformCardsSection(BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
-    print('🔧 Building platform cards section with ${game.platforms.length} platforms');
+  Widget _buildPlatformCardsSection(
+      BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
+    print(
+        '🔧 Building platform cards section with ${game.platforms.length} platforms');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,8 +74,8 @@ class PlatformReleaseSection extends StatelessWidget {
             Text(
               'Available Platforms',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -82,9 +87,9 @@ class PlatformReleaseSection extends StatelessWidget {
               child: Text(
                 '${game.platforms.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -99,7 +104,8 @@ class PlatformReleaseSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: game.platforms.length,
             itemBuilder: (context, index) {
-              print('🔧 Building platform card $index: ${game.platforms[index].name}');
+              print(
+                  '🔧 Building platform card $index: ${game.platforms[index].name}');
               final platform = game.platforms[index];
               final releases = platformReleases[platform.id] ?? [];
               return Padding(
@@ -116,155 +122,168 @@ class PlatformReleaseSection extends StatelessWidget {
   }
 
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
-  Widget _buildPlatformCard(BuildContext context, Platform platform, List<ReleaseDate> releases) {
-    print('🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
+  Widget _buildPlatformCard(
+      BuildContext context, Platform platform, List<ReleaseDate> releases) {
+    print(
+        '🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
 
     final earliestRelease = releases.isNotEmpty
-        ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) < (b.date?.millisecondsSinceEpoch ?? 0) ? a : b)
+        ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
+                (b.date?.millisecondsSinceEpoch ?? 0)
+            ? a
+            : b)
         : null;
 
     final platformColor = _getPlatformColor(platform.name);
     final platformIcon = _getPlatformIcon(platform.name);
 
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: platformColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: platformColor.withOpacity(0.3),
-          width: 1.5,
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigations.navigateToPlatformDetails(context, platformId: platform.id);
+      },
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: platformColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: platformColor.withOpacity(0.3),
+            width: 1.5,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Platform Logo/Icon - SIMPLIFIED
-          Container(
-            height: 60,
-            width: 60,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: platformColor.withValues(alpha: 0.2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Platform Logo/Icon - SIMPLIFIED
+            Container(
+              height: 70,
+              width: 160,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: platformColor.withValues(alpha: 0.2),
+                ),
               ),
-            ),
-            child: platform.logoUrl != null && platform.logoUrl!.isNotEmpty
-                ? CachedImageWidget(
-              imageUrl: platform.logoUrl!,
-              fit: BoxFit.contain,
-              errorWidget: Icon(
+              child: platform.logoUrl != null && platform.logoUrl!.isNotEmpty
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedImageWidget(
+                  imageUrl: platform.logo!.logoMed2xUrl,
+                  fit: BoxFit.cover, // oder BoxFit.scaleDown
+                  errorWidget: Icon(
+                    _getPlatformIcon(platform.name),
+                    color: platformColor,
+                    size: 24,
+                  ),
+                ),
+              )
+                  : Icon(
                 _getPlatformIcon(platform.name),
                 color: platformColor,
                 size: 24,
               ),
-            )
-                : Icon(
-              _getPlatformIcon(platform.name),
-              color: platformColor,
-              size: 24,
             ),
-          ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // Platform Name - SAFE
-          Text(
-            _getSafePlatformName(platform),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: platformColor,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: 4),
-
-          // Platform Category - SAFE
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: platformColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              _getSafePlatformCategory(platform),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: platformColor,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Release Date (if available) - SAFE
-          if (earliestRelease?.date != null) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: platformColor.withOpacity(0.2),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 12,
+            // Platform Name - SAFE
+            Text(
+              _getSafePlatformName(platform),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                     color: platformColor,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormatter.formatShortDate(earliestRelease!.date!),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: platformColor,
-                    ),
-                  ),
-                ],
-              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ] else ...[
-            // Fallback for no release date
+
+            const SizedBox(height: 4),
+
+            // Platform Category - SAFE
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: platformColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Release TBD',
+                _getSafePlatformCategory(platform),
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                  color: platformColor,
                 ),
               ),
             ),
-          ],
 
-          // Multiple regions indicator
-          if (releases.length > 1) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${releases.length} releases',
-              style: TextStyle(
-                fontSize: 9,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
+            const SizedBox(height: 8),
+
+            // Release Date (if available) - SAFE
+            if (earliestRelease?.date != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: platformColor.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: platformColor,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      DateFormatter.formatShortDate(earliestRelease!.date!),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: platformColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ] else ...[
+              // Fallback for no release date
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Release TBD',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ],
+
+            // Multiple regions indicator
+            if (releases.length > 1) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${releases.length} releases',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -277,7 +296,8 @@ class PlatformReleaseSection extends StatelessWidget {
     for (final release in game.releaseDates) {
       if (release.date != null) {
         final dateKey = DateFormatter.formatShortDate(release.date!);
-        releasesGrouped[dateKey] = (releasesGrouped[dateKey] ?? [])..add(release);
+        releasesGrouped[dateKey] = (releasesGrouped[dateKey] ?? [])
+          ..add(release);
       }
     }
 
@@ -305,8 +325,8 @@ class PlatformReleaseSection extends StatelessWidget {
             Text(
               'Release Timeline',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -327,7 +347,8 @@ class PlatformReleaseSection extends StatelessWidget {
   }
 
   // ✅ TIMELINE ITEM
-  Widget _buildTimelineItem(BuildContext context, List<ReleaseDate> releases, bool isLast) {
+  Widget _buildTimelineItem(
+      BuildContext context, List<ReleaseDate> releases, bool isLast) {
     final firstRelease = releases.first;
 
     return Row(
@@ -364,11 +385,12 @@ class PlatformReleaseSection extends StatelessWidget {
               children: [
                 // Date
                 Text(
-                  firstRelease.human ?? DateFormatter.formatFullDate(firstRelease.date!),
+                  firstRelease.human ??
+                      DateFormatter.formatFullDate(firstRelease.date!),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
 
                 const SizedBox(height: 4),
@@ -381,7 +403,8 @@ class PlatformReleaseSection extends StatelessWidget {
                     final platform = _findPlatformById(release.platformId);
 
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(12),
@@ -392,7 +415,9 @@ class PlatformReleaseSection extends StatelessWidget {
                           Icon(
                             _getPlatformIcon(platform.name),
                             size: 12,
-                            color: Theme.of(context).colorScheme.onSecondaryContainer,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -400,14 +425,19 @@ class PlatformReleaseSection extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSecondaryContainer,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
                             ),
                           ),
                           Text(
                             ' (${_formatRegion(release.regionDisplayName)})',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context).colorScheme.onSecondaryContainer.withOpacity(0.7),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer
+                                  .withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -456,16 +486,16 @@ class PlatformReleaseSection extends StatelessWidget {
                 Text(
                   'First Release',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   DateFormatter.formatFullDate(game.firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -482,7 +512,8 @@ class PlatformReleaseSection extends StatelessWidget {
 
     for (final release in game.releaseDates) {
       if (release.platformId != null) {
-        grouped[release.platformId!] = (grouped[release.platformId!] ?? [])..add(release);
+        grouped[release.platformId!] = (grouped[release.platformId!] ?? [])
+          ..add(release);
       }
     }
 
@@ -491,13 +522,15 @@ class PlatformReleaseSection extends StatelessWidget {
 
   Platform _findPlatformById(int? platformId) {
     if (platformId == null) {
-      return Platform(id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
+      return Platform(
+          id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
     }
 
     try {
       return game.platforms.firstWhere((p) => p.id == platformId);
     } catch (e) {
-      return Platform(id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
+      return Platform(
+          id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
     }
   }
 
@@ -515,19 +548,24 @@ class PlatformReleaseSection extends StatelessWidget {
       final categoryStr = platform.categoryName;
 
       // Remove enum prefix if present
-      final cleanCategory = categoryStr.contains('.')
-          ? categoryStr.split('.').last
-          : categoryStr;
+      final cleanCategory =
+          categoryStr.contains('.') ? categoryStr.split('.').last : categoryStr;
 
       switch (cleanCategory.toLowerCase()) {
-        case 'console': return 'Console';
-        case 'operatingsystem': return 'PC';
-        case 'arcade': return 'Arcade';
-        case 'portableconsole': return 'Handheld';
-        case 'computer': return 'PC';
-        default: return 'Platform';
-      }
+        case 'console':
+          return 'Console';
+        case 'operatingsystem':
+          return 'PC';
+        case 'arcade':
+          return 'Arcade';
+        case 'portableconsole':
+          return 'Handheld';
+        case 'computer':
+          return 'PC';
+        default:
           return 'Platform';
+      }
+      return 'Platform';
     } catch (e) {
       print('🔧 Error formatting platform category: $e');
       return 'Platform';
@@ -541,7 +579,9 @@ class PlatformReleaseSection extends StatelessWidget {
       return const Color(0xFF003791); // PlayStation Blue
     } else if (name.contains('xbox')) {
       return const Color(0xFF107C10); // Xbox Green
-    } else if (name.contains('steam') || name.contains('pc') || name.contains('microsoft windows')) {
+    } else if (name.contains('steam') ||
+        name.contains('pc') ||
+        name.contains('microsoft windows')) {
       return const Color(0xFF1B2838); // Steam Dark Blue
     } else if (name.contains('nintendo') || name.contains('switch')) {
       return const Color(0xFFE60012); // Nintendo Red
@@ -563,7 +603,9 @@ class PlatformReleaseSection extends StatelessWidget {
       return Icons.videogame_asset;
     } else if (name.contains('xbox')) {
       return Icons.sports_esports;
-    } else if (name.contains('steam') || name.contains('pc') || name.contains('microsoft windows')) {
+    } else if (name.contains('steam') ||
+        name.contains('pc') ||
+        name.contains('microsoft windows')) {
       return Icons.computer;
     } else if (name.contains('nintendo') || name.contains('switch')) {
       return Icons.games;

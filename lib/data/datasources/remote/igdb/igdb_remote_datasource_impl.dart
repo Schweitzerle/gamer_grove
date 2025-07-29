@@ -1437,10 +1437,11 @@ platforms.platform_logo.checksum,
     try {
       final body = '''
         where id = $platformId;
-        fields *, platform_logo.*, platform_family.*, versions.*, versions.platform_version_companies.*, versions.platform_version_release_dates.*;
+        fields *, platform_logo.*, platform_family.*, versions.*, versions.platform_version_release_dates.*;
         limit 1;
       ''';
 
+      print(body);
       final response = await _makeRawRequest('platforms', body);
       final List<dynamic> data = json.decode(response.body);
       return data.isNotEmpty ? data.first : {};
@@ -1449,6 +1450,54 @@ platforms.platform_logo.checksum,
       return {};
     }
   }
+
+  @override
+  Future<Map<String, dynamic>> getCompleteGameEngineData(
+      int gameEngineId) async {
+    try {
+      final body = '''
+        where id = $gameEngineId;
+        fields *, logo.*, companies.*, companies.logo.*, platforms.*, platforms.platform_logo.*;
+        limit 1;
+      ''';
+
+      print(body);
+      final response = await _makeRawRequest('game_engines', body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.isNotEmpty ? data.first : {};
+    } catch (e) {
+      print('💥 IGDB: Get complete gameEngine data error: $e');
+      return {};
+    }
+  }
+
+
+  @override
+  Future<List<GameModel>> getGamesByGameEngines({
+    required List<int> gameEngineIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  }) async {
+    if (gameEngineIds.isEmpty) return [];
+
+    final gameEnginesIdsString = gameEngineIds.join(',');
+    final body = '''
+      where game_engines = ($gameEnginesIdsString);
+      fields $_basicGameFields;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+          (json) => GameModel.fromJson(json),
+    );
+  }
+
 
   // Continue with remaining methods...
   // Due to length constraints, I'll provide the remaining methods in abbreviated form
@@ -3822,8 +3871,8 @@ platforms.platform_logo.checksum,
 
     final platformIdsString = platformIds.join(',');
     final body = '''
-      where platforms = ($platformIdsString) & category = 0;
-      fields id, name, slug, summary, cover, first_release_date, genres, platforms, total_rating, total_rating_count, rating, rating_count, aggregated_rating, aggregated_rating_count, category, status, themes, keywords, involved_companies, screenshots, artworks, videos, websites, age_ratings, game_modes, player_perspectives, multiplayer_modes, similar_games, dlcs, expansions, standalone_expansions, bundles, parent_game, franchise, franchises, collection, alternative_names, time_to_beat, game_engines, language_supports, release_dates, external_games, created_at, updated_at, checksum, url, game_localizations;
+      where platforms = ($platformIdsString);
+      fields $_basicGameFields;
       sort $sortBy $sortOrder;
       limit $limit;
       offset $offset;

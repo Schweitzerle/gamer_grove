@@ -4,7 +4,7 @@
 
 // lib/presentation/blocs/character/character_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/game_enrichment_utils.dart' hide GetCharacterDetailsEvent;
+import '../../../core/utils/game_enrichment_utils.dart';
 import '../../../domain/usecases/characters/get_character_with_games.dart';
 import 'character_event.dart';
 import 'character_state.dart';

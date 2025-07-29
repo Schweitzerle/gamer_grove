@@ -2,14 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/community_info_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_description_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'; // ✅ Import Live Loading
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
@@ -17,12 +13,10 @@ import '../../../domain/entities/game/game.dart';
 import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../widgets/rating_dialog.dart';
 import '../../widgets/sections/character_section.dart';
 import '../../widgets/sections/content_dlc_section.dart';
 import '../../widgets/sections/events_section.dart';
 import '../../widgets/sections/franchise_collection_section.dart';
-import '../../widgets/top_three_dialog.dart';
 
 class GameDetailPage extends StatefulWidget {
   final int gameId;

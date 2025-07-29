@@ -426,3 +426,63 @@ class CharacterLoadingSteps {
     ),
   ];
 }
+
+class PlatformLoadingSteps {
+  static List<LoadingStep> platformDetails(BuildContext context) => [
+    LoadingStep(
+      text: 'Connecting to platform database...',
+      substep: 'Initializing IGDB connection',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Fetching platform profile...',
+      substep: 'Loading platform metadata',
+      color: Theme.of(context).colorScheme.tertiary,
+    ),
+    LoadingStep(
+      text: 'Processing platform games...',
+      substep: 'Retrieving games published on this platform',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+    LoadingStep(
+      text: 'Enriching platform data...',
+      substep: 'Loading additional platform information',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Finalizing platform details...',
+      substep: 'Preparing platform profile display',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+  ];
+}
+
+class GameEngineLoadingSteps {
+  static List<LoadingStep> gameEngineDetails(BuildContext context) => [
+    LoadingStep(
+      text: 'Connecting to game engine database...',
+      substep: 'Initializing IGDB connection',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Fetching game engine profile...',
+      substep: 'Loading game engine metadata',
+      color: Theme.of(context).colorScheme.tertiary,
+    ),
+    LoadingStep(
+      text: 'Processing game engine games...',
+      substep: 'Retrieving games published on this game engine',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+    LoadingStep(
+      text: 'Enriching game engine data...',
+      substep: 'Loading additional game engine information',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Finalizing game engine details...',
+      substep: 'Preparing game engine profile display',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+  ];
+}

@@ -2,6 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/character/character.dart';
@@ -45,6 +49,7 @@ class Navigations {
       ),
     );
   }
+
 
   // ==========================================
   // 🆕 LOCAL ALL GAMES METHODS (mit bereits gefetchten Daten)
@@ -443,6 +448,64 @@ class Navigations {
           child: CharacterDetailPage(
             characterId: characterId,
             character: character,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void navigateToPlatformDetails(
+      BuildContext context, {
+        required int platformId,
+        Game? game,
+      }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                print('🎭 Navigation: Creating PlatformBloc for ID: $platformId');
+                return sl<PlatformBloc>();
+              },
+            ),
+            // Include AuthBloc if needed for user-specific data
+            BlocProvider.value(
+              value: context.read<AuthBloc>(),
+            ),
+          ],
+          child: PlatformDetailPage(
+            platformId: platformId,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void navigateToGameEngineDetails(
+      BuildContext context, {
+        required int gameEngineId,
+        Game? game,
+      }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                print('🎭 Navigation: Creating GameEngineBloc for ID: $gameEngineId');
+                return sl<GameEngineBloc>();
+              },
+            ),
+            // Include AuthBloc if needed for user-specific data
+            BlocProvider.value(
+              value: context.read<AuthBloc>(),
+            ),
+          ],
+          child: GameEngineDetailPage(
+            gameEngineId: gameEngineId,
           ),
         ),
       ),

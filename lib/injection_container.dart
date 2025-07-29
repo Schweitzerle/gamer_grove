@@ -1,7 +1,10 @@
 // lib/injection_container.dart
 import 'package:gamer_grove/domain/usecases/game/getUserRated.dart';
+import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,6 +56,7 @@ import 'domain/usecases/game/get_user_wishlist.dart';
 import 'domain/usecases/game/get_user_recommendations.dart';
 import 'domain/usecases/game/rate_game.dart';
 import 'domain/usecases/game/toggle_wishlist.dart';
+import 'domain/usecases/gameEngine/get_game_engine_with_games.dart';
 import 'domain/usecases/game_details/get_complete_game_details_page_data.dart';
 import 'domain/usecases/game_details/get_enhanced_game_details.dart';
 import 'domain/usecases/user/follow_user.dart';
@@ -92,22 +96,21 @@ Future<void> init() async {
   // Data sources
   print('📡 DI: Registering data sources...');
   sl.registerLazySingleton<IGDBRemoteDataSource>(
-        () => IGDBRemoteDataSourceImpl(client: sl()),
+    () => IGDBRemoteDataSourceImpl(client: sl()),
   );
 
   sl.registerLazySingleton<SupabaseRemoteDataSource>(
-        () => SupabaseRemoteDataSourceImpl(client: sl()),
+    () => SupabaseRemoteDataSourceImpl(client: sl()),
   );
 
   sl.registerLazySingleton<LocalDataSource>(
-        () => LocalDataSourceImpl(sharedPreferences: sl()),
+    () => LocalDataSourceImpl(sharedPreferences: sl()),
   );
-
 
   // Repositories
   print('🏛️ DI: Registering repositories...');
   sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(
+    () => AuthRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
       networkInfo: sl(),
@@ -115,7 +118,7 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<GameRepository>(
-        () => GameRepositoryImpl(
+    () => GameRepositoryImpl(
       igdbDataSource: sl(),
       supabaseDataSource: sl(),
       localDataSource: sl(),
@@ -124,7 +127,7 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<UserRepository>(
-        () => UserRepositoryImpl(
+    () => UserRepositoryImpl(
       remoteDataSource: sl(),
       localDataSource: sl(),
       networkInfo: sl(),
@@ -133,7 +136,7 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<EventRepository>(
-        () => EventRepositoryImpl(
+    () => EventRepositoryImpl(
       igdbDataSource: sl(),
       localDataSource: sl(),
       networkInfo: sl(),
@@ -183,7 +186,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUserTopThreeGames(sl()));
 
   sl.registerLazySingleton(() => GetEnhancedGameDetails(sl()));
-  sl.registerLazySingleton(() => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
+  sl.registerLazySingleton(
+      () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
 
   // Use Cases Event
   sl.registerLazySingleton(() => GetEventDetails(sl()));
@@ -194,18 +198,20 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetEventsByGames(sl()));
   sl.registerLazySingleton(() => GetGameEvents(sl()));
   sl.registerLazySingleton(() => GetCompleteEventDetails(
-    eventRepository: sl(),
-    gameRepository: sl(),
-  ));
+        eventRepository: sl(),
+        gameRepository: sl(),
+      ));
 
   sl.registerLazySingleton(() => GetCharacterWithGames(sl()));
 
+  sl.registerLazySingleton(() => GetPlatformWithGames(sl()));
 
+  sl.registerLazySingleton(() => GetGameEngineWithGames(sl()));
 
   // BLoCs
   print('🧠 DI: Registering BLoCs...');
   sl.registerFactory(
-        () => AuthBloc(
+    () => AuthBloc(
       signIn: sl(),
       signUp: sl(),
       signOut: sl(),
@@ -214,29 +220,39 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-        () => GameBloc(
-          searchGames: sl(),
-          getGameDetails: sl(),
-          getEnhancedGameDetails: sl(), // 🆕 ADD this
-          getCompleteGameDetailPageData: sl(), //
-          getSimilarGames: sl(), // NEW
-          getGameDLCs: sl(), // NEW
-          getGameExpansions: sl(), // NEW
-          rateGame: sl(),
-          toggleWishlist: sl(),
-          toggleRecommend: sl(),
-          addToTopThree: sl(),
-          getPopularGames: sl(),
-          getUpcomingGames: sl(),
-          getUserWishlist: sl(),
-          getUserRecommendations: sl(),
-          getUserTopThreeGames: sl(), getUserRated: sl(), getUserTopThree: sl(), getTopRatedGames: sl(), getLatestGames: sl(), gameRepository: sl<GameRepository>(),
-        ),
+    () => GameBloc(
+      searchGames: sl(),
+      getGameDetails: sl(),
+      getEnhancedGameDetails: sl(),
+      // 🆕 ADD this
+      getCompleteGameDetailPageData: sl(),
+      //
+      getSimilarGames: sl(),
+      // NEW
+      getGameDLCs: sl(),
+      // NEW
+      getGameExpansions: sl(),
+      // NEW
+      rateGame: sl(),
+      toggleWishlist: sl(),
+      toggleRecommend: sl(),
+      addToTopThree: sl(),
+      getPopularGames: sl(),
+      getUpcomingGames: sl(),
+      getUserWishlist: sl(),
+      getUserRecommendations: sl(),
+      getUserTopThreeGames: sl(),
+      getUserRated: sl(),
+      getUserTopThree: sl(),
+      getTopRatedGames: sl(),
+      getLatestGames: sl(),
+      gameRepository: sl<GameRepository>(),
+    ),
   );
 
   // Bloc
   sl.registerFactory(
-        () => EventBloc(
+    () => EventBloc(
       getEventDetails: sl(),
       getCurrentEvents: sl(),
       getUpcomingEvents: sl(),
@@ -248,10 +264,19 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-        () => CharacterBloc(
+    () => CharacterBloc(
       getCharacterWithGames: sl(),
     ),
   );
+
+  sl.registerFactory(
+    () => PlatformBloc(getPlatformWithGames: sl()),
+  );
+
+  sl.registerFactory(
+        () => GameEngineBloc(getGameEngineWithGames: sl()),
+  );
+
 
   print('✅ DI: Dependency injection setup complete!');
 }

@@ -1,5 +1,8 @@
 // data/repositories/game_repository_impl.dart
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/data/models/game/game_engine_model.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
@@ -16,6 +19,7 @@ import '../../domain/entities/game/game_sort_options.dart';
 import '../../domain/entities/game/game_video.dart';
 import '../../domain/entities/genre.dart';
 import '../../domain/entities/platform/platform.dart';
+import '../../domain/entities/platform/platform_logo.dart';
 import '../../domain/entities/screenshot.dart';
 import '../../domain/entities/search/search_filters.dart';
 import '../../domain/entities/user/user.dart';
@@ -32,6 +36,7 @@ import 'package:get_it/get_it.dart';
 
 import '../models/character/character_model.dart';
 import '../models/game/game_model.dart';
+import '../models/platform/platform_model.dart';
 
 class GameRepositoryImpl implements GameRepository {
   final IGDBRemoteDataSource igdbDataSource;
@@ -846,7 +851,7 @@ class GameRepositoryImpl implements GameRepository {
     required List<int> platformIds,
     int limit = 20,
     int offset = 0,
-    GameSortBy sortBy = GameSortBy.popularity,
+    GameSortBy sortBy = GameSortBy.ratingCount,
     SortOrder sortOrder = SortOrder.descending,
   }) async {
     try {
@@ -2900,6 +2905,216 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: 'Failed to load collection games'));
+    }
+  }
+
+  // In game_repository_impl.dart implementieren:
+  @override
+  Future<Either<Failure, Platform>> getPlatformDetails(int platformId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting platform details: $platformId');
+
+      final platformData = await igdbDataSource.getCompletePlatformDataWithVersions(platformId);
+
+      if (platformData.isEmpty) {
+        return const Left(NotFoundFailure(message: 'Platform not found'));
+      }
+
+      final platform = _parseCompletePlatformData(platformData);
+      if (platform == null) {
+        return const Left(ServerFailure(message: 'Failed to parse platform'));
+      }
+
+      print('✅ GameRepository: Platform loaded: ${platform.name}');
+      return Right(platform);
+
+    } catch (e) {
+      return Left(ServerFailure(message: 'Platform details failed: $e'));
+    }
+  }
+
+  Platform? _parseCompletePlatformData(Map<String, dynamic> data) {
+    try {
+      // Extract platform logo image ID from nested data
+      String? logoImageId;
+      final logoData = data['platform_logo'];
+      if (logoData is Map<String, dynamic>) {
+        logoImageId = logoData['image_id']?.toString();
+      }
+
+      // Parse platform logo
+      PlatformLogo? logo;
+      if (logoData is Map<String, dynamic>) {
+        logo = PlatformLogo(
+          id: logoData['id'] ?? 0,
+          url: logoData['url'],
+          imageId: logoData['image_id']?.toString() ?? '',
+          width: logoData['width'],
+          height: logoData['height'],
+          alphaChannel: logoData['alpha_channel'],
+          animated: logoData['animated'] ?? false,
+          checksum: logoData['checksum'] ?? '',
+        );
+      }
+
+      // Parse category enum
+      PlatformCategoryEnum? categoryEnum;
+      if (data['category'] is int) {
+        final categoryValue = data['category'] as int;
+        switch (categoryValue) {
+          case 1:
+            categoryEnum = PlatformCategoryEnum.console;
+            break;
+          case 2:
+            categoryEnum = PlatformCategoryEnum.arcade;
+            break;
+          case 3:
+            categoryEnum = PlatformCategoryEnum.platform;
+            break;
+          case 4:
+            categoryEnum = PlatformCategoryEnum.operatingSystem;
+            break;
+          case 5:
+            categoryEnum = PlatformCategoryEnum.portableConsole;
+            break;
+          case 6:
+            categoryEnum = PlatformCategoryEnum.computer;
+            break;
+        }
+      }
+
+      // Create platform with parsed data
+      return PlatformModel(
+        id: data['id'] ?? 0,
+        checksum: data['checksum'] ?? '',
+        name: data['name'] ?? '',
+        abbreviation: data['abbreviation'],
+        alternativeName: data['alternative_name'],
+        generation: data['generation'],
+        platformFamilyId: data['platform_family'] is Map
+            ? data['platform_family']['id']
+            : data['platform_family'],
+        platformLogoId: logoData is Map ? logoData['id'] : logoData,
+        logo: logo,
+        platformTypeId: data['platform_type'],
+        slug: data['slug'] ?? '',
+        summary: data['summary'],
+        url: data['url'],
+        versionIds: _parseIdList(data['versions']),
+        websiteIds: _parseIdList(data['websites']),
+        createdAt: _parseDateTime(data['created_at']),
+        updatedAt: _parseDateTime(data['updated_at']),
+        categoryEnum: categoryEnum,
+        category: data['category'],
+      );
+    } catch (e) {
+      print('❌ GameRepository: Error parsing platform data: $e');
+      return null;
+    }
+  }
+
+  @override
+  Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🎮 GameRepository: Getting gameEngine details: $gameEngineId');
+
+      final gameEngineData = await igdbDataSource.getCompleteGameEngineData(gameEngineId);
+
+      if (gameEngineData.isEmpty) {
+        return const Left(NotFoundFailure(message: 'GameEngine not found'));
+      }
+
+      final gameEngine = _parseCompleteGameEngineData(gameEngineData);
+      if (gameEngine == null) {
+        return const Left(ServerFailure(message: 'Failed to parse gameEngine'));
+      }
+
+      print('✅ GameRepository: GameEngine loaded: ${gameEngine.name}');
+      return Right(gameEngine);
+
+    } catch (e) {
+      return Left(ServerFailure(message: 'GameEngine details failed: $e'));
+    }
+  }
+
+  GameEngine? _parseCompleteGameEngineData(Map<String, dynamic> data) {
+    try {
+      // Extract platform logo image ID from nested data
+      String? logoImageId;
+      final logoData = data['platform_logo'];
+      if (logoData is Map<String, dynamic>) {
+        logoImageId = logoData['image_id']?.toString();
+      }
+
+      // Parse platform logo
+      GameEngineLogo? logo;
+      if (logoData is Map<String, dynamic>) {
+        logo = GameEngineLogo(
+          id: logoData['id'] ?? 0,
+          url: logoData['url'],
+          imageId: logoData['image_id']?.toString() ?? '',
+          width: logoData['width'],
+          height: logoData['height'],
+          alphaChannel: logoData['alpha_channel'],
+          animated: logoData['animated'] ?? false,
+          checksum: logoData['checksum'] ?? '',
+        );
+      }
+
+
+      // Create platform with parsed data
+      return GameEngineModel.fromJson(data);
+    } catch (e) {
+      print('❌ GameRepository: Error parsing platform data: $e');
+      return null;
+    }
+  }
+
+
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByGameEngine({
+    required List<int> gameEngineIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.ratingCount,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (gameEngineIds.isEmpty) {
+        return const Right([]);
+      }
+
+      print('🎮 GameRepository: Getting games by gameEngines: $gameEngineIds');
+
+      final games = await igdbDataSource.getGamesByGameEngines(
+        gameEngineIds: gameEngineIds,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print(
+          '✅ GameRepository: Found ${enrichedGames.length} games for gameEngines');
+      return Right(enrichedGames);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get games by gameEngine'));
     }
   }
 }
