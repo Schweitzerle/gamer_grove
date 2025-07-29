@@ -60,11 +60,22 @@ class GameCard extends StatelessWidget {
               // Gradient Overlay
               _buildGradientOverlay(),
 
-              // Content Overlay (noch weniger Höhe - nur für Titel und Genres)
+              // User Elements Background Gradient
+              if (_hasUserElements()) _buildUserElementsBackground(),
+
+              // Content Overlay (unten)
               _buildContentOverlay(context),
 
-              // Ratings und States Overlay
+              // Ratings und States Overlay (rechts)
               _buildRatingsOverlay(context),
+
+              // IGDB Rating (unten rechts)
+              if (game.totalRating != null)
+                Positioned(
+                  bottom: 6,
+                  right: 6,
+                  child: _buildIGDBRatingCircle(context),
+                ),
             ],
           ),
         ),
@@ -128,29 +139,60 @@ class GameCard extends StatelessWidget {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withOpacity(0.3),
-            Colors.black.withOpacity(0.8),
+            Colors.black.withOpacity(0.7),
+            Colors.black.withOpacity(0.9),
           ],
-          stops: const [0.0, 0.4, 0.7, 1.0],
+          stops: const [0.0, 0.6, 0.8, 1.0],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserElementsBackground() {
+    // Dynamische Höhe basierend auf Anzahl der User-Elemente
+    final elementCount = _getUserElementsCount();
+    final height = _calculateUserElementsHeight(elementCount);
+
+    return Positioned(
+      top: 0,
+      right: 0,
+      width: 44,
+      height: height,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: RadialGradient(
+            center: const Alignment(1.0, -1.0), // Exakt in der Ecke oben rechts
+            radius: 2.8, // Größerer Radius für bessere Abdeckung
+            colors: [
+              Colors.black.withOpacity(0.7),
+              Colors.black.withOpacity(0.4),
+              Colors.black.withOpacity(0.1),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.4, 0.7, 1.0],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildContentOverlay(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6),
+    return Positioned(
+      left: 6,
+      right: 50, // Platz für rechte Elemente
+      bottom: 6,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Nur Game Title - viel mehr Platz
+          // Game Title
           Text(
             game.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               shadows: [
                 Shadow(
                   offset: const Offset(0, 1),
@@ -163,24 +205,24 @@ class GameCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 0),
+          const SizedBox(height: 4),
 
-          // Release Date & Genres Row - mehr Platz
+          // Date + Genres in einer Row
           Row(
             children: [
               // Release Date
               if (game.firstReleaseDate != null) ...[
                 Icon(
                   Icons.calendar_today,
-                  size: 12,
+                  size: 10,
                   color: Colors.white.withOpacity(0.9),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
                 Text(
                   DateFormatter.formatYearOnly(game.firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withOpacity(0.9),
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -189,6 +231,7 @@ class GameCard extends StatelessWidget {
                     ' • ',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.white.withOpacity(0.7),
+                      fontSize: 10,
                     ),
                   ),
                 ],
@@ -201,7 +244,7 @@ class GameCard extends StatelessWidget {
                     game.genres.take(2).map((g) => g.name).join(', '),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 11,
+                      fontSize: 10,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -215,24 +258,182 @@ class GameCard extends StatelessWidget {
   }
 
   Widget _buildRatingsOverlay(BuildContext context) {
-    return Stack(
-      children: [
-        // IGDB Rating (oben links)
-        if (game.totalRating != null)
-          Positioned(
-            top: 12,
-            left: 12,
-            child: _buildIGDBRatingCircle(context),
+    return Positioned(
+      top: 4,
+      right: 4,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // User Rating
+          game.userRating != null
+              ? _buildUserRatingCircle(context)
+              : Container(height: 0),
+
+          // Abstand nur wenn User Rating vorhanden
+          game.userRating != null ? const SizedBox(height: 4) : Container(height: 0),
+
+          // Top Three
+          (game.isInTopThree ?? false)
+              ? _buildTopThreeCircle(context)
+              : Container(height: 0),
+
+          // Abstand nur wenn Top Three vorhanden
+          (game.isInTopThree ?? false) ? const SizedBox(height: 4) : Container(height: 0),
+
+          // Wishlist
+          game.isWishlisted
+              ? _buildWishlistCircle(context)
+              : Container(height: 0),
+
+          // Abstand nur wenn Wishlist vorhanden
+          game.isWishlisted ? const SizedBox(height: 4) : Container(height: 0),
+
+          // Recommend
+          game.isRecommended
+              ? _buildRecommendCircle(context)
+              : Container(height: 0),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserRatingCircle(BuildContext context) {
+    final rating = game.userRating! / 10; // 0-1 range
+    final displayRating = (game.userRating! * 10);
+    final color = ColorScales.getRatingColor(displayRating);
+
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black.withOpacity(0.75),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Circular Progress
+          Positioned.fill(
+            child: CircularProgressIndicator(
+              value: rating,
+              strokeWidth: 2,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
           ),
 
-        // User Rating mit States (oben rechts)
-        if (game.userRating != null || _hasUserStates())
-          Positioned(
-            top: 12,
-            right: 12,
-            child: _buildUserDataCircle(context),
+          // Center Content
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person,
+                  size: 10,
+                  color: Colors.white,
+                ),
+                Text(
+                  displayRating.toStringAsFixed(0),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.7),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopThreeCircle(BuildContext context) {
+    final position = game.topThreePosition ?? 1;
+    final color = ColorScales.getTopThreeColor(position);
+
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black.withOpacity(0.75),
+        border: Border.all(
+          color: color.withOpacity(0.8),
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.emoji_events,
+              size: 10,
+              color: color,
+            ),
+            Text(
+              '#$position',
+              style: TextStyle(
+                color: color,
+                fontSize: 6,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWishlistCircle(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black.withOpacity(0.75),
+        border: Border.all(
+          color: Colors.red.withOpacity(0.8),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        Icons.favorite,
+        size: 12,
+        color: Colors.red,
+      ),
+    );
+  }
+
+  Widget _buildRecommendCircle(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black.withOpacity(0.75),
+        border: Border.all(
+          color: Colors.green.withOpacity(0.8),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        Icons.thumb_up,
+        size: 12,
+        color: Colors.green,
+      ),
     );
   }
 
@@ -269,104 +470,13 @@ class GameCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.star_outline,
-                  size: 14,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  game.totalRating!.toStringAsFixed(0),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
-                        color: Colors.black.withOpacity(0.7),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserDataCircle(BuildContext context) {
-    final hasUserRating = game.userRating != null;
-    final userStates = _getUserStates(context);
-
-    return Container(
-      constraints: const BoxConstraints(
-        minWidth: 44,
-        minHeight: 44,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: Colors.black.withOpacity(0.75),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // User Rating Circle (wenn vorhanden)
-          if (hasUserRating) _buildUserRatingSection(context),
-
-          // User States (darunter)
-          if (userStates.isNotEmpty) ...[
-            if (hasUserRating) const SizedBox(height: 6),
-            _buildUserStatesSection(context, userStates),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserRatingSection(BuildContext context) {
-    final rating = game.userRating! / 10; // 0-1 range
-    final displayRating = (game.userRating! * 10);
-    final color = ColorScales.getRatingColor(displayRating);
-
-    return Container(
-      width: 40,
-      height: 40,
-      margin: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.transparent,
-      ),
-      child: Stack(
-        children: [
-          // Circular Progress
-          Positioned.fill(
-            child: CircularProgressIndicator(
-              value: rating,
-              strokeWidth: 3,
-              backgroundColor: Colors.white.withOpacity(0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-
-          // Center Content
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.star,
+                  Icons.public, // Globe icon für IGDB/externe Quelle
                   size: 12,
                   color: Colors.white,
                 ),
+                const SizedBox(height: 1),
                 Text(
-                  displayRating.toStringAsFixed(0),
+                  game.totalRating!.toStringAsFixed(0),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 9,
@@ -388,115 +498,46 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserStatesSection(BuildContext context, List<Widget> states) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 0, 6, 6),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: states
-            .map((state) => Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: state,
-        ))
-            .toList()
-          ..removeLast(), // Remove last padding
-      ),
-    );
-  }
-
-  List<Widget> _getUserStates(BuildContext context) {
-    final states = <Widget>[];
-
-    if (game.isWishlisted) {
-      states.add(_buildCompactStateIcon(
-        Icons.favorite,
-        Colors.red,
-      ));
-    }
-
-    if (game.isRecommended) {
-      states.add(_buildCompactStateIcon(
-        Icons.thumb_up,
-        Colors.green,
-      ));
-    }
-
-    if (game.isInTopThree) {
-      states.add(_buildTopThreeCompact(context));
-    }
-
-    return states;
-  }
-
-  Widget _buildCompactStateIcon(IconData icon, Color color) {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.2),
-        border: Border.all(
-          color: color.withOpacity(0.6),
-          width: 1,
-        ),
-      ),
-      child: Icon(
-        icon,
-        size: 12,
-        color: color,
-      ),
-    );
-  }
-
-  Widget _buildTopThreeCompact(BuildContext context) {
-    final position = game.topThreePosition ?? 1;
-    final color = ColorScales.getTopThreeColor(position);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: color.withOpacity(0.6),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.emoji_events,
-            size: 10,
-            color: color,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            '#$position',
-            style: TextStyle(
-              color: color,
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  bool _hasUserStates() {
-    return game.isWishlisted ||
+  // Helper methods
+  bool _hasUserElements() {
+    return game.userRating != null ||
+        game.isWishlisted ||
         game.isRecommended ||
         (game.isInTopThree ?? false);
   }
 
-  // Helper method to check if game is rated
+  int _getUserElementsCount() {
+    int count = 0;
+    if (game.userRating != null) count++;
+    if (game.isInTopThree ?? false) count++;
+    if (game.isWishlisted) count++;
+    if (game.isRecommended) count++;
+    return count;
+  }
+
+  double _calculateUserElementsHeight(int count) {
+    if (count == 0) return 0;
+
+    double height = 16; // Base padding (oben und unten)
+
+    if (game.userRating != null) {
+      height += 32; // User rating ist größer
+      count--;
+      if (count > 0) height += 4; // Spacing nach User Rating
+    }
+
+    height += count * 24; // Andere Elemente sind 24px
+    height += (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
+
+    return height;
+  }
+
   bool _isGameRated() {
     return game.userRating != null && game.userRating! > 0;
   }
 }
 
-// Shimmer Loading Version (angepasst an neues Design)
+// Shimmer Loading Version
 class GameCardShimmer extends StatelessWidget {
   final double? width;
   final double? height;
@@ -534,51 +575,95 @@ class GameCardShimmer extends StatelessWidget {
               ),
             ),
 
-            // Content area shimmer
+            // User Elements shimmer (rechts oben)
             Positioned(
-              left: 12,
+              top: 12,
               right: 12,
-              bottom: 12,
-              height: (height ?? 240) * 0.3,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Title shimmer
+                  // User Rating shimmer
                   Container(
-                    width: double.infinity,
-                    height: 16,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   const SizedBox(height: 8),
-
-                  // Subtitle shimmer
-                  Container(
-                    width: 100,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+                  // States shimmer
+                  ...List.generate(2, (index) =>
+                      Container(
+                        width: 32,
+                        height: 32,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.surface,
+                        ),
+                      ),
                   ),
                 ],
               ),
             ),
 
-            // Rating shimmer (top right)
+            // IGDB Rating shimmer (unten rechts)
             Positioned(
-              top: 12,
+              bottom: 12,
               right: 12,
               child: Container(
-                width: 36,
-                height: 36,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Theme.of(context).colorScheme.surface,
                 ),
+              ),
+            ),
+
+            // Content area shimmer (unten links)
+            Positioned(
+              left: 12,
+              right: 70,
+              bottom: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title shimmer
+                  Container(
+                    width: double.infinity,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Date + Genres shimmer
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 60,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
