@@ -36,6 +36,7 @@ import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
 import '../../../injection_container.dart';
 import '../../pages/game_detail/game_detail_page.dart';
+import 'game_extensions.dart';
 
 part 'game_event.dart';
 
@@ -123,6 +124,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<GetGameExpansionsEvent>(_onGetGameExpansions);
     on<LoadCompleteFranchiseGamesEvent>(_onLoadCompleteFranchiseGames);
     on<LoadCompleteCollectionGamesEvent>(_onLoadCompleteCollectionGames);
+
+    on<SearchGamesWithFiltersEvent>(_onSearchGamesWithFilters);
+    on<SaveSearchQueryEvent>(_onSaveSearchQuery);
   }
 
   // Debounce transformer for search
@@ -1390,6 +1394,50 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       ));
     } catch (e) {
       emit(GameError('Failed to enrich collection games: $e'));
+    }
+  }
+
+  // Search Games with Filters
+  Future<void> _onSearchGamesWithFilters(
+      SearchGamesWithFiltersEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    if (event.query.isEmpty && !event.filters.hasFilters) {
+      emit(GameInitial());
+      return;
+    }
+
+    emit(GameSearchLoading());
+
+    final result = await gameRepository.searchGamesWithFilters(
+      query: event.query,
+      filters: event.filters,
+      limit: 20,
+      offset: 0,
+    );
+
+    result.fold(
+          (failure) => emit(GameSearchError(message: failure.message)),
+          (games) => emit(GameSearchLoaded(
+        games: games,
+        hasReachedMax: games.length < 20,
+        currentQuery: event.query,
+      )),
+    );
+  }
+
+
+  // Save Search Query
+  Future<void> _onSaveSearchQuery(
+      SaveSearchQueryEvent event,
+      Emitter<GameState> emit,
+      ) async {
+    try {
+      await gameRepository.saveSearchQuery(event.userId, event.query);
+      // Optional: emit success state if needed
+    } catch (e) {
+      // Silently fail - search query saving is not critical
+      print('Failed to save search query: $e');
     }
   }
 }

@@ -161,3 +161,57 @@ class EmptyStateWidget extends StatelessWidget {
   }
 }
 
+
+class AppErrorWidget extends StatelessWidget {
+  final String message;
+  final VoidCallback? onRetry;
+  final IconData? icon;
+
+  const AppErrorWidget({
+    super.key,
+    required this.message,
+    this.onRetry,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon ?? Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Text(
+              'Oops! Something went wrong',
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppConstants.paddingSmall),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: AppConstants.paddingLarge),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

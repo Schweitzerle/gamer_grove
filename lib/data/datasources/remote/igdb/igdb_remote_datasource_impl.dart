@@ -238,6 +238,32 @@ platforms.platform_logo.checksum,
   websites.type.id, websites.type.type,
     tags  ''';
 
+  static const String _completeCompanyFields = '''
+  id, name, checksum, description, slug, url, country, 
+  created_at, updated_at, change_date, change_date_category, 
+  changed_company_id, parent, status, start_date, start_date_category,
+  
+  logo.id, logo.alpha_channel, logo.animated, logo.checksum, 
+  logo.height, logo.image_id, logo.url, logo.width,
+  
+  parent.id, parent.name, parent.slug, parent.description,
+  parent.logo.id, parent.logo.url, parent.logo.image_id,
+  
+  websites.id, websites.category, websites.trusted, websites.url, websites.checksum,
+  
+  developed.id, developed.name, developed.slug, developed.first_release_date, 
+  developed.total_rating, developed.total_rating_count,
+  developed.cover.id, developed.cover.url, developed.cover.image_id,
+  developed.genres.id, developed.genres.name,
+  developed.platforms.id, developed.platforms.name,
+  
+  published.id, published.name, published.slug, published.first_release_date, 
+  published.total_rating, published.total_rating_count,
+  published.cover.id, published.cover.url, published.cover.image_id,
+  published.genres.id, published.genres.name,
+  published.platforms.id, published.platforms.name
+''';
+
   // ==========================================
   // CORE HTTP METHODS
   // ==========================================
@@ -2343,17 +2369,24 @@ platforms.platform_logo.checksum,
       [];
 
   @override
-  Future<Map<String, dynamic>> getCompleteCompanyData(int companyId) async {
-    try {
-      final body =
-          'where id = $companyId; fields *, logo.*, websites.*; limit 1;';
-      final response = await _makeRawRequest('companies', body);
-      final List<dynamic> data = json.decode(response.body);
-      return data.isNotEmpty ? data.first : {};
-    } catch (e) {
-      print('💥 IGDB: Get complete company data error: $e');
-      return {};
+  Future<CompanyModel> getCompleteCompanyDetails(int companyId) async {
+    final body = '''
+    where id = $companyId;
+    fields $_completeCompanyFields;
+    limit 1;
+  ''';
+
+    final companies = await _makeRequest(
+      'companies',
+      body,
+          (json) => CompanyModel.fromJson(json),
+    );
+
+    if (companies.isEmpty) {
+      throw ServerException(message: 'Company with id $companyId not found');
     }
+
+    return companies.first;
   }
 
   @override

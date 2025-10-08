@@ -463,10 +463,10 @@ class GameRepositoryImpl implements GameRepository {
       }
 
       // Apply pagination to IDs
-      final paginatedIds = gameIds.skip(offset).take(limit).toList();
+      //final paginatedIds = gameIds.skip(offset).take(limit).toList();
 
       // Get enhanced game data
-      final games = await igdbDataSource.getGamesByIds(paginatedIds);
+      final games = await igdbDataSource.getGamesByIds(gameIds);
       final enrichedGames = await _enrichGamesWithUserData(games);
 
       print('✅ GameRepository: Loaded ${enrichedGames.length} wishlist games');
@@ -496,10 +496,10 @@ class GameRepositoryImpl implements GameRepository {
       }
 
       // Apply pagination to IDs
-      final paginatedIds = gameIds.skip(offset).take(limit).toList();
+      //final paginatedIds = gameIds.skip(offset).take(limit).toList();
 
       // Get enhanced game data
-      final games = await igdbDataSource.getGamesByIds(paginatedIds);
+      final games = await igdbDataSource.getGamesByIds(gameIds);
       final enrichedGames = await _enrichGamesWithUserData(games);
 
       print(
@@ -530,10 +530,10 @@ class GameRepositoryImpl implements GameRepository {
       }
 
       // Apply pagination to IDs
-      final paginatedIds = gameIds.skip(offset).take(limit).toList();
+      //final paginatedIds = gameIds.skip(offset).take(limit).toList();
 
       // Get enhanced game data
-      final games = await igdbDataSource.getGamesByIds(paginatedIds);
+      final games = await igdbDataSource.getGamesByIds(gameIds);
       final enrichedGames = await _enrichGamesWithUserData(games);
 
       print('✅ GameRepository: Loaded ${enrichedGames.length} rated games');
@@ -3049,6 +3049,42 @@ class GameRepositoryImpl implements GameRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Company>> getCompanyDetails(int companyId, String? userId) async {    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      print('🏢 GameRepository: Getting complete company details: $companyId');
+
+      // 1. Hol das Company Model mit allen related data
+      final companyModel = await igdbDataSource.getCompleteCompanyDetails(companyId);
+
+      // 2. Enrich developed games with user data
+      List<Game> enrichedDevelopedGames = companyModel.developedGames ?? [];
+      if (userId != null && enrichedDevelopedGames.isNotEmpty) {
+        enrichedDevelopedGames = await _enrichGamesWithUserData(enrichedDevelopedGames);
+        print('✅ Enriched ${enrichedDevelopedGames.length} developed games with user data');
+      }
+
+      // 3. Enrich published games with user data
+      List<Game> enrichedPublishedGames = companyModel.publishedGames ?? [];
+      if (userId != null && enrichedPublishedGames.isNotEmpty) {
+        enrichedPublishedGames = await _enrichGamesWithUserData(enrichedPublishedGames);
+        print('✅ Enriched ${enrichedPublishedGames.length} published games with user data');
+      }
+
+      print('✅ GameRepository: Company loaded: ${companyModel.name}');
+      return Right(companyModel);
+
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Company details failed: $e'));
+    }
+  }
+
+
   GameEngine? _parseCompleteGameEngineData(Map<String, dynamic> data) {
     try {
       print('🔧 Parsing complete GameEngine data: ${data['name']}');
@@ -3201,4 +3237,5 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: 'Failed to get games by gameEngine'));
     }
   }
+
 }

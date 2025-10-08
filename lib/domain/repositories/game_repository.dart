@@ -73,11 +73,6 @@ abstract class GameRepository {
   // ENHANCED COMPANY & CONTENT METHODS
   // ==========================================
 
-  /// Get companies (developers, publishers, etc.)
-  Future<Either<Failure, List<Company>>> getCompanies({
-    List<int>? ids,
-    String? search
-  });
 
   /// Get websites associated with games
   Future<Either<Failure, List<Website>>> getGameWebsites(List<int> gameIds);
@@ -437,6 +432,10 @@ abstract class GameRepository {
   Future<Either<Failure, Platform>> getPlatformDetails(int platformId);
 
   Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId);
+
+  Future<Either<Failure, Company>> getCompanyDetails(int companyId, String? userId);
+
+  Future<Either<Failure, List<Company>>> getCompanies({List<int>? ids, String? search});
 
   /// Get games by specific gameEngine
   Future<Either<Failure, List<Game>>> getGamesByGameEngine({

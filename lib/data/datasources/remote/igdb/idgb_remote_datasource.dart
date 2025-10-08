@@ -227,6 +227,8 @@ abstract class IGDBRemoteDataSource {
 
   Future<Map<String, dynamic>> getCompleteGameEngineData(int gameEngineId);
 
+  Future<CompanyModel> getCompleteCompanyDetails(int companyId);
+
   /// Get games by gameEngine with sorting options
   Future<List<GameModel>> getGamesByGameEngines({
     required List<int> gameEngineIds,
@@ -624,9 +626,6 @@ abstract class IGDBRemoteDataSource {
 
   /// Get companies by published games
   Future<List<CompanyModel>> getCompaniesByPublishedGames(List<int> gameIds);
-
-  /// Get complete company data
-  Future<Map<String, dynamic>> getCompleteCompanyData(int companyId);
 
   /// Get company hierarchy
   Future<List<CompanyModel>> getCompanyHierarchy(int companyId);

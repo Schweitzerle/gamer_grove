@@ -2,6 +2,10 @@
 // lib/data/models/company/company_model.dart
 import '../../../../domain/entities/company/company.dart';
 import '../../../../domain/entities/company/company_logo.dart';
+import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/website/website.dart';
+import '../game/game_model.dart';
+import '../website/website_model.dart';
 import 'company_model_logo.dart';
 
 class CompanyModel extends Company {
@@ -19,16 +23,16 @@ class CompanyModel extends Company {
     super.changeDateCategory,
     super.changeDateFormatId,
     super.changedCompanyId,
-    super.parentId,
+    super.parentCompany,
     super.logoId,
     super.logo, // NEU
     super.statusId,
     super.startDate,
     super.startDateCategory,
     super.startDateFormatId,
-    super.developedGameIds,
-    super.publishedGameIds,
-    super.websiteIds,
+    super.developedGames,
+    super.publishedGames,
+    super.websites,
   });
 
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
@@ -46,17 +50,37 @@ class CompanyModel extends Company {
       changeDateCategory: _parseChangeDateCategory(json['change_date_category']),
       changeDateFormatId: json['change_date_format'],
       changedCompanyId: json['changed_company_id'],
-      parentId: json['parent'],
+      parentCompany: json['parent'],
       logoId: _parseLogoId(json['logo']),
       logo: _parseLogo(json['logo']), // NEU: Parse logo object
       statusId: json['status'],
       startDate: _parseDateTime(json['start_date']),
       startDateCategory: _parseChangeDateCategory(json['start_date_category']),
       startDateFormatId: json['start_date_format'],
-      developedGameIds: _parseIdList(json['developed']),
-      publishedGameIds: _parseIdList(json['published']),
-      websiteIds: _parseIdList(json['websites']),
+      developedGames: _extractGameList(json['developed']),
+      publishedGames: _extractGameList(json['published']),
+      websites: _extractWebsites(json['websites']),
     );
+  }
+
+  static List<Website> _extractWebsites(dynamic websites) {
+    if (websites is List) {
+      return websites
+          .where((item) => item is Map)
+          .map((item) => WebsiteModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Game> _extractGameList(dynamic games) {
+    if (games is List) {
+      return games
+          .where((item) => item is Map)
+          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
   }
 
   // NEU: Parse logo data
@@ -123,15 +147,15 @@ class CompanyModel extends Company {
       'change_date_category': changeDateCategory?.value,
       'change_date_format': changeDateFormatId,
       'changed_company_id': changedCompanyId,
-      'parent': parentId,
+      'parent': parentCompany,
       'logo': logoId,
       'status': statusId,
       'start_date': startDate?.toIso8601String(),
       'start_date_category': startDateCategory?.value,
       'start_date_format': startDateFormatId,
-      'developed': developedGameIds,
-      'published': publishedGameIds,
-      'websites': websiteIds,
+      'developed': developedGames,
+      'published': publishedGames,
+      'websites': websites,
     };
   }
 }

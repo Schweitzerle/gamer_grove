@@ -1,6 +1,8 @@
 // ===== COMPANY ENTITY (UPDATED WITH LOGO URL) =====
 // lib/domain/entities/company/company.dart
 import 'package:equatable/equatable.dart';
+import '../game/game.dart';
+import '../website/website.dart';
 import 'company_logo.dart'; // Import für CompanyLogo
 
 enum CompanyChangeDateCategory {
@@ -41,7 +43,6 @@ class Company extends Equatable {
   final CompanyChangeDateCategory? changeDateCategory; // DEPRECATED
   final int? changeDateFormatId;
   final int? changedCompanyId;
-  final int? parentId;
 
   // Company data
   final int? logoId;
@@ -52,9 +53,10 @@ class Company extends Equatable {
   final int? startDateFormatId;
 
   // Associated data
-  final List<int> developedGameIds;
-  final List<int> publishedGameIds;
-  final List<int> websiteIds;
+  final List<Game>? developedGames;
+  final List<Game>? publishedGames;
+  final List<Website>? websites;
+  final Company? parentCompany;
 
   const Company({
     required this.id,
@@ -70,31 +72,31 @@ class Company extends Equatable {
     this.changeDateCategory,
     this.changeDateFormatId,
     this.changedCompanyId,
-    this.parentId,
+    this.parentCompany,
     this.logoId,
     this.logo, // NEU
     this.statusId,
     this.startDate,
     this.startDateCategory,
     this.startDateFormatId,
-    this.developedGameIds = const [],
-    this.publishedGameIds = const [],
-    this.websiteIds = const [],
+    this.developedGames = const [],
+    this.publishedGames = const [],
+    this.websites = const [],
   });
 
   // Helper getters
   bool get hasLogo => logo != null || logoId != null;
-  bool get hasParent => parentId != null;
+  bool get hasParent => parentCompany != null;
   bool get hasStatus => statusId != null;
-  bool get hasWebsites => websiteIds.isNotEmpty;
-  bool get hasDevelopedGames => developedGameIds.isNotEmpty;
-  bool get hasPublishedGames => publishedGameIds.isNotEmpty;
+  bool get hasWebsites => websites != null;
+  bool get hasDevelopedGames => developedGames != null;
+  bool get hasPublishedGames => publishedGames != null;
   bool get hasFoundingDate => startDate != null;
   bool get hasDescription => description != null && description!.isNotEmpty;
 
-  int get totalGamesCount => developedGameIds.length + publishedGameIds.length;
-  bool get isDeveloper => developedGameIds.isNotEmpty;
-  bool get isPublisher => publishedGameIds.isNotEmpty;
+  int get totalGamesCount => developedGames!= null && publishedGames != null ? developedGames!.length + publishedGames!.length : 0;
+  bool get isDeveloper => developedGames != null && developedGames!.isNotEmpty;
+  bool get isPublisher => publishedGames != null && publishedGames!.isNotEmpty;
   bool get isDeveloperAndPublisher => isDeveloper && isPublisher;
 
   // NEU: Logo URL getters
@@ -119,15 +121,15 @@ class Company extends Equatable {
     changeDateCategory,
     changeDateFormatId,
     changedCompanyId,
-    parentId,
+    parentCompany,
     logoId,
     logo, // NEU
     statusId,
     startDate,
     startDateCategory,
     startDateFormatId,
-    developedGameIds,
-    publishedGameIds,
-    websiteIds,
+    developedGames,
+    publishedGames,
+    websites,
   ];
 }
