@@ -6,7 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/website/website.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
@@ -60,8 +59,8 @@ class ExternalLinksSection extends StatelessWidget {
             Text(
               'Official & Social Links',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -73,9 +72,9 @@ class ExternalLinksSection extends StatelessWidget {
               child: Text(
                 '${websites.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -121,8 +120,8 @@ class ExternalLinksSection extends StatelessWidget {
             Text(
               'Digital Stores',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -134,9 +133,9 @@ class ExternalLinksSection extends StatelessWidget {
               child: Text(
                 '${stores.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -206,9 +205,9 @@ class ExternalLinksSection extends StatelessWidget {
                 Text(
                   websiteName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: websiteColor,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: websiteColor,
+                      ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -266,9 +265,9 @@ class ExternalLinksSection extends StatelessWidget {
                 Text(
                   storeName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: storeColor,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: storeColor,
+                      ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -322,8 +321,6 @@ class ExternalLinksSection extends StatelessWidget {
         return 'Google Play';
       case WebsiteCategory.bluesky:
         return 'Bluesky';
-      default:
-        return 'Website';
     }
   }
 
@@ -333,75 +330,75 @@ class ExternalLinksSection extends StatelessWidget {
     switch (website.category) {
       case WebsiteCategory.official:
         iconData = Icons.public;
-        iconColor = Color(0xFF07355A);
+        iconColor = const Color(0xFF07355A);
         break;
       case WebsiteCategory.wikia:
         iconData = FontAwesomeIcons.wikipediaW;
-        iconColor = Color(0xFF939598);
+        iconColor = const Color(0xFF939598);
         break;
       case WebsiteCategory.wikipedia:
         iconData = FontAwesomeIcons.wikipediaW;
-        iconColor = Color(0xFFc7c8ca);
+        iconColor = const Color(0xFFc7c8ca);
         break;
       case WebsiteCategory.facebook:
         iconData = FontAwesomeIcons.facebook;
-        iconColor = Color(0xFF1877f2);
+        iconColor = const Color(0xFF1877f2);
         break;
       case WebsiteCategory.twitter:
         iconData = FontAwesomeIcons.twitter;
-        iconColor = Color(0xFF1da1f2);
+        iconColor = const Color(0xFF1da1f2);
         break;
       case WebsiteCategory.twitch:
         iconData = FontAwesomeIcons.twitch;
-        iconColor = Color(0xFF9146ff);
+        iconColor = const Color(0xFF9146ff);
         break;
       case WebsiteCategory.instagram:
         iconData = FontAwesomeIcons.instagram;
-        iconColor = Color(0xFFc13584);
+        iconColor = const Color(0xFFc13584);
         break;
       case WebsiteCategory.youtube:
         iconData = FontAwesomeIcons.youtube;
-        iconColor = Color(0xFFff0000);
+        iconColor = const Color(0xFFff0000);
         break;
       case WebsiteCategory.iphone:
         iconData = FontAwesomeIcons.apple;
-        iconColor = Color(0xFF000000);
+        iconColor = const Color(0xFF000000);
         break;
       case WebsiteCategory.ipad:
         iconData = FontAwesomeIcons.apple;
-        iconColor = Color(0xFF000000);
+        iconColor = const Color(0xFF000000);
         break;
       case WebsiteCategory.android:
         iconData = FontAwesomeIcons.android;
-        iconColor = Color(0xFFa4c639);
+        iconColor = const Color(0xFFa4c639);
         break;
       case WebsiteCategory.steam:
         iconData = FontAwesomeIcons.steam;
-        iconColor = Color(0xFF00adee);
+        iconColor = const Color(0xFF00adee);
         break;
       case WebsiteCategory.reddit:
         iconData = FontAwesomeIcons.reddit;
-        iconColor = Color(0xFFff4500);
+        iconColor = const Color(0xFFff4500);
         break;
       case WebsiteCategory.itch:
         iconData = FontAwesomeIcons.itchIo;
-        iconColor = Color(0xFFfa5c5c);
+        iconColor = const Color(0xFFfa5c5c);
         break;
       case WebsiteCategory.epicgames:
         iconData = FontAwesomeIcons.earlybirds;
-        iconColor = Color(0xFF242424);
+        iconColor = const Color(0xFF242424);
         break;
       case WebsiteCategory.gog:
         iconData = FontAwesomeIcons.galacticRepublic;
-        iconColor = Color(0xFF7cb4dc);
+        iconColor = const Color(0xFF7cb4dc);
         break;
       case WebsiteCategory.discord:
         iconData = FontAwesomeIcons.discord;
-        iconColor = Color(0xFF5865f2);
+        iconColor = const Color(0xFF5865f2);
         break;
       default:
         iconData = Icons.link;
-        iconColor = Color(0xFF07355A);
+        iconColor = const Color(0xFF07355A);
     }
 
     return Icon(iconData, color: iconColor, size: 20);
@@ -443,8 +440,6 @@ class ExternalLinksSection extends StatelessWidget {
         return const Color(0xFF3DDC84);
       case WebsiteCategory.bluesky:
         return const Color(0xFF0085FF);
-      default:
-        return Colors.grey;
     }
   }
 
@@ -523,7 +518,8 @@ class ExternalLinksSection extends StatelessWidget {
     }
   }
 
-  Color _getStoreColor(BuildContext context, ExternalGameCategoryEnum? category) {
+  Color _getStoreColor(
+      BuildContext context, ExternalGameCategoryEnum? category) {
     if (category == null) return Theme.of(context).colorScheme.primary;
 
     switch (category) {

@@ -11,15 +11,12 @@ import '../../pages/game_detail/widgets/community_info_section.dart';
 import '../../pages/game_detail/widgets/company_section.dart';
 import '../../pages/game_detail/widgets/game_description_section.dart';
 import '../../pages/game_detail/widgets/user_states_section.dart';
-import '../accordion_tile.dart';
 import 'external_links_section.dart';
 import 'game_engines_section.dart';
 import 'platform_section.dart';
 import 'genre_section.dart';
 import 'game_features_section.dart';
 import 'age_ratings_section.dart';
-import 'keywords_section.dart';
-import 'statistics_section.dart';
 import 'game_info_section.dart';
 
 class GameDetailsAccordion extends StatelessWidget {
@@ -49,7 +46,8 @@ class GameDetailsAccordion extends StatelessWidget {
                 title: 'Your Activity',
                 icon: Icons.person,
                 preview: _buildUserStatesPreview(context, game),
-                child: UserStatesContent(game: game), // ✅ Simplified - no callbacks needed
+                child: UserStatesContent(
+                    game: game), // ✅ Simplified - no callbacks needed
               ),
 
               // Community & Ratings
@@ -102,16 +100,15 @@ class GameDetailsAccordion extends StatelessWidget {
               // Platforms & Release
               if (game.platforms.isNotEmpty)
                 EnhancedAccordionTile(
-                  title: 'Platforms & Release',
-                  icon: Icons.devices,
-                  preview: _buildPlatformsPreview(context, game),
-                  child: GenericPlatformSection(
-                    game: game,
-                    title: 'Available Platforms',
-                    showReleaseTimeline: true,
-                    showFirstReleaseInfo: true,
-                  )
-                ),
+                    title: 'Platforms & Release',
+                    icon: Icons.devices,
+                    preview: _buildPlatformsPreview(context, game),
+                    child: GenericPlatformSection(
+                      game: game,
+                      title: 'Available Platforms',
+                      showReleaseTimeline: true,
+                      showFirstReleaseInfo: true,
+                    )),
 
               // Genres & Categories
               if (game.genres.isNotEmpty || game.themes.isNotEmpty)
@@ -154,15 +151,14 @@ class GameDetailsAccordion extends StatelessWidget {
               // Companies
               if (game.involvedCompanies.isNotEmpty)
                 EnhancedAccordionTile(
-                  title: 'Companies',
-                  icon: Icons.business,
-                  preview: _buildCompaniesPreview(context, game),
-                  child: GenericCompanySection(
-                    involvedCompanies: game.involvedCompanies,
-                    title: 'Development & Publishing',
-                    showRoles: true,
-                  )
-                ),
+                    title: 'Companies',
+                    icon: Icons.business,
+                    preview: _buildCompaniesPreview(context, game),
+                    child: GenericCompanySection(
+                      involvedCompanies: game.involvedCompanies,
+                      title: 'Development & Publishing',
+                      showRoles: true,
+                    )),
 
               // External Links & Stores
               if (game.websites.isNotEmpty || game.externalGames.isNotEmpty)
@@ -181,14 +177,15 @@ class GameDetailsAccordion extends StatelessWidget {
 
   // ✅ ACCORDION GROUP BUILDER (unchanged)
   Widget _buildAccordionGroup(
-      BuildContext context, {
-        required String title,
-        required IconData icon,
-        required Color color,
-        required List<Widget> children,
-      }) {
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required List<Widget> children,
+  }) {
     // Filter out any empty children
-    final validChildren = children.where((child) => child != const SizedBox.shrink()).toList();
+    final validChildren =
+        children.where((child) => child != const SizedBox.shrink()).toList();
 
     if (validChildren.isEmpty) {
       return const SizedBox.shrink();
@@ -227,14 +224,15 @@ class GameDetailsAccordion extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                   ),
                 ),
                 // ✅ Section Count Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -259,7 +257,8 @@ class GameDetailsAccordion extends StatelessWidget {
               elevation: 0,
               color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
               child: Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
                 child: Column(
                   children: validChildren,
                 ),
@@ -437,7 +436,8 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildEnginesPreview(BuildContext context, Game game) {
     if (game.gameEngines.isEmpty) return const SizedBox.shrink();
 
-    List<String> engineNames = game.gameEngines.take(2).map((e) => e.name).toList();
+    List<String> engineNames =
+        game.gameEngines.take(2).map((e) => e.name).toList();
     String preview = engineNames.join(' • ');
 
     if (game.gameEngines.length > 2) {
@@ -457,7 +457,8 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildPlatformsPreview(BuildContext context, Game game) {
     if (game.platforms.isEmpty) return const SizedBox.shrink();
 
-    List<String> platformNames = game.platforms.take(3).map((p) => p.abbreviation ?? p.name).toList();
+    List<String> platformNames =
+        game.platforms.take(3).map((p) => p.abbreviation ?? p.name).toList();
     String preview = platformNames.join(' • ');
 
     if (game.platforms.length > 3) {
@@ -514,7 +515,8 @@ class GameDetailsAccordion extends StatelessWidget {
     }
 
     if (features.length < 3 && game.playerPerspectives.isNotEmpty) {
-      features.addAll(game.playerPerspectives.take(3 - features.length).map((p) => p.name));
+      features.addAll(
+          game.playerPerspectives.take(3 - features.length).map((p) => p.name));
     }
 
     String preview = features.take(3).join(' • ');
@@ -562,9 +564,7 @@ class GameDetailsAccordion extends StatelessWidget {
     List<String> companies = [];
 
     for (var involved in game.involvedCompanies.take(2)) {
-      if (involved.company != null) {
-        companies.add(involved.company!.name);
-      }
+      companies.add(involved.company.name);
     }
 
     String preview = companies.join(' • ');
@@ -587,10 +587,14 @@ class GameDetailsAccordion extends StatelessWidget {
     List<String> stores = [];
 
     for (var extGame in game.externalGames.take(3)) {
-      if (extGame.url?.contains('steam') == true) stores.add('Steam');
-      else if (extGame.url?.contains('epic') == true) stores.add('Epic');
-      else if (extGame.url?.contains('gog') == true) stores.add('GOG');
-      else if (extGame.url?.contains('playstation') == true) stores.add('PlayStation');
+      if (extGame.url?.contains('steam') == true) {
+        stores.add('Steam');
+      } else if (extGame.url?.contains('epic') == true)
+        stores.add('Epic');
+      else if (extGame.url?.contains('gog') == true)
+        stores.add('GOG');
+      else if (extGame.url?.contains('playstation') == true)
+        stores.add('PlayStation');
       else if (extGame.url?.contains('xbox') == true) stores.add('Xbox');
     }
 
@@ -599,7 +603,9 @@ class GameDetailsAccordion extends StatelessWidget {
 
     String preview = stores.take(2).join(' • ');
     if (totalLinks > stores.length) {
-      preview += preview.isNotEmpty ? ' • +${totalLinks - stores.length} more' : '$totalLinks links';
+      preview += preview.isNotEmpty
+          ? ' • +${totalLinks - stores.length} more'
+          : '$totalLinks links';
     }
 
     return Text(
@@ -615,7 +621,8 @@ class GameDetailsAccordion extends StatelessWidget {
   String _formatLabel(String label) {
     return label
         .replaceAll('_', ' ')
-        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}')
+        .replaceAllMapped(
+            RegExp(r'([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}')
         .split(' ')
         .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');
@@ -687,36 +694,52 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.all(16),
-                decoration: _isExpanded ? BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
-                      Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ) : null,
+                decoration: _isExpanded
+                    ? BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.1),
+                            Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withOpacity(0.05),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
+                      )
+                    : null,
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: _isExpanded
-                            ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.15)
                             : Theme.of(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
-                        boxShadow: _isExpanded ? [
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ] : null,
+                        boxShadow: _isExpanded
+                            ? [
+                                BoxShadow(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
                       ),
                       child: Icon(
                         widget.icon,
@@ -731,12 +754,15 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                         children: [
                           Text(
                             widget.title,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: _isExpanded
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: _isExpanded
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
                           ),
                           if (!_isExpanded && widget.preview != null) ...[
                             const SizedBox(height: 4),
@@ -752,7 +778,10 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                         Icons.keyboard_arrow_down,
                         color: _isExpanded
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                       ),
                     ),
                   ],

@@ -2,7 +2,6 @@
 // ALL IMAGES GRID
 // ==================================================
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/utils/image_utils.dart';
@@ -67,7 +66,8 @@ class AllImagesGrid extends StatelessWidget {
                     imageUrl: ImageUtils.getMediumImageUrl(images[index]),
                     fit: BoxFit.cover,
                     placeholder: Container(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: const Center(child: CircularProgressIndicator()),
                     ),
                   ),

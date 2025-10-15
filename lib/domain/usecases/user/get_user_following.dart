@@ -12,17 +12,20 @@ class GetUserFollowing extends UseCase<List<User>, GetUserFollowingParams> {
   GetUserFollowing(this.repository);
 
   @override
-  Future<Either<Failure, List<User>>> call(GetUserFollowingParams params) async {
+  Future<Either<Failure, List<User>>> call(
+      GetUserFollowingParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
     if (params.limit <= 0) {
-      return const Left(ValidationFailure(message: 'Limit must be greater than 0'));
+      return const Left(
+          ValidationFailure(message: 'Limit must be greater than 0'));
     }
 
     if (params.offset < 0) {
-      return const Left(ValidationFailure(message: 'Offset cannot be negative'));
+      return const Left(
+          ValidationFailure(message: 'Offset cannot be negative'));
     }
 
     return await repository.getUserFollowing(
@@ -47,13 +50,13 @@ class GetUserFollowingParams extends Equatable {
   });
 
   // Convenience constructors
-  GetUserFollowingParams.firstPage({
+  const GetUserFollowingParams.firstPage({
     required this.userId,
     this.currentUserId,
     this.limit = 20,
   }) : offset = 0;
 
-  GetUserFollowingParams.nextPage({
+  const GetUserFollowingParams.nextPage({
     required this.userId,
     this.currentUserId,
     required int currentCount,

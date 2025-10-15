@@ -7,10 +7,8 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../widgets/game_card.dart';
-import '../../widgets/game_card_shimmer.dart';
 import '../../widgets/game_list_shimmer.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../game_detail/game_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -137,7 +135,8 @@ class _SearchPageState extends State<SearchPage> {
                   builder: (context, state) {
                     if (_showRecentSearches && state is GameInitial) {
                       return _buildInitialView();
-                    } else if (state is GameSearchLoading && state.games.isEmpty) {
+                    } else if (state is GameSearchLoading &&
+                        state.games.isEmpty) {
                       return const GameListShimmer();
                     } else if (state is GameSearchLoaded) {
                       return _buildSearchResults(state);
@@ -198,13 +197,13 @@ class _SearchPageState extends State<SearchPage> {
               ),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                icon: const Icon(Icons.clear_rounded),
-                onPressed: _clearSearch,
-              )
+                      icon: const Icon(Icons.clear_rounded),
+                      onPressed: _clearSearch,
+                    )
                   : IconButton(
-                icon: const Icon(Icons.tune_rounded),
-                onPressed: _showFilters,
-              ),
+                      icon: const Icon(Icons.tune_rounded),
+                      onPressed: _showFilters,
+                    ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: OutlineInputBorder(
@@ -232,22 +231,28 @@ class _SearchPageState extends State<SearchPage> {
             builder: (context, state) {
               if (state is GameSearchLoaded && state.games.isNotEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+                  padding:
+                      const EdgeInsets.only(top: AppConstants.paddingSmall),
                   child: Row(
                     children: [
                       Text(
                         'Found ${state.games.length} games',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                       if (!state.hasReachedMax) ...[
                         const Text(' • '),
                         Text(
                           'Scroll for more',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                       ],
                       const Spacer(),
@@ -291,15 +296,15 @@ class _SearchPageState extends State<SearchPage> {
                 Text(
                   'Discover Games',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: AppConstants.paddingSmall),
                 Text(
                   'Search for your favorite games and discover new ones',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -313,14 +318,16 @@ class _SearchPageState extends State<SearchPage> {
             Text(
               'Recent Searches',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _recentSearches.map((search) => _buildSearchChip(search)).toList(),
+              children: _recentSearches
+                  .map((search) => _buildSearchChip(search))
+                  .toList(),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
           ],
@@ -329,8 +336,8 @@ class _SearchPageState extends State<SearchPage> {
           Text(
             'Popular Searches',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: AppConstants.paddingSmall),
           Wrap(
@@ -398,8 +405,8 @@ class _SearchPageState extends State<SearchPage> {
             Text(
               'Try searching for something else or check your spelling',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppConstants.paddingLarge),
@@ -442,17 +449,6 @@ class _SearchPageState extends State<SearchPage> {
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
           );
         },
-      ),
-    );
-  }
-
-
-  void _toggleWishlist(int gameId) {
-    // TODO: Implement wishlist toggle
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Wishlist feature coming soon!'),
-        duration: const Duration(seconds: 2),
       ),
     );
   }

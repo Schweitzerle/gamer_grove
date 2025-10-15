@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 
@@ -16,7 +15,6 @@ class TopThreeGameItem extends StatelessWidget {
     required this.game,
     required this.index,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -54,21 +52,27 @@ class TopThreeGameItem extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: game.coverUrl != null
                     ? CachedNetworkImage(
-                  imageUrl: game.coverUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: const Icon(Icons.games),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: const Icon(Icons.games),
-                  ),
-                )
+                        imageUrl: game.coverUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          child: const Icon(Icons.games),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          child: const Icon(Icons.games),
+                        ),
+                      )
                     : Container(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  child: const Icon(Icons.games),
-                ),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: const Icon(Icons.games),
+                      ),
               ),
             ),
           ),

@@ -57,7 +57,6 @@ class NetworkTypeModel extends NetworkType {
     return null;
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,11 +1,5 @@
-// ==================================================
-// PLATFORM BLOC STATES
-// ==================================================
-
-// lib/presentation/blocs/platform/game_engine_state.dart
 import 'package:equatable/equatable.dart';
-import 'package:gamer_grove/domain/entities/game/game_engine.dart';
-import '../../../domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
 import '../../../domain/entities/game/game.dart';
 
 abstract class CompanyState extends Equatable {
@@ -20,11 +14,11 @@ class CompanyInitial extends CompanyState {}
 class CompanyLoading extends CompanyState {}
 
 class CompanyDetailsLoaded extends CompanyState {
-  final GameEngine gameEngine;
+  final Company company;
   final List<Game> games;
 
   const CompanyDetailsLoaded({
-    required this.gameEngine,
+    required this.company,
     required this.games,
   });
 
@@ -32,7 +26,7 @@ class CompanyDetailsLoaded extends CompanyState {
   int get gameCount => games.length;
 
   @override
-  List<Object> get props => [gameEngine, games];
+  List<Object> get props => [company, games];
 }
 
 class CompanyError extends CompanyState {

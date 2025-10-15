@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +28,6 @@ import '../../domain/entities/game/game.dart';
 import '../../domain/entities/franchise.dart';
 import '../../domain/entities/collection/collection.dart';
 import '../../presentation/widgets/sections/franchise_collection_section.dart';
-import '../constants/app_constants.dart';
 
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
@@ -50,22 +48,21 @@ class Navigations {
     );
   }
 
-
   // ==========================================
   // 🆕 LOCAL ALL GAMES METHODS (mit bereits gefetchten Daten)
   // ==========================================
 
   /// Generic method for enriched all games screen (replaces LocalAllGamesScreen)
   static void navigateToLocalAllGames(
-      BuildContext context, {
-        required String title,
-        String? subtitle,
-        required List<Game> games,
-        bool showFilters = true,
-        bool showSearch = true,
-        bool blurRated = false,
-        bool showViewToggle = true,
-      }) {
+    BuildContext context, {
+    required String title,
+    String? subtitle,
+    required List<Game> games,
+    bool showFilters = true,
+    bool showSearch = true,
+    bool blurRated = false,
+    bool showViewToggle = true,
+  }) {
     final userId = _getCurrentUserId(context);
 
     Navigator.of(context).push(
@@ -86,9 +83,9 @@ class Navigations {
 
   /// Navigate to all games in a franchise
   static void navigateToFranchiseGames(
-      BuildContext context,
-      Franchise franchise,
-      ) {
+    BuildContext context,
+    Franchise franchise,
+  ) {
     final games = franchise.games ?? [];
     navigateToLocalAllGames(
       context,
@@ -102,9 +99,9 @@ class Navigations {
 
   /// Navigate to all games in a collection
   static void navigateToCollectionGames(
-      BuildContext context,
-      Collection collection,
-      ) {
+    BuildContext context,
+    Collection collection,
+  ) {
     final games = collection.games ?? [];
     navigateToLocalAllGames(
       context,
@@ -116,7 +113,8 @@ class Navigations {
     );
   }
 
-  static void navigateToEventGames(BuildContext context, SeriesItem item, Event event) {
+  static void navigateToEventGames(
+      BuildContext context, SeriesItem item, Event event) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
@@ -127,7 +125,8 @@ class Navigations {
     );
   }
 
-  static void navigateToCharacterGames(BuildContext context, SeriesItem item, Character character) {
+  static void navigateToCharacterGames(
+      BuildContext context, SeriesItem item, Character character) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
@@ -142,12 +141,13 @@ class Navigations {
     final authState = context.read<AuthBloc>().state;
     return authState is Authenticated ? authState.user.id : null;
   }
+
   /// Navigate to similar games list
   static void navigateToSimilarGames(
-      BuildContext context,
-      String gameName,
-      List<Game> similarGames,
-      ) {
+    BuildContext context,
+    String gameName,
+    List<Game> similarGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'Similar to $gameName',
@@ -161,10 +161,10 @@ class Navigations {
 
   /// Navigate to game DLCs list
   static void navigateToGameDLCs(
-      BuildContext context,
-      String gameName,
-      List<Game> dlcs,
-      ) {
+    BuildContext context,
+    String gameName,
+    List<Game> dlcs,
+  ) {
     navigateToLocalAllGames(
       context,
       title: '$gameName DLCs',
@@ -177,10 +177,10 @@ class Navigations {
 
   /// Navigate to game expansions list
   static void navigateToGameExpansions(
-      BuildContext context,
-      String gameName,
-      List<Game> expansions,
-      ) {
+    BuildContext context,
+    String gameName,
+    List<Game> expansions,
+  ) {
     navigateToLocalAllGames(
       context,
       title: '$gameName Expansions',
@@ -193,9 +193,9 @@ class Navigations {
 
   /// Navigate to user's wishlist (local data)
   static void navigateToUserWishlist(
-      BuildContext context,
-      List<Game> wishlistGames,
-      ) {
+    BuildContext context,
+    List<Game> wishlistGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'My Wishlist',
@@ -208,9 +208,9 @@ class Navigations {
 
   /// Navigate to user's rated games (local data)
   static void navigateToUserRatedGames(
-      BuildContext context,
-      List<Game> ratedGames,
-      ) {
+    BuildContext context,
+    List<Game> ratedGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'My Rated Games',
@@ -223,9 +223,9 @@ class Navigations {
 
   /// Navigate to user's recommended games (local data)
   static void navigateToUserRecommendedGames(
-      BuildContext context,
-      List<Game> recommendedGames,
-      ) {
+    BuildContext context,
+    List<Game> recommendedGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'My Recommendations',
@@ -249,9 +249,9 @@ class Navigations {
   }
 
   static void navigateToRatedGames(
-      BuildContext context,
-      List<Game> ratedGames,
-      ) {
+    BuildContext context,
+    List<Game> ratedGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'My Rated Games',
@@ -283,11 +283,10 @@ class Navigations {
     );
   }
 
-
   static void navigateToRecommendations(
-      BuildContext context,
-      List<Game> recommendedGames,
-      ) {
+    BuildContext context,
+    List<Game> recommendedGames,
+  ) {
     navigateToLocalAllGames(
       context,
       title: 'My Recommendations',
@@ -312,14 +311,15 @@ class Navigations {
   static void navigateToFranchiseDetail(BuildContext context, int franchiseId) {
     // TODO: Implement franchise detail screen
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Franchise detail screen coming soon!')),
+      const SnackBar(content: Text('Franchise detail screen coming soon!')),
     );
   }
 
-  static void navigateToCollectionDetail(BuildContext context, int collectionId) {
+  static void navigateToCollectionDetail(
+      BuildContext context, int collectionId) {
     // TODO: Implement collection detail screen
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Collection detail screen coming soon!')),
+      const SnackBar(content: Text('Collection detail screen coming soon!')),
     );
   }
 
@@ -344,12 +344,12 @@ class Navigations {
   }
 
   static void navigateToAllEvents(
-      BuildContext context, {
-        required Game game,
-        required List<Event> events,
-        String? customTitle,
-        String? customSubtitle,
-      }) {
+    BuildContext context, {
+    required Game game,
+    required List<Event> events,
+    String? customTitle,
+    String? customSubtitle,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AllEventsScreen(
@@ -366,14 +366,14 @@ class Navigations {
 
   /// Navigate to all events screen (generic)
   static void navigateToAllEventsGeneric(
-      BuildContext context, {
-        required String title,
-        String? subtitle,
-        required List<Event> events,
-        Game? game,
-        bool showFilters = true,
-        bool showSearch = true,
-      }) {
+    BuildContext context, {
+    required String title,
+    String? subtitle,
+    required List<Event> events,
+    Game? game,
+    bool showFilters = true,
+    bool showSearch = true,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AllEventsScreen(
@@ -390,10 +390,10 @@ class Navigations {
 
   // Ersetze die Navigation mit User-aware Events:
   static void navigateToEventDetails(
-      BuildContext context, {
-        required int eventId,
-        Game? game,
-      }) {
+    BuildContext context, {
+    required int eventId,
+    Game? game,
+  }) {
     // Get current user
     final authState = context.read<AuthBloc>().state;
     String? userId;
@@ -425,7 +425,8 @@ class Navigations {
     );
   }
 
-  static void navigateToCharacterDetail(BuildContext context, int characterId, {Character? character}) {
+  static void navigateToCharacterDetail(BuildContext context, int characterId,
+      {Character? character}) {
     print('🎭 Navigation: Opening character detail for ID: $characterId');
     print('🎭 Navigation: Pre-loaded character: ${character?.name ?? "none"}');
 
@@ -436,7 +437,8 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print('🎭 Navigation: Creating CharacterBloc for ID: $characterId');
+                print(
+                    '🎭 Navigation: Creating CharacterBloc for ID: $characterId');
                 return sl<CharacterBloc>();
               },
             ),
@@ -455,10 +457,10 @@ class Navigations {
   }
 
   static void navigateToPlatformDetails(
-      BuildContext context, {
-        required int platformId,
-        Game? game,
-      }) {
+    BuildContext context, {
+    required int platformId,
+    Game? game,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -466,7 +468,8 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print('🎭 Navigation: Creating PlatformBloc for ID: $platformId');
+                print(
+                    '🎭 Navigation: Creating PlatformBloc for ID: $platformId');
                 return sl<PlatformBloc>();
               },
             ),
@@ -484,10 +487,10 @@ class Navigations {
   }
 
   static void navigateToGameEngineDetails(
-      BuildContext context, {
-        required int gameEngineId,
-        Game? game,
-      }) {
+    BuildContext context, {
+    required int gameEngineId,
+    Game? game,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -495,7 +498,8 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print('🎭 Navigation: Creating GameEngineBloc for ID: $gameEngineId');
+                print(
+                    '🎭 Navigation: Creating GameEngineBloc for ID: $gameEngineId');
                 return sl<GameEngineBloc>();
               },
             ),
@@ -514,10 +518,10 @@ class Navigations {
 
   /// Navigate to event details screen with event object
   static void navigateToEventDetailsWithEvent(
-      BuildContext context, {
-        required Event event,
-        List<Game>? featuredGames,
-      }) {
+    BuildContext context, {
+    required Event event,
+    List<Game>? featuredGames,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EventDetailScreen(
@@ -626,7 +630,6 @@ class Navigations {
   // 🎪 EVENT-SPECIFIC GAME NAVIGATION
   // ==========================================
 
-
   /// Navigate to all games that have events
   static void navigateToGamesWithEvents(BuildContext context) {
     // TODO: Implement games with events screen
@@ -641,12 +644,13 @@ class Navigations {
 
   /// Open event live stream
   static Future<void> openEventLiveStream(
-      BuildContext context,
-      Event event,
-      ) async {
+    BuildContext context,
+    Event event,
+  ) async {
     if (!event.hasLiveStream) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No live stream available for this event')),
+        const SnackBar(
+            content: Text('No live stream available for this event')),
       );
       return;
     }
@@ -676,7 +680,6 @@ class Navigations {
     );
   }
 
-
   // ==========================================
   // 🎪 BULK EVENT OPERATIONS (for later)
   // ==========================================
@@ -693,7 +696,8 @@ class Navigations {
   static void navigateToEventNotifications(BuildContext context) {
     // TODO: Implement event notifications settings
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Event notifications settings coming soon!')),
+      const SnackBar(
+          content: Text('Event notifications settings coming soon!')),
     );
   }
 }

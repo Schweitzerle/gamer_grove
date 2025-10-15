@@ -3,7 +3,6 @@
 // ==================================================
 
 // lib/core/error/error_handler.dart
-import '../../domain/entities/game/game.dart';
 import 'failures.dart';
 
 class ErrorHandler {
@@ -11,17 +10,17 @@ class ErrorHandler {
     switch (failure.runtimeType) {
       case ServerFailure:
         final serverFailure = failure as ServerFailure;
-        return serverFailure.message ?? 'Server error occurred';
+        return serverFailure.message;
       case NetworkFailure:
         return 'Please check your internet connection';
       case CacheFailure:
         return 'Local data error occurred';
       case AuthenticationFailure:
         final authFailure = failure as AuthenticationFailure;
-        return authFailure.message ?? 'Authentication failed';
+        return authFailure.message;
       case ValidationFailure:
         final validationFailure = failure as ValidationFailure;
-        return validationFailure.message ?? 'Validation error occurred';
+        return validationFailure.message;
       default:
         return 'An unexpected error occurred';
     }

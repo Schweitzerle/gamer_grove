@@ -38,21 +38,22 @@ class CharacterDetailPage extends StatelessWidget {
         final userId = authState is Authenticated ? authState.user.id : null;
         print('🎭 CharacterDetailPage: Adding GetCharacterDetailsEvent');
         bloc.add(GetCharacterDetailsEvent(
-          characterId: characterId,
-          includeGames: true, // 🆕 Explicitly set to true
-          userId: userId
-        ));
+            characterId: characterId,
+            includeGames: true, // 🆕 Explicitly set to true
+            userId: userId));
         return bloc;
       },
       child: BlocBuilder<CharacterBloc, CharacterState>(
         builder: (context, state) {
-          print('🎭 CharacterDetailPage: State changed to ${state.runtimeType}');
+          print(
+              '🎭 CharacterDetailPage: State changed to ${state.runtimeType}');
 
           if (state is CharacterLoading) {
             print('🔄 CharacterDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is CharacterDetailsLoaded) {
-            print('✅ CharacterDetailPage: Loaded state - ${state.character.name} with ${state.games.length} games');
+            print(
+                '✅ CharacterDetailPage: Loaded state - ${state.character.name} with ${state.games.length} games');
             return CharacterDetailScreen(
               character: state.character,
               games: state.games,
@@ -69,7 +70,6 @@ class CharacterDetailPage extends StatelessWidget {
     );
   }
 
-
   Widget _buildLiveLoadingState(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -77,7 +77,8 @@ class CharacterDetailPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -105,7 +106,8 @@ class CharacterDetailPage extends StatelessWidget {
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -135,9 +137,9 @@ class CharacterDetailPage extends StatelessWidget {
               Text(
                 'Failed to Load Character',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                 textAlign: TextAlign.center,
               ),
 
@@ -150,16 +152,17 @@ class CharacterDetailPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontFamily: 'monospace',
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily: 'monospace',
+                      ),
                 ),
               ),
 
@@ -171,8 +174,8 @@ class CharacterDetailPage extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     context.read<CharacterBloc>().add(
-                      GetCharacterDetailsEvent(characterId: characterId),
-                    );
+                          GetCharacterDetailsEvent(characterId: characterId),
+                        );
                   },
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry Loading'),

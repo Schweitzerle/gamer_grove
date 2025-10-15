@@ -240,7 +240,7 @@ class DateFormatter {
       return 'Starts ${formatEventDate(start)}';
     }
 
-    final startTime = _formatTime(start);
+    _formatTime(start);
     final endTime = _formatTime(end);
 
     // Same day event
@@ -394,7 +394,8 @@ class DateFormatter {
   }
 
   /// Format live event indicator
-  static String formatLiveEventIndicator(DateTime startTime, DateTime? endTime) {
+  static String formatLiveEventIndicator(
+      DateTime startTime, DateTime? endTime) {
     final now = DateTime.now();
 
     if (endTime != null && endTime.isAfter(now) && startTime.isBefore(now)) {
@@ -427,32 +428,54 @@ class DateFormatter {
 
   static String _getDayName(int weekday) {
     const days = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-      'Friday', 'Saturday', 'Sunday'
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
     ];
     return days[weekday - 1];
   }
 
   static String _getDayNameShort(int weekday) {
-    const days = [
-      'Mon', 'Tue', 'Wed', 'Thu',
-      'Fri', 'Sat', 'Sun'
-    ];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
   }
 
   static String _getMonthName(int month) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return months[month - 1];
   }
 
   static String _getMonthNameShort(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[month - 1];
   }
@@ -518,6 +541,4 @@ class DateFormatter {
 
     return '$days day event';
   }
-
 }
-

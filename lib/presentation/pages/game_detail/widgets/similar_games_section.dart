@@ -5,13 +5,9 @@
 // lib/presentation/pages/game_detail/widgets/similar_games_section.dart
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/navigations.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../core/utils/image_utils.dart';
 import '../../../../domain/entities/game/game.dart';
-import '../game_detail_page.dart';
 
 class SimilarGamesSection extends StatelessWidget {
   final List<Game> games;
@@ -31,8 +27,8 @@ class SimilarGamesSection extends StatelessWidget {
           Text(
             'Similar Games',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: AppConstants.paddingMedium),
           buildHorizontalGameList(games)
@@ -57,8 +53,8 @@ class SimilarGamesSection extends StatelessWidget {
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
                 game: game,
-                onTap: () => Navigations.navigateToGameDetail(game.id, context)
-            ),
+                onTap: () =>
+                    Navigations.navigateToGameDetail(game.id, context)),
           );
         },
       ),

@@ -2,9 +2,6 @@
 // ENHANCED USER STATES CONTENT - With Integrated Functions
 // ==================================================
 
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +51,9 @@ class UserStatesContent extends StatelessWidget {
             Expanded(
               child: _buildMediumInfoCard(
                 context,
-                icon: game.isWishlisted == true ? Icons.favorite : Icons.favorite_outline,
+                icon: game.isWishlisted == true
+                    ? Icons.favorite
+                    : Icons.favorite_outline,
                 label: 'Wishlist',
                 value: game.isWishlisted == true ? 'Added' : 'Add',
                 color: game.isWishlisted == true ? Colors.red : Colors.grey,
@@ -74,7 +73,9 @@ class UserStatesContent extends StatelessWidget {
             Expanded(
               child: _buildMediumInfoCard(
                 context,
-                icon: game.isRecommended == true ? Icons.thumb_up : Icons.thumb_up_outlined,
+                icon: game.isRecommended == true
+                    ? Icons.thumb_up
+                    : Icons.thumb_up_outlined,
                 label: 'Recommend',
                 value: game.isRecommended == true ? 'Recommended' : 'Recommend',
                 color: game.isRecommended == true ? Colors.green : Colors.grey,
@@ -89,7 +90,9 @@ class UserStatesContent extends StatelessWidget {
             Expanded(
               child: _buildMediumInfoCard(
                 context,
-                icon: game.isInTopThree == true ? Icons.emoji_events : Icons.emoji_events_outlined,
+                icon: game.isInTopThree == true
+                    ? Icons.emoji_events
+                    : Icons.emoji_events_outlined,
                 label: 'Top 3',
                 value: game.isInTopThree == true
                     ? '#${game.topThreePosition ?? 1}'
@@ -148,11 +151,9 @@ class UserStatesContent extends StatelessWidget {
     final isCurrentlyWishlisted = game.isWishlisted == true;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-            isCurrentlyWishlisted
-                ? 'Removed from wishlist'
-                : 'Added to wishlist'
-        ),
+        content: Text(isCurrentlyWishlisted
+            ? 'Removed from wishlist'
+            : 'Added to wishlist'),
         backgroundColor: isCurrentlyWishlisted ? Colors.grey : Colors.red,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -181,11 +182,9 @@ class UserStatesContent extends StatelessWidget {
     final isCurrentlyRecommended = game.isRecommended == true;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-            isCurrentlyRecommended
-                ? 'Recommendation removed'
-                : 'Game recommended'
-        ),
+        content: Text(isCurrentlyRecommended
+            ? 'Recommendation removed'
+            : 'Game recommended'),
         backgroundColor: isCurrentlyRecommended ? Colors.grey : Colors.green,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -260,14 +259,14 @@ class UserStatesContent extends StatelessWidget {
 
   // ✅ Medium-sized Info Card (unchanged)
   Widget _buildMediumInfoCard(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-        required Color color,
-        required bool isActive,
-        VoidCallback? onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required bool isActive,
+    VoidCallback? onTap,
+  }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -311,10 +310,13 @@ class UserStatesContent extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 11,
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
                 textAlign: TextAlign.center,
               ),
 
@@ -324,10 +326,10 @@ class UserStatesContent extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isActive ? color : Colors.grey,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
+                      color: isActive ? color : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

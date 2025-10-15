@@ -6,11 +6,9 @@ import '../../core/network/network_info.dart';
 import '../../domain/entities/user/user.dart';
 import '../../domain/entities/user/user_relationship.dart';
 import '../../domain/entities/user/user_gaming_activity.dart';
-import '../../domain/entities/game/game.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/supabase/supabase_remote_datasource.dart';
-import '../models/user_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final SupabaseRemoteDataSource remoteDataSource;
@@ -536,7 +534,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRecommendedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>>
+      getUserPublicRecommendedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,
@@ -920,7 +919,8 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, List<String>>> suggestUsernames(String baseUsername) async {
+  Future<Either<Failure, List<String>>> suggestUsernames(
+      String baseUsername) async {
     try {
       final suggestions = await remoteDataSource.suggestUsernames(baseUsername);
       return Right(suggestions);

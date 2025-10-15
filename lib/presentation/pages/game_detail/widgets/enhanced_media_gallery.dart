@@ -90,7 +90,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
       }
     }
 
-    if(widget.event != null){
+    if (widget.event != null) {
       if (widget.event!.videos.isNotEmpty) {
         tabs.add(Tab(text: 'Videos (${widget.event!.videos.length})'));
         tabViews.add(_buildVideosView(widget.event!.videos));
@@ -103,19 +103,22 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Card(
         elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withOpacity(0.3),
         child: Column(
           children: [
-              TabBar(
-                controller: _tabController,
-                tabs: tabs,
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor:
-                    Theme.of(context).colorScheme.onSurfaceVariant,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-                indicatorWeight: 3,
-                isScrollable: true,
-              ),
+            TabBar(
+              controller: _tabController,
+              tabs: tabs,
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor:
+                  Theme.of(context).colorScheme.onSurfaceVariant,
+              indicatorColor: Theme.of(context).colorScheme.primary,
+              indicatorWeight: 3,
+              isScrollable: true,
+            ),
             SizedBox(
               height: 320, // Optimierte Höhe
               child: tabs.length > 1
@@ -242,7 +245,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                   imageUrl: ImageUtils.getMediumImageUrl(imageUrl),
                   fit: BoxFit.cover,
                   placeholder: Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     child: const Center(child: CircularProgressIndicator()),
                   ),
                   errorWidget: Container(
@@ -288,7 +292,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                         ),
                         if (totalCount != null)
                           Text(
-                            '+${totalCount! - index} more',
+                            '+${totalCount - index} more',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                               fontSize: isLarge ? 12 : 10,
@@ -353,9 +357,9 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                 Expanded(
                   flex: 2,
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.black87,
-                      borderRadius: const BorderRadius.vertical(
+                      borderRadius: BorderRadius.vertical(
                         top: Radius.circular(12),
                       ),
                     ),
@@ -453,7 +457,10 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
       child: Container(
         width: 200,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).colorScheme.outline.withOpacity(0.3),

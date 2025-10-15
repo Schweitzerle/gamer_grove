@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../domain/entities/character/character.dart';
-import '../../../widgets/accordion_tile.dart';
 import '../../../widgets/sections/game_details_accordion.dart';
 
 class CharacterDetailsAccordion extends StatelessWidget {
@@ -57,8 +56,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
         Text(
           'Character Details',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );
@@ -110,9 +109,9 @@ class CharacterDetailsAccordion extends StatelessWidget {
     return Column(
       children: accordionItems
           .map((item) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: item,
-      ))
+                padding: const EdgeInsets.only(bottom: 8),
+                child: item,
+              ))
           .toList(),
     );
   }
@@ -145,8 +144,7 @@ class CharacterDetailsAccordion extends StatelessWidget {
             value: character.countryName!,
             color: Colors.orange,
           ),
-        if (character.akas.isNotEmpty)
-          _buildAlternativeNamesDetail(context),
+        if (character.akas.isNotEmpty) _buildAlternativeNamesDetail(context),
       ],
     );
   }
@@ -214,12 +212,12 @@ class CharacterDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildDetailRow(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -241,16 +239,16 @@ class CharacterDetailsAccordion extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ],
             ),
@@ -272,7 +270,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
               color: Colors.amber.withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Icon(Icons.alternate_email, size: 16, color: Colors.amber),
+            child: const Icon(Icons.alternate_email,
+                size: 16, color: Colors.amber),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -282,9 +281,9 @@ class CharacterDetailsAccordion extends StatelessWidget {
                 Text(
                   'Alternative Names',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Wrap(
@@ -292,7 +291,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
                   runSpacing: 4,
                   children: character.akas.map((name) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.amber.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -317,11 +317,11 @@ class CharacterDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildLinkTile(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String url,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String url,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -370,16 +370,16 @@ class CharacterDetailsAccordion extends StatelessWidget {
             Text(
               'No Additional Details',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               'Extended character information is not available.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade500,
-              ),
+                    color: Colors.grey.shade500,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -398,8 +398,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
     return Text(
       items.take(2).join(' • '),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Colors.grey.shade600,
-      ),
+            color: Colors.grey.shade600,
+          ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -409,8 +409,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
     return Text(
       'ID: ${character.id} • ${character.gameIds.length} games',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Colors.grey.shade600,
-      ),
+            color: Colors.grey.shade600,
+          ),
     );
   }
 
@@ -418,8 +418,8 @@ class CharacterDetailsAccordion extends StatelessWidget {
     return Text(
       character.url != null ? 'Official page available' : 'No external links',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Colors.grey.shade600,
-      ),
+            color: Colors.grey.shade600,
+          ),
     );
   }
 

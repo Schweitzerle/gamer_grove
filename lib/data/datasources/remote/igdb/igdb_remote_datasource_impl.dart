@@ -1,11 +1,9 @@
 // lib/data/datasources/remote/igdb_remote_datasource_impl.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 
 // Domain Entities
-import '../../../../domain/entities/character/character.dart';
 import '../../../../domain/entities/character/character_gender.dart';
 import '../../../../domain/entities/character/character_species.dart';
 import '../../../../domain/entities/company/company_website.dart';
@@ -131,8 +129,6 @@ import 'igdb_isolated_client.dart';
 
 class IGDBRemoteDataSourceImpl implements IGDBRemoteDataSource {
   final http.Client client;
-  String? _accessToken;
-  DateTime? _tokenExpiry;
 
   IGDBRemoteDataSourceImpl({http.Client? client})
       : client = client ?? http.Client();
@@ -314,7 +310,7 @@ platforms.platform_logo.checksum,
     json.forEach((key, value) {
       final type = value.runtimeType.toString();
       if (value is Map) {
-        print('  $key: $type with keys: ${(value as Map).keys.join(", ")}');
+        print('  $key: $type with keys: ${(value).keys.join(", ")}');
       } else if (value is List && value.isNotEmpty) {
         final firstItemType = value.first.runtimeType.toString();
         print('  $key: List<$firstItemType> (${value.length} items)');
@@ -1196,7 +1192,7 @@ platforms.platform_logo.checksum,
     try {
       final detailed = await getAlternativeNamesDetailed(gameIds);
       return detailed
-          .map((alt) => alt.name ?? '')
+          .map((alt) => alt.name)
           .where((name) => name.isNotEmpty)
           .toList();
     } catch (e) {
@@ -1322,7 +1318,7 @@ platforms.platform_logo.checksum,
 
   @override
   Future<List<PlatformModel>> getPopularPlatforms() async {
-    final body = '''
+    const body = '''
       where category != null;
       fields id, abbreviation, alternative_name, category, checksum, created_at, generation, name, platform_logo, slug, summary, updated_at, url, versions;
       sort generation desc;
@@ -1497,7 +1493,6 @@ platforms.platform_logo.checksum,
     }
   }
 
-
   @override
   Future<List<GameModel>> getGamesByGameEngines({
     required List<int> gameEngineIds,
@@ -1520,10 +1515,35 @@ platforms.platform_logo.checksum,
     return await _makeRequest(
       'games',
       body,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
     );
   }
 
+  @override
+  Future<List<GameModel>> getGamesByCompanies({
+    required List<int> companyIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  }) async {
+    if (companyIds.isEmpty) return [];
+
+    final companyIdsString = companyIds.join(',');
+    final body = '''
+      where involved_companies = ($companyIdsString);
+      fields $_basicGameFields;
+      sort $sortBy $sortOrder;
+      limit $limit;
+      offset $offset;
+    ''';
+
+    return await _makeRequest(
+      'games',
+      body,
+      (json) => GameModel.fromJson(json),
+    );
+  }
 
   // Continue with remaining methods...
   // Due to length constraints, I'll provide the remaining methods in abbreviated form
@@ -2126,7 +2146,6 @@ platforms.platform_logo.checksum,
     }
   }
 
-
 // 🆕 ADD this method to parse characters with mugshot data:
   CharacterModel? _parseCharacterWithMugShot(Map<String, dynamic> data) {
     try {
@@ -2180,10 +2199,7 @@ platforms.platform_logo.checksum,
 // 🆕 ADD helper methods if they don't exist:
   List<String> _parseStringList(dynamic data) {
     if (data is List) {
-      return data
-          .where((item) => item is String)
-          .map((item) => item.toString())
-          .toList();
+      return data.whereType<String>().map((item) => item.toString()).toList();
     }
     return [];
   }
@@ -2379,7 +2395,7 @@ platforms.platform_logo.checksum,
     final companies = await _makeRequest(
       'companies',
       body,
-          (json) => CompanyModel.fromJson(json),
+      (json) => CompanyModel.fromJson(json),
     );
 
     if (companies.isEmpty) {
@@ -2646,7 +2662,7 @@ platforms.platform_logo.checksum,
     final collections = await searchCollections(name);
 
     for (final collection in collections) {
-      if (collection.name?.toLowerCase() == name.toLowerCase()) {
+      if (collection.name.toLowerCase() == name.toLowerCase()) {
         return collection;
       }
     }
@@ -2768,7 +2784,7 @@ platforms.platform_logo.checksum,
     final franchises = await searchFranchises(name);
 
     for (final franchise in franchises) {
-      if (franchise.name?.toLowerCase() == name.toLowerCase()) {
+      if (franchise.name.toLowerCase() == name.toLowerCase()) {
         return franchise;
       }
     }
@@ -3972,7 +3988,7 @@ platforms.platform_logo.checksum,
 
   @override
   Future<List<GenreModel>> getAllGenres() async {
-    final body = '''
+    const body = '''
       fields id, name, slug, checksum, created_at, updated_at, url;
       sort name asc;
       limit 100;
@@ -3987,7 +4003,7 @@ platforms.platform_logo.checksum,
 
   @override
   Future<List<PlatformModel>> getAllPlatforms() async {
-    final body = '''
+    const body = '''
       fields id, name, abbreviation, alternative_name, category, checksum, created_at, generation, platform_family, platform_logo, platform_type, slug, summary, updated_at, url, versions, websites;
       sort name asc;
       limit 200;

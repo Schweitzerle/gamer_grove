@@ -4,17 +4,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
 import '../../repositories/user_repository.dart';
 import '../base_usecase.dart';
 
-class GetUserPublicRatedGames extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
+class GetUserPublicRatedGames
+    extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
   final UserRepository repository;
 
   GetUserPublicRatedGames(this.repository);
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> call(GetUserPublicGamesParams params) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> call(
+      GetUserPublicGamesParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -28,13 +29,15 @@ class GetUserPublicRatedGames extends UseCase<List<Map<String, dynamic>>, GetUse
   }
 }
 
-class GetUserPublicRecommendedGames extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
+class GetUserPublicRecommendedGames
+    extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
   final UserRepository repository;
 
   GetUserPublicRecommendedGames(this.repository);
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> call(GetUserPublicGamesParams params) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> call(
+      GetUserPublicGamesParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -64,4 +67,3 @@ class GetUserPublicGamesParams extends Equatable {
   @override
   List<Object?> get props => [userId, currentUserId, limit, offset];
 }
-

@@ -45,10 +45,7 @@ class ExternalGameModel extends ExternalGame {
 
   static List<int> _parseCountries(dynamic data) {
     if (data is List) {
-      return data
-          .where((item) => item is int)
-          .map((item) => item as int)
-          .toList();
+      return data.whereType<int>().map((item) => item).toList();
     }
     return [];
   }
@@ -118,8 +115,11 @@ class ExternalGameModel extends ExternalGame {
 
 /// Extended version that can store expanded reference data
 class ExternalGameModelExpanded extends ExternalGameModel {
+  @override
   final String? platformName;
+  @override
   final String? sourceName;
+  @override
   final String? formatName;
 
   const ExternalGameModelExpanded({
@@ -162,8 +162,10 @@ class ExternalGameModelExpanded extends ExternalGameModel {
       mediaEnum: ExternalGameModel._parseMediaEnum(json['media']),
       // Extract expanded data
       platformName: JsonHelpers.extractNested<String>(json, 'platform.name'),
-      sourceName: JsonHelpers.extractNested<String>(json, 'external_game_source.name'),
-      formatName: JsonHelpers.extractNested<String>(json, 'game_release_format.format'),
+      sourceName:
+          JsonHelpers.extractNested<String>(json, 'external_game_source.name'),
+      formatName:
+          JsonHelpers.extractNested<String>(json, 'game_release_format.format'),
     );
   }
 }

@@ -1,6 +1,5 @@
 // data/repositories/game_repository_impl.dart
 import 'package:dartz/dartz.dart';
-import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
 import '../../core/errors/exceptions.dart';
@@ -216,7 +215,7 @@ class GameRepositoryImpl implements GameRepository {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       print('💥 GameRepository: Unexpected error getting games by IDs: $e');
-      return Left(ServerFailure(message: 'Failed to load games'));
+      return const Left(ServerFailure(message: 'Failed to load games'));
     }
   }
 
@@ -246,7 +245,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load popular games'));
+      return const Left(ServerFailure(message: 'Failed to load popular games'));
     }
   }
 
@@ -273,7 +272,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load upcoming games'));
+      return const Left(
+          ServerFailure(message: 'Failed to load upcoming games'));
     }
   }
 
@@ -299,7 +299,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load latest games'));
+      return const Left(ServerFailure(message: 'Failed to load latest games'));
     }
   }
 
@@ -327,7 +327,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load companies'));
+      return const Left(ServerFailure(message: 'Failed to load companies'));
     }
   }
 
@@ -348,7 +348,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load game websites'));
+      return const Left(ServerFailure(message: 'Failed to load game websites'));
     }
   }
 
@@ -370,7 +370,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load age ratings'));
+      return const Left(ServerFailure(message: 'Failed to load age ratings'));
     }
   }
 
@@ -395,7 +395,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load similar games'));
+      return const Left(ServerFailure(message: 'Failed to load similar games'));
     }
   }
 
@@ -416,7 +416,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load game DLCs'));
+      return const Left(ServerFailure(message: 'Failed to load game DLCs'));
     }
   }
 
@@ -437,7 +437,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load game expansions'));
+      return const Left(
+          ServerFailure(message: 'Failed to load game expansions'));
     }
   }
 
@@ -474,7 +475,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load wishlist'));
+      return const Left(ServerFailure(message: 'Failed to load wishlist'));
     }
   }
 
@@ -508,7 +509,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load recommendations'));
+      return const Left(
+          ServerFailure(message: 'Failed to load recommendations'));
     }
   }
 
@@ -541,7 +543,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load rated games'));
+      return const Left(ServerFailure(message: 'Failed to load rated games'));
     }
   }
 
@@ -588,7 +590,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load top 3 games'));
+      return const Left(ServerFailure(message: 'Failed to load top 3 games'));
     }
   }
 
@@ -616,7 +618,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to rate game'));
+      return const Left(ServerFailure(message: 'Failed to rate game'));
     }
   }
 
@@ -640,7 +642,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to toggle wishlist'));
+      return const Left(ServerFailure(message: 'Failed to toggle wishlist'));
     }
   }
 
@@ -664,7 +666,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to toggle recommendation'));
+      return const Left(
+          ServerFailure(message: 'Failed to toggle recommendation'));
     }
   }
 
@@ -696,7 +699,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load top rated games'));
+      return const Left(
+          ServerFailure(message: 'Failed to load top rated games'));
     }
   }
 
@@ -723,7 +727,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load newest games'));
+      return const Left(ServerFailure(message: 'Failed to load newest games'));
     }
   }
 
@@ -765,7 +769,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to load wishlist recent releases'));
     }
   }
@@ -807,7 +811,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to search games with filters'));
     }
   }
@@ -846,7 +850,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get games by genre'));
+      return const Left(ServerFailure(message: 'Failed to get games by genre'));
     }
   }
 
@@ -885,7 +889,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get games by platform'));
+      return const Left(
+          ServerFailure(message: 'Failed to get games by platform'));
     }
   }
 
@@ -922,7 +927,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get games by release year'));
     }
   }
@@ -961,7 +966,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get games by rating range'));
     }
   }
@@ -992,7 +997,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get genres'));
+      return const Left(ServerFailure(message: 'Failed to get genres'));
     }
   }
 
@@ -1022,7 +1027,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get platforms'));
+      return const Left(ServerFailure(message: 'Failed to get platforms'));
     }
   }
 
@@ -1054,7 +1059,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get filtered games'));
+      return const Left(ServerFailure(message: 'Failed to get filtered games'));
     }
   }
 
@@ -1088,7 +1093,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to perform advanced search'));
+      return const Left(
+          ServerFailure(message: 'Failed to perform advanced search'));
     }
   }
 
@@ -1115,7 +1121,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get search suggestions'));
+      return const Left(
+          ServerFailure(message: 'Failed to get search suggestions'));
     }
   }
 
@@ -1142,7 +1149,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get recent searches'));
+      return const Left(
+          ServerFailure(message: 'Failed to get recent searches'));
     }
   }
 
@@ -1163,7 +1171,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to save search query'));
+      return const Left(ServerFailure(message: 'Failed to save search query'));
     }
   }
 
@@ -1224,7 +1232,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get filtered wishlist'));
+      return const Left(
+          ServerFailure(message: 'Failed to get filtered wishlist'));
     }
   }
 
@@ -1302,7 +1311,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get filtered rated games'));
+      return const Left(
+          ServerFailure(message: 'Failed to get filtered rated games'));
     }
   }
 
@@ -1358,7 +1368,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get filtered recommended games'));
     }
   }
@@ -1400,7 +1410,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get collection summary'));
+      return const Left(
+          ServerFailure(message: 'Failed to get collection summary'));
     }
   }
 
@@ -1436,11 +1447,10 @@ class GameRepositoryImpl implements GameRepository {
       }
 
       // Extract successful results
-      final wishlist = results[0].fold((l) => <Game>[], (r) => r as List<Game>);
-      final rated = results[1].fold((l) => <Game>[], (r) => r as List<Game>);
-      final recommended =
-          results[2].fold((l) => <Game>[], (r) => r as List<Game>);
-      final topThree = results[3].fold((l) => <Game>[], (r) => r as List<Game>);
+      final wishlist = results[0].fold((l) => <Game>[], (r) => r);
+      final rated = results[1].fold((l) => <Game>[], (r) => r);
+      final recommended = results[2].fold((l) => <Game>[], (r) => r);
+      final topThree = results[3].fold((l) => <Game>[], (r) => r);
 
       final collections = {
         UserCollectionType.wishlist: wishlist,
@@ -1454,7 +1464,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get all user collections'));
+      return const Left(
+          ServerFailure(message: 'Failed to get all user collections'));
     }
   }
 
@@ -1475,7 +1486,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get gaming statistics'));
+      return const Left(
+          ServerFailure(message: 'Failed to get gaming statistics'));
     }
   }
 
@@ -1508,7 +1520,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to batch add to wishlist'));
+      return const Left(
+          ServerFailure(message: 'Failed to batch add to wishlist'));
     }
   }
 
@@ -1536,7 +1549,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to batch rate games'));
+      return const Left(ServerFailure(message: 'Failed to batch rate games'));
     }
   }
 
@@ -1576,9 +1589,9 @@ class GameRepositoryImpl implements GameRepository {
         }
       }
 
-      print('✅ GameRepository: Successfully converted ${characterEntities.length} characters');
+      print(
+          '✅ GameRepository: Successfully converted ${characterEntities.length} characters');
       return Right(characterEntities);
-
     } on ServerException catch (e) {
       print('❌ GameRepository: ServerException: ${e.message}');
       return Left(ServerFailure(message: e.message));
@@ -1592,9 +1605,9 @@ class GameRepositoryImpl implements GameRepository {
 // 🆕 ENHANCED CHARACTER DETAIL METHOD
 // ==========================================
 
-
   @override
-  Future<Either<Failure, Character>> getCharacterDetails(int characterId) async {
+  Future<Either<Failure, Character>> getCharacterDetails(
+      int characterId) async {
     try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
@@ -1603,7 +1616,8 @@ class GameRepositoryImpl implements GameRepository {
       print('🎭 GameRepository: Getting character details: $characterId');
 
       // Das ist korrekt - für EINEN Character
-      final characterData = await igdbDataSource.getCompleteCharacterData(characterId);
+      final characterData =
+          await igdbDataSource.getCompleteCharacterData(characterId);
 
       if (characterData.isEmpty) {
         return const Left(NotFoundFailure(message: 'Character not found'));
@@ -1616,26 +1630,27 @@ class GameRepositoryImpl implements GameRepository {
 
       print('✅ GameRepository: Character loaded: ${character.name}');
       return Right(character);
-
     } catch (e) {
       return Left(ServerFailure(message: 'Character details failed: $e'));
     }
   }
-
 
   Future<void> debugCharacterMethods(int gameId) async {
     print('\n=== 🔍 CHARACTER DEBUG ===');
 
     try {
       // Test Multiple Characters
-      final charactersList = await igdbDataSource.getCharactersForGames([gameId]);
+      final charactersList =
+          await igdbDataSource.getCharactersForGames([gameId]);
       print('✅ getCharactersForGames: ${charactersList.length} characters');
       print('📝 Type: ${charactersList.runtimeType}');
 
       // Test Single Character
       if (charactersList.isNotEmpty) {
-        final characterData = await igdbDataSource.getCompleteCharacterData(charactersList.first.id);
-        print('✅ getCompleteCharacterData: ${characterData.keys.length} fields');
+        final characterData = await igdbDataSource
+            .getCompleteCharacterData(charactersList.first.id);
+        print(
+            '✅ getCompleteCharacterData: ${characterData.keys.length} fields');
         print('📝 Type: ${characterData.runtimeType}');
       }
     } catch (e) {
@@ -1644,64 +1659,8 @@ class GameRepositoryImpl implements GameRepository {
   }
 
 // ==========================================
-// 🆕 ENHANCED SINGLE CHARACTER ENRICHMENT
-// ==========================================
-
-  Future<Character> _enrichSingleCharacterWithGames(Character character) async {
-    if (character.gameIds.isEmpty) {
-      print('ℹ️ Character ${character.name} has no game IDs');
-      return character;
-    }
-
-    try {
-      print('🎮 Loading ${character.gameIds.length} games for character: ${character.name}');
-      print('🔍 Game IDs: ${character.gameIds}');
-
-      // Get games for this character with detailed logging
-      final games = await igdbDataSource.getGamesByIds(character.gameIds);
-
-      print('📡 IGDB returned ${games.length} games for character');
-
-      if (games.isNotEmpty) {
-        // Log game names for debugging
-        final gameNames = games.map((g) => g.name).take(3).join(', ');
-        print('🎮 Sample games: $gameNames${games.length > 3 ? "..." : ""}');
-      }
-
-      // Create enriched character with games
-      final enrichedCharacter = character.copyWith(games: games);
-
-      print('✅ Successfully enriched ${character.name} with ${games.length} games');
-      return enrichedCharacter;
-    } catch (e) {
-      print('❌ Failed to load games for character ${character.name}: $e');
-      print('📍 Error type: ${e.runtimeType}');
-
-      // Return character without games on error but log why
-      return character;
-    }
-  }
-
-// ==========================================
 // 🆕 ENHANCED BATCH CHARACTER ENRICHMENT
 // ==========================================
-
-  Future<List<Character>> _enrichCharactersWithGames(List<Character> characters) async {
-    final enrichedCharacters = <Character>[];
-
-    print('🔄 Enriching ${characters.length} characters with games');
-
-    for (final character in characters) {
-      final enrichedCharacter = await _enrichSingleCharacterWithGames(character);
-      enrichedCharacters.add(enrichedCharacter);
-    }
-
-    final totalGames = enrichedCharacters.map((c) => c.loadedGameCount).reduce((a, b) => a + b);
-    print('✅ Enrichment complete: ${enrichedCharacters.length} characters with $totalGames total games');
-
-    return enrichedCharacters;
-  }
-
 
 // Keep existing _parseCompleteCharacterData method unchanged...
   Character? _parseCompleteCharacterData(Map<String, dynamic> data) {
@@ -1744,10 +1703,7 @@ class GameRepositoryImpl implements GameRepository {
 // Keep existing helper methods unchanged...
   List<String> _parseStringList(dynamic data) {
     if (data is List) {
-      return data
-          .where((item) => item is String)
-          .map((item) => item.toString())
-          .toList();
+      return data.whereType<String>().map((item) => item.toString()).toList();
     }
     return [];
   }
@@ -1801,7 +1757,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game videos'));
+      return const Left(ServerFailure(message: 'Failed to get game videos'));
     }
   }
 
@@ -1823,7 +1779,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game screenshots'));
+      return const Left(
+          ServerFailure(message: 'Failed to get game screenshots'));
     }
   }
 
@@ -1843,7 +1800,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game artwork'));
+      return const Left(ServerFailure(message: 'Failed to get game artwork'));
     }
   }
 
@@ -1882,7 +1839,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get game media collection'));
     }
   }
@@ -1908,7 +1865,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to search characters'));
+      return const Left(ServerFailure(message: 'Failed to search characters'));
     }
   }
 
@@ -1930,7 +1887,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get popular characters'));
+      return const Left(
+          ServerFailure(message: 'Failed to get popular characters'));
     }
   }
 
@@ -1954,7 +1912,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get characters by gender'));
+      return const Left(
+          ServerFailure(message: 'Failed to get characters by gender'));
     }
   }
 
@@ -1979,7 +1938,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get characters by species'));
     }
   }
@@ -2019,7 +1978,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get games by character'));
+      return const Left(
+          ServerFailure(message: 'Failed to get games by character'));
     }
   }
 
@@ -2043,7 +2003,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to search events'));
+      return const Left(ServerFailure(message: 'Failed to search events'));
     }
   }
 
@@ -2067,7 +2027,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get event details'));
+      return const Left(ServerFailure(message: 'Failed to get event details'));
     }
   }
 
@@ -2104,10 +2064,9 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get event games'));
+      return const Left(ServerFailure(message: 'Failed to get event games'));
     }
   }
-
 
   // ==========================================
   // HELPER METHODS - Enhanced
@@ -2360,7 +2319,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to batch remove from wishlist'));
     }
   }
@@ -2397,7 +2356,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to move games between collections'));
     }
   }
@@ -2456,7 +2415,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get all collection summaries'));
     }
   }
@@ -2540,7 +2499,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to search user collections'));
+      return const Left(
+          ServerFailure(message: 'Failed to search user collections'));
     }
   }
 
@@ -2595,7 +2555,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get recently added games'));
+      return const Left(
+          ServerFailure(message: 'Failed to get recently added games'));
     }
   }
 
@@ -2619,7 +2580,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get user top genres'));
+      return const Left(
+          ServerFailure(message: 'Failed to get user top genres'));
     }
   }
 
@@ -2652,7 +2614,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get user activity timeline'));
     }
   }
@@ -2679,7 +2641,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get genre preferences'));
+      return const Left(
+          ServerFailure(message: 'Failed to get genre preferences'));
     }
   }
 
@@ -2701,7 +2664,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get platform statistics'));
+      return const Left(
+          ServerFailure(message: 'Failed to get platform statistics'));
     }
   }
 
@@ -2722,10 +2686,10 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get rating analytics'));
+      return const Left(
+          ServerFailure(message: 'Failed to get rating analytics'));
     }
   }
-
 
   @override
   Future<Either<Failure, List<Event>>> getGameEvents(int gameId) async {
@@ -2753,7 +2717,7 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get game events'));
+      return const Left(ServerFailure(message: 'Failed to get game events'));
     }
   }
 
@@ -2850,12 +2814,11 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(
+      return const Left(
           ServerFailure(message: 'Failed to get enhanced game details'));
     }
   }
 
-  @override
   Future<Either<Failure, List<Game>>> getCompleteFranchiseGames(
       int franchiseId) async {
     try {
@@ -2879,11 +2842,11 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load franchise games'));
+      return const Left(
+          ServerFailure(message: 'Failed to load franchise games'));
     }
   }
 
-  @override
   Future<Either<Failure, List<Game>>> getCompleteCollectionGames(
       int collectionId) async {
     try {
@@ -2908,7 +2871,8 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load collection games'));
+      return const Left(
+          ServerFailure(message: 'Failed to load collection games'));
     }
   }
 
@@ -2922,7 +2886,8 @@ class GameRepositoryImpl implements GameRepository {
 
       print('🎮 GameRepository: Getting platform details: $platformId');
 
-      final platformData = await igdbDataSource.getCompletePlatformDataWithVersions(platformId);
+      final platformData =
+          await igdbDataSource.getCompletePlatformDataWithVersions(platformId);
 
       if (platformData.isEmpty) {
         return const Left(NotFoundFailure(message: 'Platform not found'));
@@ -2935,7 +2900,6 @@ class GameRepositoryImpl implements GameRepository {
 
       print('✅ GameRepository: Platform loaded: ${platform.name}');
       return Right(platform);
-
     } catch (e) {
       return Left(ServerFailure(message: 'Platform details failed: $e'));
     }
@@ -2944,11 +2908,8 @@ class GameRepositoryImpl implements GameRepository {
   Platform? _parseCompletePlatformData(Map<String, dynamic> data) {
     try {
       // Extract platform logo image ID from nested data
-      String? logoImageId;
       final logoData = data['platform_logo'];
-      if (logoData is Map<String, dynamic>) {
-        logoImageId = logoData['image_id']?.toString();
-      }
+      if (logoData is Map<String, dynamic>) {}
 
       // Parse platform logo
       PlatformLogo? logo;
@@ -3022,7 +2983,8 @@ class GameRepositoryImpl implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId) async {
+  Future<Either<Failure, GameEngine>> getGameEngineDetails(
+      int gameEngineId) async {
     try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
@@ -3030,7 +2992,8 @@ class GameRepositoryImpl implements GameRepository {
 
       print('🎮 GameRepository: Getting gameEngine details: $gameEngineId');
 
-      final gameEngineData = await igdbDataSource.getCompleteGameEngineData(gameEngineId);
+      final gameEngineData =
+          await igdbDataSource.getCompleteGameEngineData(gameEngineId);
 
       if (gameEngineData.isEmpty) {
         return const Left(NotFoundFailure(message: 'GameEngine not found'));
@@ -3043,14 +3006,15 @@ class GameRepositoryImpl implements GameRepository {
 
       print('✅ GameRepository: GameEngine loaded: ${gameEngine.name}');
       return Right(gameEngine);
-
     } catch (e) {
       return Left(ServerFailure(message: 'GameEngine details failed: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Company>> getCompanyDetails(int companyId, String? userId) async {    try {
+  Future<Either<Failure, Company>> getCompanyDetails(
+      int companyId, String? userId) async {
+    try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
       }
@@ -3058,32 +3022,35 @@ class GameRepositoryImpl implements GameRepository {
       print('🏢 GameRepository: Getting complete company details: $companyId');
 
       // 1. Hol das Company Model mit allen related data
-      final companyModel = await igdbDataSource.getCompleteCompanyDetails(companyId);
+      final companyModel =
+          await igdbDataSource.getCompleteCompanyDetails(companyId);
 
       // 2. Enrich developed games with user data
       List<Game> enrichedDevelopedGames = companyModel.developedGames ?? [];
       if (userId != null && enrichedDevelopedGames.isNotEmpty) {
-        enrichedDevelopedGames = await _enrichGamesWithUserData(enrichedDevelopedGames);
-        print('✅ Enriched ${enrichedDevelopedGames.length} developed games with user data');
+        enrichedDevelopedGames =
+            await _enrichGamesWithUserData(enrichedDevelopedGames);
+        print(
+            '✅ Enriched ${enrichedDevelopedGames.length} developed games with user data');
       }
 
       // 3. Enrich published games with user data
       List<Game> enrichedPublishedGames = companyModel.publishedGames ?? [];
       if (userId != null && enrichedPublishedGames.isNotEmpty) {
-        enrichedPublishedGames = await _enrichGamesWithUserData(enrichedPublishedGames);
-        print('✅ Enriched ${enrichedPublishedGames.length} published games with user data');
+        enrichedPublishedGames =
+            await _enrichGamesWithUserData(enrichedPublishedGames);
+        print(
+            '✅ Enriched ${enrichedPublishedGames.length} published games with user data');
       }
 
       print('✅ GameRepository: Company loaded: ${companyModel.name}');
       return Right(companyModel);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: 'Company details failed: $e'));
     }
   }
-
 
   GameEngine? _parseCompleteGameEngineData(Map<String, dynamic> data) {
     try {
@@ -3121,7 +3088,9 @@ class GameRepositoryImpl implements GameRepository {
                 description: companyData['description'],
                 url: companyData['url'],
                 logo: companyLogo,
-                logoId: companyData['logo'] is Map ? companyData['logo']['id'] : companyData['logo'],
+                logoId: companyData['logo'] is Map
+                    ? companyData['logo']['id']
+                    : companyData['logo'],
                 country: companyData['country'],
                 createdAt: _parseDateTime(companyData['created_at']),
                 updatedAt: _parseDateTime(companyData['updated_at']),
@@ -3143,7 +3112,8 @@ class GameRepositoryImpl implements GameRepository {
               // Enhanced platform parsing with logo support
               PlatformLogo? platformLogo;
               if (platformData['platform_logo'] is Map<String, dynamic>) {
-                platformLogo = PlatformLogoModel.fromJson(platformData['platform_logo']);
+                platformLogo =
+                    PlatformLogoModel.fromJson(platformData['platform_logo']);
               }
 
               final platform = Platform(
@@ -3189,15 +3159,14 @@ class GameRepositoryImpl implements GameRepository {
         updatedAt: _parseDateTime(data['updated_at']),
       );
 
-      print('✅ GameEngine parsed: ${gameEngine.name} with ${companies.length} companies and ${platforms.length} platforms');
+      print(
+          '✅ GameEngine parsed: ${gameEngine.name} with ${companies.length} companies and ${platforms.length} platforms');
       return gameEngine;
-
     } catch (e) {
       print('❌ GameRepository: Error parsing complete gameEngine data: $e');
       return null;
     }
   }
-
 
   @override
   Future<Either<Failure, List<Game>>> getGamesByGameEngine({
@@ -3234,8 +3203,48 @@ class GameRepositoryImpl implements GameRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get games by gameEngine'));
+      return const Left(
+          ServerFailure(message: 'Failed to get games by gameEngine'));
     }
   }
 
+  @override
+  Future<Either<Failure, List<Game>>> getGamesByCompany({
+    required List<int> companyIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.ratingCount,
+    SortOrder sortOrder = SortOrder.descending,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      if (companyIds.isEmpty) {
+        return const Right([]);
+      }
+
+      print('🎮 GameRepository: Getting games by companies: $companyIds');
+
+      final games = await igdbDataSource.getGamesByCompanies(
+        companyIds: companyIds,
+        limit: limit,
+        offset: offset,
+        sortBy: sortBy.igdbField,
+        sortOrder: sortOrder.value,
+      );
+
+      final enrichedGames = await _enrichGamesWithUserData(games);
+
+      print(
+          '✅ GameRepository: Found ${enrichedGames.length} games for companies');
+      return Right(enrichedGames);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return const Left(
+          ServerFailure(message: 'Failed to get games by company'));
+    }
+  }
 }

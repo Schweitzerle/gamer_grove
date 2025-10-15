@@ -1,6 +1,5 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
@@ -143,7 +142,8 @@ class _GameDetailPageState extends State<GameDetailPage>
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -153,7 +153,8 @@ class _GameDetailPageState extends State<GameDetailPage>
           child: LiveLoadingProgress(
             title: 'Loading Game Details',
             steps: EventLoadingSteps.gameDetails(context),
-            stepDuration: const Duration(milliseconds: 1000), // ✅ Slightly faster for games
+            stepDuration: const Duration(
+                milliseconds: 1000), // ✅ Slightly faster for games
           ),
         ),
       ),
@@ -172,7 +173,8 @@ class _GameDetailPageState extends State<GameDetailPage>
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -202,9 +204,9 @@ class _GameDetailPageState extends State<GameDetailPage>
               Text(
                 'Failed to Load Game',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                 textAlign: TextAlign.center,
               ),
 
@@ -217,16 +219,18 @@ class _GameDetailPageState extends State<GameDetailPage>
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontFamily: 'monospace', // ✅ Console-style for error messages
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily:
+                            'monospace', // ✅ Console-style for error messages
+                      ),
                 ),
               ),
 
@@ -281,13 +285,15 @@ class _GameDetailPageState extends State<GameDetailPage>
     print('🎯 Game: ${game.name} (ID: ${game.id})');
 
     // 🆕 UPDATED: Characters data with detailed image info
-    if (game.characters != null && game.characters!.isNotEmpty) {
-      print('\n👥 CHARACTERS (${game.characters!.length}): ✅ CHARACTERS SECTION WILL SHOW');
+    if (game.characters.isNotEmpty) {
+      print(
+          '\n👥 CHARACTERS (${game.characters.length}): ✅ CHARACTERS SECTION WILL SHOW');
       print('   📱 UI: Container with Card elevation, preview of 4 characters');
-      print('   🔗 Navigation: Tap "View All" → CharactersScreen with filter/sort');
+      print(
+          '   🔗 Navigation: Tap "View All" → CharactersScreen with filter/sort');
 
-      for (var i = 0; i < game.characters!.length && i < 5; i++) {
-        final char = game.characters![i];
+      for (var i = 0; i < game.characters.length && i < 5; i++) {
+        final char = game.characters[i];
         print('  • ${char.name} (ID: ${char.id})');
 
         // 🆕 NEW: Log image information
@@ -296,28 +302,35 @@ class _GameDetailPageState extends State<GameDetailPage>
           print('    🔗 URL: ${char.imageUrl}');
           print('    📏 Sizes Available: thumb, micro, medium, large');
         } else if (char.hasMugShot) {
-          print('    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShotId} but no imageId (needs separate fetch)');
+          print(
+              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShotId} but no imageId (needs separate fetch)');
         } else {
           print('    🖼️ Image: ❌ No image data available');
         }
 
         if (char.description != null) {
-          print('    📝 Description: ${char.description!.length > 50 ? '${char.description!.substring(0, 50)}...' : char.description}');
+          print(
+              '    📝 Description: ${char.description!.length > 50 ? '${char.description!.substring(0, 50)}...' : char.description}');
         }
       }
 
-      if (game.characters!.length > 5) {
-        print('  ... and ${game.characters!.length - 5} more characters');
+      if (game.characters.length > 5) {
+        print('  ... and ${game.characters.length - 5} more characters');
       }
 
       // 🆕 NEW: Summary of image availability
-      final charactersWithImages = game.characters!.where((c) => c.hasImage).length;
-      final charactersWithMugShotIds = game.characters!.where((c) => c.hasMugShot).length;
+      final charactersWithImages =
+          game.characters.where((c) => c.hasImage).length;
+      final charactersWithMugShotIds =
+          game.characters.where((c) => c.hasMugShot).length;
 
       print('\n📊 CHARACTER IMAGE SUMMARY:');
-      print('   ✅ With Images: $charactersWithImages/${game.characters!.length}');
-      print('   🔗 With MugShot IDs: $charactersWithMugShotIds/${game.characters!.length}');
-      print('   📱 UI Ready: ${charactersWithImages > 0 ? 'YES - Images will display' : 'PARTIAL - Fallback icons will show'}');
+      print(
+          '   ✅ With Images: $charactersWithImages/${game.characters.length}');
+      print(
+          '   🔗 With MugShot IDs: $charactersWithMugShotIds/${game.characters.length}');
+      print(
+          '   📱 UI Ready: ${charactersWithImages > 0 ? 'YES - Images will display' : 'PARTIAL - Fallback icons will show'}');
     } else {
       print('\n👥 CHARACTERS: None found ❌ Characters section hidden');
     }
@@ -341,11 +354,11 @@ class _GameDetailPageState extends State<GameDetailPage>
         ),
         title: _isHeaderCollapsed
             ? Text(
-          game.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 1, // ✅ Same ellipsis fix as EventDetailScreen
-          overflow: TextOverflow.ellipsis,
-        )
+                game.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1, // ✅ Same ellipsis fix as EventDetailScreen
+                overflow: TextOverflow.ellipsis,
+              )
             : null,
       ),
     );
@@ -457,9 +470,9 @@ class _GameDetailPageState extends State<GameDetailPage>
               ),
 
             FranchiseCollectionsSection(game: game), // Franchises&Collections
-            ContentDLCSection(game: game),           // 🟢 DLCs & Content
-            VersionsRemakesSection(game: game),      // 🔵 Versions & Remakes
-            SimilarRelatedSection(game: game),       // 🟣 Similar & Related
+            ContentDLCSection(game: game), // 🟢 DLCs & Content
+            VersionsRemakesSection(game: game), // 🔵 Versions & Remakes
+            SimilarRelatedSection(game: game), // 🟣 Similar & Related
 
             // Media Gallery with Tabs
             if (game.screenshots.isNotEmpty ||

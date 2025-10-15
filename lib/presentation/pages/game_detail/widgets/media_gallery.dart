@@ -4,7 +4,6 @@
 
 // lib/presentation/pages/game_detail/widgets/media_gallery.dart
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
@@ -33,8 +32,8 @@ class MediaGallery extends StatelessWidget {
           Text(
             'Media Gallery',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: AppConstants.paddingMedium),
 
@@ -43,8 +42,8 @@ class MediaGallery extends StatelessWidget {
             Text(
               'Videos',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             SizedBox(
@@ -65,8 +64,8 @@ class MediaGallery extends StatelessWidget {
             Text(
               'Screenshots',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             SizedBox(
@@ -75,7 +74,8 @@ class MediaGallery extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: screenshots.length,
                 itemBuilder: (context, index) {
-                  return _buildScreenshotThumbnail(context, screenshots[index], index);
+                  return _buildScreenshotThumbnail(
+                      context, screenshots[index], index);
                 },
               ),
             ),
@@ -87,8 +87,8 @@ class MediaGallery extends StatelessWidget {
             Text(
               'Artworks',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             SizedBox(
@@ -97,7 +97,8 @@ class MediaGallery extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: artworks.length,
                 itemBuilder: (context, index) {
-                  return _buildArtworkThumbnail(context, artworks[index], index);
+                  return _buildArtworkThumbnail(
+                      context, artworks[index], index);
                 },
               ),
             ),
@@ -164,7 +165,8 @@ class MediaGallery extends StatelessWidget {
     );
   }
 
-  Widget _buildScreenshotThumbnail(BuildContext context, String imageUrl, int index) {
+  Widget _buildScreenshotThumbnail(
+      BuildContext context, String imageUrl, int index) {
     return Container(
       width: 300,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -183,7 +185,8 @@ class MediaGallery extends StatelessWidget {
     );
   }
 
-  Widget _buildArtworkThumbnail(BuildContext context, String imageUrl, int index) {
+  Widget _buildArtworkThumbnail(
+      BuildContext context, String imageUrl, int index) {
     return Container(
       width: 200,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -219,7 +222,8 @@ class MediaGallery extends StatelessWidget {
     );
   }
 
-  void _openImageGallery(BuildContext context, List<String> images, int initialIndex) {
+  void _openImageGallery(
+      BuildContext context, List<String> images, int initialIndex) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ImageGalleryPage(

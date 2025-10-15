@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_filter_bar.dart';
 import '../../../core/utils/navigations.dart';
 import '../../../domain/entities/character/character.dart';
-import 'character_detail_screen.dart';
 import 'widgets/character_card.dart';
 
 enum CharacterSortBy {
@@ -102,8 +101,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
           Text(
             widget.gameTitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey.shade600,
-            ),
+                  color: Colors.grey.shade600,
+                ),
           ),
         ],
       ),
@@ -118,9 +117,9 @@ class _CharactersScreenState extends State<CharactersScreen> {
           child: Text(
             '${_filteredCharacters.length} characters',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.purple,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: Colors.purple,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
       ],
@@ -185,17 +184,17 @@ class _CharactersScreenState extends State<CharactersScreen> {
               ),
               subtitle: character.description != null
                   ? Text(
-                character.description!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              )
+                      character.description!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    )
                   : const Text(
-                'No description available',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
+                      'No description available',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
               onTap: () => _onCharacterTapped(character),
             ),
           ),
@@ -214,20 +213,20 @@ class _CharactersScreenState extends State<CharactersScreen> {
       ),
       child: character.imageUrl != null
           ? ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          character.imageUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Icon(
-            Icons.person,
-            color: Colors.purple.withOpacity(0.6),
-          ),
-        ),
-      )
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                character.imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.person,
+                  color: Colors.purple.withOpacity(0.6),
+                ),
+              ),
+            )
           : Icon(
-        Icons.person,
-        color: Colors.purple.withOpacity(0.6),
-      ),
+              Icons.person,
+              color: Colors.purple.withOpacity(0.6),
+            ),
     );
   }
 
@@ -245,15 +244,15 @@ class _CharactersScreenState extends State<CharactersScreen> {
           Text(
             'No characters found',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.grey.shade600,
-            ),
+                  color: Colors.grey.shade600,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Try adjusting your search or filters',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade500,
-            ),
+                  color: Colors.grey.shade500,
+                ),
           ),
           const SizedBox(height: 24),
           TextButton.icon(
@@ -265,7 +264,6 @@ class _CharactersScreenState extends State<CharactersScreen> {
       ),
     );
   }
-
 
   // 🆕 NEW: Navigation method - goes directly to CharacterDetailScreen
   void _navigateToCharacterDetail(BuildContext context, Character character) {
@@ -287,7 +285,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
     if (index != -1) {
       if (_viewMode == CharacterViewMode.grid) {
         // For grid view, calculate approximate position
-        final itemHeight = (MediaQuery.of(context).size.width - 44) / 2 * (1 / 0.75) + 12;
+        final itemHeight =
+            (MediaQuery.of(context).size.width - 44) / 2 * (1 / 0.75) + 12;
         final row = index ~/ 2;
         final position = row * itemHeight;
 

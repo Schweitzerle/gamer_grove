@@ -1,6 +1,5 @@
 // lib/presentation/pages/all_games/enriched_all_games_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/navigations.dart';
@@ -65,11 +64,11 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   bool _blurRatedGames = false;
 
   // Filter states
-  List<Genre> _selectedGenres = [];
-  List<Platform> _selectedPlatforms = [];
+  final List<Genre> _selectedGenres = [];
+  final List<Platform> _selectedPlatforms = [];
   int? _selectedMinYear;
   int? _selectedMaxYear;
-  RatingFilter _ratingFilter = RatingFilter.all;
+  final RatingFilter _ratingFilter = RatingFilter.all;
   SortOption _sortOption = SortOption.nameAZ;
 
   // Enrichment progress
@@ -99,11 +98,11 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     setState(() {
       _isEnriching = true;
       _enrichmentProgress = 0;
-      _enrichmentStatus = 'Preparing to enrich ${_totalGames} games...';
+      _enrichmentStatus = 'Preparing to enrich $_totalGames games...';
     });
 
     try {
-      print('🔄 Starting to enrich ${_totalGames} games with user data...');
+      print('🔄 Starting to enrich $_totalGames games with user data...');
 
       final supabaseDataSource = sl<SupabaseRemoteDataSource>();
 
@@ -112,7 +111,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         _enrichmentStatus = 'Loading your top games...';
       });
 
-      final topThreeData = await supabaseDataSource.getUserTopThreeGames(userId: widget.userId!);
+      final topThreeData =
+          await supabaseDataSource.getUserTopThreeGames(userId: widget.userId!);
       final topThreeMap = <int, int>{};
       for (var entry in topThreeData) {
         topThreeMap[entry['game_id'] as int] = entry['position'] as int;
@@ -123,16 +123,20 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
       final List<Game> enrichedGames = [];
 
       for (int i = 0; i < widget.games.length; i += batchSize) {
-        final int endIndex = (i + batchSize < widget.games.length) ? i + batchSize : widget.games.length;
+        final int endIndex = (i + batchSize < widget.games.length)
+            ? i + batchSize
+            : widget.games.length;
         final List<Game> batch = widget.games.sublist(i, endIndex);
 
         setState(() {
           _enrichmentProgress = i;
-          _enrichmentStatus = 'Enriching games ${i + 1}-${endIndex} of ${_totalGames}...';
+          _enrichmentStatus =
+              'Enriching games ${i + 1}-$endIndex of $_totalGames...';
         });
 
         // Enrich this batch
-        final List<Game> enrichedBatch = await _enrichGamesBatch(batch, widget.userId!, topThreeMap);
+        final List<Game> enrichedBatch =
+            await _enrichGamesBatch(batch, widget.userId!, topThreeMap);
         enrichedGames.addAll(enrichedBatch);
 
         // Small delay to allow UI updates
@@ -143,28 +147,28 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         _isEnriching = false;
         _allGames = enrichedGames;
         _enrichmentProgress = _totalGames;
-        _enrichmentStatus = 'Completed! ${_totalGames} games enriched.';
+        _enrichmentStatus = 'Completed! $_totalGames games enriched.';
       });
 
       print('✅ Successfully enriched ${enrichedGames.length} games');
       _applyFiltersAndSort();
-
     } catch (e) {
       print('❌ Error enriching games: $e');
       setState(() {
         _isEnriching = false;
         _allGames = List.from(widget.games); // Fallback to non-enriched
-        _enrichmentStatus = 'Enrichment failed, showing games without user data.';
+        _enrichmentStatus =
+            'Enrichment failed, showing games without user data.';
       });
       _applyFiltersAndSort();
     }
   }
 
   Future<List<Game>> _enrichGamesBatch(
-      List<Game> games,
-      String userId,
-      Map<int, int> topThreeMap,
-      ) async {
+    List<Game> games,
+    String userId,
+    Map<int, int> topThreeMap,
+  ) async {
     try {
       final supabaseDataSource = sl<SupabaseRemoteDataSource>();
 
@@ -212,20 +216,26 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((game) =>
-          game.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+      filtered = filtered
+          .where((game) =>
+              game.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
     }
 
     // Apply genre filter
     if (_selectedGenres.isNotEmpty) {
-      filtered = filtered.where((game) =>
-          game.genres.any((genre) => _selectedGenres.contains(genre))).toList();
+      filtered = filtered
+          .where((game) =>
+              game.genres.any((genre) => _selectedGenres.contains(genre)))
+          .toList();
     }
 
     // Apply platform filter
     if (_selectedPlatforms.isNotEmpty) {
-      filtered = filtered.where((game) =>
-          game.platforms.any((platform) => _selectedPlatforms.contains(platform))).toList();
+      filtered = filtered
+          .where((game) => game.platforms
+              .any((platform) => _selectedPlatforms.contains(platform)))
+          .toList();
     }
 
     // Apply year filter
@@ -247,8 +257,9 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         filtered = filtered.where((game) => game.userRating == null).toList();
         break;
       case RatingFilter.highRated:
-        filtered = filtered.where((game) =>
-        game.userRating != null && game.userRating! >= 7.0).toList();
+        filtered = filtered
+            .where((game) => game.userRating != null && game.userRating! >= 7.0)
+            .toList();
         break;
       case RatingFilter.all:
         break;
@@ -278,7 +289,9 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         break;
       case SortOption.releaseDateNew:
         filtered.sort((a, b) {
-          if (a.firstReleaseDate == null && b.firstReleaseDate == null) return 0;
+          if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
+            return 0;
+          }
           if (a.firstReleaseDate == null) return 1;
           if (b.firstReleaseDate == null) return -1;
           return b.firstReleaseDate!.compareTo(a.firstReleaseDate!);
@@ -286,7 +299,9 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         break;
       case SortOption.releaseDateOld:
         filtered.sort((a, b) {
-          if (a.firstReleaseDate == null && b.firstReleaseDate == null) return 0;
+          if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
+            return 0;
+          }
           if (a.firstReleaseDate == null) return 1;
           if (b.firstReleaseDate == null) return -1;
           return a.firstReleaseDate!.compareTo(b.firstReleaseDate!);
@@ -322,56 +337,59 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
           Text(
             widget.title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           if (widget.subtitle != null)
             Text(
               widget.subtitle!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
         ],
       ),
-      actions: _isEnriching ? [] : [
-        // Blur Toggle
-        if (widget.blurRated)
-          IconButton(
-            icon: Icon(_blurRatedGames ? Icons.blur_off : Icons.blur_on),
-            onPressed: () {
-              setState(() {
-                _blurRatedGames = !_blurRatedGames;
-              });
-            },
-            tooltip: _blurRatedGames ? 'Show ratings' : 'Blur ratings',
-          ),
+      actions: _isEnriching
+          ? []
+          : [
+              // Blur Toggle
+              if (widget.blurRated)
+                IconButton(
+                  icon: Icon(_blurRatedGames ? Icons.blur_off : Icons.blur_on),
+                  onPressed: () {
+                    setState(() {
+                      _blurRatedGames = !_blurRatedGames;
+                    });
+                  },
+                  tooltip: _blurRatedGames ? 'Show ratings' : 'Blur ratings',
+                ),
 
-        // View Toggle
-        if (widget.showViewToggle)
-          IconButton(
-            icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
-            tooltip: _isGridView ? 'List view' : 'Grid view',
-          ),
+              // View Toggle
+              if (widget.showViewToggle)
+                IconButton(
+                  icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
+                  onPressed: () {
+                    setState(() {
+                      _isGridView = !_isGridView;
+                    });
+                  },
+                  tooltip: _isGridView ? 'List view' : 'Grid view',
+                ),
 
-        // Filters
-        if (widget.showFilters)
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFiltersDialog,
-            tooltip: 'Filters',
-          ),
-      ],
+              // Filters
+              if (widget.showFilters)
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: _showFiltersDialog,
+                  tooltip: 'Filters',
+                ),
+            ],
     );
   }
 
   Widget _buildEnrichmentProgress() {
-    final double progress = _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
+    final double progress =
+        _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
 
     return Padding(
       padding: const EdgeInsets.all(AppConstants.paddingLarge),
@@ -391,7 +409,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 8,
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -400,16 +419,18 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
                   children: [
                     Text(
                       '${(_enrichmentProgress / _totalGames * 100).toInt()}%',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                     ),
                     Text(
                       '$_enrichmentProgress/$_totalGames',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -424,8 +445,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
             _enrichmentStatus,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
 
           const SizedBox(height: 12),
@@ -435,8 +456,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
             'Loading your personal game data...',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
 
           const SizedBox(height: 24),
@@ -479,8 +500,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
           child: _filteredGames.isEmpty
               ? _buildEmptyState()
               : _isGridView
-              ? _buildGridView()
-              : _buildListView(),
+                  ? _buildGridView()
+                  : _buildListView(),
         ),
       ],
     );
@@ -496,15 +517,15 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _searchController.clear();
-              setState(() {
-                _searchQuery = '';
-              });
-              _applyFiltersAndSort();
-            },
-          )
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                    _applyFiltersAndSort();
+                  },
+                )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -531,8 +552,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
           Text(
             '${_filteredGames.length} of ${_allGames.length} games',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const Spacer(),
           if (widget.showFilters)
@@ -576,7 +597,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
       controller: _scrollController,
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       itemCount: _filteredGames.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppConstants.paddingSmall),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppConstants.paddingSmall),
       itemBuilder: (context, index) {
         final game = _filteredGames[index];
         return GameCard(
@@ -608,8 +630,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
             'Try adjusting your filters or search terms.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -628,18 +650,20 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('Sort by'),
-        children: SortOption.values.map((option) =>
-            SimpleDialogOption(
-              onPressed: () {
-                setState(() {
-                  _sortOption = option;
-                });
-                Navigator.of(context).pop();
-                _applyFiltersAndSort();
-              },
-              child: Text(_getSortOptionName(option)),
-            ),
-        ).toList(),
+        children: SortOption.values
+            .map(
+              (option) => SimpleDialogOption(
+                onPressed: () {
+                  setState(() {
+                    _sortOption = option;
+                  });
+                  Navigator.of(context).pop();
+                  _applyFiltersAndSort();
+                },
+                child: Text(_getSortOptionName(option)),
+              ),
+            )
+            .toList(),
       ),
     );
   }

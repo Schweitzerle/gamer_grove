@@ -42,14 +42,13 @@ class EventRepositoryImpl implements EventRepository {
 
       print('✅ EventRepository: Found ${events.length} events in date range');
       return Right(events);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load events by date range'));
+      return const Left(
+          ServerFailure(message: 'Failed to load events by date range'));
     }
   }
-
 
   @override
   Future<Either<Failure, Event>> getEventDetails(int eventId) async {
@@ -68,19 +67,20 @@ class EventRepositoryImpl implements EventRepository {
       }
 
       print('✅ EventRepository: Event details loaded');
-      print('📊 EventRepository: Event "${event.name}" has ${event.games.length} games, ${event.eventNetworks.length} networks');
+      print(
+          '📊 EventRepository: Event "${event.name}" has ${event.games.length} games, ${event.eventNetworks.length} networks');
 
       return Right(event);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get event details'));
+      return const Left(ServerFailure(message: 'Failed to get event details'));
     }
   }
 
   @override
-  Future<Either<Failure, List<Event>>> getCurrentEvents({int limit = 10}) async {
+  Future<Either<Failure, List<Event>>> getCurrentEvents(
+      {int limit = 10}) async {
     try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
@@ -89,21 +89,23 @@ class EventRepositoryImpl implements EventRepository {
       print('🎪 EventRepository: Getting current events (limit: $limit)');
 
       // Use enhanced method for complete event data
-      final liveEvents = await igdbDataSource.getLiveEventsWithCompleteData(limit: limit);
+      final liveEvents =
+          await igdbDataSource.getLiveEventsWithCompleteData(limit: limit);
 
-      print('✅ EventRepository: Found ${liveEvents.length} live events with complete data');
+      print(
+          '✅ EventRepository: Found ${liveEvents.length} live events with complete data');
 
       return Right(liveEvents);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get current events'));
+      return const Left(ServerFailure(message: 'Failed to get current events'));
     }
   }
 
   @override
-  Future<Either<Failure, List<Event>>> getUpcomingEvents({int limit = 10}) async {
+  Future<Either<Failure, List<Event>>> getUpcomingEvents(
+      {int limit = 10}) async {
     try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
@@ -112,16 +114,18 @@ class EventRepositoryImpl implements EventRepository {
       print('🎪 EventRepository: Getting upcoming events (limit: $limit)');
 
       // Use enhanced method for complete event data
-      final upcomingEvents = await igdbDataSource.getUpcomingEventsWithCompleteData(limit: limit);
+      final upcomingEvents =
+          await igdbDataSource.getUpcomingEventsWithCompleteData(limit: limit);
 
-      print('✅ EventRepository: Found ${upcomingEvents.length} upcoming events with complete data');
+      print(
+          '✅ EventRepository: Found ${upcomingEvents.length} upcoming events with complete data');
 
       return Right(upcomingEvents);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get upcoming events'));
+      return const Left(
+          ServerFailure(message: 'Failed to get upcoming events'));
     }
   }
 
@@ -137,19 +141,20 @@ class EventRepositoryImpl implements EventRepository {
       // Use enhanced method for complete event data
       final events = await igdbDataSource.searchEventsWithCompleteData(query);
 
-      print('✅ EventRepository: Found ${events.length} events with complete data');
+      print(
+          '✅ EventRepository: Found ${events.length} events with complete data');
 
       return Right(events);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to search events'));
+      return const Left(ServerFailure(message: 'Failed to search events'));
     }
   }
 
   @override
-  Future<Either<Failure, List<Event>>> getEventsByGames(List<int> gameIds) async {
+  Future<Either<Failure, List<Event>>> getEventsByGames(
+      List<int> gameIds) async {
     try {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure());
@@ -162,22 +167,18 @@ class EventRepositoryImpl implements EventRepository {
       print('🎪 EventRepository: Getting events for ${gameIds.length} games');
 
       // Use enhanced method for complete event data
-      final events = await igdbDataSource.getEventsByGamesWithCompleteData(gameIds);
+      final events =
+          await igdbDataSource.getEventsByGamesWithCompleteData(gameIds);
 
-      print('✅ EventRepository: Found ${events.length} events with complete data');
+      print(
+          '✅ EventRepository: Found ${events.length} events with complete data');
 
       return Right(events);
-
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to get events by games'));
+      return const Left(
+          ServerFailure(message: 'Failed to get events by games'));
     }
   }
 }
-
-
-
-
-
-

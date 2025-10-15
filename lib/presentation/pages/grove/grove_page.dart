@@ -1,6 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
@@ -74,7 +71,6 @@ class _GrovePageState extends State<GrovePage> {
                 ),
               ),
 
-
               if (_currentUserId != null)
                 const SliverToBoxAdapter(
                   child: TopThreeSection(),
@@ -82,9 +78,9 @@ class _GrovePageState extends State<GrovePage> {
 
               // Rated Game Section
               if (_currentUserId != null)
-              const SliverToBoxAdapter(
-                child: RatedSection(),
-              ),
+                const SliverToBoxAdapter(
+                  child: RatedSection(),
+                ),
 
               // User Wishlist Section (if logged in)
               if (_currentUserId != null)
@@ -108,6 +104,4 @@ class _GrovePageState extends State<GrovePage> {
       ),
     );
   }
-
-
 }

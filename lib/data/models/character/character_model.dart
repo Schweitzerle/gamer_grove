@@ -65,10 +65,10 @@ class CharacterModel extends Character {
 
   // 🆕 NEW: Factory method when we have separate mugShot data and games
   factory CharacterModel.fromJsonWithMugShot(
-      Map<String, dynamic> characterJson,
-      Map<String, dynamic>? mugShotJson, {
-        List<Game>? games, // 🆕 ADD this parameter
-      }) {
+    Map<String, dynamic> characterJson,
+    Map<String, dynamic>? mugShotJson, {
+    List<Game>? games, // 🆕 ADD this parameter
+  }) {
     final character = CharacterModel.fromJson(characterJson);
 
     final mugShotImageId = mugShotJson?['image_id']?.toString();
@@ -98,10 +98,7 @@ class CharacterModel extends Character {
   // Existing helper methods (unchanged)
   static List<String> _parseStringList(dynamic data) {
     if (data is List) {
-      return data
-          .where((item) => item is String)
-          .map((item) => item.toString())
-          .toList();
+      return data.whereType<String>().map((item) => item.toString()).toList();
     }
     return [];
   }

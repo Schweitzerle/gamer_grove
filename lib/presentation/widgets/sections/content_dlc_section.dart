@@ -45,7 +45,9 @@ class ContentDLCSection extends StatelessWidget {
                   SizedBox(
                     height: 380,
                     child: TabBarView(
-                      children: contentTabs.map((tab) => _buildTabView(context, tab)).toList(),
+                      children: contentTabs
+                          .map((tab) => _buildTabView(context, tab))
+                          .toList(),
                     ),
                   ),
                 ],
@@ -68,7 +70,7 @@ class ContentDLCSection extends StatelessWidget {
               color: Colors.green.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.extension,
               color: Colors.green,
               size: 20,
@@ -78,8 +80,8 @@ class ContentDLCSection extends StatelessWidget {
           Text(
             'Additional Content',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -148,23 +150,25 @@ class ContentDLCSection extends StatelessWidget {
       ),
       child: TabBar(
         isScrollable: tabs.length > 3,
-        tabs: tabs.map((tab) => Tab(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(tab.icon, size: 16, color: tab.color),
-              const SizedBox(width: 6),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(tab.title, maxLines: 1),
-                  Text('(${tab.games.length})',
-                      style: TextStyle(fontSize: 10, color: tab.color)),
-                ],
-              ),
-            ],
-          ),
-        )).toList(),
+        tabs: tabs
+            .map((tab) => Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(tab.icon, size: 16, color: tab.color),
+                      const SizedBox(width: 6),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(tab.title, maxLines: 1),
+                          Text('(${tab.games.length})',
+                              style: TextStyle(fontSize: 10, color: tab.color)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ))
+            .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
         indicatorColor: Theme.of(context).colorScheme.primary,
@@ -205,15 +209,15 @@ class ContentDLCSection extends StatelessWidget {
               Text(
                 tab.displayTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               Text(
                 tab.subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: tab.color,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: tab.color,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -308,7 +312,9 @@ class VersionsRemakesSection extends StatelessWidget {
                   SizedBox(
                     height: 380,
                     child: TabBarView(
-                      children: versionTabs.map((tab) => _buildTabView(context, tab)).toList(),
+                      children: versionTabs
+                          .map((tab) => _buildTabView(context, tab))
+                          .toList(),
                     ),
                   ),
                 ],
@@ -331,7 +337,7 @@ class VersionsRemakesSection extends StatelessWidget {
               color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.auto_fix_high,
               color: Colors.blue,
               size: 20,
@@ -341,8 +347,8 @@ class VersionsRemakesSection extends StatelessWidget {
           Text(
             'Versions & Remakes',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -423,23 +429,25 @@ class VersionsRemakesSection extends StatelessWidget {
       ),
       child: TabBar(
         isScrollable: tabs.length > 3,
-        tabs: tabs.map((tab) => Tab(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(tab.icon, size: 16, color: tab.color),
-              const SizedBox(width: 6),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(tab.title, maxLines: 1),
-                  Text('(${tab.games.length})',
-                      style: TextStyle(fontSize: 10, color: tab.color)),
-                ],
-              ),
-            ],
-          ),
-        )).toList(),
+        tabs: tabs
+            .map((tab) => Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(tab.icon, size: 16, color: tab.color),
+                      const SizedBox(width: 6),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(tab.title, maxLines: 1),
+                          Text('(${tab.games.length})',
+                              style: TextStyle(fontSize: 10, color: tab.color)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ))
+            .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
         indicatorColor: Theme.of(context).colorScheme.primary,
@@ -480,15 +488,15 @@ class VersionsRemakesSection extends StatelessWidget {
               Text(
                 tab.displayTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               Text(
                 tab.subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: tab.color,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: tab.color,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -573,7 +581,9 @@ class SimilarRelatedSection extends StatelessWidget {
                   SizedBox(
                     height: 380,
                     child: TabBarView(
-                      children: relatedTabs.map((tab) => _buildTabView(context, tab)).toList(),
+                      children: relatedTabs
+                          .map((tab) => _buildTabView(context, tab))
+                          .toList(),
                     ),
                   ),
                 ],
@@ -596,7 +606,7 @@ class SimilarRelatedSection extends StatelessWidget {
               color: Colors.purple.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.lightbulb_outline,
               color: Colors.purple,
               size: 20,
@@ -606,8 +616,8 @@ class SimilarRelatedSection extends StatelessWidget {
           Text(
             'Similar & Related',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -666,23 +676,25 @@ class SimilarRelatedSection extends StatelessWidget {
       ),
       child: TabBar(
         isScrollable: tabs.length > 3,
-        tabs: tabs.map((tab) => Tab(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(tab.icon, size: 16, color: tab.color),
-              const SizedBox(width: 6),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(tab.title, maxLines: 1),
-                  Text('(${tab.games.length})',
-                      style: TextStyle(fontSize: 10, color: tab.color)),
-                ],
-              ),
-            ],
-          ),
-        )).toList(),
+        tabs: tabs
+            .map((tab) => Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(tab.icon, size: 16, color: tab.color),
+                      const SizedBox(width: 6),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(tab.title, maxLines: 1),
+                          Text('(${tab.games.length})',
+                              style: TextStyle(fontSize: 10, color: tab.color)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ))
+            .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
         indicatorColor: Theme.of(context).colorScheme.primary,
@@ -723,15 +735,15 @@ class SimilarRelatedSection extends StatelessWidget {
               Text(
                 tab.displayTitle,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               Text(
                 tab.subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: tab.color,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: tab.color,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -786,7 +798,9 @@ class SimilarRelatedSection extends StatelessWidget {
 // ==========================================
 
 enum ContentType { dlc, expansion, standaloneExpansion, bundle }
+
 enum VersionType { remake, remaster, port, expandedGame, versionParent }
+
 enum RelatedType { similar, fork, parentGame }
 
 class ContentTab {
@@ -806,19 +820,27 @@ class ContentTab {
 
   String get displayTitle {
     switch (type) {
-      case ContentType.dlc: return 'Downloadable Content';
-      case ContentType.expansion: return 'Expansions';
-      case ContentType.standaloneExpansion: return 'Standalone Expansions';
-      case ContentType.bundle: return 'Game Bundles';
+      case ContentType.dlc:
+        return 'Downloadable Content';
+      case ContentType.expansion:
+        return 'Expansions';
+      case ContentType.standaloneExpansion:
+        return 'Standalone Expansions';
+      case ContentType.bundle:
+        return 'Game Bundles';
     }
   }
 
   String get subtitle {
     switch (type) {
-      case ContentType.dlc: return 'Additional content • ${games.length} DLCs';
-      case ContentType.expansion: return 'Game expansions • ${games.length} expansions';
-      case ContentType.standaloneExpansion: return 'Standalone content • ${games.length} games';
-      case ContentType.bundle: return 'Game collections • ${games.length} bundles';
+      case ContentType.dlc:
+        return 'Additional content • ${games.length} DLCs';
+      case ContentType.expansion:
+        return 'Game expansions • ${games.length} expansions';
+      case ContentType.standaloneExpansion:
+        return 'Standalone content • ${games.length} games';
+      case ContentType.bundle:
+        return 'Game collections • ${games.length} bundles';
     }
   }
 }
@@ -840,21 +862,31 @@ class VersionTab {
 
   String get displayTitle {
     switch (type) {
-      case VersionType.remake: return 'Remakes';
-      case VersionType.remaster: return 'Remasters';
-      case VersionType.port: return 'Platform Ports';
-      case VersionType.expandedGame: return 'Expanded Games';
-      case VersionType.versionParent: return 'Original Version';
+      case VersionType.remake:
+        return 'Remakes';
+      case VersionType.remaster:
+        return 'Remasters';
+      case VersionType.port:
+        return 'Platform Ports';
+      case VersionType.expandedGame:
+        return 'Expanded Games';
+      case VersionType.versionParent:
+        return 'Original Version';
     }
   }
 
   String get subtitle {
     switch (type) {
-      case VersionType.remake: return 'Remade versions • ${games.length} remakes';
-      case VersionType.remaster: return 'Enhanced versions • ${games.length} remasters';
-      case VersionType.port: return 'Platform versions • ${games.length} ports';
-      case VersionType.expandedGame: return 'Enhanced editions • ${games.length} games';
-      case VersionType.versionParent: return 'Original version • ${games.length} game';
+      case VersionType.remake:
+        return 'Remade versions • ${games.length} remakes';
+      case VersionType.remaster:
+        return 'Enhanced versions • ${games.length} remasters';
+      case VersionType.port:
+        return 'Platform versions • ${games.length} ports';
+      case VersionType.expandedGame:
+        return 'Enhanced editions • ${games.length} games';
+      case VersionType.versionParent:
+        return 'Original version • ${games.length} game';
     }
   }
 }
@@ -876,17 +908,23 @@ class RelatedTab {
 
   String get displayTitle {
     switch (type) {
-      case RelatedType.similar: return 'Similar Games';
-      case RelatedType.fork: return 'Game Forks';
-      case RelatedType.parentGame: return 'Main Game';
+      case RelatedType.similar:
+        return 'Similar Games';
+      case RelatedType.fork:
+        return 'Game Forks';
+      case RelatedType.parentGame:
+        return 'Main Game';
     }
   }
 
   String get subtitle {
     switch (type) {
-      case RelatedType.similar: return 'Games you might like • ${games.length} games';
-      case RelatedType.fork: return 'Alternative versions • ${games.length} forks';
-      case RelatedType.parentGame: return 'Base game • ${games.length} game';
+      case RelatedType.similar:
+        return 'Games you might like • ${games.length} games';
+      case RelatedType.fork:
+        return 'Alternative versions • ${games.length} forks';
+      case RelatedType.parentGame:
+        return 'Base game • ${games.length} game';
     }
   }
 }

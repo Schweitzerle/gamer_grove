@@ -2,7 +2,7 @@
 // PLATFORM BLOC EVENTS
 // ==================================================
 
-// lib/presentation/blocs/platform/game_engine_event.dart
+// lib/presentation/blocs/platform/company_event.dart
 import 'package:equatable/equatable.dart';
 
 abstract class CompanyEvent extends Equatable {
@@ -13,20 +13,18 @@ abstract class CompanyEvent extends Equatable {
 }
 
 class GetCompanyDetailsEvent extends CompanyEvent {
-  final int gameEngineId;
+  final int companyId;
   final bool includeGames;
   final String? userId;
 
   const GetCompanyDetailsEvent({
-    required this.gameEngineId,
+    required this.companyId,
     this.includeGames = true,
     this.userId,
   });
 
   @override
-  List<Object> get props => [gameEngineId, includeGames];
+  List<Object> get props => [companyId, includeGames];
 }
 
 class ClearCompanyEvent extends CompanyEvent {}
-
-

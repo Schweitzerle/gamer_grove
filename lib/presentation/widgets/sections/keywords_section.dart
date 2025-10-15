@@ -29,7 +29,8 @@ class KeywordsSection extends StatelessWidget {
                 keywords[index].name,
                 style: const TextStyle(fontSize: 11),
               ),
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
               visualDensity: VisualDensity.compact,
             ),
           );

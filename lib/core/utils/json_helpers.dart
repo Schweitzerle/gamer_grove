@@ -10,7 +10,6 @@ import '../../domain/entities/game/game.dart';
 /// - Basic fields: { "company": 123 }
 /// - Complete fields: { "company": { "id": 123, "name": "Company Name", ... } }
 class JsonHelpers {
-
   // ==========================================
   // ID EXTRACTION METHODS
   // ==========================================
@@ -163,9 +162,7 @@ class JsonHelpers {
   /// - extractMultipleNested(json, ["user.name", "user.email", "user.id"])
   ///   -> {"user.name": "John", "user.email": "john@example.com", "user.id": 123}
   static Map<String, dynamic> extractMultipleNested(
-      dynamic value,
-      List<String> paths
-      ) {
+      dynamic value, List<String> paths) {
     final result = <String, dynamic>{};
     for (final path in paths) {
       result[path] = extractNested(value, path);
@@ -267,11 +264,11 @@ class JsonHelpers {
   /// Debug helper to analyze JSON structure
   /// Very useful for understanding what IGDB API returns
   static void analyzeJsonStructure(
-      Map<String, dynamic> json, {
-        String prefix = '',
-        int maxDepth = 2,
-        int currentDepth = 0,
-      }) {
+    Map<String, dynamic> json, {
+    String prefix = '',
+    int maxDepth = 2,
+    int currentDepth = 0,
+  }) {
     if (currentDepth >= maxDepth) return;
 
     json.forEach((key, value) {
@@ -286,7 +283,10 @@ class JsonHelpers {
 
         // Recurse into nested objects
         if (currentDepth < maxDepth - 1) {
-          analyzeJsonStructure(value, prefix: '$prefix  ', maxDepth: maxDepth, currentDepth: currentDepth + 1);
+          analyzeJsonStructure(value,
+              prefix: '$prefix  ',
+              maxDepth: maxDepth,
+              currentDepth: currentDepth + 1);
         }
       } else if (value is List) {
         if (value.isNotEmpty) {
@@ -294,18 +294,19 @@ class JsonHelpers {
           if (first is Map<String, dynamic>) {
             final keys = first.keys.take(6).join(', ');
             final moreKeys = first.keys.length > 6 ? '...' : '';
-            print('$prefix$key: List<Map> (${value.length} items) with keys: $keys$moreKeys');
+            print(
+                '$prefix$key: List<Map> (${value.length} items) with keys: $keys$moreKeys');
           } else {
-            print('$prefix$key: List<${first.runtimeType}> (${value.length} items)');
+            print(
+                '$prefix$key: List<${first.runtimeType}> (${value.length} items)');
           }
         } else {
           print('$prefix$key: Empty list');
         }
       } else {
         final valueStr = value.toString();
-        final displayValue = valueStr.length > 50
-            ? '${valueStr.substring(0, 50)}...'
-            : valueStr;
+        final displayValue =
+            valueStr.length > 50 ? '${valueStr.substring(0, 50)}...' : valueStr;
         print('$prefix$key: ${value.runtimeType} = $displayValue');
       }
     });
@@ -332,7 +333,8 @@ class JsonHelpers {
     print('   Total fields: $totalFields');
     print('   Expanded objects: $expandedObjects');
     print('   Simple references: $simpleReferences');
-    print('   Response type: ${expandedObjects > simpleReferences ? "COMPLETE" : "BASIC"}');
+    print(
+        '   Response type: ${expandedObjects > simpleReferences ? "COMPLETE" : "BASIC"}');
   }
 
   // ==========================================
@@ -342,9 +344,9 @@ class JsonHelpers {
   /// Extract IGDB image URL with proper formatting
   /// Handles both direct URLs and image_id constructions
   static String? extractImageUrl(
-      dynamic value, {
-        String size = 'cover_big', // cover_small, cover_big, 720p, 1080p, etc.
-      }) {
+    dynamic value, {
+    String size = 'cover_big', // cover_small, cover_big, 720p, 1080p, etc.
+  }) {
     if (value == null) return null;
 
     // Direct URL
@@ -380,7 +382,7 @@ class JsonHelpers {
   static List<Game> extractGameList(dynamic games) {
     if (games is List) {
       return games
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }

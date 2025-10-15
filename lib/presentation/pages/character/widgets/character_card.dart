@@ -3,9 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import 'package:gamer_grove/presentation/pages/character/character_detail_page.dart';
 import '../../../../domain/entities/character/character.dart';
-import '../character_detail_screen.dart';
 
 // 🎨 MODERNE CHARACTER CARD DESIGNS
 // Verschiedene stilvolle Varianten zur Auswahl
@@ -197,9 +195,9 @@ class CharacterCard extends StatelessWidget {
                   child: Text(
                     _getCharacterSubtitle(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 11,
-                    ),
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 11,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

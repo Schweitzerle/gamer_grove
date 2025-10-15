@@ -22,7 +22,7 @@ class GenericCompanySection extends StatelessWidget {
     this.title = 'Related Companies',
     this.showRoles = true,
   }) : assert(involvedCompanies != null || companies != null,
-  'Either involvedCompanies or companies must be provided');
+            'Either involvedCompanies or companies must be provided');
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,9 @@ class GenericCompanySection extends StatelessWidget {
   Widget _buildInvolvedCompanySection(BuildContext context) {
     final developers = involvedCompanies!.where((c) => c.isDeveloper).toList();
     final publishers = involvedCompanies!.where((c) => c.isPublisher).toList();
-    final others = involvedCompanies!.where((c) => !c.isDeveloper && !c.isPublisher).toList();
+    final others = involvedCompanies!
+        .where((c) => !c.isDeveloper && !c.isPublisher)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,13 +52,10 @@ class GenericCompanySection extends StatelessWidget {
           if (publishers.isNotEmpty || others.isNotEmpty)
             const SizedBox(height: 20),
         ],
-
         if (publishers.isNotEmpty) ...[
           _buildInvolvedCompanySubsection(context, 'Publisher', publishers),
-          if (others.isNotEmpty)
-            const SizedBox(height: 20),
+          if (others.isNotEmpty) const SizedBox(height: 20),
         ],
-
         if (others.isNotEmpty) ...[
           _buildInvolvedCompanySubsection(context, 'Other Companies', others),
         ],
@@ -85,22 +84,24 @@ class GenericCompanySection extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${companies!.length}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               ],
@@ -131,10 +132,10 @@ class GenericCompanySection extends StatelessWidget {
 
   // ✅ INVOLVED COMPANY SUBSECTION (mit Rollen)
   Widget _buildInvolvedCompanySubsection(
-      BuildContext context,
-      String subtitle,
-      List<InvolvedCompany> companyList,
-      ) {
+    BuildContext context,
+    String subtitle,
+    List<InvolvedCompany> companyList,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,8 +145,8 @@ class GenericCompanySection extends StatelessWidget {
             Text(
               subtitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -157,9 +158,9 @@ class GenericCompanySection extends StatelessWidget {
               child: Text(
                 '${companyList.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -187,7 +188,8 @@ class GenericCompanySection extends StatelessWidget {
   }
 
   // ✅ INVOLVED COMPANY CARD (mit Rollen)
-  Widget _buildInvolvedCompanyCard(BuildContext context, InvolvedCompany involvedCompany) {
+  Widget _buildInvolvedCompanyCard(
+      BuildContext context, InvolvedCompany involvedCompany) {
     final company = involvedCompany.company;
     final roles = _getRoles(involvedCompany);
 
@@ -230,33 +232,41 @@ class GenericCompanySection extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: company.logoUrl != null
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedImageWidget(
-                        imageUrl: company.logoUrl!,
-                        fit: BoxFit.contain,
-                        errorWidget: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
+                            child: CachedImageWidget(
+                              imageUrl: company.logoUrl!,
+                              fit: BoxFit.contain,
+                              errorWidget: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.business,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Icon(
                             Icons.business,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             size: 24,
                           ),
-                        ),
-                      ),
-                    )
-                        : Icon(
-                      Icons.business,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      size: 24,
-                    ),
                   ),
                 ),
 
@@ -270,8 +280,8 @@ class GenericCompanySection extends StatelessWidget {
                       Text(
                         company.name,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                              fontWeight: FontWeight.w600,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -280,11 +290,14 @@ class GenericCompanySection extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           roles.join(' • '),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: 9,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                fontSize: 9,
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -342,33 +355,41 @@ class GenericCompanySection extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: company.hasLogo
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedImageWidget(
-                        imageUrl: company.logoUrl!,
-                        fit: BoxFit.contain,
-                        errorWidget: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
+                            child: CachedImageWidget(
+                              imageUrl: company.logoUrl!,
+                              fit: BoxFit.contain,
+                              errorWidget: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.business,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Icon(
                             Icons.business,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                             size: 24,
                           ),
-                        ),
-                      ),
-                    )
-                        : Icon(
-                      Icons.business,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      size: 24,
-                    ),
                   ),
                 ),
 
@@ -382,8 +403,8 @@ class GenericCompanySection extends StatelessWidget {
                       Text(
                         company.name,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                              fontWeight: FontWeight.w600,
+                            ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,

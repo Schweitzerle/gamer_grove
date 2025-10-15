@@ -6,7 +6,6 @@ import '../../../domain/entities/user/user.dart';
 import '../../../domain/usecases/auth/sign_in.dart';
 import '../../../domain/usecases/auth/sign_up.dart';
 import '../../../domain/usecases/auth/sign_out.dart';
-import '../../../domain/usecases/base_usecase.dart';
 import '../../../domain/usecases/auth/get_current_user.dart';
 
 part 'auth_event.dart';
@@ -34,9 +33,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignInRequested(
-      SignInRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+    SignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     final result = await signIn(SignInParams(
@@ -45,15 +44,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ));
 
     result.fold(
-          (failure) => emit(AuthError(failure.message)),
-          (user) => emit(Authenticated(user)),
+      (failure) => emit(AuthError(failure.message)),
+      (user) => emit(Authenticated(user)),
     );
   }
 
   Future<void> _onSignUpRequested(
-      SignUpRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+    SignUpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     print('🔐 AuthBloc: Starting signup process...');
     print('📧 AuthBloc: Email: ${event.email}');
     print('👤 AuthBloc: Username: ${event.username}');
@@ -68,11 +67,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ));
 
       result.fold(
-            (failure) {
+        (failure) {
           print('❌ AuthBloc: Signup failed with failure: ${failure.message}');
           emit(AuthError(failure.message));
         },
-            (user) {
+        (user) {
           print('✅ AuthBloc: Signup successful for user: ${user.username}');
           emit(Authenticated(user));
         },
@@ -85,23 +84,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOutRequested(
-      SignOutRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+    SignOutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     final result = await signOut();
 
     result.fold(
-          (failure) => emit(AuthError(failure.message)),
-          (_) => emit(Unauthenticated()),
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(Unauthenticated()),
     );
   }
 
   void _onAuthStateChanged(
-      AuthStateChanged event,
-      Emitter<AuthState> emit,
-      ) {
+    AuthStateChanged event,
+    Emitter<AuthState> emit,
+  ) {
     if (event.user != null) {
       emit(Authenticated(event.user!));
     } else {
@@ -110,19 +109,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onCheckAuthStatus(
-      CheckAuthStatus event,
-      Emitter<AuthState> emit,
-      ) async {
+    CheckAuthStatus event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     final result = await getCurrentUser();
 
     result.fold(
-          (failure) => emit(Unauthenticated()),
-          (user) => emit(Authenticated(user)),
+      (failure) => emit(Unauthenticated()),
+      (user) => emit(Authenticated(user)),
     );
   }
-
 
   @override
   Future<void> close() {
@@ -130,4 +128,3 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return super.close();
   }
 }
-

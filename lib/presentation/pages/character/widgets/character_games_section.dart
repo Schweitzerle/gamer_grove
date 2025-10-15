@@ -24,7 +24,7 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Game> _displayGames = [];
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void initState() {
@@ -43,10 +43,12 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
     // 🆕 UPDATED: Prefer character.games over passed games parameter
     if (widget.character.hasLoadedGames) {
       _displayGames = widget.character.games!;
-      print('🎮 CharacterGamesSection: Using character.games (${_displayGames.length} games)');
+      print(
+          '🎮 CharacterGamesSection: Using character.games (${_displayGames.length} games)');
     } else if (widget.games != null && widget.games!.isNotEmpty) {
       _displayGames = widget.games!;
-      print('🎮 CharacterGamesSection: Using passed games parameter (${_displayGames.length} games)');
+      print(
+          '🎮 CharacterGamesSection: Using passed games parameter (${_displayGames.length} games)');
     } else {
       // No games loaded yet - let parent component handle loading
       print('🎮 CharacterGamesSection: No games available yet');
@@ -111,9 +113,9 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
             else if (_displayGames.isEmpty && widget.character.hasGames)
               _buildLoadingGamesState()
             else if (_displayGames.isEmpty)
-                _buildEmptyState()
-              else
-                _buildGamesContent(),
+              _buildEmptyState()
+            else
+              _buildGamesContent(),
           ],
         ),
       ),
@@ -144,8 +146,8 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
               Text(
                 'Featured Games',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(width: 8),
               Container(
@@ -157,9 +159,9 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
                 child: Text(
                   '${_displayGames.length}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -338,16 +340,16 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
             Text(
               'No Games Found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
               'This character doesn\'t appear in any games yet.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade500,
-              ),
+                    color: Colors.grey.shade500,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -356,30 +358,14 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
     );
   }
 
-  void _loadCharacterGames() {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // TODO: Implement actual game loading logic
-    // This would typically call a repository method to fetch games by character ID
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          // _displayGames = fetchedGames;
-        });
-      }
-    });
-  }
-
   void _showAllGames() {
     // TODO: Navigate to a full games list screen for this character
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('${widget.character.name} Games'),
-        content: Text('Show all ${_displayGames.length} games featuring this character.'),
+        content: Text(
+            'Show all ${_displayGames.length} games featuring this character.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

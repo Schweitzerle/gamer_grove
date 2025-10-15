@@ -24,8 +24,8 @@ class GameDescriptionContent extends StatelessWidget {
           Text(
             game.summary!,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              height: 1.6,
-            ),
+                  height: 1.6,
+                ),
           ),
         ],
 
@@ -42,7 +42,10 @@ class GameDescriptionContent extends StatelessWidget {
   Widget _buildStorylineSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -77,8 +80,8 @@ class GameDescriptionContent extends StatelessWidget {
                 child: Text(
                   'Read Full Storyline',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
             ],
@@ -87,8 +90,8 @@ class GameDescriptionContent extends StatelessWidget {
             Text(
               game.storyline!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                height: 1.6,
-              ),
+                    height: 1.6,
+                  ),
             ),
           ],
         ),

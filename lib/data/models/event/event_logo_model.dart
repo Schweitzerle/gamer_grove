@@ -70,7 +70,6 @@ class EventLogoModel extends EventLogo {
     return null;
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -110,10 +109,10 @@ class EventLogoModel extends EventLogo {
       alphaChannel: alphaChannel,
       animated: animated,
       eventId: eventId,
-      url: customUrl ?? 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+      url: customUrl ??
+          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
   }
 }
-

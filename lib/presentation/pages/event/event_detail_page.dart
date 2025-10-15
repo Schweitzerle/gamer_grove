@@ -9,7 +9,6 @@ import '../../../../domain/entities/game/game.dart';
 import '../../blocs/event/event_bloc.dart';
 import '../../blocs/event/event_event.dart';
 import '../../blocs/event/event_state.dart';
-import '../../widgets/custom_shimmer.dart';
 import '../../widgets/live_loading_progress.dart';
 import 'event_details_screen.dart';
 // ==================================================
@@ -72,7 +71,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -113,15 +113,15 @@ class _EventDetailPageState extends State<EventDetailPage> {
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
                 context.read<EventBloc>().add(
-                  GetCompleteEventDetailsEvent(eventId: widget.eventId),
-                );
+                      GetCompleteEventDetailsEvent(eventId: widget.eventId),
+                    );
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),

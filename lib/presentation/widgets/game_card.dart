@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../domain/entities/game/game.dart';
-import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';
 import '../../core/widgets/cached_image_widget.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 class GameCard extends StatelessWidget {
   final Game game;
@@ -221,18 +219,18 @@ class GameCard extends StatelessWidget {
                 Text(
                   DateFormatter.formatYearOnly(game.firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 if (game.genres.isNotEmpty) ...[
                   Text(
                     ' • ',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 10,
-                    ),
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 10,
+                        ),
                   ),
                 ],
               ],
@@ -243,9 +241,9 @@ class GameCard extends StatelessWidget {
                   child: Text(
                     game.genres.take(2).map((g) => g.name).join(', '),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 10,
-                    ),
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 10,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -270,15 +268,19 @@ class GameCard extends StatelessWidget {
               : Container(height: 0),
 
           // Abstand nur wenn User Rating vorhanden
-          game.userRating != null ? const SizedBox(height: 4) : Container(height: 0),
+          game.userRating != null
+              ? const SizedBox(height: 4)
+              : Container(height: 0),
 
           // Top Three
-          (game.isInTopThree ?? false)
+          (game.isInTopThree)
               ? _buildTopThreeCircle(context)
               : Container(height: 0),
 
           // Abstand nur wenn Top Three vorhanden
-          (game.isInTopThree ?? false) ? const SizedBox(height: 4) : Container(height: 0),
+          (game.isInTopThree)
+              ? const SizedBox(height: 4)
+              : Container(height: 0),
 
           // Wishlist
           game.isWishlisted
@@ -330,7 +332,7 @@ class GameCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.person,
                   size: 10,
                   color: Colors.white,
@@ -409,7 +411,7 @@ class GameCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Icon(
+      child: const Icon(
         Icons.favorite,
         size: 12,
         color: Colors.red,
@@ -429,7 +431,7 @@ class GameCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Icon(
+      child: const Icon(
         Icons.thumb_up,
         size: 12,
         color: Colors.green,
@@ -469,7 +471,7 @@ class GameCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.public, // Globe icon für IGDB/externe Quelle
                   size: 12,
                   color: Colors.white,
@@ -503,13 +505,13 @@ class GameCard extends StatelessWidget {
     return game.userRating != null ||
         game.isWishlisted ||
         game.isRecommended ||
-        (game.isInTopThree ?? false);
+        (game.isInTopThree);
   }
 
   int _getUserElementsCount() {
     int count = 0;
     if (game.userRating != null) count++;
-    if (game.isInTopThree ?? false) count++;
+    if (game.isInTopThree) count++;
     if (game.isWishlisted) count++;
     if (game.isRecommended) count++;
     return count;
@@ -527,7 +529,8 @@ class GameCard extends StatelessWidget {
     }
 
     height += count * 24; // Andere Elemente sind 24px
-    height += (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
+    height +=
+        (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
 
     return height;
   }
@@ -555,7 +558,7 @@ class GameCardShimmer extends StatelessWidget {
       height: height ?? 240,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -568,8 +571,11 @@ class GameCardShimmer extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.surfaceVariant,
-                    Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                    Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withOpacity(0.5),
                   ],
                 ),
               ),
@@ -592,16 +598,17 @@ class GameCardShimmer extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   // States shimmer
-                  ...List.generate(2, (index) =>
-                      Container(
-                        width: 32,
-                        height: 32,
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.surface,
-                        ),
+                  ...List.generate(
+                    2,
+                    (index) => Container(
+                      width: 32,
+                      height: 32,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.surface,
                       ),
+                    ),
                   ),
                 ],
               ),

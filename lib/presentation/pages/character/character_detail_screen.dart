@@ -1,12 +1,9 @@
-
 // ==================================================
 // CHARACTER DETAIL SCREEN (NEW UI DESIGN)
 // ==================================================
 
 // lib/presentation/pages/character_detail/character_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/character/character.dart';
@@ -58,7 +55,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     _scrollController.dispose();
     super.dispose();
   }
-
 
   SeriesItem _createCharacterGamesSeriesItem() {
     return SeriesItem(
@@ -120,11 +116,11 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
         ),
         title: _isHeaderCollapsed
             ? Text(
-          widget.character.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        )
+                widget.character.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
             : null,
       ),
     );
@@ -135,10 +131,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       tag: 'character_hero_${widget.character.id}',
       child: widget.character.hasImage
           ? CachedImageWidget(
-        imageUrl: widget.character.largeUrl ?? widget.character.imageUrl!,
-        fit: BoxFit.cover,
-        placeholder: _buildFallbackHero(),
-      )
+              imageUrl: widget.character.largeUrl ?? widget.character.imageUrl!,
+              fit: BoxFit.cover,
+              placeholder: _buildFallbackHero(),
+            )
           : _buildFallbackHero(),
     );
   }
@@ -232,17 +228,17 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                       borderRadius: BorderRadius.circular(28),
                       child: widget.character.hasImage
                           ? CachedImageWidget(
-                        imageUrl: widget.character.thumbUrl!,
-                        fit: BoxFit.cover,
-                      )
+                              imageUrl: widget.character.thumbUrl!,
+                              fit: BoxFit.cover,
+                            )
                           : Container(
-                        color: Colors.purple.withOpacity(0.1),
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.purple,
-                          size: 30,
-                        ),
-                      ),
+                              color: Colors.purple.withOpacity(0.1),
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.purple,
+                                size: 30,
+                              ),
+                            ),
                     ),
                   ),
 
@@ -256,9 +252,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                         // Character Name
                         Text(
                           widget.character.name,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -301,9 +298,9 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                   Text(
                     '${widget.games.length} games',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
                   ),
                   const Spacer(),
                   if (widget.character.countryName != null)
@@ -317,9 +314,12 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                         const SizedBox(width: 4),
                         Text(
                           widget.character.countryName!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                         ),
                       ],
                     ),
@@ -367,12 +367,14 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppConstants.paddingLarge), // Space for floating card
+            const SizedBox(
+                height: AppConstants.paddingLarge), // Space for floating card
 
             // Character Information Accordion
             if (widget.character.hasDescription)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium),
                 child: _buildCharacterInfoAccordion(),
               ),
 
@@ -381,15 +383,18 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             // Character Games Section
             if (widget.games.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
-                child: _buildTabView(context, _createCharacterGamesSeriesItem()),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium),
+                child:
+                    _buildTabView(context, _createCharacterGamesSeriesItem()),
               ),
 
             const SizedBox(height: 16),
 
             // Character Details Accordion
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium),
               child: _buildCharacterDetailsAccordion(),
             ),
 
@@ -414,8 +419,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
               Text(
                 widget.character.description!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  height: 1.5,
-                ),
+                      height: 1.5,
+                    ),
               ),
             ],
           ),
@@ -458,19 +463,19 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                             .textTheme
                             .titleMedium
                             ?.copyWith(
-                          fontWeight: item.type == SeriesType.mainFranchise
-                              ? FontWeight.bold
-                              : FontWeight.w600,
-                        ),
+                              fontWeight: item.type == SeriesType.mainFranchise
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         '${item.type.displayName} • ${item.totalCount} games',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: item.accentColor,
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: item.accentColor,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ],
                   ),
@@ -552,8 +557,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             Text(
               'Games loading...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -574,10 +579,13 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
               padding: const EdgeInsets.all(AppConstants.paddingMedium),
               child: Column(
                 children: [
-                  _buildDetailRow('Gender', widget.character.displayGender, Icons.person),
-                  _buildDetailRow('Species', widget.character.displaySpecies, Icons.pets),
+                  _buildDetailRow(
+                      'Gender', widget.character.displayGender, Icons.person),
+                  _buildDetailRow(
+                      'Species', widget.character.displaySpecies, Icons.pets),
                   if (widget.character.countryName != null)
-                    _buildDetailRow('Country', widget.character.countryName!, Icons.location_on),
+                    _buildDetailRow('Country', widget.character.countryName!,
+                        Icons.location_on),
                   if (widget.character.akas.isNotEmpty)
                     _buildDetailRow(
                       'Also Known As',
@@ -597,10 +605,12 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
               padding: const EdgeInsets.all(AppConstants.paddingMedium),
               child: Column(
                 children: [
-                  _buildTechnicalRow('Character ID', widget.character.id.toString()),
+                  _buildTechnicalRow(
+                      'Character ID', widget.character.id.toString()),
                   if (widget.character.slug != null)
                     _buildTechnicalRow('Slug', widget.character.slug!),
-                  _buildTechnicalRow('Games Count', widget.character.gameIds.length.toString()),
+                  _buildTechnicalRow('Games Count',
+                      widget.character.gameIds.length.toString()),
                   _buildTechnicalRow('Checksum', widget.character.checksum),
                 ],
               ),
@@ -629,15 +639,15 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -657,9 +667,9 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
           const SizedBox(width: 12),
@@ -667,8 +677,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-              ),
+                    fontFamily: 'monospace',
+                  ),
             ),
           ),
         ],
@@ -678,10 +688,12 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
 
   void _logCharacterData() {
     print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED (BLOC) ===');
-    print('🎯 Character: ${widget.character.name} (ID: ${widget.character.id})');
+    print(
+        '🎯 Character: ${widget.character.name} (ID: ${widget.character.id})');
     print('🎮 Games: ${widget.games.length} loaded');
     print('🖼️ Image: ${widget.character.hasImage ? 'Available' : 'Fallback'}');
-    print('📝 Description: ${widget.character.hasDescription ? 'Available' : 'None'}');
+    print(
+        '📝 Description: ${widget.character.hasDescription ? 'Available' : 'None'}');
     print('=== END CHARACTER DETAIL LOG ===\n');
   }
 }

@@ -3,9 +3,7 @@
 // ==================================================
 
 // lib/presentation/pages/platform_detail/platform_detail_screen.dart
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
@@ -79,7 +77,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
       return Colors.blue;
     } else if (platformName.contains('xbox')) {
       return Colors.green;
-    } else if (platformName.contains('nintendo') || platformName.contains('switch')) {
+    } else if (platformName.contains('nintendo') ||
+        platformName.contains('switch')) {
       return Colors.red;
     } else if (platformName.contains('pc') || platformName.contains('steam')) {
       return Colors.purple;
@@ -130,11 +129,11 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
         ),
         title: _isHeaderCollapsed
             ? Text(
-          widget.platform.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        )
+                widget.platform.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
             : null,
       ),
     );
@@ -145,10 +144,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
       tag: 'platform_hero_${widget.platform.id}',
       child: widget.platform.hasLogo
           ? CachedImageWidget(
-        imageUrl: widget.platform.logo!.logoMed2xUrl,
-        fit: BoxFit.cover,
-        placeholder: _buildFallbackHero(),
-      )
+              imageUrl: widget.platform.logo!.logoMed2xUrl,
+              fit: BoxFit.cover,
+              placeholder: _buildFallbackHero(),
+            )
           : _buildFallbackHero(),
     );
   }
@@ -242,17 +241,17 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                       borderRadius: BorderRadius.circular(28),
                       child: widget.platform.hasLogo
                           ? CachedImageWidget(
-                        imageUrl: widget.platform.logo!.logoMed2xUrl,
-                        fit: BoxFit.cover,
-                      )
+                              imageUrl: widget.platform.logo!.logoMed2xUrl,
+                              fit: BoxFit.cover,
+                            )
                           : Container(
-                        color: _getPlatformAccentColor().withOpacity(0.1),
-                        child: Icon(
-                          Icons.videogame_asset,
-                          color: _getPlatformAccentColor(),
-                          size: 30,
-                        ),
-                      ),
+                              color: _getPlatformAccentColor().withOpacity(0.1),
+                              child: Icon(
+                                Icons.videogame_asset,
+                                color: _getPlatformAccentColor(),
+                                size: 30,
+                              ),
+                            ),
                     ),
                   ),
 
@@ -266,9 +265,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                         // Platform Name
                         Text(
                           widget.platform.name,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -284,7 +284,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                                 _getPlatformAccentColor(),
                                 Icons.label,
                               ),
-                            if (widget.platform.abbreviation != null && widget.platform.generation != null)
+                            if (widget.platform.abbreviation != null &&
+                                widget.platform.generation != null)
                               const SizedBox(width: 8),
                             if (widget.platform.generation != null)
                               _buildInfoChip(
@@ -299,8 +300,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                   ),
                 ],
               ),
-
-
             ],
           ),
         ),
@@ -343,11 +342,13 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppConstants.paddingLarge), // Space for floating card
+            const SizedBox(
+                height: AppConstants.paddingLarge), // Space for floating card
 
             // Platform Information Accordion
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium),
               child: _buildPlatformInformationAccordion(),
             ),
 
@@ -356,7 +357,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
             // Platform Games Section
             if (widget.games.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium),
                 child: _buildTabView(context, _createPlatformGamesSeriesItem()),
               ),
 
@@ -385,15 +387,16 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                     Text(
                       widget.platform.summary!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.5,
-                      ),
+                            height: 1.5,
+                          ),
                     ),
                     if (widget.platform.url != null) ...[
                       const SizedBox(height: 16),
                       InkWell(
                         onTap: () => _launchUrl(widget.platform.url!),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: _getPlatformAccentColor().withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
@@ -436,19 +439,25 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
               child: Column(
                 children: [
                   if (widget.platform.alternativeName != null)
-                    _buildDetailRow('Alternative Name', widget.platform.alternativeName!, Icons.label_important),
+                    _buildDetailRow(
+                        'Alternative Name',
+                        widget.platform.alternativeName!,
+                        Icons.label_important),
                   if (widget.platform.abbreviation != null)
-                    _buildDetailRow('Abbreviation', widget.platform.abbreviation!, Icons.short_text),
+                    _buildDetailRow('Abbreviation',
+                        widget.platform.abbreviation!, Icons.short_text),
                   if (widget.platform.generation != null)
-                    _buildDetailRow('Generation', 'Generation ${widget.platform.generation}', Icons.timeline),
+                    _buildDetailRow(
+                        'Generation',
+                        'Generation ${widget.platform.generation}',
+                        Icons.timeline),
                   if (widget.platform.platformTypeId != null)
                     _buildDetailRow(
                       'Platform Type',
                       _getPlatformTypeDisplay(),
                       Icons.category,
                     ),
-                  if (widget.platform.slug != null)
-                    _buildDetailRow('Slug', widget.platform.slug!, Icons.link),
+                  _buildDetailRow('Slug', widget.platform.slug, Icons.link),
                 ],
               ),
             ),
@@ -492,19 +501,19 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                             .textTheme
                             .titleMedium
                             ?.copyWith(
-                          fontWeight: item.type == SeriesType.mainFranchise
-                              ? FontWeight.bold
-                              : FontWeight.w600,
-                        ),
+                              fontWeight: item.type == SeriesType.mainFranchise
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         item.type.displayName,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: item.accentColor,
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: item.accentColor,
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ],
                   ),
@@ -586,41 +595,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
             Text(
               'Games loading...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlatformDetailsAccordion() {
-    return Card(
-      elevation: 2,
-      child: AccordionTile(
-        title: 'Platform Information',
-        icon: Icons.info,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            children: [
-              if (widget.platform.alternativeName != null)
-                _buildDetailRow('Alternative Name', widget.platform.alternativeName!, Icons.label_important),
-              if (widget.platform.abbreviation != null)
-                _buildDetailRow('Abbreviation', widget.platform.abbreviation!, Icons.short_text),
-              if (widget.platform.generation != null)
-                _buildDetailRow('Generation', 'Generation ${widget.platform.generation}', Icons.timeline),
-              if (widget.platform.platformTypeId != null)
-                _buildDetailRow(
-                  'Platform Type',
-                  _getPlatformTypeDisplay(),
-                  Icons.category,
-                ),
-              if (widget.platform.slug != null)
-                _buildDetailRow('Slug', widget.platform.slug!, Icons.link),
-            ],
-          ),
         ),
       ),
     );
@@ -644,15 +622,15 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -693,10 +671,11 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     print('📊 Generation: ${widget.platform.generation ?? 'Unknown'}');
     print('🎮 Games: ${widget.games.length} loaded');
     print('🖼️ Logo: ${widget.platform.hasLogo ? 'Available' : 'Fallback'}');
-    print('📄 Summary: ${widget.platform.summary != null ? 'Available' : 'None'}');
+    print(
+        '📄 Summary: ${widget.platform.summary != null ? 'Available' : 'None'}');
     print('🔗 URL: ${widget.platform.url ?? 'None'}');
     print('🏷️ Platform Type: ${_getPlatformTypeDisplay()}');
-    print('🔑 Slug: ${widget.platform.slug ?? 'None'}');
+    print('🔑 Slug: ${widget.platform.slug}');
     print('=== END PLATFORM DETAIL LOG ===\n');
   }
 }

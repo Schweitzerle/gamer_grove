@@ -1,84 +1,76 @@
-// ==================================================
-// PLATFORM BLOC IMPLEMENTATION
-// ==================================================
-
-// lib/presentation/blocs/platform/game_engine_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
 import '../../../core/utils/game_enrichment_utils.dart';
 import '../../../domain/usecases/company/get_company_with_games.dart';
-import '../../../domain/usecases/platform/get_platform_with_games.dart';
-import 'game_engine_event.dart';
-import 'game_engine_state.dart';
 
-class CompanyBloc extends Bloc<CompanyBloc, CompanyState> {
-  final GetCompleteCompanyDetails getCompleteCompanyDetails;
+class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
+  final GetCompanyWithGames getCompanyWithGames;
+
   CompanyBloc({
-    required this.getCompleteCompanyDetails,
+    required this.getCompanyWithGames,
   }) : super(CompanyInitial()) {
-    on<GetC>(_onGetGameEngineDetails);
-    on<ClearCompanyEvent>(_onClearGameEngine);
+    on<GetCompanyDetailsEvent>(_onGetCompanyDetails);
+    on<ClearCompanyEvent>(_onClearCompany);
   }
 
-  Future<void> _onGetGameEngineDetails(
-      GetGameEngineDetailsEvent event,
-      Emitter<GameEngineState> emit,
-      ) async {
+  Future<void> _onGetCompanyDetails(
+    GetCompanyDetailsEvent event,
+    Emitter<CompanyState> emit,
+  ) async {
     emit(CompanyLoading());
 
-    final result = await getCompleteCompanyDetails(
-      GetGameEngineWithGamesParams(
-        gameEngineId: event.companyId,
+    final result = await getCompanyWithGames(
+      GetCompanyWithGamesParams(
+        companyId: event.companyId,
         includeGames: event.includeGames,
+        userId: event.userId,
       ),
     );
 
     await result.fold(
-          (failure) async {
-        emit(GameEngineError(message: failure.message));
+      (failure) async {
+        emit(CompanyError(message: failure.message));
       },
-          (gameEngineWithGames) async {
-        // 🔧 ENRICHMENT LOGIC mit GameEnrichmentUtils
-        if (event.userId != null && gameEngineWithGames.games.isNotEmpty) {
+      (companyWithGames) async {
+        if (event.userId != null && companyWithGames.games.isNotEmpty) {
           try {
-            print('🎮 GameEngineBloc: Enriching gameEngine games with GameEnrichmentUtils...');
+            print(
+                '🎮 CompanyBloc: Enriching company games with GameEnrichmentUtils...');
 
-            // Verwende die Utils für Game Enrichment
-            final enrichedGames = await GameEnrichmentUtils.enrichGameEngineGames(
-              gameEngineWithGames.games,
+            final enrichedGames = await GameEnrichmentUtils.enrichCompanyGames(
+              companyWithGames.games,
               event.userId!,
             );
 
-            // Debug Stats
-            GameEnrichmentUtils.printEnrichmentStats(enrichedGames, context: 'GameEngine');
+            GameEnrichmentUtils.printEnrichmentStats(enrichedGames,
+                context: 'Company');
 
-            emit(GameEngineDetailsLoaded(
-              company: gameEngineWithGames.gameEngine,
+            emit(CompanyDetailsLoaded(
+              company: companyWithGames.company,
               games: enrichedGames,
             ));
           } catch (e) {
-            print('❌ GameEngineBloc: Failed to enrich games: $e');
-            emit(GameEngineDetailsLoaded(
-              company: gameEngineWithGames.gameEngine,
-              games: gameEngineWithGames.games,
+            print('❌ CompanyBloc: Failed to enrich games: $e');
+            emit(CompanyDetailsLoaded(
+              company: companyWithGames.company,
+              games: companyWithGames.games,
             ));
           }
         } else {
-          emit(GameEngineDetailsLoaded(
-            company: gameEngineWithGames.gameEngine,
-            games: gameEngineWithGames.games,
+          emit(CompanyDetailsLoaded(
+            company: companyWithGames.company,
+            games: companyWithGames.games,
           ));
         }
       },
     );
   }
 
-  Future<void> _onClearGameEngine(
-      ClearGameEngineEvent event,
-      Emitter<GameEngineState> emit,
-      ) async {
-    emit(GameEngineInitial());
+  Future<void> _onClearCompany(
+    ClearCompanyEvent event,
+    Emitter<CompanyState> emit,
+  ) async {
+    emit(CompanyInitial());
   }
 }

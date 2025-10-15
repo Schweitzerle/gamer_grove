@@ -63,7 +63,8 @@ class GameUtils {
 
     if (minutes < 60) {
       return '${minutes}m';
-    } else if (minutes < 1440) { // Less than 24 hours
+    } else if (minutes < 1440) {
+      // Less than 24 hours
       final hours = minutes ~/ 60;
       final remainingMinutes = minutes % 60;
       if (remainingMinutes == 0) {
@@ -142,7 +143,6 @@ class GameUtils {
       highlights.add('Hyped (${game.hypes} hype points)');
     }
 
-
     // Add platform highlights
     if (game.platforms.length >= 5) {
       highlights.add('Multi-Platform (${game.platforms.length} platforms)');
@@ -150,17 +150,4 @@ class GameUtils {
 
     return highlights;
   }
-
-  static String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
-  }
 }
-
-
-
-

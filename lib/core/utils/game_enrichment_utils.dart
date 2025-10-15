@@ -93,8 +93,7 @@ class GameEnrichmentUtils {
       }
 
       if (enableLogging) {
-        final enrichedCount =
-            enrichedGames.where((g) => g.isWishlisted != null).length;
+        final enrichedCount = countEnrichedGames(enrichedGames);
         print(
             '✅ GameEnrichment: Successfully enriched $enrichedCount/${enrichedGames.length} games');
       }
@@ -184,10 +183,25 @@ class GameEnrichmentUtils {
   }
 
   static Future<List<Game>> enrichGameEngineGames(
-      List<Game> games,
-      String userId, {
-        int limit = 10,
-      }) async {
+    List<Game> games,
+    String userId, {
+    int limit = 10,
+  }) async {
+    return await enrichGamesWithUserData(
+      games,
+      userId,
+      enrichLimit: limit,
+      enableTopThree: true,
+      enableParallelRequests: true,
+      enableLogging: true,
+    );
+  }
+
+  static Future<List<Game>> enrichCompanyGames(
+    List<Game> games,
+    String userId, {
+    int limit = 10,
+  }) async {
     return await enrichGamesWithUserData(
       games,
       userId,
@@ -349,10 +363,10 @@ class GameEnrichmentUtils {
 
   /// Prüft ob ein Game User Data hat
   static bool hasUserData(Game game) {
-    return game.isWishlisted != null ||
-        game.isRecommended != null ||
+    return game.isWishlisted ||
+        game.isRecommended ||
         game.userRating != null ||
-        game.isInTopThree != null;
+        game.isInTopThree;
   }
 
   /// Zählt enriched Games

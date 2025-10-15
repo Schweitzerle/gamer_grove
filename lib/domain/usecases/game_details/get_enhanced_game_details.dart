@@ -8,13 +8,15 @@ import '../../entities/game/game.dart';
 import '../../repositories/game_repository.dart';
 import '../base_usecase.dart';
 
-class GetEnhancedGameDetails extends UseCase<Game, GetEnhancedGameDetailsParams> {
+class GetEnhancedGameDetails
+    extends UseCase<Game, GetEnhancedGameDetailsParams> {
   final GameRepository repository;
 
   GetEnhancedGameDetails(this.repository);
 
   @override
-  Future<Either<Failure, Game>> call(GetEnhancedGameDetailsParams params) async {
+  Future<Either<Failure, Game>> call(
+      GetEnhancedGameDetailsParams params) async {
     if (params.gameId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
@@ -45,28 +47,28 @@ class GetEnhancedGameDetailsParams extends Equatable {
   });
 
   // Quick constructors for different use cases
-  GetEnhancedGameDetailsParams.fullDetails({
+  const GetEnhancedGameDetailsParams.fullDetails({
     required this.gameId,
     this.userId,
-  }) : includeCharacters = true,
+  })  : includeCharacters = true,
         includeEvents = true,
         includeMedia = true;
 
-  GetEnhancedGameDetailsParams.mediaOnly({
+  const GetEnhancedGameDetailsParams.mediaOnly({
     required this.gameId,
     this.userId,
-  }) : includeCharacters = false,
+  })  : includeCharacters = false,
         includeEvents = false,
         includeMedia = true;
 
-  GetEnhancedGameDetailsParams.charactersAndEvents({
+  const GetEnhancedGameDetailsParams.charactersAndEvents({
     required this.gameId,
     this.userId,
-  }) : includeCharacters = true,
+  })  : includeCharacters = true,
         includeEvents = true,
         includeMedia = false;
 
   @override
-  List<Object?> get props => [gameId, userId, includeCharacters, includeEvents, includeMedia];
+  List<Object?> get props =>
+      [gameId, userId, includeCharacters, includeEvents, includeMedia];
 }
-

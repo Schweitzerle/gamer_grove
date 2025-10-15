@@ -8,7 +8,6 @@ import '../../domain/entities/user/user.dart' as domain;
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/cache_datasource.dart';
 import '../datasources/remote/supabase/supabase_remote_datasource.dart';
-import '../models/user_model.dart';
 import '../../main.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -84,6 +83,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: 'Unexpected error: $e'));
     }
   }
+
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
@@ -118,7 +118,8 @@ class AuthRepositoryImpl implements AuthRepository {
       // No user found anywhere
       return const Left(AuthenticationFailure(message: 'No user logged in'));
     } catch (e) {
-      return const Left(AuthenticationFailure(message: 'Failed to get current user'));
+      return const Left(
+          AuthenticationFailure(message: 'Failed to get current user'));
     }
   }
 

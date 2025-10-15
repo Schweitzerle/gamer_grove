@@ -5,9 +5,7 @@
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/utils/game_enrichment_utils.dart';
-import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
 import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/game/game.dart';
 import '../../../domain/usecases/event/get_complete_event_details.dart';
 import '../../../domain/usecases/event/get_current_events.dart';
 import '../../../domain/usecases/event/get_event_details.dart';
@@ -15,7 +13,6 @@ import '../../../domain/usecases/event/get_events_by_date_range.dart';
 import '../../../domain/usecases/event/get_events_by_games.dart';
 import '../../../domain/usecases/event/get_upcoming_events.dart';
 import '../../../domain/usecases/event/search_events.dart';
-import '../../../injection_container.dart';
 import 'event_event.dart';
 import 'event_state.dart';
 
@@ -300,7 +297,6 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
       print('✅ EventBloc: Event enriched with ${enrichedGames.length} games');
       return enrichedEvent;
-
     } catch (e) {
       print('❌ EventBloc: Error enriching event games: $e');
       return event;

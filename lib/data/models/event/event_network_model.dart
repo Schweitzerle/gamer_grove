@@ -59,28 +59,29 @@ class EventNetworkModel extends EventNetwork {
       try {
         return NetworkTypeModel.fromJson(networkType);
       } catch (e) {
-        print('⚠️ EventNetworkModel: Failed to parse network type: $networkType - Error: $e');
+        print(
+            '⚠️ EventNetworkModel: Failed to parse network type: $networkType - Error: $e');
         return null;
       }
     }
     return null;
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'checksum': checksum,
       'url': url,
       'event': eventId,
-      'network_type': networkType != null ? {
-        'id': networkType!.id,
-        'name': networkType!.name,
-        'checksum': networkType!.checksum,
-      } : networkTypeId,
+      'network_type': networkType != null
+          ? {
+              'id': networkType!.id,
+              'name': networkType!.name,
+              'checksum': networkType!.checksum,
+            }
+          : networkTypeId,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
 }
-

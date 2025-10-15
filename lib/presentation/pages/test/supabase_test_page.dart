@@ -7,7 +7,6 @@ import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dar
 import '../../../data/models/user_model.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../../main.dart';
 
 class SupabaseTestPage extends StatefulWidget {
   const SupabaseTestPage({super.key});
@@ -17,7 +16,8 @@ class SupabaseTestPage extends StatefulWidget {
 }
 
 class _SupabaseTestPageState extends State<SupabaseTestPage> {
-  final SupabaseRemoteDataSource _supabaseDataSource = sl<SupabaseRemoteDataSource>();
+  final SupabaseRemoteDataSource _supabaseDataSource =
+      sl<SupabaseRemoteDataSource>();
 
   // Controllers
   final _usernameController = TextEditingController();
@@ -66,7 +66,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
   void _addTestResult(String result) {
     setState(() {
-      _testResults += '${DateTime.now().toString().substring(11, 19)}: $result\n';
+      _testResults +=
+          '${DateTime.now().toString().substring(11, 19)}: $result\n';
     });
   }
 
@@ -143,9 +144,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             Text(
               'Current User Info',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             if (_currentUserId != null) ...[
@@ -153,8 +154,10 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               Text('Username: ${_currentUserProfile?.username ?? "Unknown"}'),
               Text('Email: ${_currentUserProfile?.email ?? "Unknown"}'),
               Text('Bio: ${_currentUserProfile?.bio ?? "No bio"}'),
-              Text('Wishlist Count: ${_currentUserProfile?.wishlistGameIds.length ?? 0}'),
-              Text('Rated Games: ${_currentUserProfile?.ratedGameIds.length ?? 0}'),
+              Text(
+                  'Wishlist Count: ${_currentUserProfile?.wishlistGameIds.length ?? 0}'),
+              Text(
+                  'Rated Games: ${_currentUserProfile?.ratedGameIds.length ?? 0}'),
               Text('Following: ${_currentUserProfile?.followingCount ?? 0}'),
               Text('Followers: ${_currentUserProfile?.followersCount ?? 0}'),
             ] else ...[
@@ -182,12 +185,11 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             Text(
               'Profile Management Tests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
@@ -196,7 +198,6 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             TextField(
               controller: _bioController,
               decoration: const InputDecoration(
@@ -206,7 +207,6 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               maxLines: 3,
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             Wrap(
               spacing: 8,
               children: [
@@ -238,12 +238,11 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             Text(
               'Game Actions Tests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             Row(
               children: [
                 Expanded(
@@ -270,7 +269,6 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               ],
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -323,9 +321,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             Text(
               'Social Features Tests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
 
@@ -393,8 +391,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
                 'Search Results:',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              ...(_searchResults.take(5).map((user) =>
-                  ListTile(
+              ...(_searchResults.take(5).map((user) => ListTile(
                     title: Text(user.username),
                     subtitle: Text(user.id),
                     trailing: IconButton(
@@ -405,8 +402,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
                       },
                     ),
                     dense: true,
-                  )
-              )),
+                  ))),
             ],
           ],
         ),
@@ -424,12 +420,11 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             Text(
               'Top Games Tests',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             TextField(
               controller: _topGamesController,
               decoration: const InputDecoration(
@@ -439,7 +434,6 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-
             Wrap(
               spacing: 8,
               children: [
@@ -478,9 +472,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
                 Text(
                   'Test Results',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
                 const Spacer(),
                 if (_isLoading)
@@ -505,10 +499,12 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
               ),
               child: SingleChildScrollView(
                 child: Text(
-                  _testResults.isEmpty ? 'No test results yet...' : _testResults,
+                  _testResults.isEmpty
+                      ? 'No test results yet...'
+                      : _testResults,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                  ),
+                        fontFamily: 'monospace',
+                      ),
                 ),
               ),
             ),
@@ -548,7 +544,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
         updates['bio'] = _bioController.text;
       }
 
-      final updatedProfile = await _supabaseDataSource.updateUserProfile(userId: _currentUserId!);
+      final updatedProfile =
+          await _supabaseDataSource.updateUserProfile(userId: _currentUserId!);
       setState(() {
         _currentUserProfile = updatedProfile;
       });
@@ -636,9 +633,11 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final wishlistIds = await _supabaseDataSource.getUserWishlistIds(_currentUserId!);
+      final wishlistIds =
+          await _supabaseDataSource.getUserWishlistIds(_currentUserId!);
       _addTestResult('✅ Wishlist retrieved: ${wishlistIds.length} games');
-      _addTestResult('   Game IDs: ${wishlistIds.take(5).join(", ")}${wishlistIds.length > 5 ? "..." : ""}');
+      _addTestResult(
+          '   Game IDs: ${wishlistIds.take(5).join(", ")}${wishlistIds.length > 5 ? "..." : ""}');
     } catch (e) {
       _addTestResult('❌ Failed to get wishlist: $e');
     }
@@ -650,9 +649,12 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final recommendedIds = await _supabaseDataSource.getUserRecommendedIds(_currentUserId!);
-      _addTestResult('✅ Recommended games retrieved: ${recommendedIds.length} games');
-      _addTestResult('   Game IDs: ${recommendedIds.take(5).join(", ")}${recommendedIds.length > 5 ? "..." : ""}');
+      final recommendedIds =
+          await _supabaseDataSource.getUserRecommendedIds(_currentUserId!);
+      _addTestResult(
+          '✅ Recommended games retrieved: ${recommendedIds.length} games');
+      _addTestResult(
+          '   Game IDs: ${recommendedIds.take(5).join(", ")}${recommendedIds.length > 5 ? "..." : ""}');
     } catch (e) {
       _addTestResult('❌ Failed to get recommended games: $e');
     }
@@ -666,7 +668,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
     try {
       final ratings = await _supabaseDataSource.getUserRatings(_currentUserId!);
       _addTestResult('✅ Ratings retrieved: ${ratings.length} games');
-      final sample = ratings.entries.take(3).map((e) => '${e.key}:${e.value}').join(', ');
+      final sample =
+          ratings.entries.take(3).map((e) => '${e.key}:${e.value}').join(', ');
       if (sample.isNotEmpty) {
         _addTestResult('   Sample: $sample${ratings.length > 3 ? "..." : ""}');
       }
@@ -710,7 +713,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.followUser(currentUserId: _currentUserId!, targetUserId: targetId);
+      await _supabaseDataSource.followUser(
+          currentUserId: _currentUserId!, targetUserId: targetId);
       _addTestResult('✅ Successfully followed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to follow user: $e');
@@ -729,7 +733,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.unfollowUser(currentUserId: _currentUserId!, targetUserId: targetId);
+      await _supabaseDataSource.unfollowUser(
+          currentUserId: _currentUserId!, targetUserId: targetId);
       _addTestResult('✅ Successfully unfollowed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to unfollow user: $e');
@@ -742,10 +747,12 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final followers = await _supabaseDataSource.getUserFollowers(userId: _currentUserId!);
+      final followers =
+          await _supabaseDataSource.getUserFollowers(userId: _currentUserId!);
       _addTestResult('✅ Followers retrieved: ${followers.length}');
       if (followers.isNotEmpty) {
-        _addTestResult('   IDs: ${followers.take(3).join(", ")}${followers.length > 3 ? "..." : ""}');
+        _addTestResult(
+            '   IDs: ${followers.take(3).join(", ")}${followers.length > 3 ? "..." : ""}');
       }
     } catch (e) {
       _addTestResult('❌ Failed to get followers: $e');
@@ -758,10 +765,12 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final following = await _supabaseDataSource.getUserFollowing(userId: _currentUserId!);
+      final following =
+          await _supabaseDataSource.getUserFollowing(userId: _currentUserId!);
       _addTestResult('✅ Following retrieved: ${following.length}');
       if (following.isNotEmpty) {
-        _addTestResult('   IDs: ${following.take(3).join(", ")}${following.length > 3 ? "..." : ""}');
+        _addTestResult(
+            '   IDs: ${following.take(3).join(", ")}${following.length > 3 ? "..." : ""}');
       }
     } catch (e) {
       _addTestResult('❌ Failed to get following: $e');
@@ -779,7 +788,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
     }
 
     try {
-      final gameIds = gameIdsString.split(',')
+      final gameIds = gameIdsString
+          .split(',')
           .map((s) => int.tryParse(s.trim()))
           .where((id) => id != null)
           .cast<int>()
@@ -793,11 +803,13 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
       // ✅ Duplikate entfernen
       final uniqueGameIds = gameIds.toSet().toList();
       if (uniqueGameIds.length != gameIds.length) {
-        _addTestResult('⚠️ Duplicate games removed. Using: ${uniqueGameIds.join(", ")}');
+        _addTestResult(
+            '⚠️ Duplicate games removed. Using: ${uniqueGameIds.join(", ")}');
       }
 
       setState(() => _isLoading = true);
-      await _supabaseDataSource.updateTopThreeGames(userId: _currentUserId!, gameIds: uniqueGameIds);
+      await _supabaseDataSource.updateTopThreeGames(
+          userId: _currentUserId!, gameIds: uniqueGameIds);
       _addTestResult('✅ Top games updated: ${uniqueGameIds.join(", ")}');
     } catch (e) {
       _addTestResult('❌ Failed to update top games: $e');
@@ -810,7 +822,8 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final topGames = await _supabaseDataSource.getUserTopThreeGames(userId: _currentUserId!);
+      final topGames = await _supabaseDataSource.getUserTopThreeGames(
+          userId: _currentUserId!);
       _addTestResult('✅ Top games retrieved: ${topGames.length}');
       if (topGames.isNotEmpty) {
         _addTestResult('   Game IDs: ${topGames.join(", ")}');

@@ -15,11 +15,13 @@ class UserTopThree extends Equatable {
   const UserTopThree.empty() : this();
 
   // Helper getters
-  bool get isComplete => firstGameId != null && secondGameId != null && thirdGameId != null;
+  bool get isComplete =>
+      firstGameId != null && secondGameId != null && thirdGameId != null;
   bool get hasFirst => firstGameId != null;
   bool get hasSecond => secondGameId != null;
   bool get hasThird => thirdGameId != null;
-  int get gameCount => [firstGameId, secondGameId, thirdGameId].where((id) => id != null).length;
+  int get gameCount =>
+      [firstGameId, secondGameId, thirdGameId].where((id) => id != null).length;
 
   List<int> get gameIds => [firstGameId, secondGameId, thirdGameId]
       .where((id) => id != null)
@@ -29,10 +31,14 @@ class UserTopThree extends Equatable {
   // Get game at specific position (1-based)
   int? getGameAtPosition(int position) {
     switch (position) {
-      case 1: return firstGameId;
-      case 2: return secondGameId;
-      case 3: return thirdGameId;
-      default: return null;
+      case 1:
+        return firstGameId;
+      case 2:
+        return secondGameId;
+      case 3:
+        return thirdGameId;
+      default:
+        return null;
     }
   }
 
@@ -52,7 +58,7 @@ class UserTopThree extends Equatable {
   // Factory methods
   factory UserTopThree.fromList(List<int> gameIds) {
     return UserTopThree(
-      firstGameId: gameIds.length > 0 ? gameIds[0] : null,
+      firstGameId: gameIds.isNotEmpty ? gameIds[0] : null,
       secondGameId: gameIds.length > 1 ? gameIds[1] : null,
       thirdGameId: gameIds.length > 2 ? gameIds[2] : null,
     );
@@ -69,4 +75,3 @@ class UserTopThree extends Equatable {
   @override
   List<Object?> get props => [firstGameId, secondGameId, thirdGameId];
 }
-

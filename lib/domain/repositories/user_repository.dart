@@ -2,7 +2,6 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../entities/user/user.dart';
-import '../entities/game/game.dart';
 import '../entities/user/user_gaming_activity.dart';
 import '../entities/user/user_relationship.dart';
 
@@ -171,7 +170,8 @@ abstract class UserRepository {
   });
 
   /// Get user's public recommended games
-  Future<Either<Failure, List<Map<String, dynamic>>>> getUserPublicRecommendedGames({
+  Future<Either<Failure, List<Map<String, dynamic>>>>
+      getUserPublicRecommendedGames({
     required String userId,
     String? currentUserId,
     int limit = 20,

@@ -5,7 +5,6 @@
 // lib/presentation/widgets/sections/generic_platform_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/navigations.dart';
 import '../../../core/widgets/cached_image_widget.dart';
@@ -28,7 +27,8 @@ class GenericPlatformSection extends StatelessWidget {
     this.title = 'Available Platforms',
     this.showReleaseTimeline = true,
     this.showFirstReleaseInfo = true,
-  }) : assert(game != null || platforms != null, 'Either game or platforms must be provided');
+  }) : assert(game != null || platforms != null,
+            'Either game or platforms must be provided');
 
   // ✅ GETTER FÜR PLATFORM LIST
   List<Platform> get _platforms {
@@ -57,10 +57,12 @@ class GenericPlatformSection extends StatelessWidget {
     }
 
     // Debug Print
-    print('🔧 GenericPlatformSection: Building with ${_platforms.length} platforms');
+    print(
+        '🔧 GenericPlatformSection: Building with ${_platforms.length} platforms');
 
     // Group release dates by platform (only if game is provided)
-    final platformReleases = game != null ? _groupReleasesByPlatform() : <int, List<ReleaseDate>>{};
+    final platformReleases =
+        game != null ? _groupReleasesByPlatform() : <int, List<ReleaseDate>>{};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,13 +71,17 @@ class GenericPlatformSection extends StatelessWidget {
         _buildPlatformCardsSection(context, platformReleases),
 
         // ✅ RELEASE TIMELINE SECTION (nur wenn Game und Release Dates vorhanden)
-        if (game != null && showReleaseTimeline && _releaseDates.isNotEmpty) ...[
+        if (game != null &&
+            showReleaseTimeline &&
+            _releaseDates.isNotEmpty) ...[
           const SizedBox(height: 24),
           _buildReleaseTimelineSection(context),
         ],
 
         // ✅ FIRST RELEASE INFO (nur wenn Game und First Release Date vorhanden)
-        if (game != null && showFirstReleaseInfo && _firstReleaseDate != null) ...[
+        if (game != null &&
+            showFirstReleaseInfo &&
+            _firstReleaseDate != null) ...[
           const SizedBox(height: 16),
           _buildFirstReleaseInfo(context),
         ],
@@ -86,7 +92,8 @@ class GenericPlatformSection extends StatelessWidget {
   // ✅ PLATFORM CARDS SECTION
   Widget _buildPlatformCardsSection(
       BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
-    print('🔧 Building platform cards section with ${_platforms.length} platforms');
+    print(
+        '🔧 Building platform cards section with ${_platforms.length} platforms');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,8 +110,8 @@ class GenericPlatformSection extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(width: 8),
             Container(
@@ -116,9 +123,9 @@ class GenericPlatformSection extends StatelessWidget {
               child: Text(
                 '${_platforms.length}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -133,7 +140,8 @@ class GenericPlatformSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: _platforms.length,
             itemBuilder: (context, index) {
-              print('🔧 Building platform card $index: ${_platforms[index].name}');
+              print(
+                  '🔧 Building platform card $index: ${_platforms[index].name}');
               final platform = _platforms[index];
               final releases = platformReleases[platform.id] ?? [];
               return Padding(
@@ -152,13 +160,14 @@ class GenericPlatformSection extends StatelessWidget {
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
   Widget _buildPlatformCard(
       BuildContext context, Platform platform, List<ReleaseDate> releases) {
-    print('🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
+    print(
+        '🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
 
     final earliestRelease = releases.isNotEmpty
         ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
-        (b.date?.millisecondsSinceEpoch ?? 0)
-        ? a
-        : b)
+                (b.date?.millisecondsSinceEpoch ?? 0)
+            ? a
+            : b)
         : null;
 
     final platformColor = _getPlatformColor(platform.name);
@@ -195,22 +204,22 @@ class GenericPlatformSection extends StatelessWidget {
               ),
               child: platform.logoUrl != null && platform.logoUrl!.isNotEmpty
                   ? ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CachedImageWidget(
-                  imageUrl: platform.logo!.logoMed2xUrl,
-                  fit: BoxFit.cover,
-                  errorWidget: Icon(
-                    _getPlatformIcon(platform.name),
-                    color: platformColor,
-                    size: 24,
-                  ),
-                ),
-              )
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedImageWidget(
+                        imageUrl: platform.logo!.logoMed2xUrl,
+                        fit: BoxFit.cover,
+                        errorWidget: Icon(
+                          _getPlatformIcon(platform.name),
+                          color: platformColor,
+                          size: 24,
+                        ),
+                      ),
+                    )
                   : Icon(
-                _getPlatformIcon(platform.name),
-                color: platformColor,
-                size: 24,
-              ),
+                      _getPlatformIcon(platform.name),
+                      color: platformColor,
+                      size: 24,
+                    ),
             ),
 
             const SizedBox(height: 8),
@@ -219,9 +228,9 @@ class GenericPlatformSection extends StatelessWidget {
             Text(
               _getSafePlatformName(platform),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: platformColor,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: platformColor,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -286,7 +295,7 @@ class GenericPlatformSection extends StatelessWidget {
                   color: Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
+                child: const Text(
                   'Release TBD',
                   style: TextStyle(
                     fontSize: 10,
@@ -296,9 +305,11 @@ class GenericPlatformSection extends StatelessWidget {
               ),
             ] else ...[
               // For non-game context (e.g., Game Engine), show platform abbreviation
-              if (platform.abbreviation != null && platform.abbreviation!.isNotEmpty)
+              if (platform.abbreviation != null &&
+                  platform.abbreviation!.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   decoration: BoxDecoration(
                     color: platformColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -374,8 +385,8 @@ class GenericPlatformSection extends StatelessWidget {
             Text(
               'Release Timeline',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -437,9 +448,9 @@ class GenericPlatformSection extends StatelessWidget {
                   firstRelease.human ??
                       DateFormatter.formatFullDate(firstRelease.date!),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
 
                 const SizedBox(height: 4),
@@ -539,16 +550,16 @@ class GenericPlatformSection extends StatelessWidget {
                 Text(
                   'First Release',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   DateFormatter.formatFullDate(_firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -577,14 +588,14 @@ class GenericPlatformSection extends StatelessWidget {
 
   Platform _findPlatformById(int? platformId) {
     if (platformId == null) {
-      return Platform(
+      return const Platform(
           id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
     }
 
     try {
       return _platforms.firstWhere((p) => p.id == platformId);
     } catch (e) {
-      return Platform(
+      return const Platform(
           id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
     }
   }
@@ -604,7 +615,7 @@ class GenericPlatformSection extends StatelessWidget {
 
       // Remove enum prefix if present
       final cleanCategory =
-      categoryStr.contains('.') ? categoryStr.split('.').last : categoryStr;
+          categoryStr.contains('.') ? categoryStr.split('.').last : categoryStr;
 
       switch (cleanCategory.toLowerCase()) {
         case 'console':

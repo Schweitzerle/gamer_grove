@@ -19,7 +19,6 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
   // AUTH METHODS (OPTIMIZED)
   // ==========================================
 
-
   @override
   Future<Map<int, double>> getUserRatings(String userId) async {
     try {
@@ -235,12 +234,15 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
       if (bio != null) updateData['bio'] = bio;
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
       if (country != null) updateData['country'] = country;
-      if (isProfilePublic != null)
+      if (isProfilePublic != null) {
         updateData['is_profile_public'] = isProfilePublic;
-      if (showRatedGames != null)
+      }
+      if (showRatedGames != null) {
         updateData['show_rated_games'] = showRatedGames;
-      if (showRecommendedGames != null)
+      }
+      if (showRecommendedGames != null) {
         updateData['show_recommended_games'] = showRecommendedGames;
+      }
       if (showTopThree != null) updateData['show_top_three'] = showTopThree;
 
       if (updateData.isEmpty) {

@@ -1,16 +1,10 @@
 // lib/data/datasources/remote/igdb_remote_datasource.dart
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/errors/exceptions.dart';
 
 // Domain Entities
-import '../../../../domain/entities/character/character.dart';
 import '../../../../domain/entities/character/character_gender.dart';
 import '../../../../domain/entities/character/character_species.dart';
 import '../../../../domain/entities/company/company_website.dart';
 import '../../../../domain/entities/externalGame/external_game.dart';
-import '../../../../domain/entities/game/game.dart';
 import '../../../../domain/entities/platform/platform.dart';
 import '../../../../domain/entities/popularity/popularity_primitive.dart';
 import '../../../../domain/entities/search/search.dart';
@@ -125,7 +119,6 @@ import '../../../models/involved_company_model.dart';
 /// This interface defines all methods for interacting with the IGDB API.
 /// It's organized by logical groups for better maintainability.
 abstract class IGDBRemoteDataSource {
-
   // ==========================================
   // CORE GAME METHODS
   // ==========================================
@@ -152,10 +145,12 @@ abstract class IGDBRemoteDataSource {
   Future<List<GameModel>> getGamesByIds(List<int> gameIds);
 
   /// Get games by status
-  Future<List<GameModel>> getGamesByStatus(int statusId, {int limit = 20, int offset = 0});
+  Future<List<GameModel>> getGamesByStatus(int statusId,
+      {int limit = 20, int offset = 0});
 
   /// Get games by type/category
-  Future<List<GameModel>> getGamesByType(int typeId, {int limit = 20, int offset = 0});
+  Future<List<GameModel>> getGamesByType(int typeId,
+      {int limit = 20, int offset = 0});
 
   /// Get similar games for a given game
   Future<List<GameModel>> getSimilarGames(int gameId);
@@ -238,8 +233,17 @@ abstract class IGDBRemoteDataSource {
     String sortOrder = 'desc',
   });
 
+  Future<List<GameModel>> getGamesByCompanies({
+    required List<int> companyIds,
+    int limit = 20,
+    int offset = 0,
+    String sortBy = 'total_rating',
+    String sortOrder = 'desc',
+  });
+
   /// Get game engines
-  Future<List<GameEngineModel>> getGameEngines({List<int>? ids, String? search});
+  Future<List<GameEngineModel>> getGameEngines(
+      {List<int>? ids, String? search});
 
   /// Get game engine logos
   Future<List<GameEngineLogoModel>> getGameEngineLogos({
@@ -270,7 +274,8 @@ abstract class IGDBRemoteDataSource {
   Future<GameLocalizationModel?> getGameLocalizationById(int id);
 
   /// Get game localizations for specific games
-  Future<List<GameLocalizationModel>> getGameLocalizationsByGameIds(List<int> gameIds);
+  Future<List<GameLocalizationModel>> getGameLocalizationsByGameIds(
+      List<int> gameIds);
 
   // ==========================================
   // GAME STATUS & TYPE METHODS
@@ -323,7 +328,8 @@ abstract class IGDBRemoteDataSource {
   Future<GameVersionFeatureModel?> getGameVersionFeatureById(int id);
 
   /// Get game version features by category
-  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(String category);
+  Future<List<GameVersionFeatureModel>> getGameVersionFeaturesByCategory(
+      String category);
 
   /// Get game version feature values
   Future<List<GameVersionFeatureValueModel>> getGameVersionFeatureValues({
@@ -336,7 +342,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<GameVersionFeatureValueModel>> getFeatureValuesByGame(int gameId);
 
   /// Get feature values by feature
-  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(int featureId);
+  Future<List<GameVersionFeatureValueModel>> getFeatureValuesByFeature(
+      int featureId);
 
   // ==========================================
   // ALTERNATIVE NAMES METHODS
@@ -346,7 +353,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<String>> getAlternativeNames(List<int> gameIds);
 
   /// Get detailed alternative names
-  Future<List<AlternativeNameModel>> getAlternativeNamesDetailed(List<int> gameIds);
+  Future<List<AlternativeNameModel>> getAlternativeNamesDetailed(
+      List<int> gameIds);
 
   /// Search games by alternative names
   Future<List<GameModel>> searchGamesByAlternativeNames(String query);
@@ -364,7 +372,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get platforms by category
-  Future<List<PlatformModel>> getPlatformsByCategory(PlatformCategoryEnum category);
+  Future<List<PlatformModel>> getPlatformsByCategory(
+      PlatformCategoryEnum category);
 
   /// Get popular platforms
   Future<List<PlatformModel>> getPopularPlatforms();
@@ -388,7 +397,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get complete platform data with versions
-  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(int platformId);
+  Future<Map<String, dynamic>> getCompletePlatformDataWithVersions(
+      int platformId);
 
   // ==========================================
   // PLATFORM VERSION METHODS
@@ -405,10 +415,12 @@ abstract class IGDBRemoteDataSource {
   Future<PlatformVersionModel?> getPlatformVersionById(int id);
 
   /// Get platform versions by platform ID
-  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(int platformId);
+  Future<List<PlatformVersionModel>> getPlatformVersionsByPlatformId(
+      int platformId);
 
   /// Get platform versions with details
-  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(List<int> versionIds);
+  Future<List<Map<String, dynamic>>> getPlatformVersionsWithDetails(
+      List<int> versionIds);
 
   /// Get platform version history
   Future<List<Map<String, dynamic>>> getPlatformVersionHistory(int platformId);
@@ -420,7 +432,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get companies by version IDs
-  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(List<int> versionIds);
+  Future<List<PlatformVersionCompanyModel>> getCompaniesByVersionIds(
+      List<int> versionIds);
 
   /// Get platform version release dates
   Future<List<PlatformVersionReleaseDateModel>> getPlatformVersionReleaseDates({
@@ -430,7 +443,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get release dates by version IDs
-  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(List<int> versionIds);
+  Future<List<PlatformVersionReleaseDateModel>> getReleaseDatesByVersionIds(
+      List<int> versionIds);
 
   /// Get platform websites
   Future<List<PlatformWebsiteModel>> getPlatformWebsites({
@@ -439,7 +453,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get websites by platform IDs
-  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(List<int> platformIds);
+  Future<List<PlatformWebsiteModel>> getWebsitesByPlatformIds(
+      List<int> platformIds);
 
   /// Get platform websites by type
   Future<List<PlatformWebsiteModel>> getPlatformWebsitesByType(int typeId);
@@ -463,7 +478,6 @@ abstract class IGDBRemoteDataSource {
 
   /// Search genres
   Future<List<GenreModel>> searchGenres(String query);
-
 
   /// Get genres with game count
   Future<List<Map<String, dynamic>>> getGenresWithGameCount({
@@ -576,10 +590,12 @@ abstract class IGDBRemoteDataSource {
   Future<List<CharacterModel>> getPopularCharacters({int limit = 20});
 
   /// Get characters by gender
-  Future<List<CharacterModel>> getCharactersByGender(CharacterGenderEnum gender);
+  Future<List<CharacterModel>> getCharactersByGender(
+      CharacterGenderEnum gender);
 
   /// Get characters by species
-  Future<List<CharacterModel>> getCharactersBySpecies(CharacterSpeciesEnum species);
+  Future<List<CharacterModel>> getCharactersBySpecies(
+      CharacterSpeciesEnum species);
 
   /// Get character by name
   Future<CharacterModel?> getCharacterByName(String name);
@@ -594,12 +610,11 @@ abstract class IGDBRemoteDataSource {
   Future<List<CharacterSpeciesModel>> getCharacterSpecies({List<int>? ids});
 
   /// Get character mug shots
-  Future<List<CharacterMugShotModel>> getCharacterMugShots(List<int> mugShotIds);
+  Future<List<CharacterMugShotModel>> getCharacterMugShots(
+      List<int> mugShotIds);
 
   /// Get complete character data
   Future<Map<String, dynamic>> getCompleteCharacterData(int characterId);
-
-
 
   // ==========================================
   // COMPANY METHODS
@@ -659,9 +674,9 @@ abstract class IGDBRemoteDataSource {
 
   /// Get company websites by category
   Future<List<CompanyWebsiteModel>> getCompanyWebsitesByCategory(
-      CompanyWebsiteCategory category, {
-        int limit = 50,
-      });
+    CompanyWebsiteCategory category, {
+    int limit = 50,
+  });
 
   // ==========================================
   // EXTERNAL GAME METHODS
@@ -672,15 +687,15 @@ abstract class IGDBRemoteDataSource {
 
   /// Get external games by store
   Future<List<ExternalGameModel>> getExternalGamesByStore(
-      ExternalGameCategoryEnum store, {
-        int limit = 100,
-      });
+    ExternalGameCategoryEnum store, {
+    int limit = 100,
+  });
 
   /// Get store links for games
   Future<Map<int, List<ExternalGameModel>>> getStoreLinksForGames(
-      List<int> gameIds, {
-        List<ExternalGameCategoryEnum>? preferredStores,
-      });
+    List<int> gameIds, {
+    List<ExternalGameCategoryEnum>? preferredStores,
+  });
 
   /// Get main store links
   Future<List<ExternalGameModel>> getMainStoreLinks(List<int> gameIds);
@@ -689,13 +704,14 @@ abstract class IGDBRemoteDataSource {
   Future<List<ExternalGameModel>> getSteamLinks(List<int> gameIds);
 
   /// Get external games by media
-  Future<Map<String, List<ExternalGameModel>>> getExternalGamesByMedia(List<int> gameIds);
+  Future<Map<String, List<ExternalGameModel>>> getExternalGamesByMedia(
+      List<int> gameIds);
 
   /// Get best store link
   Future<ExternalGameModel?> getBestStoreLink(
-      int gameId, {
-        List<ExternalGameCategoryEnum>? preferredStores,
-      });
+    int gameId, {
+    List<ExternalGameCategoryEnum>? preferredStores,
+  });
 
   /// Search external games by UID
   Future<List<ExternalGameModel>> searchExternalGamesByUid(String uid);
@@ -704,13 +720,15 @@ abstract class IGDBRemoteDataSource {
   Future<List<Map<String, dynamic>>> getPopularStores();
 
   /// Get external game sources
-  Future<List<ExternalGameSourceModel>> getExternalGameSources({List<int>? ids});
+  Future<List<ExternalGameSourceModel>> getExternalGameSources(
+      {List<int>? ids});
 
   /// Get game release formats
   Future<List<GameReleaseFormatModel>> getGameReleaseFormats({List<int>? ids});
 
   /// Get complete external game data
-  Future<List<Map<String, dynamic>>> getCompleteExternalGameData(List<int> gameIds);
+  Future<List<Map<String, dynamic>>> getCompleteExternalGameData(
+      List<int> gameIds);
 
   // ==========================================
   // COLLECTION METHODS
@@ -810,7 +828,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<FranchiseModel>> getRandomFranchises({int limit = 10});
 
   /// Get similar franchises
-  Future<List<FranchiseModel>> getSimilarFranchises(int franchiseId, {int limit = 10});
+  Future<List<FranchiseModel>> getSimilarFranchises(int franchiseId,
+      {int limit = 10});
 
   /// Get franchises with games
   Future<List<Map<String, dynamic>>> getFranchisesWithGames({
@@ -834,7 +853,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<AgeRatingModel>> getAgeRatings(List<int> gameIds);
 
   /// Get age rating organizations
-  Future<List<AgeRatingOrganizationModel>> getAgeRatingOrganizations({List<int>? ids});
+  Future<List<AgeRatingOrganizationModel>> getAgeRatingOrganizations(
+      {List<int>? ids});
 
   /// Get age rating categories
   Future<List<AgeRatingCategoryModel>> getAgeRatingCategories({
@@ -906,7 +926,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<EventNetworkModel>> getEventNetworksByEventId(int eventId);
 
   /// Get event networks by network type
-  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(int networkTypeId);
+  Future<List<EventNetworkModel>> getEventNetworksByNetworkType(
+      int networkTypeId);
 
   /// Get network types
   Future<List<NetworkTypeModel>> getNetworkTypes({
@@ -919,7 +940,8 @@ abstract class IGDBRemoteDataSource {
   Future<NetworkTypeModel?> getNetworkTypeById(int id);
 
   /// Search network types
-  Future<List<NetworkTypeModel>> searchNetworkTypes(String query, {int limit = 20});
+  Future<List<NetworkTypeModel>> searchNetworkTypes(String query,
+      {int limit = 20});
 
   /// Get events with games and networks
   Future<List<EventModel>> getEventsWithGamesAndNetworks({
@@ -975,10 +997,13 @@ abstract class IGDBRemoteDataSource {
   Future<List<ReleaseDateModel>> getThisMonthsReleaseDates();
 
   /// Get release dates for year
-  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year, {int limit = 100});
+  Future<List<ReleaseDateModel>> getReleaseDatesForYear(int year,
+      {int limit = 100});
 
   /// Get release dates for quarter
-  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(int year, int quarter, {int limit = 50});
+  Future<List<ReleaseDateModel>> getReleaseDatesForQuarter(
+      int year, int quarter,
+      {int limit = 50});
 
   /// Get release date regions
   Future<List<ReleaseDateRegionModel>> getReleaseDateRegions({
@@ -991,7 +1016,8 @@ abstract class IGDBRemoteDataSource {
   Future<ReleaseDateRegionModel?> getReleaseDateRegionById(int id);
 
   /// Search release date regions
-  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query, {int limit = 20});
+  Future<List<ReleaseDateRegionModel>> searchReleaseDateRegions(String query,
+      {int limit = 20});
 
   /// Get release date statuses
   Future<List<ReleaseDateStatusModel>> getReleaseDateStatuses({
@@ -1004,7 +1030,8 @@ abstract class IGDBRemoteDataSource {
   Future<ReleaseDateStatusModel?> getReleaseDateStatusById(int id);
 
   /// Search release date statuses
-  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query, {int limit = 20});
+  Future<List<ReleaseDateStatusModel>> searchReleaseDateStatuses(String query,
+      {int limit = 20});
 
   /// Get complete release date data
   Future<Map<String, dynamic>> getCompleteReleaseDateData(int releaseDateId);
@@ -1024,7 +1051,8 @@ abstract class IGDBRemoteDataSource {
   Future<ReleaseDateModel?> getLatestReleaseDate(int gameId);
 
   /// Get game release dates by region
-  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(int gameId);
+  Future<Map<String, List<ReleaseDateModel>>> getGameReleaseDatesByRegion(
+      int gameId);
 
   // ==========================================
   // SEARCH & POPULARITY METHODS
@@ -1056,7 +1084,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<SearchModel>> getPopularSearches({int limit = 20});
 
   /// Autocomplete search
-  Future<List<SearchModel>> autocompleteSearch(String partialQuery, {int limit = 10});
+  Future<List<SearchModel>> autocompleteSearch(String partialQuery,
+      {int limit = 10});
 
   /// Get search history
   Future<List<String>> getSearchHistory();
@@ -1074,7 +1103,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Get complete search results
-  Future<Map<String, dynamic>> getCompleteSearchResults(String query, {int limit = 50});
+  Future<Map<String, dynamic>> getCompleteSearchResults(String query,
+      {int limit = 50});
 
   // ==========================================
   // POPULARITY METHODS
@@ -1096,10 +1126,12 @@ abstract class IGDBRemoteDataSource {
   Future<List<PopularityPrimitiveModel>> getGamePopularityMetrics(int gameId);
 
   /// Get popularity by type
-  Future<List<PopularityPrimitiveModel>> getPopularityByType(int popularityTypeId);
+  Future<List<PopularityPrimitiveModel>> getPopularityByType(
+      int popularityTypeId);
 
   /// Get popularity by source
-  Future<List<PopularityPrimitiveModel>> getPopularityBySource(PopularitySourceEnum source);
+  Future<List<PopularityPrimitiveModel>> getPopularityBySource(
+      PopularitySourceEnum source);
 
   /// Get top popular games
   Future<List<PopularityPrimitiveModel>> getTopPopularGames({
@@ -1132,10 +1164,12 @@ abstract class IGDBRemoteDataSource {
   Future<PopularityTypeModel?> getPopularityTypeById(int id);
 
   /// Search popularity types
-  Future<List<PopularityTypeModel>> searchPopularityTypes(String query, {int limit = 20});
+  Future<List<PopularityTypeModel>> searchPopularityTypes(String query,
+      {int limit = 20});
 
   /// Get popularity types by source
-  Future<List<PopularityTypeModel>> getPopularityTypesBySource(PopularitySourceEnum source);
+  Future<List<PopularityTypeModel>> getPopularityTypesBySource(
+      PopularitySourceEnum source);
 
   /// Get game popularity analysis
   Future<Map<String, dynamic>> getGamePopularityAnalysis(int gameId);
@@ -1191,7 +1225,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<LanguageModel>> getLanguagesByLocale(List<String> locales);
 
   /// Get language support types
-  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes({List<int>? ids});
+  Future<List<LanguageSupportTypeModel>> getLanguageSupportTypes(
+      {List<int>? ids});
 
   /// Get language support type by ID
   Future<LanguageSupportTypeModel?> getLanguageSupportTypeById(int id);
@@ -1251,7 +1286,8 @@ abstract class IGDBRemoteDataSource {
   Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByGame(int gameId);
 
   /// Get involved companies by company
-  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByCompany(int companyId);
+  Future<List<InvolvedCompanyModel>> getInvolvedCompaniesByCompany(
+      int companyId);
 
   /// Get developers for games
   Future<List<InvolvedCompanyModel>> getDevelopersForGames(List<int> gameIds);
@@ -1260,10 +1296,12 @@ abstract class IGDBRemoteDataSource {
   Future<List<InvolvedCompanyModel>> getPublishersForGames(List<int> gameIds);
 
   /// Get porting companies for games
-  Future<List<InvolvedCompanyModel>> getPortingCompaniesForGames(List<int> gameIds);
+  Future<List<InvolvedCompanyModel>> getPortingCompaniesForGames(
+      List<int> gameIds);
 
   /// Get supporting companies for games
-  Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(List<int> gameIds);
+  Future<List<InvolvedCompanyModel>> getSupportingCompaniesForGames(
+      List<int> gameIds);
 
   // ==========================================
   // PHASE 1 - HOME SCREEN DATA METHODS
@@ -1271,23 +1309,23 @@ abstract class IGDBRemoteDataSource {
 
   /// Get games sorted by rating (highest first)
   Future<List<GameModel>> getTopRatedGames({
-  int limit = 20,
-  int offset = 0,
-  double minRating = 70, // Minimum rating to include
+    int limit = 20,
+    int offset = 0,
+    double minRating = 70, // Minimum rating to include
   });
 
   /// Get games sorted by release date (newest first)
   Future<List<GameModel>> getGamesSortedByReleaseDate({
-  int limit = 20,
-  int offset = 0,
-  int maxDaysOld = 365, // Only games released in last X days
+    int limit = 20,
+    int offset = 0,
+    int maxDaysOld = 365, // Only games released in last X days
   });
 
   /// Get specific games by IDs with release dates in a range
   Future<List<GameModel>> getGamesByReleaseDateRange({
-  required List<int> gameIds,
-  required DateTime fromDate,
-  required DateTime toDate,
+    required List<int> gameIds,
+    required DateTime fromDate,
+    required DateTime toDate,
   });
 
   // ==========================================
@@ -1473,7 +1511,8 @@ abstract class IGDBRemoteDataSource {
   });
 
   /// Search events with complete data
-  Future<List<EventModel>> searchEventsWithCompleteData(String query, {int limit = 20});
+  Future<List<EventModel>> searchEventsWithCompleteData(String query,
+      {int limit = 20});
 
   /// Get games with their events
   Future<List<GameModel>> getGamesWithEvents(List<int> gameIds);
@@ -1484,4 +1523,3 @@ abstract class IGDBRemoteDataSource {
   /// Preload event relationships for better performance
   Future<void> preloadEventRelationships(List<int> eventIds);
 }
-

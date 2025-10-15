@@ -14,12 +14,6 @@ import '../entities/game/game_sort_options.dart';
 import '../entities/game/game_video.dart';
 import '../entities/genre.dart';
 import '../entities/platform/platform.dart';
-import '../entities/recommendations/discovery_challenge.dart';
-import '../entities/recommendations/game_mood.dart';
-import '../entities/recommendations/genre_trend.dart';
-import '../entities/recommendations/platform_trend.dart';
-import '../entities/recommendations/recommendation_signal.dart';
-import '../entities/recommendations/seasons.dart';
 import '../entities/screenshot.dart';
 import '../entities/search/search_filters.dart';
 import '../entities/user/user_collection_filters.dart';
@@ -33,26 +27,24 @@ import '../entities/ageRating/age_rating.dart';
 /// This interface defines all game-related operations that are currently
 /// implemented in the GameRepositoryImpl.
 abstract class GameRepository {
-
   // ==========================================
   // BASIC GAME METHODS
   // ==========================================
 
   /// Search for games by query with pagination
-  Future<Either<Failure, List<Game>>> searchGames(String query,
-      int limit,
-      int offset);
+  Future<Either<Failure, List<Game>>> searchGames(
+      String query, int limit, int offset);
 
   /// Get basic game details by ID
   Future<Either<Failure, Game>> getGameDetails(int gameId);
 
   /// Get complete game details with all related data
-  Future<Either<Failure, Game>> getCompleteGameDetails(int gameId,
-      String? userId);
+  Future<Either<Failure, Game>> getCompleteGameDetails(
+      int gameId, String? userId);
 
   /// Get game details enriched with user-specific data
-  Future<Either<Failure, Game>> getGameDetailsWithUserData(int gameId,
-      String? userId);
+  Future<Either<Failure, Game>> getGameDetailsWithUserData(
+      int gameId, String? userId);
 
   /// Get multiple games by their IDs (batch operation)
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds);
@@ -72,7 +64,6 @@ abstract class GameRepository {
   // ==========================================
   // ENHANCED COMPANY & CONTENT METHODS
   // ==========================================
-
 
   /// Get websites associated with games
   Future<Either<Failure, List<Website>>> getGameWebsites(List<int> gameIds);
@@ -98,19 +89,16 @@ abstract class GameRepository {
   // ==========================================
 
   /// Get user's wishlist games with pagination
-  Future<Either<Failure, List<Game>>> getUserWishlist(String userId,
-      int limit,
-      int offset);
+  Future<Either<Failure, List<Game>>> getUserWishlist(
+      String userId, int limit, int offset);
 
   /// Get user's recommended games with pagination
-  Future<Either<Failure, List<Game>>> getUserRecommendations(String userId,
-      int limit,
-      int offset);
+  Future<Either<Failure, List<Game>>> getUserRecommendations(
+      String userId, int limit, int offset);
 
   /// Get user's rated games with pagination
-  Future<Either<Failure, List<Game>>> getUserRated(String userId,
-      int limit,
-      int offset);
+  Future<Either<Failure, List<Game>>> getUserRated(
+      String userId, int limit, int offset);
 
   /// Get user's top three favorite games
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
@@ -120,9 +108,8 @@ abstract class GameRepository {
   // ==========================================
 
   /// Rate a game (0-10 scale)
-  Future<Either<Failure, void>> rateGame(int gameId,
-      String userId,
-      double rating);
+  Future<Either<Failure, void>> rateGame(
+      int gameId, String userId, double rating);
 
   /// Toggle game in user's wishlist
   Future<Either<Failure, void>> toggleWishlist(int gameId, String userId);
@@ -286,16 +273,15 @@ abstract class GameRepository {
   // ==========================================
 
   /// Get all user collections data in one call (for Grove page overview)
-  Future<Either<Failure,
-      Map<UserCollectionType, List<Game>>>> getAllUserCollections({
+  Future<Either<Failure, Map<UserCollectionType, List<Game>>>>
+      getAllUserCollections({
     required String userId,
     int limitPerCollection = 10,
   });
 
   /// Get user collection summaries for all collection types
-  Future<Either<Failure,
-      Map<UserCollectionType,
-          UserCollectionSummary>>> getAllUserCollectionSummaries(String userId);
+  Future<Either<Failure, Map<UserCollectionType, UserCollectionSummary>>>
+      getAllUserCollectionSummaries(String userId);
 
   /// Search within user's collections
   Future<Either<Failure, List<Game>>> searchUserCollections({
@@ -433,9 +419,11 @@ abstract class GameRepository {
 
   Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId);
 
-  Future<Either<Failure, Company>> getCompanyDetails(int companyId, String? userId);
+  Future<Either<Failure, Company>> getCompanyDetails(
+      int companyId, String? userId);
 
-  Future<Either<Failure, List<Company>>> getCompanies({List<int>? ids, String? search});
+  Future<Either<Failure, List<Company>>> getCompanies(
+      {List<int>? ids, String? search});
 
   /// Get games by specific gameEngine
   Future<Either<Failure, List<Game>>> getGamesByGameEngine({
@@ -446,6 +434,11 @@ abstract class GameRepository {
     SortOrder sortOrder = SortOrder.descending,
   });
 
-
+  Future<Either<Failure, List<Game>>> getGamesByCompany({
+    required List<int> companyIds,
+    int limit = 20,
+    int offset = 0,
+    GameSortBy sortBy = GameSortBy.popularity,
+    SortOrder sortOrder = SortOrder.descending,
+  });
 }
-

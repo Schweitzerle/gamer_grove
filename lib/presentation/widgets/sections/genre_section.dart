@@ -4,10 +4,7 @@
 import '../../../domain/entities/game/game.dart';
 import 'package:flutter/material.dart';
 
-
 // lib/presentation/pages/game_detail/widgets/sections/genre_section.dart
-import 'package:flutter/material.dart';
-import '../../../domain/entities/game/game.dart';
 
 class GenreSection extends StatelessWidget {
   final Game game;
@@ -51,8 +48,8 @@ class GenreSection extends StatelessWidget {
             Text(
               'Themes & Tags',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -97,15 +94,15 @@ class GenreSection extends StatelessWidget {
 
   // ✅ EXPANDABLE TAG SECTION - MIT BOTTOM SHEET
   Widget _buildExpandableTagSection(
-      BuildContext context,
-      String title,
-      List<String> tags,
-      Color color,
-      IconData icon,
-      ) {
+    BuildContext context,
+    String title,
+    List<String> tags,
+    Color color,
+    IconData icon,
+  ) {
     const int maxDisplayed = 8;
     final bool hasMore = tags.length > maxDisplayed;
-    tags.sort((a,b) => a.compareTo(b));
+    tags.sort((a, b) => a.compareTo(b));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,9 +115,9 @@ class GenreSection extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
             ),
           ],
         ),
@@ -133,31 +130,34 @@ class GenreSection extends StatelessWidget {
           children: [
             // Display first tags
             ...tags.take(maxDisplayed).map((tag) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: color.withOpacity(0.3),
-                ),
-              ),
-              child: Text(
-                tag,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: color,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            )),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: color.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    tag,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )),
 
             // ✅ SHOW ALL BUTTON
             if (hasMore)
               InkWell(
-                onTap: () => _showTagsBottomSheet(context, title, tags, color, icon),
+                onTap: () =>
+                    _showTagsBottomSheet(context, title, tags, color, icon),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -195,12 +195,12 @@ class GenreSection extends StatelessWidget {
 
   // ✅ TAGS BOTTOM SHEET
   void _showTagsBottomSheet(
-      BuildContext context,
-      String title,
-      List<String> tags,
-      Color color,
-      IconData icon,
-      ) {
+    BuildContext context,
+    String title,
+    List<String> tags,
+    Color color,
+    IconData icon,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -247,15 +247,23 @@ class GenreSection extends StatelessWidget {
                         children: [
                           Text(
                             'All $title',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           Text(
                             '${tags.length} ${title.toLowerCase()}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ),
@@ -272,24 +280,27 @@ class GenreSection extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: tags.map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: color.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: color,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    )).toList(),
+                    children: tags
+                        .map((tag) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: color.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                tag,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: color,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ))
+                        .toList(),
                   ),
                 ),
               ),

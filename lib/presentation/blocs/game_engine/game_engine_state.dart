@@ -5,7 +5,6 @@
 // lib/presentation/blocs/platform/game_engine_state.dart
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
-import '../../../domain/entities/platform/platform.dart';
 import '../../../domain/entities/game/game.dart';
 
 abstract class GameEngineState extends Equatable {

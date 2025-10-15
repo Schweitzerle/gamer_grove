@@ -2,7 +2,6 @@
 // lib/data/models/ageRating/age_rating_model.dart
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../domain/entities/ageRating/age_rating_organization.dart';
-import 'age_rating_category_model.dart';
 import 'age_rating_organization.dart';
 
 class AgeRatingModel extends AgeRating {
@@ -28,7 +27,8 @@ class AgeRatingModel extends AgeRating {
       organizationId: _parseOrganizationId(json['organization']),
       organization: _parseOrganization(json['organization']), // NEU
       ratingCategoryId: json['rating_category'],
-      ratingContentDescriptions: _parseIdList(json['rating_content_descriptions']),
+      ratingContentDescriptions:
+          _parseIdList(json['rating_content_descriptions']),
       ratingCoverUrl: json['rating_cover_url'],
       synopsis: json['synopsis'],
       categoryEnum: _parseCategory(json['category']),
@@ -98,4 +98,3 @@ class AgeRatingModel extends AgeRating {
     };
   }
 }
-

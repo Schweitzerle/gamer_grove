@@ -1,6 +1,5 @@
 // domain/usecases/auth/sign_out.dart
 import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
 import '../../../core/errors/failures.dart';
 import '../../repositories/auth_repository.dart';
 import '../base_usecase.dart';
@@ -15,4 +14,3 @@ class SignOut extends NoParamsUseCase<void> {
     return await repository.signOut();
   }
 }
-

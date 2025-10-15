@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../blocs/game/game_bloc.dart';
@@ -86,14 +85,16 @@ abstract class BaseGameSection extends StatelessWidget {
                       Text(
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Text(
                         subtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -130,9 +131,9 @@ abstract class BaseGameSection extends StatelessWidget {
             width: 160,
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
-              game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context)
-            ),
+                game: game,
+                onTap: () =>
+                    Navigations.navigateToGameDetail(game.id, context)),
           );
         },
       ),
@@ -160,7 +161,9 @@ abstract class BaseGameSection extends StatelessWidget {
                     child: CustomShimmer(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(AppConstants.borderRadius),
                           ),
@@ -179,7 +182,9 @@ abstract class BaseGameSection extends StatelessWidget {
                             child: Container(
                               height: 16,
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -190,7 +195,9 @@ abstract class BaseGameSection extends StatelessWidget {
                               height: 12,
                               width: 80,
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -208,7 +215,8 @@ abstract class BaseGameSection extends StatelessWidget {
     );
   }
 
-  Widget buildEmptySection(String message, IconData icon, BuildContext context) {
+  Widget buildEmptySection(
+      String message, IconData icon, BuildContext context) {
     return Container(
       height: 120,
       margin: const EdgeInsets.symmetric(
@@ -228,8 +236,8 @@ abstract class BaseGameSection extends StatelessWidget {
               Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -259,8 +267,8 @@ abstract class BaseGameSection extends StatelessWidget {
               Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),

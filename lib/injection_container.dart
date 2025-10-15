@@ -1,5 +1,5 @@
 // lib/injection_container.dart
-import 'package:gamer_grove/domain/usecases/game/getUserRated.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_rated.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
@@ -274,9 +274,8 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-        () => GameEngineBloc(getGameEngineWithGames: sl()),
+    () => GameEngineBloc(getGameEngineWithGames: sl()),
   );
-
 
   print('✅ DI: Dependency injection setup complete!');
 }

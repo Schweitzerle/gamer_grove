@@ -8,12 +8,9 @@ import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_event.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dart';
-import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_details_screen.dart';
-import 'package:gamer_grove/presentation/pages/platform/platform_details_screen.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/platform/platform_event.dart';
 import '../../widgets/live_loading_progress.dart';
 
 class GameEngineDetailPage extends StatelessWidget {
@@ -41,19 +38,20 @@ class GameEngineDetailPage extends StatelessWidget {
         bloc.add(GetGameEngineDetailsEvent(
             gameEngineId: gameEngineId,
             includeGames: true, // 🆕 Explicitly set to true
-            userId: userId
-        ));
+            userId: userId));
         return bloc;
       },
       child: BlocBuilder<GameEngineBloc, GameEngineState>(
         builder: (context, state) {
-          print('🎭 GameEngineDetailPage: State changed to ${state.runtimeType}');
+          print(
+              '🎭 GameEngineDetailPage: State changed to ${state.runtimeType}');
 
           if (state is GameEngineLoading) {
             print('🔄 GameEngineDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is GameEngineDetailsLoaded) {
-            print('✅ GameEngineDetailPage: Loaded state - ${state.gameEngine.name} with ${state.games.length} games');
+            print(
+                '✅ GameEngineDetailPage: Loaded state - ${state.gameEngine.name} with ${state.games.length} games');
             return GameEngineDetailScreen(
               gameEngine: state.gameEngine,
               games: state.games,
@@ -70,7 +68,6 @@ class GameEngineDetailPage extends StatelessWidget {
     );
   }
 
-
   Widget _buildLiveLoadingState(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -78,7 +75,8 @@ class GameEngineDetailPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -106,7 +104,8 @@ class GameEngineDetailPage extends StatelessWidget {
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -136,9 +135,9 @@ class GameEngineDetailPage extends StatelessWidget {
               Text(
                 'Failed to Load Game Engine',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                 textAlign: TextAlign.center,
               ),
 
@@ -151,16 +150,17 @@ class GameEngineDetailPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontFamily: 'monospace',
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily: 'monospace',
+                      ),
                 ),
               ),
 
@@ -172,8 +172,8 @@ class GameEngineDetailPage extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     context.read<GameEngineBloc>().add(
-                      GetGameEngineDetailsEvent(gameEngineId: gameEngineId),
-                    );
+                          GetGameEngineDetailsEvent(gameEngineId: gameEngineId),
+                        );
                   },
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry Loading'),

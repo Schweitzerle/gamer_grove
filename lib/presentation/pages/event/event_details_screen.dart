@@ -4,12 +4,10 @@
 
 // lib/presentation/pages/event_detail/event_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/navigations.dart';
-import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/game/game.dart';
@@ -449,7 +447,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 child: _buildTabView(context, _createEventGamesSeriesItem()),
               ),
 
-
             // Event Networks (unchanged!)
             if (widget.event.hasNetworkObjects)
               Column(
@@ -462,7 +459,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                 ],
               ),
-
 
             if (widget.event.hasVideos)
               _buildEnhancedMediaGallery(widget.event),
@@ -951,7 +947,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   onTap: () => _launchUrl(network.url),
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

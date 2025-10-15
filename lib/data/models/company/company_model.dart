@@ -47,7 +47,8 @@ class CompanyModel extends Company {
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
       changeDate: _parseDateTime(json['change_date']),
-      changeDateCategory: _parseChangeDateCategory(json['change_date_category']),
+      changeDateCategory:
+          _parseChangeDateCategory(json['change_date_category']),
       changeDateFormatId: json['change_date_format'],
       changedCompanyId: json['changed_company_id'],
       parentCompany: json['parent'],
@@ -66,7 +67,7 @@ class CompanyModel extends Company {
   static List<Website> _extractWebsites(dynamic websites) {
     if (websites is List) {
       return websites
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) => WebsiteModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
@@ -76,7 +77,7 @@ class CompanyModel extends Company {
   static List<Game> _extractGameList(dynamic games) {
     if (games is List) {
       return games
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
           .toList();
     }
@@ -104,16 +105,6 @@ class CompanyModel extends Company {
       }
     }
     return null;
-  }
-
-  static List<int> _parseIdList(dynamic data) {
-    if (data is List) {
-      return data
-          .where((item) => item is int || (item is Map && item['id'] is int))
-          .map((item) => item is int ? item : item['id'] as int)
-          .toList();
-    }
-    return [];
   }
 
   static DateTime? _parseDateTime(dynamic date) {

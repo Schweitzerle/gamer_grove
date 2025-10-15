@@ -9,7 +9,8 @@ import '../../../../core/errors/exceptions.dart';
 
 class SharedPrefsTokenManager {
   static SharedPrefsTokenManager? _instance;
-  static SharedPrefsTokenManager get instance => _instance ??= SharedPrefsTokenManager._();
+  static SharedPrefsTokenManager get instance =>
+      _instance ??= SharedPrefsTokenManager._();
 
   SharedPrefsTokenManager._();
 
@@ -29,8 +30,10 @@ class SharedPrefsTokenManager {
     // Prüfe Cache zuerst (ultra-schnell)
     if (_cachedToken != null &&
         _cachedExpiry != null &&
-        DateTime.now().isBefore(_cachedExpiry!.subtract(Duration(hours: 1)))) {
-      print('⚡ TOKEN MANAGER: Using cached token (${_cachedExpiry!.difference(DateTime.now()).inDays} days left)');
+        DateTime.now()
+            .isBefore(_cachedExpiry!.subtract(const Duration(hours: 1)))) {
+      print(
+          '⚡ TOKEN MANAGER: Using cached token (${_cachedExpiry!.difference(DateTime.now()).inDays} days left)');
       return _cachedToken!;
     }
 
@@ -38,7 +41,7 @@ class SharedPrefsTokenManager {
     if (_isRefreshing) {
       print('⏳ TOKEN MANAGER: Refresh in progress, waiting...');
       while (_isRefreshing) {
-        await Future.delayed(Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 50));
       }
       return _cachedToken!;
     }
@@ -52,8 +55,10 @@ class SharedPrefsTokenManager {
       // Prüfe ob Token noch gültig ist
       if (_cachedToken != null &&
           _cachedExpiry != null &&
-          DateTime.now().isBefore(_cachedExpiry!.subtract(Duration(hours: 1)))) {
-        print('✅ TOKEN MANAGER: Using stored token (${_cachedExpiry!.difference(DateTime.now()).inDays} days left)');
+          DateTime.now()
+              .isBefore(_cachedExpiry!.subtract(const Duration(hours: 1)))) {
+        print(
+            '✅ TOKEN MANAGER: Using stored token (${_cachedExpiry!.difference(DateTime.now()).inDays} days left)');
         return _cachedToken!;
       }
 
@@ -62,7 +67,6 @@ class SharedPrefsTokenManager {
       await _refreshAndStoreToken();
 
       return _cachedToken!;
-
     } finally {
       _isRefreshing = false;
     }
@@ -94,7 +98,8 @@ class SharedPrefsTokenManager {
       print('🔄 TOKEN MANAGER: Requesting new token from Twitch...');
 
       // Hole neuen Token von Twitch
-      final request = http.Request('POST', Uri.parse('https://id.twitch.tv/oauth2/token'));
+      final request =
+          http.Request('POST', Uri.parse('https://id.twitch.tv/oauth2/token'));
       request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
       request.bodyFields = {
         'client_id': ApiConstants.igdbClientId,
@@ -120,7 +125,8 @@ class SharedPrefsTokenManager {
       final expiryDate = DateTime.now().add(Duration(seconds: expiresIn));
 
       print('✅ TOKEN MANAGER: Got new token, expires at: $expiryDate');
-      print('📅 TOKEN MANAGER: Token valid for ${expiryDate.difference(DateTime.now()).inDays} days');
+      print(
+          '📅 TOKEN MANAGER: Token valid for ${expiryDate.difference(DateTime.now()).inDays} days');
 
       // Speichere in SharedPreferences
       final prefs = await SharedPreferences.getInstance();
@@ -132,7 +138,6 @@ class SharedPrefsTokenManager {
       _cachedExpiry = expiryDate;
 
       print('💾 TOKEN MANAGER: Token stored locally');
-
     } catch (e) {
       print('💥 TOKEN MANAGER: Token refresh failed: $e');
       throw ServerException(message: 'Token refresh failed: $e');
@@ -175,8 +180,10 @@ class SharedPrefsTokenManager {
       await _loadFromPrefs();
 
       if (_cachedExpiry != null &&
-          DateTime.now().isAfter(_cachedExpiry!.subtract(Duration(days: 7)))) {
-        print('🔄 TOKEN MANAGER: Background refresh triggered (expires in < 7 days)');
+          DateTime.now()
+              .isAfter(_cachedExpiry!.subtract(const Duration(days: 7)))) {
+        print(
+            '🔄 TOKEN MANAGER: Background refresh triggered (expires in < 7 days)');
         await _refreshAndStoreToken();
       }
     } catch (e) {

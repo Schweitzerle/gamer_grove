@@ -11,9 +11,9 @@ import '../base_usecase.dart';
 import '../game/get_all_genres.dart';
 import '../game/get_all_platforms.dart';
 import '../game/get_search_suggestions.dart';
-import '../game/search_games_with_filter.dart';
 
-class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataParams> {
+class GetSearchScreenData
+    extends UseCase<SearchScreenData, GetSearchScreenDataParams> {
   final GetAllGenres getAllGenres;
   final GetAllPlatforms getAllPlatforms;
   final GetSearchSuggestions getSearchSuggestions;
@@ -25,7 +25,8 @@ class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataP
   });
 
   @override
-  Future<Either<Failure, SearchScreenData>> call(GetSearchScreenDataParams params) async {
+  Future<Either<Failure, SearchScreenData>> call(
+      GetSearchScreenDataParams params) async {
     try {
       // Get all genres
       final genresResult = await getAllGenres();
@@ -39,8 +40,7 @@ class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataP
       List<String> suggestions = [];
       if (params.partialQuery?.isNotEmpty == true) {
         final suggestionsResult = await getSearchSuggestions(
-            GetSearchSuggestionsParams(partialQuery: params.partialQuery!)
-        );
+            GetSearchSuggestionsParams(partialQuery: params.partialQuery!));
         suggestions = suggestionsResult.fold((l) => <String>[], (r) => r);
       }
 
@@ -50,7 +50,8 @@ class GetSearchScreenData extends UseCase<SearchScreenData, GetSearchScreenDataP
         suggestions: suggestions,
       ));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load search screen data: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to load search screen data: $e'));
     }
   }
 }

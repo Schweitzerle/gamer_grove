@@ -10,12 +10,10 @@ import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dar
 import '../../../data/datasources/remote/supabase/supabase_remote_datasource_impl.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
-import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/repositories/game_repository.dart';
-import '../../../domain/usecases/game/getUserRated.dart';
-import '../../../domain/usecases/game/get_complete_game_details.dart';
+import '../../../domain/usecases/game/get_user_rated.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
 import '../../../domain/usecases/game/get_game_expansions.dart';
 import '../../../domain/usecases/game/get_latest_games.dart';
@@ -35,7 +33,6 @@ import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
 import '../../../injection_container.dart';
-import '../../pages/game_detail/game_detail_page.dart';
 import 'game_extensions.dart';
 
 part 'game_event.dart';
@@ -64,7 +61,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
   final GameRepository gameRepository;
-
 
   GameBloc({
     required this.searchGames,
@@ -393,7 +389,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-
   Future<void> _onGetGameDetailsWithUserData(
     GetGameDetailsWithUserDataEvent event,
     Emitter<GameState> emit,
@@ -548,7 +543,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         // Auch andere States updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isWishlisted: !game.isWishlisted);
-        });
+        }, emit);
       },
     );
   }
@@ -584,7 +579,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         // Auch andere States updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(isRecommended: !game.isRecommended);
-        });
+        }, emit);
       },
     );
   }
@@ -608,7 +603,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         // Update in allen States
         _updateGameInHomePageState(event.gameId, (game) {
           return game.copyWith(userRating: event.rating);
-        });
+        }, emit);
 
         // Falls aktueller State GameDetailsLoaded ist
         if (state is GameDetailsLoaded) {
@@ -624,7 +619,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
 // Helper method to update a game in all possible states
-  void _updateGameInAllStates(int gameId, Game Function(Game) updateFunction) {
+  void _updateGameInAllStates(
+      int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
     final currentState = state;
 
     if (currentState is PopularGamesLoaded) {
@@ -637,14 +633,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(currentState.copyWith(games: updatedGames));
     } else if (currentState is HomePageLoaded) {
-      final updatedPopular = currentState.popularGames?.map((game) {
+      final updatedPopular = currentState.popularGames.map((game) {
         if (game.id == gameId) {
           return updateFunction(game);
         }
         return game;
       }).toList();
 
-      final updatedUpcoming = currentState.upcomingGames?.map((game) {
+      final updatedUpcoming = currentState.upcomingGames.map((game) {
         if (game.id == gameId) {
           return updateFunction(game);
         }
@@ -733,14 +729,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       print('❌ GameBloc: Failed to get user ratings: $e');
       return <int, double>{};
     }
-  }
-
-  Future<List<int>> _getTopThreeGames(String userId) async {
-    final result = await getUserTopThree(GetUserTopThreeParams(userId: userId));
-    return result.fold(
-      (failure) => <int>[],
-      (topThreeIds) => topThreeIds.map((game) => game.id).toList(),
-    );
   }
 
   Future<List<int>> _getUserTopThreeGames(String userId) async {
@@ -904,10 +892,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   Future<List<Game>> enrichGamesWithUserData(
-      List<Game> games,
-      String userId, {
-        int? enrichLimit,
-      }) async {
+    List<Game> games,
+    String userId, {
+    int? enrichLimit,
+  }) async {
     return await GameEnrichmentUtils.enrichGameDetailGames(
       games,
       userId,
@@ -916,7 +904,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void _updateGameInHomePageState(
-      int gameId, Game Function(Game) updateFunction) {
+      int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
     final currentState = state;
 
     if (currentState is HomePageLoaded) {
@@ -948,15 +936,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   Future<void> _onGetCompleteGameDetails(
-      GetCompleteGameDetailsEvent event,
-      Emitter<GameState> emit,
-      ) async {
+    GetCompleteGameDetailsEvent event,
+    Emitter<GameState> emit,
+  ) async {
     if (emit.isDone) return;
 
     emit(GameDetailsLoading());
 
     try {
-      print('🎮 GameBloc: Loading ENHANCED game details with characters & events...');
+      print(
+          '🎮 GameBloc: Loading ENHANCED game details with characters & events...');
       print('📋 GameBloc: gameId = ${event.gameId}, userId = ${event.userId}');
 
       // 🆕 Use GetEnhancedGameDetails instead of GetCompleteGameDetails
@@ -968,25 +957,28 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       );
 
       await result.fold(
-            (failure) async {
+        (failure) async {
           if (!emit.isDone) {
-            print('❌ GameBloc: Failed to load enhanced game details: ${failure.message}');
+            print(
+                '❌ GameBloc: Failed to load enhanced game details: ${failure.message}');
             emit(GameError(_mapFailureToMessage(failure)));
           }
         },
-            (game) async {
+        (game) async {
           print('✅ GameBloc: Enhanced game details loaded successfully!');
-          print('📊 GameBloc: Characters: ${game.characters?.length ?? 0}');
-          print('📊 GameBloc: Events: ${game.events?.length ?? 0}');
+          print('📊 GameBloc: Characters: ${game.characters.length}');
+          print('📊 GameBloc: Events: ${game.events.length}');
 
           // Add user data enrichment if userId provided
           if (event.userId != null && !emit.isDone) {
             try {
               print('🔄 GameBloc: Enriching with user data...');
-              final enrichedMainGames = await enrichGamesWithUserData([game], event.userId!);
+              final enrichedMainGames =
+                  await enrichGamesWithUserData([game], event.userId!);
               Game enrichedGame = enrichedMainGames[0];
 
-              enrichedGame = await _enrichGameWithAllNestedUserData(enrichedGame, event.userId!);
+              enrichedGame = await _enrichGameWithAllNestedUserData(
+                  enrichedGame, event.userId!);
 
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(enrichedGame));
@@ -1072,16 +1064,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
    */
 
 // 🆕 UPDATED: Limits für Franchise/Collection
-  Future<Game> _enrichGameWithAllNestedUserData(Game game, String userId) async {
+  Future<Game> _enrichGameWithAllNestedUserData(
+      Game game, String userId) async {
     try {
       // ⚡ PERFORMANCE LIMITS für große Listen
-      const int franchiseLimit = 10;  // Nur erste 10 Franchise Games enrichen
+      const int franchiseLimit = 10; // Nur erste 10 Franchise Games enrichen
       const int collectionLimit = 10; // Nur erste 10 Collection Games enrichen
 
       // 1-7. Normale Listen (wie vorher, ohne Limit)
       List<Game> enrichedSimilarGames = game.similarGames;
       if (game.similarGames.isNotEmpty) {
-        enrichedSimilarGames = await enrichGamesWithUserData(game.similarGames, userId);
+        enrichedSimilarGames =
+            await enrichGamesWithUserData(game.similarGames, userId);
       }
 
       List<Game> enrichedDLCs = game.dlcs;
@@ -1091,12 +1085,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       List<Game> enrichedExpansions = game.expansions;
       if (game.expansions.isNotEmpty) {
-        enrichedExpansions = await enrichGamesWithUserData(game.expansions, userId);
+        enrichedExpansions =
+            await enrichGamesWithUserData(game.expansions, userId);
       }
 
       List<Game> enrichedStandaloneExpansions = game.standaloneExpansions;
       if (game.standaloneExpansions.isNotEmpty) {
-        enrichedStandaloneExpansions = await enrichGamesWithUserData(game.standaloneExpansions, userId);
+        enrichedStandaloneExpansions =
+            await enrichGamesWithUserData(game.standaloneExpansions, userId);
       }
 
       List<Game> enrichedBundles = game.bundles;
@@ -1111,7 +1107,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       List<Game> enrichedRemasters = game.remasters;
       if (game.remasters.isNotEmpty) {
-        enrichedRemasters = await enrichGamesWithUserData(game.remasters, userId);
+        enrichedRemasters =
+            await enrichGamesWithUserData(game.remasters, userId);
       }
 
       List<Game> enrichedPorts = game.ports;
@@ -1121,12 +1118,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       List<Game> enrichedExpandedGames = game.expandedGames;
       if (game.expandedGames.isNotEmpty) {
-        enrichedExpandedGames = await enrichGamesWithUserData(game.expandedGames, userId);
+        enrichedExpandedGames =
+            await enrichGamesWithUserData(game.expandedGames, userId);
       }
 
-      List<Game> enrichedVersionParent = game.versionParent != null ? [game.versionParent!] : [];
+      List<Game> enrichedVersionParent =
+          game.versionParent != null ? [game.versionParent!] : [];
       if (game.versionParent != null) {
-        enrichedVersionParent = await enrichGamesWithUserData(game.versionParent != null ? [game.versionParent!] : [], userId);
+        enrichedVersionParent = await enrichGamesWithUserData(
+            game.versionParent != null ? [game.versionParent!] : [], userId);
       }
 
       List<Game> enrichedForks = game.forks;
@@ -1134,21 +1134,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         enrichedForks = await enrichGamesWithUserData(game.forks, userId);
       }
 
-      List<Game> enrichedParentGames = game.parentGame != null ? [game.parentGame!] : [];
+      List<Game> enrichedParentGames =
+          game.parentGame != null ? [game.parentGame!] : [];
       if (game.versionParent != null) {
-        enrichedParentGames = await enrichGamesWithUserData(game.parentGame != null ? [game.parentGame!] : [], userId);
+        enrichedParentGames = await enrichGamesWithUserData(
+            game.parentGame != null ? [game.parentGame!] : [], userId);
       }
-
 
       // 8. 🌟 MAIN FRANCHISE (🆕 MIT LIMIT!)
       Franchise? enrichedMainFranchise = game.mainFranchise;
-      if (game.mainFranchise?.games != null && game.mainFranchise!.games!.isNotEmpty) {
+      if (game.mainFranchise?.games != null &&
+          game.mainFranchise!.games!.isNotEmpty) {
         print('🔄 Enriching main franchise games (limit: $franchiseLimit)...');
         final enrichedFranchiseGames = await enrichGamesWithUserData(
-            game.mainFranchise!.games!,
-            userId,
-            enrichLimit: franchiseLimit  // 🎯 NUR ERSTE 10!
-        );
+            game.mainFranchise!.games!, userId,
+            enrichLimit: franchiseLimit // 🎯 NUR ERSTE 10!
+            );
 
         enrichedMainFranchise = Franchise(
           id: game.mainFranchise!.id,
@@ -1172,10 +1173,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         for (final franchise in game.franchises) {
           if (franchise.games != null && franchise.games!.isNotEmpty) {
             final enrichedGames = await enrichGamesWithUserData(
-                franchise.games!,
-                userId,
-                enrichLimit: franchiseLimit  // 🎯 NUR ERSTE 10!
-            );
+                franchise.games!, userId,
+                enrichLimit: franchiseLimit // 🎯 NUR ERSTE 10!
+                );
 
             enrichedFranchises.add(Franchise(
               id: franchise.id,
@@ -1203,10 +1203,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         for (final collection in game.collections) {
           if (collection.games != null && collection.games!.isNotEmpty) {
             final enrichedGames = await enrichGamesWithUserData(
-                collection.games!,
-                userId,
-                enrichLimit: collectionLimit  // 🎯 NUR ERSTE 10!
-            );
+                collection.games!, userId,
+                enrichLimit: collectionLimit // 🎯 NUR ERSTE 10!
+                );
 
             enrichedCollections.add(Collection(
               id: collection.id,
@@ -1230,31 +1229,33 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Rest wie vorher...
       final enrichedGame = game.copyWith(
-        similarGames: enrichedSimilarGames,
-        dlcs: enrichedDLCs,
-        expansions: enrichedExpansions,
-        standaloneExpansions: enrichedStandaloneExpansions,
-        bundles: enrichedBundles,
-        remakes: enrichedRemakes,
-        remasters: enrichedRemasters,
-        mainFranchise: enrichedMainFranchise,
-        franchises: enrichedFranchises,
-        collections: enrichedCollections,
-        ports: enrichedPorts,
-        expandedGames: enrichedExpandedGames,
-        versionParent: enrichedVersionParent.isNotEmpty ? enrichedVersionParent[0] : null,
-        forks: enrichedForks,
-        parentGame: enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null
-      );
+          similarGames: enrichedSimilarGames,
+          dlcs: enrichedDLCs,
+          expansions: enrichedExpansions,
+          standaloneExpansions: enrichedStandaloneExpansions,
+          bundles: enrichedBundles,
+          remakes: enrichedRemakes,
+          remasters: enrichedRemasters,
+          mainFranchise: enrichedMainFranchise,
+          franchises: enrichedFranchises,
+          collections: enrichedCollections,
+          ports: enrichedPorts,
+          expandedGames: enrichedExpandedGames,
+          versionParent: enrichedVersionParent.isNotEmpty
+              ? enrichedVersionParent[0]
+              : null,
+          forks: enrichedForks,
+          parentGame:
+              enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null);
 
-      print('✅ Successfully enriched nested games with limits (franchise: $franchiseLimit, collection: $collectionLimit)');
+      print(
+          '✅ Successfully enriched nested games with limits (franchise: $franchiseLimit, collection: $collectionLimit)');
       return enrichedGame;
     } catch (e) {
       print('❌ Error enriching nested games: $e');
       return game;
     }
   }
-
 
   Future<void> _onGetSimilarGames(
     GetSimilarGamesEvent event,
@@ -1328,7 +1329,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             isInTopThree: true,
             topThreePosition: event.position,
           );
-        });
+        }, emit);
       },
     );
   }
@@ -1346,16 +1347,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-
   /// Handler for complete franchise games - enriches existing games
   Future<void> _onLoadCompleteFranchiseGames(
-      LoadCompleteFranchiseGamesEvent event,
-      Emitter<GameState> emit,
-      ) async {
+    LoadCompleteFranchiseGamesEvent event,
+    Emitter<GameState> emit,
+  ) async {
     emit(GameDetailsLoading());
 
     try {
-      print('🔄 Enriching ${event.games.length} franchise games with user data...');
+      print(
+          '🔄 Enriching ${event.games.length} franchise games with user data...');
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
@@ -1374,13 +1375,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   /// Handler for complete collection games - enriches existing games
   Future<void> _onLoadCompleteCollectionGames(
-      LoadCompleteCollectionGamesEvent event,
-      Emitter<GameState> emit,
-      ) async {
+    LoadCompleteCollectionGamesEvent event,
+    Emitter<GameState> emit,
+  ) async {
     emit(GameDetailsLoading());
 
     try {
-      print('🔄 Enriching ${event.games.length} collection games with user data...');
+      print(
+          '🔄 Enriching ${event.games.length} collection games with user data...');
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
@@ -1399,9 +1401,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   // Search Games with Filters
   Future<void> _onSearchGamesWithFilters(
-      SearchGamesWithFiltersEvent event,
-      Emitter<GameState> emit,
-      ) async {
+    SearchGamesWithFiltersEvent event,
+    Emitter<GameState> emit,
+  ) async {
     if (event.query.isEmpty && !event.filters.hasFilters) {
       emit(GameInitial());
       return;
@@ -1417,8 +1419,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
 
     result.fold(
-          (failure) => emit(GameSearchError(message: failure.message)),
-          (games) => emit(GameSearchLoaded(
+      (failure) => emit(GameSearchError(message: failure.message)),
+      (games) => emit(GameSearchLoaded(
         games: games,
         hasReachedMax: games.length < 20,
         currentQuery: event.query,
@@ -1426,12 +1428,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
-
   // Save Search Query
   Future<void> _onSaveSearchQuery(
-      SaveSearchQueryEvent event,
-      Emitter<GameState> emit,
-      ) async {
+    SaveSearchQueryEvent event,
+    Emitter<GameState> emit,
+  ) async {
     try {
       await gameRepository.saveSearchQuery(event.userId, event.query);
       // Optional: emit success state if needed
@@ -1441,4 +1442,3 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 }
-

@@ -12,14 +12,15 @@ class CharacterDescriptionSection extends StatefulWidget {
   });
 
   @override
-  State<CharacterDescriptionSection> createState() => _CharacterDescriptionSectionState();
+  State<CharacterDescriptionSection> createState() =>
+      _CharacterDescriptionSectionState();
 }
 
-class _CharacterDescriptionSectionState extends State<CharacterDescriptionSection>
+class _CharacterDescriptionSectionState
+    extends State<CharacterDescriptionSection>
     with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
   late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -27,9 +28,6 @@ class _CharacterDescriptionSectionState extends State<CharacterDescriptionSectio
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
 
@@ -86,8 +84,8 @@ class _CharacterDescriptionSectionState extends State<CharacterDescriptionSectio
         Text(
           'Character Description',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );
@@ -106,11 +104,12 @@ class _CharacterDescriptionSectionState extends State<CharacterDescriptionSectio
           child: Text(
             description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              height: 1.5,
-              color: Colors.grey.shade700,
-            ),
+                  height: 1.5,
+                  color: Colors.grey.shade700,
+                ),
             maxLines: _isExpanded ? null : 6,
-            overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            overflow:
+                _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
         ),
         if (shouldShowToggle) ...[
@@ -178,16 +177,16 @@ class _CharacterDescriptionSectionState extends State<CharacterDescriptionSectio
               Text(
                 'No Description Available',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 'This character doesn\'t have a detailed description yet.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade500,
-                ),
+                      color: Colors.grey.shade500,
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],

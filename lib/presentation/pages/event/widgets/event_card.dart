@@ -4,9 +4,7 @@
 
 // lib/presentation/widgets/event_card.dart
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../../../../core/utils/image_utils.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../domain/entities/event/event.dart';
 
@@ -40,7 +38,8 @@ class EventCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           constraints: BoxConstraints(
-            maxHeight: compact ? 120 : 180, // ✅ RADICAL FIX: Absolute max height
+            maxHeight:
+                compact ? 120 : 180, // ✅ RADICAL FIX: Absolute max height
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +77,8 @@ class EventCard extends StatelessWidget {
         // Conditional content based on available space
         if (!compact) ...[
           const SizedBox(height: 4),
-          Expanded( // ✅ Use remaining space efficiently
+          Expanded(
+            // ✅ Use remaining space efficiently
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -111,9 +111,10 @@ class EventCard extends StatelessWidget {
         Expanded(
           child: Text(
             event.name,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith( // ✅ Smaller title
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  // ✅ Smaller title
+                  fontWeight: FontWeight.w600,
+                ),
             maxLines: 1, // ✅ Always single line
             overflow: TextOverflow.ellipsis,
           ),
@@ -127,7 +128,7 @@ class EventCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
               border: Border.all(color: Colors.red.withOpacity(0.3)),
             ),
-            child: Text(
+            child: const Text(
               'LIVE',
               style: TextStyle(
                 fontSize: 7, // ✅ Very small
@@ -142,7 +143,8 @@ class EventCard extends StatelessWidget {
 
   Widget _buildEventTiming(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), // ✅ Very compact
+      padding: const EdgeInsets.symmetric(
+          horizontal: 6, vertical: 3), // ✅ Very compact
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(6),
@@ -162,9 +164,9 @@ class EventCard extends StatelessWidget {
             child: Text(
               _formatEventTime(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: 10, // ✅ Small text
-              ),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 10, // ✅ Small text
+                  ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -178,10 +180,10 @@ class EventCard extends StatelessWidget {
     return Text(
       event.description!,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        height: 1.2,
-        fontSize: 9, // ✅ Very small text
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+            height: 1.2,
+            fontSize: 9, // ✅ Very small text
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
       maxLines: 2, // ✅ Maximum 2 lines
       overflow: TextOverflow.ellipsis,
     );
@@ -266,7 +268,8 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniChip(BuildContext context, IconData icon, String text, Color color) {
+  Widget _buildMiniChip(
+      BuildContext context, IconData icon, String text, Color color) {
     return Container(
       margin: const EdgeInsets.only(right: 4),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -332,14 +335,12 @@ class EventCard extends StatelessWidget {
                 const SizedBox(width: 6),
 
                 // Live Indicator
-                if (event.isLive && showStatus)
-                  _buildLiveIndicator(context),
+                if (event.isLive && showStatus) _buildLiveIndicator(context),
 
                 const Spacer(),
 
                 // Status Badge
-                if (showStatus && !event.isLive)
-                  _buildStatusBadge(context),
+                if (showStatus && !event.isLive) _buildStatusBadge(context),
               ],
             ),
           ),
@@ -409,7 +410,7 @@ class EventCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 2),
-          Text(
+          const Text(
             'LIVE',
             style: TextStyle(
               color: Colors.white,
@@ -443,7 +444,7 @@ class EventCard extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 7,
           fontWeight: FontWeight.w600,
           color: Colors.white,

@@ -6,12 +6,10 @@
 import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/event/event_logo.dart';
 import '../../../domain/entities/event/event_network.dart';
-import '../../../domain/entities/event/network_type.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/game/game_video.dart';
 import 'event_logo_model.dart';
 import 'event_network_model.dart';
-import 'network_type_model.dart';
 import '../game/game_model.dart';
 import '../game/game_video_model.dart';
 
@@ -113,7 +111,8 @@ class EventModel extends Event {
       try {
         return EventLogoModel.fromJson(eventLogo);
       } catch (e) {
-        print('⚠️ EventModel: Failed to parse event logo: $eventLogo - Error: $e');
+        print(
+            '⚠️ EventModel: Failed to parse event logo: $eventLogo - Error: $e');
         return null;
       }
     }
@@ -124,15 +123,16 @@ class EventModel extends Event {
   static List<EventNetwork> _extractEventNetworks(dynamic eventNetworks) {
     if (eventNetworks is List) {
       return eventNetworks
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) {
-        try {
-          return EventNetworkModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ EventModel: Failed to parse event network: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return EventNetworkModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print(
+                  '⚠️ EventModel: Failed to parse event network: $item - Error: $e');
+              return null;
+            }
+          })
           .where((network) => network != null)
           .cast<EventNetwork>()
           .toList();
@@ -144,15 +144,15 @@ class EventModel extends Event {
   static List<Game> _extractGames(dynamic games) {
     if (games is List) {
       return games
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) {
-        try {
-          return GameModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ EventModel: Failed to parse game: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return GameModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print('⚠️ EventModel: Failed to parse game: $item - Error: $e');
+              return null;
+            }
+          })
           .where((game) => game != null)
           .cast<Game>()
           .toList();
@@ -164,15 +164,15 @@ class EventModel extends Event {
   static List<GameVideo> _extractVideos(dynamic videos) {
     if (videos is List) {
       return videos
-          .where((item) => item is Map)
+          .whereType<Map>()
           .map((item) {
-        try {
-          return GameVideoModel.fromJson(item as Map<String, dynamic>);
-        } catch (e) {
-          print('⚠️ EventModel: Failed to parse video: $item - Error: $e');
-          return null;
-        }
-      })
+            try {
+              return GameVideoModel.fromJson(item as Map<String, dynamic>);
+            } catch (e) {
+              print('⚠️ EventModel: Failed to parse video: $item - Error: $e');
+              return null;
+            }
+          })
           .where((video) => video != null)
           .cast<GameVideo>()
           .toList();
@@ -184,7 +184,6 @@ class EventModel extends Event {
   // ENHANCED SERIALIZATION
   // ==========================================
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -200,35 +199,45 @@ class EventModel extends Event {
       'live_stream_url': liveStreamUrl,
 
       // Enhanced object serialization
-      'event_logo': eventLogo != null ? {
-        'id': eventLogo!.id,
-        'image_id': eventLogo!.imageId,
-        'url': eventLogo!.url,
-        'width': eventLogo!.width,
-        'height': eventLogo!.height,
-      } : null,
+      'event_logo': eventLogo != null
+          ? {
+              'id': eventLogo!.id,
+              'image_id': eventLogo!.imageId,
+              'url': eventLogo!.url,
+              'width': eventLogo!.width,
+              'height': eventLogo!.height,
+            }
+          : null,
 
-      'event_networks': eventNetworks.map((network) => {
-        'id': network.id,
-        'url': network.url,
-        'network_type': network.networkType != null ? {
-          'id': network.networkType!.id,
-          'name': network.networkType!.name,
-        } : null,
-      }).toList(),
+      'event_networks': eventNetworks
+          .map((network) => {
+                'id': network.id,
+                'url': network.url,
+                'network_type': network.networkType != null
+                    ? {
+                        'id': network.networkType!.id,
+                        'name': network.networkType!.name,
+                      }
+                    : null,
+              })
+          .toList(),
 
-      'games': games.map((game) => {
-        'id': game.id,
-        'name': game.name,
-        'slug': game.slug,
-        'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
-      }).toList(),
+      'games': games
+          .map((game) => {
+                'id': game.id,
+                'name': game.name,
+                'slug': game.slug,
+                'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
+              })
+          .toList(),
 
-      'videos': videos.map((video) => {
-        'id': video.id,
-        'name': video.title,
-        'video_id': video.videoId,
-      }).toList(),
+      'videos': videos
+          .map((video) => {
+                'id': video.id,
+                'name': video.title,
+                'video_id': video.videoId,
+              })
+          .toList(),
 
       // Legacy ID fields for backward compatibility
       'event_logo_id': eventLogoId,
@@ -322,4 +331,3 @@ class EventModel extends Event {
     );
   }
 }
-

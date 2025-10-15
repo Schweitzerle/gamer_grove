@@ -42,25 +42,25 @@ class GetUserProfileParams extends Equatable {
   });
 
   // Convenience constructors
-  GetUserProfileParams.basic({
+  const GetUserProfileParams.basic({
     required this.userId,
     this.currentUserId,
-  }) : includePrivateData = false,
+  })  : includePrivateData = false,
         includeSocialStats = true,
         includeTopThree = false,
         includeGamingStats = false;
 
-  GetUserProfileParams.detailed({
+  const GetUserProfileParams.detailed({
     required this.userId,
     this.currentUserId,
-  }) : includePrivateData = false,
+  })  : includePrivateData = false,
         includeSocialStats = true,
         includeTopThree = true,
         includeGamingStats = true;
 
-  GetUserProfileParams.ownProfile({
+  const GetUserProfileParams.ownProfile({
     required this.userId,
-  }) : currentUserId = userId,
+  })  : currentUserId = userId,
         includePrivateData = true,
         includeSocialStats = true,
         includeTopThree = true,
@@ -68,11 +68,11 @@ class GetUserProfileParams extends Equatable {
 
   @override
   List<Object?> get props => [
-    userId,
-    currentUserId,
-    includePrivateData,
-    includeSocialStats,
-    includeTopThree,
-    includeGamingStats,
-  ];
+        userId,
+        currentUserId,
+        includePrivateData,
+        includeSocialStats,
+        includeTopThree,
+        includeGamingStats,
+      ];
 }

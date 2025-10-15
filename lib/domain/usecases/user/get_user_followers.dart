@@ -12,17 +12,20 @@ class GetUserFollowers extends UseCase<List<User>, GetUserFollowersParams> {
   GetUserFollowers(this.repository);
 
   @override
-  Future<Either<Failure, List<User>>> call(GetUserFollowersParams params) async {
+  Future<Either<Failure, List<User>>> call(
+      GetUserFollowersParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
     if (params.limit <= 0) {
-      return const Left(ValidationFailure(message: 'Limit must be greater than 0'));
+      return const Left(
+          ValidationFailure(message: 'Limit must be greater than 0'));
     }
 
     if (params.offset < 0) {
-      return const Left(ValidationFailure(message: 'Offset cannot be negative'));
+      return const Left(
+          ValidationFailure(message: 'Offset cannot be negative'));
     }
 
     return await repository.getUserFollowers(
@@ -35,7 +38,8 @@ class GetUserFollowers extends UseCase<List<User>, GetUserFollowersParams> {
 
 class GetUserFollowersParams extends Equatable {
   final String userId;
-  final String? currentUserId; // For social context (which followers you also follow)
+  final String?
+      currentUserId; // For social context (which followers you also follow)
   final int limit;
   final int offset;
 
@@ -47,13 +51,13 @@ class GetUserFollowersParams extends Equatable {
   });
 
   // Convenience constructors
-  GetUserFollowersParams.firstPage({
+  const GetUserFollowersParams.firstPage({
     required this.userId,
     this.currentUserId,
     this.limit = 20,
   }) : offset = 0;
 
-  GetUserFollowersParams.nextPage({
+  const GetUserFollowersParams.nextPage({
     required this.userId,
     this.currentUserId,
     required int currentCount,

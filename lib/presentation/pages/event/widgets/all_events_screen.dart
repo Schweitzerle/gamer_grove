@@ -6,7 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../data/repositories/game_repository_impl.dart';
 import '../../../../domain/entities/event/event.dart';
 import '../../../../domain/entities/game/game.dart';
 import 'event_card.dart';
@@ -78,8 +77,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
       body: Column(
         children: [
           // Search & Filters
-          if (widget.showSearch || widget.showFilters)
-            _buildSearchAndFilters(),
+          if (widget.showSearch || widget.showFilters) _buildSearchAndFilters(),
 
           // Events Count & Sort
           _buildEventsHeader(),
@@ -106,8 +104,8 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
             Text(
               widget.subtitle!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
         ],
       ),
@@ -152,15 +150,15 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                    _applyFiltersAndSort();
-                  },
-                )
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                          _applyFiltersAndSort();
+                        },
+                      )
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -232,16 +230,16 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
           Text(
             '${_filteredEvents.length} events',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
           const Spacer(),
           Text(
             _getSortLabel(_currentSort),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -311,14 +309,15 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
           Icon(
             Icons.event_busy,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color:
+                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No events found',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -326,8 +325,11 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                 ? 'Try adjusting your search or filters'
                 : 'No events match the current filters',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
-            ),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.7),
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -355,7 +357,10 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
         // Search filter
         final matchesSearch = _searchQuery.isEmpty ||
             event.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            (event.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+            (event.description
+                    ?.toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ??
+                false);
 
         // Status filter
         final matchesStatus = _statusFilter == EventStatusFilter.all ||
@@ -413,8 +418,8 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
             Text(
               'Sort Events',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingMedium),
             ...EventSortOption.values.map((option) {
@@ -422,9 +427,8 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
               return ListTile(
                 leading: Icon(
                   _getSortIcon(option),
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  color:
+                      isSelected ? Theme.of(context).colorScheme.primary : null,
                 ),
                 title: Text(
                   _getSortLabel(option),
@@ -437,9 +441,9 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                 ),
                 trailing: isSelected
                     ? Icon(
-                  Icons.check,
-                  color: Theme.of(context).colorScheme.primary,
-                )
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
                     : null,
                 onTap: () {
                   setState(() {
@@ -450,7 +454,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
                   HapticFeedback.lightImpact();
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

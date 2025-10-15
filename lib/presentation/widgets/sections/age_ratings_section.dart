@@ -1,7 +1,6 @@
 // lib/presentation/pages/game_detail/widgets/sections/age_ratings_section.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
-import '../../../domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingsSection extends StatelessWidget {
   final List<AgeRating> ageRatings;
@@ -23,8 +22,8 @@ class AgeRatingsSection extends StatelessWidget {
         Text(
           'Age Ratings',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -90,11 +89,7 @@ class AgeRatingChip extends StatelessWidget {
                 color: ratingStyle.color.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                  ratingStyle.icon,
-                  color: ratingStyle.color,
-                  size: 20
-              ),
+              child: Icon(ratingStyle.icon, color: ratingStyle.color, size: 20),
             ),
             const SizedBox(width: 12),
             Column(
@@ -129,44 +124,44 @@ class AgeRatingChip extends StatelessWidget {
   _RatingStyle _getRatingStyleFromEntity(AgeRating rating) {
     // Verwende die Helper-Getter die sowohl organization als auch categoryEnum berücksichtigen
     if (rating.isESRB) {
-      return _RatingStyle(
-        color: const Color(0xFF1976D2), // Schönes Blau
+      return const _RatingStyle(
+        color: Color(0xFF1976D2), // Schönes Blau
         icon: Icons.flag_rounded,
         organizationName: 'ESRB',
       );
     } else if (rating.isPEGI) {
-      return _RatingStyle(
-        color: const Color(0xFF388E3C), // Schönes Grün
+      return const _RatingStyle(
+        color: Color(0xFF388E3C), // Schönes Grün
         icon: Icons.euro_symbol_rounded,
         organizationName: 'PEGI',
       );
     } else if (rating.isCERO) {
-      return _RatingStyle(
-        color: const Color(0xFFD32F2F), // Schönes Rot
+      return const _RatingStyle(
+        color: Color(0xFFD32F2F), // Schönes Rot
         icon: Icons.place_rounded,
         organizationName: 'CERO',
       );
     } else if (rating.isUSK) {
-      return _RatingStyle(
-        color: const Color(0xFFFF8F00), // Schönes Orange
+      return const _RatingStyle(
+        color: Color(0xFFFF8F00), // Schönes Orange
         icon: Icons.shield_rounded,
         organizationName: 'USK',
       );
     } else if (rating.isGRAC) {
-      return _RatingStyle(
-        color: const Color(0xFF7B1FA2), // Schönes Lila
+      return const _RatingStyle(
+        color: Color(0xFF7B1FA2), // Schönes Lila
         icon: Icons.star_rounded,
         organizationName: 'GRAC',
       );
     } else if (rating.isClassInd) {
-      return _RatingStyle(
-        color: const Color(0xFF00796B), // Schönes Teal
+      return const _RatingStyle(
+        color: Color(0xFF00796B), // Schönes Teal
         icon: Icons.info_rounded,
         organizationName: 'ClassInd',
       );
     } else if (rating.isACB) {
-      return _RatingStyle(
-        color: const Color(0xFF303F9F), // Schönes Indigo
+      return const _RatingStyle(
+        color: Color(0xFF303F9F), // Schönes Indigo
         icon: Icons.public_rounded,
         organizationName: 'ACB',
       );
@@ -254,8 +249,8 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                 Text(
                   ratingStyle.organizationName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: ratingStyle.color.withOpacity(0.8),
-                  ),
+                        color: ratingStyle.color.withOpacity(0.8),
+                      ),
                 ),
               ],
             ),
@@ -285,29 +280,29 @@ class AgeRatingDetailsDialog extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: rating.contentDescriptions.map((desc) =>
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6
-                      ),
-                      decoration: BoxDecoration(
-                        color: ratingStyle.color.withOpacity(0.1),
-                        border: Border.all(
-                          color: ratingStyle.color.withOpacity(0.3),
+                children: rating.contentDescriptions
+                    .map(
+                      (desc) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: ratingStyle.color.withOpacity(0.1),
+                          border: Border.all(
+                            color: ratingStyle.color.withOpacity(0.3),
+                          ),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        desc.toString(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: ratingStyle.color,
-                          fontWeight: FontWeight.w500,
+                        child: Text(
+                          desc.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: ratingStyle.color,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                ).toList(),
+                    )
+                    .toList(),
               ),
               const SizedBox(height: 16),
             ],
@@ -330,20 +325,19 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                       rating.ratingCoverUrl!,
                       height: 120,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(
-                            height: 120,
-                            width: 120,
-                            decoration: BoxDecoration(
-                              color: ratingStyle.color.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.image_not_supported_rounded,
-                              color: ratingStyle.color,
-                              size: 40,
-                            ),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: ratingStyle.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.image_not_supported_rounded,
+                          color: ratingStyle.color,
+                          size: 40,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -368,53 +362,53 @@ class AgeRatingDetailsDialog extends StatelessWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
     );
   }
 
   /// Bestimme Rating Style (gleiche Logik wie in AgeRatingChip)
   _RatingStyle _getRatingStyleFromEntity(AgeRating rating) {
     if (rating.isESRB) {
-      return _RatingStyle(
-        color: const Color(0xFF1976D2),
+      return const _RatingStyle(
+        color: Color(0xFF1976D2),
         icon: Icons.flag_rounded,
         organizationName: 'ESRB',
       );
     } else if (rating.isPEGI) {
-      return _RatingStyle(
-        color: const Color(0xFF388E3C),
+      return const _RatingStyle(
+        color: Color(0xFF388E3C),
         icon: Icons.euro_symbol_rounded,
         organizationName: 'PEGI',
       );
     } else if (rating.isCERO) {
-      return _RatingStyle(
-        color: const Color(0xFFD32F2F),
+      return const _RatingStyle(
+        color: Color(0xFFD32F2F),
         icon: Icons.place_rounded,
         organizationName: 'CERO',
       );
     } else if (rating.isUSK) {
-      return _RatingStyle(
-        color: const Color(0xFFFF8F00),
+      return const _RatingStyle(
+        color: Color(0xFFFF8F00),
         icon: Icons.shield_rounded,
         organizationName: 'USK',
       );
     } else if (rating.isGRAC) {
-      return _RatingStyle(
-        color: const Color(0xFF7B1FA2),
+      return const _RatingStyle(
+        color: Color(0xFF7B1FA2),
         icon: Icons.star_rounded,
         organizationName: 'GRAC',
       );
     } else if (rating.isClassInd) {
-      return _RatingStyle(
-        color: const Color(0xFF00796B),
+      return const _RatingStyle(
+        color: Color(0xFF00796B),
         icon: Icons.info_rounded,
         organizationName: 'ClassInd',
       );
     } else if (rating.isACB) {
-      return _RatingStyle(
-        color: const Color(0xFF303F9F),
+      return const _RatingStyle(
+        color: Color(0xFF303F9F),
         icon: Icons.public_rounded,
         organizationName: 'ACB',
       );
@@ -442,7 +436,8 @@ class EnhancedAgeRatingsSection extends StatefulWidget {
   });
 
   @override
-  State<EnhancedAgeRatingsSection> createState() => _EnhancedAgeRatingsSectionState();
+  State<EnhancedAgeRatingsSection> createState() =>
+      _EnhancedAgeRatingsSectionState();
 }
 
 class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
@@ -455,9 +450,11 @@ class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
     }
 
     final filteredRatings = selectedOrganization != null
-        ? widget.ageRatings.where((r) =>
-    r.organizationName.toLowerCase() == selectedOrganization!.toLowerCase()
-    ).toList()
+        ? widget.ageRatings
+            .where((r) =>
+                r.organizationName.toLowerCase() ==
+                selectedOrganization!.toLowerCase())
+            .toList()
         : widget.ageRatings;
 
     final availableOrganizations = widget.ageRatings
@@ -476,8 +473,8 @@ class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
             Text(
               'Age Ratings',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             if (availableOrganizations.length > 1)
               Container(
@@ -497,11 +494,11 @@ class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
                       value: null,
                       child: Text('All'),
                     ),
-                    ...availableOrganizations.map((org) =>
-                        DropdownMenuItem<String?>(
-                          value: org,
-                          child: Text(org.toUpperCase()),
-                        ),
+                    ...availableOrganizations.map(
+                      (org) => DropdownMenuItem<String?>(
+                        value: org,
+                        child: Text(org.toUpperCase()),
+                      ),
                     ),
                   ],
                   onChanged: (value) {

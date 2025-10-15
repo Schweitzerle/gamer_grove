@@ -9,12 +9,11 @@ import '../../entities/game/game.dart';
 import '../../entities/character/character.dart';
 import '../../entities/event/event.dart';
 import '../../entities/game/game_media_collection.dart';
-import '../../entities/game/game_video.dart';
 import '../base_usecase.dart';
 import 'get_enhanced_game_details.dart';
-import 'get_game_characters.dart';
 
-class GetCompleteGameDetailPageData extends UseCase<GameDetailPageData, GetCompleteGameDetailPageDataParams> {
+class GetCompleteGameDetailPageData
+    extends UseCase<GameDetailPageData, GetCompleteGameDetailPageDataParams> {
   final GetEnhancedGameDetails getEnhancedGameDetails;
 
   GetCompleteGameDetailPageData({
@@ -22,36 +21,40 @@ class GetCompleteGameDetailPageData extends UseCase<GameDetailPageData, GetCompl
   });
 
   @override
-  Future<Either<Failure, GameDetailPageData>> call(GetCompleteGameDetailPageDataParams params) async {
+  Future<Either<Failure, GameDetailPageData>> call(
+      GetCompleteGameDetailPageDataParams params) async {
     try {
       // Get enhanced game details with all content
-      final gameResult = await getEnhancedGameDetails(GetEnhancedGameDetailsParams.fullDetails(
+      final gameResult =
+          await getEnhancedGameDetails(GetEnhancedGameDetailsParams.fullDetails(
         gameId: params.gameId,
         userId: params.userId,
       ));
 
       if (gameResult.isLeft()) {
         return gameResult.fold(
-              (failure) => Left(failure),
-              (game) => throw Exception('Unexpected success'),
+          (failure) => Left(failure),
+          (game) => throw Exception('Unexpected success'),
         );
       }
 
-      final game = gameResult.fold((l) => throw Exception('Unexpected failure'), (r) => r);
+      final game = gameResult.fold(
+          (l) => throw Exception('Unexpected failure'), (r) => r);
 
       return Right(GameDetailPageData(
         game: game,
-        characters: game.characters ?? [],
-        events: game.events ?? [],
+        characters: game.characters,
+        events: game.events,
         mediaCollection: GameMediaCollection(
           gameId: game.id,
-          videos: game.videos ?? [],
-          screenshots: game.screenshots ?? [],
-          artworks: game.artworks ?? [],
+          videos: game.videos,
+          screenshots: game.screenshots,
+          artworks: game.artworks,
         ),
       ));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load game detail page data: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to load game detail page data: $e'));
     }
   }
 }
@@ -87,7 +90,8 @@ class GameDetailPageData extends Equatable {
   bool get hasEvents => events.isNotEmpty;
   bool get hasMedia => mediaCollection.hasAnyMedia;
 
-  int get totalContentItems => characters.length + events.length + mediaCollection.totalMediaCount;
+  int get totalContentItems =>
+      characters.length + events.length + mediaCollection.totalMediaCount;
 
   @override
   List<Object> get props => [game, characters, events, mediaCollection];

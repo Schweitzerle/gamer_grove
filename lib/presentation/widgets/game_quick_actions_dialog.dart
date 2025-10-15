@@ -97,7 +97,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
                       Wrap(
                         spacing: 6,
                         children: [
-                          if (widget.game.isInTopThree ?? false)
+                          if (widget.game.isInTopThree)
                             _buildStatusChip(
                               label: '#${widget.game.topThreePosition ?? "3"}',
                               icon: Icons.emoji_events,
@@ -170,7 +170,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
                       icon: Icons.emoji_events,
                       label: 'Top 3',
                       color: Colors.orange,
-                      isActive: widget.game.isInTopThree ?? false,
+                      isActive: widget.game.isInTopThree,
                       onTap: () {
                         _showTopThreeDialog(widget.game);
                       }),

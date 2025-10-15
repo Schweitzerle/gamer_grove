@@ -17,7 +17,7 @@ class CharactersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final characters = game.characters ?? [];
+    final characters = game.characters;
 
     if (characters.isEmpty) {
       return const SizedBox.shrink();
@@ -65,8 +65,8 @@ class CharactersSection extends StatelessWidget {
               Text(
                 'Characters',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(width: 8),
               Container(
@@ -78,9 +78,9 @@ class CharactersSection extends StatelessWidget {
                 child: Text(
                   '${characters.length}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.purple,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.purple,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -103,7 +103,8 @@ class CharactersSection extends StatelessWidget {
     );
   }
 
-  Widget _buildCharactersPreview(BuildContext context, List<Character> characters) {
+  Widget _buildCharactersPreview(
+      BuildContext context, List<Character> characters) {
     // Show first 4 characters in a horizontal scroll
     final previewCharacters = characters.take(4).toList();
 
@@ -145,10 +146,10 @@ class CharactersSection extends StatelessWidget {
   }
 
   void _navigateToCharactersScreen(
-      BuildContext context,
-      List<Character> characters, {
-        Character? initialCharacter,
-      }) {
+    BuildContext context,
+    List<Character> characters, {
+    Character? initialCharacter,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CharactersScreen(

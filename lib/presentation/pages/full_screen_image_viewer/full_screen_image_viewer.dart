@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -60,7 +59,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
         const SnackBar(
           content: Row(
             children: [
-              SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+              SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
               SizedBox(width: 16),
               Text('Downloading image...'),
             ],
@@ -99,7 +101,8 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
       if (imageResponse.statusCode == 200) {
         // Temporäre Datei erstellen
         final tempDir = await getTemporaryDirectory();
-        final fileName = 'gamer_grove_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final fileName =
+            'gamer_grove_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(imageResponse.data);
 
@@ -117,7 +120,6 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
       _showErrorSnackBar('Download failed: ${e.toString()}');
     }
   }
-
 
 // Helper Methoden hinzufügen:
   void _showSuccessSnackBar(String message) {
@@ -159,29 +161,29 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
       extendBodyBehindAppBar: true,
       appBar: _isUIVisible
           ? AppBar(
-        backgroundColor: Colors.black.withOpacity(0.7),
-        foregroundColor: Colors.white,
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () => _downloadImage(widget.images[_currentIndex]),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Text(
-                '${_currentIndex + 1} / ${widget.images.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+              backgroundColor: Colors.black.withOpacity(0.7),
+              foregroundColor: Colors.white,
+              title: Text(widget.title),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.download),
+                  onPressed: () => _downloadImage(widget.images[_currentIndex]),
                 ),
-              ),
-            ),
-          ),
-        ],
-      )
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Center(
+                    child: Text(
+                      '${_currentIndex + 1} / ${widget.images.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
           : null,
       body: GestureDetector(
         onTap: _toggleUI,
@@ -215,36 +217,37 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
       ),
       bottomNavigationBar: _isUIVisible && widget.images.length > 1
           ? Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.black.withOpacity(0.7),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: _currentIndex > 0
-                  ? () => _pageController.previousPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              )
-                  : null,
-            ),
-            Text(
-              '${_currentIndex + 1} of ${widget.images.length}',
-              style: const TextStyle(color: Colors.white),
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-              onPressed: _currentIndex < widget.images.length - 1
-                  ? () => _pageController.nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              )
-                  : null,
-            ),
-          ],
-        ),
-      )
+              padding: const EdgeInsets.all(16),
+              color: Colors.black.withOpacity(0.7),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    onPressed: _currentIndex > 0
+                        ? () => _pageController.previousPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            )
+                        : null,
+                  ),
+                  Text(
+                    '${_currentIndex + 1} of ${widget.images.length}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios,
+                        color: Colors.white),
+                    onPressed: _currentIndex < widget.images.length - 1
+                        ? () => _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            )
+                        : null,
+                  ),
+                ],
+              ),
+            )
           : null,
     );
   }

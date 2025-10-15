@@ -30,10 +30,13 @@ class GameVideoModel extends GameVideo {
   }
 
   // Helper method to get YouTube URL
+  @override
   String get youtubeUrl => 'https://www.youtube.com/watch?v=$videoId';
 
   // Helper method to get YouTube thumbnail URL
-  String get thumbnailUrl => 'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
+  @override
+  String get thumbnailUrl =>
+      'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
 
   // Helper method to get YouTube embed URL
   String get embedUrl => 'https://www.youtube.com/embed/$videoId';

@@ -6,12 +6,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/navigations.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../core/utils/image_utils.dart';
-import '../../../../core/utils/date_formatter.dart';
 import '../../../../domain/entities/game/game.dart';
 import '../../../widgets/game_card.dart';
-import '../game_detail_page.dart';
 
 class DLCExpansionSection extends StatelessWidget {
   final List<Game> dlcs;
@@ -33,29 +29,27 @@ class DLCExpansionSection extends StatelessWidget {
           Text(
             'Additional Content',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: AppConstants.paddingMedium),
-
           if (expansions.isNotEmpty) ...[
             Text(
               'Expansions',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             buildHorizontalGameList(expansions),
             const SizedBox(height: AppConstants.paddingMedium),
           ],
-
           if (dlcs.isNotEmpty) ...[
             Text(
               'DLCs',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             buildHorizontalGameList(dlcs)
@@ -81,8 +75,8 @@ class DLCExpansionSection extends StatelessWidget {
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
                 game: game,
-                onTap: () => Navigations.navigateToGameDetail(game.id, context)
-            ),
+                onTap: () =>
+                    Navigations.navigateToGameDetail(game.id, context)),
           );
         },
       ),
