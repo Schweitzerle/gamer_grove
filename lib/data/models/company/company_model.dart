@@ -67,8 +67,8 @@ class CompanyModel extends Company {
   static List<Website> _extractWebsites(dynamic websites) {
     if (websites is List) {
       return websites
-          .whereType<Map>()
-          .map((item) => WebsiteModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => WebsiteModel.fromJson(item))
           .toList();
     }
     return [];
@@ -77,8 +77,8 @@ class CompanyModel extends Company {
   static List<Game> _extractGameList(dynamic games) {
     if (games is List) {
       return games
-          .whereType<Map>()
-          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameModel.fromJson(item))
           .toList();
     }
     return [];

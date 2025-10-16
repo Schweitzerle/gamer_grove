@@ -123,10 +123,10 @@ class EventModel extends Event {
   static List<EventNetwork> _extractEventNetworks(dynamic eventNetworks) {
     if (eventNetworks is List) {
       return eventNetworks
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((item) {
             try {
-              return EventNetworkModel.fromJson(item as Map<String, dynamic>);
+              return EventNetworkModel.fromJson(item);
             } catch (e) {
               print(
                   '⚠️ EventModel: Failed to parse event network: $item - Error: $e');
@@ -144,10 +144,10 @@ class EventModel extends Event {
   static List<Game> _extractGames(dynamic games) {
     if (games is List) {
       return games
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((item) {
             try {
-              return GameModel.fromJson(item as Map<String, dynamic>);
+              return GameModel.fromJson(item);
             } catch (e) {
               print('⚠️ EventModel: Failed to parse game: $item - Error: $e');
               return null;
@@ -164,10 +164,10 @@ class EventModel extends Event {
   static List<GameVideo> _extractVideos(dynamic videos) {
     if (videos is List) {
       return videos
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((item) {
             try {
-              return GameVideoModel.fromJson(item as Map<String, dynamic>);
+              return GameVideoModel.fromJson(item);
             } catch (e) {
               print('⚠️ EventModel: Failed to parse video: $item - Error: $e');
               return null;

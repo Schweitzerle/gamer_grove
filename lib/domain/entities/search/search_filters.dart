@@ -2,9 +2,6 @@
 import 'package:equatable/equatable.dart';
 import '../game/game_sort_options.dart';
 
-import 'package:equatable/equatable.dart';
-import '../game/game_sort_options.dart';
-
 class SearchFilters extends Equatable {
   // Basic Filters
   final List<int> genreIds;

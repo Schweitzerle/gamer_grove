@@ -373,8 +373,8 @@ class GameModel extends Game {
   static List<Character> _extractCharacters(dynamic characters) {
     if (characters is List) {
       return characters
-          .whereType<Map>()
-          .map((item) => CharacterModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => CharacterModel.fromJson(item))
           .toList();
     }
     return [];
@@ -383,8 +383,8 @@ class GameModel extends Game {
   static List<Event> _extractEvents(dynamic events) {
     if (events is List) {
       return events
-          .whereType<Map>()
-          .map((item) => EventModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => EventModel.fromJson(item))
           .toList();
     }
     return [];
@@ -394,8 +394,8 @@ class GameModel extends Game {
   static List<Screenshot> _extractScreenshots(dynamic screenshots) {
     if (screenshots is List) {
       return screenshots
-          .whereType<Map>()
-          .map((item) => ScreenshotModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => ScreenshotModel.fromJson(item))
           .toList();
     }
     return [];
@@ -405,8 +405,8 @@ class GameModel extends Game {
   static List<Artwork> _extractArtworks(dynamic artworks) {
     if (artworks is List) {
       return artworks
-          .whereType<Map>()
-          .map((item) => ArtworkModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => ArtworkModel.fromJson(item))
           .toList();
     }
     return [];
@@ -415,8 +415,8 @@ class GameModel extends Game {
   static List<GameVideo> _extractVideos(dynamic videos) {
     if (videos is List) {
       return videos
-          .whereType<Map>()
-          .map((item) => GameVideoModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameVideoModel.fromJson(item))
           .toList();
     }
     return [];
@@ -444,10 +444,10 @@ class GameModel extends Game {
   static List<Platform> _extractPlatforms(dynamic platforms) {
     if (platforms is List) {
       return platforms
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map((item) {
             try {
-              return PlatformModel.fromJson(item as Map<String, dynamic>);
+              return PlatformModel.fromJson(item);
             } catch (e) {
               print(
                   '⚠️ GameModel: Failed to parse platform: $item - Error: $e');
@@ -494,8 +494,8 @@ class GameModel extends Game {
   static List<Keyword> _extractKeywords(dynamic keywords) {
     if (keywords is List) {
       return keywords
-          .whereType<Map>()
-          .map((item) => KeywordModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => KeywordModel.fromJson(item))
           .toList();
     }
     return [];
@@ -505,9 +505,8 @@ class GameModel extends Game {
       dynamic perspectives) {
     if (perspectives is List) {
       return perspectives
-          .whereType<Map>()
-          .map((item) =>
-              PlayerPerspectiveModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => PlayerPerspectiveModel.fromJson(item))
           .toList();
     }
     return [];
@@ -523,9 +522,8 @@ class GameModel extends Game {
   static List<InvolvedCompany> _extractInvolvedCompanies(dynamic companies) {
     if (companies is List) {
       return companies
-          .whereType<Map>()
-          .map((item) =>
-              InvolvedCompanyModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => InvolvedCompanyModel.fromJson(item))
           .toList();
     }
     return [];
@@ -534,8 +532,8 @@ class GameModel extends Game {
   static List<GameEngine> _extractGameEngines(dynamic engines) {
     if (engines is List) {
       return engines
-          .whereType<Map>()
-          .map((item) => GameEngineModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameEngineModel.fromJson(item))
           .toList();
     }
     return [];
@@ -544,8 +542,8 @@ class GameModel extends Game {
   static List<Website> _extractWebsites(dynamic websites) {
     if (websites is List) {
       return websites
-          .whereType<Map>()
-          .map((item) => WebsiteModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => WebsiteModel.fromJson(item))
           .toList();
     }
     return [];
@@ -554,9 +552,8 @@ class GameModel extends Game {
   static List<ExternalGame> _extractExternalGames(dynamic external) {
     if (external is List) {
       return external
-          .whereType<Map>()
-          .map((item) =>
-              ExternalGameModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => ExternalGameModel.fromJson(item))
           .toList();
     }
     return [];
@@ -565,8 +562,8 @@ class GameModel extends Game {
   static List<AgeRating> _extractAgeRatings(dynamic ratings) {
     if (ratings is List) {
       return ratings
-          .whereType<Map>()
-          .map((item) => AgeRatingModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => AgeRatingModel.fromJson(item))
           .toList();
     }
     return [];
@@ -575,9 +572,8 @@ class GameModel extends Game {
   static List<MultiplayerMode> _extractMultiplayerModes(dynamic modes) {
     if (modes is List) {
       return modes
-          .whereType<Map>()
-          .map((item) =>
-              MultiplayerModeModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => MultiplayerModeModel.fromJson(item))
           .toList();
     }
     return [];
@@ -586,9 +582,8 @@ class GameModel extends Game {
   static List<LanguageSupport> _extractLanguageSupports(dynamic supports) {
     if (supports is List) {
       return supports
-          .whereType<Map>()
-          .map((item) =>
-              LanguageSupportModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => LanguageSupportModel.fromJson(item))
           .toList();
     }
     return [];
@@ -598,9 +593,8 @@ class GameModel extends Game {
       dynamic localizations) {
     if (localizations is List) {
       return localizations
-          .whereType<Map>()
-          .map((item) =>
-              GameLocalizationModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameLocalizationModel.fromJson(item))
           .toList();
     }
     return [];
@@ -609,9 +603,8 @@ class GameModel extends Game {
   static List<ReleaseDate> _extractReleaseDates(dynamic dates) {
     if (dates is List) {
       return dates
-          .whereType<Map>()
-          .map(
-              (item) => ReleaseDateModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => ReleaseDateModel.fromJson(item))
           .toList();
     }
     return [];
@@ -628,8 +621,8 @@ class GameModel extends Game {
     if (franchises is List) {
       print(franchises.length);
       return franchises
-          .whereType<Map>()
-          .map((item) => FranchiseModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => FranchiseModel.fromJson(item))
           .toList();
     }
     return [];
@@ -639,8 +632,8 @@ class GameModel extends Game {
     if (collections is List) {
       print(collections.length);
       return collections
-          .whereType<Map>()
-          .map((item) => CollectionModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => CollectionModel.fromJson(item))
           .toList();
     }
     return [];
@@ -674,8 +667,8 @@ class GameModel extends Game {
   static List<Game> _extractGameList(dynamic games) {
     if (games is List) {
       return games
-          .whereType<Map>()
-          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameModel.fromJson(item))
           .toList();
     }
     return [];
