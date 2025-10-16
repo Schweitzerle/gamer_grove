@@ -4,7 +4,7 @@
 
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/game_enrichment_utils.dart';
+import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import '../../../domain/entities/event/event.dart';
 import '../../../domain/usecases/event/get_complete_event_details.dart';
 import '../../../domain/usecases/event/get_current_events.dart';

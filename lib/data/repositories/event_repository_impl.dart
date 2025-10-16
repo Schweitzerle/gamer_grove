@@ -8,7 +8,7 @@ import '../../core/network/network_info.dart';
 import '../../domain/entities/event/event.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../datasources/local/cache_datasource.dart';
-import '../datasources/remote/igdb/idgb_remote_datasource.dart';
+import '../datasources/remote/igdb/deprecated/idgb_remote_datasource.dart';
 
 class EventRepositoryImpl implements EventRepository {
   final IGDBRemoteDataSource igdbDataSource;

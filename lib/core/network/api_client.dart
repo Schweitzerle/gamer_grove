@@ -11,15 +11,15 @@ class ApiClient {
   ApiClient(this.client);
 
   Future<dynamic> get(
-      String url, {
-        Map<String, String>? headers,
-        Map<String, String>? queryParameters,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    Map<String, String>? queryParameters,
+  }) async {
     try {
       final uri = Uri.parse(url).replace(queryParameters: queryParameters);
       final response = await client.get(uri, headers: headers).timeout(
-        ApiConstants.connectionTimeout,
-      );
+            ApiConstants.connectionTimeout,
+          );
 
       return _processResponse(response);
     } on SocketException {
@@ -27,24 +27,24 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString(), message: e.toString());
     }
   }
 
   Future<dynamic> post(
-      String url, {
-        Map<String, String>? headers,
-        dynamic body,
-        Map<String, String>? queryParameters,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    dynamic body,
+    Map<String, String>? queryParameters,
+  }) async {
     try {
       final uri = Uri.parse(url).replace(queryParameters: queryParameters);
       final response = await client
           .post(
-        uri,
-        headers: headers,
-        body: body is String ? body : json.encode(body),
-      )
+            uri,
+            headers: headers,
+            body: body is String ? body : json.encode(body),
+          )
           .timeout(ApiConstants.connectionTimeout);
 
       return _processResponse(response);
@@ -53,24 +53,24 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString(), message: e.toString());
     }
   }
 
   Future<dynamic> put(
-      String url, {
-        Map<String, String>? headers,
-        dynamic body,
-        Map<String, String>? queryParameters,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    dynamic body,
+    Map<String, String>? queryParameters,
+  }) async {
     try {
       final uri = Uri.parse(url).replace(queryParameters: queryParameters);
       final response = await client
           .put(
-        uri,
-        headers: headers,
-        body: body is String ? body : json.encode(body),
-      )
+            uri,
+            headers: headers,
+            body: body is String ? body : json.encode(body),
+          )
           .timeout(ApiConstants.connectionTimeout);
 
       return _processResponse(response);
@@ -79,15 +79,15 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString(), message: e.toString());
     }
   }
 
   Future<dynamic> delete(
-      String url, {
-        Map<String, String>? headers,
-        Map<String, String>? queryParameters,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    Map<String, String>? queryParameters,
+  }) async {
     try {
       final uri = Uri.parse(url).replace(queryParameters: queryParameters);
       final response = await client
@@ -100,7 +100,7 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      throw ServerException(e.toString(), message: e.toString());
     }
   }
 
@@ -115,6 +115,7 @@ class ApiClient {
         return json.decode(response.body);
       case 400:
         throw ServerException(
+          'Bad request',
           message: 'Bad request',
           statusCode: response.statusCode,
         );
@@ -130,16 +131,19 @@ class ApiClient {
         );
       case 404:
         throw ServerException(
+          'Not found',
           message: 'Not found',
           statusCode: response.statusCode,
         );
       case 500:
         throw ServerException(
+          'Internal server error',
           message: 'Internal server error',
           statusCode: response.statusCode,
         );
       default:
         throw ServerException(
+          'Error occurred with status code: ${response.statusCode}',
           message: 'Error occurred with status code: ${response.statusCode}',
           statusCode: response.statusCode,
         );

@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../core/errors/failures.dart';
-import '../../../core/utils/game_enrichment_utils.dart';
+import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
 import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource_impl.dart';
 import '../../../data/models/game/game_model.dart';

@@ -41,7 +41,7 @@ class SharedPrefsTokenManager {
     if (_isRefreshing) {
       print('⏳ TOKEN MANAGER: Refresh in progress, waiting...');
       while (_isRefreshing) {
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
       }
       return _cachedToken!;
     }
@@ -112,6 +112,7 @@ class SharedPrefsTokenManager {
 
       if (response.statusCode != 200) {
         throw ServerException(
+          'Failed to refresh token: ${response.body}',
           message: 'Failed to refresh token: ${response.body}',
           statusCode: response.statusCode,
         );
@@ -140,7 +141,8 @@ class SharedPrefsTokenManager {
       print('💾 TOKEN MANAGER: Token stored locally');
     } catch (e) {
       print('💥 TOKEN MANAGER: Token refresh failed: $e');
-      throw ServerException(message: 'Token refresh failed: $e');
+      throw ServerException('Token refresh failed: $e',
+          message: 'Token refresh failed: $e');
     }
   }
 

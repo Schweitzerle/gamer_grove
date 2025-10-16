@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
-import '../../../core/utils/game_enrichment_utils.dart';
+import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import '../../../domain/usecases/company/get_company_with_games.dart';
 
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {

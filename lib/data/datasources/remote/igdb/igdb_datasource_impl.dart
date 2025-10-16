@@ -3,6 +3,11 @@
 import 'package:dio/dio.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../models/game/game_model.dart';
+import '../../../models/character/character_model.dart';
+import '../../../models/platform/platform_model.dart';
+import '../../../models/company/company_model.dart';
+import '../../../models/event/event_model.dart';
+import '../../../models/game/game_engine_model.dart';
 import 'igdb_datasource.dart';
 import 'models/igdb_query.dart';
 
@@ -13,7 +18,14 @@ import 'models/igdb_query.dart';
 /// - Query string construction
 /// - HTTP requests and responses
 /// - Error handling and mapping to exceptions
-/// - Response parsing to GameModel
+/// - Response parsing to Model instances
+///
+/// All query methods follow the same pattern:
+/// 1. Ensure valid auth token
+/// 2. Build query string from IgdbQuery
+/// 3. Make POST request to appropriate endpoint
+/// 4. Parse JSON response to typed models
+/// 5. Handle errors appropriately
 class IgdbDataSourceImpl implements IgdbDataSource {
   final Dio dio;
   final String baseUrl;
@@ -28,11 +40,102 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   });
 
   // ============================================================
-  // CORE IMPLEMENTATION
+  // GAME QUERIES IMPLEMENTATION
   // ============================================================
 
   @override
   Future<List<GameModel>> queryGames(IgdbGameQuery query) async {
+    return await _executeQuery<GameModel>(
+      endpoint: 'games',
+      query: query,
+      parser: (json) => GameModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // CHARACTER QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<CharacterModel>> queryCharacters(IgdbCharacterQuery query) async {
+    return await _executeQuery<CharacterModel>(
+      endpoint: 'characters',
+      query: query,
+      parser: (json) => CharacterModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // PLATFORM QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<PlatformModel>> queryPlatforms(IgdbPlatformQuery query) async {
+    return await _executeQuery<PlatformModel>(
+      endpoint: 'platforms',
+      query: query,
+      parser: (json) => PlatformModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // COMPANY QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<CompanyModel>> queryCompanies(IgdbCompanyQuery query) async {
+    return await _executeQuery<CompanyModel>(
+      endpoint: 'companies',
+      query: query,
+      parser: (json) => CompanyModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // EVENT QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<EventModel>> queryEvents(IgdbEventQuery query) async {
+    return await _executeQuery<EventModel>(
+      endpoint: 'events',
+      query: query,
+      parser: (json) => EventModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // GAME ENGINE QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<GameEngineModel>> queryGameEngines(
+      IgdbGameEngineQuery query) async {
+    return await _executeQuery<GameEngineModel>(
+      endpoint: 'game_engines',
+      query: query,
+      parser: (json) => GameEngineModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // SHARED QUERY EXECUTION METHOD
+  // ============================================================
+
+  /// Generic method to execute any IGDB query.
+  ///
+  /// This method handles all common logic:
+  /// - Authentication
+  /// - Request building
+  /// - Error handling
+  /// - Response parsing
+  ///
+  /// Type parameter [T] is the model type being queried.
+  Future<List<T>> _executeQuery<T>({
+    required String endpoint,
+    required IgdbQuery<T> query,
+    required T Function(Map<String, dynamic>) parser,
+  }) async {
     try {
       // Ensure we have a valid access token
       await _ensureValidToken();
@@ -41,8 +144,8 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       final queryString = query.buildQuery();
 
       // Make the API request
-      final response = await dio.post(
-        '$baseUrl/games',
+      final response = await dio.post<dynamic>(
+        '$baseUrl/$endpoint',
         data: queryString,
         options: Options(
           headers: {
@@ -56,6 +159,7 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       // Check response status
       if (response.statusCode != 200) {
         throw ServerException(
+          'IGDB API returned status ${response.statusCode}',
           message: 'IGDB API returned status ${response.statusCode}',
         );
       }
@@ -63,24 +167,25 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       // Parse response data
       final List<dynamic> data = response.data ?? [];
 
-      // Convert to GameModel instances
+      // Convert to Model instances
       return data
           .map((json) {
             try {
-              return GameModel.fromJson(json as Map<String, dynamic>);
+              return parser(json as Map<String, dynamic>);
             } catch (e) {
-              // Log the error but continue processing other games
-              print('Warning: Failed to parse game: $e');
+              // Log the error but continue processing other items
+              print('Warning: Failed to parse $endpoint item: $e');
               return null;
             }
           })
-          .whereType<GameModel>()
+          .whereType<T>()
           .toList();
     } on DioException catch (e) {
       throw _handleDioException(e);
     } catch (e) {
       throw ServerException(
-        message: 'Unexpected error querying games: $e',
+        'Unexpected error querying $endpoint: $e',
+        message: 'Unexpected error querying $endpoint: $e',
       );
     }
   }
@@ -93,52 +198,42 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   ///
   /// Tokens are cached and only refreshed when expired.
   Future<void> _ensureValidToken() async {
-    // Check if we have a valid cached token
+    // Check if we have a cached token that's still valid
     if (_cachedAccessToken != null &&
         _tokenExpiryTime != null &&
         DateTime.now().isBefore(_tokenExpiryTime!)) {
       return; // Token is still valid
     }
 
-    // Token expired or doesn't exist, fetch a new one
-    await _fetchAccessToken();
+    // Need to get a new token
+    await _refreshAccessToken();
   }
 
   /// Fetches a new access token from Twitch OAuth.
-  ///
-  /// IGDB uses Twitch authentication. You need:
-  /// - Client ID (from Twitch Developer Console)
-  /// - Client Secret (from Twitch Developer Console)
-  Future<void> _fetchAccessToken() async {
+  Future<void> _refreshAccessToken() async {
     try {
-      final clientId = _getClientId();
-      final clientSecret = _getClientSecret();
-
-      final response = await dio.post(
+      final response = await dio.post<dynamic>(
         'https://id.twitch.tv/oauth2/token',
         queryParameters: {
-          'client_id': clientId,
-          'client_secret': clientSecret,
+          'client_id': _getClientId(),
+          'client_secret': _getClientSecret(),
           'grant_type': 'client_credentials',
         },
       );
 
       if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-        _cachedAccessToken = data['access_token'] as String;
-
-        // Token expires in X seconds (usually 5184000 = 60 days)
+        final data = response.data;
+        _cachedAccessToken = data['access_token'];
         final expiresIn = data['expires_in'] as int;
         _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
       } else {
-        throw AuthException(
-          message: 'Failed to fetch IGDB access token: ${response.statusCode}',
+        throw ServerException(
+          'Failed to get access token: ${response.statusCode}',
+          message: 'Failed to get access token: ${response.statusCode}',
         );
       }
     } on DioException catch (e) {
-      throw AuthException(
-        message: 'Failed to authenticate with IGDB: ${e.message}',
-      );
+      throw _handleDioException(e);
     }
   }
 
@@ -146,53 +241,47 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   // ERROR HANDLING
   // ============================================================
 
-  /// Maps Dio exceptions to our custom exception types.
+  /// Converts Dio exceptions to domain exceptions.
   Exception _handleDioException(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
         return NetworkException(
-          message: 'Connection timeout. Please check your internet connection.',
+          message: 'Request timeout. Please check your connection.',
+        );
+
+      case DioExceptionType.connectionError:
+        return NetworkException(
+          message: 'No internet connection.',
         );
 
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-
         if (statusCode == 401) {
-          return AuthException(
-            message: 'Authentication failed. Invalid or expired token.',
-          );
+          return AuthException(message: 'Authentication failed.');
         } else if (statusCode == 429) {
           return ServerException(
-            message: 'Rate limit exceeded. Please try again later.',
-          );
-        } else if (statusCode != null && statusCode >= 500) {
-          return ServerException(
-            message: 'IGDB server error. Please try again later.',
+            'Rate limit exceeded.',
+            message: 'Rate limit exceeded.',
           );
         } else {
           return ServerException(
-            message: 'Request failed with status $statusCode',
+            'Server error: $statusCode',
+            message: 'Server error: $statusCode',
           );
         }
 
       case DioExceptionType.cancel:
-        return ServerException(message: 'Request was cancelled');
-
-      case DioExceptionType.unknown:
-        if (e.error.toString().contains('SocketException')) {
-          return NetworkException(
-            message: 'No internet connection',
-          );
-        }
         return ServerException(
-          message: 'An unexpected error occurred: ${e.message}',
+          'Request cancelled.',
+          message: 'Request cancelled.',
         );
 
       default:
         return ServerException(
-          message: 'Network error: ${e.message}',
+          'Unexpected error: ${e.message}',
+          message: 'Unexpected error: ${e.message}',
         );
     }
   }
@@ -201,75 +290,21 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   // CONFIGURATION
   // ============================================================
 
-  /// Get Client ID from environment or configuration.
-  ///
-  /// In production, use flutter_dotenv or similar to manage secrets.
+  /// Gets the IGDB client ID from environment or config.
   String _getClientId() {
-    // TODO: Replace with your actual Client ID management
-    const clientId = String.fromEnvironment(
+    // TODO: Load from environment variables or secure storage
+    return const String.fromEnvironment(
       'IGDB_CLIENT_ID',
-      defaultValue: 'YOUR_CLIENT_ID_HERE',
+      defaultValue: 'your_client_id_here',
     );
-
-    if (clientId == 'YOUR_CLIENT_ID_HERE') {
-      throw ConfigurationException(
-        'IGDB_CLIENT_ID not configured. Please set it in your environment.',
-      );
-    }
-
-    return clientId;
   }
 
-  /// Get Client Secret from environment or configuration.
-  ///
-  /// In production, use flutter_dotenv or similar to manage secrets.
+  /// Gets the IGDB client secret from environment or config.
   String _getClientSecret() {
-    // TODO: Replace with your actual Client Secret management
-    const clientSecret = String.fromEnvironment(
+    // TODO: Load from environment variables or secure storage
+    return const String.fromEnvironment(
       'IGDB_CLIENT_SECRET',
-      defaultValue: 'YOUR_CLIENT_SECRET_HERE',
+      defaultValue: 'your_client_secret_here',
     );
-
-    if (clientSecret == 'YOUR_CLIENT_SECRET_HERE') {
-      throw ConfigurationException(
-        'IGDB_CLIENT_SECRET not configured. Please set it in your environment.',
-      );
-    }
-
-    return clientSecret;
   }
-}
-
-// ============================================================
-// CUSTOM EXCEPTIONS (if not already defined)
-// ============================================================
-
-/// Exception for configuration errors
-class ConfigurationException implements Exception {
-  final String message;
-
-  ConfigurationException(this.message);
-
-  @override
-  String toString() => 'ConfigurationException: $message';
-}
-
-/// Exception for authentication errors
-class AuthException implements Exception {
-  final String message;
-
-  AuthException({required this.message});
-
-  @override
-  String toString() => 'AuthException: $message';
-}
-
-/// Exception for network errors
-class NetworkException implements Exception {
-  final String message;
-
-  NetworkException({required this.message});
-
-  @override
-  String toString() => 'NetworkException: $message';
 }

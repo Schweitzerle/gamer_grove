@@ -1,118 +1,118 @@
-// lib/data/datasources/remote/igdb_remote_datasource.dart
+/* // lib/data/datasources/remote/igdb_remote_datasource.dart
 
 // Domain Entities
-import '../../../../domain/entities/character/character_gender.dart';
-import '../../../../domain/entities/character/character_species.dart';
-import '../../../../domain/entities/company/company_website.dart';
-import '../../../../domain/entities/externalGame/external_game.dart';
-import '../../../../domain/entities/platform/platform.dart';
-import '../../../../domain/entities/popularity/popularity_primitive.dart';
-import '../../../../domain/entities/search/search.dart';
+import '../../../../../domain/entities/character/character_gender.dart';
+import '../../../../../domain/entities/character/character_species.dart';
+import '../../../../../domain/entities/company/company_website.dart';
+import '../../../../../domain/entities/externalGame/external_game.dart';
+import '../../../../../domain/entities/platform/platform.dart';
+import '../../../../../domain/entities/popularity/popularity_primitive.dart';
+import '../../../../../domain/entities/search/search.dart';
 
 // Models - Age Rating
-import '../../../../domain/entities/search/search_filters.dart';
-import '../../../models/ageRating/age_rating_category_model.dart';
-import '../../../models/ageRating/age_rating_model.dart';
-import '../../../models/ageRating/age_rating_organization.dart';
+import '../../../../../domain/entities/search/search_filters.dart';
+import '../../../../models/ageRating/age_rating_category_model.dart';
+import '../../../../models/ageRating/age_rating_model.dart';
+import '../../../../models/ageRating/age_rating_organization.dart';
 
 // Models - Alternative Names
-import '../../../models/alternative_name_model.dart';
+import '../../../../models/alternative_name_model.dart';
 
 // Models - Artwork & Visual
-import '../../../models/artwork_model.dart';
-import '../../../models/collection/collection_model.dart';
-import '../../../models/cover_model.dart';
-import '../../../models/language/language_support_model.dart';
-import '../../../models/screenshot_model.dart';
+import '../../../../models/artwork_model.dart';
+import '../../../../models/collection/collection_model.dart';
+import '../../../../models/cover_model.dart';
+import '../../../../models/language/language_support_model.dart';
+import '../../../../models/screenshot_model.dart';
 
 // Models - Character
-import '../../../models/character/character_gender_model.dart';
-import '../../../models/character/character_model.dart';
-import '../../../models/character/character_mug_shot_model.dart';
-import '../../../models/character/character_species_model.dart';
+import '../../../../models/character/character_gender_model.dart';
+import '../../../../models/character/character_model.dart';
+import '../../../../models/character/character_mug_shot_model.dart';
+import '../../../../models/character/character_species_model.dart';
 
 // Models - Collection
-import '../../../models/collection/collection_membership_model.dart';
-import '../../../models/collection/collection_relation_model.dart';
-import '../../../models/collection/collection_type_model.dart';
+import '../../../../models/collection/collection_membership_model.dart';
+import '../../../../models/collection/collection_relation_model.dart';
+import '../../../../models/collection/collection_type_model.dart';
 
 // Models - Company
-import '../../../models/company/company_model.dart';
-import '../../../models/company/company_model_logo.dart';
-import '../../../models/company/company_status_model.dart';
-import '../../../models/company/company_website_model.dart';
+import '../../../../models/company/company_model.dart';
+import '../../../../models/company/company_model_logo.dart';
+import '../../../../models/company/company_status_model.dart';
+import '../../../../models/company/company_website_model.dart';
 
 // Models - Date & Time
-import '../../../models/date/date_format_model.dart';
+import '../../../../models/date/date_format_model.dart';
 
 // Models - Event
-import '../../../models/event/event_logo_model.dart';
-import '../../../models/event/event_model.dart';
-import '../../../models/event/event_network_model.dart';
-import '../../../models/event/network_type_model.dart';
+import '../../../../models/event/event_logo_model.dart';
+import '../../../../models/event/event_model.dart';
+import '../../../../models/event/event_network_model.dart';
+import '../../../../models/event/network_type_model.dart';
 
 // Models - External Game
-import '../../../models/externalGame/external_game_model.dart';
-import '../../../models/externalGame/external_game_source_model.dart';
+import '../../../../models/externalGame/external_game_model.dart';
+import '../../../../models/externalGame/external_game_source_model.dart';
 
 // Models - Franchise
-import '../../../models/franchise_model.dart';
+import '../../../../models/franchise_model.dart';
 
 // Models - Game
-import '../../../models/game/game_engine_logo_model.dart';
-import '../../../models/game/game_engine_model.dart';
-import '../../../models/game/game_localization_model.dart';
-import '../../../models/game/game_mode_model.dart';
-import '../../../models/game/game_model.dart';
-import '../../../models/game/game_release_format_model.dart';
-import '../../../models/game/game_status_model.dart';
-import '../../../models/game/game_time_to_beat_model.dart';
-import '../../../models/game/game_type_model.dart';
-import '../../../models/game/game_version_feature_model.dart';
-import '../../../models/game/game_version_feature_value_model.dart';
-import '../../../models/game/game_version_model.dart';
-import '../../../models/game/game_video_model.dart';
+import '../../../../models/game/game_engine_logo_model.dart';
+import '../../../../models/game/game_engine_model.dart';
+import '../../../../models/game/game_localization_model.dart';
+import '../../../../models/game/game_mode_model.dart';
+import '../../../../models/game/game_model.dart';
+import '../../../../models/game/game_release_format_model.dart';
+import '../../../../models/game/game_status_model.dart';
+import '../../../../models/game/game_time_to_beat_model.dart';
+import '../../../../models/game/game_type_model.dart';
+import '../../../../models/game/game_version_feature_model.dart';
+import '../../../../models/game/game_version_feature_value_model.dart';
+import '../../../../models/game/game_version_model.dart';
+import '../../../../models/game/game_video_model.dart';
 
 // Models - Basic Types
-import '../../../models/genre_model.dart';
-import '../../../models/keyword_model.dart';
-import '../../../models/theme_model.dart';
+import '../../../../models/genre_model.dart';
+import '../../../../models/keyword_model.dart';
+import '../../../../models/theme_model.dart';
 
 // Models - Language
-import '../../../models/language/language_support_type_model.dart';
-import '../../../models/language/lanuage_model.dart';
+import '../../../../models/language/language_support_type_model.dart';
+import '../../../../models/language/lanuage_model.dart';
 
 // Models - Multiplayer & Perspectives
-import '../../../models/multiplayer_mode_model.dart';
-import '../../../models/player_perspective_model.dart';
+import '../../../../models/multiplayer_mode_model.dart';
+import '../../../../models/player_perspective_model.dart';
 
 // Models - Platform
-import '../../../models/platform/paltform_type_model.dart';
-import '../../../models/platform/platform_family_model.dart';
-import '../../../models/platform/platform_logo_model.dart';
-import '../../../models/platform/platform_model.dart';
-import '../../../models/platform/platform_version_company_model.dart';
-import '../../../models/platform/platform_version_model.dart';
-import '../../../models/platform/platform_version_release_date_model.dart';
-import '../../../models/platform/platform_website_model.dart';
+import '../../../../models/platform/paltform_type_model.dart';
+import '../../../../models/platform/platform_family_model.dart';
+import '../../../../models/platform/platform_logo_model.dart';
+import '../../../../models/platform/platform_model.dart';
+import '../../../../models/platform/platform_version_company_model.dart';
+import '../../../../models/platform/platform_version_model.dart';
+import '../../../../models/platform/platform_version_release_date_model.dart';
+import '../../../../models/platform/platform_website_model.dart';
 
 // Models - Popularity & Search
-import '../../../models/popularity/popularity_primitive_model.dart';
-import '../../../models/popularity/popularity_type_model.dart';
-import '../../../models/search/search_model.dart';
+import '../../../../models/popularity/popularity_primitive_model.dart';
+import '../../../../models/popularity/popularity_type_model.dart';
+import '../../../../models/search/search_model.dart';
 
 // Models - Region & Release
-import '../../../models/region_model.dart';
-import '../../../models/release_date/release_date_model.dart';
-import '../../../models/release_date/release_date_region_model.dart';
-import '../../../models/release_date/release_date_status_model.dart';
+import '../../../../models/region_model.dart';
+import '../../../../models/release_date/release_date_model.dart';
+import '../../../../models/release_date/release_date_region_model.dart';
+import '../../../../models/release_date/release_date_status_model.dart';
 
 // Models - Website
-import '../../../models/website/website_model.dart';
-import '../../../models/website/website_type_model.dart';
+import '../../../../models/website/website_model.dart';
+import '../../../../models/website/website_type_model.dart';
 
 // Models - Involved Company
-import '../../../models/involved_company_model.dart';
+import '../../../../models/involved_company_model.dart';
 
 /// Abstract interface for IGDB API remote data source
 ///
@@ -1523,3 +1523,4 @@ abstract class IGDBRemoteDataSource {
   /// Preload event relationships for better performance
   Future<void> preloadEventRelationships(List<int> eventIds);
 }
+ */

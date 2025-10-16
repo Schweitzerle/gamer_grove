@@ -9,7 +9,7 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
-import '../../../core/utils/game_enrichment_utils.dart';
+import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 
 class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
   final GetPlatformWithGames getPlatformWithGames;

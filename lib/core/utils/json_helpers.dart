@@ -165,7 +165,7 @@ class JsonHelpers {
       dynamic value, List<String> paths) {
     final result = <String, dynamic>{};
     for (final path in paths) {
-      result[path] = extractNested(value, path);
+      result[path] = extractNested<dynamic>(value, path);
     }
     return result;
   }
@@ -382,8 +382,8 @@ class JsonHelpers {
   static List<Game> extractGameList(dynamic games) {
     if (games is List) {
       return games
-          .whereType<Map>()
-          .map((item) => GameModel.fromJson(item as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((item) => GameModel.fromJson(item))
           .toList();
     }
     return [];

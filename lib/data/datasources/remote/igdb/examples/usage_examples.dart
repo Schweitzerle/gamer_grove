@@ -3,6 +3,8 @@
 // This file contains examples of how to use the new IGDB query system.
 // These are meant to be adapted and used in your repository layer.
 
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_query_presets.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 import '../igdb_datasource.dart';

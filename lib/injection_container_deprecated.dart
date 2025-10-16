@@ -1,4 +1,4 @@
-// lib/injection_container.dart
+/* // lib/injection_container.dart
 import 'package:gamer_grove/domain/usecases/game/get_user_rated.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
@@ -281,3 +281,4 @@ Future<void> init() async {
       ));
   print('✅ DI: Dependency injection setup complete!');
 }
+ */

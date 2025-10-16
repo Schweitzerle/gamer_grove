@@ -1,4 +1,4 @@
-// 🔧 GAME ENRICHMENT UTILS - SHARED USER DATA ENRICHMENT
+/* // 🔧 GAME ENRICHMENT UTILS - SHARED USER DATA ENRICHMENT
 // Diese Klasse kann von GameBloc, EventBloc, CharacterBloc und anderen verwendet werden
 
 // ==========================================
@@ -388,3 +388,4 @@ class GameEnrichmentUtils {
     print('   Rated: $ratedCount, Top Three: $topThreeCount');
   }
 }
+ */

@@ -13,6 +13,7 @@ import '../../domain/entities/character/character.dart';
 import '../../domain/entities/event/event.dart';
 import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
+import '../../presentation/blocs/auth/auth_state.dart';
 import '../../presentation/blocs/character/character_bloc.dart';
 import '../../presentation/blocs/event/event_bloc.dart';
 import '../../presentation/blocs/event/event_event.dart';
@@ -34,7 +35,7 @@ import '../../presentation/widgets/sections/franchise_collection_section.dart';
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -68,7 +69,7 @@ class Navigations {
     final userId = _getCurrentUserId(context);
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => EnrichedAllGamesScreen(
           title: title,
           subtitle: subtitle,
@@ -141,7 +142,7 @@ class Navigations {
 
   static String? _getCurrentUserId(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    return authState is Authenticated ? authState.user.id : null;
+    return authState is AuthAuthenticated ? authState.user.id : null;
   }
 
   /// Navigate to similar games list
@@ -331,7 +332,7 @@ class Navigations {
 
   static void navigateToSupabaseTest(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => const SupabaseTestPage(),
       ),
     );
@@ -339,7 +340,7 @@ class Navigations {
 
   static void navigateToIGDBTest(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => const IGDBTestPage(),
       ),
     );
@@ -353,7 +354,7 @@ class Navigations {
     String? customSubtitle,
   }) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => AllEventsScreen(
           title: customTitle ?? '${game.name} Events',
           subtitle: customSubtitle ?? '${events.length} gaming events',
@@ -377,7 +378,7 @@ class Navigations {
     bool showSearch = true,
   }) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => AllEventsScreen(
           title: title,
           subtitle: subtitle,
@@ -399,12 +400,12 @@ class Navigations {
     // Get current user
     final authState = context.read<AuthBloc>().state;
     String? userId;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       userId = authState.user.id;
     }
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -434,7 +435,7 @@ class Navigations {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -465,7 +466,7 @@ class Navigations {
   }) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -495,7 +496,7 @@ class Navigations {
   }) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(
@@ -525,7 +526,7 @@ class Navigations {
     List<Game>? featuredGames,
   }) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => EventDetailScreen(
           event: event,
           featuredGames: featuredGames,
@@ -711,12 +712,12 @@ class Navigations {
     // Get current user
     final authState = context.read<AuthBloc>().state;
     String? userId;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       userId = authState.user.id;
     }
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => BlocProvider<GameEngineBloc>(
           create: (context) => sl<GameEngineBloc>(),
           child: GameEnginePaginatedGamesScreen(
@@ -737,12 +738,12 @@ class Navigations {
     // Get current user
     final authState = context.read<AuthBloc>().state;
     String? userId;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       userId = authState.user.id;
     }
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => BlocProvider<PlatformBloc>(
           create: (context) => sl<PlatformBloc>(),
           child: PlatformPaginatedGamesScreen(

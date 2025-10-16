@@ -5,6 +5,7 @@
 /// Registers all dependencies for the app following Clean Architecture.
 library;
 
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
 import 'package:gamer_grove/domain/usecases/auth/reset_password.dart';
@@ -90,6 +91,10 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(sl()),
+  );
+
+  sl.registerLazySingleton<GameEnrichmentService>(
+    () => GameEnrichmentService(supabase: sl()),
   );
 
   // ============================================================

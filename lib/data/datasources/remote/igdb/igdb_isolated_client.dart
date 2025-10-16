@@ -9,7 +9,8 @@ import '../../../../core/errors/exceptions.dart';
 
 class IsolatedIGDBClient {
   static IsolatedIGDBClient? _instance;
-  static IsolatedIGDBClient get instance => _instance ??= IsolatedIGDBClient._();
+  static IsolatedIGDBClient get instance =>
+      _instance ??= IsolatedIGDBClient._();
 
   IsolatedIGDBClient._();
 
@@ -23,7 +24,8 @@ class IsolatedIGDBClient {
       print('📡 IGDB: Making request to $endpoint');
       print('🔧 IGDB: Using managed token: ${token.substring(0, 10)}...');
 
-      final request = http.Request('POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
+      final request = http.Request(
+          'POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
 
       request.headers['Client-ID'] = ApiConstants.igdbClientId;
       request.headers['Authorization'] = 'Bearer $token';
@@ -45,13 +47,15 @@ class IsolatedIGDBClient {
         return jsonList;
       } else {
         throw ServerException(
+          'IGDB request failed: ${response.body}',
           message: 'IGDB request failed: ${response.body}',
           statusCode: response.statusCode,
         );
       }
     } catch (e) {
       print('💥 IGDB: Request error: $e');
-      throw ServerException(message: 'IGDB request failed: $e');
+      throw ServerException('IGDB request failed: $e',
+          message: 'IGDB request failed: $e');
     }
   }
 
@@ -59,7 +63,8 @@ class IsolatedIGDBClient {
     try {
       final token = await SharedPrefsTokenManager.instance.getValidToken();
 
-      final request = http.Request('POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
+      final request = http.Request(
+          'POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
       request.headers['Client-ID'] = ApiConstants.igdbClientId;
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Content-Type'] = 'text/plain';
@@ -71,6 +76,7 @@ class IsolatedIGDBClient {
 
       if (response.statusCode != 200) {
         throw ServerException(
+          'IGDB request failed: ${response.body}',
           message: 'IGDB request failed: ${response.body}',
           statusCode: response.statusCode,
         );
@@ -79,7 +85,8 @@ class IsolatedIGDBClient {
       return response;
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException(message: 'IGDB raw request failed: $e');
+      throw ServerException('IGDB raw request failed: $e',
+          message: 'IGDB raw request failed: $e');
     }
   }
 }

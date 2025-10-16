@@ -1,7 +1,7 @@
 // presentation/pages/test/igdb_test_page.dart
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/datasources/remote/igdb/idgb_remote_datasource.dart';
+import '../../../data/datasources/remote/igdb/deprecated/idgb_remote_datasource.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../injection_container.dart';
 
@@ -42,8 +42,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
             Text(
               'IGDB API Integration Test',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: AppConstants.paddingMedium),
 
@@ -57,8 +57,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                     Text(
                       'Search Games Test',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: AppConstants.paddingSmall),
 
@@ -82,10 +82,11 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                           onPressed: _isLoading ? null : _testSearch,
                           icon: _isLoading
                               ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                                  width: 16,
+                                  height: 16,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
                               : const Icon(Icons.search),
                           label: const Text('Test Search'),
                         ),
@@ -123,26 +124,28 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                     Text(
                       'Test Results',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: AppConstants.paddingSmall),
-
                     if (_testResult.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.all(AppConstants.paddingSmall),
+                        padding:
+                            const EdgeInsets.all(AppConstants.paddingSmall),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           _testResult,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontFamily: 'monospace',
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontFamily: 'monospace',
+                                  ),
                         ),
                       ),
-
                     if (_searchResults.isNotEmpty) ...[
                       const SizedBox(height: AppConstants.paddingMedium),
                       Text(
@@ -155,7 +158,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 0.7,
                           crossAxisSpacing: 8,
@@ -189,28 +193,33 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
             flex: 3,
             child: game.coverUrl != null
                 ? Image.network(
-              game.coverUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.image_not_supported),
-                );
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-            )
+                    game.coverUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: const Icon(Icons.image_not_supported),
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    },
+                  )
                 : Container(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: const Icon(Icons.gamepad_rounded, size: 40),
-            ),
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: const Icon(Icons.gamepad_rounded, size: 40),
+                  ),
           ),
 
           // Game Info
@@ -224,8 +233,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                   Text(
                     game.name,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -251,8 +260,9 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                     Text(
                       game.genres.take(2).map((g) => g.name).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

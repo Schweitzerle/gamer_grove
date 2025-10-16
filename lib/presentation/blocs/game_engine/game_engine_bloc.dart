@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
-import '../../../core/utils/game_enrichment_utils.dart';
+import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import 'game_engine_event.dart';
 import 'game_engine_state.dart';
 
