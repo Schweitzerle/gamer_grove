@@ -1,5 +1,9 @@
-// presentation/blocs/auth/auth_state.dart
-part of 'auth_bloc.dart';
+// ============================================================
+// STATES
+// ============================================================
+
+import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -8,21 +12,32 @@ abstract class AuthState extends Equatable {
   List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {}
+/// Initial state before any auth check.
+class AuthInitial extends AuthState {
+  const AuthInitial();
+}
 
-class AuthLoading extends AuthState {}
+/// Loading state during auth operations.
+class AuthLoading extends AuthState {
+  const AuthLoading();
+}
 
-class Authenticated extends AuthState {
+/// State when user is authenticated.
+class AuthAuthenticated extends AuthState {
   final User user;
 
-  const Authenticated(this.user);
+  const AuthAuthenticated(this.user);
 
   @override
   List<Object> get props => [user];
 }
 
-class Unauthenticated extends AuthState {}
+/// State when user is not authenticated.
+class AuthUnauthenticated extends AuthState {
+  const AuthUnauthenticated();
+}
 
+/// State when auth operation fails.
 class AuthError extends AuthState {
   final String message;
 
@@ -30,4 +45,14 @@ class AuthError extends AuthState {
 
   @override
   List<Object> get props => [message];
+}
+
+/// State when password reset email is sent.
+class PasswordResetSent extends AuthState {
+  const PasswordResetSent();
+}
+
+/// State when password is successfully updated.
+class PasswordUpdated extends AuthState {
+  const PasswordUpdated();
 }

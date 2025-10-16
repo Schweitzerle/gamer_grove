@@ -1,36 +1,45 @@
-// lib/domain/repositories/auth_repository.dart
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/user/user.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+/// Abstract repository for handling user authentication.
+///
+/// This repository defines the contract for authentication-related operations,
+/// abstracting the data source from the application's business logic.
 abstract class AuthRepository {
-  // Basic Auth Operations
-  Future<Either<Failure, User>> signIn({
-    required String email,
-    required String password,
-  });
+  /// Stream that notifies of authentication state changes.
+  Stream<supabase.User?> get authStateChanges;
 
+  /// Signs up a new user.
   Future<Either<Failure, User>> signUp({
     required String email,
     required String password,
     required String username,
   });
 
+  /// Signs in an existing user.
+  Future<Either<Failure, User>> signIn({
+    required String email,
+    required String password,
+  });
+
+  /// Signs out the current user.
   Future<Either<Failure, void>> signOut();
 
-  Future<Either<Failure, User>> getCurrentUser();
+  /// Resets the password for a given email.
+  Future<Either<Failure, void>> resetPassword({
+    required String email,
+  });
 
-  // Password Management
-  Future<Either<Failure, void>> resetPassword(String email);
-
+  /// Updates the current user's password.
   Future<Either<Failure, void>> updatePassword({
-    required String currentPassword,
     required String newPassword,
   });
 
-  // Account Management
+  /// Deletes the current user's account.
   Future<Either<Failure, void>> deleteAccount();
 
-  // Auth State Stream
-  Stream<User?> get authStateChanges;
+  /// Gets the current authenticated user.
+  Future<Either<Failure, User?>> getCurrentUser();
 }

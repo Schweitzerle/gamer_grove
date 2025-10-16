@@ -1,16 +1,31 @@
-// domain/usecases/auth/sign_out.dart
-import 'package:dartz/dartz.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/auth_repository.dart';
-import '../base_usecase.dart';
+// ============================================================
+// SIGN OUT USE CASE
+// ============================================================
 
-class SignOut extends NoParamsUseCase<void> {
+import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/auth_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
+
+/// Use case for signing out the current user.
+///
+/// Example:
+/// ```dart
+/// final useCase = SignOutUseCase(authRepository);
+/// final result = await useCase(NoParams());
+///
+/// result.fold(
+///   (failure) => print('Signout failed: ${failure.message}'),
+///   (_) => print('Signed out successfully'),
+/// );
+/// ```
+class SignOutUseCase implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
-  SignOut(this.repository);
+  SignOutUseCase(this.repository);
 
   @override
-  Future<Either<Failure, void>> call() async {
+  Future<Either<Failure, void>> call(NoParams params) async {
     return await repository.signOut();
   }
 }

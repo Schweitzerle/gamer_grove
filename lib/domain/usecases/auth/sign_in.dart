@@ -1,30 +1,52 @@
-// domain/usecases/auth/sign_in.dart
+// lib/domain/usecases/auth/
+
+/// Auth use cases for authentication operations.
+library;
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/user/user.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 import '../../repositories/auth_repository.dart';
-import '../base_usecase.dart';
+import '../usecase.dart';
 
-class SignIn extends UseCase<User, SignInParams> {
+// ============================================================
+// SIGN IN USE CASE
+// ============================================================
+
+/// Use case for signing in a user.
+///
+/// Example:
+/// ```dart
+/// final useCase = SignInUseCase(authRepository);
+/// final result = await useCase(SignInParams(
+///   email: 'user@example.com',
+///   password: 'password123',
+/// ));
+///
+/// result.fold(
+///   (failure) => print('Login failed: ${failure.message}'),
+///   (user) => print('Welcome ${user.username}!'),
+/// );
+/// ```
+class SignInUseCase implements UseCase<User, SignInParams> {
   final AuthRepository repository;
 
-  SignIn(this.repository);
+  SignInUseCase(this.repository);
 
   @override
   Future<Either<Failure, User>> call(SignInParams params) async {
-    // Email validation
+    // Validate inputs
     if (!_isValidEmail(params.email)) {
-      return const Left(ValidationFailure(message: 'Invalid email format'));
+      return const Left(ValidationFailure(
+        message: 'Invalid email format',
+      ));
     }
 
-    // Password validation
-    if (params.password.isEmpty) {
-      return const Left(ValidationFailure(message: 'Password cannot be empty'));
-    }
-
-    if (params.password.length < 6) {
-      return const Left(ValidationFailure(message: 'Password must be at least 6 characters'));
+    if (!_isValidPassword(params.password)) {
+      return const Left(ValidationFailure(
+        message: 'Password must be at least 6 characters',
+      ));
     }
 
     return await repository.signIn(
@@ -33,8 +55,17 @@ class SignIn extends UseCase<User, SignInParams> {
     );
   }
 
+  /// Validates email format using a simple regex pattern.
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  /// Validates password (minimum 6 characters).
+  bool _isValidPassword(String password) {
+    return password.length >= 6;
   }
 }
 
@@ -50,6 +81,3 @@ class SignInParams extends Equatable {
   @override
   List<Object> get props => [email, password];
 }
-
-
-

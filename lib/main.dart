@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/api_constants.dart';
 import 'injection_container.dart' as di;
@@ -25,7 +26,7 @@ void main() async {
   );
 
   // Setup Dependency Injection
-  await di.init();
+  await di.initDependencies();
 
   runApp(const GamerGroveApp());
 }
@@ -38,7 +39,7 @@ class GamerGroveApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => sl<AuthBloc>()..add(CheckAuthStatus()),
+          create: (_) => sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
         ),
       ],
       child: MaterialApp(
@@ -64,4 +65,3 @@ class GamerGroveApp extends StatelessWidget {
 
 // Global Supabase client access
 final supabase = Supabase.instance.client;
-

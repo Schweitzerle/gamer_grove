@@ -3,7 +3,8 @@ class ServerException implements Exception {
   final String message;
   final int? statusCode;
 
-  ServerException({
+  ServerException(
+    String s, {
     required this.message,
     this.statusCode,
   });

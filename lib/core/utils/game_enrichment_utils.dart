@@ -6,7 +6,7 @@
 // ==========================================
 
 import 'dart:async';
-import '../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
+import '../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
 import '../../domain/entities/game/game.dart';
 import '../../injection_container.dart';
 

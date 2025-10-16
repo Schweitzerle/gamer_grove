@@ -7,7 +7,7 @@ import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../injection_container.dart';
-import '../../../data/datasources/remote/supabase/supabase_remote_datasource.dart';
+import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
 
 enum SortOption {
   nameAZ,

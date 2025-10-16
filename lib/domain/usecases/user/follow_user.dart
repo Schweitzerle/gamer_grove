@@ -1,23 +1,57 @@
-// lib/domain/usecases/user/follow_user.dart
+// ============================================================
+// FOLLOW USER USE CASE
+// ============================================================
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
 import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import '../usecase.dart';
 
-class FollowUser extends UseCase<void, FollowUserParams> {
+/// Use case for following a user.
+///
+/// Example:
+/// ```dart
+/// final useCase = FollowUserUseCase(userRepository);
+/// final result = await useCase(FollowUserParams(
+///   currentUserId: 'uuid1',
+///   targetUserId: 'uuid2',
+/// ));
+///
+/// result.fold(
+///   (failure) => print('Follow failed: ${failure.message}'),
+///   (_) => print('Now following user'),
+/// );
+/// ```
+class FollowUserUseCase implements UseCase<void, FollowUserParams> {
   final UserRepository repository;
 
-  FollowUser(this.repository);
+  FollowUserUseCase(this.repository);
 
   @override
   Future<Either<Failure, void>> call(FollowUserParams params) async {
-    if (params.currentUserId.isEmpty || params.targetUserId.isEmpty) {
-      return const Left(ValidationFailure(message: 'User IDs cannot be empty'));
+    // Validate not trying to follow self
+    if (params.currentUserId == params.targetUserId) {
+      return const Left(ValidationFailure(
+        message: 'You cannot follow yourself',
+      ));
     }
 
-    if (params.currentUserId == params.targetUserId) {
-      return const Left(ValidationFailure(message: 'Cannot follow yourself'));
+    // Check if already following (optional - repository handles this)
+    final isFollowingResult = await repository.isFollowing(
+      currentUserId: params.currentUserId,
+      targetUserId: params.targetUserId,
+    );
+
+    final alreadyFollowing = isFollowingResult.fold(
+      (failure) => false,
+      (following) => following,
+    );
+
+    if (alreadyFollowing) {
+      return const Left(ValidationFailure(
+        message: 'You are already following this user',
+      ));
     }
 
     return await repository.followUser(
@@ -39,4 +73,3 @@ class FollowUserParams extends Equatable {
   @override
   List<Object> get props => [currentUserId, targetUserId];
 }
-

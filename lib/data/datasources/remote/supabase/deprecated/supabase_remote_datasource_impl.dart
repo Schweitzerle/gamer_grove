@@ -1,4 +1,4 @@
-// lib/data/datasources/remote/supabase/supabase_remote_datasource_impl.dart
+/* // lib/data/datasources/remote/supabase/supabase_remote_datasource_impl.dart
 // COMPLETE UPDATED IMPLEMENTATION - Combines best practices from both versions
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
@@ -2004,3 +2004,4 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
     }
   }
 }
+ */

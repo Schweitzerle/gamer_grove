@@ -1,4 +1,4 @@
-// lib/data/datasources/remote/supabase/supabase_remote_datasource.dart
+/* // lib/data/datasources/remote/supabase/supabase_remote_datasource.dart
 // UPDATED COMPLETE VERSION - Combines best of both implementations
 import '../../../../domain/entities/user/user_collection_sort_options.dart';
 import '../../../../domain/entities/user/user_gaming_activity.dart';
@@ -522,4 +522,4 @@ abstract class SupabaseRemoteDataSource {
   });
   Future<Map<String, dynamic>> getIndustryTrendAnalytics({required Duration timeWindow});
 
-}
+} */

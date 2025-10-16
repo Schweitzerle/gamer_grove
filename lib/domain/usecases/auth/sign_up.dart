@@ -1,69 +1,83 @@
-// domain/usecases/auth/sign_up.dart
+// ============================================================
+// SIGN UP USE CASE
+// ============================================================
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/user/user.dart';
-import '../../repositories/auth_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/repositories/auth_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
-class SignUp extends UseCase<User, SignUpParams> {
+/// Use case for signing up a new user.
+///
+/// Example:
+/// ```dart
+/// final useCase = SignUpUseCase(authRepository);
+/// final result = await useCase(SignUpParams(
+///   email: 'newuser@example.com',
+///   password: 'securePassword123',
+///   username: 'john_doe',
+/// ));
+///
+/// result.fold(
+///   (failure) => print('Signup failed: ${failure.message}'),
+///   (user) => print('Account created for ${user.username}'),
+/// );
+/// ```
+class SignUpUseCase implements UseCase<User, SignUpParams> {
   final AuthRepository repository;
 
-  SignUp(this.repository);
+  SignUpUseCase(this.repository);
 
   @override
   Future<Either<Failure, User>> call(SignUpParams params) async {
-    print('🔍 SignUp UseCase: Starting validation...');
-
-    // Email validation
+    // Validate email
     if (!_isValidEmail(params.email)) {
-      print('❌ SignUp UseCase: Invalid email format: ${params.email}');
-      return const Left(ValidationFailure(message: 'Invalid email format'));
-    }
-
-    // Password validation
-    if (params.password.length < 6) {
-      print('❌ SignUp UseCase: Password too short: ${params.password.length} characters');
-      return const Left(ValidationFailure(message: 'Password must be at least 6 characters'));
-    }
-
-    // Username validation
-    if (params.username.length < 3) {
-      print('❌ SignUp UseCase: Username too short: ${params.username.length} characters');
-      return const Left(ValidationFailure(message: 'Username must be at least 3 characters'));
-    }
-
-    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(params.username)) {
-      print('❌ SignUp UseCase: Invalid username format: ${params.username}');
       return const Left(ValidationFailure(
-        message: 'Username can only contain letters, numbers, and underscores',
+        message: 'Invalid email format',
       ));
     }
 
-    print('✅ SignUp UseCase: Validation passed, calling repository...');
-
-    try {
-      final result = await repository.signUp(
-        email: params.email,
-        password: params.password,
-        username: params.username,
-      );
-
-      result.fold(
-            (failure) => print('❌ SignUp UseCase: Repository returned failure: ${failure.message}'),
-            (user) => print('✅ SignUp UseCase: Repository returned user: ${user.username}'),
-      );
-
-      return result;
-    } catch (e, stackTrace) {
-      print('💥 SignUp UseCase: Unexpected error: $e');
-      print('📚 SignUp UseCase: Stack trace: $stackTrace');
-      return Left(ValidationFailure(message: 'Unexpected error: $e'));
+    // Validate password
+    if (!_isValidPassword(params.password)) {
+      return const Left(ValidationFailure(
+        message: 'Password must be at least 6 characters',
+      ));
     }
+
+    // Validate username
+    if (!_isValidUsername(params.username)) {
+      return const Left(ValidationFailure(
+        message:
+            'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+      ));
+    }
+
+    return await repository.signUp(
+      email: params.email,
+      password: params.password,
+      username: params.username,
+    );
   }
 
+  /// Validates email format using a simple regex pattern.
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  /// Validates password (minimum 6 characters).
+  bool _isValidPassword(String password) {
+    return password.length >= 6;
+  }
+
+  /// Validates username (3-20 characters, lowercase alphanumeric and underscores).
+  bool _isValidUsername(String username) {
+    final usernameRegex = RegExp(r'^[a-z0-9_]{3,20}$');
+    return usernameRegex.hasMatch(username);
   }
 }
 

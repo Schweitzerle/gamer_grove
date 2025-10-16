@@ -1,45 +1,54 @@
-// domain/usecases/auth/update_password.dart
+// ============================================================
+// UPDATE PASSWORD USE CASE
+// ============================================================
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/auth_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/auth_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
-class UpdatePassword extends UseCase<void, UpdatePasswordParams> {
+/// Use case for updating the current user's password.
+///
+/// Example:
+/// ```dart
+/// final useCase = UpdatePasswordUseCase(authRepository);
+/// final result = await useCase(UpdatePasswordParams(
+///   newPassword: 'newSecurePassword123',
+/// ));
+///
+/// result.fold(
+///   (failure) => print('Failed: ${failure.message}'),
+///   (_) => print('Password updated successfully'),
+/// );
+/// ```
+class UpdatePasswordUseCase implements UseCase<void, UpdatePasswordParams> {
   final AuthRepository repository;
 
-  UpdatePassword(this.repository);
+  UpdatePasswordUseCase(this.repository);
 
   @override
   Future<Either<Failure, void>> call(UpdatePasswordParams params) async {
-    if (params.currentPassword.isEmpty || params.newPassword.isEmpty) {
-      return const Left(ValidationFailure(message: 'Passwords cannot be empty'));
+    if (!_isValidPassword(params.newPassword)) {
+      return const Left(ValidationFailure(
+        message: 'Password must be at least 6 characters',
+      ));
     }
 
-    if (params.newPassword.length < 6) {
-      return const Left(ValidationFailure(message: 'New password must be at least 6 characters'));
-    }
+    return await repository.updatePassword(newPassword: params.newPassword);
+  }
 
-    if (params.currentPassword == params.newPassword) {
-      return const Left(ValidationFailure(message: 'New password must be different from current password'));
-    }
-
-    return await repository.updatePassword(
-      currentPassword: params.currentPassword,
-      newPassword: params.newPassword,
-    );
+  /// Validates password (minimum 6 characters).
+  bool _isValidPassword(String password) {
+    return password.length >= 6;
   }
 }
 
 class UpdatePasswordParams extends Equatable {
-  final String currentPassword;
   final String newPassword;
 
-  const UpdatePasswordParams({
-    required this.currentPassword,
-    required this.newPassword,
-  });
+  const UpdatePasswordParams({required this.newPassword});
 
   @override
-  List<Object> get props => [currentPassword, newPassword];
+  List<Object> get props => [newPassword];
 }

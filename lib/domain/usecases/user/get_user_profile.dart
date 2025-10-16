@@ -1,78 +1,57 @@
-// domain/usecases/user/get_user_profile.dart
+// lib/domain/usecases/user/
+
+/// User profile use cases for profile operations.
+library;
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/user/user.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import '../usecase.dart';
 
-class GetUserProfile extends UseCase<User, GetUserProfileParams> {
+// ============================================================
+// GET USER PROFILE USE CASE
+// ============================================================
+
+/// Use case for getting a user profile.
+///
+/// Example:
+/// ```dart
+/// final useCase = GetUserProfileUseCase(userRepository);
+/// final result = await useCase(GetUserProfileParams(userId: 'uuid'));
+///
+/// result.fold(
+///   (failure) => print('Error: ${failure.message}'),
+///   (user) => print('Found user: ${user.username}'),
+/// );
+/// ```
+class GetUserProfileUseCase implements UseCase<User, GetUserProfileParams> {
   final UserRepository repository;
 
-  GetUserProfile(this.repository);
+  GetUserProfileUseCase(this.repository);
 
   @override
   Future<Either<Failure, User>> call(GetUserProfileParams params) async {
-    if (params.userId.isEmpty) {
-      return const Left(ValidationFailure(message: 'User ID cannot be empty'));
+    if (params.userId != null) {
+      return await repository.getUserProfile(userId: params.userId!);
+    } else {
+      return const Left(ValidationFailure(
+        message: 'userId must be provided',
+      ));
     }
-
-    return await repository.getUserProfile(
-      userId: params.userId,
-      currentUserId: params.currentUserId,
-    );
   }
 }
 
 class GetUserProfileParams extends Equatable {
-  final String userId;
-  final String? currentUserId; // For privacy checks and social context
-  final bool includePrivateData;
-  final bool includeSocialStats;
-  final bool includeTopThree;
-  final bool includeGamingStats;
+  final String? userId;
+  final String? username;
 
   const GetUserProfileParams({
-    required this.userId,
-    this.currentUserId,
-    this.includePrivateData = false,
-    this.includeSocialStats = true,
-    this.includeTopThree = true,
-    this.includeGamingStats = true,
+    this.userId,
+    this.username,
   });
 
-  // Convenience constructors
-  const GetUserProfileParams.basic({
-    required this.userId,
-    this.currentUserId,
-  })  : includePrivateData = false,
-        includeSocialStats = true,
-        includeTopThree = false,
-        includeGamingStats = false;
-
-  const GetUserProfileParams.detailed({
-    required this.userId,
-    this.currentUserId,
-  })  : includePrivateData = false,
-        includeSocialStats = true,
-        includeTopThree = true,
-        includeGamingStats = true;
-
-  const GetUserProfileParams.ownProfile({
-    required this.userId,
-  })  : currentUserId = userId,
-        includePrivateData = true,
-        includeSocialStats = true,
-        includeTopThree = true,
-        includeGamingStats = true;
-
   @override
-  List<Object?> get props => [
-        userId,
-        currentUserId,
-        includePrivateData,
-        includeSocialStats,
-        includeTopThree,
-        includeGamingStats,
-      ];
+  List<Object?> get props => [userId, username];
 }
