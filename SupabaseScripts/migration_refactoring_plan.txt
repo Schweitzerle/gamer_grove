@@ -1,0 +1,754 @@
+# 🎯 Supabase Refactoring Master Plan
+
+**Complete Strategy for Auth, Users, Collections, Social & Performance**
+
+---
+
+## 📋 Table of Contents
+
+1. [Overview & Goals](#overview)
+2. [Database Schema](#database-schema)
+3. [Performance Strategy](#performance-strategy)
+4. [DataSource Architecture](#datasource-architecture)
+5. [Repository Architecture](#repository-architecture)
+6. [Implementation Timeline](#implementation-timeline)
+7. [Testing Strategy](#testing-strategy)
+
+---
+
+## 🎯 Overview & Goals {#overview}
+
+### **Ziele:**
+✅ Clean Architecture mit Base Repositories
+✅ 40x schnelleres Game Enrichment
+✅ Skalierbare Social Features
+✅ Privacy-First Design
+✅ Production-Ready Performance
+
+### **Scope:**
+- **Authentication:** Login, Signup, Password Reset
+- **User Profiles:** Username, Avatar, Bio, Privacy Settings
+- **Game Collections:** Wishlist, Rated, Recommended, Top 3
+- **Social Features:** Follow System, Public Profiles, Activity Feed
+- **Performance:** Optimized Enrichment, Caching, Batch Operations
+
+---
+
+## 🗄️ Database Schema {#database-schema}
+
+### **Tables Overview:**
+
+```
+┌─────────────────────────────────────┐
+│  DATABASE STRUCTURE                 │
+├─────────────────────────────────────┤
+│  auth.users (Supabase managed)      │
+│    ↓ references                     │
+│  public.users (Extended Profile)    │
+│    ↓ references                     │
+│  ├── user_games (Collections)       │
+│  ├── user_top_three (Top 3)         │
+│  ├── user_follows (Social)          │
+│  ├── user_activity (Feed)           │
+│  └── user_search_queries (History)  │
+└─────────────────────────────────────┘
+```
+
+### **1. User Profile Table**
+
+```sql
+CREATE TABLE public.users (
+  -- Identity
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username TEXT UNIQUE NOT NULL,
+  display_name TEXT,
+  bio TEXT,
+  avatar_url TEXT,
+  country TEXT,
+
+  -- Privacy Settings
+  is_profile_public BOOLEAN DEFAULT true,
+  show_wishlist BOOLEAN DEFAULT true,
+  show_rated_games BOOLEAN DEFAULT true,
+  show_recommended_games BOOLEAN DEFAULT true,
+  show_top_three BOOLEAN DEFAULT true,
+
+  -- Denormalized Stats (for performance)
+  total_games_rated INTEGER DEFAULT 0,
+  total_games_wishlisted INTEGER DEFAULT 0,
+  total_games_recommended INTEGER DEFAULT 0,
+  average_rating DECIMAL(3,1),
+  followers_count INTEGER DEFAULT 0,
+  following_count INTEGER DEFAULT 0,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_active_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT username_length CHECK (
+    char_length(username) >= 3 AND
+    char_length(username) <= 20
+  ),
+  CONSTRAINT bio_length CHECK (
+    char_length(bio) <= 500
+  )
+);
+
+-- Indexes
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_created_at ON users(created_at DESC);
+CREATE INDEX idx_users_public ON users(is_profile_public)
+  WHERE is_profile_public = true;
+```
+
+### **2. Game Collections Table** (Single Table Approach!)
+
+```sql
+-- ⭐ KEY DESIGN: One table for all collections!
+CREATE TABLE public.user_games (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  game_id INTEGER NOT NULL,
+
+  -- Collection Flags
+  is_wishlisted BOOLEAN DEFAULT false,
+  is_recommended BOOLEAN DEFAULT false,
+  is_rated BOOLEAN DEFAULT false,
+
+  -- Rating Data
+  rating DECIMAL(3,1), -- 0.0 to 10.0
+
+  -- Timestamps
+  wishlisted_at TIMESTAMPTZ,
+  recommended_at TIMESTAMPTZ,
+  rated_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Constraints
+  UNIQUE(user_id, game_id),
+  CONSTRAINT rating_range CHECK (
+    rating IS NULL OR (rating >= 0 AND rating <= 10)
+  ),
+  CONSTRAINT at_least_one_flag CHECK (
+    is_wishlisted = true OR
+    is_recommended = true OR
+    is_rated = true
+  )
+);
+
+-- Performance Indexes
+CREATE INDEX idx_user_games_user ON user_games(user_id);
+CREATE INDEX idx_user_games_game ON user_games(game_id);
+
+-- Partial Indexes (HUGE performance boost!)
+CREATE INDEX idx_user_games_wishlisted
+  ON user_games(user_id, game_id)
+  WHERE is_wishlisted = true;
+
+CREATE INDEX idx_user_games_recommended
+  ON user_games(user_id, game_id)
+  WHERE is_recommended = true;
+
+CREATE INDEX idx_user_games_rated
+  ON user_games(user_id, game_id, rating)
+  WHERE is_rated = true;
+```
+
+**Warum Single Table?**
+✅ Weniger JOINs
+✅ Einfacheres Enrichment
+✅ Atomic operations
+✅ Better für Batch-Queries
+
+### **3. Top Three Table**
+
+```sql
+CREATE TABLE public.user_top_three (
+  user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+
+  game_1_id INTEGER,
+  game_2_id INTEGER,
+  game_3_id INTEGER,
+
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- All must be different
+  CONSTRAINT different_games CHECK (
+    (game_1_id IS DISTINCT FROM game_2_id) AND
+    (game_2_id IS DISTINCT FROM game_3_id) AND
+    (game_1_id IS DISTINCT FROM game_3_id)
+  )
+);
+```
+
+### **4. Social Features Table**
+
+```sql
+CREATE TABLE public.user_follows (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  follower_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(follower_id, following_id),
+  CONSTRAINT no_self_follow CHECK (follower_id != following_id)
+);
+
+CREATE INDEX idx_follows_follower ON user_follows(follower_id);
+CREATE INDEX idx_follows_following ON user_follows(following_id);
+```
+
+### **5. Activity Feed Table** (Optional but recommended!)
+
+```sql
+CREATE TABLE public.user_activity (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+
+  activity_type TEXT NOT NULL, -- 'rated', 'recommended', 'wishlisted', etc.
+  game_id INTEGER,
+  metadata JSONB, -- Flexible data: {rating: 9.5, previous_rating: 8.0}
+
+  is_public BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  CONSTRAINT valid_activity_type CHECK (
+    activity_type IN ('rated', 'recommended', 'wishlisted', 'updated_top_three', 'followed_user')
+  )
+);
+
+CREATE INDEX idx_activity_user ON user_activity(user_id, created_at DESC);
+CREATE INDEX idx_activity_public ON user_activity(is_public, created_at DESC)
+  WHERE is_public = true;
+```
+
+---
+
+## ⚡ Performance Strategy {#performance-strategy}
+
+### **Problem: Game Enrichment Performance**
+
+**Before:** 80 queries × 50ms = 4 seconds 🐌
+**After:** 2 queries × 50ms = 100ms ⚡ (40x faster!)
+
+### **Solution: 3-Tier Approach**
+
+```
+┌─────────────────────────────────────┐
+│  Tier 1: Cache Layer (0ms)          │
+│  ↓ Miss                             │
+│  Tier 2: Batch Query (100ms)        │
+│  ↓ Large Lists                      │
+│  Tier 3: PostgreSQL Function (50ms) │
+└─────────────────────────────────────┘
+```
+
+### **PostgreSQL Enrichment Function**
+
+```sql
+CREATE OR REPLACE FUNCTION get_user_game_enrichment_data(
+  p_user_id UUID,
+  p_game_ids INTEGER[]
+)
+RETURNS TABLE (
+  game_id INTEGER,
+  is_wishlisted BOOLEAN,
+  is_recommended BOOLEAN,
+  is_rated BOOLEAN,
+  rating DECIMAL,
+  is_in_top_three BOOLEAN,
+  top_three_position INTEGER
+) AS $$
+BEGIN
+  RETURN QUERY
+  WITH top_three AS (
+    SELECT game_1_id, game_2_id, game_3_id
+    FROM user_top_three
+    WHERE user_id = p_user_id
+  )
+  SELECT
+    g.game_id,
+    COALESCE(ug.is_wishlisted, false) as is_wishlisted,
+    COALESCE(ug.is_recommended, false) as is_recommended,
+    COALESCE(ug.is_rated, false) as is_rated,
+    ug.rating,
+    CASE
+      WHEN g.game_id IN (SELECT game_1_id FROM top_three) THEN true
+      WHEN g.game_id IN (SELECT game_2_id FROM top_three) THEN true
+      WHEN g.game_id IN (SELECT game_3_id FROM top_three) THEN true
+      ELSE false
+    END as is_in_top_three,
+    CASE
+      WHEN g.game_id = (SELECT game_1_id FROM top_three) THEN 1
+      WHEN g.game_id = (SELECT game_2_id FROM top_three) THEN 2
+      WHEN g.game_id = (SELECT game_3_id FROM top_three) THEN 3
+      ELSE NULL
+    END as top_three_position
+  FROM unnest(p_game_ids) AS g(game_id)
+  LEFT JOIN user_games ug ON ug.game_id = g.game_id AND ug.user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql STABLE;
+```
+
+### **Dart Service Implementation**
+
+```dart
+class GameEnrichmentService {
+  final SupabaseClient supabase;
+  final GameDataCache cache;
+
+  Future<List<Game>> enrichGames(
+    List<Game> games,
+    String userId, {
+    bool useCache = true,
+  }) async {
+    if (games.isEmpty) return games;
+
+    final gameIds = games.map((g) => g.id).toList();
+
+    // Tier 1: Try cache
+    if (useCache) {
+      final cachedData = await cache.get(userId, gameIds);
+      if (cachedData != null) {
+        return _applyEnrichment(games, cachedData);
+      }
+    }
+
+    // Tier 2/3: Database query
+    final enrichmentData = gameIds.length > 50
+        ? await _enrichWithFunction(userId, gameIds)
+        : await _enrichWithBatchQuery(userId, gameIds);
+
+    // Update cache
+    await cache.set(userId, enrichmentData);
+
+    return _applyEnrichment(games, enrichmentData);
+  }
+
+  Future<Map<int, Map<String, dynamic>>> _enrichWithFunction(
+    String userId,
+    List<int> gameIds,
+  ) async {
+    final result = await supabase.rpc(
+      'get_user_game_enrichment_data',
+      params: {'p_user_id': userId, 'p_game_ids': gameIds},
+    );
+
+    return {for (var data in result) data['game_id'] as int: data};
+  }
+
+  Future<Map<int, Map<String, dynamic>>> _enrichWithBatchQuery(
+    String userId,
+    List<int> gameIds,
+  ) async {
+    final results = await Future.wait([
+      supabase.from('user_games')
+        .select('game_id, is_wishlisted, is_recommended, is_rated, rating')
+        .eq('user_id', userId)
+        .in_('game_id', gameIds),
+      supabase.from('user_top_three')
+        .select('game_1_id, game_2_id, game_3_id')
+        .eq('user_id', userId)
+        .maybeSingle(),
+    ]);
+
+    // Process and combine results...
+    return processedData;
+  }
+}
+```
+
+---
+
+## 🏗️ DataSource Architecture {#datasource-architecture}
+
+### **Structure:**
+
+```
+lib/data/datasources/remote/supabase/
+├── models/
+│   ├── supabase_filters.dart         # Query filters
+│   ├── supabase_query.dart           # Query builder
+│   └── supabase_presets.dart         # Common queries
+│
+├── supabase_auth_datasource.dart     # Auth operations
+├── supabase_auth_datasource_impl.dart
+├── supabase_user_datasource.dart     # User operations
+└── supabase_user_datasource_impl.dart
+```
+
+### **Auth DataSource** (Security-focused)
+
+```dart
+abstract class SupabaseAuthDataSource {
+  // Authentication
+  Future<UserModel> signIn(String email, String password);
+  Future<UserModel> signUp(String email, String password, String username);
+  Future<void> signOut();
+
+  // Password Management
+  Future<void> resetPassword(String email);
+  Future<void> updatePassword(String newPassword);
+
+  // Session Management
+  Future<UserModel?> getCurrentUser();
+  Future<void> refreshSession();
+}
+```
+
+### **User DataSource** (Profile & Social)
+
+```dart
+abstract class SupabaseUserDataSource {
+  // Profile
+  Future<UserModel> getUserProfile(String userId);
+  Future<UserModel> updateUserProfile(String userId, Map<String, dynamic> updates);
+  Future<String> updateUserAvatar(String userId, String imageData);
+
+  // Game Collections - Batch Operations
+  Future<Map<int, Map<String, dynamic>>> getUserGameData(
+    String userId,
+    List<int> gameIds,
+  );
+
+  // Game Actions
+  Future<void> toggleWishlist(String userId, int gameId);
+  Future<void> toggleRecommended(String userId, int gameId);
+  Future<void> rateGame(String userId, int gameId, double rating);
+  Future<void> updateTopThree(String userId, List<int> gameIds);
+
+  // Social
+  Future<void> followUser(String followerId, String followingId);
+  Future<void> unfollowUser(String followerId, String followingId);
+  Future<bool> isFollowing(String followerId, String followingId);
+  Future<List<UserModel>> getFollowers(String userId, {int limit, int offset});
+  Future<List<UserModel>> getFollowing(String userId, {int limit, int offset});
+
+  // Discovery
+  Future<List<UserModel>> searchUsers(String query, {int limit, int offset});
+  Future<List<UserModel>> getPopularUsers({int limit, int offset});
+  Future<List<UserModel>> getSimilarUsers(String userId, {int limit});
+
+  // Activity
+  Future<List<ActivityModel>> getUserActivity(String userId, {int limit});
+  Future<List<ActivityModel>> getFollowingActivity(String userId, {int limit});
+
+  // Statistics
+  Future<UserStatsModel> getUserStats(String userId);
+  Future<CollectionStatsModel> getCollectionStats(String userId);
+}
+```
+
+---
+
+## 🏛️ Repository Architecture {#repository-architecture}
+
+### **Structure:**
+
+```
+lib/data/repositories/
+├── base/
+│   ├── igdb_base_repository.dart       # IGDB operations
+│   └── supabase_base_repository.dart   # Supabase operations
+│
+├── game_repository_impl.dart           # extends IgdbBaseRepository
+├── event_repository_impl.dart          # extends IgdbBaseRepository
+├── auth_repository_impl.dart           # extends SupabaseBaseRepository
+└── user_repository_impl.dart           # extends SupabaseBaseRepository
+```
+
+### **Supabase Base Repository**
+
+```dart
+abstract class SupabaseBaseRepository {
+  final SupabaseClient supabase;
+  final NetworkInfo networkInfo;
+
+  SupabaseBaseRepository({
+    required this.supabase,
+    required this.networkInfo,
+  });
+
+  /// Unified query with automatic error handling
+  Future<Either<Failure, T>> querySupabase<T>({
+    required Future<T> Function() query,
+    required String errorMessage,
+  }) async {
+    try {
+      if (!await networkInfo.isConnected) {
+        return const Left(NetworkFailure());
+      }
+
+      final result = await query();
+      return Right(result);
+    } on PostgrestException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on AuthException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: '$errorMessage: $e'));
+    }
+  }
+}
+```
+
+### **Auth Repository**
+
+```dart
+class AuthRepositoryImpl extends SupabaseBaseRepository
+    implements AuthRepository {
+  final SupabaseAuthDataSource authDataSource;
+
+  AuthRepositoryImpl({
+    required this.authDataSource,
+    required SupabaseClient supabase,
+    required NetworkInfo networkInfo,
+  }) : super(supabase: supabase, networkInfo: networkInfo);
+
+  @override
+  Future<Either<Failure, User>> signIn(String email, String password) {
+    return querySupabase(
+      query: () => authDataSource.signIn(email, password),
+      errorMessage: 'Failed to sign in',
+    );
+  }
+
+  @override
+  Future<Either<Failure, User>> signUp(
+    String email,
+    String password,
+    String username,
+  ) {
+    return querySupabase(
+      query: () => authDataSource.signUp(email, password, username),
+      errorMessage: 'Failed to sign up',
+    );
+  }
+
+  // More methods...
+}
+```
+
+### **User Repository**
+
+```dart
+class UserRepositoryImpl extends SupabaseBaseRepository
+    implements UserRepository {
+  final SupabaseUserDataSource userDataSource;
+  final GameEnrichmentService enrichmentService;
+
+  UserRepositoryImpl({
+    required this.userDataSource,
+    required this.enrichmentService,
+    required SupabaseClient supabase,
+    required NetworkInfo networkInfo,
+  }) : super(supabase: supabase, networkInfo: networkInfo);
+
+  @override
+  Future<Either<Failure, User>> getUserProfile(String userId) {
+    return querySupabase(
+      query: () => userDataSource.getUserProfile(userId),
+      errorMessage: 'Failed to get user profile',
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> followUser(
+    String followerId,
+    String followingId,
+  ) {
+    return querySupabase(
+      query: () => userDataSource.followUser(followerId, followingId),
+      errorMessage: 'Failed to follow user',
+    );
+  }
+
+  // More methods...
+}
+```
+
+---
+
+## 📅 Implementation Timeline {#implementation-timeline}
+
+### **Week 1: Foundation (Database + Auth)**
+
+**Day 1-2: Database Setup**
+- [ ] Create all tables
+- [ ] Set up RLS policies
+- [ ] Create PostgreSQL enrichment function
+- [ ] Create indexes
+- [ ] Write migration scripts
+
+**Day 3-4: Auth System**
+- [ ] SupabaseAuthDataSource interface
+- [ ] SupabaseAuthDataSource implementation
+- [ ] AuthRepository with BaseRepository
+- [ ] Auth BLoC updates
+- [ ] Sign In/Sign Up/Sign Out
+
+**Day 5: Testing & Fixes**
+- [ ] Test auth flow
+- [ ] Test RLS policies
+- [ ] Performance testing
+
+### **Week 2: User Profiles & Collections**
+
+**Day 1-2: User Profile**
+- [ ] SupabaseUserDataSource interface
+- [ ] Profile CRUD operations
+- [ ] Avatar upload
+- [ ] Privacy settings
+- [ ] UserRepository with BaseRepository
+
+**Day 3-4: Game Collections**
+- [ ] Collection operations (wishlist, rated, etc.)
+- [ ] Top 3 management
+- [ ] Batch operations
+- [ ] GameEnrichmentService
+- [ ] Integration with GameRepository
+
+**Day 5: Testing**
+- [ ] Test all collection operations
+- [ ] Test enrichment performance
+- [ ] Test privacy rules
+
+### **Week 3: Social Features**
+
+**Day 1-2: Follow System**
+- [ ] Follow/Unfollow operations
+- [ ] Followers/Following lists
+- [ ] Follow status checks
+- [ ] Counter updates
+
+**Day 3-4: Discovery & Activity**
+- [ ] User search
+- [ ] Popular users
+- [ ] Similar users
+- [ ] Activity feed (optional)
+
+**Day 5: Testing & Polish**
+- [ ] Integration testing
+- [ ] Performance optimization
+- [ ] Bug fixes
+
+### **Week 4: Performance & Optimization**
+
+**Day 1-2: Caching**
+- [ ] GameDataCache implementation
+- [ ] Cache invalidation
+- [ ] Cache warming
+
+**Day 3-4: Optimization**
+- [ ] Query optimization
+- [ ] Index tuning
+- [ ] Load testing
+
+**Day 5: Documentation & Deployment**
+- [ ] API documentation
+- [ ] Setup guides
+- [ ] Deployment checklist
+
+---
+
+## 🧪 Testing Strategy {#testing-strategy}
+
+### **Unit Tests**
+
+```dart
+// Test enrichment service
+test('enriches games with user data', () async {
+  final games = [testGame1, testGame2];
+  final enriched = await enrichmentService.enrichGames(games, userId);
+
+  expect(enriched[0].isWishlisted, true);
+  expect(enriched[0].userRating, 9.5);
+});
+
+// Test repository
+test('follows user successfully', () async {
+  final result = await userRepository.followUser(user1Id, user2Id);
+
+  expect(result.isRight(), true);
+
+  final isFollowing = await userRepository.isFollowing(user1Id, user2Id);
+  expect(isFollowing, true);
+});
+```
+
+### **Integration Tests**
+
+```dart
+testWidgets('user can rate game and see it in profile', (tester) async {
+  // Login
+  await authRepository.signIn(email, password);
+
+  // Rate game
+  await userRepository.rateGame(userId, gameId, 9.0);
+
+  // Check profile shows rating
+  final stats = await userRepository.getUserStats(userId);
+  expect(stats.totalGamesRated, 1);
+  expect(stats.averageRating, 9.0);
+});
+```
+
+### **Performance Tests**
+
+```dart
+test('enrichment completes in <100ms for 20 games', () async {
+  final games = generateTestGames(20);
+
+  final stopwatch = Stopwatch()..start();
+  await enrichmentService.enrichGames(games, userId);
+  stopwatch.stop();
+
+  expect(stopwatch.elapsedMilliseconds, lessThan(100));
+});
+```
+
+---
+
+## ✅ Success Criteria
+
+- [ ] Auth flow works (sign in, sign up, sign out)
+- [ ] Users can create and edit profiles
+- [ ] Users can wishlist, rate, recommend games
+- [ ] Users can set Top 3 games
+- [ ] Follow system works
+- [ ] Public profiles are viewable
+- [ ] Privacy settings are respected
+- [ ] Game enrichment < 100ms for 20 games
+- [ ] All RLS policies tested
+- [ ] Integration tests pass
+- [ ] Performance benchmarks met
+
+---
+
+## 📊 Expected Results
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Game Enrichment (20) | 4000ms | 100ms | **40x faster** |
+| Game Enrichment (100) | 20000ms | 200ms | **100x faster** |
+| User Profile Load | 500ms | 150ms | **3x faster** |
+| Follow Operation | 200ms | 50ms | **4x faster** |
+| Code Duplication | 60% | 0% | **Perfect DRY** |
+| Repository Size | 2000+ lines | 400 lines | **5x smaller** |
+
+---
+
+## 🎯 Next Steps
+
+1. **Review & Approve** this plan
+2. **Set up Database** (migrations, tables, functions)
+3. **Implement Foundation** (Base repos, Auth)
+4. **Build incrementally** (Profile → Collections → Social)
+5. **Test & Optimize** continuously
+6. **Deploy & Monitor**
+
+Ready to start? 🚀
