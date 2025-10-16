@@ -471,7 +471,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${item.type.displayName} • ${item.totalCount} games',
+                        '${item.type?.displayName} • ${item.totalCount} games',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: item.accentColor,
                               fontWeight: FontWeight.w500,

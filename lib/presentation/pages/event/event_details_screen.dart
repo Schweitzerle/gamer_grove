@@ -808,7 +808,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${item.type.displayName} • ${item.totalCount} games',
+                        '${item.type?.displayName} • ${item.totalCount} games',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: item.accentColor,
                               fontWeight: FontWeight.w500,

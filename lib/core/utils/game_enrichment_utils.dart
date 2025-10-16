@@ -306,9 +306,9 @@ class GameEnrichmentUtils {
     Map<int, int> topThreeMap,
     bool enableLogging,
   ) {
-    final isWishlisted = userGameData?['is_wishlisted'] ?? false;
-    final isRecommended = userGameData?['is_recommended'] ?? false;
-    final userRating = userGameData?['rating']?.toDouble();
+    final isWishlisted = (userGameData?['is_wishlisted'] as bool?) ?? false;
+    final isRecommended = (userGameData?['is_recommended'] as bool?) ?? false;
+    final userRating = (userGameData?['rating'] as num?)?.toDouble();
     final isInTopThree = topThreeMap.containsKey(game.id);
     final topThreePosition = topThreeMap[game.id];
 

@@ -1,0 +1,207 @@
+-- ============================================================
+-- Migration 002: Create Performance Indexes
+-- Description: Optimizes query performance with strategic indexes
+-- Author: GamerGrove
+-- Date: 2024
+-- ============================================================
+
+-- ============================================================
+-- USERS TABLE INDEXES
+-- ============================================================
+
+-- Username lookup (case-insensitive search)
+CREATE INDEX IF NOT EXISTS idx_users_username_lower
+ON public.users(LOWER(username));
+
+-- Public profile queries
+CREATE INDEX IF NOT EXISTS idx_users_public_profiles
+ON public.users(is_profile_public, created_at DESC)
+WHERE is_profile_public = true;
+
+-- Active users (for recommendations)
+/* -- AUSKOMMENTIEREN START
+CREATE INDEX IF NOT EXISTS idx_users_last_active
+ON public.users(last_active_at DESC)
+WHERE last_active_at > NOW() - INTERVAL '30 days';
+*/ -- AUSKOMMENTIEREN ENDE
+
+-- Popular users (by followers)
+CREATE INDEX IF NOT EXISTS idx_users_popular
+ON public.users(followers_count DESC)
+WHERE followers_count > 0;
+
+-- Search by country
+CREATE INDEX IF NOT EXISTS idx_users_country
+ON public.users(country)
+WHERE country IS NOT NULL;
+
+COMMENT ON INDEX idx_users_username_lower IS 'Case-insensitive username search';
+COMMENT ON INDEX idx_users_public_profiles IS 'Find public profiles quickly';
+-- COMMENT ON INDEX idx_users_last_active IS 'Find recently active users'; -- <-- DIESE ZEILE AUCH ENTFERNEN
+COMMENT ON INDEX idx_users_popular IS 'Find users by follower count';
+
+-- ============================================================
+-- USER_GAMES TABLE INDEXES (Critical for performance!)
+-- ============================================================
+
+-- Primary lookups
+CREATE INDEX IF NOT EXISTS idx_user_games_user_id
+ON public.user_games(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_games_game_id
+ON public.user_games(game_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_games_user_game
+ON public.user_games(user_id, game_id);
+
+-- Partial indexes for each collection type (HUGE performance boost!)
+CREATE INDEX IF NOT EXISTS idx_user_games_wishlisted
+ON public.user_games(user_id, game_id, wishlisted_at DESC)
+WHERE is_wishlisted = true;
+
+CREATE INDEX IF NOT EXISTS idx_user_games_recommended
+ON public.user_games(user_id, game_id, recommended_at DESC)
+WHERE is_recommended = true;
+
+CREATE INDEX IF NOT EXISTS idx_user_games_rated
+ON public.user_games(user_id, game_id, rating DESC, rated_at DESC)
+WHERE is_rated = true;
+
+-- High ratings index (for "highly rated games" queries)
+CREATE INDEX IF NOT EXISTS idx_user_games_high_ratings
+ON public.user_games(user_id, game_id, rating DESC)
+WHERE is_rated = true AND rating >= 8.0;
+
+-- Recent activity indexes
+CREATE INDEX IF NOT EXISTS idx_user_games_recent_wishlisted
+ON public.user_games(user_id, wishlisted_at DESC)
+WHERE is_wishlisted = true;
+
+CREATE INDEX IF NOT EXISTS idx_user_games_recent_rated
+ON public.user_games(user_id, rated_at DESC)
+WHERE is_rated = true;
+
+CREATE INDEX IF NOT EXISTS idx_user_games_recent_recommended
+ON public.user_games(user_id, recommended_at DESC)
+WHERE is_recommended = true;
+
+-- Updated timestamp for cache invalidation
+CREATE INDEX IF NOT EXISTS idx_user_games_updated
+ON public.user_games(user_id, updated_at DESC);
+
+COMMENT ON INDEX idx_user_games_wishlisted IS 'Fast wishlist queries with timestamp ordering';
+COMMENT ON INDEX idx_user_games_recommended IS 'Fast recommendation queries';
+COMMENT ON INDEX idx_user_games_rated IS 'Fast rated games queries with rating ordering';
+COMMENT ON INDEX idx_user_games_high_ratings IS 'Quickly find highly rated games';
+
+-- ============================================================
+-- USER_TOP_THREE TABLE INDEXES
+-- ============================================================
+
+-- Game lookup (to find users who have a game in top 3)
+CREATE INDEX IF NOT EXISTS idx_user_top_three_game_1
+ON public.user_top_three(game_1_id)
+WHERE game_1_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_user_top_three_game_2
+ON public.user_top_three(game_2_id)
+WHERE game_2_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_user_top_three_game_3
+ON public.user_top_three(game_3_id)
+WHERE game_3_id IS NOT NULL;
+
+-- Recently updated top threes
+CREATE INDEX IF NOT EXISTS idx_user_top_three_updated
+ON public.user_top_three(updated_at DESC);
+
+-- ============================================================
+-- USER_FOLLOWS TABLE INDEXES
+-- ============================================================
+
+-- Follower queries (who follows this user?)
+CREATE INDEX IF NOT EXISTS idx_follows_following
+ON public.user_follows(following_id, created_at DESC);
+
+-- Following queries (who does this user follow?)
+CREATE INDEX IF NOT EXISTS idx_follows_follower
+ON public.user_follows(follower_id, created_at DESC);
+
+-- Check if user A follows user B (frequent query!)
+CREATE INDEX IF NOT EXISTS idx_follows_check
+ON public.user_follows(follower_id, following_id);
+
+-- Recent follows
+CREATE INDEX IF NOT EXISTS idx_follows_recent
+ON public.user_follows(created_at DESC);
+
+COMMENT ON INDEX idx_follows_following IS 'Fast follower list queries';
+COMMENT ON INDEX idx_follows_follower IS 'Fast following list queries';
+COMMENT ON INDEX idx_follows_check IS 'Instant follow status check';
+
+-- ============================================================
+-- USER_ACTIVITY TABLE INDEXES
+-- ============================================================
+
+-- User's activity timeline
+CREATE INDEX IF NOT EXISTS idx_activity_user_timeline
+ON public.user_activity(user_id, created_at DESC);
+
+-- Public activity feed (for following feed)
+CREATE INDEX IF NOT EXISTS idx_activity_public_feed
+ON public.user_activity(is_public, created_at DESC)
+WHERE is_public = true;
+
+-- Activity by type
+CREATE INDEX IF NOT EXISTS idx_activity_by_type
+ON public.user_activity(activity_type, created_at DESC);
+
+-- Game-specific activity
+CREATE INDEX IF NOT EXISTS idx_activity_by_game
+ON public.user_activity(game_id, created_at DESC)
+WHERE game_id IS NOT NULL;
+
+-- Composite index for following feed queries
+CREATE INDEX IF NOT EXISTS idx_activity_user_public
+ON public.user_activity(user_id, is_public, created_at DESC)
+WHERE is_public = true;
+
+COMMENT ON INDEX idx_activity_user_timeline IS 'User activity timeline';
+COMMENT ON INDEX idx_activity_public_feed IS 'Public activity feed for social features';
+
+-- ============================================================
+-- USER_SEARCH_QUERIES TABLE INDEXES
+-- ============================================================
+
+-- User's recent searches
+CREATE INDEX IF NOT EXISTS idx_search_queries_user_recent
+ON public.user_search_queries(user_id, created_at DESC);
+
+-- Popular searches (aggregate queries)
+CREATE INDEX IF NOT EXISTS idx_search_queries_query
+ON public.user_search_queries(query, created_at DESC);
+
+COMMENT ON INDEX idx_search_queries_user_recent IS 'User search history';
+
+-- ============================================================
+-- ANALYZE TABLES (Update statistics for query planner)
+-- ============================================================
+
+ANALYZE public.users;
+ANALYZE public.user_games;
+ANALYZE public.user_top_three;
+ANALYZE public.user_follows;
+ANALYZE public.user_activity;
+ANALYZE public.user_search_queries;
+
+-- ============================================================
+-- SUCCESS MESSAGE
+-- ============================================================
+
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Migration 002 completed successfully!';
+  RAISE NOTICE '🚀 Created 30+ performance indexes';
+  RAISE NOTICE '⚡ Partial indexes will dramatically speed up collection queries';
+  RAISE NOTICE '📊 Table statistics updated for query optimizer';
+END $$;

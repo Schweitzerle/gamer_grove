@@ -1,0 +1,400 @@
+-- ============================================================
+-- Migration 005: Database Triggers
+-- Description: Auto-updates for denormalized counters and activity logging
+-- Author: GamerGrove
+-- Date: 2024
+-- ============================================================
+
+-- ============================================================
+-- 1. AUTO-UPDATE TIMESTAMPS
+-- ============================================================
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to all tables with updated_at
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_user_games_updated_at
+  BEFORE UPDATE ON public.user_games
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_user_top_three_updated_at
+  BEFORE UPDATE ON public.user_top_three
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+COMMENT ON FUNCTION public.update_updated_at_column IS 'Automatically updates updated_at timestamp on row modification';
+
+-- ============================================================
+-- 2. UPDATE USER COLLECTION COUNTERS (Critical for performance!)
+-- ============================================================
+
+-- Function to update user stats when user_games changes
+CREATE OR REPLACE FUNCTION public.update_user_game_stats()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_user_id UUID;
+  v_total_rated INTEGER;
+  v_total_wishlisted INTEGER;
+  v_total_recommended INTEGER;
+  v_avg_rating DECIMAL;
+BEGIN
+  -- Determine which user to update
+  IF TG_OP = 'DELETE' THEN
+    v_user_id := OLD.user_id;
+  ELSE
+    v_user_id := NEW.user_id;
+  END IF;
+
+  -- Calculate new stats
+  SELECT
+    COUNT(*) FILTER (WHERE is_rated = true),
+    COUNT(*) FILTER (WHERE is_wishlisted = true),
+    COUNT(*) FILTER (WHERE is_recommended = true),
+    AVG(rating) FILTER (WHERE is_rated = true)
+  INTO v_total_rated, v_total_wishlisted, v_total_recommended, v_avg_rating
+  FROM public.user_games
+  WHERE user_id = v_user_id;
+
+  -- Update user record
+  UPDATE public.users
+  SET
+    total_games_rated = v_total_rated,
+    total_games_wishlisted = v_total_wishlisted,
+    total_games_recommended = v_total_recommended,
+    average_rating = ROUND(v_avg_rating, 1)
+  WHERE id = v_user_id;
+
+  RETURN NULL; -- AFTER trigger, return value doesn't matter
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_user_game_stats_insert
+  AFTER INSERT ON public.user_games
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_user_game_stats();
+
+CREATE TRIGGER update_user_game_stats_update
+  AFTER UPDATE ON public.user_games
+  FOR EACH ROW
+  WHEN (
+    OLD.is_rated IS DISTINCT FROM NEW.is_rated OR
+    OLD.is_wishlisted IS DISTINCT FROM NEW.is_wishlisted OR
+    OLD.is_recommended IS DISTINCT FROM NEW.is_recommended OR
+    OLD.rating IS DISTINCT FROM NEW.rating
+  )
+  EXECUTE FUNCTION public.update_user_game_stats();
+
+CREATE TRIGGER update_user_game_stats_delete
+  AFTER DELETE ON public.user_games
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_user_game_stats();
+
+COMMENT ON FUNCTION public.update_user_game_stats IS 'Keeps user collection counters in sync automatically';
+
+-- ============================================================
+-- 3. UPDATE FOLLOWER/FOLLOWING COUNTERS
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.update_follow_counts()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    -- Increment follower count for the followed user
+    UPDATE public.users
+    SET followers_count = followers_count + 1
+    WHERE id = NEW.following_id;
+
+    -- Increment following count for the follower
+    UPDATE public.users
+    SET following_count = following_count + 1
+    WHERE id = NEW.follower_id;
+
+  ELSIF TG_OP = 'DELETE' THEN
+    -- Decrement follower count for the unfollowed user
+    UPDATE public.users
+    SET followers_count = GREATEST(0, followers_count - 1)
+    WHERE id = OLD.following_id;
+
+    -- Decrement following count for the unfollower
+    UPDATE public.users
+    SET following_count = GREATEST(0, following_count - 1)
+    WHERE id = OLD.follower_id;
+  END IF;
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_follow_counts_insert
+  AFTER INSERT ON public.user_follows
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_follow_counts();
+
+CREATE TRIGGER update_follow_counts_delete
+  AFTER DELETE ON public.user_follows
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_follow_counts();
+
+COMMENT ON FUNCTION public.update_follow_counts IS 'Keeps follower/following counters in sync';
+
+-- ============================================================
+-- 4. AUTO-LOG ACTIVITY (Activity Feed)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.log_user_activity()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_activity_type TEXT;
+  v_metadata JSONB;
+  v_is_public BOOLEAN;
+BEGIN
+  -- Determine activity type and metadata based on what changed
+  IF TG_OP = 'INSERT' THEN
+    -- New game interaction
+    IF NEW.is_rated THEN
+      v_activity_type := 'rated';
+      v_metadata := jsonb_build_object('rating', NEW.rating);
+    ELSIF NEW.is_recommended THEN
+      v_activity_type := 'recommended';
+      v_metadata := '{}';
+    ELSIF NEW.is_wishlisted THEN
+      v_activity_type := 'wishlisted';
+      v_metadata := '{}';
+    END IF;
+
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- Rating changed
+    IF OLD.rating IS DISTINCT FROM NEW.rating AND NEW.is_rated THEN
+      v_activity_type := 'rated';
+      v_metadata := jsonb_build_object(
+        'rating', NEW.rating,
+        'previous_rating', OLD.rating
+      );
+    -- Recommended status changed
+    ELSIF OLD.is_recommended != NEW.is_recommended AND NEW.is_recommended THEN
+      v_activity_type := 'recommended';
+      v_metadata := '{}';
+    -- Wishlisted status changed
+    ELSIF OLD.is_wishlisted != NEW.is_wishlisted AND NEW.is_wishlisted THEN
+      v_activity_type := 'wishlisted';
+      v_metadata := '{}';
+    END IF;
+  END IF;
+
+  -- Only log if we have an activity type
+  IF v_activity_type IS NOT NULL THEN
+    -- Check user's privacy settings
+    SELECT
+      CASE v_activity_type
+        WHEN 'rated' THEN show_rated_games
+        WHEN 'recommended' THEN show_recommended_games
+        WHEN 'wishlisted' THEN show_wishlist
+        ELSE true
+      END AND is_profile_public
+    INTO v_is_public
+    FROM public.users
+    WHERE id = NEW.user_id;
+
+    -- Insert activity
+    INSERT INTO public.user_activity (
+      user_id,
+      activity_type,
+      game_id,
+      metadata,
+      is_public
+    ) VALUES (
+      NEW.user_id,
+      v_activity_type,
+      NEW.game_id,
+      v_metadata,
+      COALESCE(v_is_public, false)
+    );
+  END IF;
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER log_user_activity_insert
+  AFTER INSERT ON public.user_games
+  FOR EACH ROW
+  EXECUTE FUNCTION public.log_user_activity();
+
+CREATE TRIGGER log_user_activity_update
+  AFTER UPDATE ON public.user_games
+  FOR EACH ROW
+  WHEN (
+    OLD.is_rated IS DISTINCT FROM NEW.is_rated OR
+    OLD.is_recommended IS DISTINCT FROM NEW.is_recommended OR
+    OLD.is_wishlisted IS DISTINCT FROM NEW.is_wishlisted OR
+    OLD.rating IS DISTINCT FROM NEW.rating
+  )
+  EXECUTE FUNCTION public.log_user_activity();
+
+COMMENT ON FUNCTION public.log_user_activity IS 'Automatically logs user activity to activity feed';
+
+-- ============================================================
+-- 5. LOG TOP THREE UPDATES
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.log_top_three_activity()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_is_public BOOLEAN;
+BEGIN
+  -- Check if user wants to share top three publicly
+  SELECT show_top_three AND is_profile_public
+  INTO v_is_public
+  FROM public.users
+  WHERE id = NEW.user_id;
+
+  -- Log the update
+  INSERT INTO public.user_activity (
+    user_id,
+    activity_type,
+    metadata,
+    is_public
+  ) VALUES (
+    NEW.user_id,
+    'updated_top_three',
+    jsonb_build_object(
+      'game_1_id', NEW.game_1_id,
+      'game_2_id', NEW.game_2_id,
+      'game_3_id', NEW.game_3_id
+    ),
+    COALESCE(v_is_public, false)
+  );
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER log_top_three_activity
+  AFTER INSERT OR UPDATE ON public.user_top_three
+  FOR EACH ROW
+  EXECUTE FUNCTION public.log_top_three_activity();
+
+COMMENT ON FUNCTION public.log_top_three_activity IS 'Logs when user updates their top 3 games';
+
+-- ============================================================
+-- 6. LOG FOLLOW ACTIVITY
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.log_follow_activity()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_is_public BOOLEAN;
+BEGIN
+  -- Check if follower's profile is public
+  SELECT is_profile_public
+  INTO v_is_public
+  FROM public.users
+  WHERE id = NEW.follower_id;
+
+  -- Log the follow
+  INSERT INTO public.user_activity (
+    user_id,
+    activity_type,
+    metadata,
+    is_public
+  ) VALUES (
+    NEW.follower_id,
+    'followed_user',
+    jsonb_build_object('followed_user_id', NEW.following_id),
+    COALESCE(v_is_public, false)
+  );
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER log_follow_activity
+  AFTER INSERT ON public.user_follows
+  FOR EACH ROW
+  EXECUTE FUNCTION public.log_follow_activity();
+
+COMMENT ON FUNCTION public.log_follow_activity IS 'Logs when user follows another user';
+
+-- ============================================================
+-- 7. AUTO-SET TIMESTAMPS ON INSERT
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.set_user_game_timestamps()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Set timestamps based on flags
+  IF NEW.is_wishlisted AND NEW.wishlisted_at IS NULL THEN
+    NEW.wishlisted_at := NOW();
+  END IF;
+
+  IF NEW.is_recommended AND NEW.recommended_at IS NULL THEN
+    NEW.recommended_at := NOW();
+  END IF;
+
+  IF NEW.is_rated AND NEW.rated_at IS NULL THEN
+    NEW.rated_at := NOW();
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_user_game_timestamps
+  BEFORE INSERT OR UPDATE ON public.user_games
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_user_game_timestamps();
+
+COMMENT ON FUNCTION public.set_user_game_timestamps IS 'Automatically sets collection timestamps';
+
+-- ============================================================
+-- 8. CLEANUP OLD ACTIVITY (Optional - for maintenance)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.cleanup_old_activity()
+RETURNS void AS $$
+BEGIN
+  -- Delete activity older than 6 months
+  DELETE FROM public.user_activity
+  WHERE created_at < NOW() - INTERVAL '6 months';
+
+  -- Delete old search queries (older than 3 months)
+  DELETE FROM public.user_search_queries
+  WHERE created_at < NOW() - INTERVAL '3 months';
+
+  RAISE NOTICE 'Cleaned up old activity and search queries';
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION public.cleanup_old_activity IS 'Maintenance function to cleanup old activity data';
+
+-- ============================================================
+-- SUCCESS MESSAGE
+-- ============================================================
+
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Migration 005 completed successfully!';
+  RAISE NOTICE '🤖 Created 8 trigger functions:';
+  RAISE NOTICE '   1. Auto-update timestamps (3 triggers)';
+  RAISE NOTICE '   2. Auto-update collection counters (3 triggers)';
+  RAISE NOTICE '   3. Auto-update follower/following counters (2 triggers)';
+  RAISE NOTICE '   4. Auto-log game activity (2 triggers)';
+  RAISE NOTICE '   5. Auto-log top three updates (1 trigger)';
+  RAISE NOTICE '   6. Auto-log follow activity (1 trigger)';
+  RAISE NOTICE '   7. Auto-set collection timestamps (1 trigger)';
+  RAISE NOTICE '   8. Cleanup function for maintenance';
+  RAISE NOTICE '⚡ All counters will stay in sync automatically!';
+  RAISE NOTICE '📊 Activity feed will populate automatically!';
+END $$;

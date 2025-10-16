@@ -21,17 +21,28 @@ enum GameSortBy {
 
   String get displayName {
     switch (this) {
-      case relevance: return 'Relevance';
-      case name: return 'Name';
-      case rating: return 'Rating';
-      case ratingCount: return 'Rating Count';
-      case releaseDate: return 'Release Date';
-      case popularity: return 'Popularity';
-      case aggregatedRating: return 'Critic Rating';
-      case userRating: return 'User Rating';
-      case addedDate: return 'Date Added';
-      case lastPlayed: return 'Last Played';
-      case userRatingDate: return 'Date Rated';
+      case relevance:
+        return 'Relevance';
+      case name:
+        return 'Name';
+      case rating:
+        return 'Rating';
+      case ratingCount:
+        return 'Rating Count';
+      case releaseDate:
+        return 'Release Date';
+      case popularity:
+        return 'Popularity';
+      case aggregatedRating:
+        return 'Critic Rating';
+      case userRating:
+        return 'User Rating';
+      case addedDate:
+        return 'Date Added';
+      case lastPlayed:
+        return 'Last Played';
+      case userRatingDate:
+        return 'Date Rated';
     }
   }
 }
@@ -45,9 +56,10 @@ enum SortOrder {
 
   String get displayName {
     switch (this) {
-      case ascending: return 'Ascending';
-      case descending: return 'Descending';
+      case ascending:
+        return 'Ascending';
+      case descending:
+        return 'Descending';
     }
   }
 }
-

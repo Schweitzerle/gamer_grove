@@ -281,6 +281,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dart_code_metrics_presets:
+    dependency: "direct dev"
+    description:
+      name: dart_code_metrics_presets
+      sha256: c41f34c560be4f56a86c1a641bcf9395e03f5cc15bcf37ee7aba0c1a63eecebc
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.26.1"
   dart_style:
     dependency: transitive
     description:
@@ -1493,6 +1501,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  very_good_analysis:
+    dependency: "direct dev"
+    description:
+      name: very_good_analysis
+      sha256: "96245839dbcc45dfab1af5fa551603b5c7a282028a64746c19c547d21a7f1e3a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.0.0"
   vm_service:
     dependency: transitive
     description:
@@ -1590,5 +1606,5 @@ packages:
     source: hosted
     version: "9.1.1"
 sdks:
-  dart: ">=3.8.0 <4.0.0"
+  dart: ">=3.9.0 <4.0.0"
   flutter: ">=3.29.0"

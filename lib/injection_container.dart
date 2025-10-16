@@ -270,12 +270,14 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => PlatformBloc(getPlatformWithGames: sl()),
+    () => PlatformBloc(
+      getPlatformWithGames: sl(),
+      gameRepository: sl(), // 🆕 hinzufügen
+    ),
   );
-
-  sl.registerFactory(
-    () => GameEngineBloc(getGameEngineWithGames: sl()),
-  );
-
+  sl.registerFactory(() => GameEngineBloc(
+        getGameEngineWithGames: sl(),
+        gameRepository: sl(),
+      ));
   print('✅ DI: Dependency injection setup complete!');
 }

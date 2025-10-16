@@ -118,7 +118,7 @@ class SharedPrefsTokenManager {
       }
 
       final tokenData = json.decode(response.body);
-      final accessToken = tokenData['access_token'];
+      final accessToken = tokenData['access_token'] as String;
       final expiresIn = tokenData['expires_in'] as int;
 
       // IGDB Tokens sind normalerweise 60 Tage gültig

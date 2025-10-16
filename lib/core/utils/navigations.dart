@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_paginated_games_screen.dart';
+import 'package:gamer_grove/presentation/pages/platform/paltform_paginated_games_screen.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -698,6 +700,58 @@ class Navigations {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
           content: Text('Event notifications settings coming soon!')),
+    );
+  }
+
+  static void navigateToGameEngineGames(
+    BuildContext context, {
+    required int gameEngineId,
+    required String gameEngineName,
+  }) {
+    // Get current user
+    final authState = context.read<AuthBloc>().state;
+    String? userId;
+    if (authState is Authenticated) {
+      userId = authState.user.id;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<GameEngineBloc>(
+          create: (context) => sl<GameEngineBloc>(),
+          child: GameEnginePaginatedGamesScreen(
+            gameEngineId: gameEngineId,
+            gameEngineName: gameEngineName,
+            userId: userId,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static void navigateToPlatformGames(
+    BuildContext context, {
+    required int platformId,
+    required String platformName,
+  }) {
+    // Get current user
+    final authState = context.read<AuthBloc>().state;
+    String? userId;
+    if (authState is Authenticated) {
+      userId = authState.user.id;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<PlatformBloc>(
+          create: (context) => sl<PlatformBloc>(),
+          child: PlatformPaginatedGamesScreen(
+            platformId: platformId,
+            platformName: platformName,
+            userId: userId,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -61,7 +61,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
 
   SeriesItem _createGameEngineGamesSeriesItem() {
     return SeriesItem(
-      type: SeriesType.eventGames,
+      type: null,
       title: '${widget.gameEngine.name} - Games Built',
       games: _getEngineGames(),
       totalCount: widget.games.length,
@@ -533,7 +533,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        item.type.displayName,
+                        item.type?.displayName ?? '',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: item.accentColor,
                               fontWeight: FontWeight.w500,
@@ -575,7 +575,11 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
   }
 
   void _navigateToSeries(BuildContext context, SeriesItem item) {
-    // TODO: Navigate to pagination listview for game engine games
+    Navigations.navigateToGameEngineGames(
+      context,
+      gameEngineId: widget.gameEngine.id,
+      gameEngineName: widget.gameEngine.name,
+    );
   }
 
   Widget _buildGamesList(List<Game> games) {

@@ -1,0 +1,236 @@
+-- ============================================================
+-- Migration 001: Create Core Tables
+-- Description: Creates all core tables for users, collections, and social features
+-- Author: GamerGrove
+-- Date: 2024
+-- ============================================================
+
+-- ============================================================
+-- 1. USERS TABLE (Extended Profile)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.users (
+  -- Identity
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username TEXT UNIQUE NOT NULL,
+  display_name TEXT,
+  bio TEXT,
+  avatar_url TEXT,
+  country TEXT,
+
+  -- Privacy Settings
+  is_profile_public BOOLEAN NOT NULL DEFAULT true,
+  show_wishlist BOOLEAN NOT NULL DEFAULT true,
+  show_rated_games BOOLEAN NOT NULL DEFAULT true,
+  show_recommended_games BOOLEAN NOT NULL DEFAULT true,
+  show_top_three BOOLEAN NOT NULL DEFAULT true,
+
+  -- Denormalized Stats (updated via triggers)
+  total_games_rated INTEGER NOT NULL DEFAULT 0,
+  total_games_wishlisted INTEGER NOT NULL DEFAULT 0,
+  total_games_recommended INTEGER NOT NULL DEFAULT 0,
+  average_rating DECIMAL(3,1),
+  followers_count INTEGER NOT NULL DEFAULT 0,
+  following_count INTEGER NOT NULL DEFAULT 0,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_active_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT username_length CHECK (
+    char_length(username) >= 3 AND
+    char_length(username) <= 20
+  ),
+  CONSTRAINT username_format CHECK (
+    username ~* '^[a-z0-9_]+$' -- Only lowercase letters, numbers, underscores
+  ),
+  CONSTRAINT bio_length CHECK (
+    bio IS NULL OR char_length(bio) <= 500
+  ),
+  CONSTRAINT display_name_length CHECK (
+    display_name IS NULL OR (
+      char_length(display_name) >= 1 AND
+      char_length(display_name) <= 50
+    )
+  )
+);
+
+-- Comments for documentation
+COMMENT ON TABLE public.users IS 'Extended user profiles with privacy settings and statistics';
+COMMENT ON COLUMN public.users.username IS 'Unique username, 3-20 chars, lowercase alphanumeric + underscore';
+COMMENT ON COLUMN public.users.display_name IS 'Display name shown in UI (can have spaces, capitals)';
+COMMENT ON COLUMN public.users.is_profile_public IS 'Whether profile is visible to non-followers';
+COMMENT ON COLUMN public.users.average_rating IS 'Average of all user ratings (auto-calculated)';
+
+-- ============================================================
+-- 2. USER_GAMES TABLE (Single table for all collections!)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.user_games (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  game_id INTEGER NOT NULL,
+
+  -- Collection Flags
+  is_wishlisted BOOLEAN NOT NULL DEFAULT false,
+  is_recommended BOOLEAN NOT NULL DEFAULT false,
+  is_rated BOOLEAN NOT NULL DEFAULT false,
+
+  -- Rating Data
+  rating DECIMAL(3,1), -- 0.0 to 10.0 in 0.5 increments
+  review_text TEXT, -- Optional user review
+
+  -- Timestamps
+  wishlisted_at TIMESTAMPTZ,
+  recommended_at TIMESTAMPTZ,
+  rated_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  UNIQUE(user_id, game_id),
+  CONSTRAINT rating_range CHECK (
+    rating IS NULL OR (rating >= 0 AND rating <= 10)
+  ),
+  CONSTRAINT rating_consistency CHECK (
+    (is_rated = true AND rating IS NOT NULL) OR
+    (is_rated = false AND rating IS NULL)
+  ),
+  CONSTRAINT at_least_one_flag CHECK (
+    is_wishlisted = true OR
+    is_recommended = true OR
+    is_rated = true
+  ),
+  CONSTRAINT rated_at_consistency CHECK (
+    (is_rated = true AND rated_at IS NOT NULL) OR
+    (is_rated = false)
+  ),
+  CONSTRAINT wishlisted_at_consistency CHECK (
+    (is_wishlisted = true AND wishlisted_at IS NOT NULL) OR
+    (is_wishlisted = false)
+  ),
+  CONSTRAINT recommended_at_consistency CHECK (
+    (is_recommended = true AND recommended_at IS NOT NULL) OR
+    (is_recommended = false)
+  ),
+  CONSTRAINT review_text_length CHECK (
+    review_text IS NULL OR char_length(review_text) <= 2000
+  )
+);
+
+COMMENT ON TABLE public.user_games IS 'Single table for all user-game interactions (wishlist, ratings, recommendations)';
+COMMENT ON COLUMN public.user_games.rating IS 'User rating from 0.0 to 10.0 in 0.5 increments';
+COMMENT ON COLUMN public.user_games.review_text IS 'Optional user review/notes about the game';
+
+-- ============================================================
+-- 3. USER_TOP_THREE TABLE
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.user_top_three (
+  user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+
+  -- Three game slots (positions 1, 2, 3)
+  game_1_id INTEGER,
+  game_2_id INTEGER,
+  game_3_id INTEGER,
+
+  -- Timestamp
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints: All three must be different
+  CONSTRAINT different_games CHECK (
+    (game_1_id IS NULL OR game_2_id IS NULL OR game_1_id != game_2_id) AND
+    (game_2_id IS NULL OR game_3_id IS NULL OR game_2_id != game_3_id) AND
+    (game_1_id IS NULL OR game_3_id IS NULL OR game_1_id != game_3_id)
+  )
+);
+
+COMMENT ON TABLE public.user_top_three IS 'User''s top 3 favorite games';
+COMMENT ON COLUMN public.user_top_three.game_1_id IS 'First place game';
+COMMENT ON COLUMN public.user_top_three.game_2_id IS 'Second place game';
+COMMENT ON COLUMN public.user_top_three.game_3_id IS 'Third place game';
+
+-- ============================================================
+-- 4. USER_FOLLOWS TABLE (Social Feature)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.user_follows (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  follower_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  following_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  UNIQUE(follower_id, following_id),
+  CONSTRAINT no_self_follow CHECK (follower_id != following_id)
+);
+
+COMMENT ON TABLE public.user_follows IS 'User follow relationships (no approval required)';
+COMMENT ON COLUMN public.user_follows.follower_id IS 'User who is following';
+COMMENT ON COLUMN public.user_follows.following_id IS 'User being followed';
+
+-- ============================================================
+-- 5. USER_ACTIVITY TABLE (Activity Feed)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.user_activity (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+
+  -- Activity Type
+  activity_type TEXT NOT NULL,
+
+  -- Related Data
+  game_id INTEGER,
+  metadata JSONB, -- Flexible: {rating: 9.5, previous_rating: 8.0, game_name: "Elden Ring"}
+
+  -- Visibility
+  is_public BOOLEAN NOT NULL DEFAULT true,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_activity_type CHECK (
+    activity_type IN (
+      'rated',
+      'recommended',
+      'wishlisted',
+      'updated_top_three',
+      'followed_user',
+      'updated_profile'
+    )
+  )
+);
+
+COMMENT ON TABLE public.user_activity IS 'User activity feed for social features';
+COMMENT ON COLUMN public.user_activity.activity_type IS 'Type of activity performed';
+COMMENT ON COLUMN public.user_activity.metadata IS 'Additional context in JSON format';
+COMMENT ON COLUMN public.user_activity.is_public IS 'Whether activity is visible to followers';
+
+-- ============================================================
+-- 6. USER_SEARCH_QUERIES TABLE (Search History)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.user_search_queries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  query TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT query_length CHECK (char_length(query) <= 200)
+);
+
+COMMENT ON TABLE public.user_search_queries IS 'User search history for recent searches feature';
+
+-- ============================================================
+-- SUCCESS MESSAGE
+-- ============================================================
+
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Migration 001 completed successfully!';
+  RAISE NOTICE '📊 Created 6 tables: users, user_games, user_top_three, user_follows, user_activity, user_search_queries';
+END $$;

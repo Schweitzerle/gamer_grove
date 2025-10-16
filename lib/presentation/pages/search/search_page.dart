@@ -5,9 +5,20 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import '../../../injection_container.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
+import '../../../domain/entities/search/search_filters.dart';
+import '../../../domain/entities/company/company.dart';
+import '../../../domain/entities/game/game_engine.dart';
+import '../../../domain/entities/franchise.dart';
+import '../../../domain/entities/collection/collection.dart';
+import '../../../domain/entities/genre.dart';
+import '../../../domain/entities/platform/platform.dart';
+import '../../../domain/entities/game/game_mode.dart';
+import '../../../domain/entities/player_perspective.dart';
 import '../../blocs/game/game_bloc.dart';
+import '../../blocs/game/game_extensions.dart'; // For SearchGamesWithFiltersEvent
 import '../../widgets/game_card.dart';
 import '../../widgets/game_list_shimmer.dart';
+import '../../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/error_widget.dart';
 
 class SearchPage extends StatefulWidget {
@@ -26,12 +37,40 @@ class _SearchPageState extends State<SearchPage> {
   List<String> _recentSearches = [];
   bool _showRecentSearches = true;
 
+  // Filters
+  SearchFilters _currentFilters = const SearchFilters();
+
+  // Available filter options (loaded once)
+  List<Genre> _availableGenres = [];
+  List<Platform> _availablePlatforms = [];
+  List<dynamic> _availableThemes = [];
+  List<GameMode> _availableGameModes = [];
+  List<PlayerPerspective> _availablePlayerPerspectives = [];
+
   @override
   void initState() {
     super.initState();
     _gameBloc = sl<GameBloc>();
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
+    _loadFilterOptions();
+  }
+
+  Future<void> _loadFilterOptions() async {
+    try {
+      // TODO: Load genres, platforms, themes, game modes, and player perspectives
+      // from the repository. For now, we'll leave them empty and they'll be loaded
+      // when the filter sheet is opened if needed.
+
+      // Example:
+      // final genresResult = await gameRepository.getAllGenres();
+      // genresResult.fold(
+      //   (failure) => print('Failed to load genres'),
+      //   (genres) => setState(() => _availableGenres = genres),
+      // );
+    } catch (e) {
+      // Handle error silently for now
+    }
   }
 
   @override
@@ -77,22 +116,54 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _performSearch(String query) {
-    if (query.trim().isEmpty) return;
+    if (query.trim().isEmpty && !_currentFilters.hasFilters) return;
 
     final validation = InputValidator.validateSearchQuery(query);
-    if (validation != null) {
+    if (validation != null && query.trim().isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(validation)),
       );
       return;
     }
 
-    _addToRecentSearches(query.trim());
+    if (query.trim().isNotEmpty) {
+      _addToRecentSearches(query.trim());
+    }
+
     setState(() {
       _showRecentSearches = false;
     });
 
-    _gameBloc.add(SearchGamesEvent(query.trim()));
+    // Use SearchGamesWithFiltersEvent if filters are active
+    if (_currentFilters.hasFilters || query.trim().isNotEmpty) {
+      _gameBloc.add(SearchGamesWithFiltersEvent(
+        query: query.trim(),
+        filters: _currentFilters,
+      ));
+    } else {
+      _gameBloc.add(SearchGamesEvent(query.trim()));
+    }
+  }
+
+  // Dynamic search callbacks for filter bottom sheet
+  Future<List<Company>> _searchCompanies(String query) async {
+    // TODO: Implement company search using repository
+    return [];
+  }
+
+  Future<List<GameEngine>> _searchGameEngines(String query) async {
+    // TODO: Implement game engine search using repository
+    return [];
+  }
+
+  Future<List<Franchise>> _searchFranchises(String query) async {
+    // TODO: Implement franchise search using repository
+    return [];
+  }
+
+  Future<List<Collection>> _searchCollections(String query) async {
+    // TODO: Implement collection search using repository
+    return [];
   }
 
   void _clearSearch() {
@@ -100,7 +171,26 @@ class _SearchPageState extends State<SearchPage> {
     _gameBloc.add(ClearSearchEvent());
     setState(() {
       _showRecentSearches = true;
+      _currentFilters = const SearchFilters(); // Also reset filters
     });
+  }
+
+  int _getActiveFilterCount() {
+    int count = 0;
+    if (_currentFilters.genreIds.isNotEmpty) count++;
+    if (_currentFilters.platformIds.isNotEmpty) count++;
+    if (_currentFilters.minRating != null || _currentFilters.maxRating != null)
+      count++;
+    if (_currentFilters.releaseDateFrom != null ||
+        _currentFilters.releaseDateTo != null) count++;
+    if (_currentFilters.themesIds.isNotEmpty) count++;
+    if (_currentFilters.gameModesIds.isNotEmpty) count++;
+    if (_currentFilters.playerPerspectiveIds.isNotEmpty) count++;
+    if (_currentFilters.companyIds.isNotEmpty) count++;
+    if (_currentFilters.gameEngineIds.isNotEmpty) count++;
+    if (_currentFilters.franchiseIds.isNotEmpty) count++;
+    if (_currentFilters.collectionIds.isNotEmpty) count++;
+    return count;
   }
 
   @override
@@ -200,9 +290,40 @@ class _SearchPageState extends State<SearchPage> {
                       icon: const Icon(Icons.clear_rounded),
                       onPressed: _clearSearch,
                     )
-                  : IconButton(
-                      icon: const Icon(Icons.tune_rounded),
-                      onPressed: _showFilters,
+                  : Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.tune_rounded),
+                          onPressed: _showFilters,
+                        ),
+                        if (_currentFilters.hasFilters)
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${_getActiveFilterCount()}',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -272,6 +393,46 @@ class _SearchPageState extends State<SearchPage> {
               return const SizedBox.shrink();
             },
           ),
+
+          // Active Filters Display
+          if (_currentFilters.hasFilters)
+            Padding(
+              padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Chip(
+                            label: Text('${_getActiveFilterCount()} filters'),
+                            avatar: const Icon(Icons.filter_alt, size: 16),
+                            onDeleted: () {
+                              setState(() {
+                                _currentFilters = const SearchFilters();
+                              });
+                              _performSearch(_searchController.text);
+                            },
+                            deleteIcon: const Icon(Icons.close, size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton.icon(
+                            onPressed: _showFilters,
+                            icon: const Icon(Icons.edit, size: 16),
+                            label: const Text('Edit Filters'),
+                            style: TextButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -453,13 +614,28 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  void _showFilters() {
-    // TODO: Implement filters
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Filters coming soon!'),
-        duration: Duration(seconds: 2),
-      ),
+  void _showFilters() async {
+    final result = await FilterBottomSheet.show(
+      context: context,
+      currentFilters: _currentFilters,
+      availableGenres: _availableGenres,
+      availablePlatforms: _availablePlatforms,
+      availableThemes: _availableThemes,
+      availableGameModes: _availableGameModes,
+      availablePlayerPerspectives: _availablePlayerPerspectives,
+      onSearchCompanies: _searchCompanies,
+      onSearchGameEngines: _searchGameEngines,
+      onSearchFranchises: _searchFranchises,
+      onSearchCollections: _searchCollections,
     );
+
+    if (result != null) {
+      setState(() {
+        _currentFilters = result;
+      });
+
+      // Trigger search with new filters
+      _performSearch(_searchController.text);
+    }
   }
 }

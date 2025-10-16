@@ -509,7 +509,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        item.type.displayName,
+                        item.type?.displayName ?? 'Unknown',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: item.accentColor,
                               fontWeight: FontWeight.w500,
@@ -551,7 +551,11 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
   }
 
   void _navigateToSeries(BuildContext context, SeriesItem item) {
-    // TODO: Navigate to pagination listview for platform games
+    Navigations.navigateToPlatformGames(
+      context,
+      platformId: widget.platform.id,
+      platformName: widget.platform.name,
+    );
   }
 
   Widget _buildGamesList(List<Game> games) {

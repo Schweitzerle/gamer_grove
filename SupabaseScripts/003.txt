@@ -1,0 +1,305 @@
+-- ============================================================
+-- Migration 003: Row Level Security Policies
+-- Description: Implements fine-grained access control for all tables
+-- Author: GamerGrove
+-- Date: 2024
+-- ============================================================
+
+-- ============================================================
+-- ENABLE RLS ON ALL TABLES
+-- ============================================================
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_games ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_top_three ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_activity ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_search_queries ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- USERS TABLE POLICIES
+-- ============================================================
+
+-- Anyone can view public profiles
+CREATE POLICY "Users can view public profiles"
+ON public.users
+FOR SELECT
+USING (
+  is_profile_public = true
+  OR auth.uid() = id
+);
+
+-- Users can view their own profile (even if private)
+CREATE POLICY "Users can view own profile"
+ON public.users
+FOR SELECT
+USING (auth.uid() = id);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile"
+ON public.users
+FOR UPDATE
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+-- Users can insert their own profile (during signup)
+CREATE POLICY "Users can insert own profile"
+ON public.users
+FOR INSERT
+WITH CHECK (auth.uid() = id);
+
+-- Users can delete their own profile
+CREATE POLICY "Users can delete own profile"
+ON public.users
+FOR DELETE
+USING (auth.uid() = id);
+
+-- ============================================================
+-- USER_GAMES TABLE POLICIES
+-- ============================================================
+
+-- Users can view their own game data
+CREATE POLICY "Users can view own game data"
+ON public.user_games
+FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can view others' public collections
+CREATE POLICY "Users can view public wishlists"
+ON public.user_games
+FOR SELECT
+USING (
+  is_wishlisted = true AND
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE users.id = user_games.user_id
+    AND users.show_wishlist = true
+    AND users.is_profile_public = true
+  )
+);
+
+CREATE POLICY "Users can view public rated games"
+ON public.user_games
+FOR SELECT
+USING (
+  is_rated = true AND
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE users.id = user_games.user_id
+    AND users.show_rated_games = true
+    AND users.is_profile_public = true
+  )
+);
+
+CREATE POLICY "Users can view public recommendations"
+ON public.user_games
+FOR SELECT
+USING (
+  is_recommended = true AND
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE users.id = user_games.user_id
+    AND users.show_recommended_games = true
+    AND users.is_profile_public = true
+  )
+);
+
+-- Users can insert their own game data
+CREATE POLICY "Users can insert own game data"
+ON public.user_games
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own game data
+CREATE POLICY "Users can update own game data"
+ON public.user_games
+FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can delete their own game data
+CREATE POLICY "Users can delete own game data"
+ON public.user_games
+FOR DELETE
+USING (auth.uid() = user_id);
+
+-- ============================================================
+-- USER_TOP_THREE TABLE POLICIES
+-- ============================================================
+
+-- Users can view their own top three
+CREATE POLICY "Users can view own top three"
+ON public.user_top_three
+FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can view others' public top three
+CREATE POLICY "Users can view public top three"
+ON public.user_top_three
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.users
+    WHERE users.id = user_top_three.user_id
+    AND users.show_top_three = true
+    AND users.is_profile_public = true
+  )
+);
+
+-- Users can insert their own top three
+CREATE POLICY "Users can insert own top three"
+ON public.user_top_three
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own top three
+CREATE POLICY "Users can update own top three"
+ON public.user_top_three
+FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can delete their own top three
+CREATE POLICY "Users can delete own top three"
+ON public.user_top_three
+FOR DELETE
+USING (auth.uid() = user_id);
+
+-- ============================================================
+-- USER_FOLLOWS TABLE POLICIES
+-- ============================================================
+
+-- Anyone can view follows (public information)
+CREATE POLICY "Anyone can view follows"
+ON public.user_follows
+FOR SELECT
+USING (true);
+
+-- Users can follow others
+CREATE POLICY "Users can follow others"
+ON public.user_follows
+FOR INSERT
+WITH CHECK (auth.uid() = follower_id);
+
+-- Users can unfollow others
+CREATE POLICY "Users can unfollow others"
+ON public.user_follows
+FOR DELETE
+USING (auth.uid() = follower_id);
+
+-- Prevent updates (use insert/delete instead)
+-- No UPDATE policy = updates not allowed
+
+-- ============================================================
+-- USER_ACTIVITY TABLE POLICIES
+-- ============================================================
+
+-- Users can view their own activity
+CREATE POLICY "Users can view own activity"
+ON public.user_activity
+FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can view public activity
+CREATE POLICY "Users can view public activity"
+ON public.user_activity
+FOR SELECT
+USING (is_public = true);
+
+-- Users can insert their own activity
+CREATE POLICY "Users can insert own activity"
+ON public.user_activity
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own activity (e.g., change visibility)
+CREATE POLICY "Users can update own activity"
+ON public.user_activity
+FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can delete their own activity
+CREATE POLICY "Users can delete own activity"
+ON public.user_activity
+FOR DELETE
+USING (auth.uid() = user_id);
+
+-- ============================================================
+-- USER_SEARCH_QUERIES TABLE POLICIES
+-- ============================================================
+
+-- Users can only view their own search history
+CREATE POLICY "Users can view own search history"
+ON public.user_search_queries
+FOR SELECT
+USING (auth.uid() = user_id);
+
+-- Users can insert their own searches
+CREATE POLICY "Users can insert own searches"
+ON public.user_search_queries
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Users can delete their own search history
+CREATE POLICY "Users can delete own search history"
+ON public.user_search_queries
+FOR DELETE
+USING (auth.uid() = user_id);
+
+-- No UPDATE policy = search queries are immutable once created
+
+-- ============================================================
+-- HELPER FUNCTION: Check if user can view another user's data
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.can_view_user_data(
+  target_user_id UUID,
+  data_type TEXT -- 'wishlist', 'rated', 'recommended', 'top_three'
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+  is_owner BOOLEAN;
+  user_public BOOLEAN;
+  data_public BOOLEAN;
+BEGIN
+  -- Check if viewer is the owner
+  is_owner := (auth.uid() = target_user_id);
+
+  IF is_owner THEN
+    RETURN true;
+  END IF;
+
+  -- Check user's privacy settings
+  SELECT
+    is_profile_public,
+    CASE data_type
+      WHEN 'wishlist' THEN show_wishlist
+      WHEN 'rated' THEN show_rated_games
+      WHEN 'recommended' THEN show_recommended_games
+      WHEN 'top_three' THEN show_top_three
+      ELSE false
+    END
+  INTO user_public, data_public
+  FROM public.users
+  WHERE id = target_user_id;
+
+  RETURN (user_public AND data_public);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+COMMENT ON FUNCTION public.can_view_user_data IS 'Checks if current user can view another user''s game data based on privacy settings';
+
+-- ============================================================
+-- SUCCESS MESSAGE
+-- ============================================================
+
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Migration 003 completed successfully!';
+  RAISE NOTICE '🔒 Row Level Security enabled on all tables';
+  RAISE NOTICE '🛡️ Created 25+ security policies';
+  RAISE NOTICE '✨ Privacy settings are fully enforced';
+  RAISE NOTICE '👤 Users can only modify their own data';
+  RAISE NOTICE '👀 Public data is viewable by everyone';
+END $$;

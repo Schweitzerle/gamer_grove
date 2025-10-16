@@ -37,29 +37,29 @@ class FranchiseCollectionsSection extends StatelessWidget {
     for (final franchise in game.franchises) {
       if (franchise.hasGames) {
         seriesItems.add(SeriesItem(
-        type: SeriesType.franchise,
-        title: franchise.name,
-        games: _getFranchiseGames(franchise),
-        totalCount: franchise.gameCount,
-        franchise: franchise,
-        accentColor: Colors.orange,
-        icon: Icons.account_tree,
-      ));
+          type: SeriesType.franchise,
+          title: franchise.name,
+          games: _getFranchiseGames(franchise),
+          totalCount: franchise.gameCount,
+          franchise: franchise,
+          accentColor: Colors.orange,
+          icon: Icons.account_tree,
+        ));
       }
     }
 
     // Add Collections
     for (final collection in game.collections) {
-      if(collection.hasGames) {
+      if (collection.hasGames) {
         seriesItems.add(SeriesItem(
-        type: SeriesType.collection,
-        title: collection.name,
-        games: _getCollectionGames(collection),
-        totalCount: collection.gameCount,
-        collection: collection,
-        accentColor: Colors.blue,
-        icon: Icons.collections,
-      ));
+          type: SeriesType.collection,
+          title: collection.name,
+          games: _getCollectionGames(collection),
+          totalCount: collection.gameCount,
+          collection: collection,
+          accentColor: Colors.blue,
+          icon: Icons.collections,
+        ));
       }
     }
 
@@ -90,16 +90,23 @@ class FranchiseCollectionsSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withOpacity(0.2),
                           width: 1,
                         ),
                       ),
                     ),
                     child: TabBar(
-                      isScrollable: seriesItems.length > 3, // Scrollable if more than 3 tabs
-                      tabs: seriesItems.map((item) => _buildTab(context, item)).toList(),
+                      isScrollable: seriesItems.length >
+                          3, // Scrollable if more than 3 tabs
+                      tabs: seriesItems
+                          .map((item) => _buildTab(context, item))
+                          .toList(),
                       labelColor: Theme.of(context).colorScheme.primary,
-                      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                      unselectedLabelColor:
+                          Theme.of(context).colorScheme.onSurfaceVariant,
                       indicatorColor: Theme.of(context).colorScheme.primary,
                       indicatorWeight: 2,
                       labelStyle: const TextStyle(
@@ -115,9 +122,12 @@ class FranchiseCollectionsSection extends StatelessWidget {
 
                   // Tab Views
                   SizedBox(
-                    height: 380, // Etwas mehr Platz für Header + normale GameCard
+                    height:
+                        380, // Etwas mehr Platz für Header + normale GameCard
                     child: TabBarView(
-                      children: seriesItems.map((item) => _buildTabView(context, item)).toList(),
+                      children: seriesItems
+                          .map((item) => _buildTabView(context, item))
+                          .toList(),
                     ),
                   ),
                 ],
@@ -150,8 +160,8 @@ class FranchiseCollectionsSection extends StatelessWidget {
           Text(
             'Part of Series',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -210,19 +220,19 @@ class FranchiseCollectionsSection extends StatelessWidget {
                     Text(
                       item.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: item.type == SeriesType.mainFranchise
-                            ? FontWeight.bold
-                            : FontWeight.w600,
-                      ),
+                            fontWeight: item.type == SeriesType.mainFranchise
+                                ? FontWeight.bold
+                                : FontWeight.w600,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '${item.type.displayName} • ${item.totalCount} games',
+                      '${item.type?.displayName} • ${item.totalCount} games',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: item.accentColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                            color: item.accentColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                   ],
                 ),
@@ -231,7 +241,8 @@ class FranchiseCollectionsSection extends StatelessWidget {
               if (item.totalCount > 5)
                 TextButton.icon(
                   onPressed: () => _navigateToSeries(context, item),
-                  icon: Icon(Icons.arrow_forward, size: 16, color: item.accentColor),
+                  icon: Icon(Icons.arrow_forward,
+                      size: 16, color: item.accentColor),
                   label: Text(
                     'View All',
                     style: TextStyle(color: item.accentColor),
@@ -247,7 +258,8 @@ class FranchiseCollectionsSection extends StatelessWidget {
 
           // Games List (normale Größe wieder!)
           SizedBox(
-            height: 280, // Feste Höhe wie in base_game_section.dart - nicht stretched!
+            height:
+                280, // Feste Höhe wie in base_game_section.dart - nicht stretched!
             child: item.games.isNotEmpty
                 ? _buildGamesList(item.games)
                 : _buildNoGamesPlaceholder(context),
@@ -298,8 +310,8 @@ class FranchiseCollectionsSection extends StatelessWidget {
             Text(
               'Games loading...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -350,7 +362,7 @@ enum SeriesType {
 }
 
 class SeriesItem {
-  final SeriesType type;
+  final SeriesType? type;
   final String title;
   final List<Game> games;
   final int totalCount;
@@ -360,7 +372,7 @@ class SeriesItem {
   final Collection? collection;
 
   SeriesItem({
-    required this.type,
+    this.type,
     required this.title,
     required this.games,
     required this.totalCount,

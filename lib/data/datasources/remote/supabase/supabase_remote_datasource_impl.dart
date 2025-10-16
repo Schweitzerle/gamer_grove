@@ -780,11 +780,11 @@ class SupabaseRemoteDataSourceImpl implements SupabaseRemoteDataSource {
         if (follow['follower_id'] == currentUserId &&
             follow['followed_id'] == targetUserId) {
           isFollowing = true;
-          followedAt = DateTime.parse(follow['created_at']);
+          followedAt = DateTime.parse(follow['created_at'] as String);
         } else if (follow['follower_id'] == targetUserId &&
             follow['followed_id'] == currentUserId) {
           isFollowedBy = true;
-          followedBackAt = DateTime.parse(follow['created_at']);
+          followedBackAt = DateTime.parse(follow['created_at'] as String);
         }
       }
 
