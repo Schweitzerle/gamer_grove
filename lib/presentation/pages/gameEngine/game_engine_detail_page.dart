@@ -11,6 +11,7 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dar
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_details_screen.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../widgets/live_loading_progress.dart';
 
 class GameEngineDetailPage extends StatelessWidget {
@@ -33,7 +34,8 @@ class GameEngineDetailPage extends StatelessWidget {
         final bloc = sl<GameEngineBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
-        final userId = authState is Authenticated ? authState.user.id : null;
+        final userId =
+            authState is AuthAuthenticated ? authState.user.id : null;
         print('🎭 GameEngineDetailPage: Adding GetGameEngineDetailsEvent');
         bloc.add(GetGameEngineDetailsEvent(
             gameEngineId: gameEngineId,

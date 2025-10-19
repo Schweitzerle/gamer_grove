@@ -1,7 +1,8 @@
 // presentation/pages/test/igdb_test_page.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_query_presets.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/datasources/remote/igdb/deprecated/idgb_remote_datasource.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../injection_container.dart';
 
@@ -13,7 +14,7 @@ class IGDBTestPage extends StatefulWidget {
 }
 
 class _IGDBTestPageState extends State<IGDBTestPage> {
-  final IGDBRemoteDataSource _igdbDataSource = sl<IGDBRemoteDataSource>();
+  final IgdbDataSource _igdbDataSource = sl<IgdbDataSource>();
   final _searchController = TextEditingController();
 
   bool _isLoading = false;
@@ -258,7 +259,7 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
                   if (game.genres.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      game.genres.take(2).map((g) => g.name).join(', '),
+                      game.genres.take(2).map((genre) => genre.name).join(', '),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -290,7 +291,11 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
     });
 
     try {
-      final games = await _igdbDataSource.searchGames(query, 10, 0);
+      final searchQuery = GameQueryPresets.search(
+        searchTerm: query,
+        limit: 10,
+      );
+      final games = await _igdbDataSource.queryGames(searchQuery);
 
       setState(() {
         _searchResults = games;
@@ -318,7 +323,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
     });
 
     try {
-      final games = await _igdbDataSource.getPopularGames(10, 0);
+      final popularQuery = GameQueryPresets.popular(limit: 10);
+      final games = await _igdbDataSource.queryGames(popularQuery);
 
       setState(() {
         _searchResults = games;
@@ -346,7 +352,8 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
     });
 
     try {
-      final games = await _igdbDataSource.getUpcomingGames(10, 0);
+      final upcomingQuery = GameQueryPresets.upcomingReleases(limit: 10);
+      final games = await _igdbDataSource.queryGames(upcomingQuery);
 
       setState(() {
         _searchResults = games;
@@ -375,14 +382,16 @@ class _IGDBTestPageState extends State<IGDBTestPage> {
 
     try {
       // Test with The Witcher 3: Wild Hunt (ID: 1942)
-      final game = await _igdbDataSource.getGameDetails(1942);
+      final detailsQuery = GameQueryPresets.fullDetails(gameId: 1942);
+      final games = await _igdbDataSource.queryGames(detailsQuery);
+      final game = games.first;
 
       setState(() {
         _searchResults = [game];
         _testResult = '✅ Game details loaded successfully!\n'
             'Game: ${game.name}\n'
             'Rating: ${game.rating?.toStringAsFixed(1) ?? "N/A"}\n'
-            'Genres: ${game.genres.map((g) => g.name).join(", ")}\n'
+            'Genres: ${game.genres.map((genre) => genre.name).join(", ")}\n'
             'Summary length: ${game.summary?.length ?? 0} characters';
       });
     } catch (e) {

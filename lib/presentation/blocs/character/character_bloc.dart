@@ -4,16 +4,18 @@
 
 // lib/presentation/blocs/character/character_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
+import '../../../core/services/game_enrichment_service.dart';
 import '../../../domain/usecases/characters/get_character_with_games.dart';
 import 'character_event.dart';
 import 'character_state.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
   final GetCharacterWithGames getCharacterWithGames;
+  final GameEnrichmentService enrichmentService;
 
   CharacterBloc({
     required this.getCharacterWithGames,
+    required this.enrichmentService,
   }) : super(CharacterInitial()) {
     on<GetCharacterDetailsEvent>(_onGetCharacterDetails);
     on<ClearCharacterEvent>(_onClearCharacter);
@@ -37,22 +39,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
         emit(CharacterError(message: failure.message));
       },
       (characterWithGames) async {
-        // 🔧 NEUE ENRICHMENT LOGIC mit Utils
+        // Enrich games with user data using the new service
         if (event.userId != null && characterWithGames.games.isNotEmpty) {
           try {
-            print(
-                '🎭 CharacterBloc: Enriching character games with GameEnrichmentUtils...');
-
-            // 🆕 Verwende die Utils statt eigene Implementierung
-            final enrichedGames =
-                await GameEnrichmentUtils.enrichCharacterGames(
+            final enrichedGames = await enrichmentService.enrichGames(
               characterWithGames.games,
               event.userId!,
             );
-
-            // 🆕 Debug Stats
-            GameEnrichmentUtils.printEnrichmentStats(enrichedGames,
-                context: 'Character');
 
             emit(CharacterDetailsLoaded(
               character: characterWithGames.character,

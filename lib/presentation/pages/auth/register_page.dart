@@ -1,6 +1,8 @@
 // presentation/pages/auth/register_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
 import '../../../core/widgets/loading_widget.dart';
@@ -41,18 +43,15 @@ class _RegisterPageState extends State<RegisterPage> {
           _isLoading = state is AuthLoading;
         });
 
-        if (state is Authenticated) {
+        if (state is AuthAuthenticated) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute<void>(builder: (context) => const HomePage()),
           );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -72,28 +71,17 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Header
                   Text(
                     'Join Gamer Grove',
-                    style: Theme
-                        .of(context)
-                        .textTheme
-                        .headlineLarge
-                        ?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppConstants.paddingSmall),
                   Text(
                     'Create your account to start discovering games',
-                    style: Theme
-                        .of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .onSurfaceVariant,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                   ),
 
@@ -134,8 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons
-                              .visibility_off,
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -154,16 +143,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     obscureText: _obscureConfirmPassword,
                     validator: (value) =>
                         InputValidator.validatePasswordConfirmation(
-                          _passwordController.text,
-                          value,
-                        ),
+                      _passwordController.text,
+                      value,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility : Icons
-                              .visibility_off,
+                          _obscureConfirmPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -188,8 +178,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   // Login Link
                   TextButton(
-                    onPressed: _isLoading ? null : () =>
-                        Navigator.of(context).pop(),
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
                     child: const Text('Already have an account? Sign In'),
                   ),
                 ],
@@ -204,12 +194,12 @@ class _RegisterPageState extends State<RegisterPage> {
   void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
-        SignUpRequested(
-          email: _emailController.text.trim(),
-          username: _usernameController.text.trim(),
-          password: _passwordController.text,
-        ),
-      );
+            SignUpEvent(
+              email: _emailController.text.trim(),
+              username: _usernameController.text.trim(),
+              password: _passwordController.text,
+            ),
+          );
     }
   }
 }

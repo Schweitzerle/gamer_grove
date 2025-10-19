@@ -360,7 +360,7 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
 
   void _showAllGames() {
     // TODO: Navigate to a full games list screen for this character
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('${widget.character.name} Games'),

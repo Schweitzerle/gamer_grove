@@ -4,16 +4,17 @@
 
 // lib/presentation/blocs/platform/platform_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 
 class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
   final GetPlatformWithGames getPlatformWithGames;
   final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
+  final GameEnrichmentService enrichmentService;
 
   // Pagination constants
   static const int _pageSize = 20;
@@ -21,6 +22,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
   PlatformBloc({
     required this.getPlatformWithGames,
     required this.gameRepository,
+    required this.enrichmentService,
   }) : super(PlatformInitial()) {
     on<GetPlatformDetailsEvent>(_onGetPlatformDetails);
     on<ClearPlatformEvent>(_onClearPlatform);
@@ -55,19 +57,10 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         // 🔧 ENRICHMENT LOGIC mit GameEnrichmentUtils
         if (event.userId != null && platformWithGames.games.isNotEmpty) {
           try {
-            print(
-                '🎮 PlatformBloc: Enriching platform games with GameEnrichmentUtils...');
-
-            // Verwende die Utils für Game Enrichment
-            final enrichedGames = await GameEnrichmentUtils.enrichPlatformGames(
+            final enrichedGames = await enrichmentService.enrichGames(
               platformWithGames.games,
               event.userId!,
             );
-
-            // Debug Stats
-            GameEnrichmentUtils.printEnrichmentStats(enrichedGames,
-                context: 'Platform');
-
             emit(PlatformDetailsLoaded(
               platform: platformWithGames.platform,
               games: enrichedGames,
@@ -142,7 +135,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         List<Game> enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
           try {
-            enrichedGames = await GameEnrichmentUtils.enrichPlatformGames(
+            enrichedGames = await enrichmentService.enrichGames(
               games,
               event.userId!,
             );
@@ -216,7 +209,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         List<Game> enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
           try {
-            enrichedNewGames = await GameEnrichmentUtils.enrichPlatformGames(
+            enrichedNewGames = await enrichmentService.enrichGames(
               newGames,
               currentState.userId!,
             );
@@ -292,7 +285,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         List<Game> enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
           try {
-            enrichedGames = await GameEnrichmentUtils.enrichPlatformGames(
+            enrichedGames = await enrichmentService.enrichGames(
               games,
               currentState.userId!,
             );

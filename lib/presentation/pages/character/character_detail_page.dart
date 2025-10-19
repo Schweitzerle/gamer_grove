@@ -5,6 +5,7 @@
 // lib/presentation/pages/character_detail/character_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../domain/entities/character/character.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
@@ -35,7 +36,8 @@ class CharacterDetailPage extends StatelessWidget {
         final bloc = sl<CharacterBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
-        final userId = authState is Authenticated ? authState.user.id : null;
+        final userId =
+            authState is AuthAuthenticated ? authState.user.id : null;
         print('🎭 CharacterDetailPage: Adding GetCharacterDetailsEvent');
         bloc.add(GetCharacterDetailsEvent(
             characterId: characterId,

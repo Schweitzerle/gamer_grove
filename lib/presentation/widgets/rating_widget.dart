@@ -4,7 +4,7 @@ import '../../core/constants/app_constants.dart';
 
 class RatingWidget extends StatefulWidget {
   final double? initialRating;
-  final Function(double) onRatingChanged;
+  final void Function(double) onRatingChanged;
   final bool isReadOnly;
   final double size;
   final Color? activeColor;
@@ -40,12 +40,14 @@ class _RatingWidgetState extends State<RatingWidget> {
       children: List.generate(5, (index) {
         final starValue = (index + 1) * 2.0; // 0-10 scale
         return GestureDetector(
-          onTap: widget.isReadOnly ? null : () {
-            setState(() {
-              _currentRating = starValue;
-            });
-            widget.onRatingChanged(starValue);
-          },
+          onTap: widget.isReadOnly
+              ? null
+              : () {
+                  setState(() {
+                    _currentRating = starValue;
+                  });
+                  widget.onRatingChanged(starValue);
+                },
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: widget.size * 0.05),
             child: Icon(
@@ -90,7 +92,9 @@ class GameRatingCard extends StatelessWidget {
                   context,
                   rating: igdbRating!,
                   title: 'IGDB Score',
-                  subtitle: ratingCount != null ? '${_formatCount(ratingCount!)} ratings' : null,
+                  subtitle: ratingCount != null
+                      ? '${_formatCount(ratingCount!)} ratings'
+                      : null,
                   color: _getIGDBRatingColor(igdbRating!),
                 ),
               ),
@@ -107,11 +111,11 @@ class GameRatingCard extends StatelessWidget {
             Expanded(
               child: userRating != null
                   ? _buildRatingColumn(
-                context,
-                rating: userRating!,
-                title: 'Your Rating',
-                color: Theme.of(context).colorScheme.primary,
-              )
+                      context,
+                      rating: userRating!,
+                      title: 'Your Rating',
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : _buildRateButton(context),
             ),
           ],
@@ -121,20 +125,20 @@ class GameRatingCard extends StatelessWidget {
   }
 
   Widget _buildRatingColumn(
-      BuildContext context, {
-        required double rating,
-        required String title,
-        String? subtitle,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required double rating,
+    required String title,
+    String? subtitle,
+    required Color color,
+  }) {
     return Column(
       children: [
         Text(
           rating.toStringAsFixed(1),
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
         ),
         Text(
           title,
@@ -144,8 +148,8 @@ class GameRatingCard extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
       ],
     );
@@ -192,7 +196,7 @@ class GameRatingCard extends StatelessWidget {
 class RatingDialog extends StatefulWidget {
   final String gameTitle;
   final double? initialRating;
-  final Function(double rating) onRatingSubmitted;
+  final void Function(double rating) onRatingSubmitted;
 
   const RatingDialog({
     super.key,
@@ -245,9 +249,11 @@ class _RatingDialogState extends State<RatingDialog> {
           Text(
             _rating > 0 ? '${_rating.toStringAsFixed(1)}/10' : 'No rating',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: _rating > 0 ? Theme.of(context).colorScheme.primary : null,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: _rating > 0
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
           ),
 
           if (_rating > 0) ...[
@@ -255,8 +261,8 @@ class _RatingDialogState extends State<RatingDialog> {
             Text(
               _getRatingLabel(_rating),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ],
@@ -267,10 +273,12 @@ class _RatingDialogState extends State<RatingDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed: _rating > 0 ? () {
-            widget.onRatingSubmitted(_rating);
-            Navigator.of(context).pop();
-          } : null,
+          onPressed: _rating > 0
+              ? () {
+                  widget.onRatingSubmitted(_rating);
+                  Navigator.of(context).pop();
+                }
+              : null,
           child: const Text('Submit'),
         ),
       ],
@@ -319,19 +327,19 @@ class CompactRatingWidget extends StatelessWidget {
         Text(
           rating.toStringAsFixed(1),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-            fontSize: size * 0.8,
-          ),
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontSize: size * 0.8,
+              ),
         ),
         if (showLabel) ...[
           const SizedBox(width: 4),
           Text(
             _getRatingLabel(rating),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: size * 0.7,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: size * 0.7,
+                ),
           ),
         ],
       ],

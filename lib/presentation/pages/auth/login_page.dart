@@ -1,6 +1,8 @@
 // presentation/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
 import '../../../core/widgets/loading_widget.dart';
@@ -37,9 +39,9 @@ class _LoginPageState extends State<LoginPage> {
           _isLoading = state is AuthLoading;
         });
 
-        if (state is Authenticated) {
+        if (state is AuthAuthenticated) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute<void>(builder: (context) => const HomePage()),
           );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -65,16 +67,16 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     'Welcome Back!',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppConstants.paddingSmall),
                   Text(
                     'Sign in to continue your gaming journey',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                   ),
 
@@ -103,7 +105,9 @@ class _LoginPageState extends State<LoginPage> {
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -143,18 +147,17 @@ class _LoginPageState extends State<LoginPage> {
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
-        SignInRequested(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        ),
-      );
+            SignInEvent(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+            ),
+          );
     }
   }
 
   void _navigateToRegister() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const RegisterPage()),
+      MaterialPageRoute<void>(builder: (context) => const RegisterPage()),
     );
   }
 }
-

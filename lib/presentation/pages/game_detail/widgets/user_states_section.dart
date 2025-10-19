@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 
 import '../../../../domain/entities/game/game.dart';
 import '../../../blocs/auth/auth_bloc.dart';
@@ -114,7 +115,7 @@ class UserStatesContent extends StatelessWidget {
 
   String? _getCurrentUserId(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       return authState.user.id;
     }
     return null;
@@ -202,7 +203,7 @@ class UserStatesContent extends StatelessWidget {
     // ✅ GameBloc VOR dem Dialog holen
     final gameBloc = context.read<GameBloc>();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => TopThreeDialog(
         game: game,
@@ -223,7 +224,7 @@ class UserStatesContent extends StatelessWidget {
     // ✅ GameBloc VOR dem Dialog holen
     final gameBloc = context.read<GameBloc>();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => RatingDialog(
         gameName: game.name,

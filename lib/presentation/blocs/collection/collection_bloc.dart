@@ -224,7 +224,10 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
 
     result.fold(
       (failure) => emit(CollectionError(failure.message)),
-      (gameIds) => emit(TopThreeLoaded(gameIds)),
+      (games) {
+        final gameIds = games.map((game) => game['id'] as int).toList();
+        emit(TopThreeLoaded(gameIds));
+      },
     );
   }
 

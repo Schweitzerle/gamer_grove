@@ -506,7 +506,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
   void _showFullScreenViewer(
       List<String> images, int initialIndex, String type) {
     Navigator.of(context).push(
-      PageRouteBuilder(
+      PageRouteBuilder<void>(
         pageBuilder: (context, animation, _) => FadeTransition(
           opacity: animation,
           child: FullScreenImageViewer(
@@ -522,7 +522,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   void _showAllImages(List<String> images, String type) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => AllImagesGrid(
           images: images,
           title: type == 'screenshot' ? 'All Screenshots' : 'All Artworks',
@@ -534,7 +534,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   void _openVideoPlayer(GameVideo video, int index) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => VideoPlayerScreen(
           video: video,
           videoIndex: index,
@@ -545,7 +545,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   void _showAllVideos(List<GameVideo> videos) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => AllVideosGrid(
           videos: videos,
           title: 'All Videos',

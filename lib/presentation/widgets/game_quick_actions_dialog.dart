@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../domain/entities/game/game.dart';
 import '../blocs/game/game_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
@@ -30,7 +31,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
   void initState() {
     super.initState();
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
     }
   }
@@ -262,7 +263,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
 
   void _rateGame() {
     Navigator.pop(context);
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => RatingDialog(
         gameName: widget.game.name,
@@ -303,7 +304,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
       return;
     }
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => TopThreeDialog(
         game: game,

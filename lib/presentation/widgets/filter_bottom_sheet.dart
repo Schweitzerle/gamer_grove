@@ -337,7 +337,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 _selectedCompanies.remove(company);
               });
             },
-            itemBuilder: (item) => Text((item as Company).name),
+            itemBuilder: (item) => Text((item).name),
           ),
           const SizedBox(height: AppConstants.paddingLarge),
           _buildDynamicSearchSection(
@@ -361,7 +361,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 _selectedGameEngines.remove(engine);
               });
             },
-            itemBuilder: (item) => Text((item as GameEngine).name),
+            itemBuilder: (item) => Text((item).name),
           ),
           const SizedBox(height: AppConstants.paddingLarge),
           _buildDynamicSearchSection(
@@ -385,7 +385,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 _selectedFranchises.remove(franchise);
               });
             },
-            itemBuilder: (item) => Text((item as Franchise).name),
+            itemBuilder: (item) => Text((item).name),
           ),
           const SizedBox(height: AppConstants.paddingLarge),
           _buildDynamicSearchSection(
@@ -409,7 +409,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 _selectedCollections.remove(collection);
               });
             },
-            itemBuilder: (item) => Text((item as Collection).name),
+            itemBuilder: (item) => Text((item).name),
           ),
           const SizedBox(height: 80),
         ],
@@ -813,9 +813,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     required List<T> searchResults,
     required List<T> selectedItems,
     required bool isLoading,
-    required Function(String) onSearch,
-    required Function(T) onAdd,
-    required Function(T) onRemove,
+    required void Function(String) onSearch,
+    required void Function(T) onAdd,
+    required void Function(T) onRemove,
     required Widget Function(T) itemBuilder,
   }) {
     return Column(

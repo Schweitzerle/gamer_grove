@@ -8,11 +8,11 @@ class CharactersFilterBar extends StatelessWidget {
   final CharacterViewMode viewMode;
   final bool showOnlyWithImages;
   final bool showOnlyWithDescriptions;
-  final Function(String) onSearchChanged;
-  final Function(CharacterSortBy) onSortChanged;
-  final Function(CharacterViewMode) onViewModeChanged;
-  final Function(bool) onShowImagesChanged;
-  final Function(bool) onShowDescriptionsChanged;
+  final void Function(String) onSearchChanged;
+  final void Function(CharacterSortBy) onSortChanged;
+  final void Function(CharacterViewMode) onViewModeChanged;
+  final void Function(bool) onShowImagesChanged;
+  final void Function(bool) onShowDescriptionsChanged;
 
   const CharactersFilterBar({
     super.key,
@@ -63,12 +63,12 @@ class CharactersFilterBar extends StatelessWidget {
               prefixIcon: const Icon(Icons.search, color: Colors.purple),
               suffixIcon: searchController.text.isNotEmpty
                   ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  searchController.clear();
-                  onSearchChanged('');
-                },
-              )
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        searchController.clear();
+                        onSearchChanged('');
+                      },
+                    )
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -130,11 +130,11 @@ class CharactersFilterBar extends StatelessWidget {
   }
 
   Widget _buildViewModeButton(
-      BuildContext context, {
-        required IconData icon,
-        required CharacterViewMode mode,
-        required bool isSelected,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required CharacterViewMode mode,
+    required bool isSelected,
+  }) {
     return GestureDetector(
       onTap: () => onViewModeChanged(mode),
       child: Container(
@@ -174,7 +174,8 @@ class CharactersFilterBar extends StatelessWidget {
                   context,
                   label: 'With Descriptions',
                   isActive: showOnlyWithDescriptions,
-                  onTap: () => onShowDescriptionsChanged(!showOnlyWithDescriptions),
+                  onTap: () =>
+                      onShowDescriptionsChanged(!showOnlyWithDescriptions),
                   icon: Icons.description,
                 ),
               ],
@@ -209,7 +210,8 @@ class CharactersFilterBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.purple),
+            const Icon(Icons.keyboard_arrow_down,
+                size: 16, color: Colors.purple),
           ],
         ),
       ),
@@ -217,12 +219,12 @@ class CharactersFilterBar extends StatelessWidget {
   }
 
   Widget _buildFilterChip(
-      BuildContext context, {
-        required String label,
-        required bool isActive,
-        required VoidCallback onTap,
-        required IconData icon,
-      }) {
+    BuildContext context, {
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+    required IconData icon,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -258,7 +260,7 @@ class CharactersFilterBar extends StatelessWidget {
   }
 
   void _showSortOptions(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -275,8 +277,8 @@ class CharactersFilterBar extends StatelessWidget {
                 Text(
                   'Sort Characters',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -316,11 +318,11 @@ class CharactersFilterBar extends StatelessWidget {
   }
 
   Widget _buildSortOption(
-      BuildContext context,
-      String title,
-      CharacterSortBy sortBy,
-      IconData icon,
-      ) {
+    BuildContext context,
+    String title,
+    CharacterSortBy sortBy,
+    IconData icon,
+  ) {
     final isSelected = currentSort == sortBy;
 
     return ListTile(
@@ -335,9 +337,8 @@ class CharactersFilterBar extends StatelessWidget {
           color: isSelected ? Colors.purple : null,
         ),
       ),
-      trailing: isSelected
-          ? const Icon(Icons.check, color: Colors.purple)
-          : null,
+      trailing:
+          isSelected ? const Icon(Icons.check, color: Colors.purple) : null,
       onTap: () {
         onSortChanged(sortBy);
         Navigator.of(context).pop();

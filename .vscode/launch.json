@@ -8,6 +8,20 @@
             "program": "lib/main.dart"
         },
         {
+            "name": "Flutter Web (Vivaldi)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "-d",
+                "chrome"
+            ],
+            "env": {
+                "CHROME_EXECUTABLE": "/usr/bin/flatpak",
+                "CHROME_EXECUTABLE_ARGS": "run,com.vivaldi.Vivaldi"
+            }
+        },
+        {
             "name": "Flutter (Profile)",
             "request": "launch",
             "type": "dart",

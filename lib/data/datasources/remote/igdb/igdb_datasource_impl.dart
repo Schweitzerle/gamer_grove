@@ -8,6 +8,7 @@ import '../../../models/platform/platform_model.dart';
 import '../../../models/company/company_model.dart';
 import '../../../models/event/event_model.dart';
 import '../../../models/game/game_engine_model.dart';
+import '../../../models/genre_model.dart';
 import 'igdb_datasource.dart';
 import 'models/igdb_query.dart';
 
@@ -115,6 +116,19 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       endpoint: 'game_engines',
       query: query,
       parser: (json) => GameEngineModel.fromJson(json),
+    );
+  }
+
+  // ============================================================
+  // GENRE QUERIES IMPLEMENTATION
+  // ============================================================
+
+  @override
+  Future<List<GenreModel>> queryGenres(IgdbGenreQuery query) async {
+    return await _executeQuery<GenreModel>(
+      endpoint: 'genres',
+      query: query,
+      parser: (json) => GenreModel.fromJson(json),
     );
   }
 

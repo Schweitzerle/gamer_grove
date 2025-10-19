@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
 import '../../../core/constants/app_constants.dart';
@@ -36,7 +37,7 @@ class _GrovePageState extends State<GrovePage> {
   void _loadInitialData() {
     // Get current user
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
     }
 

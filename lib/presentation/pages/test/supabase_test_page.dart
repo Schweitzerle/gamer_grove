@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
+import '../../../data/datasources/remote/supabase/supabase_user_datasource.dart';
 import '../../../data/models/user_model.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 
 class SupabaseTestPage extends StatefulWidget {
   const SupabaseTestPage({super.key});
@@ -16,8 +17,8 @@ class SupabaseTestPage extends StatefulWidget {
 }
 
 class _SupabaseTestPageState extends State<SupabaseTestPage> {
-  final SupabaseRemoteDataSource _supabaseDataSource =
-      sl<SupabaseRemoteDataSource>();
+  final SupabaseUserDataSource _supabaseDataSource =
+      sl<SupabaseUserDataSource>();
 
   // Controllers
   final _usernameController = TextEditingController();
@@ -56,7 +57,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
   void _getCurrentUser() {
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
       _currentUserProfile = authState.user as UserModel?;
       _usernameController.text = authState.user.username;
@@ -152,12 +153,16 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
             if (_currentUserId != null) ...[
               Text('User ID: $_currentUserId'),
               Text('Username: ${_currentUserProfile?.username ?? "Unknown"}'),
-              Text('Email: ${_currentUserProfile?.email ?? "Unknown"}'),
+              Text(
+                'Display Name: ${_currentUserProfile?.displayName ?? "Not set"}',
+              ),
               Text('Bio: ${_currentUserProfile?.bio ?? "No bio"}'),
               Text(
-                  'Wishlist Count: ${_currentUserProfile?.wishlistGameIds.length ?? 0}'),
+                'Wishlist Count: ${_currentUserProfile?.totalGamesWishlisted ?? 0}',
+              ),
               Text(
-                  'Rated Games: ${_currentUserProfile?.ratedGameIds.length ?? 0}'),
+                'Rated Games: ${_currentUserProfile?.totalGamesRated ?? 0}',
+              ),
               Text('Following: ${_currentUserProfile?.followingCount ?? 0}'),
               Text('Followers: ${_currentUserProfile?.followersCount ?? 0}'),
             ] else ...[
@@ -520,9 +525,10 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final profile = await _supabaseDataSource.getUserProfile(_currentUserId!);
+      final profileMap =
+          await _supabaseDataSource.getUserProfile(_currentUserId!);
       setState(() {
-        _currentUserProfile = profile;
+        _currentUserProfile = UserModel.fromJson(profileMap);
       });
       _addTestResult('✅ User profile refreshed successfully');
     } catch (e) {
@@ -544,10 +550,12 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
         updates['bio'] = _bioController.text;
       }
 
-      final updatedProfile =
-          await _supabaseDataSource.updateUserProfile(userId: _currentUserId!);
+      final updatedProfileMap = await _supabaseDataSource.updateUserProfile(
+        _currentUserId!,
+        updates,
+      );
       setState(() {
-        _currentUserProfile = updatedProfile;
+        _currentUserProfile = UserModel.fromJson(updatedProfileMap);
       });
       _addTestResult('✅ Profile updated successfully');
     } catch (e) {
@@ -561,8 +569,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final profile = await _supabaseDataSource.getUserProfile(_currentUserId!);
-      _addTestResult('✅ Profile retrieved: ${profile.username}');
+      final profileMap =
+          await _supabaseDataSource.getUserProfile(_currentUserId!);
+      _addTestResult('✅ Profile retrieved: ${profileMap['username']}');
     } catch (e) {
       _addTestResult('❌ Failed to get profile: $e');
     }
@@ -580,7 +589,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.toggleWishlist(gameId, _currentUserId!);
+      await _supabaseDataSource.toggleWishlist(_currentUserId!, gameId);
       _addTestResult('✅ Wishlist toggled for game $gameId');
     } catch (e) {
       _addTestResult('❌ Failed to toggle wishlist: $e');
@@ -599,7 +608,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.toggleRecommended(gameId, _currentUserId!);
+      await _supabaseDataSource.toggleRecommended(_currentUserId!, gameId);
       _addTestResult('✅ Recommendation toggled for game $gameId');
     } catch (e) {
       _addTestResult('❌ Failed to toggle recommendation: $e');
@@ -620,7 +629,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.rateGame(gameId, _currentUserId!, rating);
+      await _supabaseDataSource.rateGame(_currentUserId!, gameId, rating);
       _addTestResult('✅ Game $gameId rated: $rating/10');
     } catch (e) {
       _addTestResult('❌ Failed to rate game: $e');
@@ -633,11 +642,15 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final wishlistIds =
-          await _supabaseDataSource.getUserWishlistIds(_currentUserId!);
-      _addTestResult('✅ Wishlist retrieved: ${wishlistIds.length} games');
-      _addTestResult(
-          '   Game IDs: ${wishlistIds.take(5).join(", ")}${wishlistIds.length > 5 ? "..." : ""}');
+      final wishlistGames =
+          await _supabaseDataSource.getWishlistedGames(_currentUserId!);
+      _addTestResult('✅ Wishlist retrieved: ${wishlistGames.length} games');
+      final gameIds = wishlistGames.map((g) => g['game_id'].toString()).take(5);
+      if (gameIds.isNotEmpty) {
+        _addTestResult(
+          '   Game IDs: ${gameIds.join(", ")}${wishlistGames.length > 5 ? "..." : ""}',
+        );
+      }
     } catch (e) {
       _addTestResult('❌ Failed to get wishlist: $e');
     }
@@ -649,12 +662,18 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final recommendedIds =
-          await _supabaseDataSource.getUserRecommendedIds(_currentUserId!);
+      final recommendedGames =
+          await _supabaseDataSource.getRecommendedGames(_currentUserId!);
       _addTestResult(
-          '✅ Recommended games retrieved: ${recommendedIds.length} games');
-      _addTestResult(
-          '   Game IDs: ${recommendedIds.take(5).join(", ")}${recommendedIds.length > 5 ? "..." : ""}');
+        '✅ Recommended games retrieved: ${recommendedGames.length} games',
+      );
+      final gameIds =
+          recommendedGames.map((g) => g['game_id'].toString()).take(5);
+      if (gameIds.isNotEmpty) {
+        _addTestResult(
+          '   Game IDs: ${gameIds.join(", ")}${recommendedGames.length > 5 ? "..." : ""}',
+        );
+      }
     } catch (e) {
       _addTestResult('❌ Failed to get recommended games: $e');
     }
@@ -666,12 +685,17 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final ratings = await _supabaseDataSource.getUserRatings(_currentUserId!);
-      _addTestResult('✅ Ratings retrieved: ${ratings.length} games');
-      final sample =
-          ratings.entries.take(3).map((e) => '${e.key}:${e.value}').join(', ');
+      final ratedGames =
+          await _supabaseDataSource.getRatedGames(_currentUserId!);
+      _addTestResult('✅ Ratings retrieved: ${ratedGames.length} games');
+      final sample = ratedGames
+          .take(3)
+          .map((g) => '${g['game_id']}:${g['rating']}')
+          .join(', ');
       if (sample.isNotEmpty) {
-        _addTestResult('   Sample: $sample${ratings.length > 3 ? "..." : ""}');
+        _addTestResult(
+          '   Sample: $sample${ratedGames.length > 3 ? "..." : ""}',
+        );
       }
     } catch (e) {
       _addTestResult('❌ Failed to get ratings: $e');
@@ -688,13 +712,14 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final users = await _supabaseDataSource.searchUsers(query: query);
+      final userMaps = await _supabaseDataSource.searchUsers(query);
       setState(() {
-        _searchResults = users;
+        _searchResults =
+            userMaps.map((map) => UserModel.fromJson(map)).toList();
       });
-      _addTestResult('✅ User search completed: ${users.length} results');
-      if (users.isNotEmpty) {
-        _addTestResult('   First result: ${users.first.username}');
+      _addTestResult('✅ User search completed: ${userMaps.length} results');
+      if (userMaps.isNotEmpty) {
+        _addTestResult('   First result: ${userMaps.first['username']}');
       }
     } catch (e) {
       _addTestResult('❌ Failed to search users: $e');
@@ -713,8 +738,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.followUser(
-          currentUserId: _currentUserId!, targetUserId: targetId);
+      await _supabaseDataSource.followUser(_currentUserId!, targetId);
       _addTestResult('✅ Successfully followed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to follow user: $e');
@@ -733,8 +757,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      await _supabaseDataSource.unfollowUser(
-          currentUserId: _currentUserId!, targetUserId: targetId);
+      await _supabaseDataSource.unfollowUser(_currentUserId!, targetId);
       _addTestResult('✅ Successfully unfollowed user: $targetId');
     } catch (e) {
       _addTestResult('❌ Failed to unfollow user: $e');
@@ -747,8 +770,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final followers =
-          await _supabaseDataSource.getUserFollowers(userId: _currentUserId!);
+      final followers = await _supabaseDataSource.getFollowers(_currentUserId!);
       _addTestResult('✅ Followers retrieved: ${followers.length}');
       if (followers.isNotEmpty) {
         _addTestResult(
@@ -765,8 +787,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final following =
-          await _supabaseDataSource.getUserFollowing(userId: _currentUserId!);
+      final following = await _supabaseDataSource.getFollowing(_currentUserId!);
       _addTestResult('✅ Following retrieved: ${following.length}');
       if (following.isNotEmpty) {
         _addTestResult(
@@ -808,8 +829,7 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
       }
 
       setState(() => _isLoading = true);
-      await _supabaseDataSource.updateTopThreeGames(
-          userId: _currentUserId!, gameIds: uniqueGameIds);
+      await _supabaseDataSource.updateTopThree(_currentUserId!, uniqueGameIds);
       _addTestResult('✅ Top games updated: ${uniqueGameIds.join(", ")}');
     } catch (e) {
       _addTestResult('❌ Failed to update top games: $e');
@@ -822,10 +842,9 @@ class _SupabaseTestPageState extends State<SupabaseTestPage> {
 
     setState(() => _isLoading = true);
     try {
-      final topGames = await _supabaseDataSource.getUserTopThreeGames(
-          userId: _currentUserId!);
-      _addTestResult('✅ Top games retrieved: ${topGames.length}');
-      if (topGames.isNotEmpty) {
+      final topGames = await _supabaseDataSource.getTopThree(_currentUserId!);
+      _addTestResult('✅ Top games retrieved: ${topGames?.length ?? 0}');
+      if (topGames != null && topGames.isNotEmpty) {
         _addTestResult('   Game IDs: ${topGames.join(", ")}');
       }
     } catch (e) {

@@ -4,7 +4,7 @@
 
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import '../../../domain/entities/event/event.dart';
 import '../../../domain/usecases/event/get_complete_event_details.dart';
 import '../../../domain/usecases/event/get_current_events.dart';
@@ -24,6 +24,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final GetEventsByDateRange getEventsByDateRange;
   final GetEventsByGames getEventsByGames;
   final GetCompleteEventDetails getCompleteEventDetails;
+  final GameEnrichmentService enrichmentService;
 
   EventBloc({
     required this.getEventDetails,
@@ -33,6 +34,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.getEventsByDateRange,
     required this.getEventsByGames,
     required this.getCompleteEventDetails,
+    required this.enrichmentService,
   }) : super(EventInitial()) {
     on<GetEventDetailsEvent>(_onGetEventDetails);
     on<GetCurrentEventsEvent>(_onGetCurrentEvents);
@@ -261,16 +263,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     if (event.games.isEmpty) return event;
 
     try {
-      print('🎉 EventBloc: Using GameEnrichmentUtils for event games...');
-
-      // 🆕 Verwende Utils statt eigene Implementierung
-      final enrichedGames = await GameEnrichmentUtils.enrichEventGames(
+      final enrichedGames = await enrichmentService.enrichGames(
         event.games,
         userId,
       );
-
-      // 🆕 Debug Stats
-      GameEnrichmentUtils.printEnrichmentStats(enrichedGames, context: 'Event');
 
       // Create new Event with enriched games
       final enrichedEvent = Event(

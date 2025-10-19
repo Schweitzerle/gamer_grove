@@ -93,18 +93,18 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
 
       // Image downloaden
       final dio = Dio();
-      final imageResponse = await dio.get(
+      final imageResponse = await dio.get<List<int>>(
         ImageUtils.getLargeImageUrl(imageUrl),
         options: Options(responseType: ResponseType.bytes),
       );
 
-      if (imageResponse.statusCode == 200) {
+      if (imageResponse.statusCode == 200 && imageResponse.data != null) {
         // Temporäre Datei erstellen
         final tempDir = await getTemporaryDirectory();
         final fileName =
             'gamer_grove_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final tempFile = File('${tempDir.path}/$fileName');
-        await tempFile.writeAsBytes(imageResponse.data);
+        await tempFile.writeAsBytes(imageResponse.data!);
 
         // In Galerie speichern
         await Gal.putImage(tempFile.path, album: 'Gamer Grove');

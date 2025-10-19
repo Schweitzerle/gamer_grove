@@ -151,7 +151,7 @@ class CharactersSection extends StatelessWidget {
     Character? initialCharacter,
   }) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => CharactersScreen(
           characters: characters,
           gameTitle: game.name,

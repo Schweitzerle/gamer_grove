@@ -404,7 +404,7 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
   }
 
   void _showSortBottomSheet() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

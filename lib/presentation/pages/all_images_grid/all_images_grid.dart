@@ -47,7 +47,7 @@ class AllImagesGrid extends StatelessWidget {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.of(context).push(
-                    PageRouteBuilder(
+                    PageRouteBuilder<void>(
                       pageBuilder: (context, animation, _) => FadeTransition(
                         opacity: animation,
                         child: FullScreenImageViewer(

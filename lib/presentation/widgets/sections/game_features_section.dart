@@ -500,7 +500,7 @@ class GameFeaturesSection extends StatelessWidget {
     Color color,
     IconData icon,
   ) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

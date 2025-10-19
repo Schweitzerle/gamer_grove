@@ -182,7 +182,7 @@ class AgeRatingChip extends StatelessWidget {
     if (rating.synopsis != null ||
         rating.contentDescriptions.isNotEmpty ||
         rating.ratingCoverUrl != null) {
-      showDialog(
+      showDialog<void>(
         context: context,
         builder: (context) => AgeRatingDetailsDialog(rating: rating),
       );

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_details_screen.dart';
 import '../../../domain/entities/platform/platform.dart';
@@ -33,13 +34,13 @@ class PlatformDetailPage extends StatelessWidget {
         final bloc = sl<PlatformBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
-        final userId = authState is Authenticated ? authState.user.id : null;
+        final userId =
+            authState is AuthAuthenticated ? authState.user.id : null;
         print('🎭 PlatformDetailPage: Adding GetPlatformDetailsEvent');
         bloc.add(GetPlatformDetailsEvent(
             platformId: platformId,
             includeGames: true, // 🆕 Explicitly set to true
-            userId: userId
-        ));
+            userId: userId));
         return bloc;
       },
       child: BlocBuilder<PlatformBloc, PlatformState>(
@@ -50,7 +51,8 @@ class PlatformDetailPage extends StatelessWidget {
             print('🔄 PlatformDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is PlatformDetailsLoaded) {
-            print('✅ PlatformDetailPage: Loaded state - ${state.platform.name} with ${state.games.length} games');
+            print(
+                '✅ PlatformDetailPage: Loaded state - ${state.platform.name} with ${state.games.length} games');
             return PlatformDetailScreen(
               platform: state.platform,
               games: state.games,
@@ -67,7 +69,6 @@ class PlatformDetailPage extends StatelessWidget {
     );
   }
 
-
   Widget _buildLiveLoadingState(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -75,7 +76,8 @@ class PlatformDetailPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -103,7 +105,8 @@ class PlatformDetailPage extends StatelessWidget {
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -133,9 +136,9 @@ class PlatformDetailPage extends StatelessWidget {
               Text(
                 'Failed to Load Platform',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                 textAlign: TextAlign.center,
               ),
 
@@ -148,16 +151,17 @@ class PlatformDetailPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
                 child: Text(
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontFamily: 'monospace',
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily: 'monospace',
+                      ),
                 ),
               ),
 
@@ -169,8 +173,8 @@ class PlatformDetailPage extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     context.read<PlatformBloc>().add(
-                      GetPlatformDetailsEvent(platformId: platformId),
-                    );
+                          GetPlatformDetailsEvent(platformId: platformId),
+                        );
                   },
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry Loading'),

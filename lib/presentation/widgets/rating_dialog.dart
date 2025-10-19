@@ -5,7 +5,7 @@ import '../../core/constants/app_constants.dart';
 class RatingDialog extends StatefulWidget {
   final String gameName;
   final double? currentRating;
-  final Function(double rating) onRatingSubmitted;
+  final void Function(double rating) onRatingSubmitted;
 
   const RatingDialog({
     super.key,
@@ -18,7 +18,8 @@ class RatingDialog extends StatefulWidget {
   State<RatingDialog> createState() => _RatingDialogState();
 }
 
-class _RatingDialogState extends State<RatingDialog> with TickerProviderStateMixin {
+class _RatingDialogState extends State<RatingDialog>
+    with TickerProviderStateMixin {
   late double _currentRating;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -77,7 +78,8 @@ class _RatingDialogState extends State<RatingDialog> with TickerProviderStateMix
     for (int i = 1; i <= 10; i++) {
       double starValue = i.toDouble();
       bool isSelected = starValue <= _currentRating;
-      bool isHalfSelected = (starValue - 0.5) <= _currentRating && starValue > _currentRating;
+      bool isHalfSelected =
+          (starValue - 0.5) <= _currentRating && starValue > _currentRating;
 
       stars.add(
         GestureDetector(
@@ -126,8 +128,8 @@ class _RatingDialogState extends State<RatingDialog> with TickerProviderStateMix
             Text(
               'Rate Game',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -171,16 +173,16 @@ class _RatingDialogState extends State<RatingDialog> with TickerProviderStateMix
                   Text(
                     _currentRating.toStringAsFixed(1),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: _getRatingColor(_currentRating),
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: _getRatingColor(_currentRating),
+                        ),
                   ),
                   Text(
                     _getRatingText(_currentRating),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: _getRatingColor(_currentRating),
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: _getRatingColor(_currentRating),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ],
               ),
@@ -220,8 +222,8 @@ class _RatingDialogState extends State<RatingDialog> with TickerProviderStateMix
             Text(
               'Tap stars or use slider to rate',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],

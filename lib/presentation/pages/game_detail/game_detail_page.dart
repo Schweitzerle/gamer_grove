@@ -1,6 +1,7 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
@@ -60,7 +61,7 @@ class _GameDetailPageState extends State<GameDetailPage>
 
     print('🔍 DEBUG: AuthState = ${authState.runtimeType}');
 
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
       print('✅ DEBUG: User authenticated, ID = $_currentUserId');
     } else {

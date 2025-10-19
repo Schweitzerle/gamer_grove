@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 
@@ -10,7 +11,7 @@ class SocialPage extends StatelessWidget {
   Widget build(BuildContext context) {
     context.select((AuthBloc bloc) {
       final state = bloc.state;
-      return state is Authenticated ? state.user : null;
+      return state is AuthAuthenticated ? state.user : null;
     });
 
     return Scaffold(

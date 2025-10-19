@@ -1,4 +1,5 @@
 /* // lib/injection_container.dart
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/usecases/game/get_user_rated.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
@@ -92,6 +93,9 @@ Future<void> init() async {
   print('🔨 DI: Registering core dependencies...');
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
   sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));
+  sl.registerLazySingleton<GameEnrichmentService>(
+    () => GameEnrichmentService(supabase: sl(), enableLogging: true),
+  );
 
   // Data sources
   print('📡 DI: Registering data sources...');
@@ -247,6 +251,7 @@ Future<void> init() async {
       getTopRatedGames: sl(),
       getLatestGames: sl(),
       gameRepository: sl<GameRepository>(),
+      enrichmentService: sl(),
     ),
   );
 
@@ -266,6 +271,7 @@ Future<void> init() async {
   sl.registerFactory(
     () => CharacterBloc(
       getCharacterWithGames: sl(),
+      enrichmentService: sl(),
     ),
   );
 

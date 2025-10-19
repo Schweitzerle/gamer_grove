@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/widgets/sections/header_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_games_section.dart';
@@ -43,7 +44,7 @@ class _HomeContentState extends State<HomeContent> {
   void _loadInitialData() {
     // Get current user
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
     }
 
@@ -84,7 +85,7 @@ class _HomeContentState extends State<HomeContent> {
                       tooltip: 'Supabase Test',
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (context) => const SupabaseTestPage(),
                           ),
                         );
@@ -95,7 +96,7 @@ class _HomeContentState extends State<HomeContent> {
                       tooltip: 'IGDB API Test',
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (context) => const IGDBTestPage(),
                           ),
                         );

@@ -46,7 +46,7 @@ class AllVideosGrid extends StatelessWidget {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.of(context).push(
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                       builder: (context) => VideoPlayerScreen(
                         video: video,
                         videoIndex: index,
@@ -85,7 +85,6 @@ class AllVideosGrid extends StatelessWidget {
                                 ),
                               ),
                             ),
-
                             Center(
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -112,9 +111,10 @@ class AllVideosGrid extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         child: Text(
                           video.title ?? 'Video ${index + 1}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),

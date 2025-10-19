@@ -207,7 +207,7 @@ class MediaGallery extends StatelessWidget {
 
   void _openVideoPlayer(BuildContext context, GameVideo video) {
     // TODO: Implement video player or launch YouTube
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(video.title ?? 'Game Video'),
@@ -225,7 +225,7 @@ class MediaGallery extends StatelessWidget {
   void _openImageGallery(
       BuildContext context, List<String> images, int initialIndex) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => ImageGalleryPage(
           images: images,
           initialIndex: initialIndex,

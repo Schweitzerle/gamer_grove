@@ -4,7 +4,8 @@ import '../../domain/entities/game/game.dart';
 
 class TopThreeDialog extends StatefulWidget {
   final Game game;
-  final Function(int) onPositionSelected; // Das erwartet die GameDetailPage
+  final void Function(int)
+      onPositionSelected; // Das erwartet die GameDetailPage
 
   const TopThreeDialog({
     super.key,

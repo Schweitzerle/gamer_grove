@@ -13,6 +13,7 @@ import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/company/company_model.dart';
 import 'package:gamer_grove/data/models/event/event_model.dart';
 import 'package:gamer_grove/data/models/game/game_engine_model.dart';
+import 'package:gamer_grove/data/models/genre_model.dart';
 
 import 'base/igdb_query.dart';
 
@@ -38,6 +39,9 @@ typedef IgdbEventQuery = IgdbQuery<EventModel>;
 /// Query type for game_engines
 typedef IgdbGameEngineQuery = IgdbQuery<GameEngineModel>;
 
+/// Query type for genres
+typedef IgdbGenreQuery = IgdbQuery<GenreModel>;
+
 // ============================================================
 // BUILDER TYPE ALIASES
 // ============================================================
@@ -59,3 +63,6 @@ typedef IgdbEventQueryBuilder = IgdbQueryBuilder<EventModel>;
 
 /// Builder type for game_engine queries
 typedef IgdbGameEngineQueryBuilder = IgdbQueryBuilder<GameEngineModel>;
+
+/// Builder type for genre queries
+typedef IgdbGenreQueryBuilder = IgdbQueryBuilder<GenreModel>;

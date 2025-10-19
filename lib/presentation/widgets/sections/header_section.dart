@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/navigations.dart';
 import '../../blocs/auth/auth_bloc.dart';
@@ -42,7 +43,7 @@ class HeaderSection extends StatelessWidget {
   Widget _buildWelcomeSection(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        if (authState is Authenticated) {
+        if (authState is AuthAuthenticated) {
           return _AuthenticatedWelcome(user: authState.user);
         } else {
           return const _GuestWelcome();
@@ -78,7 +79,8 @@ class HeaderSection extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: onSupabaseTestPressed ?? () => _navigateToSupabaseTest(context),
+            onPressed:
+                onSupabaseTestPressed ?? () => _navigateToSupabaseTest(context),
             icon: const Icon(Icons.storage),
             label: const Text('Test Supabase'),
           ),
@@ -99,7 +101,6 @@ class HeaderSection extends StatelessWidget {
   void _navigateToSearch(BuildContext context) {
     Navigations.navigateToSearch(context);
   }
-
 
   void _navigateToSupabaseTest(BuildContext context) {
     Navigations.navigateToSupabaseTest(context);
@@ -124,15 +125,15 @@ class _AuthenticatedWelcome extends StatelessWidget {
         Text(
           'Welcome back, ${user.username}!',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: AppConstants.paddingSmall),
         Text(
           'Discover your next favorite game',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );
@@ -150,15 +151,15 @@ class _GuestWelcome extends StatelessWidget {
         Text(
           'Discover Amazing Games',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: AppConstants.paddingSmall),
         Text(
           'Find, rate, and track your gaming journey',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );

@@ -4,10 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../../core/errors/failures.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
-import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
-import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource_impl.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/franchise.dart';
@@ -32,7 +30,6 @@ import '../../../domain/usecases/game/get_upcoming_games.dart';
 import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
-import '../../../injection_container.dart';
 import 'game_extensions.dart';
 
 part 'game_event.dart';
@@ -61,6 +58,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
   final GameRepository gameRepository;
+  final GameEnrichmentService enrichmentService;
 
   GameBloc({
     required this.searchGames,
@@ -84,6 +82,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getEnhancedGameDetails,
     required this.getCompleteGameDetailPageData,
     required this.gameRepository,
+    required this.enrichmentService,
   }) : super(GameInitial()) {
     // Search events
     on<SearchGamesEvent>(
@@ -410,85 +409,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         (game) async {
           if (event.userId != null) {
             try {
-              print('🔍 Loading user data for game ${event.gameId}');
+              // Use the new enrichment service - much simpler!
+              final enrichedGames = await enrichmentService.enrichGames(
+                [game],
+                event.userId!,
+              );
 
-              final supabaseDataSource = sl<SupabaseRemoteDataSource>()
-                  as SupabaseRemoteDataSourceImpl;
-
-              // Try to use RPC function first
-              try {
-                final userGameData = await supabaseDataSource.getUserGameData(
-                    event.userId!, event.gameId);
-
-                // Get top three position separately
-                final topThreeData =
-                    await supabaseDataSource.getUserTopThreeGames(
-                  userId: event.userId!,
-                );
-
-                // Find position for current game
-                int? gamePosition;
-                bool isInTopThree = false;
-
-                for (var entry in topThreeData) {
-                  if (entry['game_id'] == event.gameId) {
-                    isInTopThree = true;
-                    gamePosition = entry['position'] as int;
-                    break;
-                  }
-                }
-
-                // Update game with all user-specific data
-                final enhancedGame = game.copyWith(
-                  isWishlisted: userGameData?['is_wishlisted'] ?? false,
-                  isRecommended: userGameData?['is_recommended'] ?? false,
-                  userRating: userGameData?['user_rating']?.toDouble(),
-                  isInTopThree: isInTopThree,
-                  topThreePosition: gamePosition,
-                );
-
-                print(
-                    '✅ User data loaded: wishlist=${enhancedGame.isWishlisted}, '
-                    'recommended=${enhancedGame.isRecommended}, '
-                    'rating=${enhancedGame.userRating}, '
-                    'top3=${enhancedGame.isInTopThree} (position: $gamePosition)');
-
-                if (!emit.isDone) {
-                  emit(GameDetailsLoaded(enhancedGame));
-                }
-              } catch (rpcError) {
-                // Fallback: Load data individually
-                print('⚠️ RPC failed, loading data individually: $rpcError');
-
-                final futures = await Future.wait([
-                  _getUserWishlistIds(event.userId!),
-                  _getUserRecommendedIds(event.userId!),
-                  _getUserRatings(event.userId!),
-                  _getUserTopThreeGames(event.userId!),
-                ]);
-
-                final wishlistIds = futures[0] as List<int>;
-                final recommendedIds = futures[1] as List<int>;
-                final userRatings = futures[2] as Map<int, double>;
-                final topThreeIds = futures[3] as List<int>;
-
-                // Get position if in top three
-                int? gamePosition;
-                if (topThreeIds.contains(game.id)) {
-                  gamePosition = topThreeIds.indexOf(game.id) + 1;
-                }
-
-                final enhancedGame = game.copyWith(
-                  isWishlisted: wishlistIds.contains(game.id),
-                  isRecommended: recommendedIds.contains(game.id),
-                  userRating: userRatings[game.id],
-                  isInTopThree: topThreeIds.contains(game.id),
-                  topThreePosition: gamePosition,
-                );
-
-                if (!emit.isDone) {
-                  emit(GameDetailsLoaded(enhancedGame));
-                }
+              if (!emit.isDone) {
+                emit(GameDetailsLoaded(enrichedGames.first));
               }
             } catch (e) {
               // If user data fails, still show game without user data
@@ -700,62 +628,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     }
   }
 
-// Helper methods for user data (add to GameBloc)
-  Future<List<int>> _getUserWishlistIds(String userId) async {
-    final result = await getUserWishlist(
-        GetUserWishlistParams(userId: userId, limit: 20, offset: 0));
-    return result.fold(
-      (failure) => <int>[],
-      (games) => games.map((game) => game.id).toList(),
-    );
-  }
-
-  Future<List<int>> _getUserRecommendedIds(String userId) async {
-    final result = await getUserRecommendations(
-        GetUserRecommendationsParams(userId: userId, limit: 20, offset: 0));
-    return result.fold(
-      (failure) => <int>[],
-      (games) => games.map((game) => game.id).toList(),
-    );
-  }
-
-  Future<Map<int, double>> _getUserRatings(String userId) async {
-    try {
-      // Directly use the supabase data source since we don't have a use case for this yet
-      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
-      final ratings = await supabaseDataSource.getUserRatings(userId);
-      return ratings;
-    } catch (e) {
-      print('❌ GameBloc: Failed to get user ratings: $e');
-      return <int, double>{};
-    }
-  }
-
-  Future<List<int>> _getUserTopThreeGames(String userId) async {
-    final result =
-        await getUserTopThreeGames(GetUserTopThreeGamesParams(userId: userId));
-    return result.fold(
-      (failure) => <int>[],
-      (topThreeData) {
-        // ✅ FIX: Extract game IDs and sort by position
-        final List<int> gameIds = [];
-
-        // Sort by position first
-        topThreeData.sort(
-            (a, b) => (a['position'] as int).compareTo(b['position'] as int));
-
-        // Extract game IDs in correct order
-        for (final item in topThreeData) {
-          final gameId = item['game_id'] as int;
-          gameIds.add(gameId);
-        }
-
-        return gameIds;
-      },
-    );
-  }
-
-  // 4. Aktualisierte _onLoadHomePageData Methode:
+  // Home Page Data Loading
 
   Future<void> _onLoadHomePageData(
     LoadHomePageDataEvent event,
@@ -896,11 +769,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     String userId, {
     int? enrichLimit,
   }) async {
-    return await GameEnrichmentUtils.enrichGameDetailGames(
-      games,
-      userId,
-      limit: enrichLimit ?? 15,
-    );
+    return enrichmentService.enrichGames(games, userId);
   }
 
   void _updateGameInHomePageState(

@@ -2,6 +2,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../auth/login_page.dart';
@@ -55,20 +57,22 @@ class _SplashPageState extends State<SplashPage>
     _animationController.forward();
 
     // Wait for minimum splash duration
-    await Future.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 2));
 
     // Check auth status with timeout
     if (mounted) {
       print('🚀 SplashPage: Checking auth status...');
-      context.read<AuthBloc>().add(CheckAuthStatus());
+      context.read<AuthBloc>().add(const CheckAuthStatusEvent());
 
       // Add a safety timeout
-      Future.delayed(const Duration(seconds: 5), () {
+      Future<void>.delayed(const Duration(seconds: 5), () {
         if (mounted) {
           final currentState = context.read<AuthBloc>().state;
-          print('⏰ SplashPage: Timeout reached, current state: ${currentState.runtimeType}');
+          print(
+              '⏰ SplashPage: Timeout reached, current state: ${currentState.runtimeType}');
           if (currentState is AuthLoading) {
-            print('🔧 SplashPage: Still loading after timeout, forcing navigation to login');
+            print(
+                '🔧 SplashPage: Still loading after timeout, forcing navigation to login');
             _navigateToLogin();
           }
         }
@@ -88,10 +92,10 @@ class _SplashPageState extends State<SplashPage>
       listener: (context, state) {
         print('🔥 SplashPage: Auth state changed to ${state.runtimeType}');
 
-        if (state is Authenticated) {
+        if (state is AuthAuthenticated) {
           print('✅ SplashPage: User authenticated, navigating to home');
           _navigateToHome();
-        } else if (state is Unauthenticated) {
+        } else if (state is AuthUnauthenticated) {
           print('❌ SplashPage: User not authenticated, navigating to login');
           _navigateToLogin();
         } else if (state is AuthError) {
@@ -143,21 +147,27 @@ class _SplashPageState extends State<SplashPage>
                             // App Name
                             Text(
                               AppConstants.appName,
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                  ),
                             ),
                             const SizedBox(height: AppConstants.paddingSmall),
 
                             // App Tagline
                             Text(
                               AppConstants.appDescription,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.white.withOpacity(0.9),
-                                letterSpacing: 0.5,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    letterSpacing: 0.5,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -195,17 +205,19 @@ class _SplashPageState extends State<SplashPage>
                         const SizedBox(height: AppConstants.paddingMedium),
                         Text(
                           loadingText,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white.withOpacity(0.8),
+                                  ),
                         ),
                         if (kDebugMode) ...[
                           const SizedBox(height: AppConstants.paddingSmall),
                           Text(
                             'State: ${state.runtimeType}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.6),
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.white.withOpacity(0.6),
+                                    ),
                           ),
                         ],
                       ],
@@ -222,8 +234,8 @@ class _SplashPageState extends State<SplashPage>
           child: Text(
             'Version ${AppConstants.appVersion}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(0.7),
-            ),
+                  color: Colors.white.withOpacity(0.7),
+                ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -234,8 +246,9 @@ class _SplashPageState extends State<SplashPage>
   void _navigateToHome() {
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const HomePage(),
+        PageRouteBuilder<void>(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const HomePage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
@@ -251,8 +264,9 @@ class _SplashPageState extends State<SplashPage>
   void _navigateToLogin() {
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const LoginPage(),
+        PageRouteBuilder<void>(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const LoginPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
@@ -265,4 +279,3 @@ class _SplashPageState extends State<SplashPage>
     }
   }
 }
-

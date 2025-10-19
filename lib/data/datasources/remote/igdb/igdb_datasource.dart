@@ -6,6 +6,7 @@ import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/company/company_model.dart';
 import 'package:gamer_grove/data/models/event/event_model.dart';
 import 'package:gamer_grove/data/models/game/game_engine_model.dart';
+import 'package:gamer_grove/data/models/genre_model.dart';
 
 import 'models/igdb_query.dart';
 
@@ -208,4 +209,34 @@ abstract class IgdbDataSource {
   /// final engines = await dataSource.queryGameEngines(query);
   /// ```
   Future<List<GameEngineModel>> queryGameEngines(IgdbGameEngineQuery query);
+
+  // ============================================================
+  // GENRE QUERIES
+  // ============================================================
+
+  /// Queries genres from IGDB using the unified query system.
+  ///
+  /// Use this method to fetch all available genres or build
+  /// custom queries with [IgdbGenreQuery].
+  ///
+  /// **Parameters:**
+  /// - [query]: Complete query specification including filters, fields, sorting, etc.
+  ///
+  /// **Returns:**
+  /// List of [GenreModel] instances matching the query criteria.
+  ///
+  /// **Throws:**
+  /// - [ServerException] if the API request fails
+  /// - [NetworkException] if there's no network connection
+  ///
+  /// **Example:**
+  /// ```dart
+  /// final query = IgdbGenreQuery(
+  ///   fields: ['id', 'name', 'slug'],
+  ///   limit: 50,
+  ///   sort: 'name asc',
+  /// );
+  /// final genres = await dataSource.queryGenres(query);
+  /// ```
+  Future<List<GenreModel>> queryGenres(IgdbGenreQuery query);
 }

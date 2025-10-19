@@ -1,14 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import '../../../domain/usecases/company/get_company_with_games.dart';
 
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
   final GetCompanyWithGames getCompanyWithGames;
+  final GameEnrichmentService enrichmentService;
 
   CompanyBloc({
     required this.getCompanyWithGames,
+    required this.enrichmentService,
   }) : super(CompanyInitial()) {
     on<GetCompanyDetailsEvent>(_onGetCompanyDetails);
     on<ClearCompanyEvent>(_onClearCompany);
@@ -35,16 +37,10 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
       (companyWithGames) async {
         if (event.userId != null && companyWithGames.games.isNotEmpty) {
           try {
-            print(
-                '🎮 CompanyBloc: Enriching company games with GameEnrichmentUtils...');
-
-            final enrichedGames = await GameEnrichmentUtils.enrichCompanyGames(
+            final enrichedGames = await enrichmentService.enrichGames(
               companyWithGames.games,
               event.userId!,
             );
-
-            GameEnrichmentUtils.printEnrichmentStats(enrichedGames,
-                context: 'Company');
 
             emit(CompanyDetailsLoaded(
               company: companyWithGames.company,

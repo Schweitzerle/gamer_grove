@@ -1,5 +1,6 @@
 // lib/presentation/pages/all_games/enriched_all_games_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/navigations.dart';
@@ -7,7 +8,6 @@ import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../injection_container.dart';
-import '../../../data/datasources/remote/supabase/deprecated/supabase_remote_datasource.dart';
 
 enum SortOption {
   nameAZ,
@@ -93,122 +93,16 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   }
 
   Future<void> _enrichAllGames() async {
-    if (widget.userId == null || widget.games.isEmpty) return;
+    final enrichmentService = sl<GameEnrichmentService>();
+
+    final enrichedGames = await enrichmentService.enrichGames(
+      widget.games,
+      widget.userId!,
+    );
 
     setState(() {
-      _isEnriching = true;
-      _enrichmentProgress = 0;
-      _enrichmentStatus = 'Preparing to enrich $_totalGames games...';
+      _allGames = enrichedGames;
     });
-
-    try {
-      print('🔄 Starting to enrich $_totalGames games with user data...');
-
-      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
-
-      // Load Top Three data once for all games
-      setState(() {
-        _enrichmentStatus = 'Loading your top games...';
-      });
-
-      final topThreeData =
-          await supabaseDataSource.getUserTopThreeGames(userId: widget.userId!);
-      final topThreeMap = <int, int>{};
-      for (var entry in topThreeData) {
-        topThreeMap[entry['game_id'] as int] = entry['position'] as int;
-      }
-
-      // Process games in batches for better performance and progress updates
-      const int batchSize = 20;
-      final List<Game> enrichedGames = [];
-
-      for (int i = 0; i < widget.games.length; i += batchSize) {
-        final int endIndex = (i + batchSize < widget.games.length)
-            ? i + batchSize
-            : widget.games.length;
-        final List<Game> batch = widget.games.sublist(i, endIndex);
-
-        setState(() {
-          _enrichmentProgress = i;
-          _enrichmentStatus =
-              'Enriching games ${i + 1}-$endIndex of $_totalGames...';
-        });
-
-        // Enrich this batch
-        final List<Game> enrichedBatch =
-            await _enrichGamesBatch(batch, widget.userId!, topThreeMap);
-        enrichedGames.addAll(enrichedBatch);
-
-        // Small delay to allow UI updates
-        await Future.delayed(const Duration(milliseconds: 50));
-      }
-
-      setState(() {
-        _isEnriching = false;
-        _allGames = enrichedGames;
-        _enrichmentProgress = _totalGames;
-        _enrichmentStatus = 'Completed! $_totalGames games enriched.';
-      });
-
-      print('✅ Successfully enriched ${enrichedGames.length} games');
-      _applyFiltersAndSort();
-    } catch (e) {
-      print('❌ Error enriching games: $e');
-      setState(() {
-        _isEnriching = false;
-        _allGames = List.from(widget.games); // Fallback to non-enriched
-        _enrichmentStatus =
-            'Enrichment failed, showing games without user data.';
-      });
-      _applyFiltersAndSort();
-    }
-  }
-
-  Future<List<Game>> _enrichGamesBatch(
-    List<Game> games,
-    String userId,
-    Map<int, int> topThreeMap,
-  ) async {
-    try {
-      final supabaseDataSource = sl<SupabaseRemoteDataSource>();
-
-      // Get user game data for this batch
-      final futures = games
-          .map((game) => supabaseDataSource.getUserGameData(userId, game.id))
-          .toList();
-
-      final userGameDataList = await Future.wait(futures);
-
-      // Create enriched games
-      final enrichedGames = <Game>[];
-      for (int i = 0; i < games.length; i++) {
-        final game = games[i];
-        final userGameData = userGameDataList[i];
-
-        if (userGameData != null) {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: userGameData['is_wishlisted'] ?? false,
-            isRecommended: userGameData['is_recommended'] ?? false,
-            userRating: userGameData['rating']?.toDouble(),
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        } else {
-          enrichedGames.add(game.copyWith(
-            isWishlisted: false,
-            isRecommended: false,
-            userRating: null,
-            isInTopThree: topThreeMap.containsKey(game.id),
-            topThreePosition: topThreeMap[game.id],
-          ));
-        }
-      }
-
-      return enrichedGames;
-    } catch (e) {
-      print('❌ Error enriching batch: $e');
-      return games; // Return original games if enrichment fails
-    }
   }
 
   void _applyFiltersAndSort() {
@@ -645,8 +539,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     );
   }
 
-  void _showSortDialog() {
-    showDialog(
+  Future<void> _showSortDialog() async {
+    await showDialog<void>(
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('Sort by'),

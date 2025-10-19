@@ -1,184 +1,204 @@
-// ==========================================
-
 // lib/data/repositories/event_repository_impl.dart
+
+/// Refactored Event Repository Implementation.
+///
+/// Uses [IgdbBaseRepository] for unified error handling and the new
+/// IGDB query system for clean, maintainable code.
+///
+/// Key improvements:
+/// - Extends IgdbBaseRepository for automatic error handling
+/// - Uses EventQueryPresets for common queries
+/// - Eliminates code duplication
+/// - Better separation of concerns
+/// - Production-ready error handling
+library;
+
 import 'package:dartz/dartz.dart';
-import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/entities/event/event.dart';
 import '../../domain/repositories/event_repository.dart';
-import '../datasources/local/cache_datasource.dart';
-import '../datasources/remote/igdb/deprecated/idgb_remote_datasource.dart';
+import '../datasources/remote/igdb/igdb_datasource.dart';
+import '../datasources/remote/igdb/models/igdb_query.dart';
+import '../datasources/remote/igdb/models/igdb_filters.dart';
+import '../datasources/remote/igdb/models/event/event_query_presets.dart';
+import '../datasources/remote/igdb/models/event/event_filters.dart';
+import '../datasources/remote/igdb/models/event/event_field_sets.dart';
+import 'base/igdb_base_repository.dart';
 
-class EventRepositoryImpl implements EventRepository {
-  final IGDBRemoteDataSource igdbDataSource;
-  final LocalDataSource localDataSource;
-  final NetworkInfo networkInfo;
+/// Concrete implementation of [EventRepository].
+///
+/// Handles all event-related operations using the IGDB API through
+/// the unified query system.
+///
+/// Example usage:
+/// ```dart
+/// final eventRepo = EventRepositoryImpl(
+///   igdbDataSource: igdbDataSource,
+///   networkInfo: networkInfo,
+/// );
+///
+/// // Get current events
+/// final result = await eventRepo.getCurrentEvents(limit: 10);
+/// result.fold(
+///   (failure) => print('Error: ${failure.message}'),
+///   (events) => print('Found ${events.length} current events'),
+/// );
+/// ```
+class EventRepositoryImpl extends IgdbBaseRepository
+    implements EventRepository {
+  final IgdbDataSource igdbDataSource;
 
   EventRepositoryImpl({
     required this.igdbDataSource,
-    required this.localDataSource,
-    required this.networkInfo,
-  });
+    required NetworkInfo networkInfo,
+  }) : super(networkInfo: networkInfo);
+
+  // ============================================================
+  // CURRENT & UPCOMING EVENTS
+  // ============================================================
+
+  @override
+  Future<Either<Failure, List<Event>>> getCurrentEvents({
+    int limit = 10,
+  }) {
+    return executeIgdbOperation(
+      operation: () async {
+        final query = EventQueryPresets.ongoing(
+          limit: limit,
+          offset: 0,
+        );
+        return igdbDataSource.queryEvents(query);
+      },
+      errorMessage: 'Failed to fetch current events',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Event>>> getUpcomingEvents({
+    int limit = 10,
+  }) {
+    return executeIgdbOperation(
+      operation: () async {
+        final query = EventQueryPresets.upcoming(
+          limit: limit,
+          offset: 0,
+          daysAhead: 30,
+        );
+        return igdbDataSource.queryEvents(query);
+      },
+      errorMessage: 'Failed to fetch upcoming events',
+    );
+  }
+
+  // ============================================================
+  // SEARCH & DETAILS
+  // ============================================================
+
+  @override
+  Future<Either<Failure, List<Event>>> searchEvents(String query) {
+    if (query.trim().isEmpty) {
+      return Future.value(const Right([]));
+    }
+
+    return executeIgdbOperation(
+      operation: () async {
+        final searchQuery = EventQueryPresets.search(
+          searchTerm: query.trim(),
+          limit: 50,
+          offset: 0,
+        );
+        return igdbDataSource.queryEvents(searchQuery);
+      },
+      errorMessage: 'Failed to search events',
+    );
+  }
+
+  @override
+  Future<Either<Failure, Event>> getEventDetails(int eventId) {
+    if (eventId <= 0) {
+      return Future.value(
+        const Left(ValidationFailure(message: 'Invalid event ID')),
+      );
+    }
+
+    return executeIgdbOperation(
+      operation: () async {
+        final query = EventQueryPresets.fullDetails(eventId: eventId);
+        final events = await igdbDataSource.queryEvents(query);
+
+        if (events.isEmpty) {
+          throw const IgdbNotFoundException(
+            message: 'Event not found',
+          );
+        }
+
+        return events.first;
+      },
+      errorMessage: 'Failed to fetch event details',
+    );
+  }
+
+  // ============================================================
+  // FILTERED QUERIES
+  // ============================================================
 
   @override
   Future<Either<Failure, List<Event>>> getEventsByDateRange({
     DateTime? startDate,
     DateTime? endDate,
     int limit = 50,
-  }) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
+  }) {
+    return executeIgdbOperation(
+      operation: () async {
+        // Build filter based on provided dates
+        IgdbFilter? filter;
 
-      print('📅 EventRepository: Getting events by date range (limit: $limit)');
+        if (startDate != null && endDate != null) {
+          filter = EventFilters.between(startDate, endDate);
+        } else if (startDate != null) {
+          filter = EventFilters.startsAfter(startDate);
+        } else if (endDate != null) {
+          filter = EventFilters.startsBefore(endDate);
+        }
 
-      final events = await igdbDataSource.getEventsByDateRange(
-        startDate: startDate,
-        endDate: endDate,
-        limit: limit,
-      );
+        final query = IgdbEventQuery(
+          where: filter,
+          fields: EventFieldSets.cards,
+          limit: limit,
+          offset: 0,
+          sort: 'start_time asc',
+        );
 
-      print('✅ EventRepository: Found ${events.length} events in date range');
-      return Right(events);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(
-          ServerFailure(message: 'Failed to load events by date range'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Event>> getEventDetails(int eventId) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎪 EventRepository: Getting event details for: $eventId');
-
-      // Use enhanced method for complete event data
-      final event = await igdbDataSource.getEventByIdWithCompleteData(eventId);
-
-      if (event == null) {
-        return const Left(ServerFailure(message: 'Event not found'));
-      }
-
-      print('✅ EventRepository: Event details loaded');
-      print(
-          '📊 EventRepository: Event "${event.name}" has ${event.games.length} games, ${event.eventNetworks.length} networks');
-
-      return Right(event);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(ServerFailure(message: 'Failed to get event details'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Event>>> getCurrentEvents(
-      {int limit = 10}) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎪 EventRepository: Getting current events (limit: $limit)');
-
-      // Use enhanced method for complete event data
-      final liveEvents =
-          await igdbDataSource.getLiveEventsWithCompleteData(limit: limit);
-
-      print(
-          '✅ EventRepository: Found ${liveEvents.length} live events with complete data');
-
-      return Right(liveEvents);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(ServerFailure(message: 'Failed to get current events'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Event>>> getUpcomingEvents(
-      {int limit = 10}) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🎪 EventRepository: Getting upcoming events (limit: $limit)');
-
-      // Use enhanced method for complete event data
-      final upcomingEvents =
-          await igdbDataSource.getUpcomingEventsWithCompleteData(limit: limit);
-
-      print(
-          '✅ EventRepository: Found ${upcomingEvents.length} upcoming events with complete data');
-
-      return Right(upcomingEvents);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(
-          ServerFailure(message: 'Failed to get upcoming events'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Event>>> searchEvents(String query) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      print('🔍 EventRepository: Searching events for: "$query"');
-
-      // Use enhanced method for complete event data
-      final events = await igdbDataSource.searchEventsWithCompleteData(query);
-
-      print(
-          '✅ EventRepository: Found ${events.length} events with complete data');
-
-      return Right(events);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(ServerFailure(message: 'Failed to search events'));
-    }
+        return igdbDataSource.queryEvents(query);
+      },
+      errorMessage: 'Failed to fetch events by date range',
+    );
   }
 
   @override
   Future<Either<Failure, List<Event>>> getEventsByGames(
-      List<int> gameIds) async {
-    try {
-      if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure());
-      }
-
-      if (gameIds.isEmpty) {
-        return const Right([]);
-      }
-
-      print('🎪 EventRepository: Getting events for ${gameIds.length} games');
-
-      // Use enhanced method for complete event data
-      final events =
-          await igdbDataSource.getEventsByGamesWithCompleteData(gameIds);
-
-      print(
-          '✅ EventRepository: Found ${events.length} events with complete data');
-
-      return Right(events);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return const Left(
-          ServerFailure(message: 'Failed to get events by games'));
+    List<int> gameIds,
+  ) {
+    if (gameIds.isEmpty) {
+      return Future.value(const Right([]));
     }
+
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = EventFilters.byGames(gameIds);
+
+        final query = IgdbEventQuery(
+          where: filter,
+          fields: EventFieldSets.standard,
+          limit: 100,
+          offset: 0,
+          sort: 'start_time desc',
+        );
+
+        return igdbDataSource.queryEvents(query);
+      },
+      errorMessage: 'Failed to fetch events by games',
+    );
   }
 }

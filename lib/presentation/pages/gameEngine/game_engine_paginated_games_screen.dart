@@ -474,7 +474,7 @@ class _GameEnginePaginatedGamesScreenState
             : GameSortBy.ratingCount;
     final SortOrder initialOrder = currentState.sortOrder;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => _SortDialog(
         initialSortBy: initialSortBy,
@@ -496,7 +496,7 @@ class _GameEnginePaginatedGamesScreenState
 class _SortDialog extends StatefulWidget {
   final GameSortBy initialSortBy;
   final SortOrder initialOrder;
-  final Function(GameSortBy, SortOrder) onApply;
+  final void Function(GameSortBy, SortOrder) onApply;
 
   const _SortDialog({
     required this.initialSortBy,

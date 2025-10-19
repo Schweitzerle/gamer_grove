@@ -4,16 +4,17 @@
 
 // lib/presentation/blocs/game_engine/game_engine_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
-import '../../../core/utils/game_enrichment_utils_deprecated.dart';
 import 'game_engine_event.dart';
 import 'game_engine_state.dart';
 
 class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
   final GetGameEngineWithGames getGameEngineWithGames;
   final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
+  final GameEnrichmentService enrichmentService;
 
   // Pagination constants
   static const int _pageSize = 20;
@@ -21,6 +22,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
   GameEngineBloc({
     required this.getGameEngineWithGames,
     required this.gameRepository,
+    required this.enrichmentService,
   }) : super(GameEngineInitial()) {
     on<GetGameEngineDetailsEvent>(_onGetGameEngineDetails);
     on<ClearGameEngineEvent>(_onClearGameEngine);
@@ -55,19 +57,10 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         // 🔧 ENRICHMENT LOGIC mit GameEnrichmentUtils
         if (event.userId != null && gameEngineWithGames.games.isNotEmpty) {
           try {
-            print(
-                '🎮 GameEngineBloc: Enriching gameEngine games with GameEnrichmentUtils...');
-
-            // Verwende die Utils für Game Enrichment
-            final enrichedGames =
-                await GameEnrichmentUtils.enrichGameEngineGames(
+            final enrichedGames = await enrichmentService.enrichGames(
               gameEngineWithGames.games,
               event.userId!,
             );
-
-            // Debug Stats
-            GameEnrichmentUtils.printEnrichmentStats(enrichedGames,
-                context: 'GameEngine');
 
             emit(GameEngineDetailsLoaded(
               gameEngine: gameEngineWithGames.gameEngine,
@@ -143,7 +136,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         List<Game> enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
           try {
-            enrichedGames = await GameEnrichmentUtils.enrichGameEngineGames(
+            enrichedGames = await enrichmentService.enrichGames(
               games,
               event.userId!,
             );
@@ -218,7 +211,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         List<Game> enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
           try {
-            enrichedNewGames = await GameEnrichmentUtils.enrichGameEngineGames(
+            enrichedNewGames = await enrichmentService.enrichGames(
               newGames,
               currentState.userId!,
             );
@@ -294,7 +287,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         List<Game> enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
           try {
-            enrichedGames = await GameEnrichmentUtils.enrichGameEngineGames(
+            enrichedGames = await enrichmentService.enrichGames(
               games,
               currentState.userId!,
             );
