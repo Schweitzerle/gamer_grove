@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/constants/api_constants.dart';
 import 'injection_container.dart' as di;
 import 'injection_container.dart';
 import 'presentation/pages/splash/splash_page.dart';
@@ -19,13 +18,7 @@ void main() async {
     overlays: [SystemUiOverlay.top],
   );
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: ApiConstants.supabaseUrl,
-    anonKey: ApiConstants.supabaseAnonKey,
-  );
-
-  // Setup Dependency Injection
+  // Setup Dependency Injection (includes Supabase initialization)
   await di.initDependencies();
 
   runApp(const GamerGroveApp());
