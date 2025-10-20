@@ -85,14 +85,14 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
         throw const InvalidUsernameException();
       }
 
-      // Check if username already exists
-      final existingUser = await _supabase
-          .from('users')
-          .select('username')
-          .eq('username', username)
-          .maybeSingle();
+      // Check if username is available using database function
+      // This bypasses RLS and is safe for anonymous users
+      final isAvailable = await _supabase.rpc<bool>(
+        'is_username_available',
+        params: {'username_to_check': username},
+      );
 
-      if (existingUser != null) {
+      if (!isAvailable) {
         throw const UsernameAlreadyExistsException();
       }
 
@@ -112,8 +112,14 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
         );
       }
 
-      // Create user profile
-      await _createUserProfile(user.id, username);
+      // Debug: Check session status
+      final session = response.session;
+      print('DEBUG SignUp - User ID: ${user.id}');
+      print('DEBUG SignUp - Session exists: ${session != null}');
+      print('DEBUG SignUp - Access Token exists: ${session?.accessToken != null}');
+
+      // Note: User profile is automatically created by database trigger
+      // (handle_new_user function on auth.users INSERT)
 
       return user;
     } on AuthException catch (e) {
@@ -124,25 +130,6 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
         message: 'Failed to sign up: $e',
         originalError: e,
       );
-    }
-  }
-
-  /// Creates a user profile in the database.
-  ///
-  /// Called automatically after successful signup.
-  Future<void> _createUserProfile(String userId, String username) async {
-    try {
-      await _supabase.from('users').insert({
-        'id': userId,
-        'username': username,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-        'last_active_at': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      // Log error but don't throw - auth user was created successfully
-      // Profile creation can be retried later
-      print('Warning: Failed to create user profile: $e');
     }
   }
 

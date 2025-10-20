@@ -5,6 +5,8 @@
 /// Registers all dependencies for the app following Clean Architecture.
 library;
 
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gamer_grove/core/constants/api_constants.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
@@ -73,14 +75,8 @@ Future<void> initDependencies() async {
 
   // Initialize Supabase
   final supabase = await Supabase.initialize(
-    url: const String.fromEnvironment(
-      'SUPABASE_URL',
-      defaultValue: 'YOUR_SUPABASE_URL',
-    ),
-    anonKey: const String.fromEnvironment(
-      'SUPABASE_ANON_KEY',
-      defaultValue: 'YOUR_SUPABASE_ANON_KEY',
-    ),
+    url: ApiConstants.supabaseUrl,
+    anonKey: ApiConstants.supabaseAnonKey,
   );
 
   sl.registerLazySingleton<SupabaseClient>(() => supabase.client);
@@ -88,6 +84,9 @@ Future<void> initDependencies() async {
   // ============================================================
   // CORE
   // ============================================================
+
+  // Register Connectivity first (required by NetworkInfo)
+  sl.registerLazySingleton<Connectivity>(() => Connectivity());
 
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(sl()),

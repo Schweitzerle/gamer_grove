@@ -87,13 +87,48 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
           username,
         );
 
-        // Get the newly created profile
-        final profileResult = await this
-            .supabase
-            .from('users')
-            .select('*')
-            .eq('id', authUser.id)
-            .single();
+        // Wait for database trigger to complete profile creation
+        // Retry up to 5 times with exponential backoff
+        Map<String, dynamic>? profileResult;
+        int retries = 0;
+        const maxRetries = 5;
+
+        print('DEBUG - Attempting to fetch profile for user: ${authUser.id}');
+
+        // Verify session is active
+        final session = this.supabase.auth.currentSession;
+        print('DEBUG - Current session exists: ${session != null}');
+        print('DEBUG - Current user from session: ${session?.user.id}');
+        print('DEBUG - Access token present: ${session?.accessToken != null}');
+
+        while (retries < maxRetries) {
+          try {
+            print('DEBUG - Retry attempt ${retries + 1}/$maxRetries');
+            profileResult = await this
+                .supabase
+                .from('users')
+                .select('*')
+                .eq('id', authUser.id)
+                .single();
+            print('DEBUG - Profile fetch SUCCESS!');
+            break; // Success - exit retry loop
+          } catch (e) {
+            retries++;
+            print('DEBUG - Retry $retries failed: $e');
+            if (retries >= maxRetries) {
+              print('DEBUG - Max retries reached, giving up');
+              rethrow; // Give up after max retries
+            }
+            // Wait before retry (100ms, 200ms, 400ms, 800ms, 1600ms)
+            final delayMs = 100 * (1 << retries);
+            print('DEBUG - Waiting ${delayMs}ms before retry...');
+            await Future<void>.delayed(Duration(milliseconds: delayMs));
+          }
+        }
+
+        if (profileResult == null) {
+          throw Exception('Failed to retrieve user profile after signup');
+        }
 
         return UserModel.fromJson(profileResult).toEntity();
       },
