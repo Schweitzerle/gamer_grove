@@ -14,12 +14,9 @@
             "program": "lib/main.dart",
             "args": [
                 "-d",
-                "chrome"
-            ],
-            "env": {
-                "CHROME_EXECUTABLE": "/usr/bin/flatpak",
-                "CHROME_EXECUTABLE_ARGS": "run,com.vivaldi.Vivaldi"
-            }
+                "web-server",
+                "--web-port=8080"
+            ]
         },
         {
             "name": "Flutter (Profile)",
