@@ -742,12 +742,20 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           print('   ${whereClause.toQueryString()}');
         }
 
+        // Build sort string from filters
+        String? sortString;
+        if (filters.sortBy != GameSortBy.relevance) {
+          // Relevance doesn't need explicit sorting, it's the default
+          sortString = '${filters.sortBy.igdbField} ${filters.sortOrder.value}';
+          print('📊 Sort: $sortString');
+        }
+
         final query = IgdbGameQuery(
           where: whereClause,
           fields: GameFieldSets.standard,
           limit: limit,
           offset: offset,
-          sort: 'total_rating_count desc',
+          sort: sortString,
         );
 
         print('\n📋 Final Query String:');
