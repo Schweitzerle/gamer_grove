@@ -258,104 +258,27 @@ class GameModel extends Game {
       return GameStatus(
         id: status['id'] ?? 0,
         checksum: status['checksum'] ?? '',
-        name: status['name'] ?? 'Unknown',
+        status: status['status'] ?? 'Unknown',
         description: status['description'],
         createdAt: _parseDateTime(status['created_at']),
         updatedAt: _parseDateTime(status['updated_at']),
       );
     }
-    // Legacy support: if it's just an ID, create basic entity
-    else if (status is int) {
-      return GameStatus(
-        id: status,
-        checksum: '',
-        name: _getGameStatusName(status),
-      );
-    }
     return null; // Changed to nullable
   }
 
-  static String _getGameStatusName(int id) {
-    switch (id) {
-      case 0:
-        return 'Released';
-      case 2:
-        return 'Alpha';
-      case 3:
-        return 'Beta';
-      case 4:
-        return 'Early Access';
-      case 5:
-        return 'Offline';
-      case 6:
-        return 'Cancelled';
-      case 7:
-        return 'Rumored';
-      case 8:
-        return 'Delisted';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  // FIX: Parse GameType as Entity (not Enum)
   static GameType? _parseGameType(dynamic type) {
     // If it's already a GameType entity object
     if (type is Map && type['name'] is String) {
       return GameType(
         id: type['id'] ?? 0,
         checksum: type['checksum'] ?? '',
-        name: type['name'] ?? 'Unknown',
+        type: type['type'] ?? 'Unknown',
         createdAt: _parseDateTime(type['created_at']),
         updatedAt: _parseDateTime(type['updated_at']),
       );
     }
-    // Legacy support: if it's just an ID, create basic entity
-    else if (type is int) {
-      return GameType(
-        id: type,
-        checksum: '',
-        name: _getGameTypeName(type),
-      );
-    }
     return null; // Changed to nullable
-  }
-
-  static String _getGameTypeName(int id) {
-    switch (id) {
-      case 0:
-        return 'Main Game';
-      case 1:
-        return 'DLC/Add-on';
-      case 2:
-        return 'Expansion';
-      case 3:
-        return 'Bundle';
-      case 4:
-        return 'Standalone Expansion';
-      case 5:
-        return 'Mod';
-      case 6:
-        return 'Episode';
-      case 7:
-        return 'Season';
-      case 8:
-        return 'Remake';
-      case 9:
-        return 'Remaster';
-      case 10:
-        return 'Expanded Game';
-      case 11:
-        return 'Port';
-      case 12:
-        return 'Fork';
-      case 13:
-        return 'Pack';
-      case 14:
-        return 'Update';
-      default:
-        return 'Unknown';
-    }
   }
 
   // ===== EXTRACTION METHODS =====

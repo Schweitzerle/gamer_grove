@@ -36,6 +36,10 @@ class FieldFilter extends IgdbFilter {
   String toQueryString() {
     // Handle string values (need quotes)
     if (value is String) {
+      // For the ~ operator (partial match), add wildcards around the search term
+      if (operator == '~') {
+        return '$field $operator *"$value"*';
+      }
       return '$field $operator "$value"';
     }
     return '$field $operator $value';

@@ -2,6 +2,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
 import '../../core/errors/failures.dart';
 import '../entities/artwork.dart';
 import '../entities/character/character_gender.dart';
@@ -21,6 +27,9 @@ import '../entities/user/user_collection_sort_options.dart';
 import '../entities/user/user_collection_summary.dart';
 import '../entities/website/website.dart';
 import '../entities/ageRating/age_rating.dart';
+import '../entities/franchise.dart';
+import '../entities/collection/collection.dart';
+import '../entities/keyword.dart';
 
 /// Game Repository Interface
 ///
@@ -185,8 +194,50 @@ abstract class GameRepository {
   /// Get all available genres for filtering
   Future<Either<Failure, List<Genre>>> getAllGenres();
 
+  /// Search genres by name
+  Future<Either<Failure, List<Genre>>> searchGenres(String query);
+
   /// Get all available platforms for filtering
   Future<Either<Failure, List<Platform>>> getAllPlatforms();
+
+  /// Search platforms by name
+  Future<Either<Failure, List<Platform>>> searchPlatforms(String query);
+
+  /// Search game engines by name
+  Future<Either<Failure, List<GameEngine>>> searchGameEngines(String query);
+
+  /// Search franchises by name
+  Future<Either<Failure, List<Franchise>>> searchFranchises(String query);
+
+  /// Search collections by name
+  Future<Either<Failure, List<Collection>>> searchCollections(String query);
+
+  /// Search keywords by name
+  Future<Either<Failure, List<Keyword>>> searchKeywords(String query);
+
+  /// Search age ratings
+  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query);
+
+  /// Search themes
+  Future<Either<Failure, List<Theme>>> searchThemes(String query);
+
+  /// Get all age ratings
+  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings();
+
+  /// Get all player perspectives
+  Future<Either<Failure, List<PlayerPerspective>>> getAllPlayerPerspectives();
+
+  /// Get all game types
+  Future<Either<Failure, List<GameType>>> getAllGameTypes();
+
+  /// Get all game statuses
+  Future<Either<Failure, List<GameStatus>>> getAllGameStatuses();
+
+  /// Get all game modes
+  Future<Either<Failure, List<GameMode>>> getAllGameModes();
+
+  /// Search languages
+  Future<Either<Failure, List<Language>>> searchLanguages(String query);
 
   /// Get filtered games with complex multi-criteria search
   Future<Either<Failure, List<Game>>> getFilteredGames({

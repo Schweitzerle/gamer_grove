@@ -5,6 +5,12 @@
 // lib/presentation/widgets/filter_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
 import 'dart:async';
 import '../../core/constants/app_constants.dart';
 import '../../domain/entities/genre.dart';
@@ -21,29 +27,38 @@ import '../../domain/entities/player_perspective.dart';
 class FilterBottomSheet extends StatefulWidget {
   final SearchFilters currentFilters;
   final List<Genre> availableGenres;
-  final List<Platform> availablePlatforms;
-  final List<dynamic> availableThemes; // Theme entity
   final List<GameMode> availableGameModes;
   final List<PlayerPerspective> availablePlayerPerspectives;
+  final List<GameType> availableGameTypes;
+  final List<GameStatus> availableGameStatuses;
 
   // Callback functions for dynamic search
   final Future<List<Company>> Function(String query)? onSearchCompanies;
   final Future<List<GameEngine>> Function(String query)? onSearchGameEngines;
   final Future<List<Franchise>> Function(String query)? onSearchFranchises;
   final Future<List<Collection>> Function(String query)? onSearchCollections;
-
+  final Future<List<Keyword>> Function(String query)? onSearchKeywords;
+  final Future<List<Language>> Function(String query)? onSearchLanguages;
+  final Future<List<Platform>> Function(String query)? onSearchPlatforms;
+  final Future<List<gg_theme.Theme>> Function(String query)? onSearchThemes;
+  final Future<List<AgeRating>> Function(String query)? onSearchAgeRatings;
   const FilterBottomSheet({
     super.key,
     required this.currentFilters,
     required this.availableGenres,
-    required this.availablePlatforms,
-    this.availableThemes = const [],
-    this.availableGameModes = const [],
-    this.availablePlayerPerspectives = const [],
+    required this.availableGameTypes,
+    required this.availableGameStatuses,
+    required this.availableGameModes,
+    required this.availablePlayerPerspectives,
     this.onSearchCompanies,
     this.onSearchGameEngines,
     this.onSearchFranchises,
     this.onSearchCollections,
+    this.onSearchKeywords,
+    this.onSearchLanguages,
+    this.onSearchPlatforms,
+    this.onSearchThemes,
+    this.onSearchAgeRatings,
   });
 
   @override
@@ -53,14 +68,19 @@ class FilterBottomSheet extends StatefulWidget {
     required BuildContext context,
     required SearchFilters currentFilters,
     required List<Genre> availableGenres,
-    required List<Platform> availablePlatforms,
-    List<dynamic> availableThemes = const [],
-    List<GameMode> availableGameModes = const [],
-    List<PlayerPerspective> availablePlayerPerspectives = const [],
+    required List<PlayerPerspective> availablePlayerPerspectives,
+    required List<GameType> availableGameTypes,
+    required List<GameMode> availableGameModes,
+    required List<GameStatus> availableGameStatuses,
     Future<List<Company>> Function(String query)? onSearchCompanies,
     Future<List<GameEngine>> Function(String query)? onSearchGameEngines,
     Future<List<Franchise>> Function(String query)? onSearchFranchises,
     Future<List<Collection>> Function(String query)? onSearchCollections,
+    Future<List<Keyword>> Function(String query)? onSearchKeywords,
+    Future<List<Language>> Function(String query)? onSearchLanguages,
+    Future<List<Platform>> Function(String query)? onSearchPlatforms,
+    Future<List<gg_theme.Theme>> Function(String query)? onSearchThemes,
+    Future<List<AgeRating>> Function(String query)? onSearchAgeRatings,
   }) {
     return showModalBottomSheet<SearchFilters>(
       context: context,
@@ -69,14 +89,19 @@ class FilterBottomSheet extends StatefulWidget {
       builder: (context) => FilterBottomSheet(
         currentFilters: currentFilters,
         availableGenres: availableGenres,
-        availablePlatforms: availablePlatforms,
-        availableThemes: availableThemes,
         availableGameModes: availableGameModes,
         availablePlayerPerspectives: availablePlayerPerspectives,
+        availableGameTypes: availableGameTypes,
+        availableGameStatuses: availableGameStatuses,
         onSearchCompanies: onSearchCompanies,
         onSearchGameEngines: onSearchGameEngines,
         onSearchFranchises: onSearchFranchises,
         onSearchCollections: onSearchCollections,
+        onSearchKeywords: onSearchKeywords,
+        onSearchLanguages: onSearchLanguages,
+        onSearchPlatforms: onSearchPlatforms,
+        onSearchThemes: onSearchThemes,
+        onSearchAgeRatings: onSearchAgeRatings,
       ),
     );
   }
@@ -89,24 +114,41 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   // Selected values - Basic
   late List<int> _selectedGenres;
-  late List<int> _selectedPlatforms;
-  late double _minRating;
-  late double _maxRating;
+  late List<int> _selectedGameTypes;
+  late List<int> _selectedGameModes;
+  late List<int> _selectedGameStatuses;
+  late List<int> _selectedPlayerPerspectives;
+
+  late double _minTotalRating;
+  late double _maxTotalRating;
+  int? _minTotalRatingCount;
+
+  late double _minUserRating;
+  late double _maxUserRating;
+  int? _minUserRatingCount;
+
+  late double _minAggregatedRating;
+  late double _maxAggregatedRating;
+  int? _minAggregatedRatingCount;
+
+  int? _minFollows;
+  int? _minHypes;
+
   int? _startYear;
   int? _endYear;
   late GameSortBy _sortBy;
   late SortOrder _sortOrder;
-
-  // Selected values - Advanced
-  late List<int> _selectedThemes;
-  late List<int> _selectedGameModes;
-  late List<int> _selectedPlayerPerspectives;
 
   // Selected values - Dynamic
   final List<Company> _selectedCompanies = [];
   final List<GameEngine> _selectedGameEngines = [];
   final List<Franchise> _selectedFranchises = [];
   final List<Collection> _selectedCollections = [];
+  final List<gg_theme.Theme> _selectedThemes = [];
+  final List<AgeRating> _selectedAgeRatings = [];
+  final List<Keyword> _selectedKeywords = [];
+  final List<Language> _selectedLanguages = [];
+  final List<Platform> _selectedPlatforms = [];
 
   // Search controllers
   final TextEditingController _companySearchController =
@@ -116,45 +158,83 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       TextEditingController();
   final TextEditingController _collectionSearchController =
       TextEditingController();
+  final TextEditingController _platformSearchController =
+      TextEditingController();
+  final TextEditingController _themeSearchController = TextEditingController();
+  final TextEditingController _ageRatingSearchController =
+      TextEditingController();
+  final TextEditingController _keywordSearchController =
+      TextEditingController();
+  final TextEditingController _languagesSearchController =
+      TextEditingController();
 
   // Search results
   List<Company> _companySearchResults = [];
   List<GameEngine> _engineSearchResults = [];
   List<Franchise> _franchiseSearchResults = [];
   List<Collection> _collectionSearchResults = [];
+  List<Platform> _platformSearchResults = [];
+  List<gg_theme.Theme> _themeSearchResults = [];
+  List<AgeRating> _ageRatingSearchResults = [];
+  List<Keyword> _keywordSearchResults = [];
+  List<Language> _languageSearchResults = [];
 
   // Loading states
   bool _isSearchingCompanies = false;
   bool _isSearchingEngines = false;
   bool _isSearchingFranchises = false;
   bool _isSearchingCollections = false;
+  bool _isSearchingPlatforms = false;
+  bool _isSearchingThemes = false;
+  bool _isSearchingAgeRatings = false;
+  bool _isSearchingKeywords = false;
+  bool _isSearchingLanguages = false;
 
   // Debounce timers
   Timer? _companyDebounce;
   Timer? _engineDebounce;
   Timer? _franchiseDebounce;
   Timer? _collectionDebounce;
+  Timer? _platformDebounce;
+  Timer? _themeDebounce;
+  Timer? _ageRatingDebounce;
+  Timer? _keywordDebounce;
+  Timer? _languageDebounce;
 
   @override
   void initState() {
     super.initState();
     _filters = widget.currentFilters;
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
 
     // Initialize basic filters
     _selectedGenres = List.from(_filters.genreIds);
-    _selectedPlatforms = List.from(_filters.platformIds);
-    _minRating = _filters.minRating ?? 0.0;
-    _maxRating = _filters.maxRating ?? 10.0;
+    _selectedGameModes = List.from(_filters.gameModesIds);
+    _selectedPlayerPerspectives = List.from(_filters.playerPerspectiveIds);
+    _selectedGameStatuses = List.from(_filters.gameStatusIds);
+    _selectedGameTypes = List.from(_filters.gameTypeIds);
+
+    // Initialize rating filters
+    _minTotalRating = _filters.minTotalRating ?? 0.0;
+    _maxTotalRating = _filters.maxTotalRating ?? 10.0;
+    _minTotalRatingCount = _filters.minTotalRatingCount;
+
+    _minUserRating = _filters.minUserRating ?? 0.0;
+    _maxUserRating = _filters.maxUserRating ?? 10.0;
+    _minUserRatingCount = _filters.minUserRatingCount;
+
+    _minAggregatedRating = _filters.minAggregatedRating ?? 0.0;
+    _maxAggregatedRating = _filters.maxAggregatedRating ?? 100.0;
+    _minAggregatedRatingCount = _filters.minAggregatedRatingCount;
+
+    // Initialize popularity filters
+    _minFollows = null;
+    _minHypes = _filters.minHypes;
+
     _startYear = _filters.releaseDateFrom?.year;
     _endYear = _filters.releaseDateTo?.year;
     _sortBy = _filters.sortBy;
     _sortOrder = _filters.sortOrder;
-
-    // Initialize advanced filters
-    _selectedThemes = List.from(_filters.themesIds);
-    _selectedGameModes = List.from(_filters.gameModesIds);
-    _selectedPlayerPerspectives = List.from(_filters.playerPerspectiveIds);
   }
 
   @override
@@ -168,6 +248,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     _engineDebounce?.cancel();
     _franchiseDebounce?.cancel();
     _collectionDebounce?.cancel();
+    _platformDebounce?.cancel();
+    _themeDebounce?.cancel();
+    _ageRatingDebounce?.cancel();
+    _keywordDebounce?.cancel();
+    _languageDebounce?.cancel();
     super.dispose();
   }
 
@@ -245,9 +330,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           // Tab Bar
           TabBar(
             controller: _tabController,
+            isScrollable: true,
             tabs: const [
-              Tab(text: 'Basic', icon: Icon(Icons.tune, size: 20)),
-              Tab(text: 'Advanced', icon: Icon(Icons.filter_alt, size: 20)),
+              Tab(text: 'Game', icon: Icon(Icons.videogame_asset, size: 20)),
+              Tab(text: 'Quality', icon: Icon(Icons.stars, size: 20)),
+              Tab(text: 'Meta', icon: Icon(Icons.more_horiz, size: 20)),
               Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
             ],
           ),
@@ -257,8 +344,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildBasicFiltersTab(),
-                _buildAdvancedFiltersTab(),
+                _buildGamePropertiesTab(),
+                _buildQualityTab(),
+                _buildMetaTab(),
                 _buildSortingTab(),
               ],
             ),
@@ -272,21 +360,43 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   // ==========================================
-  // BASIC FILTERS TAB
+  // GAME PROPERTIES TAB
   // ==========================================
 
-  Widget _buildBasicFiltersTab() {
+  Widget _buildGamePropertiesTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildGenresSection(),
-          const SizedBox(height: AppConstants.paddingLarge),
-          _buildPlatformsSection(),
-          const SizedBox(height: AppConstants.paddingLarge),
-          _buildRatingSection(),
-          const SizedBox(height: AppConstants.paddingLarge),
+          _buildDynamicSearchSection(
+            title: 'Platforms',
+            icon: Icons.devices,
+            hint: 'Search platforms...',
+            controller: _platformSearchController,
+            searchResults: _platformSearchResults,
+            selectedItems: _selectedPlatforms,
+            isLoading: _isSearchingPlatforms,
+            onSearch: _searchPlatforms,
+            onAdd: (platform) {
+              setState(() {
+                _selectedPlatforms.add(platform);
+                _platformSearchResults.clear();
+                _platformSearchController.clear();
+              });
+            },
+            onRemove: (platform) {
+              setState(() {
+                _selectedPlatforms.remove(platform);
+              });
+            },
+            itemBuilder: (item) => Text((item).name),
+          ),
+          _buildGameModesSection(),
+          _buildGameTypeSection(),
+          _buildGameStatusSection(),
+          _buildPlayerPerspectivesSection(),
           _buildReleaseYearSection(),
           const SizedBox(height: 80),
         ],
@@ -295,27 +405,80 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   // ==========================================
-  // ADVANCED FILTERS TAB
+  // QUALITY & POPULARITY TAB
   // ==========================================
 
-  Widget _buildAdvancedFiltersTab() {
+  Widget _buildQualityTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.availableThemes.isNotEmpty) ...[
-            _buildThemesSection(),
-            const SizedBox(height: AppConstants.paddingLarge),
-          ],
-          if (widget.availableGameModes.isNotEmpty) ...[
-            _buildGameModesSection(),
-            const SizedBox(height: AppConstants.paddingLarge),
-          ],
-          if (widget.availablePlayerPerspectives.isNotEmpty) ...[
-            _buildPlayerPerspectivesSection(),
-            const SizedBox(height: AppConstants.paddingLarge),
-          ],
+          _buildRatingsExpansionTile(),
+          const SizedBox(height: AppConstants.paddingMedium),
+          _buildPopularityExpansionTile(),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // META & CONTENT TAB
+  // ==========================================
+
+  Widget _buildMetaTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDynamicSearchSection(
+            title: 'Themes',
+            icon: Icons.palette,
+            hint: 'Search themes...',
+            controller: _themeSearchController,
+            searchResults: _themeSearchResults,
+            selectedItems: _selectedThemes,
+            isLoading: _isSearchingThemes,
+            onSearch: _searchThemes,
+            onAdd: (theme) {
+              setState(() {
+                _selectedThemes.add(theme);
+                _themeSearchResults.clear();
+                _themeSearchController.clear();
+              });
+            },
+            onRemove: (theme) {
+              setState(() {
+                _selectedThemes.remove(theme);
+              });
+            },
+            itemBuilder: (item) => Text((item).name),
+          ),
+          _buildDynamicSearchSection(
+            title: 'Keywords',
+            icon: Icons.label,
+            hint: 'Search keywords...',
+            controller: _keywordSearchController,
+            searchResults: _keywordSearchResults,
+            selectedItems: _selectedKeywords,
+            isLoading: _isSearchingKeywords,
+            onSearch: _searchKeywords,
+            onAdd: (keyword) {
+              setState(() {
+                _selectedKeywords.add(keyword);
+                _keywordSearchResults.clear();
+                _keywordSearchController.clear();
+              });
+            },
+            onRemove: (keyword) {
+              setState(() {
+                _selectedKeywords.remove(keyword);
+              });
+            },
+            itemBuilder: (item) => Text((item).name),
+          ),
           _buildDynamicSearchSection(
             title: 'Companies',
             icon: Icons.business,
@@ -339,31 +502,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             },
             itemBuilder: (item) => Text((item).name),
           ),
-          const SizedBox(height: AppConstants.paddingLarge),
-          _buildDynamicSearchSection(
-            title: 'Game Engines',
-            icon: Icons.settings_suggest,
-            hint: 'Search game engines...',
-            controller: _engineSearchController,
-            searchResults: _engineSearchResults,
-            selectedItems: _selectedGameEngines,
-            isLoading: _isSearchingEngines,
-            onSearch: _searchGameEngines,
-            onAdd: (engine) {
-              setState(() {
-                _selectedGameEngines.add(engine);
-                _engineSearchResults.clear();
-                _engineSearchController.clear();
-              });
-            },
-            onRemove: (engine) {
-              setState(() {
-                _selectedGameEngines.remove(engine);
-              });
-            },
-            itemBuilder: (item) => Text((item).name),
-          ),
-          const SizedBox(height: AppConstants.paddingLarge),
           _buildDynamicSearchSection(
             title: 'Franchises',
             icon: Icons.auto_stories,
@@ -387,7 +525,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             },
             itemBuilder: (item) => Text((item).name),
           ),
-          const SizedBox(height: AppConstants.paddingLarge),
           _buildDynamicSearchSection(
             title: 'Collections',
             icon: Icons.collections_bookmark,
@@ -410,6 +547,75 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               });
             },
             itemBuilder: (item) => Text((item).name),
+          ),
+          _buildDynamicSearchSection(
+            title: 'Game Engines',
+            icon: Icons.settings_suggest,
+            hint: 'Search game engines...',
+            controller: _engineSearchController,
+            searchResults: _engineSearchResults,
+            selectedItems: _selectedGameEngines,
+            isLoading: _isSearchingEngines,
+            onSearch: _searchGameEngines,
+            onAdd: (engine) {
+              setState(() {
+                _selectedGameEngines.add(engine);
+                _engineSearchResults.clear();
+                _engineSearchController.clear();
+              });
+            },
+            onRemove: (engine) {
+              setState(() {
+                _selectedGameEngines.remove(engine);
+              });
+            },
+            itemBuilder: (item) => Text((item).name),
+          ),
+          _buildDynamicSearchSection(
+            title: 'Age Ratings',
+            icon: Icons.verified_user,
+            hint: 'Search age ratings...',
+            controller: _ageRatingSearchController,
+            searchResults: _ageRatingSearchResults,
+            selectedItems: _selectedAgeRatings,
+            isLoading: _isSearchingAgeRatings,
+            onSearch: _searchAgeRatings,
+            onAdd: (ageRating) {
+              setState(() {
+                _selectedAgeRatings.add(ageRating);
+                _ageRatingSearchResults.clear();
+                _ageRatingSearchController.clear();
+              });
+            },
+            onRemove: (ageRating) {
+              setState(() {
+                _selectedAgeRatings.remove(ageRating);
+              });
+            },
+            itemBuilder: (item) => Text((item).displayName),
+          ),
+          _buildDynamicSearchSection(
+            title: 'Languages',
+            icon: Icons.language,
+            hint: 'Search languages...',
+            controller: _languagesSearchController,
+            searchResults: _languageSearchResults,
+            selectedItems: _selectedLanguages,
+            isLoading: _isSearchingLanguages,
+            onSearch: _searchLanguages,
+            onAdd: (language) {
+              setState(() {
+                _selectedLanguages.add(language);
+                _languageSearchResults.clear();
+                _languagesSearchController.clear();
+              });
+            },
+            onRemove: (language) {
+              setState(() {
+                _selectedLanguages.remove(language);
+              });
+            },
+            itemBuilder: (item) => Text((item).displayName),
           ),
           const SizedBox(height: 80),
         ],
@@ -435,235 +641,320 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   // ==========================================
+  // REUSABLE COMPONENTS
+  // ==========================================
+
+  Widget _buildFilterCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+    VoidCallback? onClear,
+    int? activeCount,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: 20, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (activeCount != null && activeCount > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$activeCount',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (onClear != null && activeCount != null && activeCount > 0)
+                  TextButton.icon(
+                    onPressed: onClear,
+                    icon: const Icon(Icons.clear, size: 16),
+                    label: const Text('Clear'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChipGridSection({
+    required String title,
+    required IconData icon,
+    required List<dynamic> items,
+    required List<int> selectedIds,
+    required String Function(dynamic) getLabel,
+    required int Function(dynamic) getId,
+    bool isHorizontalScroll = false,
+  }) {
+    return _buildFilterCard(
+      title: title,
+      icon: icon,
+      activeCount: selectedIds.length,
+      onClear: selectedIds.isEmpty
+          ? null
+          : () {
+              setState(() => selectedIds.clear());
+              HapticFeedback.lightImpact();
+            },
+      child: isHorizontalScroll
+          ? SizedBox(
+              height: 50,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  final id = getId(item);
+                  final isSelected = selectedIds.contains(id);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(getLabel(item)),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedIds.add(id);
+                          } else {
+                            selectedIds.remove(id);
+                          }
+                        });
+                        HapticFeedback.lightImpact();
+                      },
+                    ),
+                  );
+                },
+              ),
+            )
+          : Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: items.map((item) {
+                final id = getId(item);
+                final isSelected = selectedIds.contains(id);
+                return FilterChip(
+                  label: Text(getLabel(item)),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        selectedIds.add(id);
+                      } else {
+                        selectedIds.remove(id);
+                      }
+                    });
+                    HapticFeedback.lightImpact();
+                  },
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  // ==========================================
   // SECTION BUILDERS
   // ==========================================
 
   Widget _buildGenresSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionTitle('Genres', Icons.bookmarks),
-            if (_selectedGenres.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  setState(() => _selectedGenres.clear());
-                  HapticFeedback.lightImpact();
-                },
-                child: Text('Clear (${_selectedGenres.length})'),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        if (widget.availableGenres.isEmpty)
-          const Center(child: CircularProgressIndicator())
-        else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.availableGenres.map((genre) {
-              final isSelected = _selectedGenres.contains(genre.id);
-              return FilterChip(
-                label: Text(genre.name),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedGenres.add(genre.id);
-                    } else {
-                      _selectedGenres.remove(genre.id);
-                    }
-                  });
-                  HapticFeedback.lightImpact();
-                },
-              );
-            }).toList(),
-          ),
-      ],
+    if (widget.availableGenres.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return _buildChipGridSection(
+      title: 'Genres',
+      icon: Icons.bookmarks,
+      items: widget.availableGenres,
+      selectedIds: _selectedGenres,
+      getLabel: (genre) => genre.name,
+      getId: (genre) => genre.id,
+      isHorizontalScroll: true, // Horizontal scroll for better space usage
     );
   }
 
-  Widget _buildPlatformsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionTitle('Platforms', Icons.devices),
-            if (_selectedPlatforms.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  setState(() => _selectedPlatforms.clear());
-                  HapticFeedback.lightImpact();
-                },
-                child: Text('Clear (${_selectedPlatforms.length})'),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        if (widget.availablePlatforms.isEmpty)
-          const Center(child: CircularProgressIndicator())
-        else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widget.availablePlatforms.map((platform) {
-              final isSelected = _selectedPlatforms.contains(platform.id);
-              return FilterChip(
-                label: Text(platform.name),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedPlatforms.add(platform.id);
-                    } else {
-                      _selectedPlatforms.remove(platform.id);
-                    }
-                  });
-                  HapticFeedback.lightImpact();
-                },
-              );
-            }).toList(),
-          ),
-      ],
+  Widget _buildGameTypeSection() {
+    if (widget.availableGameTypes.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return _buildChipGridSection(
+      title: 'Game Types',
+      icon: Icons.category,
+      items: widget.availableGameTypes,
+      selectedIds: _selectedGameTypes,
+      getLabel: (type) => type.type,
+      getId: (type) => type.id,
     );
   }
 
-  Widget _buildThemesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionTitle('Themes', Icons.palette),
-            if (_selectedThemes.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  setState(() => _selectedThemes.clear());
-                  HapticFeedback.lightImpact();
-                },
-                child: Text('Clear (${_selectedThemes.length})'),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.availableThemes.map((theme) {
-            final themeId = theme.id as int;
-            final themeName = theme.name as String;
-            final isSelected = _selectedThemes.contains(themeId);
-            return FilterChip(
-              label: Text(themeName),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedThemes.add(themeId);
-                  } else {
-                    _selectedThemes.remove(themeId);
-                  }
-                });
-                HapticFeedback.lightImpact();
-              },
-            );
-          }).toList(),
-        ),
-      ],
+  Widget _buildGameStatusSection() {
+    if (widget.availableGameStatuses.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return _buildChipGridSection(
+      title: 'Game Status',
+      icon: Icons.info_outline,
+      items: widget.availableGameStatuses,
+      selectedIds: _selectedGameStatuses,
+      getLabel: (status) => status.status,
+      getId: (status) => status.id,
     );
   }
 
   Widget _buildGameModesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionTitle('Game Modes', Icons.sports_esports),
-            if (_selectedGameModes.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  setState(() => _selectedGameModes.clear());
-                  HapticFeedback.lightImpact();
-                },
-                child: Text('Clear (${_selectedGameModes.length})'),
-              ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.availableGameModes.map((mode) {
-            final isSelected = _selectedGameModes.contains(mode.id);
-            return FilterChip(
-              label: Text(mode.name),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedGameModes.add(mode.id);
-                  } else {
-                    _selectedGameModes.remove(mode.id);
-                  }
-                });
-                HapticFeedback.lightImpact();
-              },
-            );
-          }).toList(),
-        ),
-      ],
+    return _buildChipGridSection(
+      title: 'Game Modes',
+      icon: Icons.sports_esports,
+      items: widget.availableGameModes,
+      selectedIds: _selectedGameModes,
+      getLabel: (mode) => mode.name,
+      getId: (mode) => mode.id,
     );
   }
 
   Widget _buildPlayerPerspectivesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return _buildChipGridSection(
+      title: 'Player Perspectives',
+      icon: Icons.remove_red_eye,
+      items: widget.availablePlayerPerspectives,
+      selectedIds: _selectedPlayerPerspectives,
+      getLabel: (perspective) => perspective.name,
+      getId: (perspective) => perspective.id,
+    );
+  }
+
+  // ==========================================
+  // EXPANSION TILES FOR QUALITY TAB
+  // ==========================================
+
+  Widget _buildRatingsExpansionTile() {
+    final theme = Theme.of(context);
+    final hasActiveFilters = (_minTotalRating > 0 ||
+            _maxTotalRating < 10 ||
+            _minTotalRatingCount != null) ||
+        (_minUserRating > 0 ||
+            _maxUserRating < 10 ||
+            _minUserRatingCount != null) ||
+        (_minAggregatedRating > 0 ||
+            _maxAggregatedRating < 100 ||
+            _minAggregatedRatingCount != null);
+
+    return Card(
+      elevation: 2,
+      child: ExpansionTile(
+        leading: Icon(Icons.star, color: theme.colorScheme.primary),
+        title: Row(
           children: [
-            _buildSectionTitle('Perspectives', Icons.remove_red_eye),
-            if (_selectedPlayerPerspectives.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  setState(() => _selectedPlayerPerspectives.clear());
-                  HapticFeedback.lightImpact();
-                },
-                child: Text('Clear (${_selectedPlayerPerspectives.length})'),
+            const Text('Rating Filters'),
+            if (hasActiveFilters) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Active',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
+            ],
           ],
         ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.availablePlayerPerspectives.map((perspective) {
-            final isSelected =
-                _selectedPlayerPerspectives.contains(perspective.id);
-            return FilterChip(
-              label: Text(perspective.name),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedPlayerPerspectives.add(perspective.id);
-                  } else {
-                    _selectedPlayerPerspectives.remove(perspective.id);
-                  }
-                });
-                HapticFeedback.lightImpact();
-              },
-            );
-          }).toList(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildRatingSection(),
+                const SizedBox(height: AppConstants.paddingLarge),
+                _buildUserRatingSection(),
+                const SizedBox(height: AppConstants.paddingLarge),
+                _buildAggregatedRatingSection(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPopularityExpansionTile() {
+    final theme = Theme.of(context);
+    final hasActiveFilters = _minHypes != null || _minFollows != null;
+
+    return Card(
+      elevation: 2,
+      child: ExpansionTile(
+        leading: Icon(Icons.trending_up, color: theme.colorScheme.primary),
+        title: Row(
+          children: [
+            const Text('Popularity & Hype'),
+            if (hasActiveFilters) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Active',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
-      ],
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: _buildPopularitySection(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -674,9 +965,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle('Rating', Icons.star),
+            _buildSectionTitle('Total Rating', Icons.star),
             Text(
-              '${_minRating.toStringAsFixed(1)} - ${_maxRating.toStringAsFixed(1)}',
+              '${_minTotalRating.toStringAsFixed(1)} - ${_maxTotalRating.toStringAsFixed(1)}',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
@@ -686,69 +977,408 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         ),
         const SizedBox(height: AppConstants.paddingSmall),
         RangeSlider(
-          values: RangeValues(_minRating, _maxRating),
+          values: RangeValues(_minTotalRating, _maxTotalRating),
           min: 0,
           max: 10,
           divisions: 20,
           labels: RangeLabels(
-            _minRating.toStringAsFixed(1),
-            _maxRating.toStringAsFixed(1),
+            _minTotalRating.toStringAsFixed(1),
+            _maxTotalRating.toStringAsFixed(1),
           ),
           onChanged: (RangeValues values) {
             setState(() {
-              _minRating = values.start;
-              _maxRating = values.end;
+              _minTotalRating = values.start;
+              _maxTotalRating = values.end;
             });
           },
           onChangeEnd: (_) => HapticFeedback.lightImpact(),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Min. Rating Count',
+            hintText: 'e.g., 100',
+            border: const OutlineInputBorder(),
+            suffixIcon: _minTotalRatingCount != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() => _minTotalRatingCount = null);
+                    },
+                  )
+                : null,
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+            text: _minTotalRatingCount?.toString() ?? '',
+          )..selection = TextSelection.collapsed(
+              offset: _minTotalRatingCount?.toString().length ?? 0,
+            ),
+          onChanged: (value) {
+            setState(() {
+              _minTotalRatingCount = value.isEmpty ? null : int.tryParse(value);
+            });
+          },
         ),
       ],
     );
   }
 
-  Widget _buildReleaseYearSection() {
+  Widget _buildUserRatingSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle('Release Year', Icons.calendar_today),
-            if (_startYear != null || _endYear != null)
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _startYear = null;
-                    _endYear = null;
-                  });
-                  HapticFeedback.lightImpact();
-                },
-                child: const Text('Clear'),
-              ),
+            _buildSectionTitle('User Rating (IGDB)', Icons.person),
+            Text(
+              '${_minUserRating.toStringAsFixed(1)} - ${_maxUserRating.toStringAsFixed(1)}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+            ),
           ],
         ),
         const SizedBox(height: AppConstants.paddingSmall),
-        Row(
-          children: [
-            Expanded(
-              child: _buildYearDropdown(
-                label: 'From',
-                value: _startYear,
-                onChanged: (year) => setState(() => _startYear = year),
-              ),
+        RangeSlider(
+          values: RangeValues(_minUserRating, _maxUserRating),
+          min: 0,
+          max: 10,
+          divisions: 20,
+          labels: RangeLabels(
+            _minUserRating.toStringAsFixed(1),
+            _maxUserRating.toStringAsFixed(1),
+          ),
+          onChanged: (RangeValues values) {
+            setState(() {
+              _minUserRating = values.start;
+              _maxUserRating = values.end;
+            });
+          },
+          onChangeEnd: (_) => HapticFeedback.lightImpact(),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Min. User Rating Count',
+            hintText: 'e.g., 50',
+            border: const OutlineInputBorder(),
+            suffixIcon: _minUserRatingCount != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() => _minUserRatingCount = null);
+                    },
+                  )
+                : null,
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+            text: _minUserRatingCount?.toString() ?? '',
+          )..selection = TextSelection.collapsed(
+              offset: _minUserRatingCount?.toString().length ?? 0,
             ),
-            const SizedBox(width: AppConstants.paddingMedium),
-            Expanded(
-              child: _buildYearDropdown(
-                label: 'To',
-                value: _endYear,
-                onChanged: (year) => setState(() => _endYear = year),
-              ),
-            ),
-          ],
+          onChanged: (value) {
+            setState(() {
+              _minUserRatingCount = value.isEmpty ? null : int.tryParse(value);
+            });
+          },
         ),
       ],
     );
+  }
+
+  Widget _buildAggregatedRatingSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionTitle('Critic Rating', Icons.rate_review),
+            Text(
+              '${_minAggregatedRating.toStringAsFixed(0)} - ${_maxAggregatedRating.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.paddingSmall),
+        RangeSlider(
+          values: RangeValues(_minAggregatedRating, _maxAggregatedRating),
+          min: 0,
+          max: 100,
+          divisions: 20,
+          labels: RangeLabels(
+            _minAggregatedRating.toStringAsFixed(0),
+            _maxAggregatedRating.toStringAsFixed(0),
+          ),
+          onChanged: (RangeValues values) {
+            setState(() {
+              _minAggregatedRating = values.start;
+              _maxAggregatedRating = values.end;
+            });
+          },
+          onChangeEnd: (_) => HapticFeedback.lightImpact(),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Min. Critic Rating Count',
+            hintText: 'e.g., 10',
+            border: const OutlineInputBorder(),
+            suffixIcon: _minAggregatedRatingCount != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() => _minAggregatedRatingCount = null);
+                    },
+                  )
+                : null,
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+            text: _minAggregatedRatingCount?.toString() ?? '',
+          )..selection = TextSelection.collapsed(
+              offset: _minAggregatedRatingCount?.toString().length ?? 0,
+            ),
+          onChanged: (value) {
+            setState(() {
+              _minAggregatedRatingCount =
+                  value.isEmpty ? null : int.tryParse(value);
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPopularitySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Hypes', Icons.whatshot),
+        Text(
+          'For unreleased or upcoming games',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: AppConstants.paddingSmall),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Minimum Hypes',
+            hintText: 'e.g., 100',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.whatshot),
+            suffixIcon: _minHypes != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() => _minHypes = null);
+                    },
+                  )
+                : null,
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+            text: _minHypes?.toString() ?? '',
+          )..selection = TextSelection.collapsed(
+              offset: _minHypes?.toString().length ?? 0,
+            ),
+          onChanged: (value) {
+            setState(() {
+              _minHypes = value.isEmpty ? null : int.tryParse(value);
+            });
+          },
+        ),
+        const SizedBox(height: AppConstants.paddingLarge),
+        _buildSectionTitle('Follows', Icons.people),
+        Text(
+          'Users following this game',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: AppConstants.paddingSmall),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Minimum Follows',
+            hintText: 'e.g., 500',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.people),
+            suffixIcon: _minFollows != null
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() => _minFollows = null);
+                    },
+                  )
+                : null,
+          ),
+          keyboardType: TextInputType.number,
+          controller: TextEditingController(
+            text: _minFollows?.toString() ?? '',
+          )..selection = TextSelection.collapsed(
+              offset: _minFollows?.toString().length ?? 0,
+            ),
+          onChanged: (value) {
+            setState(() {
+              _minFollows = value.isEmpty ? null : int.tryParse(value);
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReleaseYearSection() {
+    final theme = Theme.of(context);
+    final hasDateFilter = _startYear != null || _endYear != null;
+
+    String getDateRangeText() {
+      if (_startYear != null && _endYear != null) {
+        return 'From $_startYear to $_endYear';
+      } else if (_startYear != null) {
+        return 'From $_startYear';
+      } else if (_endYear != null) {
+        return 'Until $_endYear';
+      }
+      return 'Tap to select date range';
+    }
+
+    return _buildFilterCard(
+      title: 'Release Date',
+      icon: Icons.calendar_today,
+      activeCount: hasDateFilter ? 1 : null,
+      onClear: hasDateFilter
+          ? () {
+              setState(() {
+                _startYear = null;
+                _endYear = null;
+              });
+              HapticFeedback.lightImpact();
+            }
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => _showDateRangePicker(),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.5),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color:
+                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      getDateRangeText(),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: hasDateFilter
+                            ? theme.colorScheme.onSurface
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.calendar_month,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (hasDateFilter) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (_startYear != null)
+                  Expanded(
+                    child: _buildDateChip(
+                      label: 'From: $_startYear',
+                      onRemove: () {
+                        setState(() => _startYear = null);
+                        HapticFeedback.lightImpact();
+                      },
+                    ),
+                  ),
+                if (_startYear != null && _endYear != null)
+                  const SizedBox(width: 8),
+                if (_endYear != null)
+                  Expanded(
+                    child: _buildDateChip(
+                      label: 'To: $_endYear',
+                      onRemove: () {
+                        setState(() => _endYear = null);
+                        HapticFeedback.lightImpact();
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateChip(
+      {required String label, required VoidCallback onRemove}) {
+    final theme = Theme.of(context);
+    return Chip(
+      label: Text(label),
+      onDeleted: onRemove,
+      deleteIcon: const Icon(Icons.close, size: 18),
+      backgroundColor: theme.colorScheme.secondaryContainer,
+      labelStyle: TextStyle(
+        color: theme.colorScheme.onSecondaryContainer,
+      ),
+    );
+  }
+
+  Future<void> _showDateRangePicker() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(1970);
+    final lastDate = DateTime(now.year + 2);
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: _startYear != null && _endYear != null
+          ? DateTimeRange(
+              start: DateTime(_startYear!),
+              end: DateTime(_endYear!, 12, 31),
+            )
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startYear = picked.start.year;
+        _endYear = picked.end.year;
+      });
+      HapticFeedback.lightImpact();
+    }
   }
 
   Widget _buildSortSection() {
@@ -818,85 +1448,113 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     required void Function(T) onRemove,
     required Widget Function(T) itemBuilder,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(title, icon),
-        const SizedBox(height: AppConstants.paddingSmall),
+    final theme = Theme.of(context);
 
-        // Search Input
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon),
-            suffixIcon: isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          controller.clear();
-                          onSearch('');
-                        },
-                      )
-                    : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          onChanged: (value) => onSearch(value),
-        ),
-
-        // Search Results
-        if (searchResults.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Container(
-            constraints: const BoxConstraints(maxHeight: 200),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
+    return _buildFilterCard(
+      title: title,
+      icon: icon,
+      activeCount: selectedItems.length,
+      onClear: selectedItems.isEmpty
+          ? null
+          : () {
+              setState(() {
+                selectedItems.clear();
+                controller.clear();
+                onSearch('');
+              });
+            },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search Input
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: hint,
+              prefixIcon: Icon(icon),
+              suffixIcon: isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : controller.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.clear();
+                            onSearch('');
+                          },
+                        )
+                      : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              borderRadius: BorderRadius.circular(12),
+              filled: true,
+              fillColor:
+                  theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
             ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: searchResults.length,
-              itemBuilder: (context, index) {
-                final item = searchResults[index];
-                return ListTile(
-                  title: itemBuilder(item),
-                  trailing: const Icon(Icons.add),
-                  onTap: () => onAdd(item),
-                );
-              },
-            ),
+            onChanged: (value) => onSearch(value),
           ),
-        ],
 
-        // Selected Items
-        if (selectedItems.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: selectedItems.map((item) {
-              return Chip(
-                label: itemBuilder(item),
-                onDeleted: () => onRemove(item),
-                deleteIcon: const Icon(Icons.close, size: 18),
-              );
-            }).toList(),
-          ),
+          // Search Results
+          if (searchResults.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.5),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: theme.colorScheme.surface,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: searchResults.length,
+                  itemBuilder: (context, index) {
+                    final item = searchResults[index];
+                    return ListTile(
+                      title: itemBuilder(item),
+                      trailing: Icon(Icons.add_circle_outline,
+                          color: theme.colorScheme.primary),
+                      onTap: () => onAdd(item),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+
+          // Selected Items
+          if (selectedItems.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: selectedItems.map((item) {
+                return Chip(
+                  label: itemBuilder(item),
+                  onDeleted: () => onRemove(item),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  labelStyle: TextStyle(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -922,41 +1580,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               ),
         ),
       ],
-    );
-  }
-
-  Widget _buildYearDropdown({
-    required String label,
-    required int? value,
-    required ValueChanged<int?> onChanged,
-  }) {
-    final currentYear = DateTime.now().year;
-    final years = List.generate(
-      currentYear - 1970 + 2,
-      (index) => currentYear + 1 - index,
-    );
-
-    return DropdownButtonFormField<int>(
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
-      ),
-      value: value,
-      items: [
-        const DropdownMenuItem<int>(
-          value: null,
-          child: Text('Any'),
-        ),
-        ...years.map((year) => DropdownMenuItem<int>(
-              value: year,
-              child: Text(year.toString()),
-            )),
-      ],
-      onChanged: onChanged,
     );
   }
 
@@ -1105,6 +1728,146 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     });
   }
 
+  void _searchKeywords(String query) {
+    if (widget.onSearchKeywords == null) return;
+
+    _keywordDebounce?.cancel();
+    if (query.isEmpty) {
+      setState(() => _keywordSearchResults.clear());
+      return;
+    }
+
+    setState(() => _isSearchingKeywords = true);
+
+    _keywordDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await widget.onSearchKeywords!(query);
+        if (mounted) {
+          setState(() {
+            _keywordSearchResults = results;
+            _isSearchingKeywords = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSearchingKeywords = false);
+        }
+      }
+    });
+  }
+
+  void _searchLanguages(String query) {
+    if (widget.onSearchLanguages == null) return;
+
+    _languageDebounce?.cancel();
+    if (query.isEmpty) {
+      setState(() => _languageSearchResults.clear());
+      return;
+    }
+
+    setState(() => _isSearchingLanguages = true);
+
+    _languageDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await widget.onSearchLanguages!(query);
+        if (mounted) {
+          setState(() {
+            _languageSearchResults = results;
+            _isSearchingLanguages = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSearchingLanguages = false);
+        }
+      }
+    });
+  }
+
+  void _searchAgeRatings(String query) {
+    if (widget.onSearchAgeRatings == null) return;
+
+    _ageRatingDebounce?.cancel();
+    if (query.isEmpty) {
+      setState(() => _ageRatingSearchResults.clear());
+      return;
+    }
+
+    setState(() => _isSearchingAgeRatings = true);
+
+    _ageRatingDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await widget.onSearchAgeRatings!(query);
+        if (mounted) {
+          setState(() {
+            _ageRatingSearchResults = results;
+            _isSearchingAgeRatings = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSearchingAgeRatings = false);
+        }
+      }
+    });
+  }
+
+  void _searchThemes(String query) {
+    if (widget.onSearchThemes == null) return;
+
+    _themeDebounce?.cancel();
+    if (query.isEmpty) {
+      setState(() => _themeSearchResults.clear());
+      return;
+    }
+
+    setState(() => _isSearchingThemes = true);
+
+    _themeDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await widget.onSearchThemes!(query);
+        if (mounted) {
+          setState(() {
+            _themeSearchResults = results;
+            _isSearchingThemes = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSearchingThemes = false);
+        }
+      }
+    });
+  }
+
+  void _searchPlatforms(String query) {
+    if (widget.onSearchPlatforms == null) return;
+
+    _platformDebounce?.cancel();
+    if (query.isEmpty) {
+      setState(() => _platformSearchResults.clear());
+      return;
+    }
+
+    setState(() => _isSearchingPlatforms = true);
+
+    _platformDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final results = await widget.onSearchPlatforms!(query);
+        if (mounted) {
+          setState(() {
+            _platformSearchResults = results;
+            _isSearchingPlatforms = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isSearchingPlatforms = false);
+        }
+      }
+    });
+  }
+
   // ==========================================
   // ACTIONS
   // ==========================================
@@ -1112,18 +1875,43 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   void _clearAllFilters() {
     setState(() {
       _selectedGenres.clear();
-      _selectedPlatforms.clear();
-      _minRating = 0.0;
-      _maxRating = 10.0;
-      _startYear = null;
-      _endYear = null;
-      _selectedThemes.clear();
       _selectedGameModes.clear();
       _selectedPlayerPerspectives.clear();
+      _selectedGameStatuses.clear();
+      _selectedGameTypes.clear();
+
+      _selectedThemes.clear();
       _selectedCompanies.clear();
       _selectedGameEngines.clear();
       _selectedFranchises.clear();
       _selectedCollections.clear();
+      _selectedThemes.clear();
+      _selectedAgeRatings.clear();
+      _selectedKeywords.clear();
+      _selectedLanguages.clear();
+
+      _selectedPlatforms.clear();
+
+      // Clear rating filters
+      _minTotalRating = 0.0;
+      _maxTotalRating = 10.0;
+      _minTotalRatingCount = null;
+
+      _minUserRating = 0.0;
+      _maxUserRating = 10.0;
+      _minUserRatingCount = null;
+
+      _minAggregatedRating = 0.0;
+      _maxAggregatedRating = 100.0;
+      _minAggregatedRatingCount = null;
+
+      // Clear popularity filters
+      _minFollows = null;
+      _minHypes = null;
+
+      _startYear = null;
+      _endYear = null;
+
       _sortBy = GameSortBy.relevance;
       _sortOrder = SortOrder.descending;
     });
@@ -1133,16 +1921,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   void _applyFilters() {
     final newFilters = _filters.copyWith(
       genreIds: _selectedGenres.isEmpty ? null : _selectedGenres,
-      platformIds: _selectedPlatforms.isEmpty ? null : _selectedPlatforms,
-      minRating: _minRating > 0 ? _minRating : null,
-      maxRating: _maxRating < 10 ? _maxRating : null,
-      releaseDateFrom: _startYear != null ? DateTime(_startYear!) : null,
-      releaseDateTo: _endYear != null ? DateTime(_endYear!, 12, 31) : null,
-      themesIds: _selectedThemes.isEmpty ? null : _selectedThemes,
       gameModesIds: _selectedGameModes.isEmpty ? null : _selectedGameModes,
       playerPerspectiveIds: _selectedPlayerPerspectives.isEmpty
           ? null
           : _selectedPlayerPerspectives,
+      gameStatusIds:
+          _selectedGameStatuses.isEmpty ? null : _selectedGameStatuses,
+      gameTypeIds: _selectedGameTypes.isEmpty ? null : _selectedGameTypes,
       companyIds: _selectedCompanies.isEmpty
           ? null
           : _selectedCompanies.map((c) => c.id).toList(),
@@ -1155,6 +1940,37 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       collectionIds: _selectedCollections.isEmpty
           ? null
           : _selectedCollections.map((c) => c.id).toList(),
+      themesIds: _selectedThemes.isEmpty
+          ? null
+          : _selectedThemes.map((c) => c.id).toList(),
+      platformIds: _selectedPlatforms.isEmpty
+          ? null
+          : _selectedPlatforms.map((p) => p.id).toList(),
+      ageRatingIds: _selectedAgeRatings.isEmpty
+          ? null
+          : _selectedAgeRatings.map((a) => a.id).toList(),
+      keywordIds: _selectedKeywords.isEmpty
+          ? null
+          : _selectedKeywords.map((k) => k.id).toList(),
+      languageIds: _selectedLanguages.isEmpty
+          ? null
+          : _selectedLanguages.map((l) => l.id).toList(),
+      // Rating filters
+      minTotalRating: _minTotalRating > 0 ? _minTotalRating : null,
+      maxTotalRating: _maxTotalRating < 10 ? _maxTotalRating : null,
+      minTotalRatingCount: _minTotalRatingCount,
+      minUserRating: _minUserRating > 0 ? _minUserRating : null,
+      maxUserRating: _maxUserRating < 10 ? _maxUserRating : null,
+      minUserRatingCount: _minUserRatingCount,
+      minAggregatedRating:
+          _minAggregatedRating > 0 ? _minAggregatedRating : null,
+      maxAggregatedRating:
+          _maxAggregatedRating < 100 ? _maxAggregatedRating : null,
+      minAggregatedRatingCount: _minAggregatedRatingCount,
+      // Popularity filters
+      minHypes: _minHypes,
+      releaseDateFrom: _startYear != null ? DateTime(_startYear!) : null,
+      releaseDateTo: _endYear != null ? DateTime(_endYear!, 12, 31) : null,
       sortBy: _sortBy,
       sortOrder: _sortOrder,
     );
@@ -1166,16 +1982,37 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   int _getActiveFilterCount() {
     int count = 0;
     if (_selectedGenres.isNotEmpty) count++;
-    if (_selectedPlatforms.isNotEmpty) count++;
-    if (_minRating > 0 || _maxRating < 10) count++;
-    if (_startYear != null || _endYear != null) count++;
-    if (_selectedThemes.isNotEmpty) count++;
     if (_selectedGameModes.isNotEmpty) count++;
     if (_selectedPlayerPerspectives.isNotEmpty) count++;
+    if (_selectedGameStatuses.isNotEmpty) count++;
+    if (_selectedGameTypes.isNotEmpty) count++;
+
+    if (_selectedThemes.isNotEmpty) count++;
     if (_selectedCompanies.isNotEmpty) count++;
     if (_selectedGameEngines.isNotEmpty) count++;
     if (_selectedFranchises.isNotEmpty) count++;
     if (_selectedCollections.isNotEmpty) count++;
+    if (_selectedPlatforms.isNotEmpty) count++;
+    if (_selectedAgeRatings.isNotEmpty) count++;
+    if (_selectedKeywords.isNotEmpty) count++;
+    if (_selectedLanguages.isNotEmpty) count++;
+
+    // Rating filters
+    if (_minTotalRating > 0 ||
+        _maxTotalRating < 10 ||
+        _minTotalRatingCount != null) count++;
+    if (_minUserRating > 0 ||
+        _maxUserRating < 10 ||
+        _minUserRatingCount != null) count++;
+    if (_minAggregatedRating > 0 ||
+        _maxAggregatedRating < 100 ||
+        _minAggregatedRatingCount != null) count++;
+
+    // Popularity filters
+    if (_minHypes != null) count++;
+    if (_minFollows != null) count++;
+
+    if (_startYear != null || _endYear != null) count++;
     return count;
   }
 

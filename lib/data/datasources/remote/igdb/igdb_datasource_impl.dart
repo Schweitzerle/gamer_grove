@@ -1,6 +1,13 @@
 // lib/data/datasources/remote/igdb/igdb_datasource_impl.dart
 
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/data/models/game/game_mode_model.dart';
+import 'package:gamer_grove/data/models/game/game_status_model.dart';
+import 'package:gamer_grove/data/models/game/game_type_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
+import 'package:gamer_grove/data/models/player_perspective_model.dart';
+import 'package:gamer_grove/data/models/theme_model.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../models/game/game_model.dart';
 import '../../../models/character/character_model.dart';
@@ -9,6 +16,11 @@ import '../../../models/company/company_model.dart';
 import '../../../models/event/event_model.dart';
 import '../../../models/game/game_engine_model.dart';
 import '../../../models/genre_model.dart';
+import '../../../models/franchise_model.dart';
+import '../../../models/collection/collection_model.dart';
+import '../../../models/keyword_model.dart';
+import '../../../models/ageRating/age_rating_model.dart';
+import '../../../models/multiplayer_mode_model.dart';
 import 'igdb_datasource.dart';
 import 'models/igdb_query.dart';
 
@@ -132,6 +144,109 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     );
   }
 
+  @override
+  Future<List<FranchiseModel>> queryFranchises(IgdbFranchiseQuery query) async {
+    return await _executeQuery<FranchiseModel>(
+      endpoint: 'franchises',
+      query: query,
+      parser: (json) => FranchiseModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<CollectionModel>> queryCollections(
+      IgdbCollectionQuery query) async {
+    return await _executeQuery<CollectionModel>(
+      endpoint: 'collections',
+      query: query,
+      parser: (json) => CollectionModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<KeywordModel>> queryKeywords(IgdbKeywordQuery query) async {
+    return await _executeQuery<KeywordModel>(
+      endpoint: 'keywords',
+      query: query,
+      parser: (json) => KeywordModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<AgeRatingModel>> queryAgeRatings(IgdbAgeRatingQuery query) async {
+    return await _executeQuery<AgeRatingModel>(
+      endpoint: 'age_ratings',
+      query: query,
+      parser: (json) => AgeRatingModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<MultiplayerModeModel>> queryMultiplayerModes(
+      IgdbMultiplayerModeQuery query) async {
+    return await _executeQuery<MultiplayerModeModel>(
+      endpoint: 'multiplayer_modes',
+      query: query,
+      parser: (json) => MultiplayerModeModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<LanguageModel>> queryLanguages(IgdbLanguageQuery query) async {
+    return await _executeQuery<LanguageModel>(
+      endpoint: 'languages',
+      query: query,
+      parser: (json) => LanguageModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameModeModel>> queryGameModes(IgdbGameModeQuery query) async {
+    return await _executeQuery<GameModeModel>(
+      endpoint: 'game_modes',
+      query: query,
+      parser: (json) => GameModeModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameStatusModel>> queryGameStatuses(
+      IgdbGameStatusQuery query) async {
+    return await _executeQuery<GameStatusModel>(
+      endpoint: 'game_statuses',
+      query: query,
+      parser: (json) => GameStatusModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<GameTypeModel>> queryGameTypes(IgdbGameTypeQuery query) async {
+    return await _executeQuery<GameTypeModel>(
+      endpoint: 'game_types',
+      query: query,
+      parser: (json) => GameTypeModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<PlayerPerspectiveModel>> queryPlayerPerspectives(
+      IgdbPlayerPerspectiveQuery query) async {
+    return await _executeQuery<PlayerPerspectiveModel>(
+      endpoint: 'player_perspectives',
+      query: query,
+      parser: (json) => PlayerPerspectiveModel.fromJson(json),
+    );
+  }
+
+  @override
+  Future<List<ThemeModel>> queryThemes(IgdbThemeQuery query) async {
+    return await _executeQuery<ThemeModel>(
+      endpoint: 'themes',
+      query: query,
+      parser: (json) => ThemeModel.fromJson(json),
+    );
+  }
+
   // ============================================================
   // SHARED QUERY EXECUTION METHOD
   // ============================================================
@@ -151,27 +266,52 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     required T Function(Map<String, dynamic>) parser,
   }) async {
     try {
+      print('🎮 IGDB DataSource: Starting query to endpoint "$endpoint"');
+
       // Ensure we have a valid access token
       await _ensureValidToken();
+      print('✅ IGDB DataSource: Auth token valid');
 
       // Build the query string
       final queryString = query.buildQuery();
 
+      // Prepare request details
+      final clientId = _getClientId();
+      final fullUrl = '$baseUrl/$endpoint';
+      final headers = {
+        'Client-ID': clientId,
+        'Authorization': 'Bearer $_cachedAccessToken',
+        'Content-Type': 'text/plain',
+      };
+
+      // LOG COMPLETE REQUEST DETAILS
+      print('\n' + '=' * 80);
+      print('🔍 COMPLETE IGDB REQUEST DETAILS');
+      print('=' * 80);
+      print('📍 Endpoint: $fullUrl');
+      print('🔑 Client-ID: $clientId');
+      print('🎫 Access Token: $_cachedAccessToken');
+      print('📋 Query String:\n$queryString');
+      print('📄 Headers:');
+      headers.forEach((key, value) {
+        print('   $key: $value');
+      });
+      print('=' * 80 + '\n');
+
       // Make the API request
       final response = await dio.post<dynamic>(
-        '$baseUrl/$endpoint',
+        fullUrl,
         data: queryString,
         options: Options(
-          headers: {
-            'Client-ID': _getClientId(),
-            'Authorization': 'Bearer $_cachedAccessToken',
-            'Content-Type': 'text/plain',
-          },
+          headers: headers,
         ),
       );
 
+      print('📥 IGDB DataSource: Response status ${response.statusCode}');
+
       // Check response status
       if (response.statusCode != 200) {
+        print('❌ IGDB DataSource: Bad response status ${response.statusCode}');
         throw ServerException(
           'IGDB API returned status ${response.statusCode}',
           message: 'IGDB API returned status ${response.statusCode}',
@@ -180,23 +320,30 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
       // Parse response data
       final List<dynamic> data = response.data ?? [];
+      print('✅ IGDB DataSource: Received ${data.length} items from IGDB');
 
       // Convert to Model instances
-      return data
+      final results = data
           .map((json) {
             try {
               return parser(json as Map<String, dynamic>);
             } catch (e) {
               // Log the error but continue processing other items
-              print('Warning: Failed to parse $endpoint item: $e');
+              print('⚠️ IGDB DataSource: Failed to parse $endpoint item: $e');
               return null;
             }
           })
           .whereType<T>()
           .toList();
+
+      print('✅ IGDB DataSource: Successfully parsed ${results.length} items');
+      return results;
     } on DioException catch (e) {
+      print('❌ IGDB DataSource: DioException - ${e.message}');
+      print('❌ IGDB DataSource: Response: ${e.response?.data}');
       throw _handleDioException(e);
     } catch (e) {
+      print('❌ IGDB DataSource: Unexpected error querying $endpoint: $e');
       throw ServerException(
         'Unexpected error querying $endpoint: $e',
         message: 'Unexpected error querying $endpoint: $e',
@@ -226,6 +373,9 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   /// Fetches a new access token from Twitch OAuth.
   Future<void> _refreshAccessToken() async {
     try {
+      print('🔑 IGDB Auth: Requesting new access token from Twitch OAuth');
+      print('🔑 IGDB Auth: Client ID: ${_getClientId()}');
+
       final response = await dio.post<dynamic>(
         'https://id.twitch.tv/oauth2/token',
         queryParameters: {
@@ -235,18 +385,25 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         },
       );
 
+      print('🔑 IGDB Auth: Token response status ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = response.data;
         _cachedAccessToken = data['access_token'];
         final expiresIn = data['expires_in'] as int;
         _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
+        print(
+            '✅ IGDB Auth: Token acquired successfully (expires in $expiresIn seconds)');
       } else {
+        print('❌ IGDB Auth: Failed with status ${response.statusCode}');
         throw ServerException(
           'Failed to get access token: ${response.statusCode}',
           message: 'Failed to get access token: ${response.statusCode}',
         );
       }
     } on DioException catch (e) {
+      print('❌ IGDB Auth: DioException - ${e.message}');
+      print('❌ IGDB Auth: Response: ${e.response?.data}');
       throw _handleDioException(e);
     }
   }
@@ -304,21 +461,13 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   // CONFIGURATION
   // ============================================================
 
-  /// Gets the IGDB client ID from environment or config.
+  /// Gets the IGDB client ID from API constants.
   String _getClientId() {
-    // TODO: Load from environment variables or secure storage
-    return const String.fromEnvironment(
-      'IGDB_CLIENT_ID',
-      defaultValue: 'your_client_id_here',
-    );
+    return ApiConstants.igdbClientId;
   }
 
-  /// Gets the IGDB client secret from environment or config.
+  /// Gets the IGDB client secret from API constants.
   String _getClientSecret() {
-    // TODO: Load from environment variables or secure storage
-    return const String.fromEnvironment(
-      'IGDB_CLIENT_SECRET',
-      defaultValue: 'your_client_secret_here',
-    );
+    return ApiConstants.igdbClientSecret;
   }
 }

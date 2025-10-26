@@ -7,7 +7,7 @@ class GameStatusModel extends GameStatus {
   const GameStatusModel({
     required super.id,
     required super.checksum,
-    required super.name,
+    required super.status,
     super.description,
     super.createdAt,
     super.updatedAt,
@@ -17,7 +17,7 @@ class GameStatusModel extends GameStatus {
     return GameStatusModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
+      status: json['status'] ?? '',
       description: json['description'],
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
@@ -31,23 +31,11 @@ class GameStatusModel extends GameStatus {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'name': name,
-    'description': description,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
-
-  factory GameStatusModel.fromEnum(GameStatusEnum statusEnum) {
-    return GameStatusModel(
-      id: statusEnum.value,
-      checksum: '',
-      name: statusEnum.name,
-    );
-  }
+        'id': id,
+        'checksum': checksum,
+        'status': status,
+        'description': description,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
 }
-
-
-
-

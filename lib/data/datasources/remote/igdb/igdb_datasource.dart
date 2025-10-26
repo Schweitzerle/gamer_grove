@@ -1,12 +1,23 @@
 // lib/data/datasources/remote/igdb/igdb_datasource.dart
 
+import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_model.dart';
 import 'package:gamer_grove/data/models/character/character_model.dart';
+import 'package:gamer_grove/data/models/game/game_status_model.dart';
+import 'package:gamer_grove/data/models/game/game_type_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
 import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/company/company_model.dart';
 import 'package:gamer_grove/data/models/event/event_model.dart';
 import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/data/models/genre_model.dart';
+import 'package:gamer_grove/data/models/franchise_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/keyword_model.dart';
+import 'package:gamer_grove/data/models/ageRating/age_rating_model.dart';
+import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/player_perspective_model.dart';
+import 'package:gamer_grove/data/models/theme_model.dart';
 
 import 'models/igdb_query.dart';
 
@@ -239,4 +250,83 @@ abstract class IgdbDataSource {
   /// final genres = await dataSource.queryGenres(query);
   /// ```
   Future<List<GenreModel>> queryGenres(IgdbGenreQuery query);
+
+  // ============================================================
+  // FRANCHISE QUERIES
+  // ============================================================
+
+  /// Queries franchises from IGDB
+  Future<List<FranchiseModel>> queryFranchises(IgdbFranchiseQuery query);
+
+  // ============================================================
+  // COLLECTION QUERIES
+  // ============================================================
+
+  /// Queries collections from IGDB
+  Future<List<CollectionModel>> queryCollections(IgdbCollectionQuery query);
+
+  // ============================================================
+  // KEYWORD QUERIES
+  // ============================================================
+
+  /// Queries keywords from IGDB
+  Future<List<KeywordModel>> queryKeywords(IgdbKeywordQuery query);
+
+  // ============================================================
+  // AGE RATING QUERIES
+  // ============================================================
+
+  /// Queries age ratings from IGDB
+  Future<List<AgeRatingModel>> queryAgeRatings(IgdbAgeRatingQuery query);
+
+  // ============================================================
+  // MULTIPLAYER MODE QUERIES
+  // ============================================================
+
+  /// Queries multiplayer modes from IGDB
+  Future<List<MultiplayerModeModel>> queryMultiplayerModes(
+      IgdbMultiplayerModeQuery query);
+
+  // ============================================================
+  // LANGUAGE SUPPORT QUERIES
+  // ============================================================
+
+  /// Queries languages from IGDB
+  Future<List<LanguageModel>> queryLanguages(IgdbLanguageQuery query);
+
+  // ============================================================
+  // Theme QUERIES
+  // ============================================================
+
+  /// Queries themes from IGDB
+  Future<List<ThemeModel>> queryThemes(IgdbThemeQuery query);
+
+  // ============================================================
+  // Player perspective QUERIES
+  // ============================================================
+
+  /// Queries player perspectives from IGDB
+  Future<List<PlayerPerspectiveModel>> queryPlayerPerspectives(
+      IgdbPlayerPerspectiveQuery query);
+
+  // ============================================================
+  // Game modes QUERIES
+  // ============================================================
+
+  /// Queries game modes from IGDB
+  Future<List<GameModeModel>> queryGameModes(IgdbGameModeQuery query);
+
+  // ============================================================
+  // Game statuses QUERIES
+  // ============================================================
+
+  /// Queries game statuses from IGDB
+  Future<List<GameStatusModel>> queryGameStatuses(IgdbGameStatusQuery query);
+
+  // ============================================================
+  // Game types QUERIES
+  // ============================================================
+
+  /// Queries game types from IGDB
+  Future<List<GameTypeModel>> queryGameTypes(IgdbGameTypeQuery query);
 }

@@ -58,17 +58,23 @@ class GameQueryPresets {
   }
 
   /// Search query optimized for text search
+  ///
+  /// Uses IGDB's native search functionality which is better than
+  /// regex matching with 'where name ~'. The search operator finds
+  /// games by name, alternative names, and other text fields.
+  ///
+  /// Based on original query:
+  /// search "$query";
   static IgdbGameQuery search({
     required String searchTerm,
     int limit = 20,
     int offset = 0,
   }) {
     return IgdbGameQuery(
-      where: GameFilters.searchByName(searchTerm),
+      search: searchTerm,
       fields: GameFieldSets.search,
       limit: limit,
       offset: offset,
-      sort: 'total_rating_count desc',
     );
   }
 
@@ -77,46 +83,48 @@ class GameQueryPresets {
   // ============================================================
 
   /// Popular games query
+  ///
+  /// Based on original query:
+  /// where total_rating_count > 20 & total_rating_count < 50 & first_release_date != null;
   static IgdbGameQuery popular({
     int limit = 20,
     int offset = 0,
     DateTime? releasedAfter,
   }) {
-    IgdbFilter? filter;
+    final filters = <IgdbFilter>[
+      FieldFilter('total_rating_count', '>', 20),
+      FieldFilter('total_rating_count', '<', 50),
+      NullFilter('first_release_date', isNull: false),
+    ];
+
     if (releasedAfter != null) {
-      filter = CombinedFilter([
-        GameFilters.releasedAfter(releasedAfter),
-        GameFilters.mainGamesOnly(),
-        GameFilters.minRatingCount(10),
-      ]);
-    } else {
-      filter = CombinedFilter([
-        GameFilters.mainGamesOnly(),
-        GameFilters.minRatingCount(10),
-      ]);
+      filters.add(GameFilters.releasedAfter(releasedAfter));
     }
 
     return IgdbGameQuery(
-      where: filter,
+      where: CombinedFilter(filters),
       fields: GameFieldSets.standard,
       limit: limit,
       offset: offset,
-      sort: 'total_rating_count desc',
+      sort: 'total_rating desc',
     );
   }
 
   /// Top rated games query
+  ///
+  /// Based on original query:
+  /// where total_rating >= 70 & total_rating_count >= 100;
+  ///
+  /// Note: We only use total_rating_count filter because IGDB API
+  /// has issues with total_rating comparisons. We rely on sorting
+  /// to get the highest rated games.
   static IgdbGameQuery topRated({
     int limit = 20,
     int offset = 0,
-    double minRating = 80.0,
-    int minRatingCount = 50,
+    double minRating = 70.0, // Not used - IGDB API doesn't support it reliably
+    int minRatingCount = 100,
   }) {
-    final filter = CombinedFilter([
-      GameFilters.mainGamesOnly(),
-      GameFilters.ratingAbove(minRating),
-      GameFilters.minRatingCount(minRatingCount),
-    ]);
+    final filter = GameFilters.minRatingCount(minRatingCount);
 
     return IgdbGameQuery(
       where: filter,
@@ -132,16 +140,16 @@ class GameQueryPresets {
   // ============================================================
 
   /// Recent releases query
+  ///
+  /// Based on original query:
+  /// where first_release_date < $now;
   static IgdbGameQuery recentReleases({
     int limit = 20,
     int offset = 0,
     int daysAgo = 30,
   }) {
-    final date = DateTime.now().subtract(Duration(days: daysAgo));
-    final filter = CombinedFilter([
-      GameFilters.releasedAfter(date),
-      GameFilters.mainGamesOnly(),
-    ]);
+    final now = DateTime.now();
+    final filter = GameFilters.releasedBefore(now);
 
     return IgdbGameQuery(
       where: filter,
@@ -153,14 +161,14 @@ class GameQueryPresets {
   }
 
   /// Upcoming releases query
+  ///
+  /// Based on original query:
+  /// where first_release_date > $now;
   static IgdbGameQuery upcomingReleases({
     int limit = 20,
     int offset = 0,
   }) {
-    final filter = CombinedFilter([
-      GameFilters.releasedAfter(DateTime.now()),
-      GameFilters.mainGamesOnly(),
-    ]);
+    final filter = GameFilters.releasedAfter(DateTime.now());
 
     return IgdbGameQuery(
       where: filter,

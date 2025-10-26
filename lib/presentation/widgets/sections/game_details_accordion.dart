@@ -343,11 +343,11 @@ class GameDetailsAccordion extends StatelessWidget {
     List<String> info = [];
 
     if (game.gameType != null) {
-      info.add(_formatLabel(game.gameType!.name));
+      info.add(_formatLabel(game.gameType!.type));
     }
 
     if (game.gameStatus != null) {
-      info.add(_formatLabel(game.gameStatus!.name));
+      info.add(_formatLabel(game.gameStatus!.status));
     }
 
     if (game.versionTitle != null && game.versionTitle!.isNotEmpty) {

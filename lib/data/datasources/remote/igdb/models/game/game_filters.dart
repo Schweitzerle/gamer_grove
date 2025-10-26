@@ -92,12 +92,14 @@ class GameFilters {
   // ============================================================
 
   /// Filter games with rating above threshold
+  /// Note: IGDB only supports >= operator for total_rating, not >
   static IgdbFilter ratingAbove(double rating) =>
-      FieldFilter('total_rating', '>', rating);
+      FieldFilter('total_rating', '>=', rating);
 
   /// Filter games with rating below threshold
+  /// Note: IGDB only supports <= operator for total_rating, not <
   static IgdbFilter ratingBelow(double rating) =>
-      FieldFilter('total_rating', '<', rating);
+      FieldFilter('total_rating', '<=', rating);
 
   /// Filter games with rating between min and max
   static IgdbFilter ratingBetween(double min, double max) => CombinedFilter([

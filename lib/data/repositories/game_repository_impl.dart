@@ -18,8 +18,17 @@ import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/domain/entities/artwork.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
 import 'package:gamer_grove/domain/entities/screenshot.dart';
 import 'package:gamer_grove/domain/entities/search/search_filters.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
 import 'package:gamer_grove/domain/entities/user/user_collection_filters.dart';
 import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
 import 'package:gamer_grove/domain/entities/user/user_collection_summary.dart';
@@ -106,6 +115,7 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           limit: limit,
           offset: offset,
         );
+        print('Executing search query: $searchQuery');
         return igdbDataSource.queryGames(searchQuery);
       },
       errorMessage: 'Failed to search games',
@@ -202,13 +212,21 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     int limit,
     int offset,
   ) {
+    print(
+        '🎮 GameRepository: getPopularGames called (limit: $limit, offset: $offset)');
     return executeIgdbOperation(
       operation: () async {
+        print('🎮 GameRepository: Creating popular games query');
         final query = GameQueryPresets.popular(
           limit: limit,
           offset: offset,
         );
-        return igdbDataSource.queryGames(query);
+        print('🎮 GameRepository: Executing popular games query: $query');
+        print('🎮 GameRepository: Calling IGDB DataSource');
+        final result = await igdbDataSource.queryGames(query);
+        print(
+            '🎮 GameRepository: Received ${result.length} games from DataSource');
+        return result;
       },
       errorMessage: 'Failed to fetch popular games',
     );
@@ -505,48 +523,236 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }) {
     return executeIgdbOperation(
       operation: () async {
+        print('\n' + '=' * 80);
+        print('🔍 ADVANCED GAME SEARCH - FILTER DEBUG');
+        print('=' * 80);
+        print('📝 Text Query: ${textQuery ?? "NONE"}');
+        print('🎯 Filters Applied:');
+
         // Build combined filters from SearchFilters
         final igdbFilters = <IgdbFilter>[
-          GameFilters.mainGamesOnly(),
+          //GameFilters.mainGamesOnly(),
         ];
 
         // Add text search if provided
         if (textQuery != null && textQuery.trim().isNotEmpty) {
-          igdbFilters.add(GameFilters.searchByName(textQuery.trim()));
+          final nameFilter = GameFilters.searchByName(textQuery.trim());
+          print('  ✓ Name Filter: ${nameFilter.toQueryString()}');
+          igdbFilters.add(nameFilter);
         }
 
-        // Add genre filters
+        // ========== BASIC FILTERS ==========
+        // Genre filters
         if (filters.genreIds.isNotEmpty) {
-          igdbFilters.add(ContainsFilter('genres', filters.genreIds));
+          final genreFilter = ContainsFilter('genres', filters.genreIds);
+          print('  ✓ Genre Filter: ${genreFilter.toQueryString()}');
+          igdbFilters.add(genreFilter);
         }
 
-        // Add platform filters
+        // Platform filters
         if (filters.platformIds.isNotEmpty) {
-          igdbFilters.add(ContainsFilter('platforms', filters.platformIds));
+          final platformFilter =
+              ContainsFilter('platforms', filters.platformIds);
+          print('  ✓ Platform Filter: ${platformFilter.toQueryString()}');
+          igdbFilters.add(platformFilter);
         }
 
-        // Add rating filter
-        if (filters.minRating != null) {
-          igdbFilters.add(
-            FieldFilter('total_rating', '>=', filters.minRating! * 10),
-          );
-        }
-
-        // Add release date filters
+        // Release date filters
         if (filters.releaseDateFrom != null) {
-          igdbFilters.add(GameFilters.releasedAfter(filters.releaseDateFrom!));
+          final dateFilter =
+              GameFilters.releasedAfter(filters.releaseDateFrom!);
+          print('  ✓ Release Date From: ${dateFilter.toQueryString()}');
+          igdbFilters.add(dateFilter);
         }
         if (filters.releaseDateTo != null) {
-          igdbFilters.add(GameFilters.releasedBefore(filters.releaseDateTo!));
+          final dateFilter = GameFilters.releasedBefore(filters.releaseDateTo!);
+          print('  ✓ Release Date To: ${dateFilter.toQueryString()}');
+          igdbFilters.add(dateFilter);
+        }
+
+        // ========== RATING FILTERS ==========
+        // Total Rating (user + critic combined)
+        if (filters.minTotalRating != null) {
+          final filter = FieldFilter(
+              'total_rating', '>=', filters.minTotalRating!.toInt() * 10);
+          print('  ✓ Min Total Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.maxTotalRating != null) {
+          final filter = FieldFilter(
+              'total_rating', '<=', filters.maxTotalRating!.toInt() * 10);
+          print('  ✓ Max Total Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.minTotalRatingCount != null) {
+          final filter = FieldFilter(
+              'total_rating_count', '>=', filters.minTotalRatingCount);
+          print('  ✓ Min Total Rating Count: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // IGDB User Rating
+        if (filters.minUserRating != null) {
+          final filter =
+              FieldFilter('rating', '>=', filters.minUserRating!.toInt() * 10);
+          print('  ✓ Min User Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.maxUserRating != null) {
+          final filter =
+              FieldFilter('rating', '<=', filters.maxUserRating!.toInt() * 10);
+          print('  ✓ Max User Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.minUserRatingCount != null) {
+          final filter =
+              FieldFilter('rating_count', '>=', filters.minUserRatingCount);
+          print('  ✓ Min User Rating Count: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // Aggregated Critic Rating
+        if (filters.minAggregatedRating != null) {
+          final filter = FieldFilter('aggregated_rating', '>=',
+              filters.minAggregatedRating!.toInt() * 10);
+          print('  ✓ Min Aggregated Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.maxAggregatedRating != null) {
+          final filter = FieldFilter('aggregated_rating', '<=',
+              filters.maxAggregatedRating!.toInt() * 10);
+          print('  ✓ Max Aggregated Rating: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.minAggregatedRatingCount != null) {
+          final filter = FieldFilter('aggregated_rating_count', '>=',
+              filters.minAggregatedRatingCount);
+          print('  ✓ Min Aggregated Rating Count: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // ========== GAME TYPE & STATUS FILTERS ==========
+        if (filters.gameTypeIds.isNotEmpty) {
+          final filter = ContainsFilter('game_type', filters.gameTypeIds);
+          print('  ✓ Game Type Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.gameStatusIds.isNotEmpty) {
+          final filter = ContainsFilter('game_status', filters.gameStatusIds);
+          print('  ✓ Game Status Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // ========== MODES & PERSPECTIVES ==========
+        if (filters.themesIds.isNotEmpty) {
+          final filter = ContainsFilter('themes', filters.themesIds);
+          print('  ✓ Themes Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.gameModesIds.isNotEmpty) {
+          final filter = ContainsFilter('game_modes', filters.gameModesIds);
+          print('  ✓ Game Modes Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.playerPerspectiveIds.isNotEmpty) {
+          final filter = ContainsFilter(
+              'player_perspectives', filters.playerPerspectiveIds);
+          print('  ✓ Player Perspectives Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.multiplayerModeIds.isNotEmpty) {
+          final filter =
+              ContainsFilter('multiplayer_modes', filters.multiplayerModeIds);
+          print('  ✓ Multiplayer Modes Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // Multiplayer/Singleplayer boolean checks
+        if (filters.hasMultiplayer != null) {
+          if (filters.hasMultiplayer!) {
+            final filter = NullFilter('multiplayer_modes', isNull: false);
+            print('  ✓ Has Multiplayer: ${filter.toQueryString()}');
+            igdbFilters.add(filter);
+          }
+        }
+        if (filters.hasSinglePlayer != null) {
+          if (filters.hasSinglePlayer!) {
+            // Check if game_modes contains singleplayer (ID: 1)
+            final filter = ContainsFilter('game_modes', [1]);
+            print('  ✓ Has Singleplayer: ${filter.toQueryString()}');
+            igdbFilters.add(filter);
+          }
+        }
+
+        // ========== POPULARITY & HYPE ==========
+        if (filters.minHypes != null) {
+          final filter = FieldFilter('hypes', '>=', filters.minHypes!);
+          print('  ✓ Min Hypes: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // ========== AGE RATING & LOCALIZATION ==========
+        if (filters.ageRatingIds.isNotEmpty) {
+          final filter = ContainsFilter('age_ratings', filters.ageRatingIds);
+          print('  ✓ Age Ratings Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.languageSupportIds.isNotEmpty) {
+          final filter =
+              ContainsFilter('language_supports', filters.languageSupportIds);
+          print('  ✓ Language Supports Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        // ========== DYNAMIC SEARCH FILTERS ==========
+        if (filters.companyIds.isNotEmpty) {
+          final filter =
+              ContainsFilter('involved_companies.company', filters.companyIds);
+          print('  ✓ Companies Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.gameEngineIds.isNotEmpty) {
+          final filter = ContainsFilter('game_engines', filters.gameEngineIds);
+          print('  ✓ Game Engines Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.franchiseIds.isNotEmpty) {
+          final filter = ContainsFilter('franchises', filters.franchiseIds);
+          print('  ✓ Franchises Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.collectionIds.isNotEmpty) {
+          final filter = ContainsFilter('collections', filters.collectionIds);
+          print('  ✓ Collections Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+        if (filters.keywordIds.isNotEmpty) {
+          final filter = ContainsFilter('keywords', filters.keywordIds);
+          print('  ✓ Keywords Filter: ${filter.toQueryString()}');
+          igdbFilters.add(filter);
+        }
+
+        print('\n📊 Total Filters Applied: ${igdbFilters.length}');
+
+        final whereClause =
+            igdbFilters.isNotEmpty ? CombinedFilter(igdbFilters) : null;
+
+        if (whereClause != null) {
+          print('🔗 Combined WHERE Clause:');
+          print('   ${whereClause.toQueryString()}');
         }
 
         final query = IgdbGameQuery(
-          where: CombinedFilter(igdbFilters),
+          where: whereClause,
           fields: GameFieldSets.standard,
           limit: limit,
           offset: offset,
           sort: 'total_rating_count desc',
         );
+
+        print('\n📋 Final Query String:');
+        print(query.buildQuery());
+        print('=' * 80 + '\n');
 
         return igdbDataSource.queryGames(query);
       },
@@ -630,24 +836,25 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<Genre>>> getAllGenres() {
+    print('\n' + '=' * 80);
+    print('🎭 LOADING GENRES');
+    print('=' * 80);
     return executeIgdbOperation(
       operation: () async {
         // Query all genres from IGDB
         final query = IgdbGenreQuery(
           fields: [
-            'id',
-            'name',
-            'slug',
-            'url',
-            'checksum',
-            'created_at',
-            'updated_at'
+            '*',
           ],
           limit: 100,
           offset: 0,
           sort: 'name asc',
         );
-        return igdbDataSource.queryGenres(query);
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryGenres(query);
+        print('✅ Loaded ${result.length} genres');
+        print('=' * 80 + '\n');
+        return result;
       },
       errorMessage: 'Failed to fetch genres',
     );
@@ -655,6 +862,9 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<Platform>>> getAllPlatforms() {
+    print('\n' + '=' * 80);
+    print('🎮 LOADING PLATFORMS');
+    print('=' * 80);
     return executeIgdbOperation(
       operation: () async {
         final query = PlatformQueryPresets.basicList(
@@ -662,9 +872,218 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           offset: 0,
           sort: 'name asc',
         );
-        return igdbDataSource.queryPlatforms(query);
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryPlatforms(query);
+        print('✅ Loaded ${result.length} platforms');
+        print('=' * 80 + '\n');
+        return result;
       },
       errorMessage: 'Failed to fetch platforms',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Genre>>> searchGenres(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING GENRES');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbGenreQuery(
+          where: filter,
+          fields: const [
+            '*',
+          ],
+          limit: 50,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryGenres(igdbQuery);
+        print('✅ Found ${result.length} genres');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search genres',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Platform>>> searchPlatforms(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING PLATFORMS');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = PlatformQueryPresets.basicList(
+          filter: filter,
+          limit: 50,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryPlatforms(igdbQuery);
+        print('✅ Found ${result.length} platforms');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search platforms',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<GameEngine>>> searchGameEngines(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING GAME ENGINES');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final igdbQuery = GameEngineQueryPresets.search(
+          searchTerm: query,
+          limit: 20,
+          offset: 0,
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryGameEngines(igdbQuery);
+        print('✅ Found ${result.length} game engines');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search game engines',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Franchise>>> searchFranchises(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING FRANCHISES');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbFranchiseQuery(
+          where: filter,
+          fields: const [
+            '*',
+          ],
+          limit: 20,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryFranchises(igdbQuery);
+        print('✅ Found ${result.length} franchises');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search franchises',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Collection>>> searchCollections(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING COLLECTIONS');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbCollectionQuery(
+          where: filter,
+          fields: const [
+            '*',
+          ],
+          limit: 20,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryCollections(igdbQuery);
+        print('✅ Found ${result.length} collections');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search collections',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Keyword>>> searchKeywords(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING KEYWORDS');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbKeywordQuery(
+          where: filter,
+          fields: const [
+            '*',
+          ],
+          limit: 20,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryKeywords(igdbQuery);
+        print('✅ Found ${result.length} keywords');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search keywords',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings() {
+    print('\n' + '=' * 80);
+    print('🔞 LOADING AGE RATINGS');
+    print('=' * 80);
+    return executeIgdbOperation(
+      operation: () async {
+        final igdbQuery = IgdbAgeRatingQuery(
+          fields: const ['*', 'rating_category.*', 'organization.*'],
+          limit: 100,
+          sort: 'organization asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryAgeRatings(igdbQuery);
+        print('✅ Found ${result.length} age ratings');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to get age ratings',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Language>>> searchLanguages(
+    String query,
+  ) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING LANGUAGES');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final igdbQuery = IgdbLanguageQuery(
+          fields: const [
+            '*',
+          ],
+          limit: 100,
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryLanguages(igdbQuery);
+        print('✅ Found ${result.length} languages');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search languages',
     );
   }
 
@@ -810,6 +1229,11 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     List<int>? ids,
     String? search,
   }) {
+    print('\n' + '=' * 80);
+    print('🏢 LOADING COMPANIES');
+    print('=' * 80);
+    print('Search term: ${search ?? "NONE"}');
+    print('IDs: ${ids ?? "NONE"}');
     return executeIgdbOperation(
       operation: () async {
         IgdbCompanyQuery query;
@@ -837,7 +1261,11 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           );
         }
 
-        return igdbDataSource.queryCompanies(query);
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryCompanies(query);
+        print('✅ Loaded ${result.length} companies');
+        print('=' * 80 + '\n');
+        return result;
       },
       errorMessage: 'Failed to fetch companies',
     );
@@ -1991,5 +2419,170 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     } on Exception catch (e) {
       return Left(ServerFailure(message: 'Failed to toggle wishlist: $e'));
     }
+  }
+
+  @override
+  Future<Either<Failure, List<GameMode>>> getAllGameModes() {
+    print('\n' + '=' * 80);
+    print('🎭 LOADING GAME MODES');
+    print('=' * 80);
+    return executeIgdbOperation(
+      operation: () async {
+        // Query all game modes from IGDB
+        final query = IgdbGameModeQuery(
+          fields: [
+            '*',
+          ],
+          limit: 100,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryGameModes(query);
+        print('✅ Loaded ${result.length} game modes');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to fetch game modes',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<GameStatus>>> getAllGameStatuses() {
+    print('\n' + '=' * 80);
+    print('🎭 LOADING GAME STATUSES');
+    print('=' * 80);
+    return executeIgdbOperation(
+      operation: () async {
+        // Query all game statuses from IGDB
+        final query = IgdbGameStatusQuery(
+          fields: [
+            '*',
+          ],
+          limit: 100,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryGameStatuses(query);
+        print('✅ Loaded ${result.length} game statuses');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to fetch game statuses',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<GameType>>> getAllGameTypes() {
+    print('\n' + '=' * 80);
+    print('🎭 LOADING GAME TYPES');
+    print('=' * 80);
+    return executeIgdbOperation(
+      operation: () async {
+        // Query all game types from IGDB
+        final query = IgdbGameTypeQuery(
+          fields: [
+            '*',
+          ],
+          limit: 100,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryGameTypes(query);
+        print('✅ Loaded ${result.length} game types');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to fetch game types',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<PlayerPerspective>>> getAllPlayerPerspectives() {
+    print('\n' + '=' * 80);
+    print('🎭 LOADING PLAYER PERSPECTIVES');
+    print('=' * 80);
+    return executeIgdbOperation(
+      operation: () async {
+        // Query all player perspectives from IGDB
+        final query = IgdbPlayerPerspectiveQuery(
+          fields: [
+            '*',
+          ],
+          limit: 100,
+          offset: 0,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${query.buildQuery()}');
+        final result = await igdbDataSource.queryPlayerPerspectives(query);
+        print('✅ Loaded ${result.length} player perspectives');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to fetch player perspectives',
+    );
+  }
+
+/* //TODO: Add functionality for multiple filters: 
+Bsp: fields *, organization.*, rating_category.*, rating_content_descriptions.*;
+sort organization.name asc;
+where organization.name ~ *"grA"* | rating_category.rating ~ *"18"* | rating_content_descriptions.description ~ *"18"*;
+ */
+  @override
+  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING AGE RATINGS');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbAgeRatingQuery(
+          where: filter,
+          fields: const [
+            '*',
+            'rating_category.*',
+            'organization.*',
+          ],
+          limit: 20,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryAgeRatings(igdbQuery);
+        print('✅ Found ${result.length} age ratings');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search age ratings',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Theme>>> searchThemes(String query) {
+    print('\n' + '=' * 80);
+    print('🔍 SEARCHING THEMES');
+    print('=' * 80);
+    print('Search term: $query');
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = FieldFilter('name', '~', query);
+        final igdbQuery = IgdbThemeQuery(
+          where: filter,
+          fields: const [
+            '*',
+          ],
+          limit: 20,
+          sort: 'name asc',
+        );
+        print('📋 Query: ${igdbQuery.buildQuery()}');
+        final result = await igdbDataSource.queryThemes(igdbQuery);
+        print('✅ Found ${result.length} themes');
+        print('=' * 80 + '\n');
+        return result;
+      },
+      errorMessage: 'Failed to search themes',
+    );
   }
 }

@@ -8,12 +8,23 @@ export 'base/igdb_query.dart';
 
 // Import models for type aliases
 import 'package:gamer_grove/data/models/character/character_model.dart';
+import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/data/models/game/game_status_model.dart';
+import 'package:gamer_grove/data/models/game/game_type_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
 import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/company/company_model.dart';
 import 'package:gamer_grove/data/models/event/event_model.dart';
 import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/data/models/genre_model.dart';
+import 'package:gamer_grove/data/models/franchise_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/keyword_model.dart';
+import 'package:gamer_grove/data/models/ageRating/age_rating_model.dart';
+import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/player_perspective_model.dart';
+import 'package:gamer_grove/data/models/theme_model.dart';
 
 import 'base/igdb_query.dart';
 
@@ -41,6 +52,41 @@ typedef IgdbGameEngineQuery = IgdbQuery<GameEngineModel>;
 
 /// Query type for genres
 typedef IgdbGenreQuery = IgdbQuery<GenreModel>;
+
+/// Query type for game statuses
+typedef IgdbGameStatusQuery = IgdbQuery<GameStatusModel>;
+
+/// Query type for game modes
+typedef IgdbGameModeQuery = IgdbQuery<GameModeModel>;
+
+/// Query type for game types
+typedef IgdbGameTypeQuery = IgdbQuery<GameTypeModel>;
+
+/// Query type for player perspectives
+typedef IgdbPlayerPerspectiveQuery = IgdbQuery<PlayerPerspectiveModel>;
+
+/// Query type for collections
+typedef IgdbCollectionQuery = IgdbQuery<CollectionModel>;
+
+/// Query type for franchises
+typedef IgdbFranchiseQuery = IgdbQuery<FranchiseModel>;
+
+/// Query type for keywords
+typedef IgdbKeywordQuery = IgdbQuery<KeywordModel>;
+
+/// Query type for age ratings
+typedef IgdbAgeRatingQuery = IgdbQuery<AgeRatingModel>;
+
+/// Query type for multiplayer modes
+typedef IgdbMultiplayerModeQuery = IgdbQuery<MultiplayerModeModel>;
+
+/// Query type for languages
+typedef IgdbLanguageQuery = IgdbQuery<LanguageModel>;
+
+/// Query type for themes
+typedef IgdbThemeQuery = IgdbQuery<ThemeModel>;
+
+/// Query type for player
 
 // ============================================================
 // BUILDER TYPE ALIASES

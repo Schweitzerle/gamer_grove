@@ -27,6 +27,10 @@ import '../igdb_filters.dart';
 /// final queryString = query.buildQuery();
 /// ```
 class IgdbQuery<T> extends Equatable {
+  /// Search term for IGDB's search endpoint
+  /// Use this instead of 'where name ~' for better search results
+  final String? search;
+
   /// Filter condition for the WHERE clause
   final IgdbFilter? where;
 
@@ -48,6 +52,7 @@ class IgdbQuery<T> extends Equatable {
   final List<String>? exclude;
 
   const IgdbQuery({
+    this.search,
     this.where,
     this.fields = const ['*'],
     this.limit = 20,
@@ -60,10 +65,16 @@ class IgdbQuery<T> extends Equatable {
   String buildQuery() {
     final parts = <String>[];
 
+    // Search clause (optional)
+    if (search != null && search!.isNotEmpty) {
+      parts.add('search "$search"; ');
+    }
+
     // Fields clause (required)
     parts.add('fields ${fields.join(',')}; ');
 
-    // Where clause (optional)
+    // Where clause (optional, can be combined with search!)
+    // IGDB allows both search and where to be used together
     if (where != null) {
       parts.add('where ${where!.toQueryString()}; ');
     }
@@ -89,6 +100,7 @@ class IgdbQuery<T> extends Equatable {
 
   /// Creates a copy of this query with modified parameters
   IgdbQuery<T> copyWith({
+    String? search,
     IgdbFilter? where,
     List<String>? fields,
     int? limit,
@@ -97,6 +109,7 @@ class IgdbQuery<T> extends Equatable {
     List<String>? exclude,
   }) {
     return IgdbQuery<T>(
+      search: search ?? this.search,
       where: where ?? this.where,
       fields: fields ?? this.fields,
       limit: limit ?? this.limit,
@@ -123,7 +136,7 @@ class IgdbQuery<T> extends Equatable {
   }
 
   @override
-  List<Object?> get props => [where, fields, limit, offset, sort, exclude];
+  List<Object?> get props => [search, where, fields, limit, offset, sort, exclude];
 
   @override
   String toString() => 'IgdbQuery<$T>(limit: $limit, offset: $offset)';
@@ -157,6 +170,7 @@ class IgdbQuery<T> extends Equatable {
 ///   .build();
 /// ```
 class IgdbQueryBuilder<T> {
+  String? _search;
   IgdbFilter? _where;
   List<String> _fields = const ['*'];
   int _limit = 20;
@@ -168,12 +182,18 @@ class IgdbQueryBuilder<T> {
 
   /// Start from an existing query
   IgdbQueryBuilder.from(IgdbQuery<T> query)
-      : _where = query.where,
+      : _search = query.search,
+        _where = query.where,
         _fields = query.fields,
         _limit = query.limit,
         _offset = query.offset,
         _sort = query.sort,
         _exclude = query.exclude;
+
+  IgdbQueryBuilder<T> withSearch(String? search) {
+    _search = search;
+    return this;
+  }
 
   IgdbQueryBuilder<T> withFilter(IgdbFilter? filter) {
     _where = filter;
@@ -208,6 +228,7 @@ class IgdbQueryBuilder<T> {
   /// Build the final query
   IgdbQuery<T> build() {
     return IgdbQuery<T>(
+      search: _search,
       where: _where,
       fields: _fields,
       limit: _limit,

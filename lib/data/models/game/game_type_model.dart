@@ -7,7 +7,7 @@ class GameTypeModel extends GameType {
   const GameTypeModel({
     required super.id,
     required super.checksum,
-    required super.name,
+    required super.type,
     super.createdAt,
     super.updatedAt,
   });
@@ -16,7 +16,7 @@ class GameTypeModel extends GameType {
     return GameTypeModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
+      type: json['type'] ?? '',
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
@@ -29,18 +29,10 @@ class GameTypeModel extends GameType {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'name': name,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
-
-  factory GameTypeModel.fromCategory(GameCategoryEnum category) {
-    return GameTypeModel(
-      id: category.value,
-      checksum: '',
-      name: category.name,
-    );
-  }
+        'id': id,
+        'checksum': checksum,
+        'type': type,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
 }

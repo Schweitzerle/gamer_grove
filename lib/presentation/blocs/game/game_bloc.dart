@@ -634,9 +634,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     LoadHomePageDataEvent event,
     Emitter<GameState> emit,
   ) async {
+    print('🏠 GameBloc: Loading home page data (userId: ${event.userId})');
     emit(HomePageLoading());
 
     try {
+      print('🏠 GameBloc: Starting parallel data fetch...');
       // Load all data in parallel
       final results = await Future.wait([
         getPopularGames(const GetPopularGamesParams(limit: 10)),
@@ -651,15 +653,53 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         ],
       ]);
 
+      print('🏠 GameBloc: Parallel data fetch complete! Processing results...');
+
       // Extract results
-      final popularGames = results[0].fold((l) => <Game>[], (r) => r);
-      final upcomingGames = results[1].fold((l) => <Game>[], (r) => r);
-      final latestGames = results[2].fold((l) => <Game>[], (r) => r);
-      final topRatedGames = results[3].fold((l) => <Game>[], (r) => r);
-      final userWishlist = event.userId != null && results.length > 2
+      final popularGames = results[0].fold(
+        (l) {
+          print('❌ GameBloc: Popular games failed: ${l.message}');
+          return <Game>[];
+        },
+        (r) {
+          print('✅ GameBloc: Popular games: ${r.length} games');
+          return r;
+        },
+      );
+      final upcomingGames = results[1].fold(
+        (l) {
+          print('❌ GameBloc: Upcoming games failed: ${l.message}');
+          return <Game>[];
+        },
+        (r) {
+          print('✅ GameBloc: Upcoming games: ${r.length} games');
+          return r;
+        },
+      );
+      final latestGames = results[2].fold(
+        (l) {
+          print('❌ GameBloc: Latest games failed: ${l.message}');
+          return <Game>[];
+        },
+        (r) {
+          print('✅ GameBloc: Latest games: ${r.length} games');
+          return r;
+        },
+      );
+      final topRatedGames = results[3].fold(
+        (l) {
+          print('❌ GameBloc: Top rated games failed: ${l.message}');
+          return <Game>[];
+        },
+        (r) {
+          print('✅ GameBloc: Top rated games: ${r.length} games');
+          return r;
+        },
+      );
+      final userWishlist = event.userId != null && results.length > 4
           ? results[4].fold((l) => <Game>[], (r) => r)
           : <Game>[];
-      final userRecommendations = event.userId != null && results.length > 3
+      final userRecommendations = event.userId != null && results.length > 5
           ? results[5].fold((l) => <Game>[], (r) => r)
           : <Game>[];
 
