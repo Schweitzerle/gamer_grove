@@ -67,6 +67,19 @@ class SearchFilters extends Equatable {
   final List<int> keywordIds; // Keywords
 
   // ============================================================
+  // NAME MAPPINGS FOR DYNAMIC FILTERS
+  // ============================================================
+  final Map<int, String> platformNames;
+  final Map<int, String> companyNames;
+  final Map<int, String> gameEngineNames;
+  final Map<int, String> franchiseNames;
+  final Map<int, String> collectionNames;
+  final Map<int, String> themeNames;
+  final Map<int, String> ageRatingNames;
+  final Map<int, String> keywordNames;
+  final Map<int, String> languageNames;
+
+  // ============================================================
   // SORTING
   // ============================================================
   final GameSortBy sortBy;
@@ -116,6 +129,17 @@ class SearchFilters extends Equatable {
     this.franchiseIds = const [],
     this.collectionIds = const [],
     this.keywordIds = const [],
+
+    // Name Mappings
+    this.platformNames = const {},
+    this.companyNames = const {},
+    this.gameEngineNames = const {},
+    this.franchiseNames = const {},
+    this.collectionNames = const {},
+    this.themeNames = const {},
+    this.ageRatingNames = const {},
+    this.keywordNames = const {},
+    this.languageNames = const {},
 
     // Sorting
     this.sortBy = GameSortBy.relevance,
@@ -196,6 +220,15 @@ class SearchFilters extends Equatable {
     List<int>? franchiseIds,
     List<int>? collectionIds,
     List<int>? keywordIds,
+    Map<int, String>? platformNames,
+    Map<int, String>? companyNames,
+    Map<int, String>? gameEngineNames,
+    Map<int, String>? franchiseNames,
+    Map<int, String>? collectionNames,
+    Map<int, String>? themeNames,
+    Map<int, String>? ageRatingNames,
+    Map<int, String>? keywordNames,
+    Map<int, String>? languageNames,
     GameSortBy? sortBy,
     SortOrder? sortOrder,
   }) {
@@ -231,6 +264,15 @@ class SearchFilters extends Equatable {
       franchiseIds: franchiseIds ?? this.franchiseIds,
       collectionIds: collectionIds ?? this.collectionIds,
       keywordIds: keywordIds ?? this.keywordIds,
+      platformNames: platformNames ?? this.platformNames,
+      companyNames: companyNames ?? this.companyNames,
+      gameEngineNames: gameEngineNames ?? this.gameEngineNames,
+      franchiseNames: franchiseNames ?? this.franchiseNames,
+      collectionNames: collectionNames ?? this.collectionNames,
+      themeNames: themeNames ?? this.themeNames,
+      ageRatingNames: ageRatingNames ?? this.ageRatingNames,
+      keywordNames: keywordNames ?? this.keywordNames,
+      languageNames: languageNames ?? this.languageNames,
       sortBy: sortBy ?? this.sortBy,
       sortOrder: sortOrder ?? this.sortOrder,
     );
@@ -272,6 +314,15 @@ class SearchFilters extends Equatable {
         franchiseIds,
         collectionIds,
         keywordIds,
+        platformNames,
+        companyNames,
+        gameEngineNames,
+        franchiseNames,
+        collectionNames,
+        themeNames,
+        ageRatingNames,
+        keywordNames,
+        languageNames,
         sortBy,
         sortOrder,
       ];
