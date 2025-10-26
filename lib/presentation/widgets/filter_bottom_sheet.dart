@@ -12,6 +12,7 @@ import 'package:gamer_grove/domain/entities/keyword.dart';
 import 'package:gamer_grove/domain/entities/language/language.dart';
 import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
 import 'dart:async';
+import 'dart:ui';
 import '../../core/constants/app_constants.dart';
 import '../../domain/entities/genre.dart';
 import '../../domain/entities/platform/platform.dart';
@@ -316,94 +317,165 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Column(
+      child: Stack(
         children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Filters & Sorting',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+          // Main content
+          Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                Row(
+              ),
+
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (_filters.hasFilters)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${_getActiveFilterCount()} active',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Text(
+                      'Filters & Sorting',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    const SizedBox(width: 8),
-                    TextButton.icon(
-                      onPressed: _clearAllFilters,
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear'),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
+                    Row(
+                      children: [
+                        if (_filters.hasFilters)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${_getActiveFilterCount()} active',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          onPressed: _clearAllFilters,
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text('Clear'),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Tab Bar
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: const [
-              Tab(text: 'Game', icon: Icon(Icons.videogame_asset, size: 20)),
-              Tab(text: 'Quality', icon: Icon(Icons.stars, size: 20)),
-              Tab(text: 'Meta', icon: Icon(Icons.more_horiz, size: 20)),
-              Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
+              // Tab Bar
+              TabBar(
+                controller: _tabController,
+                isScrollable: false,
+                tabAlignment: TabAlignment.fill,
+                tabs: const [
+                  Tab(text: 'Game', icon: Icon(Icons.videogame_asset, size: 20)),
+                  Tab(text: 'Quality', icon: Icon(Icons.stars, size: 20)),
+                  Tab(text: 'Meta', icon: Icon(Icons.more_horiz, size: 20)),
+                  Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
+                ],
+              ),
+
+              // Tab Views
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildGamePropertiesTab(),
+                    _buildQualityTab(),
+                    _buildMetaTab(),
+                    _buildSortingTab(),
+                  ],
+                ),
+              ),
             ],
           ),
 
-          // Tab Views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildGamePropertiesTab(),
-                _buildQualityTab(),
-                _buildMetaTab(),
-                _buildSortingTab(),
-              ],
+          // Glassmorphism Floating Action Button
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.colorScheme.primaryContainer.withOpacity(0.7),
+                        theme.colorScheme.secondaryContainer.withOpacity(0.5),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _applyFilters,
+                      borderRadius: BorderRadius.circular(28),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: theme.colorScheme.onPrimaryContainer,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Apply Filters',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-
-          // Apply Button
-          _buildApplyButton(),
         ],
       ),
     );
@@ -445,6 +517,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             itemBuilder: (item) => Text(item.name),
             getId: (item) => item.id,
             getLabel: (item) => item.name,
+            getImageUrl: (item) => item.logoUrl,
           ),
           _buildGameModesSection(),
           _buildGameTypeSection(),
@@ -569,6 +642,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             itemBuilder: (item) => Text(item.name),
             getId: (item) => item.id,
             getLabel: (item) => item.name,
+            getImageUrl: (item) => item.logoUrl,
           ),
           _buildDynamicSearchSection<Franchise>(
             title: 'Franchises',
@@ -647,6 +721,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             itemBuilder: (item) => Text(item.name),
             getId: (item) => item.id,
             getLabel: (item) => item.name,
+            getImageUrl: (item) => item.logoUrl,
           ),
           _buildDynamicSearchSection<AgeRating>(
             title: 'Age Ratings',
@@ -797,6 +872,62 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     );
   }
 
+  Widget _buildLoadingCard({
+    required String title,
+    required IconData icon,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 20, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.paddingMedium),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.paddingMedium),
+                    Text(
+                      'Loading $title...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildChipGridSection({
     required String title,
     required IconData icon,
@@ -922,7 +1053,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   Widget _buildGenresSection() {
     if (widget.availableGenres.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildLoadingCard(
+        title: 'Genres',
+        icon: Icons.bookmarks,
+      );
     }
     return _buildChipGridSection(
       title: 'Genres',
@@ -936,7 +1070,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   Widget _buildGameTypeSection() {
     if (widget.availableGameTypes.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildLoadingCard(
+        title: 'Game Types',
+        icon: Icons.category,
+      );
     }
     return _buildChipGridSection(
       title: 'Game Types',
@@ -950,7 +1087,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   Widget _buildGameStatusSection() {
     if (widget.availableGameStatuses.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildLoadingCard(
+        title: 'Game Status',
+        icon: Icons.info_outline,
+      );
     }
     return _buildChipGridSection(
       title: 'Game Status',
@@ -1913,6 +2053,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     required Widget Function(T) itemBuilder,
     required int Function(T) getId,
     required String Function(T) getLabel,
+    String? Function(T)? getImageUrl, // Optional image URL getter
   }) {
     final theme = Theme.of(context);
 
@@ -1989,7 +2130,53 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                     final itemId = getId(item);
                     final isSelected = selectedIds.contains(itemId);
 
+                    // Get image URL if available
+                    final imageUrl = getImageUrl?.call(item);
+
+                    // Build placeholder widget for consistency
+                    Widget buildPlaceholder() {
+                      return Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color:
+                              theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      );
+                    }
+
+                    // If getImageUrl is provided, always show a leading widget
+                    // (either image or placeholder)
+                    Widget? leadingWidget;
+                    if (getImageUrl != null) {
+                      if (imageUrl != null && imageUrl.isNotEmpty) {
+                        // Show image with placeholder fallback
+                        leadingWidget = ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            imageUrl,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return buildPlaceholder();
+                            },
+                          ),
+                        );
+                      } else {
+                        // Show placeholder for items without image
+                        leadingWidget = buildPlaceholder();
+                      }
+                    }
+
                     return ListTile(
+                      leading: leadingWidget,
                       title: itemBuilder(item),
                       trailing: isSelected
                           ? Icon(Icons.check_circle,
@@ -2071,34 +2258,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     );
   }
 
-  Widget _buildApplyButton() {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _applyFilters,
-            icon: const Icon(Icons.check),
-            label: const Text('Apply Filters'),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   // ==========================================
   // SEARCH DEBOUNCE METHODS

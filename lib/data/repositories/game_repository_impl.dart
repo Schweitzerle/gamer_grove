@@ -2525,11 +2525,6 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     );
   }
 
-/* //TODO: Add functionality for multiple filters: 
-Bsp: fields *, organization.*, rating_category.*, rating_content_descriptions.*;
-sort organization.name asc;
-where organization.name ~ *"grA"* | rating_category.rating ~ *"18"* | rating_content_descriptions.description ~ *"18"*;
- */
   @override
   Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query) {
     print('\n' + '=' * 80);
@@ -2538,16 +2533,24 @@ where organization.name ~ *"grA"* | rating_category.rating ~ *"18"* | rating_con
     print('Search term: $query');
     return executeIgdbOperation(
       operation: () async {
-        final filter = FieldFilter('name', '~', query);
+        // Create multiple filters for different fields (OR logic)
+        // Search in: organization name, rating category, and content descriptions
+        final multiFieldFilter = CombinedFilter([
+          FieldFilter('organization.name', '~', query),
+          FieldFilter('rating_category.rating', '~', query),
+          FieldFilter('rating_content_descriptions.description', '~', query),
+        ], operator: '|'); // Use OR operator to match ANY field
+
         final igdbQuery = IgdbAgeRatingQuery(
-          where: filter,
+          where: multiFieldFilter,
           fields: const [
             '*',
-            'rating_category.*',
             'organization.*',
+            'rating_category.*',
+            'rating_content_descriptions.*',
           ],
           limit: 20,
-          sort: 'name asc',
+          sort: 'organization.name asc',
         );
         print('📋 Query: ${igdbQuery.buildQuery()}');
         final result = await igdbDataSource.queryAgeRatings(igdbQuery);
