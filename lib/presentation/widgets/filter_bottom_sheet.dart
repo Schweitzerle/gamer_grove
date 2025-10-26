@@ -122,33 +122,52 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   late double _minTotalRating;
   late double _maxTotalRating;
   int? _minTotalRatingCount;
+  int? _maxTotalRatingCount;
 
   late double _minUserRating;
   late double _maxUserRating;
   int? _minUserRatingCount;
+  int? _maxUserRatingCount;
 
   late double _minAggregatedRating;
   late double _maxAggregatedRating;
   int? _minAggregatedRatingCount;
+  int? _maxAggregatedRatingCount;
 
   int? _minFollows;
+  int? _maxFollows;
   int? _minHypes;
+  int? _maxHypes;
 
-  int? _startYear;
-  int? _endYear;
+  DateTime? _releaseDateFrom;
+  DateTime? _releaseDateTo;
+  DateTime? _singleReleaseDate;
+  String? _dateOperator; // 'before', 'after', 'on'
+
   late GameSortBy _sortBy;
   late SortOrder _sortOrder;
 
-  // Selected values - Dynamic
-  final List<Company> _selectedCompanies = [];
-  final List<GameEngine> _selectedGameEngines = [];
-  final List<Franchise> _selectedFranchises = [];
-  final List<Collection> _selectedCollections = [];
-  final List<gg_theme.Theme> _selectedThemes = [];
-  final List<AgeRating> _selectedAgeRatings = [];
-  final List<Keyword> _selectedKeywords = [];
-  final List<Language> _selectedLanguages = [];
-  final List<Platform> _selectedPlatforms = [];
+  // Selected values - Dynamic (storing IDs like the prefetched ones)
+  late List<int> _selectedCompanyIds;
+  late List<int> _selectedGameEngineIds;
+  late List<int> _selectedFranchiseIds;
+  late List<int> _selectedCollectionIds;
+  late List<int> _selectedThemeIds;
+  late List<int> _selectedAgeRatingIds;
+  late List<int> _selectedKeywordIds;
+  late List<int> _selectedLanguageIds;
+  late List<int> _selectedPlatformIds;
+
+  // ID to name mappings for displaying chips
+  final Map<int, String> _companyNames = {};
+  final Map<int, String> _gameEngineNames = {};
+  final Map<int, String> _franchiseNames = {};
+  final Map<int, String> _collectionNames = {};
+  final Map<int, String> _themeNames = {};
+  final Map<int, String> _ageRatingNames = {};
+  final Map<int, String> _keywordNames = {};
+  final Map<int, String> _languageNames = {};
+  final Map<int, String> _platformNames = {};
 
   // Search controllers
   final TextEditingController _companySearchController =
@@ -218,21 +237,52 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     _minTotalRating = _filters.minTotalRating ?? 0.0;
     _maxTotalRating = _filters.maxTotalRating ?? 10.0;
     _minTotalRatingCount = _filters.minTotalRatingCount;
+    _maxTotalRatingCount = null;
 
     _minUserRating = _filters.minUserRating ?? 0.0;
     _maxUserRating = _filters.maxUserRating ?? 10.0;
     _minUserRatingCount = _filters.minUserRatingCount;
+    _maxUserRatingCount = null;
 
     _minAggregatedRating = _filters.minAggregatedRating ?? 0.0;
     _maxAggregatedRating = _filters.maxAggregatedRating ?? 100.0;
     _minAggregatedRatingCount = _filters.minAggregatedRatingCount;
+    _maxAggregatedRatingCount = null;
 
     // Initialize popularity filters
     _minFollows = null;
+    _maxFollows = null;
     _minHypes = _filters.minHypes;
+    _maxHypes = null;
 
-    _startYear = _filters.releaseDateFrom?.year;
-    _endYear = _filters.releaseDateTo?.year;
+    // Initialize date filters
+    _releaseDateFrom = _filters.releaseDateFrom;
+    _releaseDateTo = _filters.releaseDateTo;
+    _singleReleaseDate = null;
+    _dateOperator = null;
+
+    // Initialize dynamic filter IDs
+    _selectedPlatformIds = List.from(_filters.platformIds);
+    _selectedThemeIds = List.from(_filters.themesIds);
+    _selectedCompanyIds = List.from(_filters.companyIds);
+    _selectedGameEngineIds = List.from(_filters.gameEngineIds);
+    _selectedFranchiseIds = List.from(_filters.franchiseIds);
+    _selectedCollectionIds = List.from(_filters.collectionIds);
+    _selectedAgeRatingIds = List.from(_filters.ageRatingIds);
+    _selectedKeywordIds = List.from(_filters.keywordIds);
+    _selectedLanguageIds = List.from(_filters.languageSupportIds);
+
+    // Initialize name mappings from filters
+    _platformNames.addAll(_filters.platformNames);
+    _themeNames.addAll(_filters.themeNames);
+    _companyNames.addAll(_filters.companyNames);
+    _gameEngineNames.addAll(_filters.gameEngineNames);
+    _franchiseNames.addAll(_filters.franchiseNames);
+    _collectionNames.addAll(_filters.collectionNames);
+    _ageRatingNames.addAll(_filters.ageRatingNames);
+    _keywordNames.addAll(_filters.keywordNames);
+    _languageNames.addAll(_filters.languageNames);
+
     _sortBy = _filters.sortBy;
     _sortOrder = _filters.sortOrder;
   }
@@ -370,28 +420,31 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildGenresSection(),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Platform>(
             title: 'Platforms',
             icon: Icons.devices,
             hint: 'Search platforms...',
             controller: _platformSearchController,
             searchResults: _platformSearchResults,
-            selectedItems: _selectedPlatforms,
+            selectedIds: _selectedPlatformIds,
+            nameMap: _platformNames,
             isLoading: _isSearchingPlatforms,
             onSearch: _searchPlatforms,
-            onAdd: (platform) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedPlatforms.add(platform);
-                _platformSearchResults.clear();
-                _platformSearchController.clear();
+                _selectedPlatformIds.add(id);
+                _platformNames[id] = name;
               });
             },
-            onRemove: (platform) {
+            onRemove: (id) {
               setState(() {
-                _selectedPlatforms.remove(platform);
+                _selectedPlatformIds.remove(id);
+                _platformNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
           _buildGameModesSection(),
           _buildGameTypeSection(),
@@ -414,9 +467,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildRatingsExpansionTile(),
-          const SizedBox(height: AppConstants.paddingMedium),
-          _buildPopularityExpansionTile(),
+          _buildTotalRatingExpansionTile(),
+          const SizedBox(height: AppConstants.paddingSmall),
+          _buildUserRatingExpansionTile(),
+          const SizedBox(height: AppConstants.paddingSmall),
+          _buildCriticRatingExpansionTile(),
+          const SizedBox(height: AppConstants.paddingSmall),
+          _buildHypesExpansionTile(),
+          const SizedBox(height: AppConstants.paddingSmall),
+          _buildFollowsExpansionTile(),
           const SizedBox(height: 80),
         ],
       ),
@@ -433,189 +492,213 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<gg_theme.Theme>(
             title: 'Themes',
             icon: Icons.palette,
             hint: 'Search themes...',
             controller: _themeSearchController,
             searchResults: _themeSearchResults,
-            selectedItems: _selectedThemes,
+            selectedIds: _selectedThemeIds,
+            nameMap: _themeNames,
             isLoading: _isSearchingThemes,
             onSearch: _searchThemes,
-            onAdd: (theme) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedThemes.add(theme);
-                _themeSearchResults.clear();
-                _themeSearchController.clear();
+                _selectedThemeIds.add(id);
+                _themeNames[id] = name;
               });
             },
-            onRemove: (theme) {
+            onRemove: (id) {
               setState(() {
-                _selectedThemes.remove(theme);
+                _selectedThemeIds.remove(id);
+                _themeNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Keyword>(
             title: 'Keywords',
             icon: Icons.label,
             hint: 'Search keywords...',
             controller: _keywordSearchController,
             searchResults: _keywordSearchResults,
-            selectedItems: _selectedKeywords,
+            selectedIds: _selectedKeywordIds,
+            nameMap: _keywordNames,
             isLoading: _isSearchingKeywords,
             onSearch: _searchKeywords,
-            onAdd: (keyword) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedKeywords.add(keyword);
-                _keywordSearchResults.clear();
-                _keywordSearchController.clear();
+                _selectedKeywordIds.add(id);
+                _keywordNames[id] = name;
               });
             },
-            onRemove: (keyword) {
+            onRemove: (id) {
               setState(() {
-                _selectedKeywords.remove(keyword);
+                _selectedKeywordIds.remove(id);
+                _keywordNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Company>(
             title: 'Companies',
             icon: Icons.business,
             hint: 'Search developers & publishers...',
             controller: _companySearchController,
             searchResults: _companySearchResults,
-            selectedItems: _selectedCompanies,
+            selectedIds: _selectedCompanyIds,
+            nameMap: _companyNames,
             isLoading: _isSearchingCompanies,
             onSearch: _searchCompanies,
-            onAdd: (company) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedCompanies.add(company);
-                _companySearchResults.clear();
-                _companySearchController.clear();
+                _selectedCompanyIds.add(id);
+                _companyNames[id] = name;
               });
             },
-            onRemove: (company) {
+            onRemove: (id) {
               setState(() {
-                _selectedCompanies.remove(company);
+                _selectedCompanyIds.remove(id);
+                _companyNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Franchise>(
             title: 'Franchises',
             icon: Icons.auto_stories,
             hint: 'Search franchises...',
             controller: _franchiseSearchController,
             searchResults: _franchiseSearchResults,
-            selectedItems: _selectedFranchises,
+            selectedIds: _selectedFranchiseIds,
+            nameMap: _franchiseNames,
             isLoading: _isSearchingFranchises,
             onSearch: _searchFranchises,
-            onAdd: (franchise) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedFranchises.add(franchise);
-                _franchiseSearchResults.clear();
-                _franchiseSearchController.clear();
+                _selectedFranchiseIds.add(id);
+                _franchiseNames[id] = name;
               });
             },
-            onRemove: (franchise) {
+            onRemove: (id) {
               setState(() {
-                _selectedFranchises.remove(franchise);
+                _selectedFranchiseIds.remove(id);
+                _franchiseNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Collection>(
             title: 'Collections',
             icon: Icons.collections_bookmark,
             hint: 'Search collections...',
             controller: _collectionSearchController,
             searchResults: _collectionSearchResults,
-            selectedItems: _selectedCollections,
+            selectedIds: _selectedCollectionIds,
+            nameMap: _collectionNames,
             isLoading: _isSearchingCollections,
             onSearch: _searchCollections,
-            onAdd: (collection) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedCollections.add(collection);
-                _collectionSearchResults.clear();
-                _collectionSearchController.clear();
+                _selectedCollectionIds.add(id);
+                _collectionNames[id] = name;
               });
             },
-            onRemove: (collection) {
+            onRemove: (id) {
               setState(() {
-                _selectedCollections.remove(collection);
+                _selectedCollectionIds.remove(id);
+                _collectionNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<GameEngine>(
             title: 'Game Engines',
             icon: Icons.settings_suggest,
             hint: 'Search game engines...',
             controller: _engineSearchController,
             searchResults: _engineSearchResults,
-            selectedItems: _selectedGameEngines,
+            selectedIds: _selectedGameEngineIds,
+            nameMap: _gameEngineNames,
             isLoading: _isSearchingEngines,
             onSearch: _searchGameEngines,
-            onAdd: (engine) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedGameEngines.add(engine);
-                _engineSearchResults.clear();
-                _engineSearchController.clear();
+                _selectedGameEngineIds.add(id);
+                _gameEngineNames[id] = name;
               });
             },
-            onRemove: (engine) {
+            onRemove: (id) {
               setState(() {
-                _selectedGameEngines.remove(engine);
+                _selectedGameEngineIds.remove(id);
+                _gameEngineNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).name),
+            itemBuilder: (item) => Text(item.name),
+            getId: (item) => item.id,
+            getLabel: (item) => item.name,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<AgeRating>(
             title: 'Age Ratings',
             icon: Icons.verified_user,
             hint: 'Search age ratings...',
             controller: _ageRatingSearchController,
             searchResults: _ageRatingSearchResults,
-            selectedItems: _selectedAgeRatings,
+            selectedIds: _selectedAgeRatingIds,
+            nameMap: _ageRatingNames,
             isLoading: _isSearchingAgeRatings,
             onSearch: _searchAgeRatings,
-            onAdd: (ageRating) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedAgeRatings.add(ageRating);
-                _ageRatingSearchResults.clear();
-                _ageRatingSearchController.clear();
+                _selectedAgeRatingIds.add(id);
+                _ageRatingNames[id] = name;
               });
             },
-            onRemove: (ageRating) {
+            onRemove: (id) {
               setState(() {
-                _selectedAgeRatings.remove(ageRating);
+                _selectedAgeRatingIds.remove(id);
+                _ageRatingNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).displayName),
+            itemBuilder: (item) => Text(item.displayName),
+            getId: (item) => item.id,
+            getLabel: (item) => item.displayName,
           ),
-          _buildDynamicSearchSection(
+          _buildDynamicSearchSection<Language>(
             title: 'Languages',
             icon: Icons.language,
             hint: 'Search languages...',
             controller: _languagesSearchController,
             searchResults: _languageSearchResults,
-            selectedItems: _selectedLanguages,
+            selectedIds: _selectedLanguageIds,
+            nameMap: _languageNames,
             isLoading: _isSearchingLanguages,
             onSearch: _searchLanguages,
-            onAdd: (language) {
+            onAdd: (id, name) {
               setState(() {
-                _selectedLanguages.add(language);
-                _languageSearchResults.clear();
-                _languagesSearchController.clear();
+                _selectedLanguageIds.add(id);
+                _languageNames[id] = name;
               });
             },
-            onRemove: (language) {
+            onRemove: (id) {
               setState(() {
-                _selectedLanguages.remove(language);
+                _selectedLanguageIds.remove(id);
+                _languageNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text((item).displayName),
+            itemBuilder: (item) => Text(item.displayName),
+            getId: (item) => item.id,
+            getLabel: (item) => item.displayName,
           ),
           const SizedBox(height: 80),
         ],
@@ -721,70 +804,115 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     required List<int> selectedIds,
     required String Function(dynamic) getLabel,
     required int Function(dynamic) getId,
-    bool isHorizontalScroll = false,
   }) {
-    return _buildFilterCard(
-      title: title,
-      icon: icon,
-      activeCount: selectedIds.length,
-      onClear: selectedIds.isEmpty
-          ? null
-          : () {
-              setState(() => selectedIds.clear());
-              HapticFeedback.lightImpact();
-            },
-      child: isHorizontalScroll
-          ? SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final id = getId(item);
-                  final isSelected = selectedIds.contains(id);
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(getLabel(item)),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            selectedIds.add(id);
-                          } else {
-                            selectedIds.remove(id);
-                          }
-                        });
-                        HapticFeedback.lightImpact();
-                      },
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: AppConstants.paddingMedium),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppConstants.paddingMedium,
+              AppConstants.paddingMedium,
+              AppConstants.paddingMedium,
+              0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon,
+                        size: 20, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                  );
-                },
+                    if (selectedIds.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${selectedIds.length}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (selectedIds.isNotEmpty)
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() => selectedIds.clear());
+                      HapticFeedback.lightImpact();
+                    },
+                    icon: const Icon(Icons.clear, size: 16),
+                    label: const Text('Clear'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Horizontal scrollable chips (bleeding into edges)
+          SizedBox(
+            height: 56,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingMedium,
+                vertical: 8,
               ),
-            )
-          : Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: items.map((item) {
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
                 final id = getId(item);
                 final isSelected = selectedIds.contains(id);
-                return FilterChip(
-                  label: Text(getLabel(item)),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        selectedIds.add(id);
-                      } else {
-                        selectedIds.remove(id);
-                      }
-                    });
-                    HapticFeedback.lightImpact();
-                  },
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: index < items.length - 1 ? 8 : 0,
+                  ),
+                  child: FilterChip(
+                    label: Text(getLabel(item)),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          selectedIds.add(id);
+                        } else {
+                          selectedIds.remove(id);
+                        }
+                      });
+                      HapticFeedback.lightImpact();
+                    },
+                  ),
                 );
-              }).toList(),
+              },
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -803,7 +931,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       selectedIds: _selectedGenres,
       getLabel: (genre) => genre.name,
       getId: (genre) => genre.id,
-      isHorizontalScroll: true, // Horizontal scroll for better space usage
     );
   }
 
@@ -861,17 +988,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   // EXPANSION TILES FOR QUALITY TAB
   // ==========================================
 
-  Widget _buildRatingsExpansionTile() {
+  Widget _buildTotalRatingExpansionTile() {
     final theme = Theme.of(context);
-    final hasActiveFilters = (_minTotalRating > 0 ||
-            _maxTotalRating < 10 ||
-            _minTotalRatingCount != null) ||
-        (_minUserRating > 0 ||
-            _maxUserRating < 10 ||
-            _minUserRatingCount != null) ||
-        (_minAggregatedRating > 0 ||
-            _maxAggregatedRating < 100 ||
-            _minAggregatedRatingCount != null);
+    final hasActiveFilters = _minTotalRating > 0 ||
+        _maxTotalRating < 10 ||
+        _minTotalRatingCount != null ||
+        _maxTotalRatingCount != null;
 
     return Card(
       elevation: 2,
@@ -879,7 +1001,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         leading: Icon(Icons.star, color: theme.colorScheme.primary),
         title: Row(
           children: [
-            const Text('Rating Filters'),
+            const Text('Total Rating'),
             if (hasActiveFilters) ...[
               const SizedBox(width: 8),
               Container(
@@ -902,33 +1024,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         children: [
           Padding(
             padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRatingSection(),
-                const SizedBox(height: AppConstants.paddingLarge),
-                _buildUserRatingSection(),
-                const SizedBox(height: AppConstants.paddingLarge),
-                _buildAggregatedRatingSection(),
-              ],
-            ),
+            child: _buildRatingSection(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPopularityExpansionTile() {
+  Widget _buildUserRatingExpansionTile() {
     final theme = Theme.of(context);
-    final hasActiveFilters = _minHypes != null || _minFollows != null;
+    final hasActiveFilters = _minUserRating > 0 ||
+        _maxUserRating < 10 ||
+        _minUserRatingCount != null ||
+        _maxUserRatingCount != null;
 
     return Card(
       elevation: 2,
       child: ExpansionTile(
-        leading: Icon(Icons.trending_up, color: theme.colorScheme.primary),
+        leading: Icon(Icons.person, color: theme.colorScheme.primary),
         title: Row(
           children: [
-            const Text('Popularity & Hype'),
+            const Text('User Rating (IGDB)'),
             if (hasActiveFilters) ...[
               const SizedBox(width: 8),
               Container(
@@ -951,7 +1067,130 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         children: [
           Padding(
             padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: _buildPopularitySection(),
+            child: _buildUserRatingSection(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCriticRatingExpansionTile() {
+    final theme = Theme.of(context);
+    final hasActiveFilters = _minAggregatedRating > 0 ||
+        _maxAggregatedRating < 100 ||
+        _minAggregatedRatingCount != null ||
+        _maxAggregatedRatingCount != null;
+
+    return Card(
+      elevation: 2,
+      child: ExpansionTile(
+        leading: Icon(Icons.rate_review, color: theme.colorScheme.primary),
+        title: Row(
+          children: [
+            const Text('Critic Rating'),
+            if (hasActiveFilters) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Active',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: _buildAggregatedRatingSection(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHypesExpansionTile() {
+    final theme = Theme.of(context);
+    final hasActiveFilters = _minHypes != null || _maxHypes != null;
+
+    return Card(
+      elevation: 2,
+      child: ExpansionTile(
+        leading: Icon(Icons.whatshot, color: theme.colorScheme.primary),
+        title: Row(
+          children: [
+            const Text('Hypes'),
+            if (hasActiveFilters) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Active',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: _buildHypesSection(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFollowsExpansionTile() {
+    final theme = Theme.of(context);
+    final hasActiveFilters = _minFollows != null || _maxFollows != null;
+
+    return Card(
+      elevation: 2,
+      child: ExpansionTile(
+        leading: Icon(Icons.people, color: theme.colorScheme.primary),
+        title: Row(
+          children: [
+            const Text('Follows'),
+            if (hasActiveFilters) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Active',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: _buildFollowsSection(),
           ),
         ],
       ),
@@ -993,32 +1232,69 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           },
           onChangeEnd: (_) => HapticFeedback.lightImpact(),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Min. Rating Count',
-            hintText: 'e.g., 100',
-            border: const OutlineInputBorder(),
-            suffixIcon: _minTotalRatingCount != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() => _minTotalRatingCount = null);
-                    },
-                  )
-                : null,
-          ),
-          keyboardType: TextInputType.number,
-          controller: TextEditingController(
-            text: _minTotalRatingCount?.toString() ?? '',
-          )..selection = TextSelection.collapsed(
-              offset: _minTotalRatingCount?.toString().length ?? 0,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min. Count',
+                  hintText: 'e.g., 100',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _minTotalRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _minTotalRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _minTotalRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _minTotalRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _minTotalRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
             ),
-          onChanged: (value) {
-            setState(() {
-              _minTotalRatingCount = value.isEmpty ? null : int.tryParse(value);
-            });
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max. Count',
+                  hintText: 'e.g., 1000',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _maxTotalRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _maxTotalRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _maxTotalRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _maxTotalRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _maxTotalRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1059,32 +1335,69 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           },
           onChangeEnd: (_) => HapticFeedback.lightImpact(),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Min. User Rating Count',
-            hintText: 'e.g., 50',
-            border: const OutlineInputBorder(),
-            suffixIcon: _minUserRatingCount != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() => _minUserRatingCount = null);
-                    },
-                  )
-                : null,
-          ),
-          keyboardType: TextInputType.number,
-          controller: TextEditingController(
-            text: _minUserRatingCount?.toString() ?? '',
-          )..selection = TextSelection.collapsed(
-              offset: _minUserRatingCount?.toString().length ?? 0,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min. Count',
+                  hintText: 'e.g., 50',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _minUserRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _minUserRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _minUserRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _minUserRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _minUserRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
             ),
-          onChanged: (value) {
-            setState(() {
-              _minUserRatingCount = value.isEmpty ? null : int.tryParse(value);
-            });
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max. Count',
+                  hintText: 'e.g., 500',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _maxUserRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _maxUserRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _maxUserRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _maxUserRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _maxUserRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1125,112 +1438,223 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           },
           onChangeEnd: (_) => HapticFeedback.lightImpact(),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Min. Critic Rating Count',
-            hintText: 'e.g., 10',
-            border: const OutlineInputBorder(),
-            suffixIcon: _minAggregatedRatingCount != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() => _minAggregatedRatingCount = null);
-                    },
-                  )
-                : null,
-          ),
-          keyboardType: TextInputType.number,
-          controller: TextEditingController(
-            text: _minAggregatedRatingCount?.toString() ?? '',
-          )..selection = TextSelection.collapsed(
-              offset: _minAggregatedRatingCount?.toString().length ?? 0,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min. Count',
+                  hintText: 'e.g., 10',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _minAggregatedRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _minAggregatedRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _minAggregatedRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _minAggregatedRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _minAggregatedRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
             ),
-          onChanged: (value) {
-            setState(() {
-              _minAggregatedRatingCount =
-                  value.isEmpty ? null : int.tryParse(value);
-            });
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max. Count',
+                  hintText: 'e.g., 100',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _maxAggregatedRatingCount != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _maxAggregatedRatingCount = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _maxAggregatedRatingCount?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _maxAggregatedRatingCount?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _maxAggregatedRatingCount =
+                        value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildPopularitySection() {
+  Widget _buildHypesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Hypes', Icons.whatshot),
         Text(
           'For unreleased or upcoming games',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
         ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Minimum Hypes',
-            hintText: 'e.g., 100',
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.whatshot),
-            suffixIcon: _minHypes != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() => _minHypes = null);
-                    },
-                  )
-                : null,
-          ),
-          keyboardType: TextInputType.number,
-          controller: TextEditingController(
-            text: _minHypes?.toString() ?? '',
-          )..selection = TextSelection.collapsed(
-              offset: _minHypes?.toString().length ?? 0,
+        const SizedBox(height: AppConstants.paddingMedium),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min. Hypes',
+                  hintText: 'e.g., 100',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.whatshot),
+                  suffixIcon: _minHypes != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _minHypes = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _minHypes?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _minHypes?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _minHypes = value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
             ),
-          onChanged: (value) {
-            setState(() {
-              _minHypes = value.isEmpty ? null : int.tryParse(value);
-            });
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max. Hypes',
+                  hintText: 'e.g., 10000',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _maxHypes != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _maxHypes = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _maxHypes?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _maxHypes?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _maxHypes = value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: AppConstants.paddingLarge),
-        _buildSectionTitle('Follows', Icons.people),
+      ],
+    );
+  }
+
+  Widget _buildFollowsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           'Users following this game',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
         ),
-        const SizedBox(height: AppConstants.paddingSmall),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Minimum Follows',
-            hintText: 'e.g., 500',
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.people),
-            suffixIcon: _minFollows != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() => _minFollows = null);
-                    },
-                  )
-                : null,
-          ),
-          keyboardType: TextInputType.number,
-          controller: TextEditingController(
-            text: _minFollows?.toString() ?? '',
-          )..selection = TextSelection.collapsed(
-              offset: _minFollows?.toString().length ?? 0,
+        const SizedBox(height: AppConstants.paddingMedium),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Min. Follows',
+                  hintText: 'e.g., 500',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.people),
+                  suffixIcon: _minFollows != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _minFollows = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _minFollows?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _minFollows?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _minFollows = value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
             ),
-          onChanged: (value) {
-            setState(() {
-              _minFollows = value.isEmpty ? null : int.tryParse(value);
-            });
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: 'Max. Follows',
+                  hintText: 'e.g., 50000',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: _maxFollows != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _maxFollows = null);
+                          },
+                        )
+                      : null,
+                ),
+                keyboardType: TextInputType.number,
+                controller: TextEditingController(
+                  text: _maxFollows?.toString() ?? '',
+                )..selection = TextSelection.collapsed(
+                    offset: _maxFollows?.toString().length ?? 0,
+                  ),
+                onChanged: (value) {
+                  setState(() {
+                    _maxFollows = value.isEmpty ? null : int.tryParse(value);
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -1238,17 +1662,31 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   Widget _buildReleaseYearSection() {
     final theme = Theme.of(context);
-    final hasDateFilter = _startYear != null || _endYear != null;
+    final hasDateFilter = _releaseDateFrom != null ||
+        _releaseDateTo != null ||
+        _singleReleaseDate != null;
 
-    String getDateRangeText() {
-      if (_startYear != null && _endYear != null) {
-        return 'From $_startYear to $_endYear';
-      } else if (_startYear != null) {
-        return 'From $_startYear';
-      } else if (_endYear != null) {
-        return 'Until $_endYear';
+    String getDateFilterText() {
+      if (_singleReleaseDate != null && _dateOperator != null) {
+        final dateStr = _formatDate(_singleReleaseDate!);
+        switch (_dateOperator) {
+          case 'before':
+            return 'Before $dateStr';
+          case 'after':
+            return 'After $dateStr';
+          case 'on':
+            return 'On $dateStr';
+          default:
+            return dateStr;
+        }
+      } else if (_releaseDateFrom != null && _releaseDateTo != null) {
+        return '${_formatDate(_releaseDateFrom!)} - ${_formatDate(_releaseDateTo!)}';
+      } else if (_releaseDateFrom != null) {
+        return 'From ${_formatDate(_releaseDateFrom!)}';
+      } else if (_releaseDateTo != null) {
+        return 'Until ${_formatDate(_releaseDateTo!)}';
       }
-      return 'Tap to select date range';
+      return 'Tap to select date';
     }
 
     return _buildFilterCard(
@@ -1258,8 +1696,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       onClear: hasDateFilter
           ? () {
               setState(() {
-                _startYear = null;
-                _endYear = null;
+                _releaseDateFrom = null;
+                _releaseDateTo = null;
+                _singleReleaseDate = null;
+                _dateOperator = null;
               });
               HapticFeedback.lightImpact();
             }
@@ -1268,7 +1708,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () => _showDateRangePicker(),
+            onTap: () => _showDateFilterDialog(),
             borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -1285,7 +1725,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 children: [
                   Expanded(
                     child: Text(
-                      getDateRangeText(),
+                      getDateFilterText(),
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: hasDateFilter
                             ? theme.colorScheme.onSurface
@@ -1303,29 +1743,37 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           ),
           if (hasDateFilter) ...[
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                if (_startYear != null)
-                  Expanded(
-                    child: _buildDateChip(
-                      label: 'From: $_startYear',
-                      onRemove: () {
-                        setState(() => _startYear = null);
-                        HapticFeedback.lightImpact();
-                      },
-                    ),
+                if (_singleReleaseDate != null && _dateOperator != null)
+                  _buildDateChip(
+                    label:
+                        '${_getOperatorSymbol(_dateOperator!)} ${_formatDate(_singleReleaseDate!)}',
+                    onRemove: () {
+                      setState(() {
+                        _singleReleaseDate = null;
+                        _dateOperator = null;
+                      });
+                      HapticFeedback.lightImpact();
+                    },
                   ),
-                if (_startYear != null && _endYear != null)
-                  const SizedBox(width: 8),
-                if (_endYear != null)
-                  Expanded(
-                    child: _buildDateChip(
-                      label: 'To: $_endYear',
-                      onRemove: () {
-                        setState(() => _endYear = null);
-                        HapticFeedback.lightImpact();
-                      },
-                    ),
+                if (_releaseDateFrom != null && _singleReleaseDate == null)
+                  _buildDateChip(
+                    label: 'From: ${_formatDate(_releaseDateFrom!)}',
+                    onRemove: () {
+                      setState(() => _releaseDateFrom = null);
+                      HapticFeedback.lightImpact();
+                    },
+                  ),
+                if (_releaseDateTo != null && _singleReleaseDate == null)
+                  _buildDateChip(
+                    label: 'To: ${_formatDate(_releaseDateTo!)}',
+                    onRemove: () {
+                      setState(() => _releaseDateTo = null);
+                      HapticFeedback.lightImpact();
+                    },
                   ),
               ],
             ),
@@ -1333,6 +1781,23 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}.${date.month}.${date.year}';
+  }
+
+  String _getOperatorSymbol(String operator) {
+    switch (operator) {
+      case 'before':
+        return '<';
+      case 'after':
+        return '>';
+      case 'on':
+        return '=';
+      default:
+        return '';
+    }
   }
 
   Widget _buildDateChip(
@@ -1349,36 +1814,34 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     );
   }
 
-  Future<void> _showDateRangePicker() async {
-    final now = DateTime.now();
-    final firstDate = DateTime(1970);
-    final lastDate = DateTime(now.year + 2);
-
-    final picked = await showDateRangePicker(
+  Future<void> _showDateFilterDialog() async {
+    await showDialog<void>(
       context: context,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      initialDateRange: _startYear != null && _endYear != null
-          ? DateTimeRange(
-              start: DateTime(_startYear!),
-              end: DateTime(_endYear!, 12, 31),
-            )
-          : null,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context),
-          child: child!,
-        );
-      },
+      builder: (context) => DateFilterDialog(
+        initialDateFrom: _releaseDateFrom,
+        initialDateTo: _releaseDateTo,
+        initialSingleDate: _singleReleaseDate,
+        initialOperator: _dateOperator,
+        onApply: (dateFrom, dateTo, singleDate, operator) {
+          setState(() {
+            if (singleDate != null && operator != null) {
+              // Single date mode
+              _singleReleaseDate = singleDate;
+              _dateOperator = operator;
+              _releaseDateFrom = null;
+              _releaseDateTo = null;
+            } else {
+              // Range mode
+              _releaseDateFrom = dateFrom;
+              _releaseDateTo = dateTo;
+              _singleReleaseDate = null;
+              _dateOperator = null;
+            }
+          });
+          HapticFeedback.lightImpact();
+        },
+      ),
     );
-
-    if (picked != null) {
-      setState(() {
-        _startYear = picked.start.year;
-        _endYear = picked.end.year;
-      });
-      HapticFeedback.lightImpact();
-    }
   }
 
   Widget _buildSortSection() {
@@ -1441,24 +1904,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     required String hint,
     required TextEditingController controller,
     required List<T> searchResults,
-    required List<T> selectedItems,
+    required List<int> selectedIds,
+    required Map<int, String> nameMap,
     required bool isLoading,
     required void Function(String) onSearch,
-    required void Function(T) onAdd,
-    required void Function(T) onRemove,
+    required void Function(int id, String name) onAdd,
+    required void Function(int) onRemove,
     required Widget Function(T) itemBuilder,
+    required int Function(T) getId,
+    required String Function(T) getLabel,
   }) {
     final theme = Theme.of(context);
 
     return _buildFilterCard(
       title: title,
       icon: icon,
-      activeCount: selectedItems.length,
-      onClear: selectedItems.isEmpty
+      activeCount: selectedIds.length,
+      onClear: selectedIds.isEmpty
           ? null
           : () {
               setState(() {
-                selectedItems.clear();
+                selectedIds.clear();
+                nameMap.clear();
                 controller.clear();
                 onSearch('');
               });
@@ -1519,11 +1986,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   itemCount: searchResults.length,
                   itemBuilder: (context, index) {
                     final item = searchResults[index];
+                    final itemId = getId(item);
+                    final isSelected = selectedIds.contains(itemId);
+
                     return ListTile(
                       title: itemBuilder(item),
-                      trailing: Icon(Icons.add_circle_outline,
-                          color: theme.colorScheme.primary),
-                      onTap: () => onAdd(item),
+                      trailing: isSelected
+                          ? Icon(Icons.check_circle,
+                              color: theme.colorScheme.primary)
+                          : Icon(Icons.add_circle_outline,
+                              color: theme.colorScheme.primary),
+                      onTap: isSelected
+                          ? null
+                          : () => onAdd(itemId, getLabel(item)),
+                      enabled: !isSelected,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -1534,16 +2010,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             ),
           ],
 
-          // Selected Items
-          if (selectedItems.isNotEmpty) ...[
+          // Selected Items as Chips
+          if (selectedIds.isNotEmpty) ...[
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: selectedItems.map((item) {
+              children: selectedIds.map((id) {
+                // Try to get name from map first, then from search results
+                String name;
+                if (nameMap.containsKey(id)) {
+                  name = nameMap[id]!;
+                } else {
+                  final item = searchResults.cast<T?>().firstWhere(
+                        (item) => item != null && getId(item) == id,
+                        orElse: () => null,
+                      );
+                  name = item != null ? getLabel(item) : 'ID: $id';
+                }
+
                 return Chip(
-                  label: itemBuilder(item),
-                  onDeleted: () => onRemove(item),
+                  label: Text(name),
+                  onDeleted: () => onRemove(id),
                   deleteIcon: const Icon(Icons.close, size: 18),
                   backgroundColor: theme.colorScheme.secondaryContainer,
                   labelStyle: TextStyle(
@@ -1880,37 +2368,54 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       _selectedGameStatuses.clear();
       _selectedGameTypes.clear();
 
-      _selectedThemes.clear();
-      _selectedCompanies.clear();
-      _selectedGameEngines.clear();
-      _selectedFranchises.clear();
-      _selectedCollections.clear();
-      _selectedThemes.clear();
-      _selectedAgeRatings.clear();
-      _selectedKeywords.clear();
-      _selectedLanguages.clear();
+      _selectedThemeIds.clear();
+      _selectedCompanyIds.clear();
+      _selectedGameEngineIds.clear();
+      _selectedFranchiseIds.clear();
+      _selectedCollectionIds.clear();
+      _selectedAgeRatingIds.clear();
+      _selectedKeywordIds.clear();
+      _selectedLanguageIds.clear();
+      _selectedPlatformIds.clear();
 
-      _selectedPlatforms.clear();
+      // Clear name mappings
+      _platformNames.clear();
+      _themeNames.clear();
+      _companyNames.clear();
+      _gameEngineNames.clear();
+      _franchiseNames.clear();
+      _collectionNames.clear();
+      _ageRatingNames.clear();
+      _keywordNames.clear();
+      _languageNames.clear();
 
       // Clear rating filters
       _minTotalRating = 0.0;
       _maxTotalRating = 10.0;
       _minTotalRatingCount = null;
+      _maxTotalRatingCount = null;
 
       _minUserRating = 0.0;
       _maxUserRating = 10.0;
       _minUserRatingCount = null;
+      _maxUserRatingCount = null;
 
       _minAggregatedRating = 0.0;
       _maxAggregatedRating = 100.0;
       _minAggregatedRatingCount = null;
+      _maxAggregatedRatingCount = null;
 
       // Clear popularity filters
       _minFollows = null;
+      _maxFollows = null;
       _minHypes = null;
+      _maxHypes = null;
 
-      _startYear = null;
-      _endYear = null;
+      // Clear date filters
+      _releaseDateFrom = null;
+      _releaseDateTo = null;
+      _singleReleaseDate = null;
+      _dateOperator = null;
 
       _sortBy = GameSortBy.relevance;
       _sortOrder = SortOrder.descending;
@@ -1920,41 +2425,32 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   void _applyFilters() {
     final newFilters = _filters.copyWith(
-      genreIds: _selectedGenres.isEmpty ? null : _selectedGenres,
-      gameModesIds: _selectedGameModes.isEmpty ? null : _selectedGameModes,
-      playerPerspectiveIds: _selectedPlayerPerspectives.isEmpty
-          ? null
-          : _selectedPlayerPerspectives,
-      gameStatusIds:
-          _selectedGameStatuses.isEmpty ? null : _selectedGameStatuses,
-      gameTypeIds: _selectedGameTypes.isEmpty ? null : _selectedGameTypes,
-      companyIds: _selectedCompanies.isEmpty
-          ? null
-          : _selectedCompanies.map((c) => c.id).toList(),
-      gameEngineIds: _selectedGameEngines.isEmpty
-          ? null
-          : _selectedGameEngines.map((e) => e.id).toList(),
-      franchiseIds: _selectedFranchises.isEmpty
-          ? null
-          : _selectedFranchises.map((f) => f.id).toList(),
-      collectionIds: _selectedCollections.isEmpty
-          ? null
-          : _selectedCollections.map((c) => c.id).toList(),
-      themesIds: _selectedThemes.isEmpty
-          ? null
-          : _selectedThemes.map((c) => c.id).toList(),
-      platformIds: _selectedPlatforms.isEmpty
-          ? null
-          : _selectedPlatforms.map((p) => p.id).toList(),
-      ageRatingIds: _selectedAgeRatings.isEmpty
-          ? null
-          : _selectedAgeRatings.map((a) => a.id).toList(),
-      keywordIds: _selectedKeywords.isEmpty
-          ? null
-          : _selectedKeywords.map((k) => k.id).toList(),
-      languageIds: _selectedLanguages.isEmpty
-          ? null
-          : _selectedLanguages.map((l) => l.id).toList(),
+      genreIds: _selectedGenres,
+      gameModesIds: _selectedGameModes,
+      playerPerspectiveIds: _selectedPlayerPerspectives,
+      gameStatusIds: _selectedGameStatuses,
+      gameTypeIds: _selectedGameTypes,
+      companyIds: _selectedCompanyIds,
+      gameEngineIds: _selectedGameEngineIds,
+      franchiseIds: _selectedFranchiseIds,
+      collectionIds: _selectedCollectionIds,
+      themesIds: _selectedThemeIds,
+      platformIds: _selectedPlatformIds,
+      ageRatingIds: _selectedAgeRatingIds,
+      keywordIds: _selectedKeywordIds,
+      languageIds: _selectedLanguageIds,
+      // Name mappings
+      platformNames: _platformNames.isEmpty ? {} : Map.from(_platformNames),
+      companyNames: _companyNames.isEmpty ? {} : Map.from(_companyNames),
+      gameEngineNames:
+          _gameEngineNames.isEmpty ? {} : Map.from(_gameEngineNames),
+      franchiseNames: _franchiseNames.isEmpty ? {} : Map.from(_franchiseNames),
+      collectionNames:
+          _collectionNames.isEmpty ? {} : Map.from(_collectionNames),
+      themeNames: _themeNames.isEmpty ? {} : Map.from(_themeNames),
+      ageRatingNames: _ageRatingNames.isEmpty ? {} : Map.from(_ageRatingNames),
+      keywordNames: _keywordNames.isEmpty ? {} : Map.from(_keywordNames),
+      languageNames: _languageNames.isEmpty ? {} : Map.from(_languageNames),
       // Rating filters
       minTotalRating: _minTotalRating > 0 ? _minTotalRating : null,
       maxTotalRating: _maxTotalRating < 10 ? _maxTotalRating : null,
@@ -1969,8 +2465,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       minAggregatedRatingCount: _minAggregatedRatingCount,
       // Popularity filters
       minHypes: _minHypes,
-      releaseDateFrom: _startYear != null ? DateTime(_startYear!) : null,
-      releaseDateTo: _endYear != null ? DateTime(_endYear!, 12, 31) : null,
+      // Date filters - handle both single date and range
+      releaseDateFrom: _singleReleaseDate != null && _dateOperator == 'after'
+          ? _singleReleaseDate
+          : _singleReleaseDate != null && _dateOperator == 'on'
+              ? _singleReleaseDate
+              : _releaseDateFrom,
+      releaseDateTo: _singleReleaseDate != null && _dateOperator == 'before'
+          ? _singleReleaseDate
+          : _singleReleaseDate != null && _dateOperator == 'on'
+              ? DateTime(_singleReleaseDate!.year, _singleReleaseDate!.month,
+                  _singleReleaseDate!.day, 23, 59, 59)
+              : _releaseDateTo,
       sortBy: _sortBy,
       sortOrder: _sortOrder,
     );
@@ -1987,32 +2493,38 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     if (_selectedGameStatuses.isNotEmpty) count++;
     if (_selectedGameTypes.isNotEmpty) count++;
 
-    if (_selectedThemes.isNotEmpty) count++;
-    if (_selectedCompanies.isNotEmpty) count++;
-    if (_selectedGameEngines.isNotEmpty) count++;
-    if (_selectedFranchises.isNotEmpty) count++;
-    if (_selectedCollections.isNotEmpty) count++;
-    if (_selectedPlatforms.isNotEmpty) count++;
-    if (_selectedAgeRatings.isNotEmpty) count++;
-    if (_selectedKeywords.isNotEmpty) count++;
-    if (_selectedLanguages.isNotEmpty) count++;
+    if (_selectedThemeIds.isNotEmpty) count++;
+    if (_selectedCompanyIds.isNotEmpty) count++;
+    if (_selectedGameEngineIds.isNotEmpty) count++;
+    if (_selectedFranchiseIds.isNotEmpty) count++;
+    if (_selectedCollectionIds.isNotEmpty) count++;
+    if (_selectedPlatformIds.isNotEmpty) count++;
+    if (_selectedAgeRatingIds.isNotEmpty) count++;
+    if (_selectedKeywordIds.isNotEmpty) count++;
+    if (_selectedLanguageIds.isNotEmpty) count++;
 
     // Rating filters
     if (_minTotalRating > 0 ||
         _maxTotalRating < 10 ||
-        _minTotalRatingCount != null) count++;
+        _minTotalRatingCount != null ||
+        _maxTotalRatingCount != null) count++;
     if (_minUserRating > 0 ||
         _maxUserRating < 10 ||
-        _minUserRatingCount != null) count++;
+        _minUserRatingCount != null ||
+        _maxUserRatingCount != null) count++;
     if (_minAggregatedRating > 0 ||
         _maxAggregatedRating < 100 ||
-        _minAggregatedRatingCount != null) count++;
+        _minAggregatedRatingCount != null ||
+        _maxAggregatedRatingCount != null) count++;
 
     // Popularity filters
-    if (_minHypes != null) count++;
-    if (_minFollows != null) count++;
+    if (_minHypes != null || _maxHypes != null) count++;
+    if (_minFollows != null || _maxFollows != null) count++;
 
-    if (_startYear != null || _endYear != null) count++;
+    // Date filters
+    if (_releaseDateFrom != null ||
+        _releaseDateTo != null ||
+        _singleReleaseDate != null) count++;
     return count;
   }
 
@@ -2067,6 +2579,364 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         return Icons.play_circle_outline;
       case GameSortBy.userRatingDate:
         return Icons.date_range;
+    }
+  }
+}
+
+// ==========================================
+// DATE FILTER DIALOG
+// ==========================================
+
+class DateFilterDialog extends StatefulWidget {
+  final DateTime? initialDateFrom;
+  final DateTime? initialDateTo;
+  final DateTime? initialSingleDate;
+  final String? initialOperator;
+  final void Function(DateTime?, DateTime?, DateTime?, String?) onApply;
+
+  const DateFilterDialog({
+    super.key,
+    this.initialDateFrom,
+    this.initialDateTo,
+    this.initialSingleDate,
+    this.initialOperator,
+    required this.onApply,
+  });
+
+  @override
+  State<DateFilterDialog> createState() => _DateFilterDialogState();
+}
+
+class _DateFilterDialogState extends State<DateFilterDialog>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  DateTime? _dateFrom;
+  DateTime? _dateTo;
+  DateTime? _singleDate;
+  String _operator = 'after'; // 'before', 'after', 'on'
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialSingleDate != null ? 1 : 0,
+    );
+    _dateFrom = widget.initialDateFrom;
+    _dateTo = widget.initialDateTo;
+    _singleDate = widget.initialSingleDate;
+    _operator = widget.initialOperator ?? 'after';
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today, color: theme.colorScheme.primary),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Release Date Filter',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+
+            // Tabs
+            TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: 'Date Range', icon: Icon(Icons.date_range, size: 20)),
+                Tab(text: 'Single Date', icon: Icon(Icons.event, size: 20)),
+              ],
+            ),
+
+            // Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildRangeTab(),
+                  _buildSingleDateTab(),
+                ],
+              ),
+            ),
+
+            // Buttons
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      widget.onApply(null, null, null, null);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Clear'),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () {
+                      if (_tabController.index == 0) {
+                        // Range mode
+                        widget.onApply(_dateFrom, _dateTo, null, null);
+                      } else {
+                        // Single date mode
+                        widget.onApply(null, null, _singleDate, _operator);
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Apply'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRangeTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select a date range',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+          _buildDateButton(
+            label: 'From Date',
+            date: _dateFrom,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _dateFrom ?? DateTime.now(),
+                firstDate: DateTime(1970),
+                lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+              );
+              if (picked != null) {
+                setState(() => _dateFrom = picked);
+              }
+            },
+            onClear: () => setState(() => _dateFrom = null),
+          ),
+          const SizedBox(height: 12),
+          _buildDateButton(
+            label: 'To Date',
+            date: _dateTo,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _dateTo ?? DateTime.now(),
+                firstDate: DateTime(1970),
+                lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+              );
+              if (picked != null) {
+                setState(() => _dateTo = picked);
+              }
+            },
+            onClear: () => setState(() => _dateTo = null),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSingleDateTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select a date and operator',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+          _buildDateButton(
+            label: 'Date',
+            date: _singleDate,
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _singleDate ?? DateTime.now(),
+                firstDate: DateTime(1970),
+                lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+              );
+              if (picked != null) {
+                setState(() => _singleDate = picked);
+              }
+            },
+            onClear: () => setState(() => _singleDate = null),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Operator',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(
+                value: 'before',
+                label: Text('Before'),
+                icon: Icon(Icons.arrow_back, size: 16),
+              ),
+              ButtonSegment(
+                value: 'on',
+                label: Text('On'),
+                icon: Icon(Icons.circle, size: 16),
+              ),
+              ButtonSegment(
+                value: 'after',
+                label: Text('After'),
+                icon: Icon(Icons.arrow_forward, size: 16),
+              ),
+            ],
+            selected: {_operator},
+            onSelectionChanged: (Set<String> newSelection) {
+              setState(() => _operator = newSelection.first);
+            },
+          ),
+          if (_singleDate != null) ...[
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _getOperatorDescription(),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateButton({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
+    required VoidCallback onClear,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.outline),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  date != null
+                      ? '${date.day}.${date.month}.${date.year}'
+                      : 'Select date',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: date != null
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Row(
+                  children: [
+                    if (date != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: onClear,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.calendar_today,
+                        color: theme.colorScheme.primary),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getOperatorDescription() {
+    if (_singleDate == null) return '';
+    final dateStr =
+        '${_singleDate!.day}.${_singleDate!.month}.${_singleDate!.year}';
+    switch (_operator) {
+      case 'before':
+        return 'Shows games released before $dateStr';
+      case 'after':
+        return 'Shows games released after $dateStr';
+      case 'on':
+        return 'Shows games released on $dateStr';
+      default:
+        return '';
     }
   }
 }

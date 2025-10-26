@@ -179,7 +179,14 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _performSearch(String query) {
-    if (query.trim().isEmpty && !_currentFilters.hasFilters) return;
+    // If both query and filters are empty, show initial view
+    if (query.trim().isEmpty && !_currentFilters.hasFilters) {
+      setState(() {
+        _showRecentSearches = true;
+      });
+      _gameBloc.add(ClearSearchEvent());
+      return;
+    }
 
     final validation = InputValidator.validateSearchQuery(query);
     if (validation != null && query.trim().isNotEmpty) {
@@ -651,6 +658,10 @@ class _SearchPageState extends State<SearchPage> {
                             onDeleted: () {
                               setState(() {
                                 _currentFilters = const SearchFilters();
+                                // If search text is also empty, show initial view
+                                if (_searchController.text.trim().isEmpty) {
+                                  _showRecentSearches = true;
+                                }
                               });
                               _performSearch(_searchController.text);
                             },
