@@ -692,9 +692,18 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         }
 
         // ========== AGE RATING & LOCALIZATION ==========
+        // TODO: Age ratings filter may not work correctly with current implementation
+        // IGDB's age_ratings is a nested array of objects, not simple IDs
+        // Current approach: filters.ageRatingIds contains age_rating record IDs
+        // Possible fix: Extract category/rating enum values from age_rating IDs
+        // and filter by age_ratings.category or age_ratings.rating instead
+        // Example: age_ratings.category = (1,2) for ESRB and PEGI
+        // or age_ratings.rating = (8,11) for E and M ratings
         if (filters.ageRatingIds.isNotEmpty) {
+          // Current implementation - may need to be changed to age_ratings.category or age_ratings.rating
           final filter = ContainsFilter('age_ratings', filters.ageRatingIds);
           print('  ✓ Age Ratings Filter: ${filter.toQueryString()}');
+          print('  ⚠️  Warning: Age ratings filter might need to use category/rating field instead of IDs');
           igdbFilters.add(filter);
         }
         if (filters.languageSupportIds.isNotEmpty) {
