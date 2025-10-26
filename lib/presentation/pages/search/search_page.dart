@@ -881,13 +881,13 @@ class _SearchPageState extends State<SearchPage> {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: _showFilters,
+                  onTap: _isLoadingFilterOptions ? null : _showFilters,
                   borderRadius: BorderRadius.circular(28),
                   child: Stack(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16),
-                        child: !_isLoadingFilterOptions
+                        child: _isLoadingFilterOptions
                             ? SizedBox(
                                 width: 28,
                                 height: 28,
