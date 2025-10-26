@@ -10,6 +10,7 @@ import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/search/search_filters.dart';
 import '../../../domain/repositories/game_repository.dart';
 import '../../../domain/usecases/game/get_user_rated.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
@@ -171,16 +172,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(currentState.copyWith(isLoadingMore: true));
 
-      final result = await searchGames(
-        SearchGamesParams(
-          query: currentState.currentQuery,
-          limit: 20,
-          offset: currentState.games.length,
-        ),
-      );
+      // Use filters if available, otherwise use regular search
+      final result = currentState.currentFilters != null
+          ? await gameRepository.searchGamesWithFilters(
+              query: currentState.currentQuery,
+              filters: currentState.currentFilters!,
+              limit: 20,
+              offset: currentState.games.length,
+            )
+          : await searchGames(
+              SearchGamesParams(
+                query: currentState.currentQuery,
+                limit: 20,
+                offset: currentState.games.length,
+              ),
+            );
 
       result.fold(
-        (failure) => emit(GameError(failure.message)),
+        (failure) => emit(GameError(failure.message, games: currentState.games)),
         (games) {
           if (games.isEmpty) {
             emit(currentState.copyWith(
@@ -1333,6 +1342,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         games: games,
         hasReachedMax: games.length < 20,
         currentQuery: event.query,
+        currentFilters: event.filters,
       )),
     );
   }

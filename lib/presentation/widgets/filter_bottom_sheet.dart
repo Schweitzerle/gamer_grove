@@ -1363,7 +1363,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               start: DateTime(_startYear!),
               end: DateTime(_endYear!, 12, 31),
             )
-          : null,
+          : _startYear != null
+              ? DateTimeRange(
+                  start: DateTime(_startYear!),
+                  end: DateTime(_startYear!, 12, 31),
+                )
+              : null,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context),
@@ -1375,7 +1380,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     if (picked != null) {
       setState(() {
         _startYear = picked.start.year;
-        _endYear = picked.end.year;
+        // Only set end year if it's different from start year
+        // This preserves single-date selections
+        if (picked.start.year != picked.end.year) {
+          _endYear = picked.end.year;
+        } else {
+          _endYear = null;
+        }
       });
       HapticFeedback.lightImpact();
     }
@@ -1519,11 +1530,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   itemCount: searchResults.length,
                   itemBuilder: (context, index) {
                     final item = searchResults[index];
+                    final isSelected = selectedItems.contains(item);
                     return ListTile(
                       title: itemBuilder(item),
-                      trailing: Icon(Icons.add_circle_outline,
-                          color: theme.colorScheme.primary),
-                      onTap: () => onAdd(item),
+                      trailing: Icon(
+                        isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                        color: isSelected 
+                            ? theme.colorScheme.primary 
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      onTap: () {
+                        if (isSelected) {
+                          onRemove(item);
+                        } else {
+                          onAdd(item);
+                        }
+                      },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
