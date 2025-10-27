@@ -336,7 +336,7 @@ class SupabaseInsert {
   }
 
   /// Builds and executes the insert operation.
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     var query = supabase.from(table);
 
     final data = _multipleValues ?? _values;
@@ -354,7 +354,8 @@ class SupabaseInsert {
       return query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
@@ -416,7 +417,7 @@ class SupabaseUpdate {
   }
 
   /// Builds and executes the update operation.
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     if (_values == null || _values!.isEmpty) {
       throw ArgumentError('No values provided for update');
     }
@@ -439,7 +440,8 @@ class SupabaseUpdate {
       return query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
@@ -487,7 +489,7 @@ class SupabaseDelete {
   }
 
   /// Builds and executes the delete operation.
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     if (_filters.isEmpty) {
       throw ArgumentError(
           'No filters provided for delete - this would delete all rows!');
@@ -511,7 +513,8 @@ class SupabaseDelete {
       return query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
