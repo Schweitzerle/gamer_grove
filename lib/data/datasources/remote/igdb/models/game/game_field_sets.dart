@@ -96,6 +96,11 @@ class GameFieldSets {
     'age_ratings.category',
     'age_ratings.rating',
     'age_ratings.synopsis',
+    'age_ratings.rating_cover_url',
+    'age_ratings.content_descriptions',
+    'age_ratings.rating_content_descriptions',
+    'age_ratings.organization.*',
+    'age_ratings.rating_category.*',
     // Metadata
     'genres.*',
     'themes.*',

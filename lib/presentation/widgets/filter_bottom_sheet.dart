@@ -266,7 +266,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       if (fromDate.year == toDate.year &&
           fromDate.month == toDate.month &&
           fromDate.day == toDate.day &&
-          toDate.hour == 23 && toDate.minute == 59) {
+          toDate.hour == 23 &&
+          toDate.minute == 59) {
         // This is a single date "on" filter
         _singleReleaseDate = fromDate;
         _dateOperator = 'on';
@@ -279,13 +280,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         _singleReleaseDate = null;
         _dateOperator = null;
       }
-    } else if (_filters.releaseDateFrom != null && _filters.releaseDateTo == null) {
+    } else if (_filters.releaseDateFrom != null &&
+        _filters.releaseDateTo == null) {
       // Only fromDate - this is an "after" filter
       _singleReleaseDate = _filters.releaseDateFrom;
       _dateOperator = 'after';
       _releaseDateFrom = null;
       _releaseDateTo = null;
-    } else if (_filters.releaseDateFrom == null && _filters.releaseDateTo != null) {
+    } else if (_filters.releaseDateFrom == null &&
+        _filters.releaseDateTo != null) {
       // Only toDate - this is a "before" filter
       _singleReleaseDate = _filters.releaseDateTo;
       _dateOperator = 'before';
@@ -424,7 +427,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 isScrollable: false,
                 tabAlignment: TabAlignment.fill,
                 tabs: const [
-                  Tab(text: 'Game', icon: Icon(Icons.videogame_asset, size: 20)),
+                  Tab(
+                      text: 'Game',
+                      icon: Icon(Icons.videogame_asset, size: 20)),
                   Tab(text: 'Quality', icon: Icon(Icons.stars, size: 20)),
                   Tab(text: 'Meta', icon: Icon(Icons.more_horiz, size: 20)),
                   Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
@@ -782,7 +787,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 _ageRatingNames.remove(id);
               });
             },
-            itemBuilder: (item) => Text(item.displayName),
+            itemBuilder: (item) =>
+                Text('${item.displayName} (${item.organization?.name})'),
             getId: (item) => item.id,
             getLabel: (item) => item.displayName,
           ),
@@ -2176,8 +2182,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color:
-                              theme.colorScheme.surfaceContainerHighest,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Icon(
@@ -2297,7 +2302,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
 
   // ==========================================
   // SEARCH DEBOUNCE METHODS
@@ -3123,4 +3127,3 @@ class _DateFilterDialogState extends State<DateFilterDialog>
     }
   }
 }
-

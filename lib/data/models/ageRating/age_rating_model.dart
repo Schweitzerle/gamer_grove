@@ -36,9 +36,7 @@ class AgeRatingModel extends AgeRating {
       categoryEnum: _parseCategory(json['category']),
       ratingEnum: _parseRating(json['rating']),
     );
-  }
-
-  // NEU: Parse organization data
+  } // NEU: Parse organization data
   static int? _parseOrganizationId(dynamic orgData) {
     if (orgData is int) {
       return orgData;

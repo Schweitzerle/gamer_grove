@@ -142,18 +142,17 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         final charactersResult = await getGameCharacters(gameId);
         final eventResult = await getGameEvents(gameId);
         final game = games.first;
-        
+
         // Handle the Either result from getGameCharacters
         charactersResult.fold(
           (failure) => game.characters = [],
           (characters) => game.characters = characters,
         );
-        
-         eventResult.fold(
+
+        eventResult.fold(
           (failure) => game.events = [],
           (events) => game.events = events,
         );
-        
 
         return game;
       },
@@ -765,7 +764,8 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
             (textQuery == null || textQuery.trim().isEmpty)) {
           // Fall back to total_rating_count when relevance is selected without search
           sortString = 'total_rating_count ${filters.sortOrder.value}';
-          print('⚠️ Relevance sort requires text search - falling back to total_rating_count');
+          print(
+              '⚠️ Relevance sort requires text search - falling back to total_rating_count');
         } else {
           sortString = '${filters.sortBy.igdbField} ${filters.sortOrder.value}';
         }
@@ -1100,11 +1100,18 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     print('Search term: $query');
     return executeIgdbOperation(
       operation: () async {
+        final multiFieldFilter = CombinedFilter([
+          FieldFilter('name', '~', query),
+          FieldFilter('native_name', '~', query),
+        ], operator: '|'); // Use OR operator to match ANY field
+
         final igdbQuery = IgdbLanguageQuery(
+          where: multiFieldFilter,
           fields: const [
             '*',
           ],
-          limit: 100,
+          limit: 20,
+          sort: 'name asc',
         );
         print('📋 Query: ${igdbQuery.buildQuery()}');
         final result = await igdbDataSource.queryLanguages(igdbQuery);
