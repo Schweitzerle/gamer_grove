@@ -71,6 +71,15 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<CharacterModel>> queryCharacters(IgdbCharacterQuery query) async {
+    // Debug log: show the constructed IGDB query for characters
+    try {
+      final q = query.buildQuery();
+      print('🔍 IGDB Characters Query:\n$q');
+    } catch (e) {
+      // If buildQuery throws for any reason, still proceed but log the error
+      print('⚠️ Failed to build characters query for debug logging: $e');
+    }
+
     return await _executeQuery<CharacterModel>(
       endpoint: 'characters',
       query: query,

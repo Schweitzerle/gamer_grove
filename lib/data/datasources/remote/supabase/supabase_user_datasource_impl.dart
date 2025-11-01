@@ -368,47 +368,16 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
   }
 
   @override
-  Future<void> setTopThreePosition(
+  Future<void> removeGameFromTopThree(
     String userId, {
-    required int position,
-    int? gameId,
+    required int gameId,
   }) async {
     try {
-      // Validate position
-      if (position < 1 || position > 3) {
-        throw const InvalidTopThreeException(
-          message: 'Position must be 1, 2, or 3',
-        );
-      }
-
-      // Get current top three
-      final current = await getTopThree(userId);
-
-      // Determine column name based on position
-      final columnName = 'game_${position}_id';
-
-      if (current == null) {
-        // No top three exists yet - create new entry
-        await SupabaseInsert('user_top_three')
-            .values({
-              'user_id': userId,
-              columnName: gameId,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .upsert()
-            .build(_supabase);
-      } else {
-        // Update existing entry
-        await SupabaseUpdate('user_top_three')
-            .set({
-              columnName: gameId,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .filter(EqualFilter('user_id', userId))
-            .build(_supabase);
-      }
+      await _supabase.rpc<void>('remove_from_top_three', params: {
+        'p_user_id': userId,
+        'p_game_id': gameId,
+      },);
     } catch (e) {
-      if (e is UserException) rethrow;
       throw UserExceptionMapper.map(e);
     }
   }

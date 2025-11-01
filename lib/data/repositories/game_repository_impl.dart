@@ -139,7 +139,23 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           throw const IgdbNotFoundException(message: 'Game not found');
         }
 
-        return games.first;
+        final charactersResult = await getGameCharacters(gameId);
+        final eventResult = await getGameEvents(gameId);
+        final game = games.first;
+        
+        // Handle the Either result from getGameCharacters
+        charactersResult.fold(
+          (failure) => game.characters = [],
+          (characters) => game.characters = characters,
+        );
+        
+         eventResult.fold(
+          (failure) => game.events = [],
+          (events) => game.events = events,
+        );
+        
+
+        return game;
       },
       errorMessage: 'Failed to fetch game details',
     );

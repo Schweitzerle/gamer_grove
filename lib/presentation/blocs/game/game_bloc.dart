@@ -21,6 +21,7 @@ import '../../../domain/usecases/game/get_user_top_three.dart';
 import '../../../domain/usecases/game_details/get_complete_game_details_page_data.dart';
 import '../../../domain/usecases/game_details/get_enhanced_game_details.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
+import '../../../domain/usecases/user/remove_from_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
 import '../../../domain/usecases/game/get_game_details.dart';
 import '../../../domain/usecases/game/rate_game.dart';
@@ -44,6 +45,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final ToggleWishlist toggleWishlist;
   final ToggleRecommend toggleRecommend;
   final AddToTopThree addToTopThree;
+  final RemoveFromTopThree removeFromTopThree;
   final GetPopularGames getPopularGames;
   final GetUpcomingGames getUpcomingGames;
   final GetLatestGames getLatestGames;
@@ -68,6 +70,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.toggleWishlist,
     required this.toggleRecommend,
     required this.addToTopThree,
+    required this.removeFromTopThree,
     required this.getPopularGames,
     required this.getUpcomingGames,
     required this.getLatestGames,
@@ -99,6 +102,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<ToggleWishlistEvent>(_onToggleWishlist);
     on<ToggleRecommendEvent>(_onToggleRecommend);
     on<AddToTopThreeEvent>(_onAddToTopThree);
+    on<RemoveFromTopThreeEvent>(_onRemoveFromTopThree);
+    on<UpdateTopThreeEvent>(_onUpdateTopThree);
     on<GetGameDetailsWithUserDataEvent>(_onGetGameDetailsWithUserData);
     on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
 
@@ -1247,20 +1252,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       },
       (_) {
-        // ✅ NICHT rekursiv ein neues Event triggern!
-        // Stattdessen aktuellen State updaten
-        if (state is GameDetailsLoaded && !emit.isDone) {
-          final currentGame = (state as GameDetailsLoaded).game;
-          if (currentGame.id == event.gameId) {
-            final updatedGame = currentGame.copyWith(
-              isInTopThree: true,
-              topThreePosition: event.position,
-            );
-            emit(GameDetailsLoaded(updatedGame));
-          }
-        }
+        add(UpdateTopThreeEvent(userId: event.userId));
 
-        // ✅ Auch andere States updaten
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(
             isInTopThree: true,
@@ -1269,6 +1262,51 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }, emit);
       },
     );
+  }
+
+  Future<void> _onRemoveFromTopThree(
+    RemoveFromTopThreeEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    final result = await removeFromTopThree(RemoveFromTopThreeParams(
+      userId: event.userId,
+      gameId: event.gameId,
+    ));
+
+    result.fold(
+      (failure) {
+        if (!emit.isDone) {
+          emit(GameError(_mapFailureToMessage(failure)));
+        }
+      },
+      (_) {
+        add(UpdateTopThreeEvent(userId: event.userId));
+
+        _updateGameInAllStates(event.gameId, (game) {
+          return game.copyWith(
+            isInTopThree: false,
+            topThreePosition: null,
+          );
+        }, emit);
+      },
+    );
+  }
+
+  Future<void> _onUpdateTopThree(
+    UpdateTopThreeEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is GrovePageLoaded) {
+      final result = await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+
+      result.fold(
+        (failure) => emit(GameError(_mapFailureToMessage(failure))),
+        (games) {
+          emit(currentState.copyWith(userTopThree: games));
+        },
+      );
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {

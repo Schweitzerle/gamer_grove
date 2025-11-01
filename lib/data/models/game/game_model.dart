@@ -50,7 +50,7 @@ import '../release_date/release_date_model.dart';
 import 'game_localization_model.dart';
 
 class GameModel extends Game {
-  const GameModel({
+  GameModel({
     required super.id,
     required super.name,
     super.summary,

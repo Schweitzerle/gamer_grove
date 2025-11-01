@@ -148,7 +148,7 @@ abstract class UserRepository {
   /// Remove game from top three
   Future<Either<Failure, void>> removeFromTopThree({
     required String userId,
-    required int position,
+    required int gameId,
   });
 
   /// Reorder top three games
