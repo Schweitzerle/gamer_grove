@@ -1,4 +1,6 @@
 // lib/data/models/character/character_model.dart - UPDATED VERSION
+import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
+
 import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/character/character_gender.dart';
 import '../../../domain/entities/character/character_species.dart';
@@ -15,7 +17,7 @@ class CharacterModel extends Character {
     super.countryName,
     super.description,
     super.gameIds,
-    super.mugShotId,
+    super.mugShot,
     super.slug,
     super.url,
     super.createdAt,
@@ -37,7 +39,7 @@ class CharacterModel extends Character {
       countryName: json['country_name'],
       description: json['description'],
       gameIds: _parseIdList(json['games']),
-      mugShotId: json['mug_shot'],
+      mugShot: _parseMugShot(json['mug_shot']),
       slug: json['slug'],
       url: json['url'],
       createdAt: _parseDateTime(json['created_at']),
@@ -83,7 +85,7 @@ class CharacterModel extends Character {
       countryName: character.countryName,
       description: character.description,
       gameIds: character.gameIds,
-      mugShotId: character.mugShotId,
+      mugShot: character.mugShot,
       slug: character.slug,
       url: character.url,
       createdAt: character.createdAt,
@@ -136,6 +138,20 @@ class CharacterModel extends Character {
     return null;
   }
 
+  static CharacterMugShot? _parseMugShot(dynamic mugShot) {
+    if (mugShot is Map<String, dynamic>) {
+      return CharacterMugShot(
+        id: mugShot['id'] ?? 0,
+        checksum: mugShot['checksum'] ?? '',
+        imageId: mugShot['image_id']?.toString() ?? '',
+        height: mugShot['height'] ?? 0,
+        width: mugShot['width'] ?? 0,
+        url: mugShot['url'],
+      );
+    }
+    return null;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -147,7 +163,7 @@ class CharacterModel extends Character {
       'country_name': countryName,
       'description': description,
       'games': gameIds,
-      'mug_shot': mugShotId,
+      'mug_shot': mugShot,
       'slug': slug,
       'url': url,
       'created_at': createdAt?.toIso8601String(),

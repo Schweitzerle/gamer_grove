@@ -93,16 +93,42 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   }
 
   Future<void> _enrichAllGames() async {
-    final enrichmentService = sl<GameEnrichmentService>();
-
-    final enrichedGames = await enrichmentService.enrichGames(
-      widget.games,
-      widget.userId!,
-    );
-
     setState(() {
-      _allGames = enrichedGames;
+      _isEnriching = true;
+      _enrichmentProgress = 0;
+      _enrichmentStatus = 'Loading game data...';
     });
+
+    try {
+      final enrichmentService = sl<GameEnrichmentService>();
+
+      final enrichedGames = await enrichmentService.enrichGames(
+        widget.games,
+        widget.userId!,
+      );
+
+      setState(() {
+        _allGames = enrichedGames;
+        _isEnriching = false;
+        _enrichmentProgress = _totalGames;
+      });
+
+      _applyFiltersAndSort();
+    } catch (e) {
+      setState(() {
+        _allGames = List.from(widget.games);
+        _isEnriching = false;
+        _enrichmentStatus = 'Error loading data';
+      });
+
+      _applyFiltersAndSort();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error enriching games: $e')),
+        );
+      }
+    }
   }
 
   void _applyFiltersAndSort() {

@@ -1,5 +1,6 @@
 // lib/domain/entities/character/character.dart - UPDATED VERSION
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
 import '../game/game.dart';
 import 'character_gender.dart';
 import 'character_species.dart';
@@ -14,7 +15,7 @@ class Character extends Equatable {
   final String? countryName;
   final String? description;
   final List<int> gameIds;
-  final int? mugShotId;
+  final CharacterMugShot? mugShot;
   final String? slug;
   final String? url;
   final DateTime? createdAt;
@@ -40,7 +41,7 @@ class Character extends Equatable {
     this.countryName,
     this.description,
     this.gameIds = const [],
-    this.mugShotId,
+    this.mugShot,
     this.slug,
     this.url,
     this.createdAt,
@@ -82,7 +83,7 @@ class Character extends Equatable {
   }
 
   bool get hasGames => gameIds.isNotEmpty;
-  bool get hasMugShot => mugShotId != null;
+  bool get hasMugShot => mugShot != null;
   bool get hasDescription => description != null && description!.isNotEmpty;
 
   // 🆕 NEW: Image-related helpers
@@ -104,7 +105,7 @@ class Character extends Equatable {
     String? countryName,
     String? description,
     List<int>? gameIds,
-    int? mugShotId,
+    CharacterMugShot? mugShot,
     String? slug,
     String? url,
     DateTime? createdAt,
@@ -124,7 +125,7 @@ class Character extends Equatable {
       countryName: countryName ?? this.countryName,
       description: description ?? this.description,
       gameIds: gameIds ?? this.gameIds,
-      mugShotId: mugShotId ?? this.mugShotId,
+      mugShot: mugShot ?? this.mugShot,
       slug: slug ?? this.slug,
       url: url ?? this.url,
       createdAt: createdAt ?? this.createdAt,
@@ -147,7 +148,7 @@ class Character extends Equatable {
     countryName,
     description,
     gameIds,
-    mugShotId,
+    mugShot,
     slug,
     url,
     createdAt,

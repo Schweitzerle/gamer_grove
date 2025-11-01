@@ -304,7 +304,7 @@ class _GameDetailPageState extends State<GameDetailPage>
           print('    📏 Sizes Available: thumb, micro, medium, large');
         } else if (char.hasMugShot) {
           print(
-              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShotId} but no imageId (needs separate fetch)');
+              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShot} but no imageId (needs separate fetch)');
         } else {
           print('    🖼️ Image: ❌ No image data available');
         }
