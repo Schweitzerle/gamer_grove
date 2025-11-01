@@ -10,13 +10,11 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/domain/entities/user/user_gaming_activity.dart';
 import 'package:gamer_grove/domain/entities/user/user_relationship.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import '../../core/network/network_info.dart';
-import '../../domain/repositories/user_repository.dart';
-import '../datasources/remote/supabase/supabase_user_datasource.dart';
-import '../models/user_model.dart';
-import 'base/supabase_base_repository.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_datasource.dart';
+import 'package:gamer_grove/data/models/user_model.dart';
+import 'package:gamer_grove/data/repositories/base/supabase_base_repository.dart';
 
 /// Concrete implementation of [UserRepository].
 ///
@@ -39,13 +37,15 @@ import 'base/supabase_base_repository.dart';
 /// ```
 class UserRepositoryImpl extends SupabaseBaseRepository
     implements UserRepository {
+  /// The data source for user-related operations.
   final SupabaseUserDataSource userDataSource;
 
+  /// Creates an instance of [UserRepositoryImpl].
   UserRepositoryImpl({
     required this.userDataSource,
-    required supabase.SupabaseClient supabase,
-    required NetworkInfo networkInfo,
-  }) : super(supabase: supabase, networkInfo: networkInfo);
+    required super.supabase,
+    required super.networkInfo,
+  });
 
   // ============================================================
   // PROFILE OPERATIONS
@@ -99,13 +99,18 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         if (bio != null) updates['bio'] = bio;
         if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
         if (country != null) updates['country'] = country;
-        if (isProfilePublic != null)
+        if (isProfilePublic != null) {
           updates['is_profile_public'] = isProfilePublic;
-        if (showRatedGames != null)
+        }
+        if (showRatedGames != null) {
           updates['show_rated_games'] = showRatedGames;
-        if (showRecommendedGames != null)
+        }
+        if (showRecommendedGames != null) {
           updates['show_recommended_games'] = showRecommendedGames;
-        if (showTopThree != null) updates['show_top_three'] = showTopThree;
+        }
+        if (showTopThree != null) {
+          updates['show_top_three'] = showTopThree;
+        }
 
         final updatedData = await userDataSource.updateUserProfile(
           userId,
@@ -140,15 +145,21 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseVoidOperation(
       operation: () {
         final settings = <String, bool>{};
-        if (isProfilePublic != null)
+        if (isProfilePublic != null) {
           settings['is_profile_public'] = isProfilePublic;
-        if (showRatedGames != null)
+        }
+        if (showRatedGames != null) {
           settings['show_rated_games'] = showRatedGames;
-        if (showRecommendedGames != null)
+        }
+        if (showRecommendedGames != null) {
           settings['show_recommended_games'] = showRecommendedGames;
-        if (showTopThree != null) settings['show_top_three'] = showTopThree;
-        if (allowFollowRequests != null)
+        }
+        if (showTopThree != null) {
+          settings['show_top_three'] = showTopThree;
+        }
+        if (allowFollowRequests != null) {
           settings['allow_follow_requests'] = allowFollowRequests;
+        }
 
         return userDataSource.updatePrivacySettings(userId, settings);
       },
@@ -174,6 +185,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Toggles a game in the user's wishlist.
   Future<Either<Failure, void>> toggleWishlist(String userId, int gameId) {
     return executeSupabaseVoidOperation(
       operation: () => userDataSource.toggleWishlist(userId, gameId),
@@ -181,6 +193,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Toggles a game in the user's recommended list.
   Future<Either<Failure, void>> toggleRecommended(String userId, int gameId) {
     return executeSupabaseVoidOperation(
       operation: () => userDataSource.toggleRecommended(userId, gameId),
@@ -188,6 +201,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Rates a game for the user.
   Future<Either<Failure, void>> rateGame(
     String userId,
     int gameId,
@@ -199,6 +213,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Removes a rating from a game for the user.
   Future<Either<Failure, void>> removeRating(String userId, int gameId) {
     return executeSupabaseVoidOperation(
       operation: () => userDataSource.removeRating(userId, gameId),
@@ -206,6 +221,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Updates the user's top three games.
   Future<Either<Failure, void>> updateTopThree(
     String userId,
     List<int> gameIds,
@@ -216,6 +232,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Gets the user's top three games.
   Future<Either<Failure, List<int>?>> getTopThree(String userId) {
     return executeSupabaseOperation(
       operation: () => userDataSource.getTopThree(userId),
@@ -223,6 +240,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Clears the user's top three games.
   Future<Either<Failure, void>> clearTopThree(String userId) {
     return executeSupabaseVoidOperation(
       operation: () => userDataSource.clearTopThree(userId),
@@ -230,6 +248,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Gets the user's wishlisted games.
   Future<Either<Failure, List<int>>> getWishlistedGames(
     String userId, {
     int? limit,
@@ -248,6 +267,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Gets the user's rated games.
   Future<Either<Failure, List<Map<String, dynamic>>>> getRatedGames(
     String userId, {
     int? limit,
@@ -263,6 +283,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Gets the user's recommended games.
   Future<Either<Failure, List<int>>> getRecommendedGames(
     String userId, {
     int? limit,
@@ -457,9 +478,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
             .order('created_at', ascending: false)
             .limit(limit)
             .range(offset, offset + limit - 1);
-
         return (response as List)
-            .map((data) => UserModel.fromJson(data).toEntity())
+            .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
             .toList();
       },
       errorMessage: 'Failed to get new users',
@@ -496,7 +516,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
-        // TODO: Implement UserGamingActivity aggregation
+        // TODO(developer): Implement UserGamingActivity aggregation.
         // For now, return a default instance
         throw UnimplementedError('getUserActivity not yet implemented');
       },
@@ -597,6 +617,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   // STATISTICS (implementation-specific methods)
   // ============================================================
 
+  /// Gets the user's gaming statistics.
   Future<Either<Failure, Map<String, dynamic>>> getUserStats(String userId) {
     return executeSupabaseOperation(
       operation: () async {
@@ -607,6 +628,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Gets the user's collection statistics.
   Future<Either<Failure, Map<String, dynamic>>> getCollectionStats(
     String userId,
   ) {
@@ -703,35 +725,18 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
-  @override
-  Future<Either<Failure, void>> setTopThreeGameAtPosition({
-    required String userId,
-    required int position,
-    required int gameId,
-  }) {
-    return executeSupabaseVoidOperation(
-      operation: () async {
-        await userDataSource.setTopThreePosition(
-          userId,
-          position: position,
-          gameId: gameId,
-        );
-      },
-      errorMessage: 'Failed to set top three game at position',
-    );
-  }
+
 
   @override
   Future<Either<Failure, void>> removeFromTopThree({
     required String userId,
-    required int position,
+    required int gameId,
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await userDataSource.setTopThreePosition(
+        await userDataSource.removeGameFromTopThree(
           userId,
-          position: position,
-          gameId: null, // null removes the game from this position
+          gameId: gameId,
         );
       },
       errorMessage: 'Failed to remove from top three',
@@ -942,7 +947,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
             await this.supabase.from('users').select().inFilter('id', userIds);
 
         return (response as List)
-            .map((data) => UserModel.fromJson(data).toEntity())
+            .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
             .toList();
       },
       errorMessage: 'Failed to get multiple user profiles',
@@ -1001,7 +1006,9 @@ class UserRepositoryImpl extends SupabaseBaseRepository
           isAvailable.fold(
             (failure) => null,
             (available) {
-              if (available) suggestions.add(suggestion);
+              if (available) {
+                suggestions.add(suggestion);
+              }
             },
           );
         }
@@ -1010,45 +1017,6 @@ class UserRepositoryImpl extends SupabaseBaseRepository
       errorMessage: 'Failed to suggest usernames',
     );
   }
-
-  // ============================================================
-  // USER DELETION & ACCOUNT MANAGEMENT
-  // ============================================================
-
-  @override
-  Future<Either<Failure, void>> deleteUserAccount(String userId) {
-    return executeSupabaseVoidOperation(
-      operation: () async {
-        await this.supabase.from('users').delete().eq('id', userId);
-      },
-      errorMessage: 'Failed to delete user account',
-    );
-  }
-
-  @override
-  Future<Either<Failure, void>> deactivateUserAccount(String userId) {
-    return executeSupabaseVoidOperation(
-      operation: () async {
-        await this.supabase.from('users').update({
-          'is_active': false,
-        }).eq('id', userId);
-      },
-      errorMessage: 'Failed to deactivate user account',
-    );
-  }
-
-  @override
-  Future<Either<Failure, void>> reactivateUserAccount(String userId) {
-    return executeSupabaseVoidOperation(
-      operation: () async {
-        await this.supabase.from('users').update({
-          'is_active': true,
-        }).eq('id', userId);
-      },
-      errorMessage: 'Failed to reactivate user account',
-    );
-  }
-
   @override
   Future<Either<Failure, List<User>>> getFollowSuggestions({
     required String userId,
@@ -1066,6 +1034,60 @@ class UserRepositoryImpl extends SupabaseBaseRepository
             .toList();
       },
       errorMessage: 'Failed to get follow suggestions',
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> setTopThreeGameAtPosition({
+    required String userId,
+    required int position,
+    required int gameId,
+  }) {
+    return executeSupabaseVoidOperation(
+      operation: () async {
+        final currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
+        if (position >= 1 && position <= 3) {
+          currentTopThree[position - 1] = gameId;
+        }
+        await userDataSource.updateTopThree(userId, currentTopThree);
+      },
+      errorMessage: 'Failed to set top three game at position',
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> deactivateUserAccount(String userId) {
+    return executeSupabaseVoidOperation(
+      operation: () async {
+        await this.supabase.from('users').update({
+          'is_active': false,
+          'deactivated_at': DateTime.now().toIso8601String(),
+        }).eq('id', userId);
+      },
+      errorMessage: 'Failed to deactivate user account',
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> reactivateUserAccount(String userId) {
+    return executeSupabaseVoidOperation(
+      operation: () async {
+        await this.supabase.from('users').update({
+          'is_active': true,
+          'deactivated_at': null,
+        }).eq('id', userId);
+      },
+      errorMessage: 'Failed to reactivate user account',
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteUserAccount(String userId) {
+    return executeSupabaseVoidOperation(
+      operation: () async {
+        await supabase.from('users').delete().eq('id', userId);
+      },
+      errorMessage: 'Failed to delete user account',
     );
   }
 }

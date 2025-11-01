@@ -51,6 +51,7 @@ import 'package:gamer_grove/domain/usecases/game/toggle_wishlist.dart';
 import 'package:gamer_grove/domain/usecases/game_details/get_complete_game_details_page_data.dart';
 import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_details.dart';
 import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -105,32 +106,32 @@ Future<void> initDependencies() async {
     anonKey: ApiConstants.supabaseAnonKey,
   );
 
-  sl.registerLazySingleton<SupabaseClient>(() => supabase.client);
+  sl..registerLazySingleton<SupabaseClient>(() => supabase.client)
 
   // ============================================================
   // CORE
   // ============================================================
 
   // Register Connectivity first (required by NetworkInfo)
-  sl.registerLazySingleton<Connectivity>(() => Connectivity());
+  ..registerLazySingleton<Connectivity>(() => Connectivity())
 
-  sl.registerLazySingleton<NetworkInfo>(
+  ..registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(sl()),
-  );
+  )
 
-  sl.registerLazySingleton<GameEnrichmentService>(
+  ..registerLazySingleton<GameEnrichmentService>(
     () => GameEnrichmentService(
       supabase: sl(),
       enableLogging: true, // Enable logging to debug enrichment
     ),
-  );
+  )
 
   // ============================================================
   // PRESENTATION LAYER - BLOCS
   // ============================================================
 
   // Auth BLoC
-  sl.registerFactory(
+  ..registerFactory(
     () => AuthBloc(
       signInUseCase: sl(),
       signUpUseCase: sl(),
@@ -140,10 +141,10 @@ Future<void> initDependencies() async {
       updatePasswordUseCase: sl(),
       isAuthenticatedUseCase: sl(),
     ),
-  );
+  )
 
   // User Profile BLoC
-  sl.registerFactory(
+  ..registerFactory(
     () => UserProfileBloc(
       getUserProfileUseCase: sl(),
       updateUserProfileUseCase: sl(),
@@ -153,10 +154,10 @@ Future<void> initDependencies() async {
       getFollowersUseCase: sl(),
       getFollowingUseCase: sl(),
     ),
-  );
+  )
 
   // Collection BLoC
-  sl.registerFactory(
+  ..registerFactory(
     () => CollectionBloc(
       getUserGameDataUseCase: sl(),
       rateGameUseCase: sl(),
@@ -169,10 +170,10 @@ Future<void> initDependencies() async {
       getWishlistedGamesUseCase: sl(),
       getRatedGamesUseCase: sl(),
     ),
-  );
+  )
 
   // Game BLoC
-  sl.registerFactory(
+  ..registerFactory(
     () => GameBloc(
       searchGames: sl(),
       getGameDetails: sl(),
@@ -195,115 +196,116 @@ Future<void> initDependencies() async {
       getEnhancedGameDetails: sl(),
       getCompleteGameDetailPageData: sl(),
       gameRepository: sl(),
-      enrichmentService: sl(),
+      enrichmentService: sl(), removeFromTopThree: sl(),
     ),
-  );
+  )
 
   // ============================================================
   // DOMAIN LAYER - USE CASES
   // ============================================================
 
   // Auth Use Cases
-  sl.registerLazySingleton(() => SignInUseCase(sl()));
-  sl.registerLazySingleton(() => SignUpUseCase(sl()));
-  sl.registerLazySingleton(() => SignOutUseCase(sl()));
-  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
-  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
-  sl.registerLazySingleton(() => UpdatePasswordUseCase(sl()));
-  sl.registerLazySingleton(() => IsAuthenticatedUseCase(sl()));
+  ..registerLazySingleton(() => SignInUseCase(sl()))
+  ..registerLazySingleton(() => SignUpUseCase(sl()))
+  ..registerLazySingleton(() => SignOutUseCase(sl()))
+  ..registerLazySingleton(() => GetCurrentUserUseCase(sl()))
+  ..registerLazySingleton(() => ResetPasswordUseCase(sl()))
+  ..registerLazySingleton(() => UpdatePasswordUseCase(sl()))
+  ..registerLazySingleton(() => IsAuthenticatedUseCase(sl()))
 
   // User Profile Use Cases
-  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateUserAvatarUseCase(sl()));
-  sl.registerLazySingleton(() => FollowUserUseCase(sl()));
-  sl.registerLazySingleton(() => UnfollowUserUseCase(sl()));
-  sl.registerLazySingleton(() => GetFollowersUseCase(sl()));
-  sl.registerLazySingleton(() => GetFollowingUseCase(sl()));
+  ..registerLazySingleton(() => GetUserProfileUseCase(sl()))
+  ..registerLazySingleton(() => UpdateUserProfileUseCase(sl()))
+  ..registerLazySingleton(() => UpdateUserAvatarUseCase(sl()))
+  ..registerLazySingleton(() => FollowUserUseCase(sl()))
+  ..registerLazySingleton(() => UnfollowUserUseCase(sl()))
+  ..registerLazySingleton(() => GetFollowersUseCase(sl()))
+  ..registerLazySingleton(() => GetFollowingUseCase(sl()))
 
   // Collection Use Cases
-  sl.registerLazySingleton(() => GetUserGameDataUseCase(sl()));
-  sl.registerLazySingleton(() => RateGameUseCase(sl()));
-  sl.registerLazySingleton(() => RemoveRatingUseCase(sl()));
-  sl.registerLazySingleton(() => ToggleWishlistUseCase(sl()));
-  sl.registerLazySingleton(() => ToggleRecommendedUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => GetTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => ClearTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => GetWishlistedGamesUseCase(sl()));
-  sl.registerLazySingleton(() => GetRatedGamesUseCase(sl()));
+  ..registerLazySingleton(() => GetUserGameDataUseCase(sl()))
+  ..registerLazySingleton(() => RateGameUseCase(sl()))
+  ..registerLazySingleton(() => RemoveRatingUseCase(sl()))
+  ..registerLazySingleton(() => ToggleWishlistUseCase(sl()))
+  ..registerLazySingleton(() => ToggleRecommendedUseCase(sl()))
+  ..registerLazySingleton(() => UpdateTopThreeUseCase(sl()))
+  ..registerLazySingleton(() => GetTopThreeUseCase(sl()))
+  ..registerLazySingleton(() => ClearTopThreeUseCase(sl()))
+  ..registerLazySingleton(() => GetWishlistedGamesUseCase(sl()))
+  ..registerLazySingleton(() => GetRatedGamesUseCase(sl()))
 
   // Game Use Cases
-  sl.registerLazySingleton(() => SearchGames(sl()));
-  sl.registerLazySingleton(() => GetGameDetails(sl()));
-  sl.registerLazySingleton(() => RateGame(sl()));
-  sl.registerLazySingleton(() => ToggleWishlist(sl()));
-  sl.registerLazySingleton(() => ToggleRecommend(sl()));
-  sl.registerLazySingleton(() => AddToTopThree(sl()));
-  sl.registerLazySingleton(() => GetPopularGames(sl()));
-  sl.registerLazySingleton(() => GetUpcomingGames(sl()));
-  sl.registerLazySingleton(() => GetLatestGames(sl()));
-  sl.registerLazySingleton(() => GetTopRatedGames(sl()));
-  sl.registerLazySingleton(() => GetUserWishlist(sl()));
-  sl.registerLazySingleton(() => GetUserRecommendations(sl()));
-  sl.registerLazySingleton(() => GetUserTopThreeGames(sl()));
-  sl.registerLazySingleton(() => GetUserTopThree(sl()));
-  sl.registerLazySingleton(() => GetUserRated(sl()));
-  sl.registerLazySingleton(() => GetSimilarGames(sl()));
-  sl.registerLazySingleton(() => GetGameDLCs(sl()));
-  sl.registerLazySingleton(() => GetGameExpansions(sl()));
-  sl.registerLazySingleton(() => GetEnhancedGameDetails(sl()));
-  sl.registerLazySingleton(
-      () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
+  ..registerLazySingleton(() => SearchGames(sl()))
+  ..registerLazySingleton(() => GetGameDetails(sl()))
+  ..registerLazySingleton(() => RateGame(sl()))
+  ..registerLazySingleton(() => ToggleWishlist(sl()))
+  ..registerLazySingleton(() => ToggleRecommend(sl()))
+  ..registerLazySingleton(() => AddToTopThree(sl()))
+  ..registerLazySingleton(() => RemoveFromTopThree(sl()))
+  ..registerLazySingleton(() => GetPopularGames(sl()))
+  ..registerLazySingleton(() => GetUpcomingGames(sl()))
+  ..registerLazySingleton(() => GetLatestGames(sl()))
+  ..registerLazySingleton(() => GetTopRatedGames(sl()))
+  ..registerLazySingleton(() => GetUserWishlist(sl()))
+  ..registerLazySingleton(() => GetUserRecommendations(sl()))
+  ..registerLazySingleton(() => GetUserTopThreeGames(sl()))
+  ..registerLazySingleton(() => GetUserTopThree(sl()))
+  ..registerLazySingleton(() => GetUserRated(sl()))
+  ..registerLazySingleton(() => GetSimilarGames(sl()))
+  ..registerLazySingleton(() => GetGameDLCs(sl()))
+  ..registerLazySingleton(() => GetGameExpansions(sl()))
+  ..registerLazySingleton(() => GetEnhancedGameDetails(sl()))
+  ..registerLazySingleton(
+      () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()))
 
   // ============================================================
   // DATA LAYER - REPOSITORIES
   // ============================================================
 
-  sl.registerLazySingleton<AuthRepository>(
+  ..registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       authDataSource: sl(),
       supabase: sl(),
       networkInfo: sl(),
     ),
-  );
+  )
 
-  sl.registerLazySingleton<UserRepository>(
+  ..registerLazySingleton<UserRepository>(
     () => UserRepositoryImpl(
       userDataSource: sl(),
       supabase: sl(),
       networkInfo: sl(),
     ),
-  );
+  )
 
-  sl.registerLazySingleton<GameRepository>(
+  ..registerLazySingleton<GameRepository>(
     () => GameRepositoryImpl(
       igdbDataSource: sl(),
       networkInfo: sl(),
       supabaseUserDataSource: sl(),
       enrichmentService: sl(),
     ),
-  );
+  )
 
   // ============================================================
   // DATA LAYER - DATA SOURCES
   // ============================================================
 
-  sl.registerLazySingleton<SupabaseAuthDataSource>(
+  ..registerLazySingleton<SupabaseAuthDataSource>(
     () => SupabaseAuthDataSourceImpl(supabase: sl()),
-  );
+  )
 
-  sl.registerLazySingleton<SupabaseUserDataSource>(
+  ..registerLazySingleton<SupabaseUserDataSource>(
     () => SupabaseUserDataSourceImpl(supabase: sl()),
-  );
+  )
 
   // IGDB Data Source
-  sl.registerLazySingleton<IgdbDataSource>(
+  ..registerLazySingleton<IgdbDataSource>(
     () => IgdbDataSourceImpl(dio: sl()),
-  );
+  )
 
   // Dio HTTP client
-  sl.registerLazySingleton<Dio>(() {
+  ..registerLazySingleton<Dio>(() {
     final dio = Dio();
     dio.options.connectTimeout = const Duration(seconds: 30);
     dio.options.receiveTimeout = const Duration(seconds: 30);

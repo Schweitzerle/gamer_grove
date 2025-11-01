@@ -167,20 +167,17 @@ abstract class SupabaseUserDataSource {
   /// ```
   Future<void> updateTopThree(String userId, List<int> gameIds);
 
-  /// Sets a game to a specific position in the user's top 3.
+  /// Removes a game from the user's top 3.
   ///
-  /// [position] must be 1, 2, or 3.
-  /// [gameId] is the game to set at that position (can be null to remove).
+  /// [gameId] is the game to remove.
   ///
   /// Example:
   /// ```dart
-  /// await userDataSource.setTopThreePosition(userId, position: 1, gameId: 1942);
-  /// await userDataSource.setTopThreePosition(userId, position: 2, gameId: null); // Remove position 2
+  /// await userDataSource.removeGameFromTopThree(userId, gameId: 1942);
   /// ```
-  Future<void> setTopThreePosition(
+  Future<void> removeGameFromTopThree(
     String userId, {
-    required int position,
-    int? gameId,
+    required int gameId,
   });
 
   /// Gets user's top 3 games.

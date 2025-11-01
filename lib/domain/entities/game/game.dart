@@ -133,10 +133,10 @@ class Game extends Equatable {
   final bool isInTopThree;
   final int? topThreePosition;
 
-  final List<Character> characters;
-  final List<Event> events;
+  List<Character> characters;
+  List<Event> events;
 
-  const Game({
+  Game({
     required this.id,
     required this.name,
     this.summary,
