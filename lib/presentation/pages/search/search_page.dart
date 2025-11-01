@@ -33,7 +33,14 @@ import '../../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/error_widget.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final SearchFilters? initialFilters;
+  final String? initialTitle;
+
+  const SearchPage({
+    super.key,
+    this.initialFilters,
+    this.initialTitle,
+  });
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -50,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
   bool _showRecentSearches = true;
 
   // Filters
-  SearchFilters _currentFilters = const SearchFilters();
+  late SearchFilters _currentFilters;
   bool _isLoadingFilterOptions = true;
 
   // Available filter options (loaded once)
@@ -63,6 +70,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _currentFilters = widget.initialFilters ?? const SearchFilters();
     _gameBloc = sl<GameBloc>();
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
@@ -72,6 +80,13 @@ class _SearchPageState extends State<SearchPage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
+    }
+
+    // If we have initial filters, trigger search automatically
+    if (widget.initialFilters != null && widget.initialFilters!.platformIds.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _performSearch('');
+      });
     }
   }
 

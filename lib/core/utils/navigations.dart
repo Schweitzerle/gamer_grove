@@ -5,11 +5,12 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_paginated_games_screen.dart';
-import 'package:gamer_grove/presentation/pages/platform/paltform_paginated_games_screen.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/search/search_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/character/character.dart';
+import '../../domain/entities/search/search_filters.dart';
 import '../../domain/entities/event/event.dart';
 import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
@@ -730,27 +731,20 @@ class Navigations {
     );
   }
 
-  static void navigateToPlatformGames(
+  static Future<void> navigateToPlatformGames(
     BuildContext context, {
     required int platformId,
     required String platformName,
-  }) {
-    // Get current user
-    final authState = context.read<AuthBloc>().state;
-    String? userId;
-    if (authState is AuthAuthenticated) {
-      userId = authState.user.id;
-    }
-
-    Navigator.of(context).push(
+  }) async {
+    // Navigate to Search Screen with platform filter pre-applied
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => BlocProvider<PlatformBloc>(
-          create: (context) => sl<PlatformBloc>(),
-          child: PlatformPaginatedGamesScreen(
-            platformId: platformId,
-            platformName: platformName,
-            userId: userId,
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            platformIds: [platformId],
+            platformNames: {platformId: platformName},
           ),
+          initialTitle: platformName,
         ),
       ),
     );

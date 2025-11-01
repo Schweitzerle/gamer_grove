@@ -413,6 +413,9 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           platformId: platformIds.first,
           limit: limit,
           offset: offset,
+          onlyMainGames: false, // 🔧 Include all game types (ports, remasters, etc.)
+          sortBy: sortBy.igdbField, // 🔧 Pass sorting parameters
+          sortOrder: sortOrder.value,
         );
         return igdbDataSource.queryGames(query);
       },

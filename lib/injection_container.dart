@@ -23,6 +23,7 @@ import 'package:gamer_grove/domain/usecases/event/get_events_by_date_range.dart'
 import 'package:gamer_grove/domain/usecases/event/get_events_by_games.dart';
 import 'package:gamer_grove/domain/usecases/event/get_upcoming_events.dart';
 import 'package:gamer_grove/domain/usecases/event/search_events.dart';
+import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/domain/usecases/user/follow_user.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_followers.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_following.dart';
@@ -63,6 +64,7 @@ import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
@@ -229,6 +231,13 @@ Future<void> initDependencies() async {
         getCompleteEventDetails: sl(),
       ),
     )
+    ..registerFactory(
+      () => PlatformBloc(
+        enrichmentService: sl(),
+        gameRepository: sl(),
+        getPlatformWithGames: sl(),
+      ),
+    )
     // ============================================================
     // DOMAIN LAYER - USE CASES
     // ============================================================
@@ -299,6 +308,9 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetEventsByGames(sl()))
     ..registerLazySingleton(() =>
         GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()))
+
+    // Platform Use Cases
+    ..registerLazySingleton(() => GetPlatformWithGames(sl()))
 
     // ============================================================
     // DATA LAYER - REPOSITORIES
