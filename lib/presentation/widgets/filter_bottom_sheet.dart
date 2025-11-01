@@ -257,10 +257,47 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     _maxHypes = null;
 
     // Initialize date filters
-    _releaseDateFrom = _filters.releaseDateFrom;
-    _releaseDateTo = _filters.releaseDateTo;
-    _singleReleaseDate = null;
-    _dateOperator = null;
+    // Detect if this is a single date filter stored as a range
+    if (_filters.releaseDateFrom != null && _filters.releaseDateTo != null) {
+      final fromDate = _filters.releaseDateFrom!;
+      final toDate = _filters.releaseDateTo!;
+
+      // Check if it's an "on" filter (same day with end of day time)
+      if (fromDate.year == toDate.year &&
+          fromDate.month == toDate.month &&
+          fromDate.day == toDate.day &&
+          toDate.hour == 23 && toDate.minute == 59) {
+        // This is a single date "on" filter
+        _singleReleaseDate = fromDate;
+        _dateOperator = 'on';
+        _releaseDateFrom = null;
+        _releaseDateTo = null;
+      } else {
+        // It's a real date range
+        _releaseDateFrom = fromDate;
+        _releaseDateTo = toDate;
+        _singleReleaseDate = null;
+        _dateOperator = null;
+      }
+    } else if (_filters.releaseDateFrom != null && _filters.releaseDateTo == null) {
+      // Only fromDate - this is an "after" filter
+      _singleReleaseDate = _filters.releaseDateFrom;
+      _dateOperator = 'after';
+      _releaseDateFrom = null;
+      _releaseDateTo = null;
+    } else if (_filters.releaseDateFrom == null && _filters.releaseDateTo != null) {
+      // Only toDate - this is a "before" filter
+      _singleReleaseDate = _filters.releaseDateTo;
+      _dateOperator = 'before';
+      _releaseDateFrom = null;
+      _releaseDateTo = null;
+    } else {
+      // No date filter
+      _releaseDateFrom = null;
+      _releaseDateTo = null;
+      _singleReleaseDate = null;
+      _dateOperator = null;
+    }
 
     // Initialize dynamic filter IDs
     _selectedPlatformIds = List.from(_filters.platformIds);
@@ -2183,10 +2220,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                               color: theme.colorScheme.primary)
                           : Icon(Icons.add_circle_outline,
                               color: theme.colorScheme.primary),
-                      onTap: isSelected
-                          ? null
-                          : () => onAdd(itemId, getLabel(item)),
-                      enabled: !isSelected,
+                      onTap: () {
+                        if (isSelected) {
+                          onRemove(itemId);
+                        } else {
+                          onAdd(itemId, getLabel(item));
+                        }
+                      },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -2703,14 +2743,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         return 'Name';
       case GameSortBy.aggregatedRating:
         return 'Aggregated Rating';
-      case GameSortBy.userRating:
-        return 'User Rating';
-      case GameSortBy.addedDate:
-        return 'Added Date';
-      case GameSortBy.lastPlayed:
-        return 'Last Played';
-      case GameSortBy.userRatingDate:
-        return 'User Rating Date';
     }
   }
 
@@ -2730,14 +2762,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         return Icons.sort_by_alpha;
       case GameSortBy.aggregatedRating:
         return Icons.star_border;
-      case GameSortBy.userRating:
-        return Icons.person;
-      case GameSortBy.addedDate:
-        return Icons.add_circle_outline;
-      case GameSortBy.lastPlayed:
-        return Icons.play_circle_outline;
-      case GameSortBy.userRatingDate:
-        return Icons.date_range;
     }
   }
 }

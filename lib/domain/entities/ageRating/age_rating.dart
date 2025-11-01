@@ -120,6 +120,7 @@ class AgeRating extends Equatable {
   final int? organizationId;
   final AgeRatingOrganization? organization; // NEU: Direktes Organization Objekt
   final int? ratingCategoryId;
+  final String? ratingString; // NEU: Rating string from rating_category (e.g., "PEGI 18", "Mature 17+")
   final List<int> ratingContentDescriptions;
   final String? ratingCoverUrl;
   final String? synopsis;
@@ -135,6 +136,7 @@ class AgeRating extends Equatable {
     this.organizationId,
     this.organization, // NEU
     this.ratingCategoryId,
+    this.ratingString, // NEU
     this.ratingContentDescriptions = const [],
     this.ratingCoverUrl,
     this.synopsis,
@@ -143,10 +145,30 @@ class AgeRating extends Equatable {
   });
 
   String get displayName {
-    if (ratingEnum != null) {
-      return ratingEnum!.displayName;
+    String rating = '';
+    String org = '';
+
+    // Get rating name
+    if (ratingString != null && ratingString!.isNotEmpty) {
+      rating = ratingString!;
+    } else if (ratingEnum != null) {
+      rating = ratingEnum!.displayName;
+    } else {
+      rating = 'Unknown Rating';
     }
-    return 'Unknown Rating';
+
+    // Get organization name
+    if (organization != null) {
+      org = organization!.name;
+    } else if (categoryEnum != null && categoryEnum != AgeRatingCategoryEnum.unknown) {
+      org = categoryEnum!.name.toUpperCase();
+    }
+
+    // Combine rating and organization
+    if (org.isNotEmpty && rating != 'Unknown Rating') {
+      return '$rating ($org)';
+    }
+    return rating;
   }
 
   // NEU: Helper getters für Rating-Organisationen
@@ -168,6 +190,7 @@ class AgeRating extends Equatable {
     organizationId,
     organization, // NEU
     ratingCategoryId,
+    ratingString, // NEU
     ratingContentDescriptions,
     ratingCoverUrl,
     synopsis,

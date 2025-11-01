@@ -10,11 +10,7 @@ enum GameSortBy {
   ratingCount('total_rating_count'),
   releaseDate('first_release_date'),
   popularity('hypes'),
-  aggregatedRating('aggregated_rating'),
-  userRating('rating'),
-  addedDate('created_at'),
-  lastPlayed('last_played'), // for user collections
-  userRatingDate('user_rating_date'); // for user collections
+  aggregatedRating('aggregated_rating');
 
   const GameSortBy(this.igdbField);
   final String igdbField;
@@ -35,14 +31,6 @@ enum GameSortBy {
         return 'Popularity';
       case aggregatedRating:
         return 'Critic Rating';
-      case userRating:
-        return 'User Rating';
-      case addedDate:
-        return 'Date Added';
-      case lastPlayed:
-        return 'Last Played';
-      case userRatingDate:
-        return 'Date Rated';
     }
   }
 }

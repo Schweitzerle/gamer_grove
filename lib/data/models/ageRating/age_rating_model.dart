@@ -12,6 +12,7 @@ class AgeRatingModel extends AgeRating {
     super.organizationId,
     super.organization, // NEU
     super.ratingCategoryId,
+    super.ratingString, // NEU
     super.ratingContentDescriptions,
     super.ratingCoverUrl,
     super.synopsis,
@@ -25,8 +26,9 @@ class AgeRatingModel extends AgeRating {
       checksum: json['checksum'] ?? '',
       contentDescriptions: _parseIdList(json['content_descriptions']),
       organizationId: _parseOrganizationId(json['organization']),
-      organization: _parseOrganization(json['organization']), // NEU
-      ratingCategoryId: json['rating_category'],
+      organization: _parseOrganization(json['organization']),
+      ratingCategoryId: _parseRatingCategoryId(json['rating_category']),
+      ratingString: _parseRatingString(json['rating_category']),
       ratingContentDescriptions:
           _parseIdList(json['rating_content_descriptions']),
       ratingCoverUrl: json['rating_cover_url'],
@@ -55,6 +57,24 @@ class AgeRatingModel extends AgeRating {
         print('Error parsing age rating organization: $e');
         return null;
       }
+    }
+    return null;
+  }
+
+  // Parse rating_category - can be either int or nested object
+  static int? _parseRatingCategoryId(dynamic categoryData) {
+    if (categoryData is int) {
+      return categoryData;
+    } else if (categoryData is Map<String, dynamic>) {
+      return categoryData['id'];
+    }
+    return null;
+  }
+
+  // Parse rating string from rating_category object
+  static String? _parseRatingString(dynamic categoryData) {
+    if (categoryData is Map<String, dynamic>) {
+      return categoryData['rating'] as String?;
     }
     return null;
   }

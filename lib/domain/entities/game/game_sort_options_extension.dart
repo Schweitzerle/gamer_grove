@@ -11,7 +11,7 @@ extension GameSortByExtension on GameSortBy {
   String get igdbField {
     switch (this) {
       case GameSortBy.popularity:
-        return 'total_rating_count';
+        return 'hypes';
       case GameSortBy.rating:
         return 'total_rating';
       case GameSortBy.releaseDate:
@@ -24,14 +24,6 @@ extension GameSortByExtension on GameSortBy {
         return 'relevance';
       case GameSortBy.aggregatedRating:
         return 'aggregated_rating';
-      case GameSortBy.userRating:
-        return 'rating';
-      case GameSortBy.addedDate:
-        return 'created_at';
-      case GameSortBy.lastPlayed:
-        return 'updated_at';
-      case GameSortBy.userRatingDate:
-        return 'rated_at';
     }
   }
 
@@ -52,14 +44,6 @@ extension GameSortByExtension on GameSortBy {
         return 'Relevance';
       case GameSortBy.aggregatedRating:
         return 'Aggregated Rating';
-      case GameSortBy.userRating:
-        return 'User Rating';
-      case GameSortBy.addedDate:
-        return 'Date Added';
-      case GameSortBy.lastPlayed:
-        return 'Last Played';
-      case GameSortBy.userRatingDate:
-        return 'Rating Date';
     }
   }
 }

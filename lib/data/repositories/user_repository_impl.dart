@@ -711,13 +711,11 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        final currentTopThree =
-            await userDataSource.getTopThree(userId) ?? [0, 0, 0];
-        final updatedTopThree = List<int>.from(currentTopThree);
-        if (position >= 1 && position <= 3) {
-          updatedTopThree[position - 1] = gameId;
-        }
-        await userDataSource.updateTopThree(userId, updatedTopThree);
+        await userDataSource.setTopThreePosition(
+          userId,
+          position: position,
+          gameId: gameId,
+        );
       },
       errorMessage: 'Failed to set top three game at position',
     );
@@ -730,13 +728,11 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        final currentTopThree =
-            await userDataSource.getTopThree(userId) ?? [0, 0, 0];
-        final updatedTopThree = List<int>.from(currentTopThree);
-        if (position >= 1 && position <= 3) {
-          updatedTopThree[position - 1] = 0;
-        }
-        await userDataSource.updateTopThree(userId, updatedTopThree);
+        await userDataSource.setTopThreePosition(
+          userId,
+          position: position,
+          gameId: null, // null removes the game from this position
+        );
       },
       errorMessage: 'Failed to remove from top three',
     );

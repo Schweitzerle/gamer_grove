@@ -10,11 +10,12 @@ abstract class GameEvent extends Equatable {
 
 class SearchGamesEvent extends GameEvent {
   final String query;
+  final String? userId;
 
-  const SearchGamesEvent(this.query);
+  const SearchGamesEvent(this.query, {this.userId});
 
   @override
-  List<Object> get props => [query];
+  List<Object?> get props => [query, userId];
 }
 
 class LoadMoreGamesEvent extends GameEvent {}

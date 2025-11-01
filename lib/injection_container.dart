@@ -119,7 +119,10 @@ Future<void> initDependencies() async {
   );
 
   sl.registerLazySingleton<GameEnrichmentService>(
-    () => GameEnrichmentService(supabase: sl()),
+    () => GameEnrichmentService(
+      supabase: sl(),
+      enableLogging: true, // Enable logging to debug enrichment
+    ),
   );
 
   // ============================================================
