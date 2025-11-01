@@ -24,11 +24,13 @@ class GameSearchLoaded extends GameState {
   @override
   final bool isLoadingMore;
   final String currentQuery;
+  final SearchFilters? currentFilters;
 
   const GameSearchLoaded({
     required this.games,
     required this.hasReachedMax,
     required this.currentQuery,
+    this.currentFilters,
     this.isLoadingMore = false,
   });
 
@@ -37,17 +39,25 @@ class GameSearchLoaded extends GameState {
     bool? hasReachedMax,
     bool? isLoadingMore,
     String? currentQuery,
+    SearchFilters? currentFilters,
   }) {
     return GameSearchLoaded(
       games: games ?? this.games,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       currentQuery: currentQuery ?? this.currentQuery,
+      currentFilters: currentFilters ?? this.currentFilters,
     );
   }
 
   @override
-  List<Object> get props => [games, hasReachedMax, isLoadingMore, currentQuery];
+  List<Object?> get props => [
+        games,
+        hasReachedMax,
+        isLoadingMore,
+        currentQuery,
+        currentFilters,
+      ];
 }
 
 // Popular Games States

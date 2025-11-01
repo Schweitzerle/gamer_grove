@@ -144,22 +144,24 @@ class GameEnrichmentService {
   ) async {
     _log('Using batch query for ${gameIds.length} games');
 
-    final results = await Future.wait([
+    final results = await Future.wait<dynamic>([
       // Query 1: Get user_games data
       supabase
           .from('user_games')
           .select('game_id, is_wishlisted, is_recommended, is_rated, rating, '
               'rated_at, wishlisted_at, recommended_at')
           .eq('user_id', userId)
-          .inFilter('game_id', gameIds),
+          .inFilter('game_id', gameIds)
+          .then((value) => value),
 
       // Query 2: Get top_three data
       supabase
           .from('user_top_three')
           .select('game_1_id, game_2_id, game_3_id')
           .eq('user_id', userId)
-          .maybeSingle(),
-    ] as Iterable<Future>);
+          .maybeSingle()
+          .then((value) => value),
+    ]);
 
     final userGamesData = results[0] as List;
     final topThreeData = results[1] as Map<String, dynamic>?;

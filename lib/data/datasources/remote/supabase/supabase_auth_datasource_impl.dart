@@ -116,7 +116,8 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
       final session = response.session;
       print('DEBUG SignUp - User ID: ${user.id}');
       print('DEBUG SignUp - Session exists: ${session != null}');
-      print('DEBUG SignUp - Access Token exists: ${session?.accessToken != null}');
+      print(
+          'DEBUG SignUp - Access Token exists: ${session?.accessToken != null}');
 
       // Note: User profile is automatically created by database trigger
       // (handle_new_user function on auth.users INSERT)

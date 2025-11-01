@@ -10,6 +10,7 @@ import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/search/search_filters.dart';
 import '../../../domain/repositories/game_repository.dart';
 import '../../../domain/usecases/game/get_user_rated.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
@@ -151,11 +152,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(GameSearchLoaded(
-        games: games,
-        hasReachedMax: games.length < 20,
-        currentQuery: event.query,
-      )),
+      (games) async {
+        // Enrich games with user data if userId is provided
+        final enrichedGames = event.userId != null
+            ? await enrichGamesWithUserData(games, event.userId!)
+            : games;
+
+        emit(GameSearchLoaded(
+          games: enrichedGames,
+          hasReachedMax: games.length < 20,
+          currentQuery: event.query,
+        ));
+      },
     );
   }
 
@@ -171,13 +179,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(currentState.copyWith(isLoadingMore: true));
 
-      final result = await searchGames(
-        SearchGamesParams(
-          query: currentState.currentQuery,
-          limit: 20,
-          offset: currentState.games.length,
-        ),
-      );
+      // Use searchGamesWithFilters if filters are present
+      final result = currentState.currentFilters != null
+          ? await gameRepository.searchGamesWithFilters(
+              query: currentState.currentQuery,
+              filters: currentState.currentFilters!,
+              limit: 20,
+              offset: currentState.games.length,
+            )
+          : await searchGames(
+              SearchGamesParams(
+                query: currentState.currentQuery,
+                limit: 20,
+                offset: currentState.games.length,
+              ),
+            );
 
       result.fold(
         (failure) => emit(GameError(failure.message)),
@@ -809,7 +825,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     String userId, {
     int? enrichLimit,
   }) async {
-    return enrichmentService.enrichGames(games, userId);
+    print('🎮 enrichGamesWithUserData: Enriching ${games.length} games for user $userId');
+    final enrichedGames = await enrichmentService.enrichGames(games, userId);
+    print('🎮 enrichGamesWithUserData: Enriched ${enrichedGames.length} games');
+    // Debug: print first game enrichment status
+    if (enrichedGames.isNotEmpty) {
+      final firstGame = enrichedGames.first;
+      print('🎮 First game: ${firstGame.name}');
+      print('  - isWishlisted: ${firstGame.isWishlisted}');
+      print('  - isRecommended: ${firstGame.isRecommended}');
+      print('  - userRating: ${firstGame.userRating}');
+      print('  - isInTopThree: ${firstGame.isInTopThree}');
+    }
+    return enrichedGames;
   }
 
   void _updateGameInHomePageState(
@@ -1333,6 +1361,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         games: games,
         hasReachedMax: games.length < 20,
         currentQuery: event.query,
+        currentFilters: event.filters,
       )),
     );
   }

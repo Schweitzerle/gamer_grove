@@ -25,6 +25,8 @@ import '../../../domain/entities/player_perspective.dart';
 import '../../../domain/repositories/game_repository.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/game/game_extensions.dart'; // For SearchGamesWithFiltersEvent
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../widgets/game_card.dart';
 import '../../widgets/game_list_shimmer.dart';
 import '../../widgets/filter_bottom_sheet.dart';
@@ -41,6 +43,7 @@ class _SearchPageState extends State<SearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late GameBloc _gameBloc;
+  String? _currentUserId;
 
   // Recent searches
   List<String> _recentSearches = [];
@@ -64,6 +67,12 @@ class _SearchPageState extends State<SearchPage> {
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
     _loadFilterOptions();
+
+    // Get current user ID from AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _currentUserId = authState.user.id;
+    }
   }
 
   Future<void> _loadFilterOptions() async {
@@ -216,7 +225,7 @@ class _SearchPageState extends State<SearchPage> {
         filters: _currentFilters,
       ));
     } else {
-      _gameBloc.add(SearchGamesEvent(query.trim()));
+      _gameBloc.add(SearchGamesEvent(query.trim(), userId: _currentUserId));
     }
   }
 
@@ -572,7 +581,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          // Search Stats (when showing results)
+          // Search Stats (when showing results) and Active Filters
           BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
               if (state is GameSearchLoaded && state.games.isNotEmpty) {
@@ -581,36 +590,96 @@ class _SearchPageState extends State<SearchPage> {
                       const EdgeInsets.only(top: AppConstants.paddingSmall),
                   child: Row(
                     children: [
-                      Text(
-                        'Found ${state.games.length} games',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              'Found ${state.games.length} games',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
-                      ),
-                      if (!state.hasReachedMax) ...[
-                        const Text(' • '),
-                        Text(
-                          'Scroll for more',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
+                            if (!state.hasReachedMax) ...[
+                              const Text(' • '),
+                              Text(
+                                'Scroll for more',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
                               ),
+                            ],
+                          ],
                         ),
-                      ],
-                      const Spacer(),
+                      ),
                       if (state.isLoadingMore)
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Theme.of(context).colorScheme.primary,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         ),
+                      if (_currentFilters.hasFilters)
+                        Chip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(
+                            '${_getActiveFilterCount()} filters',
+                          ),
+                          avatar: const Icon(Icons.filter_alt, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              _currentFilters = const SearchFilters();
+                              // If search text is also empty, show initial view
+                              if (_searchController.text.trim().isEmpty) {
+                                _showRecentSearches = true;
+                              }
+                            });
+                            _performSearch(_searchController.text);
+                          },
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                        ),
+                    ],
+                  ),
+                );
+              }
+              // Show filters even when no results
+              if (_currentFilters.hasFilters) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(top: AppConstants.paddingSmall),
+                  child: Row(
+                    children: [
+                      Chip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(
+                          '${_getActiveFilterCount()} filters',
+                        ),
+                        avatar: const Icon(Icons.filter_alt, size: 16),
+                        onDeleted: () {
+                          setState(() {
+                            _currentFilters = const SearchFilters();
+                            // If search text is also empty, show initial view
+                            if (_searchController.text.trim().isEmpty) {
+                              _showRecentSearches = true;
+                            }
+                          });
+                          _performSearch(_searchController.text);
+                        },
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                      ),
                     ],
                   ),
                 );
@@ -618,50 +687,6 @@ class _SearchPageState extends State<SearchPage> {
               return const SizedBox.shrink();
             },
           ),
-
-          // Active Filters Display
-          if (_currentFilters.hasFilters)
-            Padding(
-              padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          Chip(
-                            label: Text('${_getActiveFilterCount()} filters'),
-                            avatar: const Icon(Icons.filter_alt, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                _currentFilters = const SearchFilters();
-                                // If search text is also empty, show initial view
-                                if (_searchController.text.trim().isEmpty) {
-                                  _showRecentSearches = true;
-                                }
-                              });
-                              _performSearch(_searchController.text);
-                            },
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton.icon(
-                            onPressed: _showFilters,
-                            icon: const Icon(Icons.edit, size: 16),
-                            label: const Text('Edit Filters'),
-                            style: TextButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
@@ -813,7 +838,7 @@ class _SearchPageState extends State<SearchPage> {
     return RefreshIndicator(
       onRefresh: () async {
         if (_searchController.text.isNotEmpty) {
-          _gameBloc.add(SearchGamesEvent(_searchController.text));
+          _gameBloc.add(SearchGamesEvent(_searchController.text, userId: _currentUserId));
         }
       },
       child: GridView.builder(

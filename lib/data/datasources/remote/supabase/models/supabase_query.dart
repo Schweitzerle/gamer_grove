@@ -127,7 +127,7 @@ class SupabaseQuery {
   /// ```dart
   /// final users = await query.build(supabase);
   /// ```
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     // Start with the table and select
     dynamic queryBuilder = supabase.from(table).select(_selectColumns ?? '*');
 
@@ -180,16 +180,17 @@ class SupabaseQuery {
       );
     }
 
-    // Apply single/maybeSingle
+    // Apply single/maybeSingle and await the result
     if (_single != null) {
       if (_single == 1) {
-        return queryBuilder.single();
+        return await queryBuilder.single();
       } else {
-        return queryBuilder.maybeSingle();
+        return await queryBuilder.maybeSingle();
       }
     }
 
-    return queryBuilder;
+    // For list queries, await the result
+    return await queryBuilder;
   }
 
   @override
@@ -336,25 +337,25 @@ class SupabaseInsert {
   }
 
   /// Builds and executes the insert operation.
-  Future<dynamic> build(SupabaseClient supabase) {
-    var query = supabase.from(table);
-
+  Future<dynamic> build(SupabaseClient supabase) async {
     final data = _multipleValues ?? _values;
     if (data == null) {
       throw ArgumentError('No values provided for insert');
     }
 
+    dynamic query;
     if (_upsert) {
-      query = query.upsert(data) as SupabaseQueryBuilder;
+      query = supabase.from(table).upsert(data);
     } else {
-      query = query.insert(data) as SupabaseQueryBuilder;
+      query = supabase.from(table).insert(data);
     }
 
     if (_returning != null) {
-      return query.select(_returning!);
+      return await query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
@@ -416,7 +417,7 @@ class SupabaseUpdate {
   }
 
   /// Builds and executes the update operation.
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     if (_values == null || _values!.isEmpty) {
       throw ArgumentError('No values provided for update');
     }
@@ -439,7 +440,8 @@ class SupabaseUpdate {
       return query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
@@ -487,7 +489,7 @@ class SupabaseDelete {
   }
 
   /// Builds and executes the delete operation.
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     if (_filters.isEmpty) {
       throw ArgumentError(
           'No filters provided for delete - this would delete all rows!');
@@ -511,7 +513,8 @@ class SupabaseDelete {
       return query.select(_returning!);
     }
 
-    return query;
+    // Execute the query and return the result
+    return await query.select();
   }
 
   @override
