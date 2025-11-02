@@ -348,6 +348,120 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     super.dispose();
   }
 
+  // ==========================================
+  // FILTER COUNT HELPERS
+  // ==========================================
+
+  int _getGameTabFilterCount() {
+    int count = 0;
+
+    // Genres
+    if (_selectedGenres.isNotEmpty) count++;
+    // Platforms
+    if (_selectedPlatformIds.isNotEmpty) count++;
+    // Game Modes
+    if (_selectedGameModes.isNotEmpty) count++;
+    // Game Types
+    if (_selectedGameTypes.isNotEmpty) count++;
+    // Game Status
+    if (_selectedGameStatuses.isNotEmpty) count++;
+    // Player Perspectives
+    if (_selectedPlayerPerspectives.isNotEmpty) count++;
+    // Release Year
+    if (_releaseDateFrom != null || _releaseDateTo != null || _singleReleaseDate != null) count++;
+
+    return count;
+  }
+
+  int _getQualityTabFilterCount() {
+    int count = 0;
+
+    // Total Rating
+    if (_minTotalRating > 0.0 || _maxTotalRating < 10.0 || _minTotalRatingCount != null) count++;
+    // User Rating
+    if (_minUserRating > 0.0 || _maxUserRating < 10.0 || _minUserRatingCount != null) count++;
+    // Aggregated Rating (Critic)
+    if (_minAggregatedRating > 0.0 || _maxAggregatedRating < 100.0 || _minAggregatedRatingCount != null) count++;
+    // Hypes
+    if (_minHypes != null || _maxHypes != null) count++;
+    // Follows
+    if (_minFollows != null || _maxFollows != null) count++;
+
+    return count;
+  }
+
+  int _getMetaTabFilterCount() {
+    int count = 0;
+
+    // Themes
+    if (_selectedThemeIds.isNotEmpty) count++;
+    // Keywords
+    if (_selectedKeywordIds.isNotEmpty) count++;
+    // Companies
+    if (_selectedCompanyIds.isNotEmpty) count++;
+    // Franchises
+    if (_selectedFranchiseIds.isNotEmpty) count++;
+    // Collections
+    if (_selectedCollectionIds.isNotEmpty) count++;
+    // Game Engines
+    if (_selectedGameEngineIds.isNotEmpty) count++;
+    // Age Ratings
+    if (_selectedAgeRatingIds.isNotEmpty) count++;
+    // Languages
+    if (_selectedLanguageIds.isNotEmpty) count++;
+
+    return count;
+  }
+
+  Widget _buildTabWithBadge({
+    required String text,
+    required IconData icon,
+    required int count,
+  }) {
+    return Tab(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20),
+              const SizedBox(height: 4),
+              Text(text),
+            ],
+          ),
+          if (count > 0)
+            Positioned(
+              right: -8,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    count.toString(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -427,13 +541,23 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 controller: _tabController,
                 isScrollable: false,
                 tabAlignment: TabAlignment.fill,
-                tabs: const [
-                  Tab(
-                      text: 'Game',
-                      icon: Icon(Icons.videogame_asset, size: 20)),
-                  Tab(text: 'Quality', icon: Icon(Icons.stars, size: 20)),
-                  Tab(text: 'Meta', icon: Icon(Icons.more_horiz, size: 20)),
-                  Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
+                tabs: [
+                  _buildTabWithBadge(
+                    text: 'Game',
+                    icon: Icons.videogame_asset,
+                    count: _getGameTabFilterCount(),
+                  ),
+                  _buildTabWithBadge(
+                    text: 'Quality',
+                    icon: Icons.stars,
+                    count: _getQualityTabFilterCount(),
+                  ),
+                  _buildTabWithBadge(
+                    text: 'Meta',
+                    icon: Icons.more_horiz,
+                    count: _getMetaTabFilterCount(),
+                  ),
+                  const Tab(text: 'Sort', icon: Icon(Icons.sort, size: 20)),
                 ],
               ),
 
