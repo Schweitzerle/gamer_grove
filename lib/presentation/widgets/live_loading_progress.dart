@@ -486,3 +486,38 @@ class GameEngineLoadingSteps {
     ),
   ];
 }
+
+class CompanyLoadingSteps {
+  static List<LoadingStep> companyDetails(BuildContext context) => [
+    LoadingStep(
+      text: 'Connecting to company database...',
+      substep: 'Initializing IGDB connection',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Fetching company profile...',
+      substep: 'Loading company metadata and logo',
+      color: Theme.of(context).colorScheme.tertiary,
+    ),
+    LoadingStep(
+      text: 'Processing developed games...',
+      substep: 'Retrieving games developed by this company',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+    LoadingStep(
+      text: 'Processing published games...',
+      substep: 'Retrieving games published by this company',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+    LoadingStep(
+      text: 'Enriching company data...',
+      substep: 'Loading parent company and websites',
+      color: Theme.of(context).colorScheme.secondary,
+    ),
+    LoadingStep(
+      text: 'Finalizing company details...',
+      substep: 'Preparing company profile display',
+      color: Theme.of(context).colorScheme.primary,
+    ),
+  ];
+}
