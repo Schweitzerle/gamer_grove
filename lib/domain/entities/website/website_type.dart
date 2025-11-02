@@ -102,7 +102,11 @@ enum WebsiteCategory {
   epicgames(16),
   gog(17),
   discord(18),
-  bluesky(19);
+  bluesky(19),
+  xbox(22),
+  playstation(23),
+  nintendo(24),
+  meta(25);
 
   const WebsiteCategory(this.value);
   final int value;

@@ -1,6 +1,7 @@
 // lib/presentation/pages/game_detail/widgets/sections/age_ratings_section.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
+import '../../../core/utils/navigations.dart';
 
 class AgeRatingsSection extends StatelessWidget {
   final List<AgeRating> ageRatings;
@@ -57,8 +58,15 @@ class AgeRatingChip extends StatelessWidget {
     // VERBESSERT: Verwende die Helper-Getter der AgeRating Entity
     final ratingStyle = _getRatingStyleFromEntity(rating);
 
-    return GestureDetector(
-      onTap: () => _showRatingDetails(context, rating),
+    return InkWell(
+      onTap: rating.ratingCategory != null
+          ? () => Navigations.navigateToAgeRatingGames(
+                context,
+                ageRatingId: rating.ratingCategory!.id,
+                ageRatingName: rating.ratingCategory!.rating,
+              )
+          : null,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -165,18 +173,6 @@ class AgeRatingChip extends StatelessWidget {
       return const _RatingStyle(
         color: Color(0xFF757575), // Neutrales Grau
         icon: Icons.sports_esports_rounded,
-      );
-    }
-  }
-
-  /// Zeigt Details zum Age Rating in einem Dialog
-  void _showRatingDetails(BuildContext context, AgeRating rating) {
-    if (rating.synopsis != null ||
-        rating.contentDescriptions.isNotEmpty ||
-        rating.ratingCoverUrl != null) {
-      showDialog<void>(
-        context: context,
-        builder: (context) => AgeRatingDetailsDialog(rating: rating),
       );
     }
   }

@@ -23,6 +23,8 @@ class ExternalGameModel extends ExternalGame {
   });
 
   factory ExternalGameModel.fromJson(Map<String, dynamic> json) {
+    final sourceId = JsonHelpers.extractId(json['external_game_source']);
+
     return ExternalGameModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
@@ -30,7 +32,7 @@ class ExternalGameModel extends ExternalGame {
       uid: json['uid'] ?? '',
       countries: _parseCountries(json['countries']),
       // Fixed: Handle both ID and expanded object
-      externalGameSourceId: JsonHelpers.extractId(json['external_game_source']),
+      externalGameSourceId: sourceId,
       gameId: JsonHelpers.extractId(json['game']),
       gameReleaseFormatId: JsonHelpers.extractId(json['game_release_format']),
       platformId: JsonHelpers.extractId(json['platform']),
@@ -38,7 +40,9 @@ class ExternalGameModel extends ExternalGame {
       year: json['year'],
       createdAt: JsonHelpers.parseDateTime(json['created_at']),
       updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
-      categoryEnum: _parseCategoryEnum(json['category']),
+      // Try category field first (deprecated), fallback to external_game_source ID
+      categoryEnum: _parseCategoryEnum(json['category']) ??
+                    (sourceId != null ? ExternalGameCategoryEnum.fromValue(sourceId) : null),
       mediaEnum: _parseMediaEnum(json['media']),
     );
   }
@@ -144,13 +148,15 @@ class ExternalGameModelExpanded extends ExternalGameModel {
   });
 
   factory ExternalGameModelExpanded.fromJson(Map<String, dynamic> json) {
+    final sourceId = JsonHelpers.extractId(json['external_game_source']);
+
     return ExternalGameModelExpanded(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       name: json['name'] ?? '',
       uid: json['uid'] ?? '',
       countries: ExternalGameModel._parseCountries(json['countries']),
-      externalGameSourceId: JsonHelpers.extractId(json['external_game_source']),
+      externalGameSourceId: sourceId,
       gameId: JsonHelpers.extractId(json['game']),
       gameReleaseFormatId: JsonHelpers.extractId(json['game_release_format']),
       platformId: JsonHelpers.extractId(json['platform']),
@@ -158,7 +164,9 @@ class ExternalGameModelExpanded extends ExternalGameModel {
       year: json['year'],
       createdAt: JsonHelpers.parseDateTime(json['created_at']),
       updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
-      categoryEnum: ExternalGameModel._parseCategoryEnum(json['category']),
+      // Try category field first (deprecated), fallback to external_game_source ID
+      categoryEnum: ExternalGameModel._parseCategoryEnum(json['category']) ??
+                    (sourceId != null ? ExternalGameCategoryEnum.fromValue(sourceId) : null),
       mediaEnum: ExternalGameModel._parseMediaEnum(json['media']),
       // Extract expanded data
       platformName: JsonHelpers.extractNested<String>(json, 'platform.name'),

@@ -1,5 +1,6 @@
 // lib/domain/repositories/game_repository.dart
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/domain/entities/game/game_mode.dart';
@@ -216,13 +217,14 @@ abstract class GameRepository {
   Future<Either<Failure, List<Keyword>>> searchKeywords(String query);
 
   /// Search age ratings
-  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query);
+  Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
+      String query);
 
   /// Search themes
-  Future<Either<Failure, List<Theme>>> searchThemes(String query);
+  Future<Either<Failure, List<IGDBTheme>>> searchThemes(String query);
 
   /// Get all age ratings
-  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings();
+  Future<Either<Failure, List<AgeRatingCategory>>> getAllAgeRatings();
 
   /// Get all player perspectives
   Future<Either<Failure, List<PlayerPerspective>>> getAllPlayerPerspectives();

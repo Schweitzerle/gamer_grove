@@ -687,7 +687,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     if (widget.games.isNotEmpty) {
       print('🎮 First 3 Games:');
       for (var i = 0; i < widget.games.length && i < 3; i++) {
-        print('   ${i + 1}. ${widget.games[i].name} (ID: ${widget.games[i].id})');
+        print(
+            '   ${i + 1}. ${widget.games[i].name} (ID: ${widget.games[i].id})');
       }
     } else {
       print('⚠️  NO GAMES LOADED - This might be the issue!');

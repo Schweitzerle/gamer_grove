@@ -14,16 +14,43 @@ class GameEngineLogoModel extends GameEngineLogo {
   });
 
   factory GameEngineLogoModel.fromJson(Map<String, dynamic> json) {
+    final imageId = json['image_id'] ?? '';
+    String? url;
+
+    // Try to extract URL from json
+    if (json['url'] != null) {
+      url = _extractUrl(json['url']);
+    }
+
+    // If no URL but we have image_id, build it manually
+    if ((url == null || url.isEmpty) && imageId.isNotEmpty) {
+      url = 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg';
+    }
+
     return GameEngineLogoModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
-      imageId: json['image_id'] ?? '',
+      imageId: imageId,
       height: json['height'] ?? 0,
       width: json['width'] ?? 0,
       alphaChannel: json['alpha_channel'] ?? false,
       animated: json['animated'] ?? false,
-      url: json['url'],
+      url: url,
     );
+  }
+
+  static String? _extractUrl(dynamic urlData) {
+    if (urlData is String && urlData.isNotEmpty) {
+      // Handle URL string directly
+      return urlData.startsWith('//') ? 'https:$urlData' : urlData;
+    } else if (urlData is Map) {
+      // Handle URL as map object
+      final url = urlData['url'];
+      if (url is String && url.isNotEmpty) {
+        return url.startsWith('//') ? 'https:$url' : url;
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -58,7 +85,8 @@ class GameEngineLogoModel extends GameEngineLogo {
       width: width,
       alphaChannel: alphaChannel,
       animated: animated,
-      url: customUrl ?? 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+      url: customUrl ??
+          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
     );
   }
 }

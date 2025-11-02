@@ -1,9 +1,10 @@
 // lib/domain/entities/external_game.dart
 import 'package:equatable/equatable.dart';
 
-// External Game Category Enum (DEPRECATED but very useful)
+// External Game Category Enum (maps to external_game_source IDs from IGDB API)
 enum ExternalGameCategoryEnum {
   steam(1),
+  giantBomb(3),
   gog(5),
   youtube(10),
   microsoft(11),
@@ -23,6 +24,7 @@ enum ExternalGameCategoryEnum {
   focusEntertainment(37),
   xboxGamePassUltimateCloud(54),
   gamejolt(55),
+  igdb(121),
   unknown(0);
 
   const ExternalGameCategoryEnum(this.value);
@@ -38,6 +40,7 @@ enum ExternalGameCategoryEnum {
   String get displayName {
     switch (this) {
       case steam: return 'Steam';
+      case giantBomb: return 'Giant Bomb';
       case gog: return 'GOG';
       case youtube: return 'YouTube';
       case microsoft: return 'Microsoft Store';
@@ -57,6 +60,7 @@ enum ExternalGameCategoryEnum {
       case focusEntertainment: return 'Focus Entertainment';
       case xboxGamePassUltimateCloud: return 'Xbox Game Pass Ultimate Cloud';
       case gamejolt: return 'Game Jolt';
+      case igdb: return 'IGDB';
       case unknown: return 'Unknown';
     }
   }
@@ -77,7 +81,16 @@ enum ExternalGameCategoryEnum {
   }
 
   bool get isMainStore {
-    return [steam, gog, epicGameStore, microsoft, apple, android, playstationStoreUs, xboxMarketplace].contains(this);
+    return [
+      steam,
+      gog,
+      epicGameStore,
+      microsoft,
+      apple,
+      android,
+      playstationStoreUs,
+      xboxMarketplace,
+    ].contains(this);
   }
 }
 

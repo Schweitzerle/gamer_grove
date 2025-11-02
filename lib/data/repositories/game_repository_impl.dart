@@ -15,6 +15,7 @@
 library;
 
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/artwork.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
@@ -413,7 +414,8 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           platformId: platformIds.first,
           limit: limit,
           offset: offset,
-          onlyMainGames: false, // 🔧 Include all game types (ports, remasters, etc.)
+          onlyMainGames:
+              false, // 🔧 Include all game types (ports, remasters, etc.)
           sortBy: sortBy.igdbField, // 🔧 Pass sorting parameters
           sortOrder: sortOrder.value,
         );
@@ -710,9 +712,10 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         }
 
         // ========== AGE RATING & LOCALIZATION ==========
-        if (filters.ageRatingIds.isNotEmpty) {
-          final filter = ContainsFilter('age_ratings', filters.ageRatingIds);
-          print('  ✓ Age Ratings Filter: ${filter.toQueryString()}');
+        if (filters.ageRatingCategoryIds.isNotEmpty) {
+          final filter = ContainsFilter(
+              'age_ratings.rating_category', filters.ageRatingCategoryIds);
+          print('  ✓ Age Ratings Category Filter: ${filter.toQueryString()}');
           igdbFilters.add(filter);
         }
         if (filters.languageSupportIds.isNotEmpty) {
@@ -724,10 +727,33 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
         // ========== DYNAMIC SEARCH FILTERS ==========
         if (filters.companyIds.isNotEmpty) {
-          final filter =
+          final companyFilter =
               ContainsFilter('involved_companies.company', filters.companyIds);
-          print('  ✓ Companies Filter: ${filter.toQueryString()}');
-          igdbFilters.add(filter);
+          print('  ✓ Companies Filter: ${companyFilter.toQueryString()}');
+
+          // Add developer/publisher specific filters if specified
+          final List<IgdbFilter> companyFilters = [companyFilter];
+
+          if (filters.isDeveloper == true) {
+            companyFilters.add(
+              FieldFilter('involved_companies.developer', '=', true)
+            );
+            print('  ✓ Developer Filter: involved_companies.developer = true');
+          }
+
+          if (filters.isPublisher == true) {
+            companyFilters.add(
+              FieldFilter('involved_companies.publisher', '=', true)
+            );
+            print('  ✓ Publisher Filter: involved_companies.publisher = true');
+          }
+
+          // Combine company filters with AND logic
+          if (companyFilters.length > 1) {
+            igdbFilters.add(CombinedFilter(companyFilters));
+          } else {
+            igdbFilters.add(companyFilter);
+          }
         }
         if (filters.gameEngineIds.isNotEmpty) {
           final filter = ContainsFilter('game_engines', filters.gameEngineIds);
@@ -1072,7 +1098,7 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings() {
+  Future<Either<Failure, List<AgeRatingCategory>>> getAllAgeRatings() {
     print('\n' + '=' * 80);
     print('🔞 LOADING AGE RATINGS');
     print('=' * 80);
@@ -1731,7 +1757,6 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
       operation: () async {
         final filter = CombinedFilter([
           ContainsFilter('game_engines', gameEngineIds),
-          GameFilters.mainGamesOnly(),
         ]);
 
         final query = IgdbGameQuery(
@@ -2565,7 +2590,8 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query) {
+  Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
+      String query) {
     print('\n' + '=' * 80);
     print('🔍 SEARCHING AGE RATINGS');
     print('=' * 80);
@@ -2576,8 +2602,7 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         // Search in: organization name, rating category, and content descriptions
         final multiFieldFilter = CombinedFilter([
           FieldFilter('organization.name', '~', query),
-          FieldFilter('rating_category.rating', '~', query),
-          FieldFilter('rating_content_descriptions.description', '~', query),
+          FieldFilter('rating', '~', query),
         ], operator: '|'); // Use OR operator to match ANY field
 
         final igdbQuery = IgdbAgeRatingQuery(
@@ -2585,8 +2610,6 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           fields: const [
             '*',
             'organization.*',
-            'rating_category.*',
-            'rating_content_descriptions.*',
           ],
           limit: 20,
           sort: 'organization.name asc',
@@ -2602,7 +2625,7 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<Theme>>> searchThemes(String query) {
+  Future<Either<Failure, List<IGDBTheme>>> searchThemes(String query) {
     print('\n' + '=' * 80);
     print('🔍 SEARCHING THEMES');
     print('=' * 80);

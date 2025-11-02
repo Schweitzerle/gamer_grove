@@ -16,6 +16,7 @@ import 'package:gamer_grove/domain/usecases/auth/sign_out.dart';
 import 'package:gamer_grove/domain/usecases/auth/sign_up.dart';
 import 'package:gamer_grove/domain/usecases/auth/update_password.dart';
 import 'package:gamer_grove/domain/usecases/characters/get_character_with_games.dart';
+import 'package:gamer_grove/domain/usecases/company/get_company_with_games.dart';
 import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
 import 'package:gamer_grove/domain/usecases/event/get_current_events.dart';
 import 'package:gamer_grove/domain/usecases/event/get_event_details.dart';
@@ -23,6 +24,7 @@ import 'package:gamer_grove/domain/usecases/event/get_events_by_date_range.dart'
 import 'package:gamer_grove/domain/usecases/event/get_events_by_games.dart';
 import 'package:gamer_grove/domain/usecases/event/get_upcoming_events.dart';
 import 'package:gamer_grove/domain/usecases/event/search_events.dart';
+import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/domain/usecases/user/follow_user.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_followers.dart';
@@ -63,7 +65,9 @@ import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -238,6 +242,19 @@ Future<void> initDependencies() async {
         getPlatformWithGames: sl(),
       ),
     )
+    ..registerFactory(
+      () => GameEngineBloc(
+        enrichmentService: sl(),
+        gameRepository: sl(),
+        getGameEngineWithGames: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => CompanyBloc(
+        getCompanyWithGames: sl(),
+        enrichmentService: sl(),
+      ),
+    )
     // ============================================================
     // DOMAIN LAYER - USE CASES
     // ============================================================
@@ -311,6 +328,12 @@ Future<void> initDependencies() async {
 
     // Platform Use Cases
     ..registerLazySingleton(() => GetPlatformWithGames(sl()))
+
+    // Game Engine Use Cases
+    ..registerLazySingleton(() => GetGameEngineWithGames(sl()))
+
+    // Company Use Cases
+    ..registerLazySingleton(() => GetCompanyWithGames(sl()))
 
     // ============================================================
     // DATA LAYER - REPOSITORIES

@@ -85,7 +85,7 @@ class Company extends Equatable {
   });
 
   // Helper getters
-  bool get hasLogo => logo != null || logoId != null;
+  bool get hasLogo => logo != null && logo!.imageId.isNotEmpty;
   bool get hasParent => parentCompany != null;
   bool get hasStatus => statusId != null;
   bool get hasWebsites => websites != null;

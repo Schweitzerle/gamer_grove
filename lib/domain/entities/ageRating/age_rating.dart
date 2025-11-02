@@ -1,6 +1,7 @@
 // ===== UPDATED AGE RATING ENTITY =====
 // lib/domain/entities/ageRating/age_rating.dart
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'age_rating_organization.dart'; // Import für AgeRatingOrganization
 
 // Age Rating Category Enum (DEPRECATED but still used)
@@ -149,7 +150,7 @@ class AgeRating extends Equatable {
   final int? organizationId;
   final AgeRatingOrganization?
       organization; // NEU: Direktes Organization Objekt
-  final int? ratingCategoryId;
+  final AgeRatingCategory? ratingCategory;
   final String?
       ratingString; // NEU: Rating string from rating_category (e.g., "PEGI 18", "Mature 17+")
   final List<int> ratingContentDescriptions;
@@ -166,7 +167,7 @@ class AgeRating extends Equatable {
     this.contentDescriptions = const [],
     this.organizationId,
     this.organization, // NEU
-    this.ratingCategoryId,
+    this.ratingCategory,
     this.ratingString, // NEU
     this.ratingContentDescriptions = const [],
     this.ratingCoverUrl,
@@ -187,8 +188,8 @@ class AgeRating extends Equatable {
     }
 
     // Priority 3: Use ratingCategoryId as fallback
-    if (ratingCategoryId != null) {
-      return 'Rating ID: $ratingCategoryId';
+    if (ratingCategory != null) {
+      return 'Rating ID: $ratingCategory';
     }
 
     // Last resort
@@ -256,7 +257,7 @@ class AgeRating extends Equatable {
         contentDescriptions,
         organizationId,
         organization, // NEU
-        ratingCategoryId,
+        ratingCategory,
         ratingString, // NEU
         ratingContentDescriptions,
         ratingCoverUrl,

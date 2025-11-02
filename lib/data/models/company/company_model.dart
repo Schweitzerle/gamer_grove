@@ -51,7 +51,7 @@ class CompanyModel extends Company {
           _parseChangeDateCategory(json['change_date_category']),
       changeDateFormatId: json['change_date_format'],
       changedCompanyId: json['changed_company_id'],
-      parentCompany: json['parent'],
+      parentCompany: _parseParentCompany(json['parent']),
       logoId: _parseLogoId(json['logo']),
       logo: _parseLogo(json['logo']), // NEU: Parse logo object
       statusId: json['status'],
@@ -84,6 +84,19 @@ class CompanyModel extends Company {
     return [];
   }
 
+  // Parse parent company
+  static Company? _parseParentCompany(dynamic parentData) {
+    if (parentData is Map<String, dynamic>) {
+      try {
+        return CompanyModel.fromJson(parentData);
+      } catch (e) {
+        print('Error parsing parent company: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
   // NEU: Parse logo data
   static int? _parseLogoId(dynamic logoData) {
     if (logoData is int) {
@@ -98,9 +111,18 @@ class CompanyModel extends Company {
   static CompanyLogo? _parseLogo(dynamic logoData) {
     if (logoData is Map<String, dynamic>) {
       try {
-        return CompanyLogoModel.fromJson(logoData);
+        // Validate that image_id exists and is not empty
+        final imageId = logoData['image_id'];
+        print('🖼️ CompanyModel: Parsing logo with image_id: $imageId');
+        if (imageId == null || (imageId is String && imageId.isEmpty)) {
+          print('⚠️ CompanyModel: Company logo has no valid image_id, skipping');
+          return null;
+        }
+        final logo = CompanyLogoModel.fromJson(logoData);
+        print('✅ CompanyModel: Logo parsed successfully - URL: ${logo.logoMedUrl}');
+        return logo;
       } catch (e) {
-        print('Error parsing company logo: $e');
+        print('❌ CompanyModel: Error parsing company logo: $e');
         return null;
       }
     }

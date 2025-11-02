@@ -5,7 +5,7 @@
 // lib/presentation/widgets/filter_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
 import 'package:gamer_grove/domain/entities/keyword.dart';
@@ -41,8 +41,9 @@ class FilterBottomSheet extends StatefulWidget {
   final Future<List<Keyword>> Function(String query)? onSearchKeywords;
   final Future<List<Language>> Function(String query)? onSearchLanguages;
   final Future<List<Platform>> Function(String query)? onSearchPlatforms;
-  final Future<List<gg_theme.Theme>> Function(String query)? onSearchThemes;
-  final Future<List<AgeRating>> Function(String query)? onSearchAgeRatings;
+  final Future<List<gg_theme.IGDBTheme>> Function(String query)? onSearchThemes;
+  final Future<List<AgeRatingCategory>> Function(String query)?
+      onSearchAgeRatings;
   const FilterBottomSheet({
     super.key,
     required this.currentFilters,
@@ -80,8 +81,8 @@ class FilterBottomSheet extends StatefulWidget {
     Future<List<Keyword>> Function(String query)? onSearchKeywords,
     Future<List<Language>> Function(String query)? onSearchLanguages,
     Future<List<Platform>> Function(String query)? onSearchPlatforms,
-    Future<List<gg_theme.Theme>> Function(String query)? onSearchThemes,
-    Future<List<AgeRating>> Function(String query)? onSearchAgeRatings,
+    Future<List<gg_theme.IGDBTheme>> Function(String query)? onSearchThemes,
+    Future<List<AgeRatingCategory>> Function(String query)? onSearchAgeRatings,
   }) {
     return showModalBottomSheet<SearchFilters>(
       context: context,
@@ -194,8 +195,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   List<Franchise> _franchiseSearchResults = [];
   List<Collection> _collectionSearchResults = [];
   List<Platform> _platformSearchResults = [];
-  List<gg_theme.Theme> _themeSearchResults = [];
-  List<AgeRating> _ageRatingSearchResults = [];
+  List<gg_theme.IGDBTheme> _themeSearchResults = [];
+  List<AgeRatingCategory> _ageRatingSearchResults = [];
   List<Keyword> _keywordSearchResults = [];
   List<Language> _languageSearchResults = [];
 
@@ -309,7 +310,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     _selectedGameEngineIds = List.from(_filters.gameEngineIds);
     _selectedFranchiseIds = List.from(_filters.franchiseIds);
     _selectedCollectionIds = List.from(_filters.collectionIds);
-    _selectedAgeRatingIds = List.from(_filters.ageRatingIds);
+    _selectedAgeRatingIds = List.from(_filters.ageRatingCategoryIds);
     _selectedKeywordIds = List.from(_filters.keywordIds);
     _selectedLanguageIds = List.from(_filters.languageSupportIds);
 
@@ -607,7 +608,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDynamicSearchSection<gg_theme.Theme>(
+          _buildDynamicSearchSection<gg_theme.IGDBTheme>(
             title: 'Themes',
             icon: Icons.palette,
             hint: 'Search themes...',
@@ -765,7 +766,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             getLabel: (item) => item.name,
             getImageUrl: (item) => item.logoUrl,
           ),
-          _buildDynamicSearchSection<AgeRating>(
+          _buildDynamicSearchSection<AgeRatingCategory>(
             title: 'Age Ratings',
             icon: Icons.verified_user,
             hint: 'Search age ratings...',
@@ -788,9 +789,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               });
             },
             itemBuilder: (item) =>
-                Text('${item.displayName} (${item.organization?.name})'),
+                Text('${item.rating} (${item.organization?.name})'),
             getId: (item) => item.id,
-            getLabel: (item) => item.displayName,
+            getLabel: (item) => item.rating,
           ),
           _buildDynamicSearchSection<Language>(
             title: 'Languages',

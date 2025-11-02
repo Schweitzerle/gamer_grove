@@ -1,5 +1,8 @@
 // ===== UPDATED AGE RATING MODEL =====
 // lib/data/models/ageRating/age_rating_model.dart
+import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
+
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../domain/entities/ageRating/age_rating_organization.dart';
 import 'age_rating_organization.dart';
@@ -11,7 +14,7 @@ class AgeRatingModel extends AgeRating {
     super.contentDescriptions,
     super.organizationId,
     super.organization, // NEU
-    super.ratingCategoryId,
+    super.ratingCategory,
     super.ratingString, // NEU
     super.ratingContentDescriptions,
     super.ratingCoverUrl,
@@ -27,7 +30,7 @@ class AgeRatingModel extends AgeRating {
       contentDescriptions: _parseIdList(json['content_descriptions']),
       organizationId: _parseOrganizationId(json['organization']),
       organization: _parseOrganization(json['organization']),
-      ratingCategoryId: _parseRatingCategoryId(json['rating_category']),
+      ratingCategory: _parseRatingCategory(json['rating_category']),
       ratingString: _parseRatingString(json['rating_category']),
       ratingContentDescriptions:
           _parseIdList(json['rating_content_descriptions']),
@@ -60,11 +63,14 @@ class AgeRatingModel extends AgeRating {
   }
 
   // Parse rating_category - can be either int or nested object
-  static int? _parseRatingCategoryId(dynamic categoryData) {
-    if (categoryData is int) {
-      return categoryData;
-    } else if (categoryData is Map<String, dynamic>) {
-      return categoryData['id'];
+  static AgeRatingCategory? _parseRatingCategory(dynamic categoryData) {
+    if (categoryData is Map<String, dynamic>) {
+      try {
+        return AgeRatingCategoryModel.fromJson(categoryData);
+      } catch (e) {
+        print('Error parsing age rating category: $e');
+        return null;
+      }
     }
     return null;
   }
@@ -107,7 +113,7 @@ class AgeRatingModel extends AgeRating {
       'checksum': checksum,
       'content_descriptions': contentDescriptions,
       'organization': organizationId,
-      'rating_category': ratingCategoryId,
+      'rating_category': ratingCategory,
       'rating_content_descriptions': ratingContentDescriptions,
       'rating_cover_url': ratingCoverUrl,
       'synopsis': synopsis,
