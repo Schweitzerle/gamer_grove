@@ -4,6 +4,7 @@
 
 // lib/presentation/widgets/sections/generic_company_section.dart
 import 'package:flutter/material.dart';
+import '../../../../core/utils/navigations.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../domain/entities/company/company.dart';
 import '../../../../domain/entities/involved_company.dart';
@@ -214,11 +215,9 @@ class GenericCompanySection extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // TODO: Navigate to company details
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Tapped on ${company.name}'),
-              ),
+            Navigations.navigateToCompanyDetails(
+              context,
+              companyId: company.id,
             );
           },
           child: Padding(
@@ -337,11 +336,9 @@ class GenericCompanySection extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // TODO: Navigate to company details
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Tapped on ${company.name}'),
-              ),
+            Navigations.navigateToCompanyDetails(
+              context,
+              companyId: company.id,
             );
           },
           child: Padding(

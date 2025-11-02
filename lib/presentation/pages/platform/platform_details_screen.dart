@@ -354,13 +354,13 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
             const SizedBox(height: 16),
 
-            // Platform Games Section
-            if (widget.games.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium),
-                child: _buildTabView(context, _createPlatformGamesSeriesItem()),
+            // Platform Games Section - Always show, even if empty
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingMedium,
               ),
+              child: _buildTabView(context, _createPlatformGamesSeriesItem()),
+            ),
 
             const SizedBox(height: 20), // Bottom spacing
           ],
@@ -591,16 +591,25 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.videogame_asset,
+              Icons.videogame_asset_off,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: 32,
             ),
             const SizedBox(height: 8),
             Text(
-              'Games loading...',
+              'No games found',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'This platform has no games in our database',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -673,7 +682,17 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
     print('🔤 Abbreviation: ${widget.platform.abbreviation ?? 'None'}');
     print('📝 Alternative Name: ${widget.platform.alternativeName ?? 'None'}');
     print('📊 Generation: ${widget.platform.generation ?? 'Unknown'}');
-    print('🎮 Games: ${widget.games.length} loaded');
+    print('🎮 Games COUNT: ${widget.games.length}');
+    print('🎮 Games EMPTY: ${widget.games.isEmpty}');
+    if (widget.games.isNotEmpty) {
+      print('🎮 First 3 Games:');
+      for (var i = 0; i < widget.games.length && i < 3; i++) {
+        print(
+            '   ${i + 1}. ${widget.games[i].name} (ID: ${widget.games[i].id})');
+      }
+    } else {
+      print('⚠️  NO GAMES LOADED - This might be the issue!');
+    }
     print('🖼️ Logo: ${widget.platform.hasLogo ? 'Available' : 'Fallback'}');
     print(
         '📄 Summary: ${widget.platform.summary != null ? 'Available' : 'None'}');

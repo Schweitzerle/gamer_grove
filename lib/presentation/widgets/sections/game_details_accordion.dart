@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/website/website_type.dart';
 import '../../pages/game_detail/widgets/community_info_section.dart';
 import '../../pages/game_detail/widgets/company_section.dart';
 import '../../pages/game_detail/widgets/game_description_section.dart';
@@ -161,7 +162,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     )),
 
               // External Links & Stores
-              if (game.websites.isNotEmpty || game.externalGames.isNotEmpty)
+              if (_hasExternalLinks(game))
                 EnhancedAccordionTile(
                   title: 'External Links & Stores',
                   icon: Icons.link,
@@ -296,6 +297,28 @@ class GameDetailsAccordion extends StatelessWidget {
     return game.gameModes.isNotEmpty ||
         game.playerPerspectives.isNotEmpty ||
         game.hasMultiplayer;
+  }
+
+  bool _hasExternalLinks(Game game) {
+    // Check if there are external games/stores
+    if (game.externalGames.isNotEmpty) {
+      return true;
+    }
+
+    // Show if there are any websites (including social media, stores, etc.)
+    // The only case we want to hide this section is if there are NO websites at all
+    // or ONLY a single official website with no other links
+    if (game.websites.isNotEmpty) {
+      // If there's more than one website, show the section
+      if (game.websites.length > 1) {
+        return true;
+      }
+
+      // If there's only one website, check if it's NOT just an official site
+      return game.websites.first.type != WebsiteCategory.official;
+    }
+
+    return false;
   }
 
   // ✅ PREVIEW BUILDERS - Build preview text for collapsed state (unchanged)
@@ -483,7 +506,8 @@ class GameDetailsAccordion extends StatelessWidget {
     }
 
     if (categories.length < 2 && game.themes.isNotEmpty) {
-      categories.addAll(game.themes.take(2 - categories.length).map((t) => t));
+      categories
+          .addAll(game.themes.take(2 - categories.length).map((t) => t.name));
     }
 
     String preview = categories.join(' • ');

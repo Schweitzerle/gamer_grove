@@ -54,13 +54,15 @@ class SearchFilters extends Equatable {
   // ============================================================
   // AGE RATING & LOCALIZATION FILTERS
   // ============================================================
-  final List<int> ageRatingIds; // PEGI, ESRB ratings
+  final List<int> ageRatingCategoryIds; // PEGI, ESRB ratings
   final List<int> languageSupportIds; // Supported languages
 
   // ============================================================
   // DYNAMIC SEARCH FILTERS
   // ============================================================
   final List<int> companyIds; // Developer/Publisher
+  final bool? isDeveloper; // Filter by developer companies
+  final bool? isPublisher; // Filter by publisher companies
   final List<int> gameEngineIds;
   final List<int> franchiseIds;
   final List<int> collectionIds;
@@ -120,11 +122,13 @@ class SearchFilters extends Equatable {
     this.minHypes,
 
     // Age Rating & Localization
-    this.ageRatingIds = const [],
+    this.ageRatingCategoryIds = const [],
     this.languageSupportIds = const [],
 
     // Dynamic Search
     this.companyIds = const [],
+    this.isDeveloper,
+    this.isPublisher,
     this.gameEngineIds = const [],
     this.franchiseIds = const [],
     this.collectionIds = const [],
@@ -170,7 +174,7 @@ class SearchFilters extends Equatable {
       hasSinglePlayer != null ||
       minFollows != null ||
       minHypes != null ||
-      ageRatingIds.isNotEmpty ||
+      ageRatingCategoryIds.isNotEmpty ||
       languageSupportIds.isNotEmpty ||
       companyIds.isNotEmpty ||
       gameEngineIds.isNotEmpty ||
@@ -216,6 +220,8 @@ class SearchFilters extends Equatable {
     List<int>? ageRatingIds,
     List<int>? languageIds,
     List<int>? companyIds,
+    bool? isDeveloper,
+    bool? isPublisher,
     List<int>? gameEngineIds,
     List<int>? franchiseIds,
     List<int>? collectionIds,
@@ -257,9 +263,11 @@ class SearchFilters extends Equatable {
       hasSinglePlayer: hasSinglePlayer ?? this.hasSinglePlayer,
       minFollows: minFollows ?? this.minFollows,
       minHypes: minHypes ?? this.minHypes,
-      ageRatingIds: ageRatingIds ?? this.ageRatingIds,
+      ageRatingCategoryIds: ageRatingIds ?? this.ageRatingCategoryIds,
       languageSupportIds: languageIds ?? this.languageSupportIds,
       companyIds: companyIds ?? this.companyIds,
+      isDeveloper: isDeveloper ?? this.isDeveloper,
+      isPublisher: isPublisher ?? this.isPublisher,
       gameEngineIds: gameEngineIds ?? this.gameEngineIds,
       franchiseIds: franchiseIds ?? this.franchiseIds,
       collectionIds: collectionIds ?? this.collectionIds,
@@ -307,9 +315,11 @@ class SearchFilters extends Equatable {
         hasSinglePlayer,
         minFollows,
         minHypes,
-        ageRatingIds,
+        ageRatingCategoryIds,
         languageSupportIds,
         companyIds,
+        isDeveloper,
+        isPublisher,
         gameEngineIds,
         franchiseIds,
         collectionIds,

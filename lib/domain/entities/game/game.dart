@@ -1,6 +1,7 @@
 // lib/domain/entities/game.dart (VOLLSTÄNDIG ERWEITERT)
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
 import '../character/character.dart';
 import '../collection/collection.dart';
 import '../event/event.dart';
@@ -99,7 +100,7 @@ class Game extends Equatable {
   final List<Genre> genres;
   final List<Platform> platforms;
   final List<GameMode> gameModes;
-  final List<String> themes;
+  final List<IGDBTheme> themes;
   final List<Keyword> keywords;
   final List<PlayerPerspective> playerPerspectives;
 
@@ -305,7 +306,7 @@ class Game extends Equatable {
             WebsiteCategory.youtube,
             WebsiteCategory.twitch,
             WebsiteCategory.discord
-          ].contains(website.category))
+          ].contains(website.type))
       .toList();
 
   /// Prüft ob das Spiel auf PC verfügbar ist
@@ -436,7 +437,7 @@ class Game extends Equatable {
     List<Genre>? genres,
     List<Platform>? platforms,
     List<GameMode>? gameModes,
-    List<String>? themes,
+    List<IGDBTheme>? themes,
     List<Keyword>? keywords,
     List<PlayerPerspective>? playerPerspectives,
     List<int>? tags,
@@ -662,7 +663,7 @@ class Game extends Equatable {
         gameLocalizations,
         parentGame,
         childGames,
-    characters,
-    events,
+        characters,
+        events,
       ];
 }

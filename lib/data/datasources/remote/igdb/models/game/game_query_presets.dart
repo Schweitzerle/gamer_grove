@@ -189,6 +189,8 @@ class GameQueryPresets {
     int limit = 20,
     int offset = 0,
     bool onlyMainGames = true,
+    String? sortBy,
+    String? sortOrder,
   }) {
     IgdbFilter filter;
     if (onlyMainGames) {
@@ -200,12 +202,17 @@ class GameQueryPresets {
       filter = GameFilters.byPlatform(platformId);
     }
 
+    // Build sort string (default: total_rating_count desc)
+    final sortString = sortBy != null && sortOrder != null
+        ? '$sortBy $sortOrder'
+        : 'total_rating_count desc';
+
     return IgdbGameQuery(
       where: filter,
       fields: GameFieldSets.platformGames,
       limit: limit,
       offset: offset,
-      sort: 'total_rating_count desc',
+      sort: sortString,
     );
   }
 

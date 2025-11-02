@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/pages/company/company_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
-import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_paginated_games_screen.dart';
-import 'package:gamer_grove/presentation/pages/platform/paltform_paginated_games_screen.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/search/search_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/character/character.dart';
+import '../../domain/entities/search/search_filters.dart';
 import '../../domain/entities/event/event.dart';
 import '../../injection_container.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
@@ -28,8 +30,6 @@ import '../../presentation/pages/test/supabase_test_page.dart';
 // 🆕 NEW: Import Local All Games Screen
 import '../../presentation/pages/all_games/local_all_games_screen.dart';
 import '../../domain/entities/game/game.dart';
-import '../../domain/entities/franchise.dart';
-import '../../domain/entities/collection/collection.dart';
 import '../../presentation/widgets/sections/franchise_collection_section.dart';
 
 class Navigations {
@@ -86,33 +86,65 @@ class Navigations {
 
   /// Navigate to all games in a franchise
   static void navigateToFranchiseGames(
-    BuildContext context,
-    Franchise franchise,
-  ) {
-    final games = franchise.games ?? [];
-    navigateToLocalAllGames(
-      context,
-      title: franchise.name,
-      subtitle: 'Franchise • ${games.length} games',
-      games: games, // ✅ Einfach alle Games übergeben
-      blurRated: false,
-      showFilters: true,
+    BuildContext context, {
+    required int franchiseId,
+    required String franchiseName,
+  }) async {
+    // Navigate to Search Screen with franchise filter pre-applied
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            franchiseIds: [franchiseId],
+            franchiseNames: {franchiseId: franchiseName},
+          ),
+          initialTitle: franchiseName,
+        ),
+      ),
     );
   }
 
   /// Navigate to all games in a collection
   static void navigateToCollectionGames(
-    BuildContext context,
-    Collection collection,
-  ) {
-    final games = collection.games ?? [];
-    navigateToLocalAllGames(
-      context,
-      title: collection.name,
-      subtitle: 'Collection • ${games.length} games',
-      games: games, // ✅ Einfach alle Games übergeben
-      blurRated: false,
-      showFilters: true,
+    BuildContext context, {
+    required int collectionId,
+    required String collectionName,
+  }) async {
+    // Navigate to Search Screen with collection filter pre-applied
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            collectionIds: [collectionId],
+            collectionNames: {collectionId: collectionName},
+          ),
+          initialTitle: collectionName,
+        ),
+      ),
+    );
+  }
+
+  /// Navigate to all games by a company (developer or publisher)
+  static void navigateToCompanyGames(
+    BuildContext context, {
+    required int companyId,
+    required String companyName,
+    bool? isDeveloper,
+    bool? isPublisher,
+  }) async {
+    // Navigate to Search Screen with company filter pre-applied
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            companyIds: [companyId],
+            companyNames: {companyId: companyName},
+            isDeveloper: isDeveloper,
+            isPublisher: isPublisher,
+          ),
+          initialTitle: companyName,
+        ),
+      ),
     );
   }
 
@@ -519,6 +551,36 @@ class Navigations {
     );
   }
 
+  static void navigateToCompanyDetails(
+    BuildContext context, {
+    required int companyId,
+    Game? game,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                print(
+                    '🏢 Navigation: Creating CompanyBloc for ID: $companyId');
+                return sl<CompanyBloc>();
+              },
+            ),
+            // Include AuthBloc if needed for user-specific data
+            BlocProvider.value(
+              value: context.read<AuthBloc>(),
+            ),
+          ],
+          child: CompanyDetailPage(
+            companyId: companyId,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Navigate to event details screen with event object
   static void navigateToEventDetailsWithEvent(
     BuildContext context, {
@@ -704,53 +766,151 @@ class Navigations {
     );
   }
 
-  static void navigateToGameEngineGames(
+  static Future<void> navigateToGameEngineGames(
     BuildContext context, {
     required int gameEngineId,
     required String gameEngineName,
-  }) {
-    // Get current user
-    final authState = context.read<AuthBloc>().state;
-    String? userId;
-    if (authState is AuthAuthenticated) {
-      userId = authState.user.id;
-    }
-
-    Navigator.of(context).push(
+  }) async {
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => BlocProvider<GameEngineBloc>(
-          create: (context) => sl<GameEngineBloc>(),
-          child: GameEnginePaginatedGamesScreen(
-            gameEngineId: gameEngineId,
-            gameEngineName: gameEngineName,
-            userId: userId,
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            gameEngineIds: [gameEngineId],
+            gameEngineNames: {gameEngineId: gameEngineName},
           ),
+          initialTitle: gameEngineName,
         ),
       ),
     );
   }
 
-  static void navigateToPlatformGames(
+  static Future<void> navigateToPlatformGames(
     BuildContext context, {
     required int platformId,
     required String platformName,
-  }) {
-    // Get current user
-    final authState = context.read<AuthBloc>().state;
-    String? userId;
-    if (authState is AuthAuthenticated) {
-      userId = authState.user.id;
-    }
-
-    Navigator.of(context).push(
+  }) async {
+    // Navigate to Search Screen with platform filter pre-applied
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => BlocProvider<PlatformBloc>(
-          create: (context) => sl<PlatformBloc>(),
-          child: PlatformPaginatedGamesScreen(
-            platformId: platformId,
-            platformName: platformName,
-            userId: userId,
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            platformIds: [platformId],
+            platformNames: {platformId: platformName},
           ),
+          initialTitle: platformName,
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // GENRE, THEME, KEYWORD NAVIGATION
+  // ==========================================
+
+  static Future<void> navigateToGenreGames(
+    BuildContext context, {
+    required int genreId,
+    required String genreName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            genreIds: [genreId],
+          ),
+          initialTitle: genreName,
+        ),
+      ),
+    );
+  }
+
+  static Future<void> navigateToThemeGames(
+    BuildContext context, {
+    required int themeId,
+    required String themeName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            themesIds: [themeId],
+            themeNames: {themeId: themeName},
+          ),
+          initialTitle: themeName,
+        ),
+      ),
+    );
+  }
+
+  static Future<void> navigateToKeywordGames(
+    BuildContext context, {
+    required int keywordId,
+    required String keywordName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            keywordIds: [keywordId],
+            keywordNames: {keywordId: keywordName},
+          ),
+          initialTitle: keywordName,
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // GAME FEATURES NAVIGATION
+  // ==========================================
+
+  static Future<void> navigateToGameModeGames(
+    BuildContext context, {
+    required int gameModeId,
+    required String gameModeName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            gameModesIds: [gameModeId],
+          ),
+          initialTitle: gameModeName,
+        ),
+      ),
+    );
+  }
+
+  static Future<void> navigateToPlayerPerspectiveGames(
+    BuildContext context, {
+    required int perspectiveId,
+    required String perspectiveName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            playerPerspectiveIds: [perspectiveId],
+          ),
+          initialTitle: perspectiveName,
+        ),
+      ),
+    );
+  }
+
+  static Future<void> navigateToAgeRatingGames(
+    BuildContext context, {
+    required int ageRatingId,
+    required String ageRatingName,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            ageRatingCategoryIds: [ageRatingId],
+            ageRatingNames: {ageRatingId: ageRatingName},
+          ),
+          initialTitle: ageRatingName,
         ),
       ),
     );

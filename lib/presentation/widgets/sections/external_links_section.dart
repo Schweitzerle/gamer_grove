@@ -4,12 +4,11 @@
 
 // lib/presentation/widgets/sections/enhanced_external_links_section.dart
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/website/website.dart';
-import '../../../domain/entities/externalGame/external_game.dart';
-import '../../../domain/entities/website/website_type.dart';
 
 class ExternalLinksSection extends StatelessWidget {
   final Game game;
@@ -23,7 +22,10 @@ class ExternalLinksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     // Separate websites and stores
     final websites = game.websites;
-    final stores = game.externalGames;
+    // Filter stores: only show those with a valid URL (clickable)
+    final storesWithUrl = game.externalGames
+        .where((store) => store.storeUrl != null && store.storeUrl!.isNotEmpty)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,9 +36,9 @@ class ExternalLinksSection extends StatelessWidget {
         ],
 
         // ✅ DIGITAL STORES SECTION (Steam, Epic, PlayStation Store, etc.)
-        if (stores.isNotEmpty) ...[
+        if (storesWithUrl.isNotEmpty) ...[
           if (websites.isNotEmpty) const SizedBox(height: 20),
-          _buildStoresSection(context, stores),
+          _buildStoresSection(context, storesWithUrl),
         ],
       ],
     );
@@ -166,8 +168,8 @@ class ExternalLinksSection extends StatelessWidget {
 
   // ✅ WEBSITE CARD WIDGET
   Widget _buildWebsiteCard(BuildContext context, Website website) {
-    final websiteColor = _getWebsiteColor(website.category);
-    final websiteName = _getWebsiteName(website.category);
+    final websiteColor = _getWebsiteColor(website.type.type);
+    final websiteName = _getWebsiteName(website.type.type);
 
     return Container(
       width: 90,
@@ -280,122 +282,152 @@ class ExternalLinksSection extends StatelessWidget {
     );
   }
 
-  // ✅ YOUR EXISTING HELPER METHODS (from paste.txt)
-
   // ===== WEBSITE HELPER METHODS =====
-  String _getWebsiteName(WebsiteCategory category) {
-    switch (category) {
-      case WebsiteCategory.official:
-        return 'Official Website';
-      case WebsiteCategory.wikia:
-        return 'Wikia';
-      case WebsiteCategory.wikipedia:
+  String _getWebsiteName(String type) {
+    switch (type.toLowerCase()) {
+      // Official API type names
+      case 'official website':
+        return 'Official';
+      case 'community wiki':
+        return 'Wiki';
+      case 'wikipedia':
         return 'Wikipedia';
-      case WebsiteCategory.facebook:
+      case 'facebook':
         return 'Facebook';
-      case WebsiteCategory.twitter:
+      case 'twitter':
         return 'Twitter';
-      case WebsiteCategory.twitch:
+      case 'twitch':
         return 'Twitch';
-      case WebsiteCategory.instagram:
+      case 'instagram':
         return 'Instagram';
-      case WebsiteCategory.youtube:
+      case 'youtube':
         return 'YouTube';
-      case WebsiteCategory.reddit:
+      case 'subreddit':
         return 'Reddit';
-      case WebsiteCategory.discord:
+      case 'discord':
         return 'Discord';
-      case WebsiteCategory.steam:
+      case 'steam':
         return 'Steam';
-      case WebsiteCategory.epicgames:
-        return 'Epic Games';
-      case WebsiteCategory.gog:
+      case 'epic':
+        return 'Epic';
+      case 'gog':
         return 'GOG';
-      case WebsiteCategory.itch:
+      case 'itch':
         return 'itch.io';
-      case WebsiteCategory.iphone:
-        return 'App Store (iPhone)';
-      case WebsiteCategory.ipad:
-        return 'App Store (iPad)';
-      case WebsiteCategory.android:
+      case 'app store (iphone)':
+        return 'App Store';
+      case 'app store (ipad)':
+        return 'App Store';
+      case 'google play':
         return 'Google Play';
-      case WebsiteCategory.bluesky:
+      case 'bluesky':
         return 'Bluesky';
+      case 'xbox':
+        return 'Xbox';
+      case 'playstation':
+        return 'PlayStation';
+      case 'nintendo':
+        return 'Nintendo';
+      case 'meta':
+        return 'Meta';
+      // Legacy support (old enum names)
+      case 'official':
+        return 'Official';
+      case 'wikia':
+        return 'Wiki';
+      case 'reddit':
+        return 'Reddit';
+      case 'epicgames':
+        return 'Epic';
+      case 'iphone':
+      case 'ipad':
+        return 'App Store';
+      case 'android':
+        return 'Google Play';
+      default:
+        return type;
     }
   }
 
   Widget _getWebsiteIcon(Website website) {
+    final typeStr = website.type.type.toLowerCase();
+    print('🌐 Website Type: "$typeStr" (original: "${website.type.type}")');
     IconData iconData;
     Color iconColor;
-    switch (website.category) {
-      case WebsiteCategory.official:
+
+    switch (typeStr) {
+      // Official API type names
+      case 'official website':
+      case 'official':
         iconData = Icons.public;
         iconColor = const Color(0xFF07355A);
-        break;
-      case WebsiteCategory.wikia:
+      case 'community wiki':
+      case 'wikia':
         iconData = FontAwesomeIcons.wikipediaW;
         iconColor = const Color(0xFF939598);
-        break;
-      case WebsiteCategory.wikipedia:
+      case 'wikipedia':
         iconData = FontAwesomeIcons.wikipediaW;
         iconColor = const Color(0xFFc7c8ca);
-        break;
-      case WebsiteCategory.facebook:
+      case 'facebook':
         iconData = FontAwesomeIcons.facebook;
         iconColor = const Color(0xFF1877f2);
-        break;
-      case WebsiteCategory.twitter:
+      case 'twitter':
         iconData = FontAwesomeIcons.twitter;
         iconColor = const Color(0xFF1da1f2);
-        break;
-      case WebsiteCategory.twitch:
+      case 'twitch':
         iconData = FontAwesomeIcons.twitch;
         iconColor = const Color(0xFF9146ff);
-        break;
-      case WebsiteCategory.instagram:
+      case 'instagram':
         iconData = FontAwesomeIcons.instagram;
         iconColor = const Color(0xFFc13584);
-        break;
-      case WebsiteCategory.youtube:
+      case 'youtube':
         iconData = FontAwesomeIcons.youtube;
         iconColor = const Color(0xFFff0000);
-        break;
-      case WebsiteCategory.iphone:
+      case 'app store (iphone)':
+      case 'app store (ipad)':
+      case 'iphone':
+      case 'ipad':
         iconData = FontAwesomeIcons.apple;
         iconColor = const Color(0xFF000000);
-        break;
-      case WebsiteCategory.ipad:
-        iconData = FontAwesomeIcons.apple;
-        iconColor = const Color(0xFF000000);
-        break;
-      case WebsiteCategory.android:
+      case 'google play':
+      case 'android':
         iconData = FontAwesomeIcons.android;
         iconColor = const Color(0xFFa4c639);
-        break;
-      case WebsiteCategory.steam:
+      case 'steam':
         iconData = FontAwesomeIcons.steam;
         iconColor = const Color(0xFF00adee);
-        break;
-      case WebsiteCategory.reddit:
+      case 'subreddit':
+      case 'reddit':
         iconData = FontAwesomeIcons.reddit;
         iconColor = const Color(0xFFff4500);
-        break;
-      case WebsiteCategory.itch:
+      case 'itch':
         iconData = FontAwesomeIcons.itchIo;
         iconColor = const Color(0xFFfa5c5c);
-        break;
-      case WebsiteCategory.epicgames:
+      case 'epic':
+      case 'epicgames':
         iconData = FontAwesomeIcons.earlybirds;
         iconColor = const Color(0xFF242424);
-        break;
-      case WebsiteCategory.gog:
+      case 'gog':
         iconData = FontAwesomeIcons.galacticRepublic;
         iconColor = const Color(0xFF7cb4dc);
-        break;
-      case WebsiteCategory.discord:
+      case 'discord':
         iconData = FontAwesomeIcons.discord;
         iconColor = const Color(0xFF5865f2);
-        break;
+      case 'bluesky':
+        iconData = FontAwesomeIcons.cloud;
+        iconColor = const Color(0xFF0085FF);
+      case 'xbox':
+        iconData = FontAwesomeIcons.xbox;
+        iconColor = const Color(0xFF107C10);
+      case 'playstation':
+        iconData = FontAwesomeIcons.playstation;
+        iconColor = const Color(0xFF0070D1);
+      case 'nintendo':
+        iconData = FontAwesomeIcons.gamepad;
+        iconColor = const Color(0xFFE60012);
+      case 'meta':
+        iconData = FontAwesomeIcons.meta;
+        iconColor = const Color(0xFF0668E1);
       default:
         iconData = Icons.link;
         iconColor = const Color(0xFF07355A);
@@ -404,115 +436,111 @@ class ExternalLinksSection extends StatelessWidget {
     return Icon(iconData, color: iconColor, size: 20);
   }
 
-  Color _getWebsiteColor(WebsiteCategory category) {
-    switch (category) {
-      case WebsiteCategory.official:
+  Color _getWebsiteColor(String type) {
+    switch (type.toLowerCase()) {
+      // Official API type names
+      case 'official website':
+      case 'official':
         return Colors.blue;
-      case WebsiteCategory.wikia:
-      case WebsiteCategory.wikipedia:
+      case 'community wiki':
+      case 'wikia':
+      case 'wikipedia':
         return Colors.orange;
-      case WebsiteCategory.facebook:
+      case 'facebook':
         return const Color(0xFF1877F2);
-      case WebsiteCategory.twitter:
+      case 'twitter':
         return Colors.black;
-      case WebsiteCategory.instagram:
+      case 'instagram':
         return const Color(0xFFE4405F);
-      case WebsiteCategory.youtube:
+      case 'youtube':
         return const Color(0xFFFF0000);
-      case WebsiteCategory.twitch:
+      case 'twitch':
         return const Color(0xFF9146FF);
-      case WebsiteCategory.reddit:
+      case 'subreddit':
+      case 'reddit':
         return const Color(0xFFFF4500);
-      case WebsiteCategory.discord:
+      case 'discord':
         return const Color(0xFF5865F2);
-      case WebsiteCategory.steam:
+      case 'steam':
         return const Color(0xFF1B2838);
-      case WebsiteCategory.epicgames:
+      case 'epic':
+      case 'epicgames':
         return const Color(0xFF0078F2);
-      case WebsiteCategory.gog:
+      case 'gog':
         return const Color(0xFF8A2BE2);
-      case WebsiteCategory.itch:
+      case 'itch':
         return const Color(0xFFFA5C5C);
-      case WebsiteCategory.iphone:
-      case WebsiteCategory.ipad:
+      case 'app store (iphone)':
+      case 'app store (ipad)':
+      case 'iphone':
+      case 'ipad':
         return const Color(0xFF007AFF);
-      case WebsiteCategory.android:
+      case 'google play':
+      case 'android':
         return const Color(0xFF3DDC84);
-      case WebsiteCategory.bluesky:
+      case 'bluesky':
         return const Color(0xFF0085FF);
+      case 'xbox':
+        return const Color(0xFF107C10);
+      case 'playstation':
+        return const Color(0xFF0070D1);
+      case 'nintendo':
+        return const Color(0xFFE60012);
+      case 'meta':
+        return const Color(0xFF0668E1);
+      default:
+        return Colors.blue;
     }
   }
 
   // ===== STORE HELPER METHODS =====
   String _getStoreName(ExternalGameCategoryEnum? category) {
     if (category == null) return 'Store';
-
-    switch (category) {
-      case ExternalGameCategoryEnum.steam:
-        return 'Steam';
-      case ExternalGameCategoryEnum.gog:
-        return 'GOG';
-      case ExternalGameCategoryEnum.epicGameStore:
-        return 'Epic Games Store';
-      case ExternalGameCategoryEnum.playstationStoreUs:
-        return 'PlayStation Store';
-      case ExternalGameCategoryEnum.xboxMarketplace:
-        return 'Xbox Marketplace';
-      case ExternalGameCategoryEnum.microsoft:
-        return 'Microsoft Store';
-      case ExternalGameCategoryEnum.apple:
-        return 'App Store';
-      case ExternalGameCategoryEnum.android:
-        return 'Google Play';
-      case ExternalGameCategoryEnum.itchIo:
-        return 'itch.io';
-      case ExternalGameCategoryEnum.amazonLuna:
-        return 'Amazon Luna';
-      case ExternalGameCategoryEnum.oculus:
-        return 'Oculus Store';
-      case ExternalGameCategoryEnum.twitch:
-        return 'Twitch';
-      case ExternalGameCategoryEnum.youtube:
-        return 'YouTube';
-      default:
-        return category.displayName;
-    }
+    // Use the enum's displayName getter for string-based approach
+    return category.displayName;
   }
 
   IconData _getStoreIcon(ExternalGameCategoryEnum? category) {
     if (category == null) return Icons.store;
 
-    switch (category) {
-      case ExternalGameCategoryEnum.steam:
+    // Use enum's name property for string-based mapping
+    switch (category.name.toLowerCase()) {
+      case 'steam':
         return FontAwesomeIcons.steam;
-      case ExternalGameCategoryEnum.gog:
+      case 'gog':
         return FontAwesomeIcons.galacticRepublic;
-      case ExternalGameCategoryEnum.epicGameStore:
+      case 'epicgamestore':
         return FontAwesomeIcons.gamepad;
-      case ExternalGameCategoryEnum.playstationStoreUs:
+      case 'playstationstoreus':
         return FontAwesomeIcons.playstation;
-      case ExternalGameCategoryEnum.xboxMarketplace:
+      case 'xboxmarketplace':
+      case 'microsoft':
+      case 'xboxgamepassultimatecloud':
         return FontAwesomeIcons.xbox;
-      case ExternalGameCategoryEnum.microsoft:
-        return FontAwesomeIcons.xbox;
-      case ExternalGameCategoryEnum.apple:
+      case 'apple':
         return FontAwesomeIcons.apple;
-      case ExternalGameCategoryEnum.android:
+      case 'android':
         return FontAwesomeIcons.android;
-      case ExternalGameCategoryEnum.itchIo:
+      case 'itchio':
         return FontAwesomeIcons.itchIo;
-      case ExternalGameCategoryEnum.amazonLuna:
+      case 'amazonluna':
+      case 'amazonadg':
+      case 'amazonasin':
         return FontAwesomeIcons.amazon;
-      case ExternalGameCategoryEnum.amazonAdg:
-        return FontAwesomeIcons.amazon;
-      case ExternalGameCategoryEnum.amazonAsin:
-        return FontAwesomeIcons.amazon;
-      case ExternalGameCategoryEnum.oculus:
+      case 'oculus':
         return FontAwesomeIcons.vrCardboard;
-      case ExternalGameCategoryEnum.twitch:
+      case 'twitch':
         return FontAwesomeIcons.twitch;
-      case ExternalGameCategoryEnum.youtube:
+      case 'youtube':
         return FontAwesomeIcons.youtube;
+      case 'utomik':
+        return FontAwesomeIcons.gamepad;
+      case 'kartridge':
+        return FontAwesomeIcons.solidCircle;
+      case 'focusentertainment':
+        return FontAwesomeIcons.gamepad;
+      case 'gamejolt':
+        return FontAwesomeIcons.bolt;
       default:
         return Icons.store;
     }
@@ -522,33 +550,45 @@ class ExternalLinksSection extends StatelessWidget {
       BuildContext context, ExternalGameCategoryEnum? category) {
     if (category == null) return Theme.of(context).colorScheme.primary;
 
-    switch (category) {
-      case ExternalGameCategoryEnum.steam:
+    // Use enum's name property for string-based mapping
+    switch (category.name.toLowerCase()) {
+      case 'steam':
         return const Color(0xFF1B2838);
-      case ExternalGameCategoryEnum.gog:
+      case 'gog':
         return const Color(0xFF8A2BE2);
-      case ExternalGameCategoryEnum.epicGameStore:
+      case 'epicgamestore':
         return const Color(0xFF0078F2);
-      case ExternalGameCategoryEnum.playstationStoreUs:
+      case 'playstationstoreus':
         return const Color(0xFF0070D1);
-      case ExternalGameCategoryEnum.xboxMarketplace:
+      case 'xboxmarketplace':
         return const Color(0xFF107C10);
-      case ExternalGameCategoryEnum.microsoft:
+      case 'microsoft':
+      case 'xboxgamepassultimatecloud':
         return const Color(0xFF00BCF2);
-      case ExternalGameCategoryEnum.apple:
+      case 'apple':
         return const Color(0xFF007AFF);
-      case ExternalGameCategoryEnum.android:
+      case 'android':
         return const Color(0xFF3DDC84);
-      case ExternalGameCategoryEnum.itchIo:
+      case 'itchio':
         return const Color(0xFFFA5C5C);
-      case ExternalGameCategoryEnum.amazonLuna:
+      case 'amazonluna':
+      case 'amazonadg':
+      case 'amazonasin':
         return const Color(0xFFFF9900);
-      case ExternalGameCategoryEnum.oculus:
+      case 'oculus':
         return const Color(0xFF1C1E20);
-      case ExternalGameCategoryEnum.twitch:
+      case 'twitch':
         return const Color(0xFF9146FF);
-      case ExternalGameCategoryEnum.youtube:
+      case 'youtube':
         return const Color(0xFFFF0000);
+      case 'utomik':
+        return const Color(0xFF6B46C1);
+      case 'kartridge':
+        return const Color(0xFFE53E3E);
+      case 'focusentertainment':
+        return const Color(0xFF2D3748);
+      case 'gamejolt':
+        return const Color(0xFF2F7D32);
       default:
         return Theme.of(context).colorScheme.primary;
     }
@@ -568,25 +608,13 @@ class ExternalLinksSection extends StatelessWidget {
 
   Future<void> _launchStoreUrl(ExternalGame store) async {
     try {
-      // Generate store URL based on category and game ID
-      String? url = _generateStoreUrl(store);
+      // Use the storeUrl getter from ExternalGame entity
+      String? url = store.storeUrl;
       if (url != null) {
         await _launchUrl(url);
       }
     } catch (e) {
       print('Error launching store URL: $e');
     }
-  }
-
-  String? _generateStoreUrl(ExternalGame store) {
-    // This would depend on your ExternalGame structure
-    // For now, return null if no URL available
-    if (store.url != null && store.url!.isNotEmpty) {
-      return store.url;
-    }
-
-    // Generate URLs based on store ID and category if needed
-    // e.g., Steam: https://store.steampowered.com/app/${store.externalId}
-    return null;
   }
 }

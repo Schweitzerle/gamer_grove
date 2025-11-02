@@ -1,27 +1,20 @@
-// lib/data/models/age_rating_category_model.dart
-import '../../../domain/entities/ageRating/age_rating_category.dart';
-import 'age_rating_organization_model.dart';
+// lib/data/models/ageRating/age_rating_organization_model.dart
+import '../../../domain/entities/ageRating/age_rating_organization.dart';
 
-class AgeRatingCategoryModel extends AgeRatingCategory {
-  const AgeRatingCategoryModel({
+class AgeRatingOrganizationModel extends AgeRatingOrganization {
+  const AgeRatingOrganizationModel({
     required super.id,
     required super.checksum,
-    required super.rating,
-    super.organization,
+    required super.name,
     super.createdAt,
     super.updatedAt,
   });
 
-  factory AgeRatingCategoryModel.fromJson(Map<String, dynamic> json) {
-    return AgeRatingCategoryModel(
+  factory AgeRatingOrganizationModel.fromJson(Map<String, dynamic> json) {
+    return AgeRatingOrganizationModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
-      rating: json['rating'] ?? '',
-      organization: json['organization'] != null
-          ? AgeRatingOrganizationModel.fromJson(
-              json['organization'] as Map<String, dynamic>,
-            )
-          : null,
+      name: json['name'] ?? '',
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
@@ -40,8 +33,7 @@ class AgeRatingCategoryModel extends AgeRatingCategory {
     return {
       'id': id,
       'checksum': checksum,
-      'rating': rating,
-      'organization': organization,
+      'name': name,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

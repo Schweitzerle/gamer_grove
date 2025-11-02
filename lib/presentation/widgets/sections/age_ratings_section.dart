@@ -1,6 +1,7 @@
 // lib/presentation/pages/game_detail/widgets/sections/age_ratings_section.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
+import '../../../core/utils/navigations.dart';
 
 class AgeRatingsSection extends StatelessWidget {
   final List<AgeRating> ageRatings;
@@ -57,8 +58,15 @@ class AgeRatingChip extends StatelessWidget {
     // VERBESSERT: Verwende die Helper-Getter der AgeRating Entity
     final ratingStyle = _getRatingStyleFromEntity(rating);
 
-    return GestureDetector(
-      onTap: () => _showRatingDetails(context, rating),
+    return InkWell(
+      onTap: rating.ratingCategory != null
+          ? () => Navigations.navigateToAgeRatingGames(
+                context,
+                ageRatingId: rating.ratingCategory!.id,
+                ageRatingName: rating.ratingCategory!.rating,
+              )
+          : null,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -104,14 +112,16 @@ class AgeRatingChip extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-                Text(
-                  ratingStyle.organizationName,
-                  style: TextStyle(
-                    color: ratingStyle.color.withOpacity(0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                // Use rating.organizationName instead of ratingStyle.organizationName
+                if (rating.organizationName != 'Unknown')
+                  Text(
+                    rating.organizationName,
+                    style: TextStyle(
+                      color: ratingStyle.color.withOpacity(0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
               ],
             ),
           ],
@@ -127,64 +137,42 @@ class AgeRatingChip extends StatelessWidget {
       return const _RatingStyle(
         color: Color(0xFF1976D2), // Schönes Blau
         icon: Icons.flag_rounded,
-        organizationName: 'ESRB',
       );
     } else if (rating.isPEGI) {
       return const _RatingStyle(
         color: Color(0xFF388E3C), // Schönes Grün
         icon: Icons.euro_symbol_rounded,
-        organizationName: 'PEGI',
       );
     } else if (rating.isCERO) {
       return const _RatingStyle(
         color: Color(0xFFD32F2F), // Schönes Rot
         icon: Icons.place_rounded,
-        organizationName: 'CERO',
       );
     } else if (rating.isUSK) {
       return const _RatingStyle(
         color: Color(0xFFFF8F00), // Schönes Orange
         icon: Icons.shield_rounded,
-        organizationName: 'USK',
       );
     } else if (rating.isGRAC) {
       return const _RatingStyle(
         color: Color(0xFF7B1FA2), // Schönes Lila
         icon: Icons.star_rounded,
-        organizationName: 'GRAC',
       );
     } else if (rating.isClassInd) {
       return const _RatingStyle(
         color: Color(0xFF00796B), // Schönes Teal
         icon: Icons.info_rounded,
-        organizationName: 'ClassInd',
       );
     } else if (rating.isACB) {
       return const _RatingStyle(
         color: Color(0xFF303F9F), // Schönes Indigo
         icon: Icons.public_rounded,
-        organizationName: 'ACB',
       );
     } else {
       // Fallback - zeige trotzdem schön an auch wenn unbekannt
-      return _RatingStyle(
-        color: const Color(0xFF757575), // Neutrales Grau
+      return const _RatingStyle(
+        color: Color(0xFF757575), // Neutrales Grau
         icon: Icons.sports_esports_rounded,
-        organizationName: rating.organizationName.isNotEmpty
-            ? rating.organizationName
-            : 'Rating',
-      );
-    }
-  }
-
-  /// Zeigt Details zum Age Rating in einem Dialog
-  void _showRatingDetails(BuildContext context, AgeRating rating) {
-    if (rating.synopsis != null ||
-        rating.contentDescriptions.isNotEmpty ||
-        rating.ratingCoverUrl != null) {
-      showDialog<void>(
-        context: context,
-        builder: (context) => AgeRatingDetailsDialog(rating: rating),
       );
     }
   }
@@ -194,12 +182,10 @@ class AgeRatingChip extends StatelessWidget {
 class _RatingStyle {
   final Color color;
   final IconData icon;
-  final String organizationName;
 
   const _RatingStyle({
     required this.color,
     required this.icon,
-    required this.organizationName,
   });
 }
 
@@ -246,12 +232,13 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  ratingStyle.organizationName,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: ratingStyle.color.withOpacity(0.8),
-                      ),
-                ),
+                if (rating.organizationName != 'Unknown')
+                  Text(
+                    rating.organizationName,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: ratingStyle.color.withOpacity(0.8),
+                        ),
+                  ),
               ],
             ),
           ),
@@ -374,51 +361,41 @@ class AgeRatingDetailsDialog extends StatelessWidget {
       return const _RatingStyle(
         color: Color(0xFF1976D2),
         icon: Icons.flag_rounded,
-        organizationName: 'ESRB',
       );
     } else if (rating.isPEGI) {
       return const _RatingStyle(
         color: Color(0xFF388E3C),
         icon: Icons.euro_symbol_rounded,
-        organizationName: 'PEGI',
       );
     } else if (rating.isCERO) {
       return const _RatingStyle(
         color: Color(0xFFD32F2F),
         icon: Icons.place_rounded,
-        organizationName: 'CERO',
       );
     } else if (rating.isUSK) {
       return const _RatingStyle(
         color: Color(0xFFFF8F00),
         icon: Icons.shield_rounded,
-        organizationName: 'USK',
       );
     } else if (rating.isGRAC) {
       return const _RatingStyle(
         color: Color(0xFF7B1FA2),
         icon: Icons.star_rounded,
-        organizationName: 'GRAC',
       );
     } else if (rating.isClassInd) {
       return const _RatingStyle(
         color: Color(0xFF00796B),
         icon: Icons.info_rounded,
-        organizationName: 'ClassInd',
       );
     } else if (rating.isACB) {
       return const _RatingStyle(
         color: Color(0xFF303F9F),
         icon: Icons.public_rounded,
-        organizationName: 'ACB',
       );
     } else {
-      return _RatingStyle(
-        color: const Color(0xFF757575),
+      return const _RatingStyle(
+        color: Color(0xFF757575),
         icon: Icons.sports_esports_rounded,
-        organizationName: rating.organizationName.isNotEmpty
-            ? rating.organizationName
-            : 'Rating',
       );
     }
   }

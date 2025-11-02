@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/collection/collection.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
@@ -33,7 +33,14 @@ import '../../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/error_widget.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final SearchFilters? initialFilters;
+  final String? initialTitle;
+
+  const SearchPage({
+    super.key,
+    this.initialFilters,
+    this.initialTitle,
+  });
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -50,7 +57,7 @@ class _SearchPageState extends State<SearchPage> {
   bool _showRecentSearches = true;
 
   // Filters
-  SearchFilters _currentFilters = const SearchFilters();
+  late SearchFilters _currentFilters;
   bool _isLoadingFilterOptions = true;
 
   // Available filter options (loaded once)
@@ -63,16 +70,19 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _currentFilters = widget.initialFilters ?? const SearchFilters();
     _gameBloc = sl<GameBloc>();
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
-    _loadFilterOptions();
 
     // Get current user ID from AuthBloc
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
     }
+
+    // Load filter options first, then trigger search if we have initial filters
+    _loadFilterOptions();
   }
 
   Future<void> _loadFilterOptions() async {
@@ -144,6 +154,14 @@ class _SearchPageState extends State<SearchPage> {
 
       print('✅ SearchPage: All filter options loaded');
       setState(() => _isLoadingFilterOptions = false);
+
+      // If we have initial filters, trigger search automatically AFTER filters are loaded
+      if (widget.initialFilters != null && widget.initialFilters!.hasFilters) {
+        print('🔍 SearchPage: Auto-triggering search with initial filters');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _performSearch('');
+        });
+      }
     } catch (e) {
       print('❌ SearchPage: Exception loading filter options: $e');
       setState(() => _isLoadingFilterOptions = false);
@@ -333,7 +351,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Future<List<AgeRating>> _searchAgeRatings(String query) async {
+  Future<List<AgeRatingCategory>> _searchAgeRatings(String query) async {
     print('🔍 SearchPage: Searching age ratings with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchAgeRatings(query);
@@ -341,7 +359,7 @@ class _SearchPageState extends State<SearchPage> {
         (failure) {
           print(
               '❌ SearchPage: Failed to search age ratings: ${failure.message}');
-          return <AgeRating>[];
+          return <AgeRatingCategory>[];
         },
         (ageRatings) {
           print('✅ SearchPage: Found ${ageRatings.length} age ratings');
@@ -394,14 +412,14 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Future<List<gg_theme.Theme>> _searchThemes(String query) async {
+  Future<List<gg_theme.IGDBTheme>> _searchThemes(String query) async {
     print('🔍 SearchPage: Searching themes with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchThemes(query);
       return result.fold(
         (failure) {
           print('❌ SearchPage: Failed to search themes: ${failure.message}');
-          return <gg_theme.Theme>[];
+          return <gg_theme.IGDBTheme>[];
         },
         (themes) {
           print('✅ SearchPage: Found ${themes.length} themes');
@@ -445,7 +463,7 @@ class _SearchPageState extends State<SearchPage> {
     if (_currentFilters.keywordIds.isNotEmpty) count++;
     if (_currentFilters.gameTypeIds.isNotEmpty) count++;
     if (_currentFilters.gameStatusIds.isNotEmpty) count++;
-    if (_currentFilters.ageRatingIds.isNotEmpty) count++;
+    if (_currentFilters.ageRatingCategoryIds.isNotEmpty) count++;
     if (_currentFilters.languageSupportIds.isNotEmpty) count++;
     if (_currentFilters.multiplayerModeIds.isNotEmpty) count++;
     if (_currentFilters.hasMultiplayer != null) count++;
@@ -838,7 +856,8 @@ class _SearchPageState extends State<SearchPage> {
     return RefreshIndicator(
       onRefresh: () async {
         if (_searchController.text.isNotEmpty) {
-          _gameBloc.add(SearchGamesEvent(_searchController.text, userId: _currentUserId));
+          _gameBloc.add(
+              SearchGamesEvent(_searchController.text, userId: _currentUserId));
         }
       },
       child: GridView.builder(
