@@ -203,10 +203,19 @@ class UserStatesContent extends StatelessWidget {
     // ✅ GameBloc VOR dem Dialog holen
     final gameBloc = context.read<GameBloc>();
 
+    // Get current top three games from the bloc state
+    List<Game>? currentTopThree;
+    final currentState = gameBloc.state;
+    if (currentState is GrovePageLoaded) {
+      currentTopThree = currentState.userTopThree;
+    }
+
     showDialog<void>(
       context: context,
       builder: (context) => TopThreeDialog(
         game: game,
+        gameBloc: gameBloc,
+        currentTopThree: currentTopThree,
         onPositionSelected: (position) {
           _addToTopThree(gameBloc, userId, position);
         },

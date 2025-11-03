@@ -1,22 +1,30 @@
 // lib/presentation/widgets/top_three_dialog.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/game/game.dart';
-import '../blocs/game/game_bloc.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/auth/auth_state.dart';
+import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_top_three.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 class TopThreeDialog extends StatefulWidget {
-  final Game game;
-  final void Function(int) onPositionSelected;
-  final List<Game>? currentTopThree; // Current top 3 games
-
   const TopThreeDialog({
     super.key,
     required this.game,
     required this.onPositionSelected,
+    required this.gameBloc,
     this.currentTopThree,
   });
+
+  final Game game;
+  final void Function(int) onPositionSelected;
+  final GameBloc gameBloc;
+  final List<Game>? currentTopThree;
 
   @override
   State<TopThreeDialog> createState() => _TopThreeDialogState();
@@ -33,15 +41,86 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   }
 
   Future<void> _loadTopThreeGames() async {
+    print('🔍 TopThreeDialog: Loading top three games...');
+    print(
+        '🔍 TopThreeDialog: currentTopThree provided: ${widget.currentTopThree != null}');
+
     if (widget.currentTopThree != null) {
+      print(
+          '🔍 TopThreeDialog: currentTopThree length: ${widget.currentTopThree!.length}');
+
+      // Sort by position and fill the array
+      final sortedGames = List<Game?>.filled(3, null);
+      for (final game in widget.currentTopThree!) {
+        print(
+            '🔍 TopThreeDialog: Game "${game.name}" position: ${game.topThreePosition}');
+        if (game.topThreePosition != null &&
+            game.topThreePosition! >= 1 &&
+            game.topThreePosition! <= 3) {
+          sortedGames[game.topThreePosition! - 1] = game;
+        }
+      }
+
+      print('🔍 TopThreeDialog: Sorted games:');
+      for (int i = 0; i < sortedGames.length; i++) {
+        print('   Position ${i + 1}: ${sortedGames[i]?.name ?? "Empty"}');
+      }
+
       setState(() {
-        _topThreeGames = List.from(widget.currentTopThree!);
+        _topThreeGames = sortedGames;
         _isLoading = false;
       });
     } else {
-      setState(() {
-        _isLoading = false;
-      });
+      print(
+          '⚠️ TopThreeDialog: No currentTopThree provided - loading from backend');
+
+      // Load top three directly from backend
+      final userId = _getCurrentUserId();
+      if (userId != null) {
+        try {
+          print('🔄 TopThreeDialog: Loading top three for user $userId');
+          final getUserTopThree = sl<GetUserTopThree>();
+          final result =
+              await getUserTopThree(GetUserTopThreeParams(userId: userId));
+
+          result.fold(
+            (failure) {
+              print(
+                  '❌ TopThreeDialog: Failed to load top three: ${failure.message}');
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            (games) {
+              print('✅ TopThreeDialog: Loaded ${games.length} top three games');
+              final sortedGames = List<Game?>.filled(3, null);
+              for (final game in games) {
+                print(
+                    '   Game: ${game.name} at position ${game.topThreePosition}');
+                if (game.topThreePosition != null &&
+                    game.topThreePosition! >= 1 &&
+                    game.topThreePosition! <= 3) {
+                  sortedGames[game.topThreePosition! - 1] = game;
+                }
+              }
+              setState(() {
+                _topThreeGames = sortedGames;
+                _isLoading = false;
+              });
+            },
+          );
+        } catch (e) {
+          print('❌ TopThreeDialog: Error loading top three: $e');
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else {
+        print('⚠️ TopThreeDialog: No user ID available');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -53,26 +132,35 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
     return null;
   }
 
-  void _removeFromTopThree(int gameId) {
+  void _removeFromTopThree(Game game) {
     final userId = _getCurrentUserId();
     if (userId == null) return;
 
-    final gameBloc = context.read<GameBloc>();
-    gameBloc.add(RemoveFromTopThreeEvent(
-      userId: userId,
-      gameId: gameId,
-    ));
+    print('🗑️ TopThreeDialog: Removing game ${game.id} from top three');
+
+    widget.gameBloc.add(
+      RemoveFromTopThreeEvent(
+        userId: userId,
+        gameId: game.id,
+      ),
+    );
 
     setState(() {
-      _topThreeGames.removeWhere((game) => game?.id == gameId);
+      // Find and clear the position
+      for (var i = 0; i < _topThreeGames.length; i++) {
+        if (_topThreeGames[i]?.id == game.id) {
+          _topThreeGames[i] = null;
+          break;
+        }
+      }
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Removed from Top 3'),
+      SnackBar(
+        content: Text('${game.name} removed from Top 3'),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -81,31 +169,32 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header - More compact
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.amber.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.emoji_events,
                       color: Colors.amber,
-                      size: 32,
+                      size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,14 +202,14 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
                         const Text(
                           'Add to Top 3',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           widget.game.name,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Colors.grey[600],
                           ),
                           maxLines: 1,
@@ -129,64 +218,61 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
                       ],
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-              // Current Top Three
-              if (!_isLoading) ...[
+              // Current Top Three Display
+              if (_isLoading)
+                _buildShimmerLoading()
+              else ...[
                 const Text(
                   'Current Top 3:',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 12),
+
+                // Display top 3 games with images
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Expanded(child: _buildTopThreeCard(1)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildTopThreeCard(2)),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildTopThreeCard(3)),
+                    _buildTopThreePosition(1),
+                    _buildTopThreePosition(2),
+                    _buildTopThreePosition(3),
                   ],
                 ),
-                const SizedBox(height: 24),
+
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
               ],
 
-              // Position Selection
-              const Text(
+              // Position Selection Instructions
+              Text(
                 'Select position:',
-                style: TextStyle(
-                  fontSize: 16,
+                style: const TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              // Position Buttons
-              Column(
-                children: [
-                  _buildPositionTile(1, '🥇', 'First Place'),
-                  _buildPositionTile(2, '🥈', 'Second Place'),
-                  _buildPositionTile(3, '🥉', 'Third Place'),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Cancel Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                ],
-              ),
+              // Position Selection Buttons - More compact
+              _buildPositionButton(1),
+              const SizedBox(height: 6),
+              _buildPositionButton(2),
+              const SizedBox(height: 6),
+              _buildPositionButton(3),
             ],
           ),
         ),
@@ -194,66 +280,185 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
     );
   }
 
-  Widget _buildTopThreeCard(int position) {
-    final game = _topThreeGames.firstWhere((game) => game?.topThreePosition == position, orElse: () => null);
-    final color = _getPositionColor(position);
-
-    if (game == null) {
-      return Container(
-        height: 140,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[300]!,
-            width: 2,
+  Widget _buildShimmerLoading() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 14,
+            width: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildShimmerCard(),
+              _buildShimmerCard(),
+              _buildShimmerCard(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard() {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTopThreePosition(int position) {
+    final game = _topThreeGames[position - 1];
+    final color = ColorScales.getRankingColor(position - 1);
+    final emoji = position == 1
+        ? '🥇'
+        : position == 2
+            ? '🥈'
+            : '🥉';
+
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Position badge - more compact
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // Game card or empty slot
+            if (game == null)
+              _buildEmptySlot()
+            else
+              _buildGameCard(game, position),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptySlot() {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: Colors.grey[300]!,
+          width: 2,
+        ),
+      ),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              position == 1 ? '🥇' : position == 2 ? '🥈' : '🥉',
-              style: const TextStyle(fontSize: 32),
+            Icon(
+              Icons.add_circle_outline,
+              size: 24,
+              color: Colors.grey[400],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               'Empty',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 10,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  Widget _buildGameCard(Game game, int position) {
+    final color = ColorScales.getRankingColor(position - 1);
 
     return Stack(
       children: [
         Container(
-          height: 140,
+          height: 120,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: color,
-              width: 3,
+              width: 2,
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             child: game.coverUrl != null
-                ? Image.network(
-                    game.coverUrl!,
+                ? CachedNetworkImage(
+                    imageUrl: ImageUtils.getMediumImageUrl(game.coverUrl),
                     fit: BoxFit.cover,
                     width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey[300],
                         child: const Icon(
                           Icons.videogame_asset,
-                          size: 40,
+                          size: 32,
                           color: Colors.grey,
                         ),
                       );
@@ -263,44 +468,28 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
                     color: Colors.grey[300],
                     child: const Icon(
                       Icons.videogame_asset,
-                      size: 40,
+                      size: 32,
                       color: Colors.grey,
                     ),
                   ),
           ),
         ),
-        // Position Badge
+        // Remove Button - more compact
         Positioned(
-          top: 6,
-          left: 6,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              position == 1 ? '🥇' : position == 2 ? '🥈' : '🥉',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-        // Delete Button
-        Positioned(
-          top: 6,
-          right: 6,
+          top: 3,
+          right: 3,
           child: GestureDetector(
-            onTap: () => _removeFromTopThree(game.id),
+            onTap: () => _removeFromTopThree(game),
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.9),
+                color: Colors.red.withValues(alpha: 0.9),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.close,
                 color: Colors.white,
-                size: 16,
+                size: 14,
               ),
             ),
           ),
@@ -309,53 +498,93 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
     );
   }
 
-  Widget _buildPositionTile(int position, String emoji, String title) {
-    final currentGame = _topThreeGames.firstWhere((game) => game?.topThreePosition == position, orElse: () => null);
+  Widget _buildPositionButton(int position) {
+    final currentGame = _topThreeGames[position - 1];
     final hasGame = currentGame != null;
+    final emoji = position == 1
+        ? '🥇'
+        : position == 2
+            ? '🥈'
+            : '🥉';
+    final title = position == 1
+        ? '1st Place'
+        : position == 2
+            ? '2nd Place'
+            : '3rd Place';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: _getPositionColor(position),
-            shape: BoxShape.circle,
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).pop();
+        widget.onPositionSelected(position);
+      },
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: hasGame ? Colors.orange[50] : Colors.grey[50],
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: hasGame ? Colors.orange[200]! : Colors.grey[300]!,
           ),
-          child: Center(
-            child: Text(
-              emoji,
-              style: const TextStyle(fontSize: 20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: ColorScales.getRankingColor(position - 1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (hasGame)
+                    Text(
+                      'Replace: ${currentGame.name}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  else
+                    Text(
+                      'Empty',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: Colors.grey[600],
+            ),
+          ],
         ),
-        title: Text(title),
-        subtitle: Text(hasGame
-          ? 'Replace: ${currentGame.name}'
-          : 'Position $position (Empty)'),
-        onTap: () {
-          Navigator.of(context).pop();
-          widget.onPositionSelected(position);
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        tileColor: hasGame ? Colors.orange[50] : Colors.grey[50],
       ),
     );
-  }
-
-  Color _getPositionColor(int position) {
-    switch (position) {
-      case 1:
-        return Colors.amber;
-      case 2:
-        return Colors.grey[600]!;
-      case 3:
-        return Colors.brown[600]!;
-      default:
-        return Colors.grey;
-    }
   }
 }

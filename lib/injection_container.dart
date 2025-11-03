@@ -212,6 +212,7 @@ Future<void> initDependencies() async {
         getGameExpansions: sl(),
         getEnhancedGameDetails: sl(),
         getCompleteGameDetailPageData: sl(),
+        getUpcomingEvents: sl(),
         gameRepository: sl(),
         enrichmentService: sl(),
         removeFromTopThree: sl(),

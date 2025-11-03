@@ -378,6 +378,7 @@ class HomePageLoaded extends GameState {
   final List<Game> topRatedGames;
   final List<Game>? userWishlist;
   final List<Game>? userRecommendations;
+  final List<Event> upcomingEvents;
 
   const HomePageLoaded({
     required this.popularGames,
@@ -386,6 +387,7 @@ class HomePageLoaded extends GameState {
     required this.topRatedGames,
     this.userWishlist,
     this.userRecommendations,
+    this.upcomingEvents = const [],
   });
 
   // copyWith Methode hinzufügen
@@ -396,6 +398,7 @@ class HomePageLoaded extends GameState {
     List<Game>? topRatedGames,
     List<Game>? userWishlist,
     List<Game>? userRecommendations,
+    List<Event>? upcomingEvents,
   }) {
     return HomePageLoaded(
       popularGames: popularGames ?? this.popularGames,
@@ -404,6 +407,7 @@ class HomePageLoaded extends GameState {
       topRatedGames: topRatedGames ?? this.topRatedGames,
       userWishlist: userWishlist ?? this.userWishlist,
       userRecommendations: userRecommendations ?? this.userRecommendations,
+      upcomingEvents: upcomingEvents ?? this.upcomingEvents,
     );
   }
 
@@ -415,6 +419,7 @@ class HomePageLoaded extends GameState {
         topRatedGames,
         userWishlist,
         userRecommendations,
+        upcomingEvents,
       ];
 }
 

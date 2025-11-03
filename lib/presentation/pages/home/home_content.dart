@@ -3,8 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import 'package:gamer_grove/presentation/widgets/sections/header_section.dart';
+//import 'package:gamer_grove/presentation/widgets/sections/header_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_rated_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/upcoming_events_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_games_section.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../injection_container.dart';
@@ -12,8 +13,6 @@ import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../widgets/sections/latest_games_section.dart';
 import '../../widgets/sections/popular_games_section.dart';
-import '../../widgets/sections/recommendations_section.dart';
-import '../../widgets/sections/wishlist_section.dart';
 import '../test/igdb_test_page.dart';
 import '../test/supabase_test_page.dart';
 
@@ -106,14 +105,22 @@ class _HomeContentState extends State<HomeContent> {
                 ],
               ),
 
-              // Header Section
+              /* // Header Section
               const SliverToBoxAdapter(
                 child: HeaderSection(),
-              ),
+              ), */
 
               // Popular Games Section
               const SliverToBoxAdapter(
                 child: PopularGamesSection(),
+              ),
+
+              // Upcoming Events Section (Carousel)
+              SliverToBoxAdapter(
+                child: UpcomingEventsSection(
+                  currentUserId: _currentUserId,
+                  gameBloc: _gameBloc,
+                ),
               ),
 
               // Latest Games Section
@@ -130,18 +137,6 @@ class _HomeContentState extends State<HomeContent> {
               const SliverToBoxAdapter(
                 child: TopRatedGamesSection(),
               ),
-
-              // User Wishlist Section (if logged in)
-              if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: WishlistSection(),
-                ),
-
-              // User Recommendations Section (if logged in)
-              if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: RecommendationsSection(),
-                ),
 
               // Bottom padding
               const SliverToBoxAdapter(

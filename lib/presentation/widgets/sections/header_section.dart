@@ -29,12 +29,12 @@ class HeaderSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildWelcomeSection(context),
-          const SizedBox(height: AppConstants.paddingLarge),
+          /*  const SizedBox(height: AppConstants.paddingLarge),
           _buildQuickActions(context),
           if (kDebugMode) ...[
             const SizedBox(height: AppConstants.paddingMedium),
             _buildDebugActions(context),
-          ],
+          ], */
         ],
       ),
     );

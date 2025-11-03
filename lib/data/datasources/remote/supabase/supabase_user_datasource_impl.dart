@@ -343,20 +343,26 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         );
       }
 
-      // Check for duplicates
-      if (gameIds.toSet().length != 3) {
+      // Convert 0 to null for empty slots
+      final game1Id = gameIds[0] == 0 ? null : gameIds[0];
+      final game2Id = gameIds[1] == 0 ? null : gameIds[1];
+      final game3Id = gameIds[2] == 0 ? null : gameIds[2];
+
+      // Check for duplicates (excluding nulls)
+      final nonNullGames = [game1Id, game2Id, game3Id].whereType<int>().toList();
+      if (nonNullGames.toSet().length != nonNullGames.length) {
         throw const InvalidTopThreeException(
-          message: 'All 3 games must be different',
+          message: 'All games must be different',
         );
       }
 
-      // Upsert top three
+      // Upsert top three (null values are allowed for empty slots)
       await SupabaseInsert('user_top_three')
           .values({
             'user_id': userId,
-            'game_1_id': gameIds[0],
-            'game_2_id': gameIds[1],
-            'game_3_id': gameIds[2],
+            'game_1_id': game1Id,
+            'game_2_id': game2Id,
+            'game_3_id': game3Id,
             'updated_at': DateTime.now().toIso8601String(),
           })
           .upsert()
@@ -367,20 +373,6 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     }
   }
 
-  @override
-  Future<void> removeGameFromTopThree(
-    String userId, {
-    required int gameId,
-  }) async {
-    try {
-      await _supabase.rpc<void>('remove_from_top_three', params: {
-        'p_user_id': userId,
-        'p_game_id': gameId,
-      },);
-    } catch (e) {
-      throw UserExceptionMapper.map(e);
-    }
-  }
 
   @override
   Future<List<int>?> getTopThree(String userId) async {
@@ -389,11 +381,12 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
       if (result == null) return null;
 
+      // Keep positions intact - convert nulls to 0 instead of filtering them out
       return [
-        result['game_1_id'] as int?,
-        result['game_2_id'] as int?,
-        result['game_3_id'] as int?,
-      ].whereType<int>().toList();
+        result['game_1_id'] as int? ?? 0,
+        result['game_2_id'] as int? ?? 0,
+        result['game_3_id'] as int? ?? 0,
+      ];
     } catch (e) {
       throw UserExceptionMapper.map(e);
     }

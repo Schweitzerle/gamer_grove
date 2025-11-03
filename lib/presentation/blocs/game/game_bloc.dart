@@ -8,6 +8,7 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
+import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/search/search_filters.dart';
@@ -32,6 +33,7 @@ import '../../../domain/usecases/game/get_upcoming_games.dart';
 import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
+import '../../../domain/usecases/event/get_upcoming_events.dart';
 import 'game_extensions.dart';
 
 part 'game_event.dart';
@@ -60,6 +62,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetGameExpansions getGameExpansions;
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
+  final GetUpcomingEvents getUpcomingEvents;
   final GameRepository gameRepository;
   final GameEnrichmentService enrichmentService;
 
@@ -85,6 +88,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getGameExpansions,
     required this.getEnhancedGameDetails,
     required this.getCompleteGameDetailPageData,
+    required this.getUpcomingEvents,
     required this.gameRepository,
     required this.enrichmentService,
   }) : super(GameInitial()) {
@@ -666,79 +670,85 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
         getLatestGames(const GetLatestGamesParams(limit: 10)),
         getTopRatedGames(const GetTopRatedGamesParams(limit: 10)),
-        if (event.userId != null) ...[
-          getUserWishlist(GetUserWishlistParams(
-              userId: event.userId!, limit: 20, offset: 0)),
-          getUserRecommendations(GetUserRecommendationsParams(
-              userId: event.userId!, limit: 20, offset: 0)),
-        ],
+        getUpcomingEvents(const GetUpcomingEventsParams(limit: 10)),
       ]);
 
       print('🏠 GameBloc: Parallel data fetch complete! Processing results...');
 
       // Extract results
-      final popularGames = results[0].fold(
+      final popularGames = results[0].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Popular games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Popular games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final upcomingGames = results[1].fold(
+      final upcomingGames = results[1].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Upcoming games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Upcoming games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final latestGames = results[2].fold(
+      final latestGames = results[2].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Latest games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Latest games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final topRatedGames = results[3].fold(
+      final topRatedGames = results[3].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Top rated games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Top rated games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final userWishlist = event.userId != null && results.length > 4
-          ? results[4].fold((l) => <Game>[], (r) => r)
+      final upcomingEvents = results[4].fold<List<Event>>(
+        (l) {
+          print('❌ GameBloc: Upcoming events failed: ${l.message}');
+          return <Event>[];
+        },
+        (r) {
+          print('✅ GameBloc: Upcoming events: ${r.length} events');
+          return r as List<Event>;
+        },
+      );
+      final userWishlist = event.userId != null && results.length > 5
+          ? results[5].fold((l) => <Game>[], (r) => r as List<Game>)
           : <Game>[];
-      final userRecommendations = event.userId != null && results.length > 5
-          ? results[5].fold((l) => <Game>[], (r) => r)
+      final userRecommendations = event.userId != null && results.length > 6
+          ? results[6].fold((l) => <Game>[], (r) => r as List<Game>)
           : <Game>[];
 
       // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
-        final enrichedPopular =
+        final List<Game> enrichedPopular =
             await enrichGamesWithUserData(popularGames, event.userId!);
-        final enrichedUpcoming =
+        final List<Game> enrichedUpcoming =
             await enrichGamesWithUserData(upcomingGames, event.userId!);
-        final enrichLatest =
+        final List<Game> enrichLatest =
             await enrichGamesWithUserData(latestGames, event.userId!);
-        final enrichedTopRated =
+        final List<Game> enrichedTopRated =
             await enrichGamesWithUserData(topRatedGames, event.userId!);
         // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
-        final enrichedWishlist = userWishlist.isNotEmpty
+        final List<Game> enrichedWishlist = userWishlist.isNotEmpty
             ? await enrichGamesWithUserData(userWishlist, event.userId!)
             : <Game>[];
-        final enrichedRecommendations = userRecommendations.isNotEmpty
+        final List<Game> enrichedRecommendations = userRecommendations
+                .isNotEmpty
             ? await enrichGamesWithUserData(userRecommendations, event.userId!)
             : <Game>[];
 
@@ -749,6 +759,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           topRatedGames: enrichedTopRated,
           userWishlist: enrichedWishlist,
           userRecommendations: enrichedRecommendations,
+          upcomingEvents: upcomingEvents,
         ));
       } else {
         emit(HomePageLoaded(
@@ -756,6 +767,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           upcomingGames: upcomingGames,
           latestGames: latestGames,
           topRatedGames: topRatedGames,
+          upcomingEvents: upcomingEvents,
         ));
       }
     } catch (e) {
@@ -830,7 +842,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     String userId, {
     int? enrichLimit,
   }) async {
-    print('🎮 enrichGamesWithUserData: Enriching ${games.length} games for user $userId');
+    print(
+        '🎮 enrichGamesWithUserData: Enriching ${games.length} games for user $userId');
     final enrichedGames = await enrichmentService.enrichGames(games, userId);
     print('🎮 enrichGamesWithUserData: Enriched ${enrichedGames.length} games');
     // Debug: print first game enrichment status
@@ -1239,6 +1252,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     AddToTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
+    print('🎮 GameBloc: _onAddToTopThree called');
+    print('   User ID: ${event.userId}');
+    print('   Game ID: ${event.gameId}');
+    print('   Position: ${event.position}');
+
     final result = await addToTopThree(AddToTopThreeParams(
       userId: event.userId,
       gameId: event.gameId,
@@ -1247,11 +1265,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
+        print('❌ GameBloc: Failed to add to top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
       (_) {
+        print('✅ GameBloc: Successfully added to top three');
         add(UpdateTopThreeEvent(userId: event.userId));
 
         _updateGameInAllStates(event.gameId, (game) {
@@ -1268,6 +1288,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     RemoveFromTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
+    print('🎮 GameBloc: _onRemoveFromTopThree called');
+    print('   User ID: ${event.userId}');
+    print('   Game ID: ${event.gameId}');
+
     final result = await removeFromTopThree(RemoveFromTopThreeParams(
       userId: event.userId,
       gameId: event.gameId,
@@ -1275,11 +1299,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
+        print('❌ GameBloc: Failed to remove from top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
       (_) {
+        print('✅ GameBloc: Successfully removed from top three');
         add(UpdateTopThreeEvent(userId: event.userId));
 
         _updateGameInAllStates(event.gameId, (game) {
@@ -1298,7 +1324,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   ) async {
     final currentState = state;
     if (currentState is GrovePageLoaded) {
-      final result = await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+      final result =
+          await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
 
       result.fold(
         (failure) => emit(GameError(_mapFailureToMessage(failure))),
