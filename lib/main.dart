@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart' as app_auth;
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'injection_container.dart' as di;
 import 'injection_container.dart';
@@ -31,15 +33,23 @@ class GamerGroveApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // Auth Bloc - manages authentication state
         BlocProvider(
           create: (_) => sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
         ),
+        // UserGameData Bloc - global state for user-game relations
+        // Uses LazySingleton to persist across the app
+        BlocProvider.value(
+          value: sl<UserGameDataBloc>(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Gamer Grove',
-        debugShowCheckedModeBanner: false,
-        theme: _buildTheme(),
-        home: const SplashPage(),
+      child: _UserGameDataListener(
+        child: MaterialApp(
+          title: 'Gamer Grove',
+          debugShowCheckedModeBanner: false,
+          theme: _buildTheme(),
+          home: const SplashPage(),
+        ),
       ),
     );
   }
@@ -52,6 +62,36 @@ class GamerGroveApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       fontFamily: 'Montserrat',
+    );
+  }
+}
+
+/// Listener widget that loads user game data when user logs in
+/// and clears it when user logs out
+class _UserGameDataListener extends StatelessWidget {
+  final Widget child;
+
+  const _UserGameDataListener({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, app_auth.AuthState>(
+      listener: (context, authState) {
+        final userGameDataBloc = context.read<UserGameDataBloc>();
+
+        if (authState is app_auth.AuthAuthenticated) {
+          // User logged in - load their game data
+          debugPrint(
+            '🎮 User authenticated, loading game data for: ${authState.user.id}',
+          );
+          userGameDataBloc.add(LoadUserGameDataEvent(authState.user.id));
+        } else if (authState is app_auth.AuthUnauthenticated) {
+          // User logged out - clear game data
+          debugPrint('🚪 User logged out, clearing game data');
+          userGameDataBloc.add(const ClearUserGameDataEvent());
+        }
+      },
+      child: child,
     );
   }
 }

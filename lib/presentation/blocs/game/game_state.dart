@@ -201,6 +201,16 @@ class UserWishlistLoaded extends GameState {
     required this.userId,
   });
 
+  UserWishlistLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserWishlistLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
+
   @override
   List<Object> get props => [games, userId];
 }
@@ -218,6 +228,16 @@ class UserRecommendationsLoaded extends GameState {
     required this.userId,
   });
 
+  UserRecommendationsLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserRecommendationsLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
+
   @override
   List<Object> get props => [games, userId];
 }
@@ -234,6 +254,16 @@ class UserRatedLoaded extends GameState {
     required this.games,
     required this.userId,
   });
+
+  UserRatedLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserRatedLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
 
   @override
   List<Object> get props => [games, userId];
@@ -468,6 +498,12 @@ class SimilarGamesLoaded extends GameState {
 
   const SimilarGamesLoaded(this.games);
 
+  SimilarGamesLoaded copyWith({
+    List<Game>? games,
+  }) {
+    return SimilarGamesLoaded(games ?? this.games);
+  }
+
   @override
   List<Object> get props => [games];
 }
@@ -513,6 +549,22 @@ class CompleteFranchiseGamesLoaded extends GameState {
     this.currentPage = 0,
   });
 
+  CompleteFranchiseGamesLoaded copyWith({
+    int? franchiseId,
+    String? franchiseName,
+    List<Game>? games,
+    bool? hasMore,
+    int? currentPage,
+  }) {
+    return CompleteFranchiseGamesLoaded(
+      franchiseId: franchiseId ?? this.franchiseId,
+      franchiseName: franchiseName ?? this.franchiseName,
+      games: games ?? this.games,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
+
   @override
   List<Object> get props =>
       [franchiseId, franchiseName, games, hasMore, currentPage];
@@ -534,6 +586,22 @@ class CompleteCollectionGamesLoaded extends GameState {
     this.hasMore = false,
     this.currentPage = 0,
   });
+
+  CompleteCollectionGamesLoaded copyWith({
+    int? collectionId,
+    String? collectionName,
+    List<Game>? games,
+    bool? hasMore,
+    int? currentPage,
+  }) {
+    return CompleteCollectionGamesLoaded(
+      collectionId: collectionId ?? this.collectionId,
+      collectionName: collectionName ?? this.collectionName,
+      games: games ?? this.games,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
 
   @override
   List<Object> get props =>
