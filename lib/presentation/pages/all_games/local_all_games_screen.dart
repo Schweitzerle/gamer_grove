@@ -9,14 +9,22 @@ import '../../../domain/entities/genre.dart';
 import '../../../domain/entities/platform/platform.dart';
 import '../../../injection_container.dart';
 
-enum SortOption {
-  nameAZ,
-  nameZA,
-  ratingHigh,
-  ratingLow,
-  releaseDateNew,
-  releaseDateOld,
+// Die alte SortOption wird durch zwei neue Enums ersetzt,
+// um Kategorie und Richtung zu trennen.
+enum SortCategory {
+  name,
+  userRating,
+  totalRating,
+  igdbUserRating,
+  aggregatedRating,
+  totalRatingCount,
+  aggregatedRatingCount,
+  igdbUserRatingCount,
+  hypes,
+  releaseDate
 }
+
+enum SortDirection { ascending, descending }
 
 enum RatingFilter {
   all,
@@ -69,7 +77,9 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   int? _selectedMinYear;
   int? _selectedMaxYear;
   final RatingFilter _ratingFilter = RatingFilter.all;
-  SortOption _sortOption = SortOption.nameAZ;
+  // State für Sortierung angepasst
+  SortCategory _sortCategory = SortCategory.name;
+  SortDirection _sortDirection = SortDirection.ascending;
 
   // Enrichment progress
   bool _isEnriching = false;
@@ -93,44 +103,26 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   }
 
   Future<void> _enrichAllGames() async {
+    final enrichmentService = sl<GameEnrichmentService>();
+
     setState(() {
       _isEnriching = true;
-      _enrichmentProgress = 0;
-      _enrichmentStatus = 'Loading game data...';
     });
 
-    try {
-      final enrichmentService = sl<GameEnrichmentService>();
+    final enrichedGames = await enrichmentService.enrichGames(
+      widget.games,
+      widget.userId!,
+    );
 
-      final enrichedGames = await enrichmentService.enrichGames(
-        widget.games,
-        widget.userId!,
-      );
+    setState(() {
+      _allGames = enrichedGames;
+      _isEnriching = false;
+    });
 
-      setState(() {
-        _allGames = enrichedGames;
-        _isEnriching = false;
-        _enrichmentProgress = _totalGames;
-      });
-
-      _applyFiltersAndSort();
-    } catch (e) {
-      setState(() {
-        _allGames = List.from(widget.games);
-        _isEnriching = false;
-        _enrichmentStatus = 'Error loading data';
-      });
-
-      _applyFiltersAndSort();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error enriching games: $e')),
-        );
-      }
-    }
+    _applyFiltersAndSort();
   }
 
+  //TODO: maybe implement filtering with dynamic data from api like in search screen and then use it for local filtering of the games
   void _applyFiltersAndSort() {
     List<Game> filtered = List.from(_allGames);
 
@@ -185,46 +177,96 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         break;
     }
 
-    // Apply sorting
-    switch (_sortOption) {
-      case SortOption.nameAZ:
-        filtered.sort((a, b) => a.name.compareTo(b.name));
+    // Apply sorting - Logik angepasst an _sortCategory und _sortDirection
+    switch (_sortCategory) {
+      case SortCategory.name:
+        filtered.sort((a, b) => _sortDirection == SortDirection.ascending
+            ? a.name.compareTo(b.name)
+            : b.name.compareTo(a.name));
         break;
-      case SortOption.nameZA:
-        filtered.sort((a, b) => b.name.compareTo(a.name));
+      case SortCategory.totalRating:
+        filtered.sort((a, b) {
+          final aRating = a.totalRating ?? 0;
+          final bRating = b.totalRating ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
+        });
         break;
-      case SortOption.ratingHigh:
+      case SortCategory.igdbUserRating:
+        filtered.sort((a, b) {
+          final aRating = a.rating ?? 0;
+          final bRating = b.rating ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
+        });
+        break;
+      case SortCategory.aggregatedRating:
         filtered.sort((a, b) {
           final aRating = a.aggregatedRating ?? 0;
           final bRating = b.aggregatedRating ?? 0;
-          return bRating.compareTo(aRating);
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
         });
         break;
-      case SortOption.ratingLow:
+      case SortCategory.userRating:
         filtered.sort((a, b) {
-          final aRating = a.aggregatedRating ?? 0;
-          final bRating = b.aggregatedRating ?? 0;
-          return aRating.compareTo(bRating);
+          final aRating = a.userRating ?? 0;
+          final bRating = b.userRating ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
         });
         break;
-      case SortOption.releaseDateNew:
+      case SortCategory.totalRatingCount:
+        filtered.sort((a, b) {
+          final aRating = a.totalRatingCount ?? 0;
+          final bRating = b.totalRatingCount ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
+        });
+        break;
+      case SortCategory.igdbUserRatingCount:
+        filtered.sort((a, b) {
+          final aRating = a.ratingCount ?? 0;
+          final bRating = b.ratingCount ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
+        });
+        break;
+      case SortCategory.aggregatedRatingCount:
+        filtered.sort((a, b) {
+          final aRating = a.aggregatedRatingCount ?? 0;
+          final bRating = b.aggregatedRatingCount ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aRating.compareTo(bRating) // Low to High
+              : bRating.compareTo(aRating); // High to Low
+        });
+        break;
+      case SortCategory.hypes:
+        filtered.sort((a, b) {
+          final aHypes = a.hypes ?? 0;
+          final bHypes = b.hypes ?? 0;
+          return _sortDirection == SortDirection.ascending
+              ? aHypes.compareTo(bHypes) // Low to High
+              : bHypes.compareTo(aHypes); // High to Low
+        });
+        break;
+      case SortCategory.releaseDate:
         filtered.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
             return 0;
           }
           if (a.firstReleaseDate == null) return 1;
           if (b.firstReleaseDate == null) return -1;
-          return b.firstReleaseDate!.compareTo(a.firstReleaseDate!);
-        });
-        break;
-      case SortOption.releaseDateOld:
-        filtered.sort((a, b) {
-          if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
-            return 0;
-          }
-          if (a.firstReleaseDate == null) return 1;
-          if (b.firstReleaseDate == null) return -1;
-          return a.firstReleaseDate!.compareTo(b.firstReleaseDate!);
+          return _sortDirection == SortDirection.ascending
+              ? a.firstReleaseDate!.compareTo(b.firstReleaseDate!) // Old to New
+              : b.firstReleaseDate!
+                  .compareTo(a.firstReleaseDate!); // New to Old
         });
         break;
     }
@@ -480,7 +522,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
             TextButton.icon(
               onPressed: _showSortDialog,
               icon: const Icon(Icons.sort, size: 16),
-              label: Text(_getSortOptionName(_sortOption)),
+              // Label nutzt jetzt die neue Helper-Methode
+              label: Text(_getCurrentSortName()),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
@@ -565,43 +608,207 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     );
   }
 
+  // --- NEUER SORTIERDIALOG ---
   Future<void> _showSortDialog() async {
     await showDialog<void>(
       context: context,
-      builder: (context) => SimpleDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Sort by'),
-        children: SortOption.values
-            .map(
-              (option) => SimpleDialogOption(
-                onPressed: () {
-                  setState(() {
-                    _sortOption = option;
-                  });
-                  Navigator.of(context).pop();
-                  _applyFiltersAndSort();
-                },
-                child: Text(_getSortOptionName(option)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.name,
+                title: 'Name',
+                ascText: 'A-Z',
+                descText: 'Z-A',
               ),
-            )
-            .toList(),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.totalRating,
+                title: 'Total Rating',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.igdbUserRating,
+                title: 'IGDB User Rating',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.aggregatedRating,
+                title: 'Critics Rating',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.userRating,
+                title: 'Your Rating',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.totalRatingCount,
+                title: 'Total Rating Count',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.igdbUserRatingCount,
+                title: 'IGDB User Rating Count',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.aggregatedRating,
+                title: 'Critics Rating Count',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.hypes,
+                title: 'Hypes',
+                ascText: 'Low-High',
+                descText: 'High-Low',
+              ),
+              _buildSortListTile(
+                context: context,
+                category: SortCategory.releaseDate,
+                title: 'Release Date',
+                ascText: 'Old-New',
+                descText: 'New-Old',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
 
-  String _getSortOptionName(SortOption option) {
-    switch (option) {
-      case SortOption.nameAZ:
-        return 'Name A-Z';
-      case SortOption.nameZA:
-        return 'Name Z-A';
-      case SortOption.ratingHigh:
-        return 'Rating High-Low';
-      case SortOption.ratingLow:
-        return 'Rating Low-High';
-      case SortOption.releaseDateNew:
-        return 'Release Date New-Old';
-      case SortOption.releaseDateOld:
-        return 'Release Date Old-New';
+  // --- NEUES HELPER WIDGET für den Dialog ---
+  Widget _buildSortListTile({
+    required BuildContext context,
+    required SortCategory category,
+    required String title,
+    required String ascText,
+    required String descText,
+  }) {
+    final bool isSelected = _sortCategory == category;
+    final bool isAscending = _sortDirection == SortDirection.ascending;
+
+    // Diese Funktion steuert die Auswahl und das Umschalten
+    void handleTap() {
+      if (isSelected) {
+        // Wenn bereits ausgewählt, nur die Richtung umschalten
+        setState(() {
+          _sortDirection =
+              isAscending ? SortDirection.descending : SortDirection.ascending;
+        });
+      } else {
+        // Wenn nicht ausgewählt, Kategorie setzen und Standardrichtung festlegen
+        final newDirection = (category == SortCategory.name)
+            ? SortDirection.ascending // Name default A-Z
+            : SortDirection.descending; // Rating/Date default High/New
+        setState(() {
+          _sortCategory = category;
+          _sortDirection = newDirection;
+        });
+      }
+      Navigator.of(context).pop();
+      _applyFiltersAndSort();
+    }
+
+    return ListTile(
+      title: Text(title),
+      leading: Radio<SortCategory>(
+        value: category,
+        groupValue: _sortCategory,
+        onChanged: (SortCategory? value) {
+          handleTap();
+        },
+      ),
+      trailing: isSelected
+          ? TextButton.icon(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              icon: Icon(
+                isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 16,
+              ),
+              label: Text(
+                isAscending ? ascText : descText,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              onPressed: handleTap, // Richtung umschalten
+            )
+          : null,
+      onTap: handleTap, // Kategorie auswählen oder Richtung umschalten
+    );
+  }
+
+  // --- NEUE HELPER METHODE für den Sortiernamen ---
+  String _getCurrentSortName() {
+    switch (_sortCategory) {
+      case SortCategory.name:
+        return _sortDirection == SortDirection.ascending
+            ? 'Name A-Z'
+            : 'Name Z-A';
+      case SortCategory.totalRating:
+        return _sortDirection == SortDirection.ascending
+            ? 'Total Rating Low-High'
+            : 'Total Rating High-Low';
+      case SortCategory.igdbUserRating:
+        return _sortDirection == SortDirection.ascending
+            ? 'IGDB User Rating Low-High'
+            : 'IGDB User Rating High-Low';
+      case SortCategory.aggregatedRating:
+        return _sortDirection == SortDirection.ascending
+            ? 'Aggregated Rating Low-High'
+            : 'Aggregated Rating High-Low';
+      case SortCategory.userRating:
+        return _sortDirection == SortDirection.ascending
+            ? 'Your Rating Low-High'
+            : 'Your Rating High-Low';
+      case SortCategory.totalRatingCount:
+        return _sortDirection == SortDirection.ascending
+            ? 'Total Rating Count Low-High'
+            : 'Total Rating Count High-Low';
+      case SortCategory.igdbUserRatingCount:
+        return _sortDirection == SortDirection.ascending
+            ? 'IGDB User Rating Count Low-High'
+            : 'IGDB User Rating Count High-Low';
+      case SortCategory.aggregatedRatingCount:
+        return _sortDirection == SortDirection.ascending
+            ? 'Aggregated Rating Count Low-High'
+            : 'Aggregated Rating Count High-Low';
+      case SortCategory.hypes:
+        return _sortDirection == SortDirection.ascending
+            ? 'Hypes Low-High'
+            : 'Hypes High-Low';
+      case SortCategory.releaseDate:
+        return _sortDirection == SortDirection.ascending
+            ? 'Release Date Old-New'
+            : 'Release Date New-Old';
     }
   }
+
+  // Alte _getSortOptionName Methode wird entfernt
 }
