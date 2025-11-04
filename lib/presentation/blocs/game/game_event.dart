@@ -404,6 +404,11 @@ class LoadAllFranchiseGamesEvent extends GameEvent {
   List<Object?> get props => [franchiseId, franchiseName, userId];
 }
 
+/// Event to refresh the current state with applied cache
+/// This is useful when returning from a detail screen to ensure
+/// that any changes made are reflected in the list views
+class RefreshCacheEvent extends GameEvent {}
+
 class LoadAllCollectionGamesEvent extends GameEvent {
   final int collectionId;
   final String collectionName;

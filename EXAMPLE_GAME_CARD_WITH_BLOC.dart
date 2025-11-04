@@ -1,23 +1,40 @@
-// presentation/widgets/game_card.dart
-import 'dart:ui'; // Für BackdropFilter
+// BEISPIEL: GameCard mit UserGameDataBloc Integration
+// Diese Datei zeigt, wie du die GameCard aktualisieren kannst
+
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
-import '../../domain/entities/game/game.dart';
-import '../../core/utils/date_formatter.dart';
-import '../../core/utils/image_utils.dart';
-import '../../core/widgets/cached_image_widget.dart';
 
-class GameCard extends StatelessWidget {
+/// Aktualisierte GameCard mit UserGameDataBloc Integration
+///
+/// Diese Karte reagiert automatisch auf Änderungen an:
+/// - Wishlist Status
+/// - User Ratings
+/// - Top Three Status
+/// - Recommendations
+///
+/// Verwendung:
+/// ```dart
+/// GameCard(
+///   game: game,
+///   onTap: () => Navigator.push(...),
+/// )
+/// ```
+class GameCardWithBloc extends StatelessWidget {
   final Game game;
   final VoidCallback onTap;
   final bool blurRated;
   final double? width;
   final double? height;
 
-  const GameCard({
+  const GameCardWithBloc({
     super.key,
     required this.game,
     required this.onTap,
@@ -51,14 +68,12 @@ class GameCard extends StatelessWidget {
           child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
             builder: (context, userDataState) {
               // Extract user-specific data from global state
-              // 🔄 Fallback to Game entity data if UserGameDataBloc is not loaded yet
-              bool isWishlisted = game.isWishlisted;
-              bool isRecommended = game.isRecommended;
-              double? userRating = game.userRating;
-              bool isInTopThree = game.isInTopThree;
-              int? topThreePosition = game.topThreePosition;
+              bool isWishlisted = false;
+              bool isRecommended = false;
+              double? userRating;
+              bool isInTopThree = false;
+              int? topThreePosition;
 
-              // Override with UserGameDataBloc data if available
               if (userDataState is UserGameDataLoaded) {
                 isWishlisted = userDataState.isWishlisted(game.id);
                 isRecommended = userDataState.isRecommended(game.id);
@@ -70,7 +85,7 @@ class GameCard extends StatelessWidget {
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Background Cover Image (full card)
+                  // Background Cover Image
                   _buildBackgroundImage(context),
 
                   // Blur Filter für rated games
@@ -228,37 +243,32 @@ class GameCard extends StatelessWidget {
   Widget _buildContentOverlay(BuildContext context) {
     return Positioned(
       left: 6,
-      right: 50, // Platz für rechte Elemente
+      right: 50,
       bottom: 6,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Game Title
           Text(
             game.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 14,
-              shadows: [
-                Shadow(
-                  offset: const Offset(0, 1),
-                  blurRadius: 2,
-                  color: Colors.black.withOpacity(0.7),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 14,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 2,
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                  ],
                 ),
-              ],
-            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-
           const SizedBox(height: 4),
-
-          // Date + Genres in einer Row
           Row(
             children: [
-              // Release Date
               if (game.firstReleaseDate != null) ...[
                 Icon(
                   Icons.calendar_today,
@@ -284,8 +294,6 @@ class GameCard extends StatelessWidget {
                   ),
                 ],
               ],
-
-              // Genres
               if (game.genres.isNotEmpty)
                 Expanded(
                   child: Text(
@@ -305,6 +313,7 @@ class GameCard extends StatelessWidget {
     );
   }
 
+  /// ⭐ UPDATED: Now uses data from UserGameDataBloc
   Widget _buildRatingsOverlay(
     BuildContext context,
     double? userRating,
@@ -362,7 +371,6 @@ class GameCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Circular Progress
           Positioned.fill(
             child: CircularProgressIndicator(
               value: rating,
@@ -371,8 +379,6 @@ class GameCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
-
-          // Center Content
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -484,7 +490,7 @@ class GameCard extends StatelessWidget {
   }
 
   Widget _buildIGDBRatingCircle(BuildContext context) {
-    final rating = game.totalRating! / 100; // 0-1 range für Progress
+    final rating = game.totalRating! / 100;
     final color = ColorScales.getRatingColor(game.totalRating!);
 
     return Container(
@@ -500,7 +506,6 @@ class GameCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Circular Progress
           Positioned.fill(
             child: CircularProgressIndicator(
               value: rating,
@@ -509,14 +514,12 @@ class GameCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
-
-          // Center Content
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.public, // Globe icon für IGDB/externe Quelle
+                  Icons.public,
                   size: 12,
                   color: Colors.white,
                 ),
@@ -574,158 +577,17 @@ class GameCard extends StatelessWidget {
   double _calculateUserElementsHeight(int count, double? userRating) {
     if (count == 0) return 0;
 
-    double height = 16; // Base padding (oben und unten)
+    double height = 16; // Base padding
 
     if (userRating != null) {
-      height += 32; // User rating ist größer
+      height += 32; // User rating is larger
       count--;
-      if (count > 0) height += 4; // Spacing nach User Rating
+      if (count > 0) height += 4;
     }
 
-    height += count * 24; // Andere Elemente sind 24px
-    height +=
-        (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
+    height += count * 24;
+    height += (count > 0 ? count - 1 : 0) * 4;
 
     return height;
-  }
-}
-
-// Shimmer Loading Version
-class GameCardShimmer extends StatelessWidget {
-  final double? width;
-  final double? height;
-
-  const GameCardShimmer({
-    super.key,
-    this.width,
-    this.height,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width ?? 160,
-      height: height ?? 240,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            // Background shimmer
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-                    Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withOpacity(0.5),
-                  ],
-                ),
-              ),
-            ),
-
-            // User Elements shimmer (rechts oben)
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Column(
-                children: [
-                  // User Rating shimmer
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.surface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // States shimmer
-                  ...List.generate(
-                    2,
-                    (index) => Container(
-                      width: 32,
-                      height: 32,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // IGDB Rating shimmer (unten rechts)
-            Positioned(
-              bottom: 12,
-              right: 12,
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-              ),
-            ),
-
-            // Content area shimmer (unten links)
-            Positioned(
-              left: 12,
-              right: 70,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title shimmer
-                  Container(
-                    width: double.infinity,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Date + Genres shimmer
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 60,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

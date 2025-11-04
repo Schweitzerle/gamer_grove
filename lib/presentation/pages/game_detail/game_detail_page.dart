@@ -95,6 +95,11 @@ class _GameDetailPageState extends State<GameDetailPage>
   void dispose() {
     _scrollController.dispose();
     _mediaTabController.dispose();
+
+    // 🎯 REFRESH CACHE - Ensure home screen shows updated game data
+    // This triggers a cache refresh when navigating back from detail screen
+    context.read<GameBloc>().add(RefreshCacheEvent());
+
     super.dispose();
   }
 

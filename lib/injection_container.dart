@@ -96,6 +96,7 @@ import 'domain/repositories/event_repository.dart';
 // Presentation Layer - BLoCs
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/collection/collection_bloc.dart';
+import 'presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 
 /// Service locator instance.
@@ -186,6 +187,20 @@ Future<void> initDependencies() async {
         clearTopThreeUseCase: sl(),
         getWishlistedGamesUseCase: sl(),
         getRatedGamesUseCase: sl(),
+      ),
+    )
+
+    // UserGameData BLoC (Global State for User-Game Relations)
+    ..registerLazySingleton(
+      () => UserGameDataBloc(
+        getWishlistedGamesUseCase: sl(),
+        getRatedGamesUseCase: sl(),
+        getTopThreeUseCase: sl(),
+        toggleWishlistUseCase: sl(),
+        toggleRecommendedUseCase: sl(),
+        rateGameUseCase: sl(),
+        removeRatingUseCase: sl(),
+        updateTopThreeUseCase: sl(),
       ),
     )
 
@@ -353,6 +368,10 @@ Future<void> initDependencies() async {
         supabase: sl(),
         networkInfo: sl(),
       ),
+    )
+    // ✅ Also register concrete implementation for UseCases that need it
+    ..registerLazySingleton<UserRepositoryImpl>(
+      () => sl<UserRepository>() as UserRepositoryImpl,
     )
     ..registerLazySingleton<EventRepository>(
       () => EventRepositoryImpl(

@@ -708,16 +708,14 @@ class UserRepositoryImpl extends SupabaseBaseRepository
           return <Map<String, dynamic>>[];
         }
 
-        // Fetch game details for each ID
+        // Return game IDs with their positions (1-indexed)
+        // UserGameDataBloc only needs IDs, not full game data
         final games = <Map<String, dynamic>>[];
-        for (final gameId in gameIds) {
-          final gameData = await this
-              .supabase
-              .from('games')
-              .select()
-              .eq('id', gameId)
-              .single();
-          games.add(gameData);
+        for (var i = 0; i < gameIds.length; i++) {
+          games.add({
+            'game_id': gameIds[i],
+            'position': i + 1, // 1-indexed position
+          });
         }
         return games;
       },
