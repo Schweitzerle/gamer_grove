@@ -7,17 +7,22 @@ import '../../blocs/game/game_bloc.dart';
 import '../sections/base_game_section.dart';
 
 class RecommendationsSection extends BaseGameSection {
+  final String? username;
+
   const RecommendationsSection({
     super.key,
     super.currentUserId,
     super.gameBloc,
+    this.username,
   });
 
   @override
-  String get title => 'Recommended for You';
+  String get title =>
+      username != null ? "Recommended by $username" : 'Recommended by You';
 
   @override
-  String get subtitle => 'Games you might enjoy';
+  String get subtitle =>
+      username != null ? 'Games $username loves' : 'Games you love';
 
   @override
   IconData get icon => Icons.recommend;
@@ -56,20 +61,25 @@ class RecommendationsSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is UserRecommendationsLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('No recommendations yet', Icons.lightbulb_outline, context);
+        return buildEmptySection(
+            'No recommendations yet', Icons.lightbulb_outline, context);
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRecommendations.isEmpty) {
-        return buildEmptySection('No recommendations yet', Icons.lightbulb_outline, context);
+        return buildEmptySection(
+            'No recommendations yet', Icons.lightbulb_outline, context);
       }
-      return buildHorizontalGameList(state.userRecommendations.take(10).toList());
+      return buildHorizontalGameList(
+          state.userRecommendations.take(10).toList());
     } else if (state is HomePageLoaded && state.userRecommendations != null) {
       // Backup für HomePageLoaded (falls irgendwo noch verwendet)
       if (state.userRecommendations!.isEmpty) {
-        return buildEmptySection('No recommendations yet', Icons.lightbulb_outline, context);
+        return buildEmptySection(
+            'No recommendations yet', Icons.lightbulb_outline, context);
       }
-      return buildHorizontalGameList(state.userRecommendations!.take(10).toList());
+      return buildHorizontalGameList(
+          state.userRecommendations!.take(10).toList());
     } else if (state is GameError) {
       return buildErrorSection('Failed to load recommendations', context);
     }

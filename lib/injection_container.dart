@@ -64,6 +64,7 @@ import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_detai
 import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/search_users.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
@@ -98,6 +99,7 @@ import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/collection/collection_bloc.dart';
 import 'presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 
 /// Service locator instance.
 final sl = GetIt.instance;
@@ -271,6 +273,17 @@ Future<void> initDependencies() async {
         enrichmentService: sl(),
       ),
     )
+
+    // User Search BLoC
+    ..registerFactory(
+      () => UserSearchBloc(
+        searchUsers: sl(),
+        getFollowers: sl(),
+        getFollowing: sl(),
+        currentUserId: null, // Will be set dynamically
+      ),
+    )
+
     // ============================================================
     // DOMAIN LAYER - USE CASES
     // ============================================================
@@ -292,6 +305,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => UnfollowUserUseCase(sl()))
     ..registerLazySingleton(() => GetFollowersUseCase(sl()))
     ..registerLazySingleton(() => GetFollowingUseCase(sl()))
+    ..registerLazySingleton(() => SearchUsers(sl()))
 
     // Collection Use Cases
     ..registerLazySingleton(() => GetUserGameDataUseCase(sl()))

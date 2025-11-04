@@ -7,17 +7,21 @@ import '../../blocs/game/game_bloc.dart';
 import 'base_game_section.dart';
 
 class RatedSection extends BaseGameSection {
+  final String? username;
+
   const RatedSection({
     super.key,
     super.currentUserId,
     super.gameBloc,
+    this.username,
   });
 
   @override
-  String get title => 'My Rated';
+  String get title => username != null ? "$username's Rated" : 'My Rated';
 
   @override
-  String get subtitle => 'Games you have rated';
+  String get subtitle =>
+      username != null ? 'Games $username has rated' : 'Games you have rated';
 
   @override
   IconData get icon => Icons.numbers;
@@ -56,12 +60,14 @@ class RatedSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is UserRatedLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('Your ratings are empty', Icons.star_border, context);
+        return buildEmptySection(
+            'Your ratings are empty', Icons.star_border, context);
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRated.isEmpty) {
-        return buildEmptySection('Your ratings are empty', Icons.star_border, context);
+        return buildEmptySection(
+            'Your ratings are empty', Icons.star_border, context);
       }
       return buildHorizontalGameList(state.userRated.take(10).toList());
     } else if (state is GameError) {

@@ -598,8 +598,17 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     int? offset,
   }) async {
     try {
-      final result = await RpcQueries.searchUsers(query, limit: limit ?? 20)
-          .build(_supabase);
+      // Use ilike for case-insensitive search on username and display_name
+      final searchPattern = '%$query%';
+
+      final result = await _supabase
+          .from('users')
+          .select('*')
+          .or('username.ilike.$searchPattern,display_name.ilike.$searchPattern')
+          .eq('is_profile_public', true)
+          .order('followers_count', ascending: false)
+          .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
+
       return (result as List).cast<Map<String, dynamic>>();
     } catch (e) {
       throw UserExceptionMapper.map(e);
