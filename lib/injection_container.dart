@@ -65,10 +65,12 @@ import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/search_users.dart';
+import 'package:gamer_grove/domain/usecases/user/get_leaderboard_users.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -82,6 +84,12 @@ import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource_impl.dart';
 import 'data/datasources/remote/supabase/supabase_auth_datasource.dart';
 import 'data/datasources/remote/supabase/supabase_auth_datasource_impl.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource_impl.dart';
+import 'package:gamer_grove/data/repositories/user_activity_repository_impl.dart';
+import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
+import 'package:gamer_grove/domain/usecases/user/get_activity_feed.dart';
+import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_bloc.dart';
 import 'data/datasources/remote/supabase/supabase_user_datasource.dart';
 import 'data/datasources/remote/supabase/supabase_user_datasource_impl.dart';
 // Data Layer - Repositories
@@ -151,7 +159,7 @@ Future<void> initDependencies() async {
     // ============================================================
 
     // Auth BLoC
-    ..registerFactory(
+    ..registerLazySingleton(
       () => AuthBloc(
         signInUseCase: sl(),
         signUpUseCase: sl(),
@@ -284,6 +292,22 @@ Future<void> initDependencies() async {
       ),
     )
 
+    // Leaderboard BLoC
+    ..registerFactory(
+      () => LeaderboardBloc(
+        getLeaderboardUsers: sl(),
+      ),
+    )
+
+    // Activity Feed BLoC
+    ..registerFactory(
+      () => ActivityFeedBloc(
+        getActivityFeed: sl(),
+        gameRepository: sl(),
+        authBloc: sl(),
+      ),
+    )
+
     // ============================================================
     // DOMAIN LAYER - USE CASES
     // ============================================================
@@ -306,6 +330,8 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetFollowersUseCase(sl()))
     ..registerLazySingleton(() => GetFollowingUseCase(sl()))
     ..registerLazySingleton(() => SearchUsers(sl()))
+    ..registerLazySingleton(() => GetLeaderboardUsersUseCase(sl()))
+    ..registerLazySingleton(() => GetActivityFeedUseCase(sl()))
 
     // Collection Use Cases
     ..registerLazySingleton(() => GetUserGameDataUseCase(sl()))
@@ -401,6 +427,13 @@ Future<void> initDependencies() async {
         enrichmentService: sl(),
       ),
     )
+    ..registerLazySingleton<UserActivityRepository>(
+      () => UserActivityRepositoryImpl(
+        dataSource: sl(),
+        supabase: sl(),
+        networkInfo: sl(),
+      ),
+    )
 
     // ============================================================
     // DATA LAYER - DATA SOURCES
@@ -411,6 +444,9 @@ Future<void> initDependencies() async {
     )
     ..registerLazySingleton<SupabaseUserDataSource>(
       () => SupabaseUserDataSourceImpl(supabase: sl()),
+    )
+    ..registerLazySingleton<SupabaseUserActivityDataSource>(
+      () => SupabaseUserActivityDataSourceImpl(supabase: sl()),
     )
 
     // IGDB Data Source

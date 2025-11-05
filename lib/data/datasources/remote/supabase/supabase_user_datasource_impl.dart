@@ -643,6 +643,24 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     }
   }
 
+  @override
+  Future<List<Map<String, dynamic>>> getLeaderboardUsers({
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      final result = await _supabase
+          .from('users')
+          .select('*')
+          .order('total_games_rated', ascending: false)
+          .range(offset ?? 0, (offset ?? 0) + (limit ?? 100) - 1);
+
+      return (result as List).cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw UserExceptionMapper.map(e);
+    }
+  }
+
   // ============================================================
   // ACTIVITY & FEED
   // ============================================================

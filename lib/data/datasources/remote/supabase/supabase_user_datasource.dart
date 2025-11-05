@@ -359,6 +359,12 @@ abstract class SupabaseUserDataSource {
     int? limit,
   });
 
+  /// Gets users for the leaderboard, sorted by rated games count.
+  Future<List<Map<String, dynamic>>> getLeaderboardUsers({
+    int? limit,
+    int? offset,
+  });
+
   // ============================================================
   // ACTIVITY & FEED
   // ============================================================

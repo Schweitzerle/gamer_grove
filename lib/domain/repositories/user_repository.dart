@@ -123,6 +123,12 @@ abstract class UserRepository {
     int limit = 20,
   });
 
+  /// Get users for the leaderboard, sorted by rated games count
+  Future<Either<Failure, List<User>>> getLeaderboardUsers({
+    int limit = 100,
+    int offset = 0,
+  });
+
   // ==========================================
   // TOP THREE GAMES MANAGEMENT
   // ==========================================

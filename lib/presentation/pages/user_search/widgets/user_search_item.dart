@@ -40,6 +40,7 @@ class UserSearchItem extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar
               _buildAvatar(colorScheme),
@@ -49,7 +50,18 @@ class UserSearchItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildUserName(theme),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _buildUserName(theme),
+                        ),
+                        if (showFollowButton) ...[
+                          const SizedBox(width: 12),
+                          _buildFollowButton(colorScheme),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     if (user.bio?.isNotEmpty ?? false) ...[
                       _buildBio(theme),
@@ -59,11 +71,6 @@ class UserSearchItem extends StatelessWidget {
                   ],
                 ),
               ),
-              // Follow button
-              if (showFollowButton) ...[
-                const SizedBox(width: 12),
-                _buildFollowButton(colorScheme),
-              ],
             ],
           ),
         ),
@@ -163,7 +170,9 @@ class UserSearchItem extends StatelessWidget {
   }
 
   Widget _buildStats(ThemeData theme) {
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: [
         _buildStatChip(
           icon: Icons.star_rounded,
@@ -171,14 +180,12 @@ class UserSearchItem extends StatelessWidget {
           tooltip: 'Rated Games',
           color: Colors.amber,
         ),
-        const SizedBox(width: 8),
         _buildStatChip(
           icon: Icons.people_rounded,
           label: '${user.followersCount}',
           tooltip: 'Followers',
           color: Colors.blue,
         ),
-        const SizedBox(width: 8),
         if (user.averageRating != null)
           _buildStatChip(
             icon: Icons.analytics_rounded,
