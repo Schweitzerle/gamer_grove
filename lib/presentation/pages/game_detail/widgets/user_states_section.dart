@@ -15,6 +15,8 @@ import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_blo
 import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
+import '../../../../injection_container.dart';
+
 class UserStatesContent extends StatelessWidget {
   final Game game;
 
@@ -44,11 +46,15 @@ class UserStatesContent extends StatelessWidget {
           isInTopThree = userDataState.isInTopThree(game.id);
           topThreePosition = userDataState.getTopThreePosition(game.id);
 
-          print('🎯 UserStatesContent: Using UserGameDataBloc data for game ${game.id}');
-          print('   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
+          print(
+              '🎯 UserStatesContent: Using UserGameDataBloc data for game ${game.id}');
+          print(
+              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         } else {
-          print('🎯 UserStatesContent: Using Game entity data (UserGameDataBloc state: ${userDataState.runtimeType})');
-          print('   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
+          print(
+              '🎯 UserStatesContent: Using Game entity data (UserGameDataBloc state: ${userDataState.runtimeType})');
+          print(
+              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         }
 
         return Column(
@@ -79,9 +85,8 @@ class UserStatesContent extends StatelessWidget {
                 Expanded(
                   child: _buildMediumInfoCard(
                     context,
-                    icon: isWishlisted
-                        ? Icons.favorite
-                        : Icons.favorite_outline,
+                    icon:
+                        isWishlisted ? Icons.favorite : Icons.favorite_outline,
                     label: 'Wishlist',
                     value: isWishlisted ? 'Added' : 'Add',
                     color: isWishlisted ? Colors.red : Colors.grey,
@@ -236,7 +241,8 @@ class UserStatesContent extends StatelessWidget {
     );
   }
 
-  void _showTopThreeDialog(BuildContext context, user_data.UserGameDataState userDataState) {
+  void _showTopThreeDialog(
+      BuildContext context, user_data.UserGameDataState userDataState) {
     final userId = _getCurrentUserId(context);
     if (userId == null) {
       _showLoginRequiredSnackBar(context);
@@ -245,7 +251,7 @@ class UserStatesContent extends StatelessWidget {
 
     // ✅ Get both blocs
     final userDataBloc = context.read<user_data.UserGameDataBloc>();
-    final gameBloc = context.read<GameBloc>();
+    final gameBloc = sl<GameBloc>();
 
     // Get current top three game IDs from the bloc state
     List<int> currentTopThreeIds = [];
@@ -288,7 +294,8 @@ class UserStatesContent extends StatelessWidget {
     );
   }
 
-  void _rateGame(user_data.UserGameDataBloc userDataBloc, String userId, double rating) {
+  void _rateGame(
+      user_data.UserGameDataBloc userDataBloc, String userId, double rating) {
     userDataBloc.add(user_data.RateGameEvent(
       gameId: game.id,
       userId: userId,

@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import '../../domain/entities/game/game.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';
@@ -32,6 +35,10 @@ class GameCard extends StatelessWidget {
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
+      },
+      onLongPress: () {
+        HapticFeedback.vibrate();
+        _showUserStatesDialog(context);
       },
       child: Container(
         width: width ?? 160,
@@ -541,6 +548,57 @@ class GameCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showUserStatesDialog(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to manage your game states.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: BlocProvider.of<UserGameDataBloc>(context),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Title
+                Text(
+                  game.name,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                // User States Content
+                UserStatesContent(game: game),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
