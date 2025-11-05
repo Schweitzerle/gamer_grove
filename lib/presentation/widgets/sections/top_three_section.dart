@@ -5,25 +5,30 @@ import '../../blocs/game/game_bloc.dart';
 import 'base_game_section.dart';
 import 'empty_top_three_section.dart';
 
-
 class TopThreeSection extends BaseGameSection {
+  final String? username;
+
   const TopThreeSection({
     super.key,
     super.currentUserId,
     super.gameBloc,
+    this.username,
   });
 
   @override
-  String get title => 'My Top 3';
+  String get title => username != null ? "$username's Top 3" : 'My Top 3';
 
   @override
-  String get subtitle => 'Your personal favorites';
+  String get subtitle => username != null
+      ? "$username's personal favorites"
+      : 'Your personal favorites';
 
   @override
   IconData get icon => Icons.star;
 
   @override
-  bool get showViewAll => false; // Da es nur 3 Games sind, kein "View All" nötig
+  bool get showViewAll =>
+      false; // Da es nur 3 Games sind, kein "View All" nötig
 
   @override
   void onViewAllPressed(BuildContext context) {

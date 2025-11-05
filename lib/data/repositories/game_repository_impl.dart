@@ -219,6 +219,27 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     );
   }
 
+  @override
+  Future<Either<Failure, List<Game>>> getGames({required List<int> gameIds}) {
+    if (gameIds.isEmpty) {
+      return Future.value(const Right([]));
+    }
+
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = ContainsFilter('id', gameIds);
+        final query = IgdbGameQuery(
+          where: filter,
+          fields: GameFieldSets.standard,
+          limit: gameIds.length,
+          offset: 0,
+        );
+        return igdbDataSource.queryGames(query);
+      },
+      errorMessage: 'Failed to fetch games by IDs',
+    );
+  }
+
   // ============================================================
   // POPULAR & DISCOVERY METHODS
   // ============================================================

@@ -59,6 +59,8 @@ abstract class GameRepository {
   /// Get multiple games by their IDs (batch operation)
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds);
 
+  Future<Either<Failure, List<Game>>> getGames({required List<int> gameIds});
+
   // ==========================================
   // POPULAR & UPCOMING GAMES
   // ==========================================

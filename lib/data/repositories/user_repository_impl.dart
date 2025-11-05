@@ -505,6 +505,25 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  @override
+  Future<Either<Failure, List<User>>> getLeaderboardUsers({
+    int limit = 100,
+    int offset = 0,
+  }) {
+    return executeSupabaseOperation(
+      operation: () async {
+        final usersData = await userDataSource.getLeaderboardUsers(
+          limit: limit,
+          offset: offset,
+        );
+        return usersData
+            .map((data) => UserModel.fromJson(data).toEntity())
+            .toList();
+      },
+      errorMessage: 'Failed to get leaderboard users',
+    );
+  }
+
   // ============================================================
   // ACTIVITY & FEED
   // ============================================================
