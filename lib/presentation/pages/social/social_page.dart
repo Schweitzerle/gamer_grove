@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/pages/activity_feed/activity_feed_page.dart';
+import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
+import 'package:gamer_grove/presentation/pages/leaderboard/leaderboard_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/user_search_page.dart';
 
-import '../../blocs/auth/auth_bloc.dart';
+
+
 
 class SocialPage extends StatelessWidget {
   const SocialPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = context.select((AuthBloc bloc) {
-      final state = bloc.state;
-      return state is AuthAuthenticated ? state.user : null;
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Social'),
@@ -23,72 +23,12 @@ class SocialPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildWelcomeCard(context, user?.username),
-          const SizedBox(height: 24),
           _buildQuickActions(context),
           const SizedBox(height: 24),
           _buildSectionTitle(context, 'Coming Soon'),
           const SizedBox(height: 16),
           _buildComingSoonFeatures(context),
         ],
-      ),
-    );
-  }
-
-  Widget _buildWelcomeCard(BuildContext context, String? username) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.primaryContainer,
-              theme.colorScheme.secondaryContainer,
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.people_rounded,
-                  size: 32,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Connect with Gamers',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Find other gamers, share your gaming experiences, and discover new games together!',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer.withValues(
-                  alpha: 0.8,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -126,11 +66,24 @@ class SocialPage extends StatelessWidget {
                 subtitle: 'See who you follow',
                 color: Colors.purple,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Following list - Coming soon!'),
-                    ),
-                  );
+                  final authState = context.read<AuthBloc>().state;
+                  if (authState is AuthAuthenticated) {
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (context) => FollowersFollowingPage(
+                          userId: authState.user.id,
+                          type: FollowListType.following,
+                          username: authState.user.username,
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('You need to be logged in to see your following list.'),
+                      ),
+                    );
+                  }
                 },
               ),
             ),
@@ -214,21 +167,25 @@ class SocialPage extends StatelessWidget {
         icon: Icons.feed_rounded,
         title: 'Activity Feed',
         description: 'See what your friends are playing',
+        onTap: () {
+          Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (context) => const ActivityFeedPage(),
+            ),
+          );
+        },
       ),
       _FeatureItem(
         icon: Icons.leaderboard_rounded,
         title: 'Leaderboards',
         description: 'Compete with other gamers',
-      ),
-      _FeatureItem(
-        icon: Icons.chat_rounded,
-        title: 'Messaging',
-        description: 'Chat with your gaming friends',
-      ),
-      _FeatureItem(
-        icon: Icons.groups_rounded,
-        title: 'Gaming Communities',
-        description: 'Join groups based on your interests',
+        onTap: () {
+          Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (context) => const LeaderboardPage(),
+            ),
+          );
+        },
       ),
     ];
 
@@ -241,6 +198,7 @@ class SocialPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: ListTile(
+            onTap: feature.onTap,
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -260,13 +218,15 @@ class SocialPage extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             subtitle: Text(feature.description),
-            trailing: const Chip(
-              label: Text(
-                'Soon',
-                style: TextStyle(fontSize: 11),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 8),
-            ),
+            trailing: feature.onTap == null
+                ? const Chip(
+                    label: Text(
+                      'Soon',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                  )
+                : const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           ),
         );
       }).toList(),
@@ -278,10 +238,12 @@ class _FeatureItem {
   final IconData icon;
   final String title;
   final String description;
+  final VoidCallback? onTap;
 
   _FeatureItem({
     required this.icon,
     required this.title,
     required this.description,
+    this.onTap,
   });
 }

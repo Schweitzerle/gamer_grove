@@ -7,7 +7,14 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_event.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_state.dart';
+import 'package:gamer_grove/presentation/pages/user_detail/user_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/widgets/user_search_item.dart';
+
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
+import '../../blocs/social_interactions/social_interactions_bloc.dart';
+import '../../blocs/social_interactions/social_interactions_event.dart';
+import '../../blocs/social_interactions/social_interactions_state.dart';
 
 /// Types of follow lists
 enum FollowListType {
@@ -36,6 +43,8 @@ class FollowersFollowingPage extends StatefulWidget {
 
 class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
   late UserSearchBloc _searchBloc;
+  late SocialInteractionsBloc _socialBloc;
+  String? _currentUserId;
   final TextEditingController _searchController = TextEditingController();
   List<User> _allUsers = [];
   List<User> _filteredUsers = [];
@@ -44,6 +53,19 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
   void initState() {
     super.initState();
     _searchBloc = sl<UserSearchBloc>();
+
+    // Get current user
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _currentUserId = authState.user.id;
+    }
+
+    _socialBloc = SocialInteractionsBloc(
+      followUser: sl(),
+      unfollowUser: sl(),
+      userRepository: sl(),
+      currentUserId: _currentUserId,
+    );
 
     // Load followers or following based on type
     if (widget.type == FollowListType.followers) {
@@ -59,6 +81,7 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
   void dispose() {
     _searchController.dispose();
     unawaited(_searchBloc.close());
+    unawaited(_socialBloc.close());
     super.dispose();
   }
 
@@ -84,8 +107,11 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
         ? "${widget.username}'s Followers"
         : "${widget.username}'s Following";
 
-    return BlocProvider.value(
-      value: _searchBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _searchBloc),
+        BlocProvider.value(value: _socialBloc),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Text(title),
@@ -127,6 +153,13 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                       _allUsers = state.users;
                       _filteredUsers = List.from(state.users);
                     });
+
+                    // Load follow status for all visible users
+                    for (final user in _allUsers) {
+                      if (_currentUserId != null && _currentUserId != user.id) {
+                        _socialBloc.add(LoadFollowStatusRequested(user.id));
+                      }
+                    }
                   }
                 },
                 builder: (context, state) {
@@ -189,8 +222,8 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                                 ? Icons.search_off
                                 : Icons.people_outline,
                             size: 64,
-                            color:
-                                theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -200,8 +233,8 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                                     ? 'No followers yet'
                                     : 'Not following anyone yet',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color:
-                                  theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.6),
                             ),
                           ),
                           if (_searchController.text.isNotEmpty) ...[
@@ -226,11 +259,35 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                         const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final user = _filteredUsers[index];
-                      return UserSearchItem(
-                        user: user,
-                        onTap: () {
-                          // Navigate to user detail page
-                          // This will be handled by UserSearchItem
+                      return BlocBuilder<SocialInteractionsBloc,
+                          SocialInteractionsState>(
+                        builder: (context, socialState) {
+                          final isFollowing = socialState.isFollowing(user.id);
+                          final isLoadingFollow = socialState.isLoading(user.id);
+
+                          return UserSearchItem(
+                            user: user,
+                            showFollowButton: user.id != _currentUserId,
+                            isFollowing: isFollowing,
+                            isLoadingFollow: isLoadingFollow,
+                            onFollowPressed: () {
+                              context.read<SocialInteractionsBloc>().add(
+                                    ToggleFollowRequested(
+                                      user.id,
+                                      isFollowing,
+                                    ),
+                                  );
+                            },
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => UserDetailPage(
+                                    user: user,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
                         },
                       );
                     },
