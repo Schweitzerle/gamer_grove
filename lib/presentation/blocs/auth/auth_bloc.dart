@@ -112,7 +112,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) {
+        if (failure.message.contains('Invalid login credentials')) {
+          emit(const AuthError('Invalid email or password.'));
+        } else {
+          emit(const AuthError('An unexpected error occurred. Please try again.'));
+        }
+      },
       (user) => emit(AuthAuthenticated(user)),
     );
   }
@@ -133,7 +139,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) {
+        if (failure.message.contains('User already exists')) {
+          emit(const AuthError('Email already in use.'));
+        } else {
+          emit(const AuthError('An unexpected error occurred. Please try again.'));
+        }
+      },
       (user) => emit(AuthAuthenticated(user)),
     );
   }
@@ -148,7 +160,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await signOutUseCase(const NoParams());
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) => emit(const AuthError('An unexpected error occurred. Please try again.')),
       (_) => emit(const AuthUnauthenticated()),
     );
   }
@@ -165,7 +177,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) => emit(const AuthError('An unexpected error occurred. Please try again.')),
       (_) => emit(const PasswordResetSent()),
     );
   }
@@ -185,7 +197,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
+      (failure) => emit(const AuthError('An unexpected error occurred. Please try again.')),
       (_) {
         // Restore authenticated state after password update
         if (currentState is AuthAuthenticated) {
