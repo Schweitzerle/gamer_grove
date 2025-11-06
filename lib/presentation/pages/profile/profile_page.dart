@@ -7,6 +7,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
+import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../test/igdb_test_page.dart';
@@ -49,11 +50,9 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.settings),
                       onPressed: () {
-                        // Settings functionality coming soon
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Settings - Coming soon!'),
-                          ),
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) => const SettingsBottomSheet(),
                         );
                       },
                     ),
