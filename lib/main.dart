@@ -62,10 +62,14 @@ class GamerGroveApp extends StatelessWidget {
               theme: FlexThemeData.light(
                 scheme: state.flexScheme,
                 useMaterial3: true,
+                surfaceMode: FlexSurfaceMode.level,
+                blendLevel: 30,
               ),
               darkTheme: FlexThemeData.dark(
                 scheme: state.flexScheme,
                 useMaterial3: true,
+                surfaceMode: FlexSurfaceMode.level,
+                blendLevel: 30,
               ),
               themeMode: state.themeMode,
               home: const SplashPage(),
