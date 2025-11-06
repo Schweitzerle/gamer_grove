@@ -8,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../auth/login_page.dart';
 import '../home/home_page.dart';
+import 'package:gamer_grove/presentation/pages/profile/profile_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -224,6 +225,19 @@ class _SplashPageState extends State<SplashPage>
                     );
                   },
                 ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: AppConstants.paddingLarge),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
+                    },
+                    child: const Text('Go to Profile (Dev)'),
+                  ),
+                ],
               ],
             ),
           ),
