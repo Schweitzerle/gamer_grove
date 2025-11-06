@@ -4,12 +4,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
-import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart' as app_auth;
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart'
+    as app_auth;
+import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'injection_container.dart' as di;
 import 'injection_container.dart';
 import 'presentation/pages/splash/splash_page.dart';
+
+import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,26 +48,35 @@ class GamerGroveApp extends StatelessWidget {
         BlocProvider.value(
           value: sl<UserGameDataBloc>(),
         ),
+        // Theme Bloc - manages app theme
+        BlocProvider(
+          create: (_) => ThemeBloc()..add(const ThemeLoadStarted()),
+        ),
       ],
       child: _UserGameDataListener(
-        child: MaterialApp(
-          title: 'Gamer Grove',
-          debugShowCheckedModeBanner: false,
-          theme: _buildTheme(),
-          home: const SplashPage(),
+        child: BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, state) {
+            return MaterialApp(
+              title: 'Gamer Grove',
+              debugShowCheckedModeBanner: false,
+              theme: FlexThemeData.light(
+                scheme: state.flexScheme,
+                useMaterial3: true,
+                surfaceMode: FlexSurfaceMode.level,
+                blendLevel: 30,
+              ),
+              darkTheme: FlexThemeData.dark(
+                scheme: state.flexScheme,
+                useMaterial3: true,
+                surfaceMode: FlexSurfaceMode.level,
+                blendLevel: 30,
+              ),
+              themeMode: state.themeMode,
+              home: const SplashPage(),
+            );
+          },
         ),
       ),
-    );
-  }
-
-  ThemeData _buildTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.deepPurple,
-        brightness: Brightness.dark,
-      ),
-      fontFamily: 'Montserrat',
     );
   }
 }

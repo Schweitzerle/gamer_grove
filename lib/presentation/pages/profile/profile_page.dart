@@ -7,6 +7,8 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
+import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
+import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
 import '../test/igdb_test_page.dart';
@@ -49,11 +51,9 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.settings),
                       onPressed: () {
-                        // Settings functionality coming soon
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Settings - Coming soon!'),
-                          ),
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) => const SettingsBottomSheet(),
                         );
                       },
                     ),
@@ -140,21 +140,52 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                backgroundImage: user.hasAvatar
-                    ? CachedNetworkImageProvider(user.avatarUrl!)
-                    : null,
-                child: !user.hasAvatar
-                    ? Text(
-                        user.username[0].toUpperCase(),
-                        style: theme.textTheme.displayMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    backgroundImage: user.hasAvatar
+                        ? CachedNetworkImageProvider(user.avatarUrl!)
+                        : null,
+                    child: !user.hasAvatar
+                        ? Text(
+                            user.username[0].toUpperCase(),
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Material(
+                      color: theme.colorScheme.secondary,
+                      shape: const CircleBorder(),
+                      elevation: 2,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => EditProfilePage(user: user),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.edit,
+                            color: theme.colorScheme.onSecondary,
+                            size: 20,
+                          ),
                         ),
-                      )
-                    : null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

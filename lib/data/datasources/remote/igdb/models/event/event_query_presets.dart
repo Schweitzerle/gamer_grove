@@ -78,10 +78,14 @@ class EventQueryPresets {
   static IgdbEventQuery upcoming({
     int limit = 20,
     int offset = 0,
-    int daysAhead = 90,
+    int daysAhead = 60,
+    int daysBack = 60,
   }) {
     final filter = CombinedFilter([
-      EventFilters.upcoming(),
+      EventFilters.between(
+        DateTime.now().subtract(Duration(days: daysBack)),
+        DateTime.now().add(Duration(days: daysAhead)),
+      ),
     ]);
 
     return IgdbEventQuery(

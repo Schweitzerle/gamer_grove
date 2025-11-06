@@ -65,6 +65,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResetPasswordEvent>(_onResetPassword);
     on<UpdatePasswordEvent>(_onUpdatePassword);
     on<AuthStateChangedEvent>(_onAuthStateChanged);
+    on<UserDataUpdated>(_onUserDataUpdated);
+  }
+
+  /// Handles user data updates.
+  Future<void> _onUserDataUpdated(
+    UserDataUpdated event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthAuthenticated(event.user));
   }
 
   /// Checks if user is authenticated on app start.

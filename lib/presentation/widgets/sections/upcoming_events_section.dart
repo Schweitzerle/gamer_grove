@@ -120,16 +120,17 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Upcoming Gaming Events',
+                        'Recent & Upcoming Gaming Events',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                       ),
                       Text(
-                        '${events.length} events coming soon',
+                        '${events.length} Events Scheduled',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                     ],
@@ -228,7 +229,8 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -280,7 +282,8 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                 child: CustomShimmer(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
