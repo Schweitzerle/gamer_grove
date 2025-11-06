@@ -7,17 +7,19 @@ import '../../blocs/game/game_bloc.dart';
 import '../sections/base_game_section.dart';
 
 class WishlistSection extends BaseGameSection {
-  const WishlistSection({
-    super.key,
-    super.currentUserId,
-    super.gameBloc,
-  });
+  final String? username;
+
+  const WishlistSection(
+      {super.key, super.currentUserId, super.gameBloc, this.username});
 
   @override
-  String get title => 'My Wishlist';
+  String get title =>
+      username != null ? "Wishlisted by $username" : 'My Wishlist';
 
   @override
-  String get subtitle => 'Games you want to play';
+  String get subtitle => username != null
+      ? 'Games $username wants to play'
+      : 'Games you want to play';
 
   @override
   IconData get icon => Icons.favorite;
@@ -35,7 +37,8 @@ class WishlistSection extends BaseGameSection {
       wishlistGames = currentState.games;
     } else if (currentState is GrovePageLoaded) {
       wishlistGames = currentState.userWishlist;
-    } else if (currentState is HomePageLoaded && currentState.userWishlist != null) {
+    } else if (currentState is HomePageLoaded &&
+        currentState.userWishlist != null) {
       wishlistGames = currentState.userWishlist!;
     }
 
@@ -59,18 +62,21 @@ class WishlistSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is UserWishlistLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('Your wishlist is empty', Icons.favorite_border, context);
+        return buildEmptySection(
+            'Your wishlist is empty', Icons.favorite_border, context);
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userWishlist.isEmpty) {
-        return buildEmptySection('Your wishlist is empty', Icons.favorite_border, context);
+        return buildEmptySection(
+            'Your wishlist is empty', Icons.favorite_border, context);
       }
       return buildHorizontalGameList(state.userWishlist.take(10).toList());
     } else if (state is HomePageLoaded && state.userWishlist != null) {
       // Backup für HomePageLoaded (falls irgendwo noch verwendet)
       if (state.userWishlist!.isEmpty) {
-        return buildEmptySection('Your wishlist is empty', Icons.favorite_border, context);
+        return buildEmptySection(
+            'Your wishlist is empty', Icons.favorite_border, context);
       }
       return buildHorizontalGameList(state.userWishlist!.take(10).toList());
     } else if (state is GameError) {

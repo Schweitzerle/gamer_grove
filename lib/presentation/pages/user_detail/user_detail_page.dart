@@ -17,6 +17,7 @@ import 'package:gamer_grove/presentation/pages/followers_following/followers_fol
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/recommendations_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/wishlist_section.dart';
 
 /// User detail page showing profile and game collections
 class UserDetailPage extends StatefulWidget {
@@ -72,6 +73,32 @@ class _UserDetailPageState extends State<UserDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if profile is private and current user is not the owner
+    if (!widget.user.isProfilePublic && _currentUserId != widget.user.id) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.user.effectiveDisplayName),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 60),
+              SizedBox(height: 16),
+              Text(
+                'This profile is private.',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                'Only the owner can view its content.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _gameBloc),
@@ -105,6 +132,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
               if (widget.user.showRecommendedGames)
                 SliverToBoxAdapter(
                   child: RecommendationsSection(
+                    username: widget.user.effectiveDisplayName,
+                  ),
+                ),
+              if (widget.user.showWishlist)
+                SliverToBoxAdapter(
+                  child: WishlistSection(
                     username: widget.user.effectiveDisplayName,
                   ),
                 ),
