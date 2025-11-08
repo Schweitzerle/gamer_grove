@@ -51,7 +51,7 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.settings),
                       onPressed: () {
-                        showModalBottomSheet(
+                        showModalBottomSheet<void>(
                           context: context,
                           builder: (context) => const SettingsBottomSheet(),
                         );
@@ -169,7 +169,7 @@ class ProfilePage extends StatelessWidget {
                         customBorder: const CircleBorder(),
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
+                            MaterialPageRoute<void>(
                               builder: (context) => EditProfilePage(user: user),
                             ),
                           );

@@ -53,6 +53,7 @@ dependencies:
 
   # Animations (minimal)
   flutter_animate: ^4.5.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
 
   assets:
     - assets/images/
+    - .env
 
   # fonts:
   #   - family: Montserrat

@@ -1,8 +1,6 @@
 // lib/presentation/widgets/rated_section.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/game/game.dart';
 import '../../blocs/game/game_bloc.dart';
 import 'base_game_section.dart';
 
@@ -28,34 +26,24 @@ class RatedSection extends BaseGameSection {
 
   @override
   void onViewAllPressed(BuildContext context) {
-    // 🆕 State vom GameBloc abrufen
-    final gameBloc = context.read<GameBloc>();
-    final currentState = gameBloc.state;
-
-    List<Game> ratedGames = [];
-
-    // Games aus dem aktuellen State extrahieren
-    if (currentState is UserRatedLoaded) {
-      ratedGames = currentState.games;
-    } else if (currentState is GrovePageLoaded) {
-      ratedGames = currentState.userRated;
-    }
-
-    // Navigation mit den gefundenen Games
-    if (ratedGames.isNotEmpty) {
-      Navigations.navigateToRatedGames(context, ratedGames);
-    } else {
+    final userId = currentUserId;
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Loading rated games...')),
+        const SnackBar(content: Text('User not logged in.')),
       );
-      if (currentUserId != null && this.gameBloc != null) {
-        this.gameBloc!.add(LoadUserRatedEvent(currentUserId!));
-      }
+      return;
     }
+    // Directly navigate to the dedicated page
+    Navigations.navigateToUserRatedGames(context);
   }
 
   @override
   Widget buildSectionContent(BuildContext context, GameState state) {
+    // The BlocListener is removed, and we just build the content.
+    return _buildContent(context, state);
+  }
+
+  Widget _buildContent(BuildContext context, GameState state) {
     if (state is UserRatedLoading || state is GrovePageLoading) {
       return buildHorizontalGameListSkeleton();
     } else if (state is UserRatedLoaded) {

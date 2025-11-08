@@ -2247,6 +2247,90 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
+  Future<Either<Failure, List<int>>> getUserRatedGameIds(String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final ratedGames = await supabaseUserDataSource!.getRatedGames(userId);
+      final gameIds = ratedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get rated game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getUserWishlistGameIds(
+      String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final wishlistedGames =
+          await supabaseUserDataSource!.getWishlistedGames(userId);
+      final gameIds = wishlistedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Failed to get wishlisted game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getUserRecommendedGameIds(
+      String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final recommendedGames =
+          await supabaseUserDataSource!.getRecommendedGames(userId);
+      final gameIds = recommendedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Failed to get recommended game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRatedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserWishlistGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRecommendedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
   Future<Either<Failure, List<Game>>> getUserWishlist(
     String userId,
     int limit,

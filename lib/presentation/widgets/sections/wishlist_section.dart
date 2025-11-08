@@ -1,8 +1,6 @@
 // lib/presentation/widgets/wishlist_section.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // 🆕 ADD: Für BlocProvider
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../sections/base_game_section.dart';
 
@@ -26,38 +24,24 @@ class WishlistSection extends BaseGameSection {
 
   @override
   void onViewAllPressed(BuildContext context) {
-    // 🆕 State vom GameBloc abrufen
-    final gameBloc = context.read<GameBloc>();
-    final currentState = gameBloc.state;
-
-    List<Game> wishlistGames = [];
-
-    // Games aus dem aktuellen State extrahieren
-    if (currentState is UserWishlistLoaded) {
-      wishlistGames = currentState.games;
-    } else if (currentState is GrovePageLoaded) {
-      wishlistGames = currentState.userWishlist;
-    } else if (currentState is HomePageLoaded &&
-        currentState.userWishlist != null) {
-      wishlistGames = currentState.userWishlist!;
-    }
-
-    // Navigation mit den gefundenen Games
-    if (wishlistGames.isNotEmpty) {
-      Navigations.navigateToUserWishlist(context, wishlistGames);
-    } else {
-      // Fallback: Lade Wishlist zuerst
+    final userId = currentUserId;
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Loading wishlist...')),
+        const SnackBar(content: Text('User not logged in.')),
       );
-      if (currentUserId != null && this.gameBloc != null) {
-        this.gameBloc!.add(LoadUserWishlistEvent(currentUserId!));
-      }
+      return;
     }
+    // Directly navigate to the dedicated page
+    Navigations.navigateToUserWishlist(context);
   }
 
   @override
   Widget buildSectionContent(BuildContext context, GameState state) {
+    // The BlocListener is removed, and we just build the content.
+    return _buildContent(context, state);
+  }
+
+  Widget _buildContent(BuildContext context, GameState state) {
     if (state is UserWishlistLoading || state is GrovePageLoading) {
       return buildHorizontalGameListSkeleton();
     } else if (state is UserWishlistLoaded) {
@@ -72,13 +56,6 @@ class WishlistSection extends BaseGameSection {
             'Your wishlist is empty', Icons.favorite_border, context);
       }
       return buildHorizontalGameList(state.userWishlist.take(10).toList());
-    } else if (state is HomePageLoaded && state.userWishlist != null) {
-      // Backup für HomePageLoaded (falls irgendwo noch verwendet)
-      if (state.userWishlist!.isEmpty) {
-        return buildEmptySection(
-            'Your wishlist is empty', Icons.favorite_border, context);
-      }
-      return buildHorizontalGameList(state.userWishlist!.take(10).toList());
     } else if (state is GameError) {
       return buildErrorSection('Failed to load wishlist', context);
     }

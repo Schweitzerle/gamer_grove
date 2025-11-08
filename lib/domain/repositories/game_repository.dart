@@ -115,6 +115,36 @@ abstract class GameRepository {
   /// Get user's top three favorite games
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
 
+  /// Get all game IDs from user's rated games
+  Future<Either<Failure, List<int>>> getUserRatedGameIds(String userId);
+
+  /// Get all game IDs from user's wishlist
+  Future<Either<Failure, List<int>>> getUserWishlistGameIds(String userId);
+
+  /// Get all game IDs from user's recommendations
+  Future<Either<Failure, List<int>>> getUserRecommendedGameIds(String userId);
+
+  /// Get user's rated games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserRatedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
+
+  /// Get user's wishlist games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserWishlistGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
+
+  /// Get user's recommended games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserRecommendedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
+
   // ==========================================
   // USER ACTIONS
   // ==========================================

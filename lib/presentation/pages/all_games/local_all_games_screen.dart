@@ -53,7 +53,10 @@ class EnrichedAllGamesScreen extends StatefulWidget {
     this.showSearch = true,
     this.blurRated = false,
     this.showViewToggle = true,
+    this.loadMore,
   });
+
+  final Future<List<Game>> Function(int offset)? loadMore;
 
   @override
   State<EnrichedAllGamesScreen> createState() => _EnrichedAllGamesScreenState();
@@ -85,7 +88,18 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   bool _isEnriching = false;
   int _enrichmentProgress = 0;
   int _totalGames = 0;
-  String _enrichmentStatus = '';
+  bool _isLoadingMore = false;
+  bool _hasReachedMax = false;
+
+  String get _enrichmentStatus {
+    if (_enrichmentProgress == 0) {
+      return 'Starting enrichment...';
+    } else if (_enrichmentProgress < _totalGames) {
+      return 'Enriching games ($_enrichmentProgress of $_totalGames)';
+    } else {
+      return 'Almost done...';
+    }
+  }
 
   @override
   void initState() {
@@ -96,10 +110,12 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     if (widget.userId != null && widget.games.isNotEmpty) {
       _enrichAllGames();
     } else {
-      // No user or no games - use games as-is
       _allGames = List.from(widget.games);
       _applyFiltersAndSort();
     }
+
+    _hasReachedMax = widget.loadMore == null || widget.games.isEmpty;
+    _scrollController.addListener(_onScroll);
   }
 
   Future<void> _enrichAllGames() async {
@@ -121,6 +137,72 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
     _applyFiltersAndSort();
   }
+
+      void _onScroll() {
+
+        if (_hasReachedMax || _isLoadingMore || widget.loadMore == null) return;
+
+    
+
+        if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+
+          _loadMoreGames();
+
+        }
+
+      }
+
+    
+
+      Future<void> _loadMoreGames() async {
+
+        if (_isLoadingMore) return;
+
+    
+
+        setState(() {
+
+          _isLoadingMore = true;
+
+        });
+
+    
+
+        try {
+
+          final newGames = await widget.loadMore!(_allGames.length);
+
+          if (newGames.isEmpty) {
+
+            _hasReachedMax = true;
+
+          } else {
+
+            _allGames.addAll(newGames);
+
+            _totalGames = _allGames.length; // Update total games count
+
+            // Re-apply filters and sort to include new games
+
+            _applyFiltersAndSort();
+
+          }
+
+        } catch (e) {
+
+          // Optionally show a snackbar or error message
+
+        } finally {
+
+          setState(() {
+
+            _isLoadingMore = false;
+
+          });
+
+        }
+
+      }
 
   //TODO: maybe implement filtering with dynamic data from api like in search screen and then use it for local filtering of the games
   void _applyFiltersAndSort() {
@@ -278,6 +360,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -459,11 +542,21 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
         // Games list/grid
         Expanded(
-          child: _filteredGames.isEmpty
+          child: _filteredGames.isEmpty && !_isLoadingMore
               ? _buildEmptyState()
-              : _isGridView
-                  ? _buildGridView()
-                  : _buildListView(),
+              : Stack(
+                  children: [
+                    _isGridView ? _buildGridView() : _buildListView(),
+                    if (_isLoadingMore)
+                      const Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: EdgeInsets.all(AppConstants.paddingMedium),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                  ],
+                ),
         ),
       ],
     );

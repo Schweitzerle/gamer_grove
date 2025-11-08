@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -165,8 +164,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                           Text(
                             state.message,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface
-                                  .withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -193,8 +192,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                 ? Icons.search_off
                                 : Icons.people_outline,
                             size: 64,
-                            color: theme.colorScheme.onSurface
-                                .withOpacity(0.3),
+                            color: theme.colorScheme.onSurface.withOpacity(0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -202,8 +200,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                 ? 'No users found'
                                 : 'Leaderboard is empty',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onSurface
-                                  .withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                           if (_searchController.text.isNotEmpty) ...[
@@ -236,7 +234,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             child: BlocBuilder<SocialInteractionsBloc,
                                 SocialInteractionsState>(
                               builder: (context, socialState) {
-                                final isFollowing = socialState.isFollowing(user.id);
+                                final isFollowing =
+                                    socialState.isFollowing(user.id);
                                 final isLoadingFollow =
                                     socialState.isLoading(user.id);
 
@@ -255,7 +254,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                   },
                                   onTap: () {
                                     Navigator.of(context).push(
-                                      MaterialPageRoute(
+                                      MaterialPageRoute<void>(
                                         builder: (context) => UserDetailPage(
                                           user: user,
                                         ),

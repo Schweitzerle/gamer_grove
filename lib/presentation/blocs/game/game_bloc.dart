@@ -34,6 +34,7 @@ import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
 import '../../../domain/usecases/event/get_upcoming_events.dart';
+import '../../../domain/usecases/game/get_user_rated_game_ids.dart';
 import 'game_extensions.dart';
 
 part 'game_event.dart';
@@ -63,6 +64,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
   final GetUpcomingEvents getUpcomingEvents;
+  final GetUserRatedGameIds getUserRatedGameIds;
   final GameRepository gameRepository;
   final GameEnrichmentService enrichmentService;
 
@@ -92,6 +94,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getEnhancedGameDetails,
     required this.getCompleteGameDetailPageData,
     required this.getUpcomingEvents,
+    required this.getUserRatedGameIds,
     required this.gameRepository,
     required this.enrichmentService,
   }) : super(GameInitial()) {
@@ -123,6 +126,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<LoadUserWishlistEvent>(_onLoadUserWishlist);
     on<LoadUserRecommendationsEvent>(_onLoadUserRecommendations);
     on<LoadUserRatedEvent>(_onLoadUserRated);
+    on<LoadAllUserRatedEvent>(_onLoadAllUserRated);
+    on<LoadAllUserWishlistEvent>(_onLoadAllUserWishlist);
+    on<LoadAllUserRecommendationsEvent>(_onLoadAllUserRecommendations);
+    on<LoadAllUserRatedPaginated>(_onLoadAllUserRatedPaginated);
+    on<LoadMoreUserRatedPaginated>(_onLoadMoreUserRatedPaginated);
+    on<LoadAllUserWishlistPaginated>(_onLoadAllUserWishlistPaginated);
+    on<LoadMoreUserWishlistPaginated>(_onLoadMoreUserWishlistPaginated);
+    on<LoadAllUserRecommendedPaginated>(_onLoadAllUserRecommendedPaginated);
+    on<LoadMoreUserRecommendedPaginated>(_onLoadMoreUserRecommendedPaginated);
 
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
     on<LoadGrovePageDataEvent>(_onLoadGrovePageData);
@@ -502,6 +514,63 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  // Load All User Rated
+  Future<void> _onLoadAllUserRated(
+    LoadAllUserRatedEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserRatedLoading());
+
+    final result = await getUserRated(
+      GetUserRatedParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserRatedLoaded(
+        games,
+      )),
+    );
+  }
+
+  // Load All User Wishlist
+  Future<void> _onLoadAllUserWishlist(
+    LoadAllUserWishlistEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserWishlistLoading());
+
+    final result = await getUserWishlist(
+      GetUserWishlistParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserWishlistedLoaded(
+        games,
+      )),
+    );
+  }
+
+// Load All User Recommendations
+  Future<void> _onLoadAllUserRecommendations(
+    LoadAllUserRecommendationsEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserRecommendationsLoading());
+
+    final result = await getUserRecommendations(
+      GetUserRecommendationsParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserRecommendationsLoaded(
+        games,
+      )),
+    );
+  }
+
   Future<void> _onGetGameDetailsWithUserData(
     GetGameDetailsWithUserDataEvent event,
     Emitter<GameState> emit,
@@ -581,8 +650,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         if (state is GameDetailsLoaded && !emit.isDone) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            final updatedGame = currentGame.copyWith(isWishlisted: !currentGame.isWishlisted);
-            _updateGameCache(event.gameId, updatedGame); // Cache the updated game
+            final updatedGame =
+                currentGame.copyWith(isWishlisted: !currentGame.isWishlisted);
+            _updateGameCache(
+                event.gameId, updatedGame); // Cache the updated game
             emit(GameDetailsLoaded(updatedGame));
           }
         }
@@ -622,7 +693,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         if (state is GameDetailsLoaded && !emit.isDone) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            final updatedGame = currentGame.copyWith(isRecommended: !currentGame.isRecommended);
+            final updatedGame =
+                currentGame.copyWith(isRecommended: !currentGame.isRecommended);
             _updateGameCache(event.gameId, updatedGame);
             emit(GameDetailsLoaded(updatedGame));
           }
@@ -734,7 +806,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
-      final updatedRecommendations = currentState.userRecommendations?.map((game) {
+      final updatedRecommendations =
+          currentState.userRecommendations?.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
@@ -758,7 +831,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
-      final updatedRecommendations = currentState.userRecommendations.map((game) {
+      final updatedRecommendations =
+          currentState.userRecommendations.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
@@ -1546,7 +1620,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
-        print('❌ GameBloc: Failed to remove from top three: ${failure.message}');
+        print(
+            '❌ GameBloc: Failed to remove from top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
@@ -1713,10 +1788,153 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final refreshedState = _applyCacheToState(currentState);
 
     if (refreshedState != currentState) {
-      print('✅ Cache applied, re-emitting state: ${refreshedState.runtimeType}');
+      print(
+          '✅ Cache applied, re-emitting state: ${refreshedState.runtimeType}');
       emit(refreshedState);
     } else {
       print('ℹ️ No cache changes to apply');
+    }
+  }
+
+  Future<void> _onLoadAllUserRatedPaginated(
+    LoadAllUserRatedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserRatedPaginatedLoading());
+
+    final result = await getUserRated(
+      GetUserRatedParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserRatedPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserRatedPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserRatedPaginated(
+    LoadMoreUserRatedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserRatedPaginatedLoaded) {
+      final currentState = state as AllUserRatedPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserRated(
+        GetUserRatedParams(userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserRatedPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<void> _onLoadAllUserWishlistPaginated(
+    LoadAllUserWishlistPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserWishlistPaginatedLoading());
+
+    final result = await getUserWishlist(
+      GetUserWishlistParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserWishlistPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserWishlistPaginated(
+    LoadMoreUserWishlistPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserWishlistPaginatedLoaded) {
+      final currentState = state as AllUserWishlistPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserWishlist(
+        GetUserWishlistParams(userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<void> _onLoadAllUserRecommendedPaginated(
+    LoadAllUserRecommendedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserRecommendedPaginatedLoading());
+
+    final result = await getUserRecommendations(
+      GetUserRecommendationsParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserRecommendedPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserRecommendedPaginated(
+    LoadMoreUserRecommendedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserRecommendedPaginatedLoaded) {
+      final currentState = state as AllUserRecommendedPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserRecommendations(
+        GetUserRecommendationsParams(
+            userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
     }
   }
 }

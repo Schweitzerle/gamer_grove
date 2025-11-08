@@ -299,14 +299,16 @@ class Game extends Equatable {
 
   /// Gibt alle Social Media Links zurück
   List<Website> get socialMediaLinks => websites
-      .where((website) => [
-            WebsiteCategory.facebook,
-            WebsiteCategory.twitter,
-            WebsiteCategory.instagram,
-            WebsiteCategory.youtube,
-            WebsiteCategory.twitch,
-            WebsiteCategory.discord
-          ].contains(website.type))
+      .where(
+        (website) => [
+          WebsiteCategory.facebook,
+          WebsiteCategory.twitter,
+          WebsiteCategory.instagram,
+          WebsiteCategory.youtube,
+          WebsiteCategory.twitch,
+          WebsiteCategory.discord,
+        ].contains(website.type),
+      )
       .toList();
 
   /// Prüft ob das Spiel auf PC verfügbar ist

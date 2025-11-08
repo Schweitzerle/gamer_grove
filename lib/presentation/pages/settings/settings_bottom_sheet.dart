@@ -56,8 +56,8 @@ class SettingsBottomSheet extends StatelessWidget {
                     onSelect: (_) {},
                   ),
                 ),
-                onTap: () {
-                  showDialog(
+                onTap: () async {
+                  await showDialog<void>(
                     context: context,
                     builder: (context) => const ThemeSelectionDialog(),
                   );
