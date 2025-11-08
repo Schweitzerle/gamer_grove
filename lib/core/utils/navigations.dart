@@ -272,13 +272,21 @@ class Navigations {
   // Diese Methoden bleiben als TODOs für API-basierte Screens
 
   static void navigateToPopularGames(BuildContext context) {
+    // Popular = Games with hype (what people are talking about/expecting)
+    // Filtered to ±6 months from today to show currently trending games
+    final now = DateTime.now();
+    final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
+    final sixMonthsFromNow = DateTime(now.year, now.month + 6, now.day);
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => SearchPage(
-          initialFilters: const SearchFilters(
+          initialFilters: SearchFilters(
+            minHypes: 5,
+            releaseDateFrom: sixMonthsAgo,
+            releaseDateTo: sixMonthsFromNow,
             sortBy: GameSortBy.popularity,
             sortOrder: SortOrder.descending,
-            minTotalRating: 7.0,
           ),
           initialTitle: 'Popular Right Now',
         ),
@@ -291,10 +299,9 @@ class Navigations {
       MaterialPageRoute<void>(
         builder: (context) => SearchPage(
           initialFilters: const SearchFilters(
+            minTotalRatingCount: 50,
             sortBy: GameSortBy.rating,
             sortOrder: SortOrder.descending,
-            minTotalRating: 8.0,
-            minTotalRatingCount: 10,
           ),
           initialTitle: 'Top Rated',
         ),
@@ -320,12 +327,10 @@ class Navigations {
 
   static void navigateToLatestReleases(BuildContext context) {
     final now = DateTime.now();
-    final threeMonthsAgo = DateTime(now.year, now.month - 3, now.day);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => SearchPage(
           initialFilters: SearchFilters(
-            releaseDateFrom: threeMonthsAgo,
             releaseDateTo: now,
             sortBy: GameSortBy.releaseDate,
             sortOrder: SortOrder.descending,
