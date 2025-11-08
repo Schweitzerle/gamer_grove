@@ -230,7 +230,7 @@ class _SplashPageState extends State<SplashPage>
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
+                        MaterialPageRoute<void>(
                           builder: (context) => const ProfilePage(),
                         ),
                       );

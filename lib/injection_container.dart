@@ -43,6 +43,7 @@ import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.da
 import 'package:gamer_grove/domain/usecases/collection/toggle_recommended_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_wishlist_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/update_top_three_use_case.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_rated_game_ids.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_details.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_dlcs.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_expansions.dart';
@@ -232,6 +233,7 @@ Future<void> initDependencies() async {
         getUserTopThreeGames: sl(),
         getUserTopThree: sl(),
         getUserRated: sl(),
+        getUserRatedGameIds: sl(),
         getSimilarGames: sl(),
         getGameDLCs: sl(),
         getGameExpansions: sl(),
@@ -346,6 +348,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetRatedGamesUseCase(sl()))
 
     // Game Use Cases
+    ..registerLazySingleton(() => GetUserRatedGameIds(sl()))
     ..registerLazySingleton(() => SearchGames(sl()))
     ..registerLazySingleton(() => GetGameDetails(sl()))
     ..registerLazySingleton(() => RateGame(sl()))

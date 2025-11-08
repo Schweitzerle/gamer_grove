@@ -263,7 +263,8 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                           SocialInteractionsState>(
                         builder: (context, socialState) {
                           final isFollowing = socialState.isFollowing(user.id);
-                          final isLoadingFollow = socialState.isLoading(user.id);
+                          final isLoadingFollow =
+                              socialState.isLoading(user.id);
 
                           return UserSearchItem(
                             user: user,
@@ -280,7 +281,7 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
                             },
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                MaterialPageRoute<void>(
                                   builder: (context) => UserDetailPage(
                                     user: user,
                                   ),

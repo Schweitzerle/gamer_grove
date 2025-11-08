@@ -79,20 +79,26 @@ class _GrovePageState extends State<GrovePage> {
 
               // Rated Game Section
               if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: RatedSection(),
+                SliverToBoxAdapter(
+                  child: RatedSection(
+                    currentUserId: _currentUserId,
+                  ),
                 ),
 
               // User Wishlist Section (if logged in)
               if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: WishlistSection(),
+                SliverToBoxAdapter(
+                  child: WishlistSection(
+                    currentUserId: _currentUserId,
+                  ),
                 ),
 
               // User Recommendations Section (if logged in)
               if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: RecommendationsSection(),
+                SliverToBoxAdapter(
+                  child: RecommendationsSection(
+                    currentUserId: _currentUserId,
+                  ),
                 ),
 
               // Bottom padding

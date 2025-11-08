@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
@@ -28,14 +27,15 @@ class SettingsPage extends StatelessWidget {
                 value: state.themeMode == ThemeMode.dark,
                 onChanged: (value) {
                   context.read<ThemeBloc>().add(
-                        ThemeModeChanged(value ? ThemeMode.dark : ThemeMode.light),
+                        ThemeModeChanged(
+                            value ? ThemeMode.dark : ThemeMode.light),
                       );
                 },
               ),
               ListTile(
                 title: const Text('Theme'),
-                onTap: () {
-                  showDialog(
+                onTap: () async {
+                  await showDialog<void>(
                     context: context,
                     builder: (context) => const ThemeSelectionDialog(),
                   );
@@ -44,7 +44,7 @@ class SettingsPage extends StatelessWidget {
               ListTile(
                 title: const Text('About Us'),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(MaterialPageRoute<void>(
                     builder: (context) => const AboutUsPage(),
                   ));
                 },

@@ -165,7 +165,6 @@ class LoadTopRatedGamesEvent extends GameEvent {
   List<Object> get props => [limit, offset];
 }
 
-
 class LoadUserRatedEvent extends GameEvent {
   final String userId;
 
@@ -214,7 +213,6 @@ class GetGameDetailsWithUserDataEvent extends GameEvent {
   @override
   List<Object?> get props => [gameId, userId];
 }
-
 
 class LoadHomePageDataEvent extends GameEvent {
   final String? userId;
@@ -328,6 +326,7 @@ class LoadCompleteCollectionGamesEvent extends GameEvent {
   @override
   List<Object?> get props => [collectionId, collectionName, games, userId];
 }
+
 /// Load complete similar games (for "View All" screens)
 class LoadCompleteSimilarGamesEvent extends GameEvent {
   final int gameId;
@@ -359,8 +358,6 @@ class LoadCompleteGameSeriesEvent extends GameEvent {
   @override
   List<Object?> get props => [gameId, gameName, userId];
 }
-
-
 
 // ⚡ NEUE EVENTS
 class LoadFranchiseGamesPreviewEvent extends GameEvent {
@@ -422,4 +419,136 @@ class LoadAllCollectionGamesEvent extends GameEvent {
 
   @override
   List<Object?> get props => [collectionId, collectionName, userId];
+}
+
+class LoadAllUserRatedEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRatedGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserRatedGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserRatedGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserWishlistGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserWishlistGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserWishlistGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserWishlistGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserRecommendedGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRecommendedGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserRecommendedGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserRecommendedGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserWishlistEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserWishlistEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRecommendationsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRecommendationsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRatedPaginated extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedPaginated(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserRatedPaginated extends GameEvent {
+  final String userId;
+
+  const LoadMoreUserRatedPaginated(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+// Wishlist Paginated
+class LoadAllUserWishlistPaginated extends GameEvent {
+  final String userId;
+  const LoadAllUserWishlistPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserWishlistPaginated extends GameEvent {
+  final String userId;
+  const LoadMoreUserWishlistPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+// Recommended Paginated
+class LoadAllUserRecommendedPaginated extends GameEvent {
+  final String userId;
+  const LoadAllUserRecommendedPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserRecommendedPaginated extends GameEvent {
+  final String userId;
+  const LoadMoreUserRecommendedPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
 }

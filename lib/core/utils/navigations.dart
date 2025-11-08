@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/pages/all_games/local_all_games_screen.dart';
+import 'package:gamer_grove/presentation/pages/character/character_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/company/company_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/event/event_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/event/event_details_screen.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/all_events_screen.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/search/search_page.dart';
+import 'package:gamer_grove/presentation/pages/test/igdb_test_page.dart';
+import 'package:gamer_grove/presentation/pages/test/supabase_test_page.dart';
+import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../domain/entities/character/character.dart';
-import '../../domain/entities/search/search_filters.dart';
-import '../../domain/entities/event/event.dart';
-import '../../injection_container.dart';
-import '../../presentation/blocs/auth/auth_bloc.dart';
-import '../../presentation/blocs/auth/auth_state.dart';
-import '../../presentation/blocs/character/character_bloc.dart';
-import '../../presentation/blocs/event/event_bloc.dart';
-import '../../presentation/blocs/event/event_event.dart';
-import '../../presentation/blocs/game/game_bloc.dart';
-import '../../presentation/pages/character/character_detail_page.dart';
-import '../../presentation/pages/event/event_detail_page.dart';
-import '../../presentation/pages/event/event_details_screen.dart';
-import '../../presentation/pages/event/widgets/all_events_screen.dart';
-import '../../presentation/pages/game_detail/game_detail_page.dart';
-import '../../presentation/pages/test/igdb_test_page.dart';
-import '../../presentation/pages/test/supabase_test_page.dart';
-// 🆕 NEW: Import Local All Games Screen
-import '../../presentation/pages/all_games/local_all_games_screen.dart';
-import '../../domain/entities/game/game.dart';
-import '../../presentation/widgets/sections/franchise_collection_section.dart';
+import '../../../presentation/pages/user_game_list_page.dart';
 
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
@@ -65,6 +67,7 @@ class Navigations {
     bool showSearch = true,
     bool blurRated = false,
     bool showViewToggle = true,
+    Future<List<Game>> Function(int offset)? loadMore,
   }) {
     final userId = _getCurrentUserId(context);
 
@@ -79,6 +82,7 @@ class Navigations {
           showSearch: showSearch,
           blurRated: blurRated,
           showViewToggle: showViewToggle,
+          loadMore: loadMore,
         ),
       ),
     );
@@ -226,48 +230,39 @@ class Navigations {
     );
   }
 
-  /// Navigate to user's wishlist (local data)
-  static void navigateToUserWishlist(
-    BuildContext context,
-    List<Game> wishlistGames,
-  ) {
-    navigateToLocalAllGames(
-      context,
-      title: 'My Wishlist',
-      subtitle: '${wishlistGames.length} games',
-      games: wishlistGames,
-      blurRated: false, // Highlight which wishlist games are already rated
-      showFilters: true,
+  /// Navigate to user's wishlist page.
+  static void navigateToUserWishlist(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      // Optional: Show a message or prompt to log in
+      return;
+    }
+    Navigator.of(context).push(
+      UserGameListPage.route(userId, GameListType.wishlist),
     );
   }
 
-  /// Navigate to user's rated games (local data)
-  static void navigateToUserRatedGames(
-    BuildContext context,
-    List<Game> ratedGames,
-  ) {
-    navigateToLocalAllGames(
-      context,
-      title: 'My Rated Games',
-      subtitle: '${ratedGames.length} games rated',
-      games: ratedGames,
-      blurRated: false, // All are rated, so no need to blur
-      showFilters: true,
+  /// Navigate to user's rated games page.
+  static void navigateToUserRatedGames(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      // Optional: Show a message or prompt to log in
+      return;
+    }
+    Navigator.of(context).push(
+      UserGameListPage.route(userId, GameListType.rated),
     );
   }
 
-  /// Navigate to user's recommended games (local data)
-  static void navigateToUserRecommendedGames(
-    BuildContext context,
-    List<Game> recommendedGames,
-  ) {
-    navigateToLocalAllGames(
-      context,
-      title: 'My Recommendations',
-      subtitle: '${recommendedGames.length} games recommended',
-      games: recommendedGames,
-      blurRated: false, // Show which recommendations are already rated
-      showFilters: true,
+  /// Navigate to user's recommended games page.
+  static void navigateToUserRecommendedGames(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      // Optional: Show a message or prompt to log in
+      return;
+    }
+    Navigator.of(context).push(
+      UserGameListPage.route(userId, GameListType.recommended),
     );
   }
 
@@ -277,44 +272,67 @@ class Navigations {
   // Diese Methoden bleiben als TODOs für API-basierte Screens
 
   static void navigateToPopularGames(BuildContext context) {
-    // TODO: Implement API-based popular games screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Popular games list coming soon!')),
-    );
-  }
-
-  static void navigateToRatedGames(
-    BuildContext context,
-    List<Game> ratedGames,
-  ) {
-    navigateToLocalAllGames(
-      context,
-      title: 'My Rated Games',
-      subtitle: '${ratedGames.length} games',
-      games: ratedGames,
-      blurRated: false, // Highlight which wishlist games are already rated
-      showFilters: true,
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: const SearchFilters(
+            sortBy: GameSortBy.popularity,
+            sortOrder: SortOrder.descending,
+            minTotalRating: 7.0,
+          ),
+          initialTitle: 'Popular Right Now',
+        ),
+      ),
     );
   }
 
   static void navigateToTopRatedGames(BuildContext context) {
-    // TODO: Implement API-based top rated games screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Top rated games list coming soon!')),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: const SearchFilters(
+            sortBy: GameSortBy.rating,
+            sortOrder: SortOrder.descending,
+            minTotalRating: 8.0,
+            minTotalRatingCount: 10,
+          ),
+          initialTitle: 'Top Rated',
+        ),
+      ),
     );
   }
 
   static void navigateToUpcomingGames(BuildContext context) {
-    // TODO: Implement API-based upcoming games screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Upcoming games list coming soon!')),
+    final now = DateTime.now();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            releaseDateFrom: now,
+            sortBy: GameSortBy.releaseDate,
+            sortOrder: SortOrder.ascending,
+          ),
+          initialTitle: 'Coming Soon',
+        ),
+      ),
     );
   }
 
   static void navigateToLatestReleases(BuildContext context) {
-    // TODO: Implement API-based latest releases screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Latest games list coming soon!')),
+    final now = DateTime.now();
+    final threeMonthsAgo = DateTime(now.year, now.month - 3, now.day);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => SearchPage(
+          initialFilters: SearchFilters(
+            releaseDateFrom: threeMonthsAgo,
+            releaseDateTo: now,
+            sortBy: GameSortBy.releaseDate,
+            sortOrder: SortOrder.descending,
+          ),
+          initialTitle: 'New Releases',
+        ),
+      ),
     );
   }
 
@@ -563,8 +581,7 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print(
-                    '🏢 Navigation: Creating CompanyBloc for ID: $companyId');
+                print('🏢 Navigation: Creating CompanyBloc for ID: $companyId');
                 return sl<CompanyBloc>();
               },
             ),

@@ -20,14 +20,13 @@ class GameCard extends StatelessWidget {
   final double? width;
   final double? height;
 
-  const GameCard({
-    super.key,
-    required this.game,
-    required this.onTap,
-    this.blurRated = false,
-    this.width,
-    this.height,
-  });
+  const GameCard(
+      {super.key,
+      required this.game,
+      required this.onTap,
+      this.blurRated = false,
+      this.width,
+      this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -551,7 +550,7 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  void _showUserStatesDialog(BuildContext context) {
+  Future<void> _showUserStatesDialog(BuildContext context) async {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -563,7 +562,7 @@ class GameCard extends StatelessWidget {
       return;
     }
 
-    showModalBottomSheet(
+    await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (dialogContext) {
@@ -609,10 +608,7 @@ class GameCard extends StatelessWidget {
     bool isRecommended,
     bool isInTopThree,
   ) {
-    return userRating != null ||
-        isWishlisted ||
-        isRecommended ||
-        isInTopThree;
+    return userRating != null || isWishlisted || isRecommended || isInTopThree;
   }
 
   int _getUserElementsCount(
