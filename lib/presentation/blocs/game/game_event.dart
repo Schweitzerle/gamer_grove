@@ -44,6 +44,19 @@ class RateGameEvent extends GameEvent {
   List<Object> get props => [gameId, userId, rating];
 }
 
+class RemoveRatingEvent extends GameEvent {
+  final int gameId;
+  final String userId;
+
+  const RemoveRatingEvent({
+    required this.gameId,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [gameId, userId];
+}
+
 class ToggleWishlistEvent extends GameEvent {
   final int gameId;
   final String userId;

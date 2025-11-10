@@ -5,12 +5,14 @@ import '../../core/constants/app_constants.dart';
 class RatingDialog extends StatefulWidget {
   final String gameName;
   final double? currentRating;
-  final void Function(double rating) onRatingSubmitted;
+  final void Function(double rating) onRatingChanged;
+  final VoidCallback? onRatingDeleted;
 
   const RatingDialog({
     super.key,
     required this.gameName,
-    required this.onRatingSubmitted,
+    required this.onRatingChanged,
+    this.onRatingDeleted,
     this.currentRating,
   });
 
@@ -229,6 +231,18 @@ class _RatingDialogState extends State<RatingDialog>
           ],
         ),
         actions: [
+          if (widget.currentRating != null && widget.onRatingDeleted != null)
+            TextButton(
+              onPressed: () {
+                widget.onRatingDeleted!();
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          const SizedBox(width: 8),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
@@ -240,12 +254,12 @@ class _RatingDialogState extends State<RatingDialog>
           ),
           FilledButton.icon(
             onPressed: () {
-              widget.onRatingSubmitted(_currentRating);
+              widget.onRatingChanged(_currentRating);
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.check),
             label: Text(
-              widget.currentRating != null ? 'Update Rating' : 'Rate Game',
+              widget.currentRating != null ? 'Update' : 'Rate',
             ),
             style: FilledButton.styleFrom(
               backgroundColor: _getRatingColor(_currentRating),

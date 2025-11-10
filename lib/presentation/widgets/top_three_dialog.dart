@@ -10,6 +10,8 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart'
+    as user_data;
 import 'package:shimmer/shimmer.dart';
 
 class TopThreeDialog extends StatefulWidget {
@@ -138,8 +140,20 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
 
     print('🗑️ TopThreeDialog: Removing game ${game.id} from top three');
 
+    // ✅ UPDATE BOTH BLOCS!
+    // 1. Update GameBloc (for game detail pages)
     widget.gameBloc.add(
       RemoveFromTopThreeEvent(
+        userId: userId,
+        gameId: game.id,
+      ),
+    );
+
+    // 2. Update UserGameDataBloc (for game cards & user states)
+    // ✅ Use RemoveFromTopThreeEvent - it handles the backend correctly
+    final userGameDataBloc = context.read<user_data.UserGameDataBloc>();
+    userGameDataBloc.add(
+      user_data.RemoveFromTopThreeEvent(
         userId: userId,
         gameId: game.id,
       ),

@@ -287,8 +287,11 @@ class UserStatesContent extends StatelessWidget {
       builder: (dialogContext) => RatingDialog(
         gameName: game.name,
         currentRating: currentRating,
-        onRatingSubmitted: (rating) {
+        onRatingChanged: (rating) {
           _rateGame(userDataBloc, userId, rating);
+        },
+        onRatingDeleted: () {
+          _deleteRating(userDataBloc, userId);
         },
       ),
     );
@@ -305,36 +308,29 @@ class UserStatesContent extends StatelessWidget {
     HapticFeedback.lightImpact();
   }
 
+  void _deleteRating(user_data.UserGameDataBloc userDataBloc, String userId) {
+    userDataBloc.add(user_data.RemoveRatingEvent(
+      gameId: game.id,
+      userId: userId,
+    ));
+
+    HapticFeedback.lightImpact();
+  }
+
   void _updateTopThree(
     user_data.UserGameDataBloc userDataBloc,
     String userId,
     int position,
     List<int> currentTopThreeIds,
   ) {
-    // Create updated list with new game at specified position
-    final updatedList = List<int>.from(currentTopThreeIds);
+    // ✅ Use SetGameTopThreePositionEvent instead of UpdateTopThreeEvent
+    // This properly handles the backend logic (removing from old position, etc.)
+    print('🎯 UserStatesSection: Setting game ${game.id} at position $position');
 
-    // Remove the game if it's already in the list
-    updatedList.remove(game.id);
-
-    // Insert at the specified position (1-indexed to 0-indexed)
-    final index = position - 1;
-    if (index >= 0 && index <= 2) {
-      if (index >= updatedList.length) {
-        updatedList.add(game.id);
-      } else {
-        updatedList.insert(index, game.id);
-      }
-
-      // Keep only first 3 games
-      if (updatedList.length > 3) {
-        updatedList.removeRange(3, updatedList.length);
-      }
-    }
-
-    userDataBloc.add(user_data.UpdateTopThreeEvent(
+    userDataBloc.add(user_data.SetGameTopThreePositionEvent(
       userId: userId,
-      gameIds: updatedList,
+      gameId: game.id,
+      position: position,
     ));
 
     HapticFeedback.lightImpact();

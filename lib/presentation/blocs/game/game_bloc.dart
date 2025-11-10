@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
 import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
@@ -45,6 +46,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final SearchGames searchGames;
   final GetGameDetails getGameDetails;
   final RateGame rateGame;
+  final RemoveRatingUseCase removeRating;
   final ToggleWishlist toggleWishlist;
   final ToggleRecommend toggleRecommend;
   final AddToTopThree addToTopThree;
@@ -75,6 +77,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.searchGames,
     required this.getGameDetails,
     required this.rateGame,
+    required this.removeRating,
     required this.toggleWishlist,
     required this.toggleRecommend,
     required this.addToTopThree,
@@ -109,11 +112,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // Game detail events
     on<GetGameDetailsEvent>(_onGetGameDetails);
     on<RateGameEvent>(_onRateGame);
+    on<RemoveRatingEvent>(_onRemoveRating);
     on<ToggleWishlistEvent>(_onToggleWishlist);
     on<ToggleRecommendEvent>(_onToggleRecommend);
     on<AddToTopThreeEvent>(_onAddToTopThree);
     on<RemoveFromTopThreeEvent>(_onRemoveFromTopThree);
-    on<UpdateTopThreeEvent>(_onUpdateTopThree);
     on<GetGameDetailsWithUserDataEvent>(_onGetGameDetailsWithUserData);
     on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
 
@@ -747,6 +750,43 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  Future<void> _onRemoveRating(
+    RemoveRatingEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    final result = await removeRating(
+      RemoveRatingParams(
+        gameId: event.gameId,
+        userId: event.userId,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (_) {
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(userRating: null);
+        });
+
+        // Update in allen States
+        _updateGameInHomePageState(event.gameId, (game) {
+          return game.copyWith(userRating: null);
+        }, emit);
+
+        // Falls aktueller State GameDetailsLoaded ist
+        if (state is GameDetailsLoaded) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            final updatedGame = currentGame.copyWith(userRating: null);
+            _updateGameCache(event.gameId, updatedGame);
+            emit(GameDetailsLoaded(updatedGame));
+          }
+        }
+      },
+    );
+  }
+
 // ✅ COMPREHENSIVE Helper method to update a game in ALL possible states
   void _updateGameInAllStates(
       int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
@@ -757,7 +797,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final updatedGames = currentState.games.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
-      emit(currentState.copyWith(games: updatedGames));
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
     }
 
     // 2. UpcomingGamesLoaded
@@ -765,7 +805,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final updatedGames = currentState.games.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
-      emit(currentState.copyWith(games: updatedGames));
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
     }
 
     // 3. LatestGamesLoaded
@@ -773,7 +813,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final updatedGames = currentState.games.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
-      emit(currentState.copyWith(games: updatedGames));
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
     }
 
     // 4. TopRatedGamesLoaded
@@ -781,7 +821,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final updatedGames = currentState.games.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
-      emit(currentState.copyWith(games: updatedGames));
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
     }
 
     // 5. HomePageLoaded - Update ALL game lists within
@@ -812,12 +852,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }).toList();
 
       emit(currentState.copyWith(
-        popularGames: updatedPopular,
-        upcomingGames: updatedUpcoming,
-        latestGames: updatedLatest,
-        topRatedGames: updatedTopRated,
-        userWishlist: updatedWishlist,
-        userRecommendations: updatedRecommendations,
+        popularGames: _applyCache(updatedPopular),
+        upcomingGames: _applyCache(updatedUpcoming),
+        latestGames: _applyCache(updatedLatest),
+        topRatedGames: _applyCache(updatedTopRated),
+        userWishlist: updatedWishlist != null ? _applyCache(updatedWishlist) : null,
+        userRecommendations: updatedRecommendations != null ? _applyCache(updatedRecommendations) : null,
       ));
     }
 
@@ -841,10 +881,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }).toList();
 
       emit(currentState.copyWith(
-        userRated: updatedRated,
-        userWishlist: updatedWishlist,
-        userRecommendations: updatedRecommendations,
-        userTopThree: updatedTopThree,
+        userRated: _applyCache(updatedRated),
+        userWishlist: _applyCache(updatedWishlist),
+        userRecommendations: _applyCache(updatedRecommendations),
+        userTopThree: _applyCache(updatedTopThree),
       ));
     }
 
@@ -1582,7 +1622,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
-      (_) {
+      (_) async {
         print('✅ GameBloc: Successfully added to top three');
 
         // 🎯 UPDATE CACHE FIRST
@@ -1593,14 +1633,25 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           );
         });
 
-        add(UpdateTopThreeEvent(userId: event.userId));
-
+        // Update the specific game in all relevant states
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(
             isInTopThree: true,
             topThreePosition: event.position,
           );
         }, emit);
+
+        // If the current state is GrovePageLoaded, update its userTopThree list
+        if (state is GrovePageLoaded) {
+          final result =
+              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          result.fold(
+            (failure) => emit(GameError(_mapFailureToMessage(failure))),
+            (games) {
+              emit((state as GrovePageLoaded).copyWith(userTopThree: games));
+            },
+          );
+        }
       },
     );
   }
@@ -1626,7 +1677,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
-      (_) {
+      (_) async {
         print('✅ GameBloc: Successfully removed from top three');
 
         // 🎯 UPDATE CACHE FIRST
@@ -1637,34 +1688,27 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           );
         });
 
-        add(UpdateTopThreeEvent(userId: event.userId));
-
+        // Update the specific game in all relevant states
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(
             isInTopThree: false,
             topThreePosition: null,
           );
         }, emit);
+
+        // If the current state is GrovePageLoaded, update its userTopThree list
+        if (state is GrovePageLoaded) {
+          final result =
+              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          result.fold(
+            (failure) => emit(GameError(_mapFailureToMessage(failure))),
+            (games) {
+              emit((state as GrovePageLoaded).copyWith(userTopThree: games));
+            },
+          );
+        }
       },
     );
-  }
-
-  Future<void> _onUpdateTopThree(
-    UpdateTopThreeEvent event,
-    Emitter<GameState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is GrovePageLoaded) {
-      final result =
-          await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
-
-      result.fold(
-        (failure) => emit(GameError(_mapFailureToMessage(failure))),
-        (games) {
-          emit(currentState.copyWith(userTopThree: games));
-        },
-      );
-    }
   }
 
   String _mapFailureToMessage(Failure failure) {

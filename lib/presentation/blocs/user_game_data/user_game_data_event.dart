@@ -90,6 +90,36 @@ class UpdateTopThreeEvent extends UserGameDataEvent {
   List<Object> get props => [userId, gameIds];
 }
 
+/// Set a game at a specific position in the user's top three
+class SetGameTopThreePositionEvent extends UserGameDataEvent {
+  final String userId;
+  final int gameId;
+  final int position; // 1, 2, or 3
+
+  const SetGameTopThreePositionEvent({
+    required this.userId,
+    required this.gameId,
+    required this.position,
+  });
+
+  @override
+  List<Object> get props => [userId, gameId, position];
+}
+
+/// Remove a game from the user's top three
+class RemoveFromTopThreeEvent extends UserGameDataEvent {
+  final String userId;
+  final int gameId;
+
+  const RemoveFromTopThreeEvent({
+    required this.userId,
+    required this.gameId,
+  });
+
+  @override
+  List<Object> get props => [userId, gameId];
+}
+
 /// Clear user game data (logout)
 class ClearUserGameDataEvent extends UserGameDataEvent {
   const ClearUserGameDataEvent();

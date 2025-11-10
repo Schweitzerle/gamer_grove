@@ -70,6 +70,13 @@ class _UserGameListPageState extends State<UserGameListPage> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
 
+  // new state variables
+  List<Game> _allGames = [];
+  List<Game> _filteredAndSortedGames = [];
+  List<Game> _displayedGames = [];
+  final int _gamesPerAPICall = 20;
+  bool _isLoadingMore = false;
+
   // Filter & Sort state
   String _searchQuery = '';
   SortCategory _sortCategory = SortCategory.name;
@@ -81,21 +88,37 @@ class _UserGameListPageState extends State<UserGameListPage> {
     super.initState();
     _loadInitialData();
     _scrollController.addListener(_onScroll);
+    _searchController.addListener(() {
+      if (_searchQuery != _searchController.text) {
+        setState(() {
+          _searchQuery = _searchController.text;
+          _resetAndApplyFilters();
+        });
+      }
+    });
   }
 
   void _loadInitialData() {
     switch (widget.type) {
       case GameListType.rated:
-        context.read<GameBloc>().add(LoadAllUserRatedPaginated(widget.userId));
+        context.read<GameBloc>().add(LoadAllUserRatedEvent(widget.userId));
+        break;
       case GameListType.wishlist:
-        context
-            .read<GameBloc>()
-            .add(LoadAllUserWishlistPaginated(widget.userId));
+        context.read<GameBloc>().add(LoadAllUserWishlistEvent(widget.userId));
+        break;
       case GameListType.recommended:
         context
             .read<GameBloc>()
-            .add(LoadAllUserRecommendedPaginated(widget.userId));
+            .add(LoadAllUserRecommendationsEvent(widget.userId));
+        break;
     }
+  }
+
+  void _resetAndApplyFilters() {
+    setState(() {
+      _filteredAndSortedGames = _applyFilterAndSort(_allGames);
+      _displayedGames = _filteredAndSortedGames.take(_gamesPerAPICall).toList();
+    });
   }
 
   String get _title {
@@ -130,12 +153,10 @@ class _UserGameListPageState extends State<UserGameListPage> {
             icon: const Icon(Icons.help_outline),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text(
-                    'Sorting and filtering only applies to already loaded games. '
-                    'Scroll down to load more games.',
-                  ),
-                  duration: const Duration(seconds: 4),
+                const SnackBar(
+                  content: Text(
+                      'All your games are loaded. Filtering and sorting is done locally.'),
+                  duration: Duration(seconds: 4),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -160,62 +181,49 @@ class _UserGameListPageState extends State<UserGameListPage> {
           Expanded(
             child: BlocConsumer<GameBloc, GameState>(
               listener: (context, state) {
-                if (state is AllUserRatedPaginatedError ||
-                    state is AllUserWishlistPaginatedError ||
-                    state is AllUserRecommendedPaginatedError) {
+                if (state is GameError) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state is AllUserRatedPaginatedError
-                          ? state.message
-                          : state is AllUserWishlistPaginatedError
-                              ? state.message
-                              : (state as AllUserRecommendedPaginatedError)
-                                  .message),
+                      content: Text(state.message),
                     ),
                   );
+                } else if (state is AllUserRatedLoaded) {
+                  _allGames = state.games;
+                  _resetAndApplyFilters();
+                } else if (state is AllUserWishlistedLoaded) {
+                  _allGames = state.games;
+                  _resetAndApplyFilters();
+                } else if (state is AllUserRecommendationsLoaded) {
+                  _allGames = state.games;
+                  _resetAndApplyFilters();
                 }
               },
               builder: (context, state) {
-                if (state is AllUserRatedPaginatedLoading ||
-                    state is AllUserWishlistPaginatedLoading ||
-                    state is AllUserRecommendedPaginatedLoading) {
-                  return const Center(
-                    child: LoadingIndicator(
-                      indicatorType: Indicator.pacman,
+                if (state is UserRatedLoading ||
+                    state is UserWishlistLoading ||
+                    state is UserRecommendationsLoading) {
+                  return Center(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      child: const LoadingIndicator(
+                        indicatorType: Indicator.pacman,
+                      ),
                     ),
                   );
                 }
 
-                List<Game>? games;
-                var hasReachedMax = false;
-
-                if (state is AllUserRatedPaginatedLoaded) {
-                  games = state.games;
-                  hasReachedMax = state.hasReachedMax;
-                } else if (state is AllUserWishlistPaginatedLoaded) {
-                  games = state.games;
-                  hasReachedMax = state.hasReachedMax;
-                } else if (state is AllUserRecommendedPaginatedLoaded) {
-                  games = state.games;
-                  hasReachedMax = state.hasReachedMax;
+                if (_allGames.isEmpty) {
+                  return _buildEmptyState();
                 }
 
-                if (games == null) {
-                  return const Center(
-                    child: Text('Something went wrong.'),
-                  );
-                }
-
-                // Apply local filtering and sorting
-                final filteredAndSortedGames = _applyFilterAndSort(games);
-
-                if (filteredAndSortedGames.isEmpty) {
+                if (_filteredAndSortedGames.isEmpty &&
+                    _searchQuery.isNotEmpty) {
                   return _buildEmptyState();
                 }
 
                 return _isGridView
-                    ? _buildGridView(filteredAndSortedGames, hasReachedMax)
-                    : _buildListView(filteredAndSortedGames, hasReachedMax);
+                    ? _buildGridView(_displayedGames)
+                    : _buildListView(_displayedGames);
               },
             ),
           ),
@@ -237,9 +245,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    setState(() {
-                      _searchQuery = '';
-                    });
                   },
                 )
               : null,
@@ -247,61 +252,41 @@ class _UserGameListPageState extends State<UserGameListPage> {
             borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           ),
         ),
-        onChanged: (query) {
-          setState(() {
-            _searchQuery = query;
-          });
-        },
       ),
     );
   }
 
   Widget _buildGamesCount() {
-    return BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        List<Game>? allGames;
-        if (state is AllUserRatedPaginatedLoaded) {
-          allGames = state.games;
-        } else if (state is AllUserWishlistPaginatedLoaded) {
-          allGames = state.games;
-        } else if (state is AllUserRecommendedPaginatedLoaded) {
-          allGames = state.games;
-        }
-
-        if (allGames == null) return const SizedBox.shrink();
-
-        final filteredCount = _applyFilterAndSort(allGames).length;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.paddingMedium,
-            vertical: AppConstants.paddingSmall,
-          ),
-          child: Row(
-            children: [
-              Text(
-                '$filteredCount of ${allGames.length} games',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: _showSortDialog,
-                icon: const Icon(Icons.sort, size: 16),
-                label: Text(_getCurrentSortName()),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.paddingMedium,
+        vertical: AppConstants.paddingSmall,
+      ),
+      child: Row(
+        children: [
+          Text(
+            'Showing ${_displayedGames.length} of '
+            '${_filteredAndSortedGames.length} games',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-              ),
-            ],
           ),
-        );
-      },
+          const Spacer(),
+          TextButton.icon(
+            onPressed: _showSortDialog,
+            icon: const Icon(Icons.sort, size: 16),
+            label: Text(_getCurrentSortName()),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildGridView(List<Game> games, bool hasReachedMax) {
+  Widget _buildGridView(List<Game> games) {
+    final bool hasMore = games.length < _filteredAndSortedGames.length;
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -311,12 +296,11 @@ class _UserGameListPageState extends State<UserGameListPage> {
         crossAxisSpacing: AppConstants.paddingMedium,
         mainAxisSpacing: AppConstants.paddingMedium,
       ),
-      itemCount: hasReachedMax ? games.length : games.length + 1,
+      itemCount: games.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= games.length) {
-          return const LoadingIndicator(
-            indicatorType: Indicator.pacman,
-          );
+          return const Center(
+              child: LoadingIndicator(indicatorType: Indicator.pacman));
         }
         final game = games[index];
         return GameCard(
@@ -327,18 +311,18 @@ class _UserGameListPageState extends State<UserGameListPage> {
     );
   }
 
-  Widget _buildListView(List<Game> games, bool hasReachedMax) {
+  Widget _buildListView(List<Game> games) {
+    final bool hasMore = games.length < _filteredAndSortedGames.length;
     return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      itemCount: hasReachedMax ? games.length : games.length + 1,
+      itemCount: games.length + (hasMore ? 1 : 0),
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppConstants.paddingSmall),
       itemBuilder: (context, index) {
         if (index >= games.length) {
-          return const LoadingIndicator(
-            indicatorType: Indicator.pacman,
-          );
+          return const Center(
+              child: LoadingIndicator(indicatorType: Indicator.pacman));
         }
         final game = games[index];
         return GameCard(
@@ -397,6 +381,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
         result.sort((a, b) => _sortDirection == SortDirection.ascending
             ? a.name.compareTo(b.name)
             : b.name.compareTo(a.name));
+        break;
       case SortCategory.totalRating:
         result.sort((a, b) {
           final aRating = a.totalRating ?? 0;
@@ -405,6 +390,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.igdbUserRating:
         result.sort((a, b) {
           final aRating = a.rating ?? 0;
@@ -413,6 +399,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.aggregatedRating:
         result.sort((a, b) {
           final aRating = a.aggregatedRating ?? 0;
@@ -421,6 +408,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.userRating:
         result.sort((a, b) {
           final aRating = a.userRating ?? 0;
@@ -429,6 +417,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.totalRatingCount:
         result.sort((a, b) {
           final aRating = a.totalRatingCount ?? 0;
@@ -437,6 +426,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.igdbUserRatingCount:
         result.sort((a, b) {
           final aRating = a.ratingCount ?? 0;
@@ -445,6 +435,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.aggregatedRatingCount:
         result.sort((a, b) {
           final aRating = a.aggregatedRatingCount ?? 0;
@@ -453,6 +444,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
+        break;
       case SortCategory.hypes:
         result.sort((a, b) {
           final aHypes = a.hypes ?? 0;
@@ -461,6 +453,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aHypes.compareTo(bHypes)
               : bHypes.compareTo(aHypes);
         });
+        break;
       case SortCategory.releaseDate:
         result.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
@@ -472,6 +465,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? a.firstReleaseDate!.compareTo(b.firstReleaseDate!)
               : b.firstReleaseDate!.compareTo(a.firstReleaseDate!);
         });
+        break;
     }
 
     return result;
@@ -616,12 +610,12 @@ class _UserGameListPageState extends State<UserGameListPage> {
     final isAscending = _sortDirection == SortDirection.ascending;
 
     void handleTap() {
+      Navigator.of(context).pop();
       if (isSelected) {
         // Toggle direction if already selected
         setState(() {
-          _sortDirection = isAscending
-              ? SortDirection.descending
-              : SortDirection.ascending;
+          _sortDirection =
+              isAscending ? SortDirection.descending : SortDirection.ascending;
         });
       } else {
         // Set category and default direction
@@ -633,7 +627,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
           _sortDirection = newDirection;
         });
       }
-      Navigator.of(context).pop();
+      _resetAndApplyFilters();
     }
 
     return ListTile(
@@ -676,21 +670,31 @@ class _UserGameListPageState extends State<UserGameListPage> {
 
   void _onScroll() {
     if (_isBottom) {
-      switch (widget.type) {
-        case GameListType.rated:
-          context
-              .read<GameBloc>()
-              .add(LoadMoreUserRatedPaginated(widget.userId));
-        case GameListType.wishlist:
-          context
-              .read<GameBloc>()
-              .add(LoadMoreUserWishlistPaginated(widget.userId));
-        case GameListType.recommended:
-          context
-              .read<GameBloc>()
-              .add(LoadMoreUserRecommendedPaginated(widget.userId));
-      }
+      _loadMoreGames();
     }
+  }
+
+  void _loadMoreGames() {
+    if (_isLoadingMore ||
+        _displayedGames.length >= _filteredAndSortedGames.length) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate network delay for a better UX
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final nextGames = _filteredAndSortedGames
+          .skip(_displayedGames.length)
+          .take(_gamesPerAPICall)
+          .toList();
+      setState(() {
+        _displayedGames.addAll(nextGames);
+        _isLoadingMore = false;
+      });
+    });
   }
 
   bool get _isBottom {

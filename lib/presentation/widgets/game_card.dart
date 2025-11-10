@@ -55,22 +55,68 @@ class GameCard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
-            builder: (context, userDataState) {
-              // Extract user-specific data from global state
-              // 🔄 Fallback to Game entity data if UserGameDataBloc is not loaded yet
-              bool isWishlisted = game.isWishlisted;
-              bool isRecommended = game.isRecommended;
-              double? userRating = game.userRating;
-              bool isInTopThree = game.isInTopThree;
-              int? topThreePosition = game.topThreePosition;
+            buildWhen: (previous, current) {
+              // 🐛 DEBUG: Log buildWhen checks
+              print('🎮 GameCard(${game.name}): buildWhen check');
+              print('   Previous: ${previous.runtimeType}, Current: ${current.runtimeType}');
 
-              // Override with UserGameDataBloc data if available
+              // Rebuild if state type changes OR if it's UserGameDataLoaded with different data
+              if (previous.runtimeType != current.runtimeType) {
+                print('   → Rebuild: State type changed');
+                return true;
+              }
+
+              // Always rebuild when UserGameDataLoaded state changes
+              if (current is UserGameDataLoaded && previous is UserGameDataLoaded) {
+                // Check if THIS game's data has changed
+                final prevWishlisted = previous.isWishlisted(game.id);
+                final currWishlisted = current.isWishlisted(game.id);
+                final prevRecommended = previous.isRecommended(game.id);
+                final currRecommended = current.isRecommended(game.id);
+                final prevRating = previous.getRating(game.id);
+                final currRating = current.getRating(game.id);
+                final prevTopThree = previous.isInTopThree(game.id);
+                final currTopThree = current.isInTopThree(game.id);
+
+                final hasChanges = prevWishlisted != currWishlisted ||
+                    prevRecommended != currRecommended ||
+                    prevRating != currRating ||
+                    prevTopThree != currTopThree;
+
+                print('   → Rebuild: ${hasChanges ? "YES (data changed)" : "NO (no changes)"}');
+                print('      Recommended: $prevRecommended → $currRecommended');
+                print('      Rating: $prevRating → $currRating');
+
+                return hasChanges;
+              }
+
+              print('   → Rebuild: YES (default)');
+              return true; // Rebuild for other state changes
+            },
+            builder: (context, userDataState) {
+              // ✅ ALWAYS read from UserGameDataBloc as single source of truth
+              // Default to false/null if not loaded yet
+              bool isWishlisted = false;
+              bool isRecommended = false;
+              double? userRating;
+              bool isInTopThree = false;
+              int? topThreePosition;
+
+              // 🐛 DEBUG: Log builder state
+              print('🎮 GameCard(${game.name}): builder called');
+              print('   State: ${userDataState.runtimeType}');
+
+              // Read from UserGameDataBloc if loaded
               if (userDataState is UserGameDataLoaded) {
                 isWishlisted = userDataState.isWishlisted(game.id);
                 isRecommended = userDataState.isRecommended(game.id);
                 userRating = userDataState.getRating(game.id);
                 isInTopThree = userDataState.isInTopThree(game.id);
                 topThreePosition = userDataState.getTopThreePosition(game.id);
+
+                print('   Loaded data: recommended=$isRecommended, rating=$userRating');
+              } else {
+                print('   State not loaded - showing defaults');
               }
 
               return Stack(
