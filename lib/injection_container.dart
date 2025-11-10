@@ -76,6 +76,7 @@ import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/statistics/statistics_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
@@ -305,6 +306,13 @@ Future<void> initDependencies() async {
     ..registerFactory(
       () => LeaderboardBloc(
         getLeaderboardUsers: sl(),
+      ),
+    )
+
+    // Statistics BLoC
+    ..registerFactory(
+      () => StatisticsBloc(
+        gameRepository: sl(),
       ),
     )
 
