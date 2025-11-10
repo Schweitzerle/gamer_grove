@@ -324,4 +324,29 @@ abstract class UserRepository {
 
   /// Reactivate user account
   Future<Either<Failure, void>> reactivateUserAccount(String userId);
+
+  // ==========================================
+  // USER GAME COLLECTIONS (IDs ONLY)
+  // ==========================================
+
+  /// Get user's wishlisted game IDs
+  Future<Either<Failure, List<int>>> getWishlistedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
+
+  /// Get user's rated game IDs with ratings
+  Future<Either<Failure, List<Map<String, dynamic>>>> getRatedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
+
+  /// Get user's recommended game IDs
+  Future<Either<Failure, List<int>>> getRecommendedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
 }

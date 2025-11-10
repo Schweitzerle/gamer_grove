@@ -235,6 +235,23 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       } else {
         // Toggle existing
         final isWishlisted = existing['is_wishlisted'] as bool;
+
+        // If turning OFF wishlist, check if this is the last flag
+        if (isWishlisted) {
+          final isRecommended = existing['is_recommended'] as bool? ?? false;
+          final rating = existing['rating'] as double?;
+          final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+          // If no other flags are set, delete the row instead of updating
+          if (!isRecommended && rating == null && !isInTopThree) {
+            await SupabaseDelete('user_games')
+                .filter(EqualFilter('user_id', userId))
+                .filter(EqualFilter('game_id', gameId))
+                .build(_supabase);
+            return;
+          }
+        }
+
         await SupabaseUpdate('user_games')
             .set({
               'is_wishlisted': !isWishlisted,
@@ -265,6 +282,24 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         }).build(_supabase);
       } else {
         final isRecommended = existing['is_recommended'] as bool;
+
+        // If turning OFF recommended, check if this is the last flag
+        if (isRecommended) {
+          final isWishlisted = existing['is_wishlisted'] as bool? ?? false;
+          final rating = existing['rating'] as double?;
+          final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+          // If no other flags are set, delete the row instead of updating
+          if (!isWishlisted && rating == null && !isInTopThree) {
+            await SupabaseDelete('user_games')
+                .filter(EqualFilter('user_id', userId))
+                .filter(EqualFilter('game_id', gameId))
+                .build(_supabase);
+            return;
+          }
+        }
+
+        // Otherwise, just toggle the flag
         await SupabaseUpdate('user_games')
             .set({
               'is_recommended': !isRecommended,
@@ -319,6 +354,27 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
   @override
   Future<void> removeRating(String userId, int gameId) async {
     try {
+      // ✅ First, check if this row exists and what other flags are set
+      final existing =
+          await UserGameQueries.getUserGame(userId, gameId).build(_supabase);
+
+      if (existing != null) {
+        // Check if removing rating would leave no other flags set
+        final isWishlisted = existing['is_wishlisted'] as bool? ?? false;
+        final isRecommended = existing['is_recommended'] as bool? ?? false;
+        final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+        // If no other flags are set, delete the row instead of updating
+        if (!isWishlisted && !isRecommended && !isInTopThree) {
+          await SupabaseDelete('user_games')
+              .filter(EqualFilter('user_id', userId))
+              .filter(EqualFilter('game_id', gameId))
+              .build(_supabase);
+          return;
+        }
+      }
+
+      // Otherwise, just set rating to null
       await SupabaseUpdate('user_games')
           .set({
             'is_rated': false,

@@ -35,6 +35,7 @@ import 'package:gamer_grove/domain/usecases/user/update_user_avatar.dart';
 import 'package:gamer_grove/domain/usecases/user/update_user_profile.dart';
 import 'package:gamer_grove/domain/usecases/collection/clear_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_rated_games_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/get_recommended_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_user_game_data_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_wishlisted_games_use_case.dart';
@@ -43,6 +44,8 @@ import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.da
 import 'package:gamer_grove/domain/usecases/collection/toggle_recommended_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_wishlist_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/update_top_three_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/game/get_user_rated_game_ids.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_details.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_dlcs.dart';
@@ -206,12 +209,15 @@ Future<void> initDependencies() async {
       () => UserGameDataBloc(
         getWishlistedGamesUseCase: sl(),
         getRatedGamesUseCase: sl(),
+        getRecommendedGamesUseCase: sl(),
         getTopThreeUseCase: sl(),
         toggleWishlistUseCase: sl(),
         toggleRecommendedUseCase: sl(),
         rateGameUseCase: sl(),
         removeRatingUseCase: sl(),
         updateTopThreeUseCase: sl(),
+        setTopThreeGameAtPositionUseCase: sl(),
+        removeFromTopThreeUseCase: sl(),
       ),
     )
 
@@ -221,6 +227,7 @@ Future<void> initDependencies() async {
         searchGames: sl(),
         getGameDetails: sl(),
         rateGame: sl(),
+        removeRating: sl(),
         toggleWishlist: sl(),
         toggleRecommend: sl(),
         addToTopThree: sl(),
@@ -342,10 +349,13 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => ToggleWishlistUseCase(sl()))
     ..registerLazySingleton(() => ToggleRecommendedUseCase(sl()))
     ..registerLazySingleton(() => UpdateTopThreeUseCase(sl()))
+    ..registerLazySingleton(() => SetTopThreeGameAtPositionUseCase(sl()))
+    ..registerLazySingleton(() => RemoveFromTopThreeUseCase(sl()))
     ..registerLazySingleton(() => GetTopThreeUseCase(sl()))
     ..registerLazySingleton(() => ClearTopThreeUseCase(sl()))
     ..registerLazySingleton(() => GetWishlistedGamesUseCase(sl()))
     ..registerLazySingleton(() => GetRatedGamesUseCase(sl()))
+    ..registerLazySingleton(() => GetRecommendedGamesUseCase(sl()))
 
     // Game Use Cases
     ..registerLazySingleton(() => GetUserRatedGameIds(sl()))

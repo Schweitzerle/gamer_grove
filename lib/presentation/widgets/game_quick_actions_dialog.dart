@@ -7,6 +7,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../domain/entities/game/game.dart';
 import '../blocs/game/game_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
+import '../blocs/user_game_data/user_game_data_bloc.dart' as user_data;
 import 'rating_dialog.dart';
 import 'top_three_dialog.dart';
 
@@ -38,150 +39,170 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle Bar
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
+    // ✅ Watch UserGameDataBloc for reactive updates
+    return BlocBuilder<user_data.UserGameDataBloc, user_data.UserGameDataState>(
+      builder: (context, userDataState) {
+        // Extract user-specific data from global state
+        bool isWishlisted = widget.game.isWishlisted;
+        bool isRecommended = widget.game.isRecommended;
+        double? userRating = widget.game.userRating;
+        bool isInTopThree = widget.game.isInTopThree;
+        int? topThreePosition = widget.game.topThreePosition;
+
+        // Override with UserGameDataBloc data if available
+        if (userDataState is user_data.UserGameDataLoaded) {
+          isWishlisted = userDataState.isWishlisted(widget.game.id);
+          isRecommended = userDataState.isRecommended(widget.game.id);
+          userRating = userDataState.getRating(widget.game.id);
+          isInTopThree = userDataState.isInTopThree(widget.game.id);
+          topThreePosition = userDataState.getTopThreePosition(widget.game.id);
+        }
+
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle Bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
 
-          // Game Info Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Game Cover
-                if (widget.game.coverUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.game.coverUrl!,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                const SizedBox(width: 12),
-
-                // Game Title & Status
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.game.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+              // Game Info Header
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    // Game Cover
+                    if (widget.game.coverUrl != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          widget.game.coverUrl!,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                    const SizedBox(width: 12),
 
-                      // Current Status Tags
-                      Wrap(
-                        spacing: 6,
+                    // Game Title & Status
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (widget.game.isInTopThree)
-                            _buildStatusChip(
-                              label: '#${widget.game.topThreePosition ?? "3"}',
-                              icon: Icons.emoji_events,
-                              color: Colors.amber,
+                          Text(
+                            widget.game.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          if (widget.game.userRating != null)
-                            _buildStatusChip(
-                              label: widget.game.userRating!.toStringAsFixed(1),
-                              icon: Icons.star,
-                              color: ColorScales.getRatingColor(
-                                  widget.game.userRating!),
-                            ),
-                          if (widget.game.isWishlisted)
-                            _buildStatusChip(
-                              label: 'Wishlist',
-                              icon: Icons.favorite,
-                              color: Colors.red,
-                            ),
-                          if (widget.game.isRecommended)
-                            _buildStatusChip(
-                              label: 'Recommended',
-                              icon: Icons.thumb_up,
-                              color: Colors.green,
-                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+
+                          // Current Status Tags
+                          Wrap(
+                            spacing: 6,
+                            children: [
+                              if (isInTopThree)
+                                _buildStatusChip(
+                                  label: '#${topThreePosition ?? "3"}',
+                                  icon: Icons.emoji_events,
+                                  color: Colors.amber,
+                                ),
+                              if (userRating != null)
+                                _buildStatusChip(
+                                  label: userRating.toStringAsFixed(1),
+                                  icon: Icons.star,
+                                  color: ColorScales.getRatingColor(userRating),
+                                ),
+                              if (isWishlisted)
+                                _buildStatusChip(
+                                  label: 'Wishlist',
+                                  icon: Icons.favorite,
+                                  color: Colors.red,
+                                ),
+                              if (isRecommended)
+                                _buildStatusChip(
+                                  label: 'Recommended',
+                                  icon: Icons.thumb_up,
+                                  color: Colors.green,
+                                ),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              const Divider(height: 1),
+
+              // Quick Actions Grid
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildActionButton(
+                        icon: userRating != null
+                            ? Icons.star
+                            : Icons.star_outline,
+                        label: userRating != null ? 'Rated' : 'Rate',
+                        color: Colors.amber,
+                        isActive: userRating != null,
+                        onTap: _rateGame,
+                      ),
+                      _buildActionButton(
+                        icon: isWishlisted
+                            ? Icons.favorite
+                            : Icons.favorite_outline,
+                        label: 'Wishlist',
+                        color: Colors.red,
+                        isActive: isWishlisted,
+                        onTap: _toggleWishlist,
+                      ),
+                      _buildActionButton(
+                        icon: isRecommended
+                            ? Icons.thumb_up
+                            : Icons.thumb_up_outlined,
+                        label: 'Recommend',
+                        color: Colors.green,
+                        isActive: isRecommended,
+                        onTap: _toggleRecommend,
+                      ),
+                      _buildActionButton(
+                          icon: Icons.emoji_events,
+                          label: 'Top 3',
+                          color: Colors.orange,
+                          isActive: isInTopThree,
+                          onTap: () {
+                            _showTopThreeDialog(widget.game);
+                          }),
+                    ]),
+              ),
+
+              // Bottom padding for gesture area
+              const SizedBox(height: 8),
+            ],
           ),
-
-          const Divider(height: 1),
-
-          // Quick Actions Grid
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionButton(
-                    icon: widget.game.userRating != null
-                        ? Icons.star
-                        : Icons.star_outline,
-                    label: widget.game.userRating != null ? 'Rated' : 'Rate',
-                    color: Colors.amber,
-                    isActive: widget.game.userRating != null,
-                    onTap: _rateGame,
-                  ),
-                  _buildActionButton(
-                    icon: widget.game.isWishlisted
-                        ? Icons.favorite
-                        : Icons.favorite_outline,
-                    label: 'Wishlist',
-                    color: Colors.red,
-                    isActive: widget.game.isWishlisted,
-                    onTap: _toggleWishlist,
-                  ),
-                  _buildActionButton(
-                    icon: widget.game.isRecommended
-                        ? Icons.thumb_up
-                        : Icons.thumb_up_outlined,
-                    label: 'Recommend',
-                    color: Colors.green,
-                    isActive: widget.game.isRecommended,
-                    onTap: _toggleRecommend,
-                  ),
-                  _buildActionButton(
-                      icon: Icons.emoji_events,
-                      label: 'Top 3',
-                      color: Colors.orange,
-                      isActive: widget.game.isInTopThree,
-                      onTap: () {
-                        _showTopThreeDialog(widget.game);
-                      }),
-                ]),
-          ),
-
-          // Bottom padding for gesture area
-          const SizedBox(height: 8),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -268,12 +289,25 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
       builder: (context) => RatingDialog(
         gameName: widget.game.name,
         currentRating: widget.game.userRating,
-        onRatingSubmitted: (rating) {
-          widget.gameBloc.add(RateGameEvent(
-            gameId: widget.game.id,
-            userId: _currentUserId!,
-            rating: rating,
-          ));
+        onRatingChanged: (rating) {
+          // ✅ Use UserGameDataBloc
+          context.read<user_data.UserGameDataBloc>().add(
+                user_data.RateGameEvent(
+                  gameId: widget.game.id,
+                  userId: _currentUserId!,
+                  rating: rating,
+                ),
+              );
+          HapticFeedback.lightImpact();
+        },
+        onRatingDeleted: () {
+          // ✅ Use UserGameDataBloc
+          context.read<user_data.UserGameDataBloc>().add(
+                user_data.RemoveRatingEvent(
+                  gameId: widget.game.id,
+                  userId: _currentUserId!,
+                ),
+              );
           HapticFeedback.lightImpact();
         },
       ),
@@ -281,19 +315,25 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
   }
 
   void _toggleWishlist() {
-    widget.gameBloc.add(ToggleWishlistEvent(
-      gameId: widget.game.id,
-      userId: _currentUserId!,
-    ));
+    // ✅ Use UserGameDataBloc
+    context.read<user_data.UserGameDataBloc>().add(
+          user_data.ToggleWishlistEvent(
+            gameId: widget.game.id,
+            userId: _currentUserId!,
+          ),
+        );
     Navigator.pop(context);
     HapticFeedback.lightImpact();
   }
 
   void _toggleRecommend() {
-    widget.gameBloc.add(ToggleRecommendEvent(
-      gameId: widget.game.id,
-      userId: _currentUserId!,
-    ));
+    // ✅ Use UserGameDataBloc
+    context.read<user_data.UserGameDataBloc>().add(
+          user_data.ToggleRecommendationEvent(
+            gameId: widget.game.id,
+            userId: _currentUserId!,
+          ),
+        );
     Navigator.pop(context);
     HapticFeedback.lightImpact();
   }
@@ -338,10 +378,38 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     print('🎯 QuickActions: Adding game $gameId to top three at position $position');
     print('🎯 QuickActions: User ID: $_currentUserId');
 
-    widget.gameBloc.add(AddToTopThreeEvent(
-      gameId: gameId,
+    // ✅ Get current top three from UserGameDataBloc
+    final userDataBloc = context.read<user_data.UserGameDataBloc>();
+    final userDataState = userDataBloc.state;
+
+    List<int> currentTopThreeIds = [];
+    if (userDataState is user_data.UserGameDataLoaded) {
+      currentTopThreeIds = userDataState.topThreeGameIds;
+    }
+
+    // Create updated list with new game at specified position
+    final updatedList = List<int>.from(currentTopThreeIds);
+    updatedList.remove(gameId); // Remove if already present
+
+    // Insert at specified position (1-indexed to 0-indexed)
+    final index = position - 1;
+    if (index >= 0 && index <= 2) {
+      if (index >= updatedList.length) {
+        updatedList.add(gameId);
+      } else {
+        updatedList.insert(index, gameId);
+      }
+
+      // Keep only first 3 games
+      if (updatedList.length > 3) {
+        updatedList.removeRange(3, updatedList.length);
+      }
+    }
+
+    // ✅ Use UserGameDataBloc to update top three
+    userDataBloc.add(user_data.UpdateTopThreeEvent(
       userId: _currentUserId!,
-      position: position,
+      gameIds: updatedList,
     ));
 
     HapticFeedback.lightImpact();
