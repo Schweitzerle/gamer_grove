@@ -6,7 +6,7 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import 'package:loading_indicator/loading_indicator.dart';
+import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
 
 /// Type of game list to display
 enum GameListType {
@@ -202,14 +202,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
                 if (state is UserRatedLoading ||
                     state is UserWishlistLoading ||
                     state is UserRecommendationsLoading) {
-                  return Center(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      child: const LoadingIndicator(
-                        indicatorType: Indicator.pacman,
-                      ),
-                    ),
-                  );
+                  return const GameListShimmer();
                 }
 
                 if (_allGames.isEmpty) {
@@ -299,8 +292,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
       itemCount: games.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= games.length) {
-          return const Center(
-              child: LoadingIndicator(indicatorType: Indicator.pacman));
+          return const Center(child: GameCardShimmer());
         }
         final game = games[index];
         return GameCard(
@@ -321,8 +313,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
           const SizedBox(height: AppConstants.paddingSmall),
       itemBuilder: (context, index) {
         if (index >= games.length) {
-          return const Center(
-              child: LoadingIndicator(indicatorType: Indicator.pacman));
+          return const Center(child: GameCardShimmer());
         }
         final game = games[index];
         return GameCard(
