@@ -8,6 +8,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
+import 'package:gamer_grove/presentation/pages/profile/profile_statistics_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
 
 import '../../blocs/auth/auth_bloc.dart';
@@ -67,6 +68,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 _buildProfileHeader(context, user),
                 _buildStats(context, user),
+                _buildStatisticsButton(context, user),
 
                 // Debug info
                 if (kDebugMode) ...[
@@ -337,5 +339,36 @@ class ProfilePage extends StatelessWidget {
     }
 
     return child;
+  }
+
+  Widget _buildStatisticsButton(BuildContext context, User user) {
+    final theme = Theme.of(context);
+
+    // Only show if user has rated games
+    if (user.totalGamesRated == 0) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (context) => ProfileStatisticsPage(userId: user.id),
+              ),
+            );
+          },
+          icon: const Icon(Icons.bar_chart_rounded),
+          label: const Text('View Detailed Statistics'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: theme.colorScheme.primaryContainer,
+            foregroundColor: theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ),
+    );
   }
 }
