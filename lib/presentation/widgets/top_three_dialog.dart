@@ -2,6 +2,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
@@ -169,13 +170,11 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
       }
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${game.name} removed from Top 3'),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
+    GamerGroveToastService.showTopThreeToast(
+      context,
+      gameName: game.name,
+      position: 0, // Removed from top 3
+      isAdded: false,
     );
   }
 
