@@ -4,10 +4,12 @@
 
 // lib/presentation/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../domain/entities/website/website_type.dart';
+import '../../blocs/user_game_data/user_game_data_bloc.dart';
 import '../../pages/game_detail/widgets/community_info_section.dart';
 import '../../pages/game_detail/widgets/company_section.dart';
 import '../../pages/game_detail/widgets/game_description_section.dart';
@@ -43,12 +45,17 @@ class GameDetailsAccordion extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
             children: [
               // Your Activity - Always show, no callback needed
-              EnhancedAccordionTile(
-                title: 'Your Activity',
-                icon: Icons.person,
-                preview: _buildUserStatesPreview(context, game),
-                child: UserStatesContent(
-                    game: game), // ✅ Simplified - no callbacks needed
+              // ✅ Use BlocBuilder for preview to get live data from UserGameDataBloc
+              BlocBuilder<UserGameDataBloc, UserGameDataState>(
+                builder: (context, userDataState) {
+                  return EnhancedAccordionTile(
+                    title: 'Your Activity',
+                    icon: Icons.person,
+                    preview: _buildUserStatesPreview(context, game, userDataState),
+                    child: UserStatesContent(
+                        game: game), // ✅ Simplified - no callbacks needed
+                  );
+                },
               ),
 
               // Community & Ratings
@@ -321,24 +328,52 @@ class GameDetailsAccordion extends StatelessWidget {
     return false;
   }
 
-  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state (unchanged)
-  Widget _buildUserStatesPreview(BuildContext context, Game game) {
+  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state
+  // ✅ UPDATED: Now reads from UserGameDataBloc for live data
+  Widget _buildUserStatesPreview(
+    BuildContext context,
+    Game game,
+    UserGameDataState userDataState,
+  ) {
     List<String> activeStates = [];
 
-    if (game.userRating != null) {
-      activeStates.add('⭐${(game.userRating! * 10).toStringAsFixed(1)}');
+    // Read from UserGameDataBloc if available, fallback to Game entity
+    double? userRating;
+    bool isWishlisted = false;
+    bool isRecommended = false;
+    bool isInTopThree = false;
+    int? topThreePosition;
+
+    if (userDataState is UserGameDataLoaded) {
+      userRating = userDataState.getRating(game.id);
+      isWishlisted = userDataState.isWishlisted(game.id);
+      isRecommended = userDataState.isRecommended(game.id);
+      isInTopThree = userDataState.isInTopThree(game.id);
+      topThreePosition = userDataState.getTopThreePosition(game.id);
+    } else {
+      // Fallback to Game entity data
+      userRating = game.userRating;
+      isWishlisted = game.isWishlisted;
+      isRecommended = game.isRecommended;
+      isInTopThree = game.isInTopThree;
+      topThreePosition = game.topThreePosition;
     }
 
-    if (game.isWishlisted == true) {
+    // Build preview string
+    if (userRating != null) {
+      activeStates.add('⭐${(userRating * 10).toStringAsFixed(1)}');
+    }
+
+    if (isWishlisted) {
       activeStates.add('❤️');
     }
 
-    if (game.isRecommended == true) {
+    if (isRecommended) {
       activeStates.add('👍');
     }
 
-    if (game.isInTopThree == true) {
-      activeStates.add('🏆#${game.topThreePosition ?? 1}');
+    if (isInTopThree) {
+      activeStates.add('🏆#${topThreePosition ?? 1}');
     }
 
     if (activeStates.isEmpty) {

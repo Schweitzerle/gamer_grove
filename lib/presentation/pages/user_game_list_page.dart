@@ -4,6 +4,8 @@ import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
@@ -295,9 +297,24 @@ class _UserGameListPageState extends State<UserGameListPage> {
           return const Center(child: GameCardShimmer());
         }
         final game = games[index];
+
+        // Get logged-in user ID
+        final authState = context.read<AuthBloc>().state;
+        final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+
+        // Only show other user states if viewing a different user's profile
+        final isDifferentUser = widget.userId != loggedInUserId;
+
         return GameCard(
           game: game,
           onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          // Pass other user's states only if viewing different user
+          otherUserId: isDifferentUser ? widget.userId : null,
+          otherUserRating: isDifferentUser ? game.userRating : null,
+          otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
+          otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
+          otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
+          otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
         );
       },
     );
@@ -316,9 +333,24 @@ class _UserGameListPageState extends State<UserGameListPage> {
           return const Center(child: GameCardShimmer());
         }
         final game = games[index];
+
+        // Get logged-in user ID
+        final authState = context.read<AuthBloc>().state;
+        final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+
+        // Only show other user states if viewing a different user's profile
+        final isDifferentUser = widget.userId != loggedInUserId;
+
         return GameCard(
           game: game,
           onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          // Pass other user's states only if viewing different user
+          otherUserId: isDifferentUser ? widget.userId : null,
+          otherUserRating: isDifferentUser ? game.userRating : null,
+          otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
+          otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
+          otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
+          otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
         );
       },
     );

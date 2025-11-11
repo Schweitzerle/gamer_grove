@@ -34,8 +34,8 @@ class RecommendationsSection extends BaseGameSection {
       );
       return;
     }
-    // Directly navigate to the dedicated page
-    Navigations.navigateToUserRecommendedGames(context);
+    // Directly navigate to the dedicated page with the user's ID
+    Navigations.navigateToUserRecommendedGames(context, userId: userId);
   }
 
   @override

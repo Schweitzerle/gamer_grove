@@ -30,15 +30,25 @@ class GetRecommendedGamesUseCase
   Future<Either<Failure, List<int>>> call(
     GetRecommendedGamesParams params,
   ) async {
-    return await repository.getRecommendedGames(params.userId);
+    return await repository.getRecommendedGames(
+      params.userId,
+      limit: params.limit,
+      offset: params.offset,
+    );
   }
 }
 
 class GetRecommendedGamesParams extends Equatable {
   final String userId;
+  final int? limit;
+  final int? offset;
 
-  const GetRecommendedGamesParams({required this.userId});
+  const GetRecommendedGamesParams({
+    required this.userId,
+    this.limit,
+    this.offset,
+  });
 
   @override
-  List<Object> get props => [userId];
+  List<Object?> get props => [userId, limit, offset];
 }

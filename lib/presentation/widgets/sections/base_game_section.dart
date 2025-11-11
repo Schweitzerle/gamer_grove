@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../custom_shimmer.dart';
 import '../game_card.dart';
@@ -127,13 +129,28 @@ abstract class BaseGameSection extends StatelessWidget {
         itemCount: games.length,
         itemBuilder: (context, index) {
           final game = games[index];
+
+          // Get logged-in user ID
+          final authState = context.read<AuthBloc>().state;
+          final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+
+          // Only show other user states if viewing a different user's profile
+          final isDifferentUser = currentUserId != null && currentUserId != loggedInUserId;
+
           return Container(
             width: 160,
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
-                game: game,
-                onTap: () =>
-                    Navigations.navigateToGameDetail(game.id, context)),
+              game: game,
+              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              // Pass other user's states only if viewing different user
+              otherUserId: isDifferentUser ? currentUserId : null,
+              otherUserRating: isDifferentUser ? game.userRating : null,
+              otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
+              otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
+              otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
+              otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
+            ),
           );
         },
       ),

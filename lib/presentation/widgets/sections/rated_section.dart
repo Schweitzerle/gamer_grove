@@ -33,8 +33,8 @@ class RatedSection extends BaseGameSection {
       );
       return;
     }
-    // Directly navigate to the dedicated page
-    Navigations.navigateToUserRatedGames(context);
+    // Directly navigate to the dedicated page with the user's ID
+    Navigations.navigateToUserRatedGames(context, userId: userId);
   }
 
   @override

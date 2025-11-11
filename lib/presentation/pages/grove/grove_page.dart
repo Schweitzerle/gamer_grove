@@ -39,10 +39,18 @@ class _GrovePageState extends State<GrovePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
+      print('GrovePage: User is authenticated with ID: $_currentUserId');
+    } else {
+      print('GrovePage: User is not authenticated.');
     }
 
     // Load all data at once
-    _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    if (_currentUserId != null) {
+      print('GrovePage: Loading data for user ID: $_currentUserId');
+      _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    } else {
+      print('GrovePage: No user ID, not loading data.');
+    }
   }
 
   @override
@@ -73,8 +81,11 @@ class _GrovePageState extends State<GrovePage> {
               ),
 
               if (_currentUserId != null)
-                const SliverToBoxAdapter(
-                  child: TopThreeSection(),
+                SliverToBoxAdapter(
+                  child: TopThreeSection(
+                    currentUserId: _currentUserId,
+                    gameBloc: _gameBloc,
+                  ),
                 ),
 
               // Rated Game Section
@@ -82,6 +93,7 @@ class _GrovePageState extends State<GrovePage> {
                 SliverToBoxAdapter(
                   child: RatedSection(
                     currentUserId: _currentUserId,
+                    gameBloc: _gameBloc,
                   ),
                 ),
 
@@ -90,6 +102,7 @@ class _GrovePageState extends State<GrovePage> {
                 SliverToBoxAdapter(
                   child: WishlistSection(
                     currentUserId: _currentUserId,
+                    gameBloc: _gameBloc,
                   ),
                 ),
 
@@ -98,6 +111,7 @@ class _GrovePageState extends State<GrovePage> {
                 SliverToBoxAdapter(
                   child: RecommendationsSection(
                     currentUserId: _currentUserId,
+                    gameBloc: _gameBloc,
                   ),
                 ),
 
