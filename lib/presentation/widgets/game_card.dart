@@ -19,14 +19,27 @@ class GameCard extends StatelessWidget {
   final bool blurRated;
   final double? width;
   final double? height;
+  final String? otherUserId;
+  final double? otherUserRating;
+  final bool? otherUserIsWishlisted;
+  final bool? otherUserIsRecommended;
+  final bool? otherUserIsInTopThree;
+  final int? otherUserTopThreePosition;
 
-  const GameCard(
-      {super.key,
-      required this.game,
-      required this.onTap,
-      this.blurRated = false,
-      this.width,
-      this.height});
+  const GameCard({
+    super.key,
+    required this.game,
+    required this.onTap,
+    this.blurRated = false,
+    this.width,
+    this.height,
+    this.otherUserId,
+    this.otherUserRating,
+    this.otherUserIsWishlisted,
+    this.otherUserIsRecommended,
+    this.otherUserIsInTopThree,
+    this.otherUserTopThreePosition,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +144,7 @@ class GameCard extends StatelessWidget {
                   // Gradient Overlay
                   _buildGradientOverlay(),
 
-                  // User Elements Background Gradient
+                  // User Elements Background Gradient (logged-in user - right)
                   if (_hasUserElements(
                     userRating,
                     isWishlisted,
@@ -143,10 +156,25 @@ class GameCard extends StatelessWidget {
                       isWishlisted,
                       isRecommended,
                       isInTopThree,
+                      isLeft: false,
+                    ),
+
+                  // Other User Elements Background Gradient (left)
+                  if (_hasOtherUserElements())
+                    _buildUserElementsBackground(
+                      otherUserRating,
+                      otherUserIsWishlisted ?? false,
+                      otherUserIsRecommended ?? false,
+                      otherUserIsInTopThree ?? false,
+                      isLeft: true,
                     ),
 
                   // Content Overlay (unten)
                   _buildContentOverlay(context),
+
+                  // Other User States Overlay (left)
+                  if (otherUserId != null)
+                    _buildOtherUserStatesOverlay(context),
 
                   // Ratings und States Overlay (rechts) - NOW WITH BLOC DATA!
                   _buildRatingsOverlay(
@@ -243,8 +271,9 @@ class GameCard extends StatelessWidget {
     double? userRating,
     bool isWishlisted,
     bool isRecommended,
-    bool isInTopThree,
-  ) {
+    bool isInTopThree, {
+    required bool isLeft,
+  }) {
     final elementCount = _getUserElementsCount(
       userRating,
       isWishlisted,
@@ -255,14 +284,15 @@ class GameCard extends StatelessWidget {
 
     return Positioned(
       top: 0,
-      right: 0,
+      left: isLeft ? 0 : null,
+      right: isLeft ? null : 0,
       width: 44,
       height: height,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: RadialGradient(
-            center: const Alignment(1.0, -1.0),
+            center: isLeft ? const Alignment(-1.0, -1.0) : const Alignment(1.0, -1.0),
             radius: 2.8,
             colors: [
               Colors.black.withOpacity(0.7),
@@ -647,6 +677,39 @@ class GameCard extends StatelessWidget {
     );
   }
 
+  Widget _buildOtherUserStatesOverlay(BuildContext context) {
+    return Positioned(
+      top: 4,
+      left: 4,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Other User Rating
+          if (otherUserRating != null) ...[
+            _buildUserRatingCircle(context, otherUserRating!),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Top Three
+          if (otherUserIsInTopThree == true &&
+              otherUserTopThreePosition != null) ...[
+            _buildTopThreeCircle(context, otherUserTopThreePosition!),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Wishlist
+          if (otherUserIsWishlisted == true) ...[
+            _buildWishlistCircle(context),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Recommend
+          if (otherUserIsRecommended == true) _buildRecommendCircle(context),
+        ],
+      ),
+    );
+  }
+
   // Helper methods
   bool _hasUserElements(
     double? userRating,
@@ -655,6 +718,13 @@ class GameCard extends StatelessWidget {
     bool isInTopThree,
   ) {
     return userRating != null || isWishlisted || isRecommended || isInTopThree;
+  }
+
+  bool _hasOtherUserElements() {
+    return otherUserRating != null ||
+        otherUserIsWishlisted == true ||
+        otherUserIsRecommended == true ||
+        otherUserIsInTopThree == true;
   }
 
   int _getUserElementsCount(

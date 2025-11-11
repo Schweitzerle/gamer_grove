@@ -31,8 +31,8 @@ class WishlistSection extends BaseGameSection {
       );
       return;
     }
-    // Directly navigate to the dedicated page
-    Navigations.navigateToUserWishlist(context);
+    // Directly navigate to the dedicated page with the user's ID
+    Navigations.navigateToUserWishlist(context, userId: userId);
   }
 
   @override

@@ -231,38 +231,41 @@ class Navigations {
   }
 
   /// Navigate to user's wishlist page.
-  static void navigateToUserWishlist(BuildContext context) {
-    final userId = _getCurrentUserId(context);
-    if (userId == null) {
+  static void navigateToUserWishlist(BuildContext context, {String? userId}) {
+    final targetUserId = userId ?? _getCurrentUserId(context);
+    if (targetUserId == null) {
       // Optional: Show a message or prompt to log in
       return;
     }
     Navigator.of(context).push(
-      UserGameListPage.route(userId, GameListType.wishlist),
+      UserGameListPage.route(targetUserId, GameListType.wishlist),
     );
   }
 
   /// Navigate to user's rated games page.
-  static void navigateToUserRatedGames(BuildContext context) {
-    final userId = _getCurrentUserId(context);
-    if (userId == null) {
+  static void navigateToUserRatedGames(BuildContext context, {String? userId}) {
+    final targetUserId = userId ?? _getCurrentUserId(context);
+    if (targetUserId == null) {
       // Optional: Show a message or prompt to log in
       return;
     }
     Navigator.of(context).push(
-      UserGameListPage.route(userId, GameListType.rated),
+      UserGameListPage.route(targetUserId, GameListType.rated),
     );
   }
 
   /// Navigate to user's recommended games page.
-  static void navigateToUserRecommendedGames(BuildContext context) {
-    final userId = _getCurrentUserId(context);
-    if (userId == null) {
+  static void navigateToUserRecommendedGames(
+    BuildContext context, {
+    String? userId,
+  }) {
+    final targetUserId = userId ?? _getCurrentUserId(context);
+    if (targetUserId == null) {
       // Optional: Show a message or prompt to log in
       return;
     }
     Navigator.of(context).push(
-      UserGameListPage.route(userId, GameListType.recommended),
+      UserGameListPage.route(targetUserId, GameListType.recommended),
     );
   }
 

@@ -121,24 +121,32 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 SliverToBoxAdapter(
                   child: TopThreeSection(
                     username: widget.user.effectiveDisplayName,
+                    currentUserId: widget.user.id,
+                    gameBloc: _gameBloc,
                   ),
                 ),
               if (widget.user.showRatedGames)
                 SliverToBoxAdapter(
                   child: RatedSection(
                     username: widget.user.effectiveDisplayName,
+                    currentUserId: widget.user.id,
+                    gameBloc: _gameBloc,
                   ),
                 ),
               if (widget.user.showRecommendedGames)
                 SliverToBoxAdapter(
                   child: RecommendationsSection(
                     username: widget.user.effectiveDisplayName,
+                    currentUserId: widget.user.id,
+                    gameBloc: _gameBloc,
                   ),
                 ),
               if (widget.user.showWishlist)
                 SliverToBoxAdapter(
                   child: WishlistSection(
                     username: widget.user.effectiveDisplayName,
+                    currentUserId: widget.user.id,
+                    gameBloc: _gameBloc,
                   ),
                 ),
               const SliverToBoxAdapter(
