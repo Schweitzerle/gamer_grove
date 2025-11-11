@@ -92,13 +92,16 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     try {
       print('🎯 UserGameDataBloc: Fetching wishlist, ratings, recommendations, and top three...');
       // Load all user game data in parallel
+      // ✅ FIX: Load ALL ratings/wishlist/recommendations with high limit (no pagination)
       final results = await Future.wait([
         getWishlistedGamesUseCase(
-          GetWishlistedGamesParams(userId: event.userId),
+          GetWishlistedGamesParams(userId: event.userId, limit: 10000), // All wishlist
         ),
-        getRatedGamesUseCase(GetRatedGamesParams(userId: event.userId)),
+        getRatedGamesUseCase(
+          GetRatedGamesParams(userId: event.userId, limit: 10000), // All ratings
+        ),
         getRecommendedGamesUseCase(
-          GetRecommendedGamesParams(userId: event.userId),
+          GetRecommendedGamesParams(userId: event.userId, limit: 10000), // All recommendations
         ),
         getTopThreeUseCase(GetTopThreeParams(userId: event.userId)),
       ]);
@@ -174,8 +177,10 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
               final gameId = game['game_id'] as int;
               final rating = (game['rating'] as num).toDouble();
               ratedGames[gameId] = rating;
+              print('   📊 Loaded rating: Game ID $gameId = $rating');
             }
-            print('   Added ${games.length} rated games');
+            print('   ✅ Added ${games.length} rated games');
+            print('   🎮 Game IDs with ratings: ${ratedGames.keys.toList()}');
           } else {
             print('   ⚠️ Unexpected rated type: ${games.runtimeType}');
           }
@@ -583,13 +588,16 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
   ) async {
     // Don't show loading state on refresh, reuse same logic as load
     try {
+      // ✅ FIX: Load ALL data with high limit (same as LoadUserGameDataEvent)
       final results = await Future.wait([
         getWishlistedGamesUseCase(
-          GetWishlistedGamesParams(userId: event.userId),
+          GetWishlistedGamesParams(userId: event.userId, limit: 10000),
         ),
-        getRatedGamesUseCase(GetRatedGamesParams(userId: event.userId)),
+        getRatedGamesUseCase(
+          GetRatedGamesParams(userId: event.userId, limit: 10000),
+        ),
         getRecommendedGamesUseCase(
-          GetRecommendedGamesParams(userId: event.userId),
+          GetRecommendedGamesParams(userId: event.userId, limit: 10000),
         ),
         getTopThreeUseCase(GetTopThreeParams(userId: event.userId)),
       ]);

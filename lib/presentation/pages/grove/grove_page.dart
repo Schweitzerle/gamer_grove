@@ -39,10 +39,18 @@ class _GrovePageState extends State<GrovePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
+      print('GrovePage: User is authenticated with ID: $_currentUserId');
+    } else {
+      print('GrovePage: User is not authenticated.');
     }
 
     // Load all data at once
-    _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    if (_currentUserId != null) {
+      print('GrovePage: Loading data for user ID: $_currentUserId');
+      _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    } else {
+      print('GrovePage: No user ID, not loading data.');
+    }
   }
 
   @override
