@@ -3,6 +3,7 @@ import 'dart:ui'; // Für BackdropFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
@@ -629,11 +630,10 @@ class GameCard extends StatelessWidget {
   Future<void> _showUserStatesDialog(BuildContext context) async {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to manage your game states.'),
-          backgroundColor: Colors.orange,
-        ),
+      GamerGroveToastService.showWarning(
+        context,
+        title: 'Login Required',
+        message: 'Please log in to manage your game states.',
       );
       return;
     }

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -156,12 +157,10 @@ class UserStatesContent extends StatelessWidget {
   }
 
   void _showLoginRequiredSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please log in to use this feature'),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
-      ),
+    GamerGroveToastService.showWarning(
+      context,
+      title: 'Login Required',
+      message: 'Please log in to use this feature',
     );
   }
 
@@ -190,16 +189,11 @@ class UserStatesContent extends StatelessWidget {
 
     HapticFeedback.lightImpact();
 
-    // Show feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isCurrentlyWishlisted
-            ? 'Removed from wishlist'
-            : 'Added to wishlist'),
-        backgroundColor: isCurrentlyWishlisted ? Colors.grey : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
+    // Show feedback with context-aware toast
+    GamerGroveToastService.showWishlistToast(
+      context,
+      gameName: game.name,
+      isWishlisted: !isCurrentlyWishlisted,
     );
   }
 
@@ -228,16 +222,11 @@ class UserStatesContent extends StatelessWidget {
 
     HapticFeedback.lightImpact();
 
-    // Show feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isCurrentlyRecommended
-            ? 'Recommendation removed'
-            : 'Game recommended'),
-        backgroundColor: isCurrentlyRecommended ? Colors.grey : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
+    // Show feedback with context-aware toast
+    GamerGroveToastService.showRecommendedToast(
+      context,
+      gameName: game.name,
+      isRecommended: !isCurrentlyRecommended,
     );
   }
 
@@ -266,7 +255,7 @@ class UserStatesContent extends StatelessWidget {
         gameBloc: gameBloc, // ✅ Pass GameBloc for dialog compatibility
         currentTopThree: null, // Dialog will load from backend if null
         onPositionSelected: (position) {
-          _updateTopThree(userDataBloc, userId, position, currentTopThreeIds);
+          _updateTopThree(context, userDataBloc, userId, position, currentTopThreeIds);
         },
       ),
     );
@@ -288,17 +277,20 @@ class UserStatesContent extends StatelessWidget {
         gameName: game.name,
         currentRating: currentRating,
         onRatingChanged: (rating) {
-          _rateGame(userDataBloc, userId, rating);
+          _rateGame(context, userDataBloc, userId, rating);
         },
         onRatingDeleted: () {
-          _deleteRating(userDataBloc, userId);
+          _deleteRating(context, userDataBloc, userId);
         },
       ),
     );
   }
 
   void _rateGame(
-      user_data.UserGameDataBloc userDataBloc, String userId, double rating) {
+      BuildContext context,
+      user_data.UserGameDataBloc userDataBloc,
+      String userId,
+      double rating) {
     userDataBloc.add(user_data.RateGameEvent(
       gameId: game.id,
       userId: userId,
@@ -306,18 +298,36 @@ class UserStatesContent extends StatelessWidget {
     ));
 
     HapticFeedback.lightImpact();
+
+    // Show rating toast
+    GamerGroveToastService.showRatingToast(
+      context,
+      gameName: game.name,
+      rating: rating / 10, // Convert to 0-1 range
+    );
   }
 
-  void _deleteRating(user_data.UserGameDataBloc userDataBloc, String userId) {
+  void _deleteRating(
+      BuildContext context,
+      user_data.UserGameDataBloc userDataBloc,
+      String userId) {
     userDataBloc.add(user_data.RemoveRatingEvent(
       gameId: game.id,
       userId: userId,
     ));
 
     HapticFeedback.lightImpact();
+
+    // Show info toast for deleted rating
+    GamerGroveToastService.showInfo(
+      context,
+      title: 'Rating Removed',
+      message: game.name,
+    );
   }
 
   void _updateTopThree(
+    BuildContext context,
     user_data.UserGameDataBloc userDataBloc,
     String userId,
     int position,
@@ -334,6 +344,14 @@ class UserStatesContent extends StatelessWidget {
     ));
 
     HapticFeedback.lightImpact();
+
+    // Show top three toast
+    GamerGroveToastService.showTopThreeToast(
+      context,
+      gameName: game.name,
+      position: position,
+      isAdded: true,
+    );
   }
 
   // ✅ Medium-sized Info Card (unchanged)
