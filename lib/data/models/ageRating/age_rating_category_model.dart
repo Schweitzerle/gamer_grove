@@ -1,12 +1,13 @@
 // lib/data/models/age_rating_category_model.dart
 import '../../../domain/entities/ageRating/age_rating_category.dart';
+import 'age_rating_organization_model.dart';
 
 class AgeRatingCategoryModel extends AgeRatingCategory {
   const AgeRatingCategoryModel({
     required super.id,
     required super.checksum,
     required super.rating,
-    super.organizationId,
+    super.organization,
     super.createdAt,
     super.updatedAt,
   });
@@ -16,7 +17,11 @@ class AgeRatingCategoryModel extends AgeRatingCategory {
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       rating: json['rating'] ?? '',
-      organizationId: json['organization'],
+      organization: json['organization'] != null
+          ? AgeRatingOrganizationModel.fromJson(
+              json['organization'] as Map<String, dynamic>,
+            )
+          : null,
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
     );
@@ -36,7 +41,7 @@ class AgeRatingCategoryModel extends AgeRatingCategory {
       'id': id,
       'checksum': checksum,
       'rating': rating,
-      'organization': organizationId,
+      'organization': organization,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

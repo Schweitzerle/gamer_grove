@@ -1,5 +1,6 @@
 // lib/domain/repositories/game_repository.dart
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/domain/entities/game/game_mode.dart';
@@ -58,6 +59,8 @@ abstract class GameRepository {
   /// Get multiple games by their IDs (batch operation)
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds);
 
+  Future<Either<Failure, List<Game>>> getGames({required List<int> gameIds});
+
   // ==========================================
   // POPULAR & UPCOMING GAMES
   // ==========================================
@@ -111,6 +114,36 @@ abstract class GameRepository {
 
   /// Get user's top three favorite games
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
+
+  /// Get all game IDs from user's rated games
+  Future<Either<Failure, List<int>>> getUserRatedGameIds(String userId);
+
+  /// Get all game IDs from user's wishlist
+  Future<Either<Failure, List<int>>> getUserWishlistGameIds(String userId);
+
+  /// Get all game IDs from user's recommendations
+  Future<Either<Failure, List<int>>> getUserRecommendedGameIds(String userId);
+
+  /// Get user's rated games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserRatedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
+
+  /// Get user's wishlist games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserWishlistGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
+
+  /// Get user's recommended games by IDs with pagination
+  Future<Either<Failure, List<Game>>> getUserRecommendedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  });
 
   // ==========================================
   // USER ACTIONS
@@ -216,13 +249,14 @@ abstract class GameRepository {
   Future<Either<Failure, List<Keyword>>> searchKeywords(String query);
 
   /// Search age ratings
-  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query);
+  Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
+      String query);
 
   /// Search themes
-  Future<Either<Failure, List<Theme>>> searchThemes(String query);
+  Future<Either<Failure, List<IGDBTheme>>> searchThemes(String query);
 
   /// Get all age ratings
-  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings();
+  Future<Either<Failure, List<AgeRatingCategory>>> getAllAgeRatings();
 
   /// Get all player perspectives
   Future<Either<Failure, List<PlayerPerspective>>> getAllPlayerPerspectives();

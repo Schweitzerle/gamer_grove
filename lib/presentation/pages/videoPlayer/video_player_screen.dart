@@ -196,10 +196,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 const SizedBox(width: 6),
                                 Text(
                                   'YouTube',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ],
                             ),
@@ -229,10 +232,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   const SizedBox(width: 4),
                                   Text(
                                     'Ready',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -246,10 +252,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       // Video Title
                       Text(
                         widget.video.title ?? 'Video ${widget.videoIndex + 1}',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          height: 1.2,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
+                                ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

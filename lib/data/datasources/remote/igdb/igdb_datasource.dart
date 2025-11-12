@@ -1,5 +1,6 @@
 // lib/data/datasources/remote/igdb/igdb_datasource.dart
 
+import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
 import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_model.dart';
 import 'package:gamer_grove/data/models/character/character_model.dart';
@@ -14,7 +15,6 @@ import 'package:gamer_grove/data/models/genre_model.dart';
 import 'package:gamer_grove/data/models/franchise_model.dart';
 import 'package:gamer_grove/data/models/collection/collection_model.dart';
 import 'package:gamer_grove/data/models/keyword_model.dart';
-import 'package:gamer_grove/data/models/ageRating/age_rating_model.dart';
 import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
 import 'package:gamer_grove/data/models/player_perspective_model.dart';
 import 'package:gamer_grove/data/models/theme_model.dart';
@@ -277,7 +277,8 @@ abstract class IgdbDataSource {
   // ============================================================
 
   /// Queries age ratings from IGDB
-  Future<List<AgeRatingModel>> queryAgeRatings(IgdbAgeRatingQuery query);
+  Future<List<AgeRatingCategoryModel>> queryAgeRatings(
+      IgdbAgeRatingQuery query);
 
   // ============================================================
   // MULTIPLAYER MODE QUERIES
@@ -299,7 +300,7 @@ abstract class IgdbDataSource {
   // ============================================================
 
   /// Queries themes from IGDB
-  Future<List<ThemeModel>> queryThemes(IgdbThemeQuery query);
+  Future<List<IGDBThemeModel>> queryThemes(IgdbThemeQuery query);
 
   // ============================================================
   // Player perspective QUERIES

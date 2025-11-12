@@ -333,9 +333,20 @@ class FranchiseCollectionsSection extends StatelessWidget {
   // Navigation methods
   void _navigateToSeries(BuildContext context, SeriesItem item) {
     if (item.franchise != null) {
-      Navigations.navigateToFranchiseGames(context, item.franchise!);
+      Navigations.navigateToFranchiseGames(context,
+          franchiseId: item.franchise!.id, franchiseName: item.franchise!.name);
     } else if (item.collection != null) {
-      Navigations.navigateToCollectionGames(context, item.collection!);
+      Navigations.navigateToCollectionGames(context,
+          collectionId: item.collection!.id,
+          collectionName: item.collection!.name);
+    } else if (item.companyId != null && item.companyName != null) {
+      Navigations.navigateToCompanyGames(
+        context,
+        companyId: item.companyId!,
+        companyName: item.companyName!,
+        isDeveloper: item.isDeveloper,
+        isPublisher: item.isPublisher,
+      );
     }
   }
 }
@@ -370,6 +381,10 @@ class SeriesItem {
   final IconData icon;
   final Franchise? franchise;
   final Collection? collection;
+  final int? companyId;
+  final String? companyName;
+  final bool? isDeveloper;
+  final bool? isPublisher;
 
   SeriesItem({
     this.type,
@@ -380,5 +395,9 @@ class SeriesItem {
     required this.icon,
     this.franchise,
     this.collection,
+    this.companyId,
+    this.companyName,
+    this.isDeveloper,
+    this.isPublisher,
   });
 }

@@ -2,14 +2,17 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
 import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import '../../../data/models/game/game_model.dart';
 import '../../../domain/entities/collection/collection.dart';
+import '../../../domain/entities/event/event.dart';
 import '../../../domain/entities/franchise.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/search/search_filters.dart';
 import '../../../domain/repositories/game_repository.dart';
 import '../../../domain/usecases/game/get_user_rated.dart';
 import '../../../domain/usecases/game/get_game_dlcs.dart';
@@ -20,6 +23,7 @@ import '../../../domain/usecases/game/get_user_top_three.dart';
 import '../../../domain/usecases/game_details/get_complete_game_details_page_data.dart';
 import '../../../domain/usecases/game_details/get_enhanced_game_details.dart';
 import '../../../domain/usecases/user/add_to_top_three.dart';
+import '../../../domain/usecases/user/remove_from_top_three.dart';
 import '../../../domain/usecases/game/search_games.dart';
 import '../../../domain/usecases/game/get_game_details.dart';
 import '../../../domain/usecases/game/rate_game.dart';
@@ -30,6 +34,8 @@ import '../../../domain/usecases/game/get_upcoming_games.dart';
 import '../../../domain/usecases/game/get_user_wishlist.dart';
 import '../../../domain/usecases/game/get_user_recommendations.dart';
 import '../../../domain/usecases/user/get_user_top_three.dart';
+import '../../../domain/usecases/event/get_upcoming_events.dart';
+import '../../../domain/usecases/game/get_user_rated_game_ids.dart';
 import 'game_extensions.dart';
 
 part 'game_event.dart';
@@ -40,9 +46,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final SearchGames searchGames;
   final GetGameDetails getGameDetails;
   final RateGame rateGame;
+  final RemoveRatingUseCase removeRating;
   final ToggleWishlist toggleWishlist;
   final ToggleRecommend toggleRecommend;
   final AddToTopThree addToTopThree;
+  final RemoveFromTopThree removeFromTopThree;
   final GetPopularGames getPopularGames;
   final GetUpcomingGames getUpcomingGames;
   final GetLatestGames getLatestGames;
@@ -57,16 +65,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   final GetGameExpansions getGameExpansions;
   final GetEnhancedGameDetails getEnhancedGameDetails;
   final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
+  final GetUpcomingEvents getUpcomingEvents;
+  final GetUserRatedGameIds getUserRatedGameIds;
   final GameRepository gameRepository;
   final GameEnrichmentService enrichmentService;
+
+  // 🎯 PERSISTENT GAME CACHE - survives state changes!
+  final Map<int, Game> _gameCache = {};
 
   GameBloc({
     required this.searchGames,
     required this.getGameDetails,
     required this.rateGame,
+    required this.removeRating,
     required this.toggleWishlist,
     required this.toggleRecommend,
     required this.addToTopThree,
+    required this.removeFromTopThree,
     required this.getPopularGames,
     required this.getUpcomingGames,
     required this.getLatestGames,
@@ -81,6 +96,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     required this.getGameExpansions,
     required this.getEnhancedGameDetails,
     required this.getCompleteGameDetailPageData,
+    required this.getUpcomingEvents,
+    required this.getUserRatedGameIds,
     required this.gameRepository,
     required this.enrichmentService,
   }) : super(GameInitial()) {
@@ -95,9 +112,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     // Game detail events
     on<GetGameDetailsEvent>(_onGetGameDetails);
     on<RateGameEvent>(_onRateGame);
+    on<RemoveRatingEvent>(_onRemoveRating);
     on<ToggleWishlistEvent>(_onToggleWishlist);
     on<ToggleRecommendEvent>(_onToggleRecommend);
     on<AddToTopThreeEvent>(_onAddToTopThree);
+    on<RemoveFromTopThreeEvent>(_onRemoveFromTopThree);
     on<GetGameDetailsWithUserDataEvent>(_onGetGameDetailsWithUserData);
     on<GetCompleteGameDetailsEvent>(_onGetCompleteGameDetails);
 
@@ -110,6 +129,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<LoadUserWishlistEvent>(_onLoadUserWishlist);
     on<LoadUserRecommendationsEvent>(_onLoadUserRecommendations);
     on<LoadUserRatedEvent>(_onLoadUserRated);
+    on<LoadAllUserRatedEvent>(_onLoadAllUserRated);
+    on<LoadAllUserWishlistEvent>(_onLoadAllUserWishlist);
+    on<LoadAllUserRecommendationsEvent>(_onLoadAllUserRecommendations);
+    on<LoadAllUserRatedPaginated>(_onLoadAllUserRatedPaginated);
+    on<LoadMoreUserRatedPaginated>(_onLoadMoreUserRatedPaginated);
+    on<LoadAllUserWishlistPaginated>(_onLoadAllUserWishlistPaginated);
+    on<LoadMoreUserWishlistPaginated>(_onLoadMoreUserWishlistPaginated);
+    on<LoadAllUserRecommendedPaginated>(_onLoadAllUserRecommendedPaginated);
+    on<LoadMoreUserRecommendedPaginated>(_onLoadMoreUserRecommendedPaginated);
 
     on<LoadHomePageDataEvent>(_onLoadHomePageData);
     on<LoadGrovePageDataEvent>(_onLoadGrovePageData);
@@ -122,11 +150,97 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     on<SearchGamesWithFiltersEvent>(_onSearchGamesWithFilters);
     on<SaveSearchQueryEvent>(_onSaveSearchQuery);
+    on<RefreshCacheEvent>(_onRefreshCache);
   }
 
   // Debounce transformer for search
   EventTransformer<T> debounce<T>(Duration duration) {
     return (events, mapper) => events.debounceTime(duration).switchMap(mapper);
+  }
+
+  // 🎯 CACHE MANAGEMENT METHODS
+
+  /// Updates a game in the cache
+  void _updateGameCache(int gameId, Game updatedGame) {
+    _gameCache[gameId] = updatedGame;
+    print('📦 Game $gameId cached: ${updatedGame.name}');
+  }
+
+  /// Updates multiple games in the cache
+  void _updateGamesCacheList(List<Game> games) {
+    for (final game in games) {
+      _gameCache[game.id] = game;
+    }
+    print('📦 Cached ${games.length} games');
+  }
+
+  /// Applies cached updates to a list of games
+  List<Game> _applyCache(List<Game> games) {
+    return games.map((game) {
+      // If we have a cached version, use it; otherwise use original
+      return _gameCache[game.id] ?? game;
+    }).toList();
+  }
+
+  /// Updates a specific game in the cache with a transformation function
+  void _updateGameInCache(int gameId, Game Function(Game) updateFn) {
+    final cachedGame = _gameCache[gameId];
+    if (cachedGame != null) {
+      _gameCache[gameId] = updateFn(cachedGame);
+      print('📦 Updated game $gameId in cache');
+    }
+  }
+
+  /// Applies cache to a state before emitting it
+  GameState _applyCacheToState(GameState state) {
+    if (state is HomePageLoaded) {
+      return state.copyWith(
+        popularGames: _applyCache(state.popularGames),
+        upcomingGames: _applyCache(state.upcomingGames),
+        latestGames: _applyCache(state.latestGames),
+        topRatedGames: _applyCache(state.topRatedGames),
+        userWishlist: state.userWishlist != null
+            ? _applyCache(state.userWishlist!)
+            : null,
+        userRecommendations: state.userRecommendations != null
+            ? _applyCache(state.userRecommendations!)
+            : null,
+      );
+    } else if (state is GrovePageLoaded) {
+      return state.copyWith(
+        userRated: _applyCache(state.userRated),
+        userWishlist: _applyCache(state.userWishlist),
+        userRecommendations: _applyCache(state.userRecommendations),
+        userTopThree: _applyCache(state.userTopThree),
+      );
+    } else if (state is GameSearchLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is PopularGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is UpcomingGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is LatestGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is TopRatedGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is UserWishlistLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is UserRecommendationsLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is UserRatedLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is SimilarGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is CompleteFranchiseGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is CompleteCollectionGamesLoaded) {
+      return state.copyWith(games: _applyCache(state.games));
+    } else if (state is GameDetailsLoaded) {
+      final cachedGame = _gameCache[state.game.id];
+      return cachedGame != null ? GameDetailsLoaded(cachedGame) : state;
+    }
+
+    return state; // Return unchanged for other states
   }
 
   // Search Games
@@ -151,11 +265,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(GameSearchLoaded(
-        games: games,
-        hasReachedMax: games.length < 20,
-        currentQuery: event.query,
-      )),
+      (games) async {
+        // Enrich games with user data if userId is provided
+        final enrichedGames = event.userId != null
+            ? await enrichGamesWithUserData(games, event.userId!)
+            : games;
+
+        emit(GameSearchLoaded(
+          games: enrichedGames,
+          hasReachedMax: games.length < 20,
+          currentQuery: event.query,
+        ));
+      },
     );
   }
 
@@ -171,13 +292,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       emit(currentState.copyWith(isLoadingMore: true));
 
-      final result = await searchGames(
-        SearchGamesParams(
-          query: currentState.currentQuery,
-          limit: 20,
-          offset: currentState.games.length,
-        ),
-      );
+      // Use searchGamesWithFilters if filters are present
+      final result = currentState.currentFilters != null
+          ? await gameRepository.searchGamesWithFilters(
+              query: currentState.currentQuery,
+              filters: currentState.currentFilters!,
+              limit: 20,
+              offset: currentState.games.length,
+            )
+          : await searchGames(
+              SearchGamesParams(
+                query: currentState.currentQuery,
+                limit: 20,
+                offset: currentState.games.length,
+              ),
+            );
 
       result.fold(
         (failure) => emit(GameError(failure.message)),
@@ -388,6 +517,63 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     );
   }
 
+  // Load All User Rated
+  Future<void> _onLoadAllUserRated(
+    LoadAllUserRatedEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserRatedLoading());
+
+    final result = await getUserRated(
+      GetUserRatedParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserRatedLoaded(
+        games,
+      )),
+    );
+  }
+
+  // Load All User Wishlist
+  Future<void> _onLoadAllUserWishlist(
+    LoadAllUserWishlistEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserWishlistLoading());
+
+    final result = await getUserWishlist(
+      GetUserWishlistParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserWishlistedLoaded(
+        games,
+      )),
+    );
+  }
+
+// Load All User Recommendations
+  Future<void> _onLoadAllUserRecommendations(
+    LoadAllUserRecommendationsEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(UserRecommendationsLoading());
+
+    final result = await getUserRecommendations(
+      GetUserRecommendationsParams(userId: event.userId, limit: 500, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (games) => emit(AllUserRecommendationsLoaded(
+        games,
+      )),
+    );
+  }
+
   Future<void> _onGetGameDetailsWithUserData(
     GetGameDetailsWithUserDataEvent event,
     Emitter<GameState> emit,
@@ -458,13 +644,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       },
       (_) {
+        // 🎯 UPDATE CACHE FIRST - this persists across state changes!
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(isWishlisted: !game.isWishlisted);
+        });
+
         // ✅ EXPLIZIT GameDetailsLoaded State aktualisieren
         if (state is GameDetailsLoaded && !emit.isDone) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(isWishlisted: !currentGame.isWishlisted),
-            ));
+            final updatedGame =
+                currentGame.copyWith(isWishlisted: !currentGame.isWishlisted);
+            _updateGameCache(
+                event.gameId, updatedGame); // Cache the updated game
+            emit(GameDetailsLoaded(updatedGame));
           }
         }
 
@@ -494,13 +687,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       },
       (_) {
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(isRecommended: !game.isRecommended);
+        });
+
         // ✅ EXPLIZIT GameDetailsLoaded State aktualisieren
         if (state is GameDetailsLoaded && !emit.isDone) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(isRecommended: !currentGame.isRecommended),
-            ));
+            final updatedGame =
+                currentGame.copyWith(isRecommended: !currentGame.isRecommended);
+            _updateGameCache(event.gameId, updatedGame);
+            emit(GameDetailsLoaded(updatedGame));
           }
         }
 
@@ -528,6 +727,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
       (failure) => emit(GameError(failure.message)),
       (_) {
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(userRating: event.rating);
+        });
+
         // Update in allen States
         _updateGameInHomePageState(event.gameId, (game) {
           return game.copyWith(userRating: event.rating);
@@ -537,76 +741,217 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         if (state is GameDetailsLoaded) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            emit(GameDetailsLoaded(
-              currentGame.copyWith(userRating: event.rating),
-            ));
+            final updatedGame = currentGame.copyWith(userRating: event.rating);
+            _updateGameCache(event.gameId, updatedGame);
+            emit(GameDetailsLoaded(updatedGame));
           }
         }
       },
     );
   }
 
-// Helper method to update a game in all possible states
+  Future<void> _onRemoveRating(
+    RemoveRatingEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    final result = await removeRating(
+      RemoveRatingParams(
+        gameId: event.gameId,
+        userId: event.userId,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(GameError(failure.message)),
+      (_) {
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(userRating: null);
+        });
+
+        // Update in allen States
+        _updateGameInHomePageState(event.gameId, (game) {
+          return game.copyWith(userRating: null);
+        }, emit);
+
+        // Falls aktueller State GameDetailsLoaded ist
+        if (state is GameDetailsLoaded) {
+          final currentGame = (state as GameDetailsLoaded).game;
+          if (currentGame.id == event.gameId) {
+            final updatedGame = currentGame.copyWith(userRating: null);
+            _updateGameCache(event.gameId, updatedGame);
+            emit(GameDetailsLoaded(updatedGame));
+          }
+        }
+      },
+    );
+  }
+
+// ✅ COMPREHENSIVE Helper method to update a game in ALL possible states
   void _updateGameInAllStates(
       int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
     final currentState = state;
 
+    // 1. PopularGamesLoaded
     if (currentState is PopularGamesLoaded) {
       final updatedGames = currentState.games.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
+    }
 
-      emit(currentState.copyWith(games: updatedGames));
-    } else if (currentState is HomePageLoaded) {
+    // 2. UpcomingGamesLoaded
+    else if (currentState is UpcomingGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
+    }
+
+    // 3. LatestGamesLoaded
+    else if (currentState is LatestGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
+    }
+
+    // 4. TopRatedGamesLoaded
+    else if (currentState is TopRatedGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: _applyCache(updatedGames)));
+    }
+
+    // 5. HomePageLoaded - Update ALL game lists within
+    else if (currentState is HomePageLoaded) {
       final updatedPopular = currentState.popularGames.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
       final updatedUpcoming = currentState.upcomingGames.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedLatest = currentState.latestGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedTopRated = currentState.topRatedGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
       final updatedWishlist = currentState.userWishlist?.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
       final updatedRecommendations =
           currentState.userRecommendations?.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
       emit(currentState.copyWith(
-        popularGames: updatedPopular,
-        upcomingGames: updatedUpcoming,
-        userWishlist: updatedWishlist,
-        userRecommendations: updatedRecommendations,
+        popularGames: _applyCache(updatedPopular),
+        upcomingGames: _applyCache(updatedUpcoming),
+        latestGames: _applyCache(updatedLatest),
+        topRatedGames: _applyCache(updatedTopRated),
+        userWishlist: updatedWishlist != null ? _applyCache(updatedWishlist) : null,
+        userRecommendations: updatedRecommendations != null ? _applyCache(updatedRecommendations) : null,
       ));
-    } else if (currentState is GameSearchLoaded) {
-      final updatedGames = currentState.games.map((game) {
-        if (game.id == gameId) {
-          return updateFunction(game);
-        }
-        return game;
+    }
+
+    // 6. GrovePageLoaded - Update ALL user collections
+    else if (currentState is GrovePageLoaded) {
+      final updatedRated = currentState.userRated.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
+      final updatedWishlist = currentState.userWishlist.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedRecommendations =
+          currentState.userRecommendations.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedTopThree = currentState.userTopThree.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      emit(currentState.copyWith(
+        userRated: _applyCache(updatedRated),
+        userWishlist: _applyCache(updatedWishlist),
+        userRecommendations: _applyCache(updatedRecommendations),
+        userTopThree: _applyCache(updatedTopThree),
+      ));
+    }
+
+    // 7. GameSearchLoaded
+    else if (currentState is GameSearchLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
       emit(currentState.copyWith(games: updatedGames));
     }
-    // Add more state types as needed
+
+    // 8. UserWishlistLoaded
+    else if (currentState is UserWishlistLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 9. UserRecommendationsLoaded
+    else if (currentState is UserRecommendationsLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 10. UserRatedLoaded
+    else if (currentState is UserRatedLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 11. SimilarGamesLoaded
+    else if (currentState is SimilarGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 12. CompleteFranchiseGamesLoaded
+    else if (currentState is CompleteFranchiseGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 13. CompleteCollectionGamesLoaded
+    else if (currentState is CompleteCollectionGamesLoaded) {
+      final updatedGames = currentState.games.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+      emit(currentState.copyWith(games: updatedGames));
+    }
+
+    // 14. GameDetailsLoaded - Update the single game if it matches
+    else if (currentState is GameDetailsLoaded) {
+      if (currentState.game.id == gameId) {
+        emit(GameDetailsLoaded(updateFunction(currentState.game)));
+      }
+    }
+
+    print('✅ Game $gameId updated in state: ${currentState.runtimeType}');
   }
 
 // Fix for _onGetGameDetails
@@ -645,96 +990,119 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
         getLatestGames(const GetLatestGamesParams(limit: 10)),
         getTopRatedGames(const GetTopRatedGamesParams(limit: 10)),
-        if (event.userId != null) ...[
-          getUserWishlist(GetUserWishlistParams(
-              userId: event.userId!, limit: 20, offset: 0)),
-          getUserRecommendations(GetUserRecommendationsParams(
-              userId: event.userId!, limit: 20, offset: 0)),
-        ],
+        getUpcomingEvents(const GetUpcomingEventsParams(limit: 10)),
       ]);
 
       print('🏠 GameBloc: Parallel data fetch complete! Processing results...');
 
       // Extract results
-      final popularGames = results[0].fold(
+      final popularGames = results[0].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Popular games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Popular games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final upcomingGames = results[1].fold(
+      final upcomingGames = results[1].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Upcoming games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Upcoming games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final latestGames = results[2].fold(
+      final latestGames = results[2].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Latest games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Latest games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final topRatedGames = results[3].fold(
+      final topRatedGames = results[3].fold<List<Game>>(
         (l) {
           print('❌ GameBloc: Top rated games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
           print('✅ GameBloc: Top rated games: ${r.length} games');
-          return r;
+          return r as List<Game>;
         },
       );
-      final userWishlist = event.userId != null && results.length > 4
-          ? results[4].fold((l) => <Game>[], (r) => r)
+      final upcomingEvents = results[4].fold<List<Event>>(
+        (l) {
+          print('❌ GameBloc: Upcoming events failed: ${l.message}');
+          return <Event>[];
+        },
+        (r) {
+          print('✅ GameBloc: Upcoming events: ${r.length} events');
+          return r as List<Event>;
+        },
+      );
+      final userWishlist = event.userId != null && results.length > 5
+          ? results[5].fold((l) => <Game>[], (r) => r as List<Game>)
           : <Game>[];
-      final userRecommendations = event.userId != null && results.length > 5
-          ? results[5].fold((l) => <Game>[], (r) => r)
+      final userRecommendations = event.userId != null && results.length > 6
+          ? results[6].fold((l) => <Game>[], (r) => r as List<Game>)
           : <Game>[];
 
       // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
-        final enrichedPopular =
+        final List<Game> enrichedPopular =
             await enrichGamesWithUserData(popularGames, event.userId!);
-        final enrichedUpcoming =
+        final List<Game> enrichedUpcoming =
             await enrichGamesWithUserData(upcomingGames, event.userId!);
-        final enrichLatest =
+        final List<Game> enrichLatest =
             await enrichGamesWithUserData(latestGames, event.userId!);
-        final enrichedTopRated =
+        final List<Game> enrichedTopRated =
             await enrichGamesWithUserData(topRatedGames, event.userId!);
         // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
-        final enrichedWishlist = userWishlist.isNotEmpty
+        final List<Game> enrichedWishlist = userWishlist.isNotEmpty
             ? await enrichGamesWithUserData(userWishlist, event.userId!)
             : <Game>[];
-        final enrichedRecommendations = userRecommendations.isNotEmpty
+        final List<Game> enrichedRecommendations = userRecommendations
+                .isNotEmpty
             ? await enrichGamesWithUserData(userRecommendations, event.userId!)
             : <Game>[];
 
+        // 🎯 CACHE GAMES for persistence
+        _updateGamesCacheList(enrichedPopular);
+        _updateGamesCacheList(enrichedUpcoming);
+        _updateGamesCacheList(enrichLatest);
+        _updateGamesCacheList(enrichedTopRated);
+        _updateGamesCacheList(enrichedWishlist);
+        _updateGamesCacheList(enrichedRecommendations);
+
+        // 🎯 APPLY CACHE - this ensures any user actions are reflected!
         emit(HomePageLoaded(
-          popularGames: enrichedPopular,
-          upcomingGames: enrichedUpcoming,
-          latestGames: enrichLatest,
-          topRatedGames: enrichedTopRated,
-          userWishlist: enrichedWishlist,
-          userRecommendations: enrichedRecommendations,
+          popularGames: _applyCache(enrichedPopular),
+          upcomingGames: _applyCache(enrichedUpcoming),
+          latestGames: _applyCache(enrichLatest),
+          topRatedGames: _applyCache(enrichedTopRated),
+          userWishlist: _applyCache(enrichedWishlist),
+          userRecommendations: _applyCache(enrichedRecommendations),
+          upcomingEvents: upcomingEvents,
         ));
       } else {
+        // 🎯 CACHE GAMES even without user data
+        _updateGamesCacheList(popularGames);
+        _updateGamesCacheList(upcomingGames);
+        _updateGamesCacheList(latestGames);
+        _updateGamesCacheList(topRatedGames);
+
         emit(HomePageLoaded(
-          popularGames: popularGames,
-          upcomingGames: upcomingGames,
-          latestGames: latestGames,
-          topRatedGames: topRatedGames,
+          popularGames: _applyCache(popularGames),
+          upcomingGames: _applyCache(upcomingGames),
+          latestGames: _applyCache(latestGames),
+          topRatedGames: _applyCache(topRatedGames),
+          upcomingEvents: upcomingEvents,
         ));
       }
     } catch (e) {
@@ -791,12 +1159,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ? await enrichGamesWithUserData(userTopThree, event.userId!)
           : <Game>[];
 
-      // ✅ State emittieren (das fehlte!)
+      // 🎯 CACHE GAMES for persistence
+      _updateGamesCacheList(enrichedRated);
+      _updateGamesCacheList(enrichedWishlist);
+      _updateGamesCacheList(enrichedRecommendations);
+      _updateGamesCacheList(enrichedTopThree);
+
+      // 🎯 APPLY CACHE - this ensures any user actions are reflected!
       emit(GrovePageLoaded(
-        userRated: enrichedRated,
-        userWishlist: enrichedWishlist,
-        userRecommendations: enrichedRecommendations,
-        userTopThree: enrichedTopThree,
+        userRated: _applyCache(enrichedRated),
+        userWishlist: _applyCache(enrichedWishlist),
+        userRecommendations: _applyCache(enrichedRecommendations),
+        userTopThree: _applyCache(enrichedTopThree),
       ));
     } catch (e) {
       print('❌ Failed to load grove page data: $e');
@@ -809,9 +1183,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     String userId, {
     int? enrichLimit,
   }) async {
-    return enrichmentService.enrichGames(games, userId);
+    print(
+        '🎮 enrichGamesWithUserData: Enriching ${games.length} games for user $userId');
+    final enrichedGames = await enrichmentService.enrichGames(games, userId);
+    print('🎮 enrichGamesWithUserData: Enriched ${enrichedGames.length} games');
+    // Debug: print first game enrichment status
+    if (enrichedGames.isNotEmpty) {
+      final firstGame = enrichedGames.first;
+      print('🎮 First game: ${firstGame.name}');
+      print('  - isWishlisted: ${firstGame.isWishlisted}');
+      print('  - isRecommended: ${firstGame.isRecommended}');
+      print('  - userRating: ${firstGame.userRating}');
+      print('  - isInTopThree: ${firstGame.isInTopThree}');
+    }
+    return enrichedGames;
   }
 
+  // ✅ UPDATED: Now includes latestGames and topRatedGames
   void _updateGameInHomePageState(
       int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
     final currentState = state;
@@ -823,6 +1211,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }).toList();
 
       final updatedUpcoming = currentState.upcomingGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedLatest = currentState.latestGames.map((game) {
+        return game.id == gameId ? updateFunction(game) : game;
+      }).toList();
+
+      final updatedTopRated = currentState.topRatedGames.map((game) {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
@@ -838,6 +1234,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       emit(currentState.copyWith(
         popularGames: updatedPopular,
         upcomingGames: updatedUpcoming,
+        latestGames: updatedLatest,
+        topRatedGames: updatedTopRated,
         userWishlist: updatedWishlist,
         userRecommendations: updatedRecommendations,
       ));
@@ -1206,6 +1604,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     AddToTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
+    print('🎮 GameBloc: _onAddToTopThree called');
+    print('   User ID: ${event.userId}');
+    print('   Game ID: ${event.gameId}');
+    print('   Position: ${event.position}');
+
     final result = await addToTopThree(AddToTopThreeParams(
       userId: event.userId,
       gameId: event.gameId,
@@ -1214,31 +1617,96 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
+        print('❌ GameBloc: Failed to add to top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
-      (_) {
-        // ✅ NICHT rekursiv ein neues Event triggern!
-        // Stattdessen aktuellen State updaten
-        if (state is GameDetailsLoaded && !emit.isDone) {
-          final currentGame = (state as GameDetailsLoaded).game;
-          if (currentGame.id == event.gameId) {
-            final updatedGame = currentGame.copyWith(
-              isInTopThree: true,
-              topThreePosition: event.position,
-            );
-            emit(GameDetailsLoaded(updatedGame));
-          }
-        }
+      (_) async {
+        print('✅ GameBloc: Successfully added to top three');
 
-        // ✅ Auch andere States updaten
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(
+            isInTopThree: true,
+            topThreePosition: event.position,
+          );
+        });
+
+        // Update the specific game in all relevant states
         _updateGameInAllStates(event.gameId, (game) {
           return game.copyWith(
             isInTopThree: true,
             topThreePosition: event.position,
           );
         }, emit);
+
+        // If the current state is GrovePageLoaded, update its userTopThree list
+        if (state is GrovePageLoaded) {
+          final result =
+              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          result.fold(
+            (failure) => emit(GameError(_mapFailureToMessage(failure))),
+            (games) {
+              emit((state as GrovePageLoaded).copyWith(userTopThree: games));
+            },
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> _onRemoveFromTopThree(
+    RemoveFromTopThreeEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    print('🎮 GameBloc: _onRemoveFromTopThree called');
+    print('   User ID: ${event.userId}');
+    print('   Game ID: ${event.gameId}');
+
+    final result = await removeFromTopThree(RemoveFromTopThreeParams(
+      userId: event.userId,
+      gameId: event.gameId,
+    ));
+
+    result.fold(
+      (failure) {
+        print(
+            '❌ GameBloc: Failed to remove from top three: ${failure.message}');
+        if (!emit.isDone) {
+          emit(GameError(_mapFailureToMessage(failure)));
+        }
+      },
+      (_) async {
+        print('✅ GameBloc: Successfully removed from top three');
+
+        // 🎯 UPDATE CACHE FIRST
+        _updateGameInCache(event.gameId, (game) {
+          return game.copyWith(
+            isInTopThree: false,
+            topThreePosition: null,
+          );
+        });
+
+        // Update the specific game in all relevant states
+        _updateGameInAllStates(event.gameId, (game) {
+          return game.copyWith(
+            isInTopThree: false,
+            topThreePosition: null,
+          );
+        }, emit);
+
+        // If the current state is GrovePageLoaded, update its userTopThree list
+        if (state is GrovePageLoaded) {
+          final result =
+              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          result.fold(
+            (failure) => emit(GameError(_mapFailureToMessage(failure))),
+            (games) {
+              emit((state as GrovePageLoaded).copyWith(userTopThree: games));
+            },
+          );
+        }
       },
     );
   }
@@ -1333,6 +1801,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         games: games,
         hasReachedMax: games.length < 20,
         currentQuery: event.query,
+        currentFilters: event.filters,
       )),
     );
   }
@@ -1348,6 +1817,168 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     } catch (e) {
       // Silently fail - search query saving is not critical
       print('Failed to save search query: $e');
+    }
+  }
+
+  // 🎯 REFRESH CACHE EVENT - Re-emits current state with applied cache
+  void _onRefreshCache(
+    RefreshCacheEvent event,
+    Emitter<GameState> emit,
+  ) {
+    print('🔄 RefreshCacheEvent: Applying cache to current state');
+    final currentState = state;
+
+    // Apply cache to the current state and re-emit it
+    final refreshedState = _applyCacheToState(currentState);
+
+    if (refreshedState != currentState) {
+      print(
+          '✅ Cache applied, re-emitting state: ${refreshedState.runtimeType}');
+      emit(refreshedState);
+    } else {
+      print('ℹ️ No cache changes to apply');
+    }
+  }
+
+  Future<void> _onLoadAllUserRatedPaginated(
+    LoadAllUserRatedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserRatedPaginatedLoading());
+
+    final result = await getUserRated(
+      GetUserRatedParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserRatedPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserRatedPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserRatedPaginated(
+    LoadMoreUserRatedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserRatedPaginatedLoaded) {
+      final currentState = state as AllUserRatedPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserRated(
+        GetUserRatedParams(userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserRatedPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<void> _onLoadAllUserWishlistPaginated(
+    LoadAllUserWishlistPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserWishlistPaginatedLoading());
+
+    final result = await getUserWishlist(
+      GetUserWishlistParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserWishlistPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserWishlistPaginated(
+    LoadMoreUserWishlistPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserWishlistPaginatedLoaded) {
+      final currentState = state as AllUserWishlistPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserWishlist(
+        GetUserWishlistParams(userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<void> _onLoadAllUserRecommendedPaginated(
+    LoadAllUserRecommendedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    emit(AllUserRecommendedPaginatedLoading());
+
+    final result = await getUserRecommendations(
+      GetUserRecommendationsParams(userId: event.userId, limit: 20, offset: 0),
+    );
+
+    result.fold(
+      (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
+      (games) {
+        emit(AllUserRecommendedPaginatedLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onLoadMoreUserRecommendedPaginated(
+    LoadMoreUserRecommendedPaginated event,
+    Emitter<GameState> emit,
+  ) async {
+    if (state is AllUserRecommendedPaginatedLoaded) {
+      final currentState = state as AllUserRecommendedPaginatedLoaded;
+
+      if (currentState.hasReachedMax) return;
+
+      final offset = currentState.games.length;
+      final result = await getUserRecommendations(
+        GetUserRecommendationsParams(
+            userId: event.userId, limit: 20, offset: offset),
+      );
+
+      result.fold(
+        (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
+        (newGames) {
+          emit(currentState.copyWith(
+            games: List.of(currentState.games)..addAll(newGames),
+            hasReachedMax: newGames.length < 20,
+          ));
+        },
+      );
     }
   }
 }

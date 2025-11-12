@@ -7,6 +7,7 @@ library;
 export 'base/igdb_query.dart';
 
 // Import models for type aliases
+import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
 import 'package:gamer_grove/data/models/character/character_model.dart';
 import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_model.dart';
@@ -21,7 +22,6 @@ import 'package:gamer_grove/data/models/genre_model.dart';
 import 'package:gamer_grove/data/models/franchise_model.dart';
 import 'package:gamer_grove/data/models/collection/collection_model.dart';
 import 'package:gamer_grove/data/models/keyword_model.dart';
-import 'package:gamer_grove/data/models/ageRating/age_rating_model.dart';
 import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
 import 'package:gamer_grove/data/models/player_perspective_model.dart';
 import 'package:gamer_grove/data/models/theme_model.dart';
@@ -75,7 +75,7 @@ typedef IgdbFranchiseQuery = IgdbQuery<FranchiseModel>;
 typedef IgdbKeywordQuery = IgdbQuery<KeywordModel>;
 
 /// Query type for age ratings
-typedef IgdbAgeRatingQuery = IgdbQuery<AgeRatingModel>;
+typedef IgdbAgeRatingQuery = IgdbQuery<AgeRatingCategoryModel>;
 
 /// Query type for multiplayer modes
 typedef IgdbMultiplayerModeQuery = IgdbQuery<MultiplayerModeModel>;
@@ -84,7 +84,7 @@ typedef IgdbMultiplayerModeQuery = IgdbQuery<MultiplayerModeModel>;
 typedef IgdbLanguageQuery = IgdbQuery<LanguageModel>;
 
 /// Query type for themes
-typedef IgdbThemeQuery = IgdbQuery<ThemeModel>;
+typedef IgdbThemeQuery = IgdbQuery<IGDBThemeModel>;
 
 /// Query type for player
 

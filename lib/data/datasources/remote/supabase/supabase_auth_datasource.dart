@@ -53,7 +53,7 @@ abstract class SupabaseAuthDataSource {
   ///   print('Username is taken');
   /// }
   /// ```
-  Future<User> signUp(
+  Future<AuthResponse> signUp(
     String email,
     String password,
     String username,

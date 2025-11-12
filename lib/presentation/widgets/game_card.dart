@@ -2,7 +2,13 @@
 import 'dart:ui'; // Für BackdropFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
 import '../../domain/entities/game/game.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/image_utils.dart';
@@ -14,6 +20,12 @@ class GameCard extends StatelessWidget {
   final bool blurRated;
   final double? width;
   final double? height;
+  final String? otherUserId;
+  final double? otherUserRating;
+  final bool? otherUserIsWishlisted;
+  final bool? otherUserIsRecommended;
+  final bool? otherUserIsInTopThree;
+  final int? otherUserTopThreePosition;
 
   const GameCard({
     super.key,
@@ -22,6 +34,12 @@ class GameCard extends StatelessWidget {
     this.blurRated = false,
     this.width,
     this.height,
+    this.otherUserId,
+    this.otherUserRating,
+    this.otherUserIsWishlisted,
+    this.otherUserIsRecommended,
+    this.otherUserIsInTopThree,
+    this.otherUserTopThreePosition,
   });
 
   @override
@@ -30,6 +48,10 @@ class GameCard extends StatelessWidget {
       onTap: () {
         HapticFeedback.lightImpact();
         onTap();
+      },
+      onLongPress: () {
+        HapticFeedback.vibrate();
+        _showUserStatesDialog(context);
       },
       child: Container(
         width: width ?? 160,
@@ -46,35 +68,135 @@ class GameCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background Cover Image (full card)
-              _buildBackgroundImage(context),
+          child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
+            buildWhen: (previous, current) {
+              // 🐛 DEBUG: Log buildWhen checks
+              print('🎮 GameCard(${game.name}): buildWhen check');
+              print('   Previous: ${previous.runtimeType}, Current: ${current.runtimeType}');
 
-              // Blur Filter für rated games
-              if (blurRated && _isGameRated()) _buildBlurOverlay(),
+              // Rebuild if state type changes OR if it's UserGameDataLoaded with different data
+              if (previous.runtimeType != current.runtimeType) {
+                print('   → Rebuild: State type changed');
+                return true;
+              }
 
-              // Gradient Overlay
-              _buildGradientOverlay(),
+              // Always rebuild when UserGameDataLoaded state changes
+              if (current is UserGameDataLoaded && previous is UserGameDataLoaded) {
+                // Check if THIS game's data has changed
+                final prevWishlisted = previous.isWishlisted(game.id);
+                final currWishlisted = current.isWishlisted(game.id);
+                final prevRecommended = previous.isRecommended(game.id);
+                final currRecommended = current.isRecommended(game.id);
+                final prevRating = previous.getRating(game.id);
+                final currRating = current.getRating(game.id);
+                final prevTopThree = previous.isInTopThree(game.id);
+                final currTopThree = current.isInTopThree(game.id);
 
-              // User Elements Background Gradient
-              if (_hasUserElements()) _buildUserElementsBackground(),
+                final hasChanges = prevWishlisted != currWishlisted ||
+                    prevRecommended != currRecommended ||
+                    prevRating != currRating ||
+                    prevTopThree != currTopThree;
 
-              // Content Overlay (unten)
-              _buildContentOverlay(context),
+                print('   → Rebuild: ${hasChanges ? "YES (data changed)" : "NO (no changes)"}');
+                print('      Recommended: $prevRecommended → $currRecommended');
+                print('      Rating: $prevRating → $currRating');
 
-              // Ratings und States Overlay (rechts)
-              _buildRatingsOverlay(context),
+                return hasChanges;
+              }
 
-              // IGDB Rating (unten rechts)
-              if (game.totalRating != null)
-                Positioned(
-                  bottom: 6,
-                  right: 6,
-                  child: _buildIGDBRatingCircle(context),
-                ),
-            ],
+              print('   → Rebuild: YES (default)');
+              return true; // Rebuild for other state changes
+            },
+            builder: (context, userDataState) {
+              // ✅ ALWAYS read from UserGameDataBloc as single source of truth
+              // Default to false/null if not loaded yet
+              bool isWishlisted = false;
+              bool isRecommended = false;
+              double? userRating;
+              bool isInTopThree = false;
+              int? topThreePosition;
+
+              // 🐛 DEBUG: Log builder state
+              print('🎮 GameCard(${game.name}): builder called');
+              print('   State: ${userDataState.runtimeType}');
+
+              // Read from UserGameDataBloc if loaded
+              if (userDataState is UserGameDataLoaded) {
+                isWishlisted = userDataState.isWishlisted(game.id);
+                isRecommended = userDataState.isRecommended(game.id);
+                userRating = userDataState.getRating(game.id);
+                isInTopThree = userDataState.isInTopThree(game.id);
+                topThreePosition = userDataState.getTopThreePosition(game.id);
+
+                print('   Loaded data: recommended=$isRecommended, rating=$userRating');
+              } else {
+                print('   State not loaded - showing defaults');
+              }
+
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Background Cover Image (full card)
+                  _buildBackgroundImage(context),
+
+                  // Blur Filter für rated games
+                  if (blurRated && userRating != null) _buildBlurOverlay(),
+
+                  // Gradient Overlay
+                  _buildGradientOverlay(),
+
+                  // User Elements Background Gradient (logged-in user - right)
+                  if (_hasUserElements(
+                    userRating,
+                    isWishlisted,
+                    isRecommended,
+                    isInTopThree,
+                  ))
+                    _buildUserElementsBackground(
+                      userRating,
+                      isWishlisted,
+                      isRecommended,
+                      isInTopThree,
+                      isLeft: false,
+                    ),
+
+                  // Other User Elements Background Gradient (left)
+                  if (_hasOtherUserElements())
+                    _buildUserElementsBackground(
+                      otherUserRating,
+                      otherUserIsWishlisted ?? false,
+                      otherUserIsRecommended ?? false,
+                      otherUserIsInTopThree ?? false,
+                      isLeft: true,
+                    ),
+
+                  // Content Overlay (unten)
+                  _buildContentOverlay(context),
+
+                  // Other User States Overlay (left)
+                  if (otherUserId != null)
+                    _buildOtherUserStatesOverlay(context),
+
+                  // Ratings und States Overlay (rechts) - NOW WITH BLOC DATA!
+                  _buildRatingsOverlay(
+                    context,
+                    userRating,
+                    isWishlisted,
+                    isRecommended,
+                    isInTopThree,
+                    topThreePosition,
+                  ),
+
+                  // IGDB Rating (unten rechts)
+                  if (game.totalRating != null)
+                    Positioned(
+                      bottom: 6,
+                      right: 6,
+                      child: _buildIGDBRatingCircle(context),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -146,22 +268,33 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserElementsBackground() {
-    // Dynamische Höhe basierend auf Anzahl der User-Elemente
-    final elementCount = _getUserElementsCount();
-    final height = _calculateUserElementsHeight(elementCount);
+  Widget _buildUserElementsBackground(
+    double? userRating,
+    bool isWishlisted,
+    bool isRecommended,
+    bool isInTopThree, {
+    required bool isLeft,
+  }) {
+    final elementCount = _getUserElementsCount(
+      userRating,
+      isWishlisted,
+      isRecommended,
+      isInTopThree,
+    );
+    final height = _calculateUserElementsHeight(elementCount, userRating);
 
     return Positioned(
       top: 0,
-      right: 0,
+      left: isLeft ? 0 : null,
+      right: isLeft ? null : 0,
       width: 44,
       height: height,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: RadialGradient(
-            center: const Alignment(1.0, -1.0), // Exakt in der Ecke oben rechts
-            radius: 2.8, // Größerer Radius für bessere Abdeckung
+            center: isLeft ? const Alignment(-1.0, -1.0) : const Alignment(1.0, -1.0),
+            radius: 2.8,
             colors: [
               Colors.black.withOpacity(0.7),
               Colors.black.withOpacity(0.4),
@@ -255,7 +388,14 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingsOverlay(BuildContext context) {
+  Widget _buildRatingsOverlay(
+    BuildContext context,
+    double? userRating,
+    bool isWishlisted,
+    bool isRecommended,
+    bool isInTopThree,
+    int? topThreePosition,
+  ) {
     return Positioned(
       top: 4,
       right: 4,
@@ -263,45 +403,33 @@ class GameCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // User Rating
-          game.userRating != null
-              ? _buildUserRatingCircle(context)
-              : Container(height: 0),
-
-          // Abstand nur wenn User Rating vorhanden
-          game.userRating != null
-              ? const SizedBox(height: 4)
-              : Container(height: 0),
+          if (userRating != null) ...[
+            _buildUserRatingCircle(context, userRating),
+            const SizedBox(height: 4),
+          ],
 
           // Top Three
-          (game.isInTopThree)
-              ? _buildTopThreeCircle(context)
-              : Container(height: 0),
-
-          // Abstand nur wenn Top Three vorhanden
-          (game.isInTopThree)
-              ? const SizedBox(height: 4)
-              : Container(height: 0),
+          if (isInTopThree && topThreePosition != null) ...[
+            _buildTopThreeCircle(context, topThreePosition),
+            const SizedBox(height: 4),
+          ],
 
           // Wishlist
-          game.isWishlisted
-              ? _buildWishlistCircle(context)
-              : Container(height: 0),
-
-          // Abstand nur wenn Wishlist vorhanden
-          game.isWishlisted ? const SizedBox(height: 4) : Container(height: 0),
+          if (isWishlisted) ...[
+            _buildWishlistCircle(context),
+            const SizedBox(height: 4),
+          ],
 
           // Recommend
-          game.isRecommended
-              ? _buildRecommendCircle(context)
-              : Container(height: 0),
+          if (isRecommended) _buildRecommendCircle(context),
         ],
       ),
     );
   }
 
-  Widget _buildUserRatingCircle(BuildContext context) {
-    final rating = game.userRating! / 10; // 0-1 range
-    final displayRating = (game.userRating! * 10);
+  Widget _buildUserRatingCircle(BuildContext context, double userRating) {
+    final rating = userRating / 10; // 0-1 range
+    final displayRating = (userRating * 10);
     final color = ColorScales.getRatingColor(displayRating);
 
     return Container(
@@ -360,8 +488,7 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTopThreeCircle(BuildContext context) {
-    final position = game.topThreePosition ?? 1;
+  Widget _buildTopThreeCircle(BuildContext context, int position) {
     final color = ColorScales.getTopThreeColor(position);
 
     return Container(
@@ -500,29 +627,126 @@ class GameCard extends StatelessWidget {
     );
   }
 
-  // Helper methods
-  bool _hasUserElements() {
-    return game.userRating != null ||
-        game.isWishlisted ||
-        game.isRecommended ||
-        (game.isInTopThree);
+  Future<void> _showUserStatesDialog(BuildContext context) async {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) {
+      GamerGroveToastService.showWarning(
+        context,
+        title: 'Login Required',
+        message: 'Please log in to manage your game states.',
+      );
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: BlocProvider.of<UserGameDataBloc>(context),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Title
+                Text(
+                  game.name,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                // User States Content
+                UserStatesContent(game: game),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  int _getUserElementsCount() {
+  Widget _buildOtherUserStatesOverlay(BuildContext context) {
+    return Positioned(
+      top: 4,
+      left: 4,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Other User Rating
+          if (otherUserRating != null) ...[
+            _buildUserRatingCircle(context, otherUserRating!),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Top Three
+          if (otherUserIsInTopThree == true &&
+              otherUserTopThreePosition != null) ...[
+            _buildTopThreeCircle(context, otherUserTopThreePosition!),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Wishlist
+          if (otherUserIsWishlisted == true) ...[
+            _buildWishlistCircle(context),
+            const SizedBox(height: 4),
+          ],
+
+          // Other User Recommend
+          if (otherUserIsRecommended == true) _buildRecommendCircle(context),
+        ],
+      ),
+    );
+  }
+
+  // Helper methods
+  bool _hasUserElements(
+    double? userRating,
+    bool isWishlisted,
+    bool isRecommended,
+    bool isInTopThree,
+  ) {
+    return userRating != null || isWishlisted || isRecommended || isInTopThree;
+  }
+
+  bool _hasOtherUserElements() {
+    return otherUserRating != null ||
+        otherUserIsWishlisted == true ||
+        otherUserIsRecommended == true ||
+        otherUserIsInTopThree == true;
+  }
+
+  int _getUserElementsCount(
+    double? userRating,
+    bool isWishlisted,
+    bool isRecommended,
+    bool isInTopThree,
+  ) {
     int count = 0;
-    if (game.userRating != null) count++;
-    if (game.isInTopThree) count++;
-    if (game.isWishlisted) count++;
-    if (game.isRecommended) count++;
+    if (userRating != null) count++;
+    if (isInTopThree) count++;
+    if (isWishlisted) count++;
+    if (isRecommended) count++;
     return count;
   }
 
-  double _calculateUserElementsHeight(int count) {
+  double _calculateUserElementsHeight(int count, double? userRating) {
     if (count == 0) return 0;
 
     double height = 16; // Base padding (oben und unten)
 
-    if (game.userRating != null) {
+    if (userRating != null) {
       height += 32; // User rating ist größer
       count--;
       if (count > 0) height += 4; // Spacing nach User Rating
@@ -533,10 +757,6 @@ class GameCard extends StatelessWidget {
         (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
 
     return height;
-  }
-
-  bool _isGameRated() {
-    return game.userRating != null && game.userRating! > 0;
   }
 }
 

@@ -4,9 +4,12 @@
 
 // lib/presentation/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../domain/entities/website/website_type.dart';
+import '../../blocs/user_game_data/user_game_data_bloc.dart';
 import '../../pages/game_detail/widgets/community_info_section.dart';
 import '../../pages/game_detail/widgets/company_section.dart';
 import '../../pages/game_detail/widgets/game_description_section.dart';
@@ -42,12 +45,17 @@ class GameDetailsAccordion extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
             children: [
               // Your Activity - Always show, no callback needed
-              EnhancedAccordionTile(
-                title: 'Your Activity',
-                icon: Icons.person,
-                preview: _buildUserStatesPreview(context, game),
-                child: UserStatesContent(
-                    game: game), // ✅ Simplified - no callbacks needed
+              // ✅ Use BlocBuilder for preview to get live data from UserGameDataBloc
+              BlocBuilder<UserGameDataBloc, UserGameDataState>(
+                builder: (context, userDataState) {
+                  return EnhancedAccordionTile(
+                    title: 'Your Activity',
+                    icon: Icons.person,
+                    preview: _buildUserStatesPreview(context, game, userDataState),
+                    child: UserStatesContent(
+                        game: game), // ✅ Simplified - no callbacks needed
+                  );
+                },
               ),
 
               // Community & Ratings
@@ -161,7 +169,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     )),
 
               // External Links & Stores
-              if (game.websites.isNotEmpty || game.externalGames.isNotEmpty)
+              if (_hasExternalLinks(game))
                 EnhancedAccordionTile(
                   title: 'External Links & Stores',
                   icon: Icons.link,
@@ -298,24 +306,74 @@ class GameDetailsAccordion extends StatelessWidget {
         game.hasMultiplayer;
   }
 
-  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state (unchanged)
-  Widget _buildUserStatesPreview(BuildContext context, Game game) {
-    List<String> activeStates = [];
-
-    if (game.userRating != null) {
-      activeStates.add('⭐${(game.userRating! * 10).toStringAsFixed(1)}');
+  bool _hasExternalLinks(Game game) {
+    // Check if there are external games/stores
+    if (game.externalGames.isNotEmpty) {
+      return true;
     }
 
-    if (game.isWishlisted == true) {
+    // Show if there are any websites (including social media, stores, etc.)
+    // The only case we want to hide this section is if there are NO websites at all
+    // or ONLY a single official website with no other links
+    if (game.websites.isNotEmpty) {
+      // If there's more than one website, show the section
+      if (game.websites.length > 1) {
+        return true;
+      }
+
+      // If there's only one website, check if it's NOT just an official site
+      return game.websites.first.type != WebsiteCategory.official;
+    }
+
+    return false;
+  }
+
+  // ✅ PREVIEW BUILDERS - Build preview text for collapsed state
+  // ✅ UPDATED: Now reads from UserGameDataBloc for live data
+  Widget _buildUserStatesPreview(
+    BuildContext context,
+    Game game,
+    UserGameDataState userDataState,
+  ) {
+    List<String> activeStates = [];
+
+    // Read from UserGameDataBloc if available, fallback to Game entity
+    double? userRating;
+    bool isWishlisted = false;
+    bool isRecommended = false;
+    bool isInTopThree = false;
+    int? topThreePosition;
+
+    if (userDataState is UserGameDataLoaded) {
+      userRating = userDataState.getRating(game.id);
+      isWishlisted = userDataState.isWishlisted(game.id);
+      isRecommended = userDataState.isRecommended(game.id);
+      isInTopThree = userDataState.isInTopThree(game.id);
+      topThreePosition = userDataState.getTopThreePosition(game.id);
+    } else {
+      // Fallback to Game entity data
+      userRating = game.userRating;
+      isWishlisted = game.isWishlisted;
+      isRecommended = game.isRecommended;
+      isInTopThree = game.isInTopThree;
+      topThreePosition = game.topThreePosition;
+    }
+
+    // Build preview string
+    if (userRating != null) {
+      activeStates.add('⭐${(userRating * 10).toStringAsFixed(1)}');
+    }
+
+    if (isWishlisted) {
       activeStates.add('❤️');
     }
 
-    if (game.isRecommended == true) {
+    if (isRecommended) {
       activeStates.add('👍');
     }
 
-    if (game.isInTopThree == true) {
-      activeStates.add('🏆#${game.topThreePosition ?? 1}');
+    if (isInTopThree) {
+      activeStates.add('🏆#${topThreePosition ?? 1}');
     }
 
     if (activeStates.isEmpty) {
@@ -483,7 +541,8 @@ class GameDetailsAccordion extends StatelessWidget {
     }
 
     if (categories.length < 2 && game.themes.isNotEmpty) {
-      categories.addAll(game.themes.take(2 - categories.length).map((t) => t));
+      categories
+          .addAll(game.themes.take(2 - categories.length).map((t) => t.name));
     }
 
     String preview = categories.join(' • ');

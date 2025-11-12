@@ -291,7 +291,22 @@ class FollowQueries {
             username,
             display_name,
             avatar_url,
-            followers_count
+            bio,
+            country,
+            is_profile_public,
+            show_wishlist,
+            show_rated_games,
+            show_recommended_games,
+            show_top_three,
+            total_games_rated,
+            total_games_wishlisted,
+            total_games_recommended,
+            average_rating,
+            followers_count,
+            following_count,
+            created_at,
+            updated_at,
+            last_active_at
           )
         ''')
         .filter(EqualFilter('following_id', userId))
@@ -319,7 +334,22 @@ class FollowQueries {
             username,
             display_name,
             avatar_url,
-            followers_count
+            bio,
+            country,
+            is_profile_public,
+            show_wishlist,
+            show_rated_games,
+            show_recommended_games,
+            show_top_three,
+            total_games_rated,
+            total_games_wishlisted,
+            total_games_recommended,
+            average_rating,
+            followers_count,
+            following_count,
+            created_at,
+            updated_at,
+            last_active_at
           )
         ''')
         .filter(EqualFilter('follower_id', userId))

@@ -1,4 +1,7 @@
 // lib/data/models/game_model.dart (VOLLSTÄNDIG ERWEITERT)
+import 'package:gamer_grove/data/models/theme_model.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
+
 import '../../../domain/entities/artwork.dart';
 import '../../../domain/entities/character/character.dart';
 import '../../../domain/entities/event/event.dart';
@@ -50,7 +53,7 @@ import '../release_date/release_date_model.dart';
 import 'game_localization_model.dart';
 
 class GameModel extends Game {
-  const GameModel({
+  GameModel({
     required super.id,
     required super.name,
     super.summary,
@@ -404,11 +407,11 @@ class GameModel extends Game {
     return [];
   }
 
-  static List<String> _extractThemes(dynamic themes) {
+  static List<IGDBTheme> _extractThemes(dynamic themes) {
     if (themes is List) {
       return themes
-          .where((item) => item is Map && item['name'] is String)
-          .map((item) => item['name'] as String)
+          .whereType<Map<String, dynamic>>()
+          .map((item) => IGDBThemeModel.fromJson(item))
           .toList();
     }
     return [];

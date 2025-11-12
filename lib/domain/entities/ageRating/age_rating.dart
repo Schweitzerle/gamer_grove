@@ -1,6 +1,7 @@
 // ===== UPDATED AGE RATING ENTITY =====
 // lib/domain/entities/ageRating/age_rating.dart
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'age_rating_organization.dart'; // Import für AgeRatingOrganization
 
 // Age Rating Category Enum (DEPRECATED but still used)
@@ -19,7 +20,7 @@ enum AgeRatingCategoryEnum {
 
   static AgeRatingCategoryEnum fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => unknown,
     );
   }
@@ -73,42 +74,71 @@ enum AgeRatingRatingEnum {
 
   static AgeRatingRatingEnum fromValue(int value) {
     return values.firstWhere(
-          (rating) => rating.value == value,
+      (rating) => rating.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case ec: return 'EC';
-      case e: return 'E';
-      case e10: return 'E10+';
-      case t: return 'T';
-      case m: return 'M';
-      case ao: return 'AO';
-      case rp: return 'RP';
-      case three: return 'PEGI 3';
-      case seven: return 'PEGI 7';
-      case twelve: return 'PEGI 12';
-      case sixteen: return 'PEGI 16';
-      case eighteen: return 'PEGI 18';
-      case usk0: return 'USK 0';
-      case usk6: return 'USK 6';
-      case usk12: return 'USK 12';
-      case usk16: return 'USK 16';
-      case usk18: return 'USK 18';
-      case ceroA: return 'CERO A';
-      case ceroB: return 'CERO B';
-      case ceroC: return 'CERO C';
-      case ceroD: return 'CERO D';
-      case ceroZ: return 'CERO Z';
-      case acbG: return 'G';
-      case acbPg: return 'PG';
-      case acbM: return 'M';
-      case acbMa15: return 'MA15+';
-      case acbR18: return 'R18+';
-      case acbRc: return 'RC';
-      default: return name.toUpperCase();
+      case ec:
+        return 'EC';
+      case e:
+        return 'E';
+      case e10:
+        return 'E10+';
+      case t:
+        return 'T';
+      case m:
+        return 'M';
+      case ao:
+        return 'AO';
+      case rp:
+        return 'RP';
+      case three:
+        return 'PEGI 3';
+      case seven:
+        return 'PEGI 7';
+      case twelve:
+        return 'PEGI 12';
+      case sixteen:
+        return 'PEGI 16';
+      case eighteen:
+        return 'PEGI 18';
+      case usk0:
+        return 'USK 0';
+      case usk6:
+        return 'USK 6';
+      case usk12:
+        return 'USK 12';
+      case usk16:
+        return 'USK 16';
+      case usk18:
+        return 'USK 18';
+      case ceroA:
+        return 'CERO A';
+      case ceroB:
+        return 'CERO B';
+      case ceroC:
+        return 'CERO C';
+      case ceroD:
+        return 'CERO D';
+      case ceroZ:
+        return 'CERO Z';
+      case acbG:
+        return 'G';
+      case acbPg:
+        return 'PG';
+      case acbM:
+        return 'M';
+      case acbMa15:
+        return 'MA15+';
+      case acbR18:
+        return 'R18+';
+      case acbRc:
+        return 'RC';
+      default:
+        return name.toUpperCase();
     }
   }
 }
@@ -118,8 +148,11 @@ class AgeRating extends Equatable {
   final String checksum;
   final List<int> contentDescriptions;
   final int? organizationId;
-  final AgeRatingOrganization? organization; // NEU: Direktes Organization Objekt
-  final int? ratingCategoryId;
+  final AgeRatingOrganization?
+      organization; // NEU: Direktes Organization Objekt
+  final AgeRatingCategory? ratingCategory;
+  final String?
+      ratingString; // NEU: Rating string from rating_category (e.g., "PEGI 18", "Mature 17+")
   final List<int> ratingContentDescriptions;
   final String? ratingCoverUrl;
   final String? synopsis;
@@ -134,7 +167,8 @@ class AgeRating extends Equatable {
     this.contentDescriptions = const [],
     this.organizationId,
     this.organization, // NEU
-    this.ratingCategoryId,
+    this.ratingCategory,
+    this.ratingString, // NEU
     this.ratingContentDescriptions = const [],
     this.ratingCoverUrl,
     this.synopsis,
@@ -143,36 +177,92 @@ class AgeRating extends Equatable {
   });
 
   String get displayName {
-    if (ratingEnum != null) {
+    // Priority 1: Use ratingString if available
+    if (ratingString != null && ratingString!.isNotEmpty) {
+      return ratingString!;
+    }
+
+    // Priority 2: Use ratingEnum if available
+    if (ratingEnum != null && ratingEnum != AgeRatingRatingEnum.unknown) {
       return ratingEnum!.displayName;
     }
+
+    // Priority 3: Use ratingCategoryId as fallback
+    if (ratingCategory != null) {
+      return 'Rating ID: $ratingCategory';
+    }
+
+    // Last resort
     return 'Unknown Rating';
   }
 
   // NEU: Helper getters für Rating-Organisationen
-  bool get isESRB => organization?.isESRB ?? (categoryEnum == AgeRatingCategoryEnum.esrb);
-  bool get isPEGI => organization?.isPEGI ?? (categoryEnum == AgeRatingCategoryEnum.pegi);
-  bool get isUSK => organization?.isUSK ?? (categoryEnum == AgeRatingCategoryEnum.usk);
-  bool get isCERO => organization?.isCERO ?? (categoryEnum == AgeRatingCategoryEnum.cero);
-  bool get isGRAC => organization?.isGRAC ?? (categoryEnum == AgeRatingCategoryEnum.grac);
-  bool get isClassInd => organization?.isClassInd ?? (categoryEnum == AgeRatingCategoryEnum.classInd);
-  bool get isACB => organization?.isACB ?? (categoryEnum == AgeRatingCategoryEnum.acb);
+  bool get isESRB =>
+      organization?.isESRB ?? (categoryEnum == AgeRatingCategoryEnum.esrb);
+  bool get isPEGI =>
+      organization?.isPEGI ?? (categoryEnum == AgeRatingCategoryEnum.pegi);
+  bool get isUSK =>
+      organization?.isUSK ?? (categoryEnum == AgeRatingCategoryEnum.usk);
+  bool get isCERO =>
+      organization?.isCERO ?? (categoryEnum == AgeRatingCategoryEnum.cero);
+  bool get isGRAC =>
+      organization?.isGRAC ?? (categoryEnum == AgeRatingCategoryEnum.grac);
+  bool get isClassInd =>
+      organization?.isClassInd ??
+      (categoryEnum == AgeRatingCategoryEnum.classInd);
+  bool get isACB =>
+      organization?.isACB ?? (categoryEnum == AgeRatingCategoryEnum.acb);
 
-  String get organizationName => organization?.name ?? categoryEnum?.name ?? 'Unknown';
+  String get organizationName {
+    // Priority 1: Use organization name if available
+    if (organization != null && organization!.name.isNotEmpty) {
+      return organization!.name;
+    }
+
+    // Priority 2: Use categoryEnum if available
+    if (categoryEnum != null && categoryEnum != AgeRatingCategoryEnum.unknown) {
+      return categoryEnum!.name.toUpperCase();
+    }
+
+    // Priority 3: Use organizationId as fallback
+    if (organizationId != null) {
+      // Map known organization IDs to names
+      switch (organizationId) {
+        case 1:
+          return 'ESRB';
+        case 2:
+          return 'PEGI';
+        case 3:
+          return 'CERO';
+        case 4:
+          return 'USK';
+        case 5:
+          return 'GRAC';
+        case 6:
+          return 'ClassInd';
+        case 7:
+          return 'ACB';
+        default:
+          return 'Org ID: $organizationId';
+      }
+    }
+
+    return 'Unknown';
+  }
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    contentDescriptions,
-    organizationId,
-    organization, // NEU
-    ratingCategoryId,
-    ratingContentDescriptions,
-    ratingCoverUrl,
-    synopsis,
-    categoryEnum,
-    ratingEnum,
-  ];
+        id,
+        checksum,
+        contentDescriptions,
+        organizationId,
+        organization, // NEU
+        ratingCategory,
+        ratingString, // NEU
+        ratingContentDescriptions,
+        ratingCoverUrl,
+        synopsis,
+        categoryEnum,
+        ratingEnum,
+      ];
 }
-

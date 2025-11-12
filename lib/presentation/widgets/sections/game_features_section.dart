@@ -5,6 +5,7 @@
 // lib/presentation/widgets/sections/enhanced_expandable_game_features_section.dart
 import 'package:flutter/material.dart';
 import '../../../domain/entities/game/game.dart';
+import '../../../core/utils/navigations.dart';
 
 class GameFeaturesSection extends StatelessWidget {
   final Game game;
@@ -79,13 +80,7 @@ class GameFeaturesSection extends StatelessWidget {
                   // Game Modes
                   if (game.gameModes.isNotEmpty)
                     Expanded(
-                      child: _buildFeatureCard(
-                        context,
-                        title: 'Game Modes',
-                        icon: Icons.sports_esports,
-                        items: game.gameModes.map((mode) => mode.name).toList(),
-                        color: Colors.blue,
-                      ),
+                      child: _buildGameModesCard(context),
                     ),
 
                   if (game.gameModes.isNotEmpty &&
@@ -95,20 +90,161 @@ class GameFeaturesSection extends StatelessWidget {
                   // Player Perspectives
                   if (game.playerPerspectives.isNotEmpty)
                     Expanded(
-                      child: _buildFeatureCard(
-                        context,
-                        title: 'Perspectives',
-                        icon: Icons.visibility,
-                        items:
-                            game.playerPerspectives.map((p) => p.name).toList(),
-                        color: Colors.green,
-                      ),
+                      child: _buildPlayerPerspectivesCard(context),
                     ),
                 ],
               ),
           ],
         ),
       ],
+    );
+  }
+
+  // ✅ CLICKABLE GAME MODES CARD
+  Widget _buildGameModesCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.blue.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.sports_esports, size: 16, color: Colors.blue),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Game Modes',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Clickable Items
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: game.gameModes
+                .map((mode) => InkWell(
+                      onTap: () => Navigations.navigateToGameModeGames(
+                        context,
+                        gameModeId: mode.id,
+                        gameModeName: mode.name,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Text(
+                          mode.name,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ CLICKABLE PLAYER PERSPECTIVES CARD
+  Widget _buildPlayerPerspectivesCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.green.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.visibility, size: 16, color: Colors.green),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Perspectives',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Clickable Items
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: game.playerPerspectives
+                .map((perspective) => InkWell(
+                      onTap: () => Navigations.navigateToPlayerPerspectiveGames(
+                        context,
+                        perspectiveId: perspective.id,
+                        perspectiveName: perspective.name,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.green.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Text(
+                          perspective.name,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 

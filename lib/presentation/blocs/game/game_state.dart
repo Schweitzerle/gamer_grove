@@ -24,11 +24,13 @@ class GameSearchLoaded extends GameState {
   @override
   final bool isLoadingMore;
   final String currentQuery;
+  final SearchFilters? currentFilters;
 
   const GameSearchLoaded({
     required this.games,
     required this.hasReachedMax,
     required this.currentQuery,
+    this.currentFilters,
     this.isLoadingMore = false,
   });
 
@@ -37,17 +39,25 @@ class GameSearchLoaded extends GameState {
     bool? hasReachedMax,
     bool? isLoadingMore,
     String? currentQuery,
+    SearchFilters? currentFilters,
   }) {
     return GameSearchLoaded(
       games: games ?? this.games,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       currentQuery: currentQuery ?? this.currentQuery,
+      currentFilters: currentFilters ?? this.currentFilters,
     );
   }
 
   @override
-  List<Object> get props => [games, hasReachedMax, isLoadingMore, currentQuery];
+  List<Object?> get props => [
+        games,
+        hasReachedMax,
+        isLoadingMore,
+        currentQuery,
+        currentFilters,
+      ];
 }
 
 // Popular Games States
@@ -191,6 +201,16 @@ class UserWishlistLoaded extends GameState {
     required this.userId,
   });
 
+  UserWishlistLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserWishlistLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
+
   @override
   List<Object> get props => [games, userId];
 }
@@ -208,6 +228,16 @@ class UserRecommendationsLoaded extends GameState {
     required this.userId,
   });
 
+  UserRecommendationsLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserRecommendationsLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
+
   @override
   List<Object> get props => [games, userId];
 }
@@ -224,6 +254,16 @@ class UserRatedLoaded extends GameState {
     required this.games,
     required this.userId,
   });
+
+  UserRatedLoaded copyWith({
+    List<Game>? games,
+    String? userId,
+  }) {
+    return UserRatedLoaded(
+      games: games ?? this.games,
+      userId: userId ?? this.userId,
+    );
+  }
 
   @override
   List<Object> get props => [games, userId];
@@ -368,6 +408,7 @@ class HomePageLoaded extends GameState {
   final List<Game> topRatedGames;
   final List<Game>? userWishlist;
   final List<Game>? userRecommendations;
+  final List<Event> upcomingEvents;
 
   const HomePageLoaded({
     required this.popularGames,
@@ -376,6 +417,7 @@ class HomePageLoaded extends GameState {
     required this.topRatedGames,
     this.userWishlist,
     this.userRecommendations,
+    this.upcomingEvents = const [],
   });
 
   // copyWith Methode hinzufügen
@@ -386,6 +428,7 @@ class HomePageLoaded extends GameState {
     List<Game>? topRatedGames,
     List<Game>? userWishlist,
     List<Game>? userRecommendations,
+    List<Event>? upcomingEvents,
   }) {
     return HomePageLoaded(
       popularGames: popularGames ?? this.popularGames,
@@ -394,6 +437,7 @@ class HomePageLoaded extends GameState {
       topRatedGames: topRatedGames ?? this.topRatedGames,
       userWishlist: userWishlist ?? this.userWishlist,
       userRecommendations: userRecommendations ?? this.userRecommendations,
+      upcomingEvents: upcomingEvents ?? this.upcomingEvents,
     );
   }
 
@@ -405,6 +449,7 @@ class HomePageLoaded extends GameState {
         topRatedGames,
         userWishlist,
         userRecommendations,
+        upcomingEvents,
       ];
 }
 
@@ -453,6 +498,12 @@ class SimilarGamesLoaded extends GameState {
 
   const SimilarGamesLoaded(this.games);
 
+  SimilarGamesLoaded copyWith({
+    List<Game>? games,
+  }) {
+    return SimilarGamesLoaded(games ?? this.games);
+  }
+
   @override
   List<Object> get props => [games];
 }
@@ -498,6 +549,22 @@ class CompleteFranchiseGamesLoaded extends GameState {
     this.currentPage = 0,
   });
 
+  CompleteFranchiseGamesLoaded copyWith({
+    int? franchiseId,
+    String? franchiseName,
+    List<Game>? games,
+    bool? hasMore,
+    int? currentPage,
+  }) {
+    return CompleteFranchiseGamesLoaded(
+      franchiseId: franchiseId ?? this.franchiseId,
+      franchiseName: franchiseName ?? this.franchiseName,
+      games: games ?? this.games,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
+
   @override
   List<Object> get props =>
       [franchiseId, franchiseName, games, hasMore, currentPage];
@@ -519,6 +586,22 @@ class CompleteCollectionGamesLoaded extends GameState {
     this.hasMore = false,
     this.currentPage = 0,
   });
+
+  CompleteCollectionGamesLoaded copyWith({
+    int? collectionId,
+    String? collectionName,
+    List<Game>? games,
+    bool? hasMore,
+    int? currentPage,
+  }) {
+    return CompleteCollectionGamesLoaded(
+      collectionId: collectionId ?? this.collectionId,
+      collectionName: collectionName ?? this.collectionName,
+      games: games ?? this.games,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
 
   @override
   List<Object> get props =>
@@ -589,4 +672,138 @@ class CollectionGamesPreviewLoaded extends GameState {
 
   @override
   List<Object> get props => [collectionId, collectionName, games];
+}
+
+class AllUserRatedLoaded extends GameState {
+  final List<Game> games;
+
+  const AllUserRatedLoaded(this.games);
+
+  @override
+  List<Object> get props => [games];
+}
+
+class AllUserWishlistedLoaded extends GameState {
+  final List<Game> games;
+
+  const AllUserWishlistedLoaded(this.games);
+
+  @override
+  List<Object> get props => [games];
+}
+
+class AllUserRecommendationsLoaded extends GameState {
+  final List<Game> games;
+
+  const AllUserRecommendationsLoaded(this.games);
+
+  @override
+  List<Object> get props => [games];
+}
+
+class AllUserRatedPaginatedLoading extends GameState {}
+
+class AllUserRatedPaginatedLoaded extends GameState {
+  @override
+  final List<Game> games;
+  final bool hasReachedMax;
+
+  const AllUserRatedPaginatedLoaded({
+    required this.games,
+    required this.hasReachedMax,
+  });
+
+  AllUserRatedPaginatedLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+  }) {
+    return AllUserRatedPaginatedLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax];
+}
+
+class AllUserRatedPaginatedError extends GameState {
+  final String message;
+
+  const AllUserRatedPaginatedError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// Wishlist Paginated
+class AllUserWishlistPaginatedLoading extends GameState {}
+
+class AllUserWishlistPaginatedLoaded extends GameState {
+  @override
+  final List<Game> games;
+  final bool hasReachedMax;
+
+  const AllUserWishlistPaginatedLoaded({
+    required this.games,
+    required this.hasReachedMax,
+  });
+
+  AllUserWishlistPaginatedLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+  }) {
+    return AllUserWishlistPaginatedLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax];
+}
+
+class AllUserWishlistPaginatedError extends GameState {
+  final String message;
+
+  const AllUserWishlistPaginatedError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// Recommended Paginated
+class AllUserRecommendedPaginatedLoading extends GameState {}
+
+class AllUserRecommendedPaginatedLoaded extends GameState {
+  @override
+  final List<Game> games;
+  final bool hasReachedMax;
+
+  const AllUserRecommendedPaginatedLoaded({
+    required this.games,
+    required this.hasReachedMax,
+  });
+
+  AllUserRecommendedPaginatedLoaded copyWith({
+    List<Game>? games,
+    bool? hasReachedMax,
+  }) {
+    return AllUserRecommendedPaginatedLoaded(
+      games: games ?? this.games,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+    );
+  }
+
+  @override
+  List<Object> get props => [games, hasReachedMax];
+}
+
+class AllUserRecommendedPaginatedError extends GameState {
+  final String message;
+
+  const AllUserRecommendedPaginatedError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

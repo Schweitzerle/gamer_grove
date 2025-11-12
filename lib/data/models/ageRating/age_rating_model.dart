@@ -1,5 +1,8 @@
 // ===== UPDATED AGE RATING MODEL =====
 // lib/data/models/ageRating/age_rating_model.dart
+import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
+
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../domain/entities/ageRating/age_rating_organization.dart';
 import 'age_rating_organization.dart';
@@ -11,7 +14,8 @@ class AgeRatingModel extends AgeRating {
     super.contentDescriptions,
     super.organizationId,
     super.organization, // NEU
-    super.ratingCategoryId,
+    super.ratingCategory,
+    super.ratingString, // NEU
     super.ratingContentDescriptions,
     super.ratingCoverUrl,
     super.synopsis,
@@ -25,8 +29,9 @@ class AgeRatingModel extends AgeRating {
       checksum: json['checksum'] ?? '',
       contentDescriptions: _parseIdList(json['content_descriptions']),
       organizationId: _parseOrganizationId(json['organization']),
-      organization: _parseOrganization(json['organization']), // NEU
-      ratingCategoryId: json['rating_category'],
+      organization: _parseOrganization(json['organization']),
+      ratingCategory: _parseRatingCategory(json['rating_category']),
+      ratingString: _parseRatingString(json['rating_category']),
       ratingContentDescriptions:
           _parseIdList(json['rating_content_descriptions']),
       ratingCoverUrl: json['rating_cover_url'],
@@ -34,9 +39,7 @@ class AgeRatingModel extends AgeRating {
       categoryEnum: _parseCategory(json['category']),
       ratingEnum: _parseRating(json['rating']),
     );
-  }
-
-  // NEU: Parse organization data
+  } // NEU: Parse organization data
   static int? _parseOrganizationId(dynamic orgData) {
     if (orgData is int) {
       return orgData;
@@ -55,6 +58,27 @@ class AgeRatingModel extends AgeRating {
         print('Error parsing age rating organization: $e');
         return null;
       }
+    }
+    return null;
+  }
+
+  // Parse rating_category - can be either int or nested object
+  static AgeRatingCategory? _parseRatingCategory(dynamic categoryData) {
+    if (categoryData is Map<String, dynamic>) {
+      try {
+        return AgeRatingCategoryModel.fromJson(categoryData);
+      } catch (e) {
+        print('Error parsing age rating category: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Parse rating string from rating_category object
+  static String? _parseRatingString(dynamic categoryData) {
+    if (categoryData is Map<String, dynamic>) {
+      return categoryData['rating'] as String?;
     }
     return null;
   }
@@ -89,7 +113,7 @@ class AgeRatingModel extends AgeRating {
       'checksum': checksum,
       'content_descriptions': contentDescriptions,
       'organization': organizationId,
-      'rating_category': ratingCategoryId,
+      'rating_category': ratingCategory,
       'rating_content_descriptions': ratingContentDescriptions,
       'rating_cover_url': ratingCoverUrl,
       'synopsis': synopsis,

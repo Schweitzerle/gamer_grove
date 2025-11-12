@@ -86,3 +86,13 @@ class AuthStateChangedEvent extends AuthEvent {
   @override
   List<Object?> get props => [user];
 }
+
+/// Event to update user data in the auth state.
+class UserDataUpdated extends AuthEvent {
+  final User user;
+
+  const UserDataUpdated(this.user);
+
+  @override
+  List<Object> get props => [user];
+}

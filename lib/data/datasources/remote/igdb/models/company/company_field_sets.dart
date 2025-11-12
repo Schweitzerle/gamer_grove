@@ -56,11 +56,13 @@ class CompanyFieldSets {
     'parent.id',
     'parent.name',
     'parent.slug',
-    'parent.logo.url',
+    'parent.description',
+    'parent.logo.*',
     // Websites
     'websites.id',
     'websites.url',
     'websites.category',
+    'websites.type.*',
     // Games developed
     'developed.id',
     'developed.name',

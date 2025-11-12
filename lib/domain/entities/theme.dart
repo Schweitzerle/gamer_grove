@@ -1,7 +1,7 @@
 // lib/domain/entities/theme.dart
 import 'package:equatable/equatable.dart';
 
-class Theme extends Equatable {
+class IGDBTheme extends Equatable {
   final int id;
   final String checksum;
   final String name;
@@ -10,7 +10,7 @@ class Theme extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  const Theme({
+  const IGDBTheme({
     required this.id,
     required this.checksum,
     required this.name,
@@ -22,12 +22,12 @@ class Theme extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    slug,
-    url,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        slug,
+        url,
+        createdAt,
+        updatedAt,
+      ];
 }

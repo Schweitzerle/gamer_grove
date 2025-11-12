@@ -10,11 +10,12 @@ abstract class GameEvent extends Equatable {
 
 class SearchGamesEvent extends GameEvent {
   final String query;
+  final String? userId;
 
-  const SearchGamesEvent(this.query);
+  const SearchGamesEvent(this.query, {this.userId});
 
   @override
-  List<Object> get props => [query];
+  List<Object?> get props => [query, userId];
 }
 
 class LoadMoreGamesEvent extends GameEvent {}
@@ -41,6 +42,19 @@ class RateGameEvent extends GameEvent {
 
   @override
   List<Object> get props => [gameId, userId, rating];
+}
+
+class RemoveRatingEvent extends GameEvent {
+  final int gameId;
+  final String userId;
+
+  const RemoveRatingEvent({
+    required this.gameId,
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [gameId, userId];
 }
 
 class ToggleWishlistEvent extends GameEvent {
@@ -73,16 +87,40 @@ class ToggleRecommendEvent extends GameEvent {
 class AddToTopThreeEvent extends GameEvent {
   final int gameId;
   final String userId;
-  final int? position; // Add position parameter
+  final int position;
 
   const AddToTopThreeEvent({
     required this.gameId,
     required this.userId,
-    this.position,
+    required this.position,
   });
 
   @override
   List<Object?> get props => [gameId, userId, position];
+}
+
+class UpdateTopThreeEvent extends GameEvent {
+  final String userId;
+
+  const UpdateTopThreeEvent({
+    required this.userId,
+  });
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class RemoveFromTopThreeEvent extends GameEvent {
+  final String userId;
+  final int gameId;
+
+  const RemoveFromTopThreeEvent({
+    required this.userId,
+    required this.gameId,
+  });
+
+  @override
+  List<Object> get props => [userId, gameId];
 }
 
 class ClearSearchEvent extends GameEvent {}
@@ -140,7 +178,6 @@ class LoadTopRatedGamesEvent extends GameEvent {
   List<Object> get props => [limit, offset];
 }
 
-
 class LoadUserRatedEvent extends GameEvent {
   final String userId;
 
@@ -189,7 +226,6 @@ class GetGameDetailsWithUserDataEvent extends GameEvent {
   @override
   List<Object?> get props => [gameId, userId];
 }
-
 
 class LoadHomePageDataEvent extends GameEvent {
   final String? userId;
@@ -303,6 +339,7 @@ class LoadCompleteCollectionGamesEvent extends GameEvent {
   @override
   List<Object?> get props => [collectionId, collectionName, games, userId];
 }
+
 /// Load complete similar games (for "View All" screens)
 class LoadCompleteSimilarGamesEvent extends GameEvent {
   final int gameId;
@@ -334,8 +371,6 @@ class LoadCompleteGameSeriesEvent extends GameEvent {
   @override
   List<Object?> get props => [gameId, gameName, userId];
 }
-
-
 
 // ⚡ NEUE EVENTS
 class LoadFranchiseGamesPreviewEvent extends GameEvent {
@@ -379,6 +414,11 @@ class LoadAllFranchiseGamesEvent extends GameEvent {
   List<Object?> get props => [franchiseId, franchiseName, userId];
 }
 
+/// Event to refresh the current state with applied cache
+/// This is useful when returning from a detail screen to ensure
+/// that any changes made are reflected in the list views
+class RefreshCacheEvent extends GameEvent {}
+
 class LoadAllCollectionGamesEvent extends GameEvent {
   final int collectionId;
   final String collectionName;
@@ -392,4 +432,136 @@ class LoadAllCollectionGamesEvent extends GameEvent {
 
   @override
   List<Object?> get props => [collectionId, collectionName, userId];
+}
+
+class LoadAllUserRatedEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRatedGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserRatedGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserRatedGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserWishlistGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserWishlistGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserWishlistGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserWishlistGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserRecommendedGameIdsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRecommendedGameIdsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadUserRecommendedGamesPageEvent extends GameEvent {
+  final List<int> gameIds;
+  final int page;
+
+  const LoadUserRecommendedGamesPageEvent(this.gameIds, this.page);
+
+  @override
+  List<Object> get props => [gameIds, page];
+}
+
+class LoadAllUserWishlistEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserWishlistEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRecommendationsEvent extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRecommendationsEvent(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadAllUserRatedPaginated extends GameEvent {
+  final String userId;
+
+  const LoadAllUserRatedPaginated(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserRatedPaginated extends GameEvent {
+  final String userId;
+
+  const LoadMoreUserRatedPaginated(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+// Wishlist Paginated
+class LoadAllUserWishlistPaginated extends GameEvent {
+  final String userId;
+  const LoadAllUserWishlistPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserWishlistPaginated extends GameEvent {
+  final String userId;
+  const LoadMoreUserWishlistPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+// Recommended Paginated
+class LoadAllUserRecommendedPaginated extends GameEvent {
+  final String userId;
+  const LoadAllUserRecommendedPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
+}
+
+class LoadMoreUserRecommendedPaginated extends GameEvent {
+  final String userId;
+  const LoadMoreUserRecommendedPaginated(this.userId);
+  @override
+  List<Object> get props => [userId];
 }

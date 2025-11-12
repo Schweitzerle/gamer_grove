@@ -52,14 +52,17 @@ class GameEnginesSection extends StatelessWidget {
               Text(
                 'Development Tools',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               Text(
                 '${gameEngines.length} ${gameEngines.length == 1 ? 'engine' : 'engines'} used',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
               ),
             ],
           ),
@@ -83,7 +86,8 @@ class GameEnginesSection extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        Navigations.navigateToGameEngineDetails(context, gameEngineId: engine.id);
+        Navigations.navigateToGameEngineDetails(context,
+            gameEngineId: engine.id);
       },
       child: Container(
         width: double.infinity,
@@ -113,17 +117,20 @@ class GameEnginesSection extends StatelessWidget {
                   Text(
                     engine.name,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                   ),
                   if (engine.hasDescription) ...[
                     const SizedBox(height: 8),
                     Text(
                       engine.description!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.8),
+                          ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -209,8 +216,8 @@ class GameEnginesSection extends StatelessWidget {
           Text(
             engine.name,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -222,10 +229,13 @@ class GameEnginesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEngineLogo(BuildContext context, GameEngine engine, {required double size}) {
+  Widget _buildEngineLogo(BuildContext context, GameEngine engine,
+      {required double size}) {
     if (engine.hasLogo) {
+      print(
+          'Loading logo for engine: ${engine.name}, logo URL: ${engine.logo?.url.toString()}');
       final logoUrl = ImageUtils.getMediumImageUrl(
-        engine.logoId.toString(),
+        engine.logo?.url.toString(),
       );
 
       return Container(
@@ -252,7 +262,8 @@ class GameEnginesSection extends StatelessWidget {
     return _buildDefaultEngineLogo(context, engine, size);
   }
 
-  Widget _buildDefaultEngineLogo(BuildContext context, GameEngine engine, double size) {
+  Widget _buildDefaultEngineLogo(
+      BuildContext context, GameEngine engine, double size) {
     // Verschiedene Icons für bekannte Engines
     IconData icon = Icons.settings_outlined;
     Color color = Theme.of(context).colorScheme.primary;
@@ -267,7 +278,8 @@ class GameEnginesSection extends StatelessWidget {
     } else if (engineName.contains('godot')) {
       icon = Icons.auto_awesome_rounded;
       color = const Color(0xFF478CBF);
-    } else if (engineName.contains('custom') || engineName.contains('proprietary')) {
+    } else if (engineName.contains('custom') ||
+        engineName.contains('proprietary')) {
       icon = Icons.code_rounded;
       color = const Color(0xFF6B46C1);
     } else if (engineName.contains('source')) {
@@ -293,14 +305,17 @@ class GameEnginesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEngineStats(BuildContext context, GameEngine engine, {bool compact = false}) {
+  Widget _buildEngineStats(BuildContext context, GameEngine engine,
+      {bool compact = false}) {
     final stats = <Widget>[];
 
     if (engine.hasCompanies) {
       stats.add(_buildStatChip(
         context,
         icon: Icons.business_rounded,
-        label: compact ? '${engine.companyCount}' : '${engine.companyCount} companies',
+        label: compact
+            ? '${engine.companyCount}'
+            : '${engine.companyCount} companies',
         color: Theme.of(context).colorScheme.secondary,
       ));
     }
@@ -309,7 +324,9 @@ class GameEnginesSection extends StatelessWidget {
       stats.add(_buildStatChip(
         context,
         icon: Icons.devices_rounded,
-        label: compact ? '${engine.platformCount}' : '${engine.platformCount} platforms',
+        label: compact
+            ? '${engine.platformCount}'
+            : '${engine.platformCount} platforms',
         color: Theme.of(context).colorScheme.tertiary,
       ));
     }
@@ -327,11 +344,11 @@ class GameEnginesSection extends StatelessWidget {
   }
 
   Widget _buildStatChip(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -358,8 +375,6 @@ class GameEnginesSection extends StatelessWidget {
       ),
     );
   }
-
-
 
   void _openEngineUrl(BuildContext context, GameEngine engine) {
     // TODO: Implement URL opening (url_launcher package)

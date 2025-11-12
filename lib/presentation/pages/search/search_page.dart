@@ -1,14 +1,16 @@
 // presentation/pages/search/search_page.dart
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/collection/collection.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
 import 'package:gamer_grove/domain/entities/keyword.dart';
 import 'package:gamer_grove/domain/entities/language/language.dart';
 import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
+import 'package:loading_indicator/loading_indicator.dart';
 import '../../../injection_container.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/input_validator.dart';
@@ -23,13 +25,22 @@ import '../../../domain/entities/player_perspective.dart';
 import '../../../domain/repositories/game_repository.dart';
 import '../../blocs/game/game_bloc.dart';
 import '../../blocs/game/game_extensions.dart'; // For SearchGamesWithFiltersEvent
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../widgets/game_card.dart';
 import '../../widgets/game_list_shimmer.dart';
 import '../../widgets/filter_bottom_sheet.dart';
 import '../../../core/widgets/error_widget.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final SearchFilters? initialFilters;
+  final String? initialTitle;
+
+  const SearchPage({
+    super.key,
+    this.initialFilters,
+    this.initialTitle,
+  });
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -39,13 +50,15 @@ class _SearchPageState extends State<SearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late GameBloc _gameBloc;
+  String? _currentUserId;
 
   // Recent searches
   List<String> _recentSearches = [];
   bool _showRecentSearches = true;
 
   // Filters
-  SearchFilters _currentFilters = const SearchFilters();
+  late SearchFilters _currentFilters;
+  bool _isLoadingFilterOptions = true;
 
   // Available filter options (loaded once)
   List<Genre> _availableGenres = [];
@@ -57,9 +70,18 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _currentFilters = widget.initialFilters ?? const SearchFilters();
     _gameBloc = sl<GameBloc>();
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
+
+    // Get current user ID from AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _currentUserId = authState.user.id;
+    }
+
+    // Load filter options first, then trigger search if we have initial filters
     _loadFilterOptions();
   }
 
@@ -131,8 +153,18 @@ class _SearchPageState extends State<SearchPage> {
       );
 
       print('✅ SearchPage: All filter options loaded');
+      setState(() => _isLoadingFilterOptions = false);
+
+      // If we have initial filters, trigger search automatically AFTER filters are loaded
+      if (widget.initialFilters != null && widget.initialFilters!.hasFilters) {
+        print('🔍 SearchPage: Auto-triggering search with initial filters');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _performSearch('');
+        });
+      }
     } catch (e) {
       print('❌ SearchPage: Exception loading filter options: $e');
+      setState(() => _isLoadingFilterOptions = false);
     }
   }
 
@@ -179,7 +211,14 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _performSearch(String query) {
-    if (query.trim().isEmpty && !_currentFilters.hasFilters) return;
+    // If both query and filters are empty, show initial view
+    if (query.trim().isEmpty && !_currentFilters.hasFilters) {
+      setState(() {
+        _showRecentSearches = true;
+      });
+      _gameBloc.add(ClearSearchEvent());
+      return;
+    }
 
     final validation = InputValidator.validateSearchQuery(query);
     if (validation != null && query.trim().isNotEmpty) {
@@ -204,7 +243,7 @@ class _SearchPageState extends State<SearchPage> {
         filters: _currentFilters,
       ));
     } else {
-      _gameBloc.add(SearchGamesEvent(query.trim()));
+      _gameBloc.add(SearchGamesEvent(query.trim(), userId: _currentUserId));
     }
   }
 
@@ -312,7 +351,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Future<List<AgeRating>> _searchAgeRatings(String query) async {
+  Future<List<AgeRatingCategory>> _searchAgeRatings(String query) async {
     print('🔍 SearchPage: Searching age ratings with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchAgeRatings(query);
@@ -320,7 +359,7 @@ class _SearchPageState extends State<SearchPage> {
         (failure) {
           print(
               '❌ SearchPage: Failed to search age ratings: ${failure.message}');
-          return <AgeRating>[];
+          return <AgeRatingCategory>[];
         },
         (ageRatings) {
           print('✅ SearchPage: Found ${ageRatings.length} age ratings');
@@ -373,14 +412,14 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Future<List<gg_theme.Theme>> _searchThemes(String query) async {
+  Future<List<gg_theme.IGDBTheme>> _searchThemes(String query) async {
     print('🔍 SearchPage: Searching themes with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchThemes(query);
       return result.fold(
         (failure) {
           print('❌ SearchPage: Failed to search themes: ${failure.message}');
-          return <gg_theme.Theme>[];
+          return <gg_theme.IGDBTheme>[];
         },
         (themes) {
           print('✅ SearchPage: Found ${themes.length} themes');
@@ -424,7 +463,7 @@ class _SearchPageState extends State<SearchPage> {
     if (_currentFilters.keywordIds.isNotEmpty) count++;
     if (_currentFilters.gameTypeIds.isNotEmpty) count++;
     if (_currentFilters.gameStatusIds.isNotEmpty) count++;
-    if (_currentFilters.ageRatingIds.isNotEmpty) count++;
+    if (_currentFilters.ageRatingCategoryIds.isNotEmpty) count++;
     if (_currentFilters.languageSupportIds.isNotEmpty) count++;
     if (_currentFilters.multiplayerModeIds.isNotEmpty) count++;
     if (_currentFilters.hasMultiplayer != null) count++;
@@ -438,54 +477,61 @@ class _SearchPageState extends State<SearchPage> {
     return BlocProvider.value(
       value: _gameBloc,
       child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildSearchHeader(),
-              Expanded(
-                child: BlocConsumer<GameBloc, GameState>(
-                  listener: (context, state) {
-                    if (state is GameError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.message),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                          action: SnackBarAction(
-                            label: 'Retry',
-                            onPressed: () {
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildSearchHeader(),
+                  Expanded(
+                    child: BlocConsumer<GameBloc, GameState>(
+                      listener: (context, state) {
+                        if (state is GameError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.message),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
+                              action: SnackBarAction(
+                                label: 'Retry',
+                                onPressed: () {
+                                  if (_searchController.text.isNotEmpty) {
+                                    _performSearch(_searchController.text);
+                                  }
+                                },
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (_showRecentSearches && state is GameInitial) {
+                          return _buildInitialView();
+                        } else if (state is GameSearchLoading &&
+                            state.games.isEmpty) {
+                          return const GameListShimmer();
+                        } else if (state is GameSearchLoaded) {
+                          return _buildSearchResults(state);
+                        } else if (state is GameError && state.games.isEmpty) {
+                          return CustomErrorWidget(
+                            message: state.message,
+                            onRetry: () {
                               if (_searchController.text.isNotEmpty) {
                                 _performSearch(_searchController.text);
                               }
                             },
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    if (_showRecentSearches && state is GameInitial) {
-                      return _buildInitialView();
-                    } else if (state is GameSearchLoading &&
-                        state.games.isEmpty) {
-                      return const GameListShimmer();
-                    } else if (state is GameSearchLoaded) {
-                      return _buildSearchResults(state);
-                    } else if (state is GameError && state.games.isEmpty) {
-                      return CustomErrorWidget(
-                        message: state.message,
-                        onRetry: () {
-                          if (_searchController.text.isNotEmpty) {
-                            _performSearch(_searchController.text);
-                          }
-                        },
-                      );
-                    }
-                    return _buildInitialView();
-                  },
-                ),
+                          );
+                        }
+                        return _buildInitialView();
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // Glassmorphism Filter FAB
+            _buildFilterFAB(context),
+          ],
         ),
       ),
     );
@@ -530,41 +576,7 @@ class _SearchPageState extends State<SearchPage> {
                       icon: const Icon(Icons.clear_rounded),
                       onPressed: _clearSearch,
                     )
-                  : Stack(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.tune_rounded),
-                          onPressed: _showFilters,
-                        ),
-                        if (_currentFilters.hasFilters)
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${_getActiveFilterCount()}',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                  : null,
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: OutlineInputBorder(
@@ -587,7 +599,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          // Search Stats (when showing results)
+          // Search Stats (when showing results) and Active Filters
           BlocBuilder<GameBloc, GameState>(
             builder: (context, state) {
               if (state is GameSearchLoaded && state.games.isNotEmpty) {
@@ -596,36 +608,96 @@ class _SearchPageState extends State<SearchPage> {
                       const EdgeInsets.only(top: AppConstants.paddingSmall),
                   child: Row(
                     children: [
-                      Text(
-                        'Found ${state.games.length} games',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              'Found ${state.games.length} games',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
-                      ),
-                      if (!state.hasReachedMax) ...[
-                        const Text(' • '),
-                        Text(
-                          'Scroll for more',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
+                            if (!state.hasReachedMax) ...[
+                              const Text(' • '),
+                              Text(
+                                'Scroll for more',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
                               ),
+                            ],
+                          ],
                         ),
-                      ],
-                      const Spacer(),
+                      ),
                       if (state.isLoadingMore)
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Theme.of(context).colorScheme.primary,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         ),
+                      if (_currentFilters.hasFilters)
+                        Chip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(
+                            '${_getActiveFilterCount()} filters',
+                          ),
+                          avatar: const Icon(Icons.filter_alt, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              _currentFilters = const SearchFilters();
+                              // If search text is also empty, show initial view
+                              if (_searchController.text.trim().isEmpty) {
+                                _showRecentSearches = true;
+                              }
+                            });
+                            _performSearch(_searchController.text);
+                          },
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                        ),
+                    ],
+                  ),
+                );
+              }
+              // Show filters even when no results
+              if (_currentFilters.hasFilters) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(top: AppConstants.paddingSmall),
+                  child: Row(
+                    children: [
+                      Chip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(
+                          '${_getActiveFilterCount()} filters',
+                        ),
+                        avatar: const Icon(Icons.filter_alt, size: 16),
+                        onDeleted: () {
+                          setState(() {
+                            _currentFilters = const SearchFilters();
+                            // If search text is also empty, show initial view
+                            if (_searchController.text.trim().isEmpty) {
+                              _showRecentSearches = true;
+                            }
+                          });
+                          _performSearch(_searchController.text);
+                        },
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                      ),
                     ],
                   ),
                 );
@@ -633,46 +705,6 @@ class _SearchPageState extends State<SearchPage> {
               return const SizedBox.shrink();
             },
           ),
-
-          // Active Filters Display
-          if (_currentFilters.hasFilters)
-            Padding(
-              padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          Chip(
-                            label: Text('${_getActiveFilterCount()} filters'),
-                            avatar: const Icon(Icons.filter_alt, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                _currentFilters = const SearchFilters();
-                              });
-                              _performSearch(_searchController.text);
-                            },
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton.icon(
-                            onPressed: _showFilters,
-                            icon: const Icon(Icons.edit, size: 16),
-                            label: const Text('Edit Filters'),
-                            style: TextButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
@@ -824,7 +856,8 @@ class _SearchPageState extends State<SearchPage> {
     return RefreshIndicator(
       onRefresh: () async {
         if (_searchController.text.isNotEmpty) {
-          _gameBloc.add(SearchGamesEvent(_searchController.text));
+          _gameBloc.add(
+              SearchGamesEvent(_searchController.text, userId: _currentUserId));
         }
       },
       child: GridView.builder(
@@ -850,6 +883,104 @@ class _SearchPageState extends State<SearchPage> {
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFilterFAB(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Positioned(
+      right: 16,
+      bottom: 16,
+      child: SafeArea(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primaryContainer.withOpacity(0.7),
+                    theme.colorScheme.secondaryContainer.withOpacity(0.5),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _isLoadingFilterOptions ? null : _showFilters,
+                  borderRadius: BorderRadius.circular(28),
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _isLoadingFilterOptions
+                            ? SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: LoadingIndicator(
+                                  indicatorType: Indicator.pacman,
+                                  colors: [theme.colorScheme.primary],
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(
+                                Icons.tune_rounded,
+                                color: theme.colorScheme.onPrimaryContainer,
+                                size: 28,
+                              ),
+                      ),
+                      if (!_isLoadingFilterOptions &&
+                          _currentFilters.hasFilters)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 20,
+                              minHeight: 20,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${_getActiveFilterCount()}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

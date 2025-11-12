@@ -123,6 +123,12 @@ abstract class UserRepository {
     int limit = 20,
   });
 
+  /// Get users for the leaderboard, sorted by rated games count
+  Future<Either<Failure, List<User>>> getLeaderboardUsers({
+    int limit = 100,
+    int offset = 0,
+  });
+
   // ==========================================
   // TOP THREE GAMES MANAGEMENT
   // ==========================================
@@ -148,7 +154,7 @@ abstract class UserRepository {
   /// Remove game from top three
   Future<Either<Failure, void>> removeFromTopThree({
     required String userId,
-    required int position,
+    required int gameId,
   });
 
   /// Reorder top three games
@@ -318,4 +324,29 @@ abstract class UserRepository {
 
   /// Reactivate user account
   Future<Either<Failure, void>> reactivateUserAccount(String userId);
+
+  // ==========================================
+  // USER GAME COLLECTIONS (IDs ONLY)
+  // ==========================================
+
+  /// Get user's wishlisted game IDs
+  Future<Either<Failure, List<int>>> getWishlistedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
+
+  /// Get user's rated game IDs with ratings
+  Future<Either<Failure, List<Map<String, dynamic>>>> getRatedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
+
+  /// Get user's recommended game IDs
+  Future<Either<Failure, List<int>>> getRecommendedGames(
+    String userId, {
+    int? limit,
+    int? offset,
+  });
 }

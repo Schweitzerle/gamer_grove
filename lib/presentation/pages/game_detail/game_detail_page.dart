@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
@@ -95,13 +96,25 @@ class _GameDetailPageState extends State<GameDetailPage>
   void dispose() {
     _scrollController.dispose();
     _mediaTabController.dispose();
+
+    // 🎯 REFRESH CACHE - Ensure home screen shows updated game data
+    // This triggers a cache refresh when navigating back from detail screen
+    context.read<GameBloc>().add(RefreshCacheEvent());
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _gameBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+          value: _gameBloc,
+        ),
+        BlocProvider.value(
+          value: sl<UserGameDataBloc>(),
+        ),
+      ],
       child: Scaffold(
         body: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
@@ -304,7 +317,7 @@ class _GameDetailPageState extends State<GameDetailPage>
           print('    📏 Sizes Available: thumb, micro, medium, large');
         } else if (char.hasMugShot) {
           print(
-              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShotId} but no imageId (needs separate fetch)');
+              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShot} but no imageId (needs separate fetch)');
         } else {
           print('    🖼️ Image: ❌ No image data available');
         }

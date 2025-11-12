@@ -235,6 +235,23 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       } else {
         // Toggle existing
         final isWishlisted = existing['is_wishlisted'] as bool;
+
+        // If turning OFF wishlist, check if this is the last flag
+        if (isWishlisted) {
+          final isRecommended = existing['is_recommended'] as bool? ?? false;
+          final rating = existing['rating'] as double?;
+          final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+          // If no other flags are set, delete the row instead of updating
+          if (!isRecommended && rating == null && !isInTopThree) {
+            await SupabaseDelete('user_games')
+                .filter(EqualFilter('user_id', userId))
+                .filter(EqualFilter('game_id', gameId))
+                .build(_supabase);
+            return;
+          }
+        }
+
         await SupabaseUpdate('user_games')
             .set({
               'is_wishlisted': !isWishlisted,
@@ -265,6 +282,24 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         }).build(_supabase);
       } else {
         final isRecommended = existing['is_recommended'] as bool;
+
+        // If turning OFF recommended, check if this is the last flag
+        if (isRecommended) {
+          final isWishlisted = existing['is_wishlisted'] as bool? ?? false;
+          final rating = existing['rating'] as double?;
+          final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+          // If no other flags are set, delete the row instead of updating
+          if (!isWishlisted && rating == null && !isInTopThree) {
+            await SupabaseDelete('user_games')
+                .filter(EqualFilter('user_id', userId))
+                .filter(EqualFilter('game_id', gameId))
+                .build(_supabase);
+            return;
+          }
+        }
+
+        // Otherwise, just toggle the flag
         await SupabaseUpdate('user_games')
             .set({
               'is_recommended': !isRecommended,
@@ -319,6 +354,27 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
   @override
   Future<void> removeRating(String userId, int gameId) async {
     try {
+      // ✅ First, check if this row exists and what other flags are set
+      final existing =
+          await UserGameQueries.getUserGame(userId, gameId).build(_supabase);
+
+      if (existing != null) {
+        // Check if removing rating would leave no other flags set
+        final isWishlisted = existing['is_wishlisted'] as bool? ?? false;
+        final isRecommended = existing['is_recommended'] as bool? ?? false;
+        final isInTopThree = existing['is_in_top_three'] as bool? ?? false;
+
+        // If no other flags are set, delete the row instead of updating
+        if (!isWishlisted && !isRecommended && !isInTopThree) {
+          await SupabaseDelete('user_games')
+              .filter(EqualFilter('user_id', userId))
+              .filter(EqualFilter('game_id', gameId))
+              .build(_supabase);
+          return;
+        }
+      }
+
+      // Otherwise, just set rating to null
       await SupabaseUpdate('user_games')
           .set({
             'is_rated': false,
@@ -343,20 +399,26 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         );
       }
 
-      // Check for duplicates
-      if (gameIds.toSet().length != 3) {
+      // Convert 0 to null for empty slots
+      final game1Id = gameIds[0] == 0 ? null : gameIds[0];
+      final game2Id = gameIds[1] == 0 ? null : gameIds[1];
+      final game3Id = gameIds[2] == 0 ? null : gameIds[2];
+
+      // Check for duplicates (excluding nulls)
+      final nonNullGames = [game1Id, game2Id, game3Id].whereType<int>().toList();
+      if (nonNullGames.toSet().length != nonNullGames.length) {
         throw const InvalidTopThreeException(
-          message: 'All 3 games must be different',
+          message: 'All games must be different',
         );
       }
 
-      // Upsert top three
+      // Upsert top three (null values are allowed for empty slots)
       await SupabaseInsert('user_top_three')
           .values({
             'user_id': userId,
-            'game_1_id': gameIds[0],
-            'game_2_id': gameIds[1],
-            'game_3_id': gameIds[2],
+            'game_1_id': game1Id,
+            'game_2_id': game2Id,
+            'game_3_id': game3Id,
             'updated_at': DateTime.now().toIso8601String(),
           })
           .upsert()
@@ -367,6 +429,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     }
   }
 
+
   @override
   Future<List<int>?> getTopThree(String userId) async {
     try {
@@ -374,10 +437,11 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
       if (result == null) return null;
 
+      // Keep positions intact - convert nulls to 0 instead of filtering them out
       return [
-        result['game_1_id'] as int,
-        result['game_2_id'] as int,
-        result['game_3_id'] as int,
+        result['game_1_id'] as int? ?? 0,
+        result['game_2_id'] as int? ?? 0,
+        result['game_3_id'] as int? ?? 0,
       ];
     } catch (e) {
       throw UserExceptionMapper.map(e);
@@ -590,8 +654,17 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     int? offset,
   }) async {
     try {
-      final result = await RpcQueries.searchUsers(query, limit: limit ?? 20)
-          .build(_supabase);
+      // Use ilike for case-insensitive search on username and display_name
+      final searchPattern = '%$query%';
+
+      final result = await _supabase
+          .from('users')
+          .select('*')
+          .or('username.ilike.$searchPattern,display_name.ilike.$searchPattern')
+          .eq('is_profile_public', true)
+          .order('followers_count', ascending: false)
+          .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
+
       return (result as List).cast<Map<String, dynamic>>();
     } catch (e) {
       throw UserExceptionMapper.map(e);
@@ -621,6 +694,24 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       // This would require a more complex algorithm
       // For now, return popular users as a placeholder
       return getPopularUsers(limit: limit ?? 10);
+    } catch (e) {
+      throw UserExceptionMapper.map(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getLeaderboardUsers({
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      final result = await _supabase
+          .from('users')
+          .select('*')
+          .order('total_games_rated', ascending: false)
+          .range(offset ?? 0, (offset ?? 0) + (limit ?? 100) - 1);
+
+      return (result as List).cast<Map<String, dynamic>>();
     } catch (e) {
       throw UserExceptionMapper.map(e);
     }

@@ -1,11 +1,12 @@
 // lib/domain/entities/age_rating_category.dart
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingCategory extends Equatable {
   final int id;
   final String checksum;
   final DateTime? createdAt;
-  final int? organizationId;
+  final AgeRatingOrganization? organization;
   final String rating;
   final DateTime? updatedAt;
 
@@ -13,11 +14,12 @@ class AgeRatingCategory extends Equatable {
     required this.id,
     required this.checksum,
     required this.rating,
-    this.organizationId,
+    this.organization,
     this.createdAt,
     this.updatedAt,
   });
 
   @override
-  List<Object?> get props => [id, checksum, rating, organizationId, createdAt, updatedAt];
+  List<Object?> get props =>
+      [id, checksum, rating, organization, createdAt, updatedAt];
 }

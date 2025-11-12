@@ -15,6 +15,17 @@ import 'package:gamer_grove/domain/usecases/auth/sign_in.dart';
 import 'package:gamer_grove/domain/usecases/auth/sign_out.dart';
 import 'package:gamer_grove/domain/usecases/auth/sign_up.dart';
 import 'package:gamer_grove/domain/usecases/auth/update_password.dart';
+import 'package:gamer_grove/domain/usecases/characters/get_character_with_games.dart';
+import 'package:gamer_grove/domain/usecases/company/get_company_with_games.dart';
+import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
+import 'package:gamer_grove/domain/usecases/event/get_current_events.dart';
+import 'package:gamer_grove/domain/usecases/event/get_event_details.dart';
+import 'package:gamer_grove/domain/usecases/event/get_events_by_date_range.dart';
+import 'package:gamer_grove/domain/usecases/event/get_events_by_games.dart';
+import 'package:gamer_grove/domain/usecases/event/get_upcoming_events.dart';
+import 'package:gamer_grove/domain/usecases/event/search_events.dart';
+import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
+import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/domain/usecases/user/follow_user.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_followers.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_following.dart';
@@ -24,6 +35,7 @@ import 'package:gamer_grove/domain/usecases/user/update_user_avatar.dart';
 import 'package:gamer_grove/domain/usecases/user/update_user_profile.dart';
 import 'package:gamer_grove/domain/usecases/collection/clear_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_rated_games_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/get_recommended_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_user_game_data_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_wishlisted_games_use_case.dart';
@@ -32,6 +44,9 @@ import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.da
 import 'package:gamer_grove/domain/usecases/collection/toggle_recommended_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_wishlist_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/update_top_three_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_rated_game_ids.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_details.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_dlcs.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_expansions.dart';
@@ -51,7 +66,17 @@ import 'package:gamer_grove/domain/usecases/game/toggle_wishlist.dart';
 import 'package:gamer_grove/domain/usecases/game_details/get_complete_game_details_page_data.dart';
 import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_details.dart';
 import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
 import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/search_users.dart';
+import 'package:gamer_grove/domain/usecases/user/get_leaderboard_users.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/statistics/statistics_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
@@ -64,20 +89,30 @@ import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource_impl.dart';
 import 'data/datasources/remote/supabase/supabase_auth_datasource.dart';
 import 'data/datasources/remote/supabase/supabase_auth_datasource_impl.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource_impl.dart';
+import 'package:gamer_grove/data/repositories/user_activity_repository_impl.dart';
+import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
+import 'package:gamer_grove/domain/usecases/user/get_activity_feed.dart';
+import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_bloc.dart';
 import 'data/datasources/remote/supabase/supabase_user_datasource.dart';
 import 'data/datasources/remote/supabase/supabase_user_datasource_impl.dart';
 // Data Layer - Repositories
 import 'data/repositories/auth_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/game_repository_impl.dart';
 import 'data/repositories/user_repository_impl.dart';
+import 'data/repositories/event_repository_impl.dart';
 // Domain Layer - Repositories (Interfaces)
 import 'domain/repositories/auth_repository.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'domain/repositories/user_repository.dart';
+import 'domain/repositories/event_repository.dart';
 // Presentation Layer - BLoCs
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/collection/collection_bloc.dart';
+import 'presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 
 /// Service locator instance.
 final sl = GetIt.instance;
@@ -105,207 +140,348 @@ Future<void> initDependencies() async {
     anonKey: ApiConstants.supabaseAnonKey,
   );
 
-  sl.registerLazySingleton<SupabaseClient>(() => supabase.client);
+  sl
+    ..registerLazySingleton<SupabaseClient>(() => supabase.client)
 
-  // ============================================================
-  // CORE
-  // ============================================================
+    // ============================================================
+    // CORE
+    // ============================================================
 
-  // Register Connectivity first (required by NetworkInfo)
-  sl.registerLazySingleton<Connectivity>(() => Connectivity());
+    // Register Connectivity first (required by NetworkInfo)
+    ..registerLazySingleton<Connectivity>(() => Connectivity())
+    ..registerLazySingleton<NetworkInfo>(
+      () => NetworkInfoImpl(sl()),
+    )
+    ..registerLazySingleton<GameEnrichmentService>(
+      () => GameEnrichmentService(
+        supabase: sl(),
+        enableLogging: true, // Enable logging to debug enrichment
+      ),
+    )
 
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(sl()),
-  );
+    // ============================================================
+    // PRESENTATION LAYER - BLOCS
+    // ============================================================
 
-  sl.registerLazySingleton<GameEnrichmentService>(
-    () => GameEnrichmentService(supabase: sl()),
-  );
+    // Auth BLoC
+    ..registerLazySingleton(
+      () => AuthBloc(
+        signInUseCase: sl(),
+        signUpUseCase: sl(),
+        signOutUseCase: sl(),
+        getCurrentUserUseCase: sl(),
+        resetPasswordUseCase: sl(),
+        updatePasswordUseCase: sl(),
+        isAuthenticatedUseCase: sl(),
+      ),
+    )
 
-  // ============================================================
-  // PRESENTATION LAYER - BLOCS
-  // ============================================================
+    // User Profile BLoC
+    ..registerFactory(
+      () => UserProfileBloc(
+        getUserProfileUseCase: sl(),
+        updateUserProfileUseCase: sl(),
+        updateUserAvatarUseCase: sl(),
+        followUserUseCase: sl(),
+        unfollowUserUseCase: sl(),
+        getFollowersUseCase: sl(),
+        getFollowingUseCase: sl(),
+      ),
+    )
 
-  // Auth BLoC
-  sl.registerFactory(
-    () => AuthBloc(
-      signInUseCase: sl(),
-      signUpUseCase: sl(),
-      signOutUseCase: sl(),
-      getCurrentUserUseCase: sl(),
-      resetPasswordUseCase: sl(),
-      updatePasswordUseCase: sl(),
-      isAuthenticatedUseCase: sl(),
-    ),
-  );
+    // Collection BLoC
+    ..registerFactory(
+      () => CollectionBloc(
+        getUserGameDataUseCase: sl(),
+        rateGameUseCase: sl(),
+        removeRatingUseCase: sl(),
+        toggleWishlistUseCase: sl(),
+        toggleRecommendedUseCase: sl(),
+        updateTopThreeUseCase: sl(),
+        getTopThreeUseCase: sl(),
+        clearTopThreeUseCase: sl(),
+        getWishlistedGamesUseCase: sl(),
+        getRatedGamesUseCase: sl(),
+      ),
+    )
 
-  // User Profile BLoC
-  sl.registerFactory(
-    () => UserProfileBloc(
-      getUserProfileUseCase: sl(),
-      updateUserProfileUseCase: sl(),
-      updateUserAvatarUseCase: sl(),
-      followUserUseCase: sl(),
-      unfollowUserUseCase: sl(),
-      getFollowersUseCase: sl(),
-      getFollowingUseCase: sl(),
-    ),
-  );
+    // UserGameData BLoC (Global State for User-Game Relations)
+    ..registerLazySingleton(
+      () => UserGameDataBloc(
+        getWishlistedGamesUseCase: sl(),
+        getRatedGamesUseCase: sl(),
+        getRecommendedGamesUseCase: sl(),
+        getTopThreeUseCase: sl(),
+        toggleWishlistUseCase: sl(),
+        toggleRecommendedUseCase: sl(),
+        rateGameUseCase: sl(),
+        removeRatingUseCase: sl(),
+        updateTopThreeUseCase: sl(),
+        setTopThreeGameAtPositionUseCase: sl(),
+        removeFromTopThreeUseCase: sl(),
+      ),
+    )
 
-  // Collection BLoC
-  sl.registerFactory(
-    () => CollectionBloc(
-      getUserGameDataUseCase: sl(),
-      rateGameUseCase: sl(),
-      removeRatingUseCase: sl(),
-      toggleWishlistUseCase: sl(),
-      toggleRecommendedUseCase: sl(),
-      updateTopThreeUseCase: sl(),
-      getTopThreeUseCase: sl(),
-      clearTopThreeUseCase: sl(),
-      getWishlistedGamesUseCase: sl(),
-      getRatedGamesUseCase: sl(),
-    ),
-  );
+    // Game BLoC
+    ..registerFactory(
+      () => GameBloc(
+        searchGames: sl(),
+        getGameDetails: sl(),
+        rateGame: sl(),
+        removeRating: sl(),
+        toggleWishlist: sl(),
+        toggleRecommend: sl(),
+        addToTopThree: sl(),
+        getPopularGames: sl(),
+        getUpcomingGames: sl(),
+        getLatestGames: sl(),
+        getTopRatedGames: sl(),
+        getUserWishlist: sl(),
+        getUserRecommendations: sl(),
+        getUserTopThreeGames: sl(),
+        getUserTopThree: sl(),
+        getUserRated: sl(),
+        getUserRatedGameIds: sl(),
+        getSimilarGames: sl(),
+        getGameDLCs: sl(),
+        getGameExpansions: sl(),
+        getEnhancedGameDetails: sl(),
+        getCompleteGameDetailPageData: sl(),
+        getUpcomingEvents: sl(),
+        gameRepository: sl(),
+        enrichmentService: sl(),
+        removeFromTopThree: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => CharacterBloc(
+        getCharacterWithGames: sl(),
+        enrichmentService: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => EventBloc(
+        enrichmentService: sl(),
+        getEventDetails: sl(),
+        getCurrentEvents: sl(),
+        getUpcomingEvents: sl(),
+        searchEvents: sl(),
+        getEventsByDateRange: sl(),
+        getEventsByGames: sl(),
+        getCompleteEventDetails: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => PlatformBloc(
+        enrichmentService: sl(),
+        gameRepository: sl(),
+        getPlatformWithGames: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => GameEngineBloc(
+        enrichmentService: sl(),
+        gameRepository: sl(),
+        getGameEngineWithGames: sl(),
+      ),
+    )
+    ..registerFactory(
+      () => CompanyBloc(
+        getCompanyWithGames: sl(),
+        enrichmentService: sl(),
+      ),
+    )
 
-  // Game BLoC
-  sl.registerFactory(
-    () => GameBloc(
-      searchGames: sl(),
-      getGameDetails: sl(),
-      rateGame: sl(),
-      toggleWishlist: sl(),
-      toggleRecommend: sl(),
-      addToTopThree: sl(),
-      getPopularGames: sl(),
-      getUpcomingGames: sl(),
-      getLatestGames: sl(),
-      getTopRatedGames: sl(),
-      getUserWishlist: sl(),
-      getUserRecommendations: sl(),
-      getUserTopThreeGames: sl(),
-      getUserTopThree: sl(),
-      getUserRated: sl(),
-      getSimilarGames: sl(),
-      getGameDLCs: sl(),
-      getGameExpansions: sl(),
-      getEnhancedGameDetails: sl(),
-      getCompleteGameDetailPageData: sl(),
-      gameRepository: sl(),
-      enrichmentService: sl(),
-    ),
-  );
+    // User Search BLoC
+    ..registerFactory(
+      () => UserSearchBloc(
+        searchUsers: sl(),
+        getFollowers: sl(),
+        getFollowing: sl(),
+        currentUserId: null, // Will be set dynamically
+      ),
+    )
 
-  // ============================================================
-  // DOMAIN LAYER - USE CASES
-  // ============================================================
+    // Leaderboard BLoC
+    ..registerFactory(
+      () => LeaderboardBloc(
+        getLeaderboardUsers: sl(),
+      ),
+    )
 
-  // Auth Use Cases
-  sl.registerLazySingleton(() => SignInUseCase(sl()));
-  sl.registerLazySingleton(() => SignUpUseCase(sl()));
-  sl.registerLazySingleton(() => SignOutUseCase(sl()));
-  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
-  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
-  sl.registerLazySingleton(() => UpdatePasswordUseCase(sl()));
-  sl.registerLazySingleton(() => IsAuthenticatedUseCase(sl()));
+    // Statistics BLoC
+    ..registerFactory(
+      () => StatisticsBloc(
+        gameRepository: sl(),
+      ),
+    )
 
-  // User Profile Use Cases
-  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateUserAvatarUseCase(sl()));
-  sl.registerLazySingleton(() => FollowUserUseCase(sl()));
-  sl.registerLazySingleton(() => UnfollowUserUseCase(sl()));
-  sl.registerLazySingleton(() => GetFollowersUseCase(sl()));
-  sl.registerLazySingleton(() => GetFollowingUseCase(sl()));
+    // Activity Feed BLoC
+    ..registerFactory(
+      () => ActivityFeedBloc(
+        getActivityFeed: sl(),
+        gameRepository: sl(),
+        authBloc: sl(),
+      ),
+    )
 
-  // Collection Use Cases
-  sl.registerLazySingleton(() => GetUserGameDataUseCase(sl()));
-  sl.registerLazySingleton(() => RateGameUseCase(sl()));
-  sl.registerLazySingleton(() => RemoveRatingUseCase(sl()));
-  sl.registerLazySingleton(() => ToggleWishlistUseCase(sl()));
-  sl.registerLazySingleton(() => ToggleRecommendedUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => GetTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => ClearTopThreeUseCase(sl()));
-  sl.registerLazySingleton(() => GetWishlistedGamesUseCase(sl()));
-  sl.registerLazySingleton(() => GetRatedGamesUseCase(sl()));
+    // ============================================================
+    // DOMAIN LAYER - USE CASES
+    // ============================================================
 
-  // Game Use Cases
-  sl.registerLazySingleton(() => SearchGames(sl()));
-  sl.registerLazySingleton(() => GetGameDetails(sl()));
-  sl.registerLazySingleton(() => RateGame(sl()));
-  sl.registerLazySingleton(() => ToggleWishlist(sl()));
-  sl.registerLazySingleton(() => ToggleRecommend(sl()));
-  sl.registerLazySingleton(() => AddToTopThree(sl()));
-  sl.registerLazySingleton(() => GetPopularGames(sl()));
-  sl.registerLazySingleton(() => GetUpcomingGames(sl()));
-  sl.registerLazySingleton(() => GetLatestGames(sl()));
-  sl.registerLazySingleton(() => GetTopRatedGames(sl()));
-  sl.registerLazySingleton(() => GetUserWishlist(sl()));
-  sl.registerLazySingleton(() => GetUserRecommendations(sl()));
-  sl.registerLazySingleton(() => GetUserTopThreeGames(sl()));
-  sl.registerLazySingleton(() => GetUserTopThree(sl()));
-  sl.registerLazySingleton(() => GetUserRated(sl()));
-  sl.registerLazySingleton(() => GetSimilarGames(sl()));
-  sl.registerLazySingleton(() => GetGameDLCs(sl()));
-  sl.registerLazySingleton(() => GetGameExpansions(sl()));
-  sl.registerLazySingleton(() => GetEnhancedGameDetails(sl()));
-  sl.registerLazySingleton(
-      () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()));
+    // Auth Use Cases
+    ..registerLazySingleton(() => SignInUseCase(sl()))
+    ..registerLazySingleton(() => SignUpUseCase(sl()))
+    ..registerLazySingleton(() => SignOutUseCase(sl()))
+    ..registerLazySingleton(() => GetCurrentUserUseCase(sl()))
+    ..registerLazySingleton(() => ResetPasswordUseCase(sl()))
+    ..registerLazySingleton(() => UpdatePasswordUseCase(sl()))
+    ..registerLazySingleton(() => IsAuthenticatedUseCase(sl()))
 
-  // ============================================================
-  // DATA LAYER - REPOSITORIES
-  // ============================================================
+    // User Profile Use Cases
+    ..registerLazySingleton(() => GetUserProfileUseCase(sl()))
+    ..registerLazySingleton(() => UpdateUserProfileUseCase(sl()))
+    ..registerLazySingleton(() => UpdateUserAvatarUseCase(sl()))
+    ..registerLazySingleton(() => FollowUserUseCase(sl()))
+    ..registerLazySingleton(() => UnfollowUserUseCase(sl()))
+    ..registerLazySingleton(() => GetFollowersUseCase(sl()))
+    ..registerLazySingleton(() => GetFollowingUseCase(sl()))
+    ..registerLazySingleton(() => SearchUsers(sl()))
+    ..registerLazySingleton(() => GetLeaderboardUsersUseCase(sl()))
+    ..registerLazySingleton(() => GetActivityFeedUseCase(sl()))
 
-  sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      authDataSource: sl(),
-      supabase: sl(),
-      networkInfo: sl(),
-    ),
-  );
+    // Collection Use Cases
+    ..registerLazySingleton(() => GetUserGameDataUseCase(sl()))
+    ..registerLazySingleton(() => RateGameUseCase(sl()))
+    ..registerLazySingleton(() => RemoveRatingUseCase(sl()))
+    ..registerLazySingleton(() => ToggleWishlistUseCase(sl()))
+    ..registerLazySingleton(() => ToggleRecommendedUseCase(sl()))
+    ..registerLazySingleton(() => UpdateTopThreeUseCase(sl()))
+    ..registerLazySingleton(() => SetTopThreeGameAtPositionUseCase(sl()))
+    ..registerLazySingleton(() => RemoveFromTopThreeUseCase(sl()))
+    ..registerLazySingleton(() => GetTopThreeUseCase(sl()))
+    ..registerLazySingleton(() => ClearTopThreeUseCase(sl()))
+    ..registerLazySingleton(() => GetWishlistedGamesUseCase(sl()))
+    ..registerLazySingleton(() => GetRatedGamesUseCase(sl()))
+    ..registerLazySingleton(() => GetRecommendedGamesUseCase(sl()))
 
-  sl.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(
-      userDataSource: sl(),
-      supabase: sl(),
-      networkInfo: sl(),
-    ),
-  );
+    // Game Use Cases
+    ..registerLazySingleton(() => GetUserRatedGameIds(sl()))
+    ..registerLazySingleton(() => SearchGames(sl()))
+    ..registerLazySingleton(() => GetGameDetails(sl()))
+    ..registerLazySingleton(() => RateGame(sl()))
+    ..registerLazySingleton(() => ToggleWishlist(sl()))
+    ..registerLazySingleton(() => ToggleRecommend(sl()))
+    ..registerLazySingleton(() => AddToTopThree(sl()))
+    ..registerLazySingleton(() => RemoveFromTopThree(sl()))
+    ..registerLazySingleton(() => GetPopularGames(sl()))
+    ..registerLazySingleton(() => GetUpcomingGames(sl()))
+    ..registerLazySingleton(() => GetLatestGames(sl()))
+    ..registerLazySingleton(() => GetTopRatedGames(sl()))
+    ..registerLazySingleton(() => GetUserWishlist(sl()))
+    ..registerLazySingleton(() => GetUserRecommendations(sl()))
+    ..registerLazySingleton(() => GetUserTopThreeGames(sl()))
+    ..registerLazySingleton(() => GetUserTopThree(sl()))
+    ..registerLazySingleton(() => GetUserRated(sl()))
+    ..registerLazySingleton(() => GetSimilarGames(sl()))
+    ..registerLazySingleton(() => GetGameDLCs(sl()))
+    ..registerLazySingleton(() => GetGameExpansions(sl()))
+    ..registerLazySingleton(() => GetEnhancedGameDetails(sl()))
+    ..registerLazySingleton(
+        () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()))
 
-  sl.registerLazySingleton<GameRepository>(
-    () => GameRepositoryImpl(
-      igdbDataSource: sl(),
-      networkInfo: sl(),
-      supabaseUserDataSource: sl(),
-      enrichmentService: sl(),
-    ),
-  );
+    //Character Use Cases
+    ..registerLazySingleton(() => GetCharacterWithGames(sl()))
 
-  // ============================================================
-  // DATA LAYER - DATA SOURCES
-  // ============================================================
+    // Event Use Cases
+    ..registerLazySingleton(() => GetEventDetails(sl()))
+    ..registerLazySingleton(() => GetCurrentEvents(sl()))
+    ..registerLazySingleton(() => GetUpcomingEvents(sl()))
+    ..registerLazySingleton(() => SearchEvents(sl()))
+    ..registerLazySingleton(() => GetEventsByDateRange(sl()))
+    ..registerLazySingleton(() => GetEventsByGames(sl()))
+    ..registerLazySingleton(() =>
+        GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()))
 
-  sl.registerLazySingleton<SupabaseAuthDataSource>(
-    () => SupabaseAuthDataSourceImpl(supabase: sl()),
-  );
+    // Platform Use Cases
+    ..registerLazySingleton(() => GetPlatformWithGames(sl()))
 
-  sl.registerLazySingleton<SupabaseUserDataSource>(
-    () => SupabaseUserDataSourceImpl(supabase: sl()),
-  );
+    // Game Engine Use Cases
+    ..registerLazySingleton(() => GetGameEngineWithGames(sl()))
 
-  // IGDB Data Source
-  sl.registerLazySingleton<IgdbDataSource>(
-    () => IgdbDataSourceImpl(dio: sl()),
-  );
+    // Company Use Cases
+    ..registerLazySingleton(() => GetCompanyWithGames(sl()))
 
-  // Dio HTTP client
-  sl.registerLazySingleton<Dio>(() {
-    final dio = Dio();
-    dio.options.connectTimeout = const Duration(seconds: 30);
-    dio.options.receiveTimeout = const Duration(seconds: 30);
-    return dio;
-  });
+    // ============================================================
+    // DATA LAYER - REPOSITORIES
+    // ============================================================
+
+    ..registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
+        authDataSource: sl(),
+        supabase: sl(),
+        networkInfo: sl(),
+      ),
+    )
+    ..registerLazySingleton<UserRepository>(
+      () => UserRepositoryImpl(
+        userDataSource: sl(),
+        supabase: sl(),
+        networkInfo: sl(),
+      ),
+    )
+    // ✅ Also register concrete implementation for UseCases that need it
+    ..registerLazySingleton<UserRepositoryImpl>(
+      () => sl<UserRepository>() as UserRepositoryImpl,
+    )
+    ..registerLazySingleton<EventRepository>(
+      () => EventRepositoryImpl(
+        igdbDataSource: sl(),
+        networkInfo: sl(),
+      ),
+    )
+    ..registerLazySingleton<GameRepository>(
+      () => GameRepositoryImpl(
+        igdbDataSource: sl(),
+        networkInfo: sl(),
+        supabaseUserDataSource: sl(),
+        enrichmentService: sl(),
+      ),
+    )
+    ..registerLazySingleton<UserActivityRepository>(
+      () => UserActivityRepositoryImpl(
+        dataSource: sl(),
+        supabase: sl(),
+        networkInfo: sl(),
+      ),
+    )
+
+    // ============================================================
+    // DATA LAYER - DATA SOURCES
+    // ============================================================
+
+    ..registerLazySingleton<SupabaseAuthDataSource>(
+      () => SupabaseAuthDataSourceImpl(supabase: sl()),
+    )
+    ..registerLazySingleton<SupabaseUserDataSource>(
+      () => SupabaseUserDataSourceImpl(supabase: sl()),
+    )
+    ..registerLazySingleton<SupabaseUserActivityDataSource>(
+      () => SupabaseUserActivityDataSourceImpl(supabase: sl()),
+    )
+
+    // IGDB Data Source
+    ..registerLazySingleton<IgdbDataSource>(
+      () => IgdbDataSourceImpl(dio: sl()),
+    )
+
+    // Dio HTTP client
+    ..registerLazySingleton<Dio>(() {
+      final dio = Dio();
+      dio.options.connectTimeout = const Duration(seconds: 30);
+      dio.options.receiveTimeout = const Duration(seconds: 30);
+      return dio;
+    });
 }
 
 /// Resets all dependencies.

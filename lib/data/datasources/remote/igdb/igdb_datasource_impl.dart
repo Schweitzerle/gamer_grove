@@ -1,6 +1,7 @@
 // lib/data/datasources/remote/igdb/igdb_datasource_impl.dart
 
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
 import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_status_model.dart';
 import 'package:gamer_grove/data/models/game/game_type_model.dart';
@@ -19,7 +20,6 @@ import '../../../models/genre_model.dart';
 import '../../../models/franchise_model.dart';
 import '../../../models/collection/collection_model.dart';
 import '../../../models/keyword_model.dart';
-import '../../../models/ageRating/age_rating_model.dart';
 import '../../../models/multiplayer_mode_model.dart';
 import 'igdb_datasource.dart';
 import 'models/igdb_query.dart';
@@ -71,6 +71,15 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<CharacterModel>> queryCharacters(IgdbCharacterQuery query) async {
+    // Debug log: show the constructed IGDB query for characters
+    try {
+      final q = query.buildQuery();
+      print('🔍 IGDB Characters Query:\n$q');
+    } catch (e) {
+      // If buildQuery throws for any reason, still proceed but log the error
+      print('⚠️ Failed to build characters query for debug logging: $e');
+    }
+
     return await _executeQuery<CharacterModel>(
       endpoint: 'characters',
       query: query,
@@ -173,11 +182,12 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   }
 
   @override
-  Future<List<AgeRatingModel>> queryAgeRatings(IgdbAgeRatingQuery query) async {
-    return await _executeQuery<AgeRatingModel>(
-      endpoint: 'age_ratings',
+  Future<List<AgeRatingCategoryModel>> queryAgeRatings(
+      IgdbAgeRatingQuery query) async {
+    return _executeQuery<AgeRatingCategoryModel>(
+      endpoint: 'age_rating_categories',
       query: query,
-      parser: (json) => AgeRatingModel.fromJson(json),
+      parser: (json) => AgeRatingCategoryModel.fromJson(json),
     );
   }
 
@@ -239,11 +249,11 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   }
 
   @override
-  Future<List<ThemeModel>> queryThemes(IgdbThemeQuery query) async {
-    return await _executeQuery<ThemeModel>(
+  Future<List<IGDBThemeModel>> queryThemes(IgdbThemeQuery query) async {
+    return await _executeQuery<IGDBThemeModel>(
       endpoint: 'themes',
       query: query,
-      parser: (json) => ThemeModel.fromJson(json),
+      parser: (json) => IGDBThemeModel.fromJson(json),
     );
   }
 

@@ -15,6 +15,7 @@
 library;
 
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/artwork.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
@@ -139,7 +140,22 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           throw const IgdbNotFoundException(message: 'Game not found');
         }
 
-        return games.first;
+        final charactersResult = await getGameCharacters(gameId);
+        final eventResult = await getGameEvents(gameId);
+        final game = games.first;
+
+        // Handle the Either result from getGameCharacters
+        charactersResult.fold(
+          (failure) => game.characters = [],
+          (characters) => game.characters = characters,
+        );
+
+        eventResult.fold(
+          (failure) => game.events = [],
+          (events) => game.events = events,
+        );
+
+        return game;
       },
       errorMessage: 'Failed to fetch game details',
     );
@@ -184,6 +200,27 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds) {
+    if (gameIds.isEmpty) {
+      return Future.value(const Right([]));
+    }
+
+    return executeIgdbOperation(
+      operation: () async {
+        final filter = ContainsFilter('id', gameIds);
+        final query = IgdbGameQuery(
+          where: filter,
+          fields: GameFieldSets.standard,
+          limit: gameIds.length,
+          offset: 0,
+        );
+        return igdbDataSource.queryGames(query);
+      },
+      errorMessage: 'Failed to fetch games by IDs',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getGames({required List<int> gameIds}) {
     if (gameIds.isEmpty) {
       return Future.value(const Right([]));
     }
@@ -398,6 +435,10 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           platformId: platformIds.first,
           limit: limit,
           offset: offset,
+          onlyMainGames:
+              false, // 🔧 Include all game types (ports, remasters, etc.)
+          sortBy: sortBy.igdbField, // 🔧 Pass sorting parameters
+          sortOrder: sortOrder.value,
         );
         return igdbDataSource.queryGames(query);
       },
@@ -692,9 +733,10 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         }
 
         // ========== AGE RATING & LOCALIZATION ==========
-        if (filters.ageRatingIds.isNotEmpty) {
-          final filter = ContainsFilter('age_ratings', filters.ageRatingIds);
-          print('  ✓ Age Ratings Filter: ${filter.toQueryString()}');
+        if (filters.ageRatingCategoryIds.isNotEmpty) {
+          final filter = ContainsFilter(
+              'age_ratings.rating_category', filters.ageRatingCategoryIds);
+          print('  ✓ Age Ratings Category Filter: ${filter.toQueryString()}');
           igdbFilters.add(filter);
         }
         if (filters.languageSupportIds.isNotEmpty) {
@@ -706,10 +748,33 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
         // ========== DYNAMIC SEARCH FILTERS ==========
         if (filters.companyIds.isNotEmpty) {
-          final filter =
+          final companyFilter =
               ContainsFilter('involved_companies.company', filters.companyIds);
-          print('  ✓ Companies Filter: ${filter.toQueryString()}');
-          igdbFilters.add(filter);
+          print('  ✓ Companies Filter: ${companyFilter.toQueryString()}');
+
+          // Add developer/publisher specific filters if specified
+          final List<IgdbFilter> companyFilters = [companyFilter];
+
+          if (filters.isDeveloper == true) {
+            companyFilters.add(
+              FieldFilter('involved_companies.developer', '=', true)
+            );
+            print('  ✓ Developer Filter: involved_companies.developer = true');
+          }
+
+          if (filters.isPublisher == true) {
+            companyFilters.add(
+              FieldFilter('involved_companies.publisher', '=', true)
+            );
+            print('  ✓ Publisher Filter: involved_companies.publisher = true');
+          }
+
+          // Combine company filters with AND logic
+          if (companyFilters.length > 1) {
+            igdbFilters.add(CombinedFilter(companyFilters));
+          } else {
+            igdbFilters.add(companyFilter);
+          }
         }
         if (filters.gameEngineIds.isNotEmpty) {
           final filter = ContainsFilter('game_engines', filters.gameEngineIds);
@@ -742,12 +807,26 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           print('   ${whereClause.toQueryString()}');
         }
 
+        // Build sort string from filters
+        // Note: 'relevance' sort only works with text search
+        String sortString;
+        if (filters.sortBy == GameSortBy.relevance &&
+            (textQuery == null || textQuery.trim().isEmpty)) {
+          // Fall back to total_rating_count when relevance is selected without search
+          sortString = 'total_rating_count ${filters.sortOrder.value}';
+          print(
+              '⚠️ Relevance sort requires text search - falling back to total_rating_count');
+        } else {
+          sortString = '${filters.sortBy.igdbField} ${filters.sortOrder.value}';
+        }
+        print('📊 Sort: $sortString');
+
         final query = IgdbGameQuery(
           where: whereClause,
           fields: GameFieldSets.standard,
           limit: limit,
           offset: offset,
-          sort: 'total_rating_count desc',
+          sort: sortString,
         );
 
         print('\n📋 Final Query String:');
@@ -1040,7 +1119,7 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
-  Future<Either<Failure, List<AgeRating>>> getAllAgeRatings() {
+  Future<Either<Failure, List<AgeRatingCategory>>> getAllAgeRatings() {
     print('\n' + '=' * 80);
     print('🔞 LOADING AGE RATINGS');
     print('=' * 80);
@@ -1071,11 +1150,18 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     print('Search term: $query');
     return executeIgdbOperation(
       operation: () async {
+        final multiFieldFilter = CombinedFilter([
+          FieldFilter('name', '~', query),
+          FieldFilter('native_name', '~', query),
+        ], operator: '|'); // Use OR operator to match ANY field
+
         final igdbQuery = IgdbLanguageQuery(
+          where: multiFieldFilter,
           fields: const [
             '*',
           ],
-          limit: 100,
+          limit: 20,
+          sort: 'name asc',
         );
         print('📋 Query: ${igdbQuery.buildQuery()}');
         final result = await igdbDataSource.queryLanguages(igdbQuery);
@@ -1692,7 +1778,6 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
       operation: () async {
         final filter = CombinedFilter([
           ContainsFilter('game_engines', gameEngineIds),
-          GameFilters.mainGamesOnly(),
         ]);
 
         final query = IgdbGameQuery(
@@ -2162,6 +2247,90 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   }
 
   @override
+  Future<Either<Failure, List<int>>> getUserRatedGameIds(String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final ratedGames = await supabaseUserDataSource!.getRatedGames(userId);
+      final gameIds = ratedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(ServerFailure(message: 'Failed to get rated game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getUserWishlistGameIds(
+      String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final wishlistedGames =
+          await supabaseUserDataSource!.getWishlistedGames(userId);
+      final gameIds = wishlistedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Failed to get wishlisted game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<int>>> getUserRecommendedGameIds(
+      String userId) async {
+    if (supabaseUserDataSource == null) {
+      return const Left(
+        ServerFailure(message: 'User datasource not available'),
+      );
+    }
+    try {
+      final recommendedGames =
+          await supabaseUserDataSource!.getRecommendedGames(userId);
+      final gameIds = recommendedGames.map((e) => e['game_id'] as int).toList();
+      return Right(gameIds);
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Failed to get recommended game ids: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRatedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserWishlistGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
+  Future<Either<Failure, List<Game>>> getUserRecommendedGamesByIds({
+    required List<int> gameIds,
+    required int limit,
+    required int offset,
+  }) {
+    final paginatedGameIds = gameIds.skip(offset).take(limit).toList();
+    return getGamesByIds(paginatedGameIds);
+  }
+
+  @override
   Future<Either<Failure, List<Game>>> getUserWishlist(
     String userId,
     int limit,
@@ -2525,29 +2694,30 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
     );
   }
 
-/* //TODO: Add functionality for multiple filters: 
-Bsp: fields *, organization.*, rating_category.*, rating_content_descriptions.*;
-sort organization.name asc;
-where organization.name ~ *"grA"* | rating_category.rating ~ *"18"* | rating_content_descriptions.description ~ *"18"*;
- */
   @override
-  Future<Either<Failure, List<AgeRating>>> searchAgeRatings(String query) {
+  Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
+      String query) {
     print('\n' + '=' * 80);
     print('🔍 SEARCHING AGE RATINGS');
     print('=' * 80);
     print('Search term: $query');
     return executeIgdbOperation(
       operation: () async {
-        final filter = FieldFilter('name', '~', query);
+        // Create multiple filters for different fields (OR logic)
+        // Search in: organization name, rating category, and content descriptions
+        final multiFieldFilter = CombinedFilter([
+          FieldFilter('organization.name', '~', query),
+          FieldFilter('rating', '~', query),
+        ], operator: '|'); // Use OR operator to match ANY field
+
         final igdbQuery = IgdbAgeRatingQuery(
-          where: filter,
+          where: multiFieldFilter,
           fields: const [
             '*',
-            'rating_category.*',
             'organization.*',
           ],
           limit: 20,
-          sort: 'name asc',
+          sort: 'organization.name asc',
         );
         print('📋 Query: ${igdbQuery.buildQuery()}');
         final result = await igdbDataSource.queryAgeRatings(igdbQuery);
@@ -2560,7 +2730,7 @@ where organization.name ~ *"grA"* | rating_category.rating ~ *"18"* | rating_con
   }
 
   @override
-  Future<Either<Failure, List<Theme>>> searchThemes(String query) {
+  Future<Either<Failure, List<IGDBTheme>>> searchThemes(String query) {
     print('\n' + '=' * 80);
     print('🔍 SEARCHING THEMES');
     print('=' * 80);

@@ -127,8 +127,8 @@ abstract class LocalDataSource {
   Future<List<GameModeModel>?> getCachedGameModes();
   Future<void> cacheGameModes(List<GameModeModel> gameModes);
 
-  Future<List<ThemeModel>?> getCachedThemes();
-  Future<void> cacheThemes(List<ThemeModel> themes);
+  Future<List<IGDBThemeModel>?> getCachedThemes();
+  Future<void> cacheThemes(List<IGDBThemeModel> themes);
 
   // ==========================================
   // GENERAL CACHE MANAGEMENT
@@ -183,13 +183,19 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   CacheType _getCacheTypeFromKey(String key) {
-    if (key.contains('user_wishlist') || key.contains('user_ratings') || key.contains('user_top_three')) {
+    if (key.contains('user_wishlist') ||
+        key.contains('user_ratings') ||
+        key.contains('user_top_three')) {
       return CacheType.userData;
     } else if (key.contains('complete_game_details')) {
       return CacheType.gameComplete;
-    } else if (key.contains('game_companies') || key.contains('game_videos') || key.contains('game_websites')) {
+    } else if (key.contains('game_companies') ||
+        key.contains('game_videos') ||
+        key.contains('game_websites')) {
       return CacheType.gameComponents;
-    } else if (key.contains('genres') || key.contains('platforms') || key.contains('themes')) {
+    } else if (key.contains('genres') ||
+        key.contains('platforms') ||
+        key.contains('themes')) {
       return CacheType.metadata;
     } else if (key.contains('search_results')) {
       return CacheType.search;
@@ -200,7 +206,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     }
   }
 
-  Future<void> _cacheWithTimestamp(String key, String jsonString, {CacheType? cacheType}) async {
+  Future<void> _cacheWithTimestamp(String key, String jsonString,
+      {CacheType? cacheType}) async {
     await sharedPreferences.setString(key, jsonString);
     await sharedPreferences.setInt(
       '${key}_timestamp',
@@ -212,10 +219,10 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   Future<T?> _getCachedData<T>(
-      String key,
-      T Function(Map<String, dynamic>) fromJson, {
-        CacheType? cacheType,
-      }) async {
+    String key,
+    T Function(Map<String, dynamic>) fromJson, {
+    CacheType? cacheType,
+  }) async {
     try {
       if (await isDataExpired(key, cacheType: cacheType)) {
         await _removeKeyWithTimestamp(key);
@@ -235,10 +242,10 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   Future<List<T>?> _getCachedList<T>(
-      String key,
-      T Function(Map<String, dynamic>) fromJson, {
-        CacheType? cacheType,
-      }) async {
+    String key,
+    T Function(Map<String, dynamic>) fromJson, {
+    CacheType? cacheType,
+  }) async {
     try {
       if (await isDataExpired(key, cacheType: cacheType)) {
         await _removeKeyWithTimestamp(key);
@@ -248,7 +255,9 @@ class LocalDataSourceImpl implements LocalDataSource {
       final jsonString = sharedPreferences.getString(key);
       if (jsonString != null) {
         final List<dynamic> jsonList = jsonDecode(jsonString);
-        return jsonList.map((json) => fromJson(json as Map<String, dynamic>)).toList();
+        return jsonList
+            .map((json) => fromJson(json as Map<String, dynamic>))
+            .toList();
       }
       return null;
     } catch (e) {
@@ -258,11 +267,11 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   Future<void> _cacheList<T>(
-      String key,
-      List<T> items,
-      Map<String, dynamic> Function(T) toJson, {
-        CacheType? cacheType,
-      }) async {
+    String key,
+    List<T> items,
+    Map<String, dynamic> Function(T) toJson, {
+    CacheType? cacheType,
+  }) async {
     try {
       final jsonList = items.map((item) => toJson(item)).toList();
       final jsonString = jsonEncode(jsonList);
@@ -286,7 +295,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<UserModel?> getCachedUser() async {
     return await _getCachedData(
       StorageConstants.userKey,
-          (json) => UserModel.fromJson(json),
+      (json) => UserModel.fromJson(json),
       cacheType: CacheType.userData,
     );
   }
@@ -295,7 +304,8 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> cacheUser(UserModel user) async {
     try {
       final jsonString = jsonEncode(user.toJson());
-      await _cacheWithTimestamp(StorageConstants.userKey, jsonString, cacheType: CacheType.userData);
+      await _cacheWithTimestamp(StorageConstants.userKey, jsonString,
+          cacheType: CacheType.userData);
     } catch (e) {
       throw CacheException(message: 'Failed to cache user');
     }
@@ -369,7 +379,8 @@ class LocalDataSourceImpl implements LocalDataSource {
       final jsonString = sharedPreferences.getString(key);
       if (jsonString != null) {
         final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
-        return jsonMap.map((key, value) => MapEntry(int.parse(key), value.toDouble()));
+        return jsonMap
+            .map((key, value) => MapEntry(int.parse(key), value.toDouble()));
       }
       return null;
     } catch (e) {
@@ -381,7 +392,8 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> cacheUserRatings(String userId, Map<int, double> ratings) async {
     try {
       final key = '${StorageConstants.userRatingsKey}_$userId';
-      final jsonMap = ratings.map((key, value) => MapEntry(key.toString(), value));
+      final jsonMap =
+          ratings.map((key, value) => MapEntry(key.toString(), value));
       final jsonString = jsonEncode(jsonMap);
       await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.userData);
     } catch (e) {
@@ -390,15 +402,18 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
-  Future<void> cacheUserGameRating(String userId, int gameId, double rating) async {
-    final currentRatings = await getCachedUserRatings(userId) ?? <int, double>{};
+  Future<void> cacheUserGameRating(
+      String userId, int gameId, double rating) async {
+    final currentRatings =
+        await getCachedUserRatings(userId) ?? <int, double>{};
     currentRatings[gameId] = rating;
     await cacheUserRatings(userId, currentRatings);
   }
 
   @override
   Future<void> removeUserGameRating(String userId, int gameId) async {
-    final currentRatings = await getCachedUserRatings(userId) ?? <int, double>{};
+    final currentRatings =
+        await getCachedUserRatings(userId) ?? <int, double>{};
     currentRatings.remove(gameId);
     await cacheUserRatings(userId, currentRatings);
   }
@@ -455,7 +470,8 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
-  Future<void> cacheUserRecommendations(String userId, List<int> gameIds) async {
+  Future<void> cacheUserRecommendations(
+      String userId, List<int> gameIds) async {
     try {
       final key = '${StorageConstants.userRecommendationsKey}_$userId';
       final jsonString = jsonEncode(gameIds);
@@ -536,7 +552,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.searchResultsKey}_${query.toLowerCase()}';
     return await _getCachedList(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.search,
     );
   }
@@ -547,7 +563,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       key,
       games,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.search,
     );
   }
@@ -557,7 +573,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameDetailsKey}_$gameId';
     return await _getCachedData(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -567,7 +583,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameDetailsKey}_$gameId';
     try {
       final jsonString = jsonEncode(game.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameBasic);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameBasic);
     } catch (e) {
       throw CacheException(message: 'Failed to cache game details');
     }
@@ -578,7 +595,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.completeGameDetailsKey}_$gameId';
     return await _getCachedData(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameComplete,
     );
   }
@@ -588,7 +605,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.completeGameDetailsKey}_$gameId';
     try {
       final jsonString = jsonEncode(game.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameComplete);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameComplete);
     } catch (e) {
       throw CacheException(message: 'Failed to cache complete game details');
     }
@@ -597,10 +615,11 @@ class LocalDataSourceImpl implements LocalDataSource {
   @override
   Future<List<GameModel>> getCachedGames() async {
     return await _getCachedList(
-      StorageConstants.popularGamesKey,
+          StorageConstants.popularGamesKey,
           (json) => GameModel.fromJson(json),
-      cacheType: CacheType.gameBasic,
-    ) ?? [];
+          cacheType: CacheType.gameBasic,
+        ) ??
+        [];
   }
 
   @override
@@ -608,7 +627,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.popularGamesKey,
       games,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -617,7 +636,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<GameModel>?> getCachedPopularGames() async {
     return await _getCachedList(
       StorageConstants.popularGamesKey,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -627,7 +646,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.popularGamesKey,
       games,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -636,7 +655,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<GameModel>?> getCachedUpcomingGames() async {
     return await _getCachedList(
       StorageConstants.upcomingGamesKey,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -646,7 +665,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.upcomingGamesKey,
       games,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -656,7 +675,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.similarGamesKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -667,7 +686,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       key,
       games,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -677,7 +696,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameDLCsKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -688,7 +707,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       key,
       dlcs,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -698,18 +717,19 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameExpansionsKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => GameModel.fromJson(json),
+      (json) => GameModel.fromJson(json),
       cacheType: CacheType.gameBasic,
     );
   }
 
   @override
-  Future<void> cacheGameExpansions(int gameId, List<GameModel> expansions) async {
+  Future<void> cacheGameExpansions(
+      int gameId, List<GameModel> expansions) async {
     final key = '${StorageConstants.gameExpansionsKey}_$gameId';
     await _cacheList(
       key,
       expansions,
-          (game) => game.toJson(),
+      (game) => game.toJson(),
       cacheType: CacheType.gameBasic,
     );
   }
@@ -723,18 +743,19 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameCompaniesKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => CompanyModel.fromJson(json),
+      (json) => CompanyModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
 
   @override
-  Future<void> cacheGameCompanies(int gameId, List<CompanyModel> companies) async {
+  Future<void> cacheGameCompanies(
+      int gameId, List<CompanyModel> companies) async {
     final key = '${StorageConstants.gameCompaniesKey}_$gameId';
     await _cacheList(
       key,
       companies,
-          (company) => company.toJson(),
+      (company) => company.toJson(),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -744,7 +765,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.companyKey}_$companyId';
     return await _getCachedData(
       key,
-          (json) => CompanyModel.fromJson(json),
+      (json) => CompanyModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -754,7 +775,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.companyKey}_$companyId';
     try {
       final jsonString = jsonEncode(company.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameComponents);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameComponents);
     } catch (e) {
       throw CacheException(message: 'Failed to cache company');
     }
@@ -765,18 +787,19 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameWebsitesKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => WebsiteModel.fromJson(json),
+      (json) => WebsiteModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
 
   @override
-  Future<void> cacheGameWebsites(int gameId, List<WebsiteModel> websites) async {
+  Future<void> cacheGameWebsites(
+      int gameId, List<WebsiteModel> websites) async {
     final key = '${StorageConstants.gameWebsitesKey}_$gameId';
     await _cacheList(
       key,
       websites,
-          (website) => website.toJson(),
+      (website) => website.toJson(),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -786,7 +809,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameVideosKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => GameVideoModel.fromJson(json),
+      (json) => GameVideoModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -797,7 +820,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       key,
       videos,
-          (video) => video.toJson(),
+      (video) => video.toJson(),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -807,18 +830,19 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.gameCharactersKey}_$gameId';
     return await _getCachedList(
       key,
-          (json) => CharacterModel.fromJson(json),
+      (json) => CharacterModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
 
   @override
-  Future<void> cacheGameCharacters(int gameId, List<CharacterModel> characters) async {
+  Future<void> cacheGameCharacters(
+      int gameId, List<CharacterModel> characters) async {
     final key = '${StorageConstants.gameCharactersKey}_$gameId';
     await _cacheList(
       key,
       characters,
-          (character) => character.toJson(),
+      (character) => character.toJson(),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -828,7 +852,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.characterKey}_$characterId';
     return await _getCachedData(
       key,
-          (json) => CharacterModel.fromJson(json),
+      (json) => CharacterModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -838,7 +862,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.characterKey}_$characterId';
     try {
       final jsonString = jsonEncode(character.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameComponents);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameComponents);
     } catch (e) {
       throw CacheException(message: 'Failed to cache character');
     }
@@ -853,17 +878,19 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.collectionKey}_$collectionId';
     return await _getCachedData(
       key,
-          (json) => CollectionModel.fromJson(json),
+      (json) => CollectionModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
 
   @override
-  Future<void> cacheCollection(int collectionId, CollectionModel collection) async {
+  Future<void> cacheCollection(
+      int collectionId, CollectionModel collection) async {
     final key = '${StorageConstants.collectionKey}_$collectionId';
     try {
       final jsonString = jsonEncode(collection.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameComponents);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameComponents);
     } catch (e) {
       throw CacheException(message: 'Failed to cache collection');
     }
@@ -874,7 +901,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.franchiseKey}_$franchiseId';
     return await _getCachedData(
       key,
-          (json) => FranchiseModel.fromJson(json),
+      (json) => FranchiseModel.fromJson(json),
       cacheType: CacheType.gameComponents,
     );
   }
@@ -884,7 +911,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final key = '${StorageConstants.franchiseKey}_$franchiseId';
     try {
       final jsonString = jsonEncode(franchise.toJson());
-      await _cacheWithTimestamp(key, jsonString, cacheType: CacheType.gameComponents);
+      await _cacheWithTimestamp(key, jsonString,
+          cacheType: CacheType.gameComponents);
     } catch (e) {
       throw CacheException(message: 'Failed to cache franchise');
     }
@@ -898,7 +926,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<GenreModel>?> getCachedGenres() async {
     return await _getCachedList(
       StorageConstants.genresKey,
-          (json) => GenreModel.fromJson(json),
+      (json) => GenreModel.fromJson(json),
       cacheType: CacheType.metadata,
     );
   }
@@ -908,7 +936,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.genresKey,
       genres,
-          (genre) => genre.toJson(),
+      (genre) => genre.toJson(),
       cacheType: CacheType.metadata,
     );
   }
@@ -917,7 +945,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<PlatformModel>?> getCachedPlatforms() async {
     return await _getCachedList(
       StorageConstants.platformsKey,
-          (json) => PlatformModel.fromJson(json),
+      (json) => PlatformModel.fromJson(json),
       cacheType: CacheType.metadata,
     );
   }
@@ -927,7 +955,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.platformsKey,
       platforms,
-          (platform) => platform.toJson(),
+      (platform) => platform.toJson(),
       cacheType: CacheType.metadata,
     );
   }
@@ -936,7 +964,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<List<GameModeModel>?> getCachedGameModes() async {
     return await _getCachedList(
       StorageConstants.gameModesKey,
-          (json) => GameModeModel.fromJson(json),
+      (json) => GameModeModel.fromJson(json),
       cacheType: CacheType.metadata,
     );
   }
@@ -946,26 +974,26 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _cacheList(
       StorageConstants.gameModesKey,
       gameModes,
-          (gameMode) => gameMode.toJson(),
+      (gameMode) => gameMode.toJson(),
       cacheType: CacheType.metadata,
     );
   }
 
   @override
-  Future<List<ThemeModel>?> getCachedThemes() async {
+  Future<List<IGDBThemeModel>?> getCachedThemes() async {
     return await _getCachedList(
       StorageConstants.themesKey,
-          (json) => ThemeModel.fromJson(json),
+      (json) => IGDBThemeModel.fromJson(json),
       cacheType: CacheType.metadata,
     );
   }
 
   @override
-  Future<void> cacheThemes(List<ThemeModel> themes) async {
+  Future<void> cacheThemes(List<IGDBThemeModel> themes) async {
     await _cacheList(
       StorageConstants.themesKey,
       themes,
-          (theme) => theme.toJson(),
+      (theme) => theme.toJson(),
       cacheType: CacheType.metadata,
     );
   }
@@ -978,7 +1006,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> clearCache() async {
     try {
       final keys = sharedPreferences.getKeys().where((key) =>
-      key.startsWith(StorageConstants.userKey) ||
+          key.startsWith(StorageConstants.userKey) ||
           key.startsWith(StorageConstants.searchResultsKey) ||
           key.startsWith(StorageConstants.gameDetailsKey) ||
           key.startsWith(StorageConstants.popularGamesKey) ||
@@ -1006,7 +1034,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> clearUserSpecificCache(String userId) async {
     try {
       final keys = sharedPreferences.getKeys().where((key) =>
-      key.contains(userId) ||
+          key.contains(userId) ||
           key.startsWith('${StorageConstants.userWishlistKey}_$userId') ||
           key.startsWith('${StorageConstants.userRatingsKey}_$userId') ||
           key.startsWith('${StorageConstants.userTopThreeKey}_$userId'));
@@ -1023,7 +1051,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> clearGameCache() async {
     try {
       final keys = sharedPreferences.getKeys().where((key) =>
-      key.startsWith(StorageConstants.gameDetailsKey) ||
+          key.startsWith(StorageConstants.gameDetailsKey) ||
           key.startsWith(StorageConstants.searchResultsKey) ||
           key.startsWith(StorageConstants.popularGamesKey) ||
           key.startsWith(StorageConstants.completeGameDetailsKey) ||
@@ -1043,7 +1071,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> clearMetadataCache() async {
     try {
       final keys = sharedPreferences.getKeys().where((key) =>
-      key.startsWith(StorageConstants.genresKey) ||
+          key.startsWith(StorageConstants.genresKey) ||
           key.startsWith(StorageConstants.platformsKey) ||
           key.startsWith(StorageConstants.gameModesKey) ||
           key.startsWith(StorageConstants.themesKey));
@@ -1080,7 +1108,8 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> clearExpiredCache() async {
     try {
       final allKeys = sharedPreferences.getKeys();
-      final cacheKeys = allKeys.where((key) => !key.contains('_timestamp') && !key.contains('_cache_type'));
+      final cacheKeys = allKeys.where(
+          (key) => !key.contains('_timestamp') && !key.contains('_cache_type'));
 
       for (final key in cacheKeys) {
         if (await isDataExpired(key)) {
@@ -1115,13 +1144,16 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<Map<String, DateTime>> getCacheInfo() async {
     try {
       final Map<String, DateTime> cacheInfo = {};
-      final keys = sharedPreferences.getKeys().where((key) => key.contains('_timestamp'));
+      final keys = sharedPreferences
+          .getKeys()
+          .where((key) => key.contains('_timestamp'));
 
       for (final key in keys) {
         final timestamp = sharedPreferences.getInt(key);
         if (timestamp != null) {
           final originalKey = key.replaceAll('_timestamp', '');
-          cacheInfo[originalKey] = DateTime.fromMillisecondsSinceEpoch(timestamp);
+          cacheInfo[originalKey] =
+              DateTime.fromMillisecondsSinceEpoch(timestamp);
         }
       }
 
@@ -1130,7 +1162,6 @@ class LocalDataSourceImpl implements LocalDataSource {
       return {};
     }
   }
-
 
   @override
   Future<void> clearCachedGameDetails(int gameId) async {

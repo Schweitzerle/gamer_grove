@@ -84,17 +84,24 @@ class GameQueryPresets {
 
   /// Popular games query
   ///
-  /// Based on original query:
-  /// where total_rating_count > 20 & total_rating_count < 50 & first_release_date != null;
+  /// Updated to use hypes (what people are talking about/expecting)
+  /// Games with hype between 5-300, filtered to ±6 months from now
+  /// to show currently trending games (not mega-hyped evergreen titles)
   static IgdbGameQuery popular({
     int limit = 20,
     int offset = 0,
     DateTime? releasedAfter,
   }) {
+    final now = DateTime.now();
+    final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
+    final sixMonthsFromNow = DateTime(now.year, now.month + 6, now.day);
+
     final filters = <IgdbFilter>[
-      FieldFilter('total_rating_count', '>', 20),
-      FieldFilter('total_rating_count', '<', 50),
-      NullFilter('first_release_date', isNull: false),
+      FieldFilter('hypes', '>=', 5),
+      FieldFilter('first_release_date', '>=',
+          sixMonthsAgo.millisecondsSinceEpoch ~/ 1000),
+      FieldFilter('first_release_date', '<=',
+          sixMonthsFromNow.millisecondsSinceEpoch ~/ 1000),
     ];
 
     if (releasedAfter != null) {
@@ -106,7 +113,7 @@ class GameQueryPresets {
       fields: GameFieldSets.standard,
       limit: limit,
       offset: offset,
-      sort: 'total_rating desc',
+      sort: 'hypes desc',
     );
   }
 
@@ -189,6 +196,8 @@ class GameQueryPresets {
     int limit = 20,
     int offset = 0,
     bool onlyMainGames = true,
+    String? sortBy,
+    String? sortOrder,
   }) {
     IgdbFilter filter;
     if (onlyMainGames) {
@@ -200,12 +209,17 @@ class GameQueryPresets {
       filter = GameFilters.byPlatform(platformId);
     }
 
+    // Build sort string (default: total_rating_count desc)
+    final sortString = sortBy != null && sortOrder != null
+        ? '$sortBy $sortOrder'
+        : 'total_rating_count desc';
+
     return IgdbGameQuery(
       where: filter,
       fields: GameFieldSets.platformGames,
       limit: limit,
       offset: offset,
-      sort: 'total_rating_count desc',
+      sort: sortString,
     );
   }
 

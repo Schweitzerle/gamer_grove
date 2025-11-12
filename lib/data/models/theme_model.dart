@@ -1,8 +1,8 @@
 // lib/data/models/theme_model.dart
 import '../../domain/entities/theme.dart';
 
-class ThemeModel extends Theme {
-  const ThemeModel({
+class IGDBThemeModel extends IGDBTheme {
+  const IGDBThemeModel({
     required super.id,
     required super.checksum,
     required super.name,
@@ -12,8 +12,8 @@ class ThemeModel extends Theme {
     super.updatedAt,
   });
 
-  factory ThemeModel.fromJson(Map<String, dynamic> json) {
-    return ThemeModel(
+  factory IGDBThemeModel.fromJson(Map<String, dynamic> json) {
+    return IGDBThemeModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       name: json['name'] ?? '',

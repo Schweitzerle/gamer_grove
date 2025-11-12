@@ -127,7 +127,7 @@ class SupabaseQuery {
   /// ```dart
   /// final users = await query.build(supabase);
   /// ```
-  Future<dynamic> build(SupabaseClient supabase) {
+  Future<dynamic> build(SupabaseClient supabase) async {
     // Start with the table and select
     dynamic queryBuilder = supabase.from(table).select(_selectColumns ?? '*');
 
@@ -180,16 +180,17 @@ class SupabaseQuery {
       );
     }
 
-    // Apply single/maybeSingle
+    // Apply single/maybeSingle and await the result
     if (_single != null) {
       if (_single == 1) {
-        return queryBuilder.single();
+        return await queryBuilder.single();
       } else {
-        return queryBuilder.maybeSingle();
+        return await queryBuilder.maybeSingle();
       }
     }
 
-    return queryBuilder;
+    // For list queries, await the result
+    return await queryBuilder;
   }
 
   @override
@@ -337,21 +338,20 @@ class SupabaseInsert {
 
   /// Builds and executes the insert operation.
   Future<dynamic> build(SupabaseClient supabase) async {
-    var query = supabase.from(table);
-
     final data = _multipleValues ?? _values;
     if (data == null) {
       throw ArgumentError('No values provided for insert');
     }
 
+    dynamic query;
     if (_upsert) {
-      query = query.upsert(data) as SupabaseQueryBuilder;
+      query = supabase.from(table).upsert(data);
     } else {
-      query = query.insert(data) as SupabaseQueryBuilder;
+      query = supabase.from(table).insert(data);
     }
 
     if (_returning != null) {
-      return query.select(_returning!);
+      return await query.select(_returning!);
     }
 
     // Execute the query and return the result

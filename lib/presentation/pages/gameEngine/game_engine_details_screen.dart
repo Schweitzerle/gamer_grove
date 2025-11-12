@@ -359,15 +359,14 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
             const SizedBox(height: 16),
 
             // Companies Section
-            if (widget.gameEngine.hasCompanies)
-              Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.paddingMedium),
-                  child: GenericCompanySection(
-                    companies: widget.gameEngine.companies,
-                    title: 'Companies Using This Engine',
-                    showRoles: false,
-                  )),
+            Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium),
+                child: GenericCompanySection(
+                  companies: widget.gameEngine.companies,
+                  title: 'Companies Using This Engine',
+                  showRoles: false,
+                )),
 
             const SizedBox(height: 16),
 
@@ -615,16 +614,24 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.videogame_asset,
+              Icons.videogame_asset_off,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               size: 32,
             ),
             const SizedBox(height: 8),
             Text(
-              'Games loading...',
+              'No games found',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'This platform has no games in our database',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
