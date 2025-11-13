@@ -66,6 +66,7 @@ dev_dependencies:
   bloc_test: ^9.1.7
   dart_code_metrics_presets: ^2.26.1
   very_good_analysis: ^10.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -80,3 +81,10 @@ flutter:
   #       - asset: fonts/Montserrat-Regular.ttf
   #       - asset: fonts/Montserrat-Bold.ttf
   #         weight: 700
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#1A1A1A"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
