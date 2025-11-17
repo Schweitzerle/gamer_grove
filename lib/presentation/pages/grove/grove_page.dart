@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
@@ -65,19 +67,29 @@ class _GrovePageState extends State<GrovePage> {
           child: CustomScrollView(
             slivers: [
               // App Bar
-              SliverAppBar(
-                floating: true,
-                pinned: false,
-                title: Row(
-                  children: [
-                    Icon(
-                      Icons.gamepad_rounded,
-                      color: Theme.of(context).colorScheme.primary,
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, authState) {
+                  return SliverAppBar(
+                    floating: true,
+                    title: Row(
+                      children: [
+                        Icon(
+                          Icons.gamepad_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Gamer Grove'),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Gamer Grove'),
-                  ],
-                ),
+                    actions: [
+                      if (authState is AuthAuthenticated)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _buildProfileAvatar(context, authState.user),
+                        ),
+                    ],
+                  );
+                },
               ),
 
               if (_currentUserId != null)
@@ -122,6 +134,36 @@ class _GrovePageState extends State<GrovePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(BuildContext context, User user) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          width: 2,
+        ),
+      ),
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: theme.colorScheme.primaryContainer,
+        backgroundImage: user.hasAvatar
+            ? CachedNetworkImageProvider(user.avatarUrl!)
+            : null,
+        child: !user.hasAvatar
+            ? Text(
+                user.username[0].toUpperCase(),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            : null,
       ),
     );
   }
