@@ -108,10 +108,10 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     // Validate username format (if being changed)
     if (updates.containsKey('username')) {
       final username = updates['username'] as String;
-      if (!RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(username)) {
+      if (!RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username)) {
         throw const InvalidProfileDataException(
           message:
-              'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+              'Username must be 3-20 characters, alphanumeric and underscores only',
         );
       }
     }

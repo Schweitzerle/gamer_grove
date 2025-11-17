@@ -50,7 +50,7 @@ class SignUpUseCase implements UseCase<User, SignUpParams> {
     if (!_isValidUsername(params.username)) {
       return const Left(ValidationFailure(
         message:
-            'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+            'Username must be 3-20 characters, alphanumeric and underscores only',
       ));
     }
 
@@ -74,9 +74,9 @@ class SignUpUseCase implements UseCase<User, SignUpParams> {
     return password.length >= 6;
   }
 
-  /// Validates username (3-20 characters, lowercase alphanumeric and underscores).
+  /// Validates username (3-20 characters, alphanumeric and underscores).
   bool _isValidUsername(String username) {
-    final usernameRegex = RegExp(r'^[a-z0-9_]{3,20}$');
+    final usernameRegex = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
     return usernameRegex.hasMatch(username);
   }
 }

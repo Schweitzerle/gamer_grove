@@ -59,11 +59,11 @@ class UpdateUserProfileUseCase
     // Validate username if provided
     if (params.updates.containsKey('username')) {
       final username = params.updates['username'] as String;
-      final usernameRegex = RegExp(r'^[a-z0-9_]{3,20}$');
+      final usernameRegex = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
       if (!usernameRegex.hasMatch(username)) {
         return const Left(ValidationFailure(
           message:
-              'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+              'Username must be 3-20 characters, alphanumeric and underscores only',
         ));
       }
     }

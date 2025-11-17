@@ -86,7 +86,7 @@ class WeakPasswordException extends AuthException {
 class InvalidUsernameException extends AuthException {
   const InvalidUsernameException({
     String message =
-        'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+        'Username must be 3-20 characters, alphanumeric and underscores only',
     String? code,
     dynamic originalError,
   }) : super(message: message, code: code, originalError: originalError);
