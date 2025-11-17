@@ -2,6 +2,7 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../entities/event/event.dart';
+import '../entities/search/event_search_filters.dart';
 
 abstract class EventRepository {
   // Current & Upcoming Events
@@ -17,6 +18,14 @@ abstract class EventRepository {
   Future<Either<Failure, List<Event>>> searchEvents(String query);
 
   Future<Either<Failure, Event>> getEventDetails(int eventId);
+
+  // Advanced Event Search with Filters
+  Future<Either<Failure, List<Event>>> advancedEventSearch({
+    required EventSearchFilters filters,
+    String? textQuery,
+    int limit = 20,
+    int offset = 0,
+  });
 
   // Events by Criteria
   Future<Either<Failure, List<Event>>> getEventsByDateRange({

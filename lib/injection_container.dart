@@ -17,6 +17,7 @@ import 'package:gamer_grove/domain/usecases/auth/sign_up.dart';
 import 'package:gamer_grove/domain/usecases/auth/update_password.dart';
 import 'package:gamer_grove/domain/usecases/characters/get_character_with_games.dart';
 import 'package:gamer_grove/domain/usecases/company/get_company_with_games.dart';
+import 'package:gamer_grove/domain/usecases/event/advanced_event_search.dart';
 import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
 import 'package:gamer_grove/domain/usecases/event/get_current_events.dart';
 import 'package:gamer_grove/domain/usecases/event/get_event_details.dart';
@@ -269,6 +270,7 @@ Future<void> initDependencies() async {
         getEventsByDateRange: sl(),
         getEventsByGames: sl(),
         getCompleteEventDetails: sl(),
+        advancedEventSearch: sl(),
       ),
     )
     ..registerFactory(
@@ -402,6 +404,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetEventsByGames(sl()))
     ..registerLazySingleton(() =>
         GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()))
+    ..registerLazySingleton(() => AdvancedEventSearch(sl()))
 
     // Platform Use Cases
     ..registerLazySingleton(() => GetPlatformWithGames(sl()))

@@ -119,3 +119,28 @@ class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
   @override
   List<Object?> get props => [eventId, userId, includeGames];
 }
+
+// ==========================================
+// ADVANCED EVENT SEARCH EVENTS
+// ==========================================
+
+class SearchEventsWithFiltersEvent extends EventEvent {
+  final String query;
+  final dynamic filters; // EventSearchFilters
+
+  const SearchEventsWithFiltersEvent({
+    required this.query,
+    required this.filters,
+  });
+
+  @override
+  List<Object> get props => [query, filters];
+}
+
+class LoadMoreEventsEvent extends EventEvent {
+  const LoadMoreEventsEvent();
+}
+
+class ClearEventSearchEvent extends EventEvent {
+  const ClearEventSearchEvent();
+}
