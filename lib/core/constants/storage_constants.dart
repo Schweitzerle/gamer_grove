@@ -121,6 +121,7 @@ class StorageConstants {
   static const String searchFiltersKey = 'search_filters';
   static const String popularSearchesKey = 'popular_searches';
   static const String recentSearchesKey = 'recent_searches';
+  static const String recentEventSearchesKey = 'recent_event_searches';
   static const String searchSuggestionsKey = 'search_suggestions';
 
   // Platform-specific searches

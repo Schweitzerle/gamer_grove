@@ -46,6 +46,10 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
     super.initState();
     _workingFilters = widget.currentFilters;
     _tabController = TabController(length: 2, vsync: this);
+
+    // Initialize date filters from current filters
+    _eventTimeFrom = widget.currentFilters.startTimeFrom;
+    _eventTimeTo = widget.currentFilters.startTimeTo;
   }
 
   @override
@@ -56,9 +60,43 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
 
   void _applyFilters() {
     // Build filters from selections
+    DateTime? finalStartTimeFrom;
+    DateTime? finalStartTimeTo;
+
+    // Handle single date with operator
+    if (_singleEventTime != null && _eventTimeOperator != null) {
+      switch (_eventTimeOperator) {
+        case 'before':
+          // Events starting before this date
+          finalStartTimeTo = _singleEventTime;
+        case 'after':
+          // Events starting after this date
+          finalStartTimeFrom = _singleEventTime;
+        case 'on':
+          // Events starting on this exact day
+          finalStartTimeFrom = DateTime(
+            _singleEventTime!.year,
+            _singleEventTime!.month,
+            _singleEventTime!.day,
+          );
+          finalStartTimeTo = DateTime(
+            _singleEventTime!.year,
+            _singleEventTime!.month,
+            _singleEventTime!.day,
+            23,
+            59,
+            59,
+          );
+      }
+    } else {
+      // Use range filters
+      finalStartTimeFrom = _eventTimeFrom;
+      finalStartTimeTo = _eventTimeTo;
+    }
+
     final filters = EventSearchFilters(
-      startTimeFrom: _eventTimeFrom,
-      startTimeTo: _eventTimeTo,
+      startTimeFrom: finalStartTimeFrom,
+      startTimeTo: finalStartTimeTo,
       sortBy: _workingFilters.sortBy,
       sortOrder: _workingFilters.sortOrder,
     );
