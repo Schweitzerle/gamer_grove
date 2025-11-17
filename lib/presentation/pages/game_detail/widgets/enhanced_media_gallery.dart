@@ -551,6 +551,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
         builder: (context) => AllVideosGrid(
           videos: videos,
           title: 'All Videos',
+          gameName: widget.game?.name ?? '',
         ),
       ),
     );
