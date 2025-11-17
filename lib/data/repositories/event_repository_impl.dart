@@ -127,32 +127,12 @@ class EventRepositoryImpl extends IgdbBaseRepository
         // Build filters based on EventSearchFilters
         final filterList = <IgdbFilter>[];
 
-        // Start time filters
+        // Start time filters (we only filter by event start_time)
         if (filters.startTimeFrom != null) {
           filterList.add(EventFilters.startsAfter(filters.startTimeFrom!));
         }
         if (filters.startTimeTo != null) {
           filterList.add(EventFilters.startsBefore(filters.startTimeTo!));
-        }
-
-        // End time filters
-        if (filters.endTimeFrom != null) {
-          filterList.add(
-            FieldFilter(
-              'end_time',
-              '>=',
-              filters.endTimeFrom!.millisecondsSinceEpoch ~/ 1000,
-            ),
-          );
-        }
-        if (filters.endTimeTo != null) {
-          filterList.add(
-            FieldFilter(
-              'end_time',
-              '<=',
-              filters.endTimeTo!.millisecondsSinceEpoch ~/ 1000,
-            ),
-          );
         }
 
         // Event networks filter
@@ -167,12 +147,12 @@ class EventRepositoryImpl extends IgdbBaseRepository
           filterList.add(FieldFilter('name', '~', textQuery.trim()));
         }
 
-        // Combine all filters
-        final IgdbFilter? combinedFilter = filterList.isEmpty
+        // Combine all filters (or null if no filters)
+        final combinedFilter = filterList.isEmpty
             ? null
-            : filterList.length == 1
+            : (filterList.length == 1
                 ? filterList.first
-                : CombinedFilter(filterList);
+                : CombinedFilter(filterList));
 
         // Determine sort order
         final String sortField;

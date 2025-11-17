@@ -15,12 +15,10 @@ enum EventSortOrder {
 
 class EventSearchFilters extends Equatable {
   // ============================================================
-  // TIME FILTERS
+  // TIME FILTERS (based on event start_time)
   // ============================================================
   final DateTime? startTimeFrom;
   final DateTime? startTimeTo;
-  final DateTime? endTimeFrom;
-  final DateTime? endTimeTo;
 
   // ============================================================
   // EVENT NETWORKS FILTERS
@@ -38,8 +36,6 @@ class EventSearchFilters extends Equatable {
     // Time Filters
     this.startTimeFrom,
     this.startTimeTo,
-    this.endTimeFrom,
-    this.endTimeTo,
 
     // Event Networks
     this.eventNetworkIds = const [],
@@ -53,24 +49,16 @@ class EventSearchFilters extends Equatable {
   bool get hasFilters =>
       startTimeFrom != null ||
       startTimeTo != null ||
-      endTimeFrom != null ||
-      endTimeTo != null ||
       eventNetworkIds.isNotEmpty ||
       sortBy != EventSortBy.relevance;
 
-  bool get hasTimeFilter =>
-      startTimeFrom != null ||
-      startTimeTo != null ||
-      endTimeFrom != null ||
-      endTimeTo != null;
+  bool get hasTimeFilter => startTimeFrom != null || startTimeTo != null;
 
   bool get hasNetworkFilter => eventNetworkIds.isNotEmpty;
 
   EventSearchFilters copyWith({
     DateTime? startTimeFrom,
     DateTime? startTimeTo,
-    DateTime? endTimeFrom,
-    DateTime? endTimeTo,
     List<int>? eventNetworkIds,
     Map<int, String>? eventNetworkNames,
     EventSortBy? sortBy,
@@ -79,8 +67,6 @@ class EventSearchFilters extends Equatable {
     return EventSearchFilters(
       startTimeFrom: startTimeFrom ?? this.startTimeFrom,
       startTimeTo: startTimeTo ?? this.startTimeTo,
-      endTimeFrom: endTimeFrom ?? this.endTimeFrom,
-      endTimeTo: endTimeTo ?? this.endTimeTo,
       eventNetworkIds: eventNetworkIds ?? this.eventNetworkIds,
       eventNetworkNames: eventNetworkNames ?? this.eventNetworkNames,
       sortBy: sortBy ?? this.sortBy,
@@ -96,8 +82,6 @@ class EventSearchFilters extends Equatable {
   List<Object?> get props => [
         startTimeFrom,
         startTimeTo,
-        endTimeFrom,
-        endTimeTo,
         eventNetworkIds,
         eventNetworkNames,
         sortBy,

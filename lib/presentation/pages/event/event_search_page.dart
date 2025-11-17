@@ -1,12 +1,15 @@
 // presentation/pages/event/event_search_page.dart
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../injection_container.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/storage_constants.dart';
 import '../../../core/utils/input_validator.dart';
 import '../../blocs/event/event_bloc.dart';
 import '../../blocs/event/event_event.dart';
@@ -111,14 +114,25 @@ class _EventSearchPageState extends State<EventSearchPage> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
-  void _loadRecentSearches() {
-    // TODO: Load from SharedPreferences
-    setState(() {
-      _recentSearches = ['E3', 'Gamescom', 'TGA', 'PAX'];
-    });
+  Future<void> _loadRecentSearches() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final recentSearchesJson =
+          prefs.getString(StorageConstants.recentEventSearchesKey);
+
+      if (recentSearchesJson != null) {
+        final List<dynamic> decoded = jsonDecode(recentSearchesJson);
+        setState(() {
+          _recentSearches = decoded.map((e) => e.toString()).toList();
+        });
+      }
+    } on Exception catch (e) {
+      // If there's an error loading, just keep the empty list
+      debugPrint('Error loading recent event searches: $e');
+    }
   }
 
-  void _addToRecentSearches(String query) {
+  Future<void> _addToRecentSearches(String query) async {
     if (query.trim().isEmpty) return;
 
     setState(() {
@@ -129,7 +143,16 @@ class _EventSearchPageState extends State<EventSearchPage> {
       }
     });
 
-    // TODO: Save to SharedPreferences
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = jsonEncode(_recentSearches);
+      await prefs.setString(
+        StorageConstants.recentEventSearchesKey,
+        jsonString,
+      );
+    } on Exception catch (e) {
+      debugPrint('Error saving recent event searches: $e');
+    }
   }
 
   void _performSearch(String query) {
@@ -181,9 +204,9 @@ class _EventSearchPageState extends State<EventSearchPage> {
   int _getActiveFilterCount() {
     int count = 0;
     if (_currentFilters.startTimeFrom != null ||
-        _currentFilters.startTimeTo != null) count++;
-    if (_currentFilters.endTimeFrom != null ||
-        _currentFilters.endTimeTo != null) count++;
+        _currentFilters.startTimeTo != null) {
+      count++;
+    }
     if (_currentFilters.eventNetworkIds.isNotEmpty) count++;
     return count;
   }
@@ -516,14 +539,26 @@ class _EventSearchPageState extends State<EventSearchPage> {
         _searchController.text = search;
         _performSearch(search);
       },
-      onDeleted: () {
-        setState(() {
-          _recentSearches.remove(search);
-        });
-        // TODO: Save updated recent searches to SharedPreferences
-      },
+      onDeleted: () => _removeFromRecentSearches(search),
       deleteIcon: const Icon(Icons.close, size: 18),
     );
+  }
+
+  Future<void> _removeFromRecentSearches(String search) async {
+    setState(() {
+      _recentSearches.remove(search);
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = jsonEncode(_recentSearches);
+      await prefs.setString(
+        StorageConstants.recentEventSearchesKey,
+        jsonString,
+      );
+    } on Exception catch (e) {
+      debugPrint('Error removing recent event search: $e');
+    }
   }
 
   Widget _buildPopularSearchChip(String search) {

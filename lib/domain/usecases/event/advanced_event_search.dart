@@ -7,16 +7,19 @@ import '../../entities/search/event_search_filters.dart';
 import '../../repositories/event_repository.dart';
 import '../base_usecase.dart';
 
-class AdvancedEventSearch extends UseCase<List<Event>, AdvancedEventSearchParams> {
+class AdvancedEventSearch
+    extends UseCase<List<Event>, AdvancedEventSearchParams> {
   final EventRepository repository;
 
   AdvancedEventSearch(this.repository);
 
   @override
-  Future<Either<Failure, List<Event>>> call(AdvancedEventSearchParams params) async {
-    if ((params.textQuery?.isEmpty ?? true) && !params.filters.hasFilters) {
+  Future<Either<Failure, List<Event>>> call(
+      AdvancedEventSearchParams params) async {
+    // No Validation needed for now
+    /* if ((params.textQuery?.isEmpty ?? true) && !params.filters.hasFilters) {
       return const Left(ValidationFailure(message: 'Text query or filters required'));
-    }
+    } */
 
     return await repository.advancedEventSearch(
       filters: params.filters,
