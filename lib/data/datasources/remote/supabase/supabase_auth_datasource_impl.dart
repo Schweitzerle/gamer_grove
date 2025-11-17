@@ -18,8 +18,8 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
   ///
   /// Requirements:
   /// - 3-20 characters
-  /// - Lowercase letters, numbers, and underscores only
-  static final RegExp _usernameRegex = RegExp(r'^[a-z0-9_]{3,20}$');
+  /// - Lowercase and uppercase letters, numbers, and underscores only
+  static final RegExp _usernameRegex = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
 
   /// Regular expression for email validation.
   static final RegExp _emailRegex = RegExp(
