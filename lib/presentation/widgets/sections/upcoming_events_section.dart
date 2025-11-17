@@ -100,117 +100,132 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
   Widget _buildEventsCarousel(List<Event> events) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.event_available,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
+      child: Card(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingMedium,
+        ),
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Recent & Upcoming Gaming Events',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.event_available,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recent & Upcoming Gaming Events',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          Text(
+                            '${events.length} Events Scheduled',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${events.length} Events Scheduled',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
+                    ),
+                    // View All button
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const EventSearchPage(),
+                          ),
+                        );
+                      },
+                      child: const Text('View All'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppConstants.paddingSmall),
+
+              // Auto-scrolling carousel
+              SizedBox(
+                height: 200,
+                child: GestureDetector(
+                  onPanDown: (_) => _stopAutoScroll(),
+                  onPanEnd: (_) => _resumeAutoScroll(),
+                  onPanCancel: () => _resumeAutoScroll(),
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemCount: events.length,
+                    itemBuilder: (context, index) {
+                      final event = events[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: EventCard(
+                          event: event,
+                          onTap: () => _navigateToEventDetails(context, event),
+                          showStatus: true,
+                          showGamesCount: true,
+                          compact: false,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              // Page indicators
+              if (events.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      events.length,
+                      (index) => Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _currentPage == index
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context)
                                   .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                                  .onSurfaceVariant
+                                  .withOpacity(0.3),
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                // View All button
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EventSearchPage(),
-                      ),
-                    );
-                  },
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingSmall),
-
-          // Auto-scrolling carousel
-          SizedBox(
-            height: 200,
-            child: GestureDetector(
-              onPanDown: (_) => _stopAutoScroll(),
-              onPanEnd: (_) => _resumeAutoScroll(),
-              onPanCancel: () => _resumeAutoScroll(),
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final event = events[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: EventCard(
-                      event: event,
-                      onTap: () => _navigateToEventDetails(context, event),
-                      showStatus: true,
-                      showGamesCount: true,
-                      compact: false,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Page indicators
-          if (events.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  events.length,
-                  (index) => Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentPage == index
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withOpacity(0.3),
                     ),
                   ),
                 ),
-              ),
-            ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
