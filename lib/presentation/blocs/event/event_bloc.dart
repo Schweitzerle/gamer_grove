@@ -6,6 +6,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import '../../../domain/entities/event/event.dart';
+import '../../../domain/entities/search/event_search_filters.dart';
+import '../../../domain/usecases/event/advanced_event_search.dart';
 import '../../../domain/usecases/event/get_complete_event_details.dart';
 import '../../../domain/usecases/event/get_current_events.dart';
 import '../../../domain/usecases/event/get_event_details.dart';
@@ -24,6 +26,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final GetEventsByDateRange getEventsByDateRange;
   final GetEventsByGames getEventsByGames;
   final GetCompleteEventDetails getCompleteEventDetails;
+  final AdvancedEventSearch advancedEventSearch;
   final GameEnrichmentService enrichmentService;
 
   EventBloc({
@@ -34,6 +37,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.getEventsByDateRange,
     required this.getEventsByGames,
     required this.getCompleteEventDetails,
+    required this.advancedEventSearch,
     required this.enrichmentService,
   }) : super(EventInitial()) {
     on<GetEventDetailsEvent>(_onGetEventDetails);
@@ -47,6 +51,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<GetEventDetailsWithUserDataEvent>(_onGetEventDetailsWithUserData);
     on<GetCompleteEventDetailsWithUserDataEvent>(
         _onGetCompleteEventDetailsWithUserData);
+    on<SearchEventsWithFiltersEvent>(_onSearchEventsWithFilters);
+    on<LoadMoreEventsEvent>(_onLoadMoreEvents);
+    on<ClearEventSearchEvent>(_onClearEventSearch);
   }
 
   Future<void> _onGetEventDetails(
@@ -257,6 +264,80 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         }
       },
     );
+  }
+
+  // ============================================================
+  // ADVANCED EVENT SEARCH HANDLERS
+  // ============================================================
+
+  Future<void> _onSearchEventsWithFilters(
+    SearchEventsWithFiltersEvent event,
+    Emitter<EventState> emit,
+  ) async {
+    emit(const EventSearchLoading());
+
+    final result = await advancedEventSearch(
+      AdvancedEventSearchParams(
+        textQuery: event.query.trim().isEmpty ? null : event.query.trim(),
+        filters: event.filters as EventSearchFilters,
+        limit: 20,
+        offset: 0,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(EventError(message: failure.message)),
+      (events) => emit(EventSearchLoaded(
+        events: events,
+        query: event.query,
+        hasReachedMax: events.length < 20,
+      )),
+    );
+  }
+
+  Future<void> _onLoadMoreEvents(
+    LoadMoreEventsEvent event,
+    Emitter<EventState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! EventSearchLoaded) return;
+    if (currentState.hasReachedMax || currentState.isLoadingMore) return;
+
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    final result = await advancedEventSearch(
+      AdvancedEventSearchParams(
+        textQuery: currentState.query.trim().isEmpty
+            ? null
+            : currentState.query.trim(),
+        filters: const EventSearchFilters(),
+        limit: 20,
+        offset: currentState.events.length,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(EventError(
+        message: failure.message,
+        events: currentState.events,
+      )),
+      (newEvents) {
+        final hasReachedMax = newEvents.length < 20;
+        emit(EventSearchLoaded(
+          events: List.of(currentState.events)..addAll(newEvents),
+          query: currentState.query,
+          hasReachedMax: hasReachedMax,
+          isLoadingMore: false,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onClearEventSearch(
+    ClearEventSearchEvent event,
+    Emitter<EventState> emit,
+  ) async {
+    emit(EventInitial());
   }
 
   Future<Event> _enrichEventWithUserData(Event event, String userId) async {

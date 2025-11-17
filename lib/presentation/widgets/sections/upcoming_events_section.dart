@@ -11,6 +11,7 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
+import 'package:gamer_grove/presentation/pages/event/event_search_page.dart';
 import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class UpcomingEventsSection extends StatefulWidget {
@@ -139,8 +140,11 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                 // View All button
                 TextButton(
                   onPressed: () {
-                    // Navigate to all events page
-                    // TODO: Implement all events page navigation
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const EventSearchPage(),
+                      ),
+                    );
                   },
                   child: const Text('View All'),
                 ),

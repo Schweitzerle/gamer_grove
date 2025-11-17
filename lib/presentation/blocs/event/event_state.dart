@@ -18,15 +18,6 @@ class EventInitial extends EventState {}
 
 class EventLoading extends EventState {}
 
-class EventError extends EventState {
-  final String message;
-
-  const EventError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
 // ==========================================
 // SUCCESS STATES
 // ==========================================
@@ -108,5 +99,63 @@ class EventsByGamesLoaded extends EventState {
   List<Object> get props => [events, gameIds];
 }
 
+// ==========================================
+// ADVANCED EVENT SEARCH STATES
+// ==========================================
 
+class EventSearchLoading extends EventState {
+  final List<Event> events;
+  final bool isLoadingMore;
 
+  const EventSearchLoading({
+    this.events = const [],
+    this.isLoadingMore = false,
+  });
+
+  @override
+  List<Object> get props => [events, isLoadingMore];
+}
+
+class EventSearchLoaded extends EventState {
+  final List<Event> events;
+  final String query;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
+
+  const EventSearchLoaded({
+    required this.events,
+    required this.query,
+    this.hasReachedMax = false,
+    this.isLoadingMore = false,
+  });
+
+  EventSearchLoaded copyWith({
+    List<Event>? events,
+    String? query,
+    bool? hasReachedMax,
+    bool? isLoadingMore,
+  }) {
+    return EventSearchLoaded(
+      events: events ?? this.events,
+      query: query ?? this.query,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
+  @override
+  List<Object> get props => [events, query, hasReachedMax, isLoadingMore];
+}
+
+class EventError extends EventState {
+  final String message;
+  final List<Event> events;
+
+  const EventError({
+    required this.message,
+    this.events = const [],
+  });
+
+  @override
+  List<Object> get props => [message, events];
+}
