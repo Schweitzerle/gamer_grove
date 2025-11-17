@@ -16,12 +16,14 @@ class FullScreenImageViewer extends StatefulWidget {
   final List<String> images;
   final int initialIndex;
   final String title;
+  final String gameName;
 
   const FullScreenImageViewer({
     super.key,
     required this.images,
     required this.initialIndex,
     required this.title,
+    required this.gameName,
   });
 
   @override

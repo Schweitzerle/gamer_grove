@@ -513,6 +513,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
             images: images,
             initialIndex: initialIndex,
             title: type == 'screenshot' ? 'Screenshots' : 'Artworks',
+            gameName: widget.game?.name ?? '',
           ),
         ),
         transitionDuration: const Duration(milliseconds: 300),
@@ -527,6 +528,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
           images: images,
           title: type == 'screenshot' ? 'All Screenshots' : 'All Artworks',
           type: type,
+          gameName: widget.game?.name ?? '',
         ),
       ),
     );
