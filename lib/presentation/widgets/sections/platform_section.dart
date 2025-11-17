@@ -5,6 +5,7 @@
 // lib/presentation/widgets/sections/generic_platform_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/navigations.dart';
 import '../../../core/widgets/cached_image_widget.dart';
@@ -99,58 +100,65 @@ class GenericPlatformSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.devices,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.devices,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                '${_platforms.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${_platforms.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
         // Platform Cards Horizontal List
-        SizedBox(
-          height: 200, // Fixed height for cards
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            itemCount: _platforms.length,
-            itemBuilder: (context, index) {
-              print(
-                  '🔧 Building platform card $index: ${_platforms[index].name}');
-              final platform = _platforms[index];
-              final releases = platformReleases[platform.id] ?? [];
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index < _platforms.length - 1 ? 12 : 0,
-                ),
-                child: _buildPlatformCard(context, platform, releases),
-              );
-            },
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+          child: SizedBox(
+            height: 200, // Fixed height for cards
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingSmall),
+              itemCount: _platforms.length,
+              itemBuilder: (context, index) {
+                print(
+                    '🔧 Building platform card $index: ${_platforms[index].name}');
+                final platform = _platforms[index];
+                final releases = platformReleases[platform.id] ?? [];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    right: index < _platforms.length - 1 ? 12 : 0,
+                  ),
+                  child: _buildPlatformCard(context, platform, releases),
+                );
+              },
+            ),
           ),
         ),
       ],

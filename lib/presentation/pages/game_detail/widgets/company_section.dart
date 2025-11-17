@@ -4,6 +4,7 @@
 
 // lib/presentation/widgets/sections/generic_company_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import '../../../../core/utils/navigations.dart';
 import '../../../../core/widgets/cached_image_widget.dart';
 import '../../../../domain/entities/company/company.dart';
@@ -68,13 +69,13 @@ class GenericCompanySection extends StatelessWidget {
   Widget _buildDirectCompanySection(BuildContext context) {
     return Card(
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Header
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingSmall),
+            child: Row(
               children: [
                 Icon(
                   Icons.business,
@@ -107,13 +108,18 @@ class GenericCompanySection extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 12),
 
-            // Companies Horizontal List
-            SizedBox(
+          // Companies Horizontal List
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+            child: SizedBox(
               height: 120,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingSmall),
                 itemCount: companies!.length,
                 itemBuilder: (context, index) {
                   return Padding(
@@ -125,8 +131,8 @@ class GenericCompanySection extends StatelessWidget {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
