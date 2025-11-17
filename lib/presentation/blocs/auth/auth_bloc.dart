@@ -160,8 +160,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignOutEvent event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
-
+    // Don't emit loading state during logout to avoid UI flicker
+    // Just perform the logout and immediately transition to unauthenticated
     final result = await signOutUseCase(const NoParams());
 
     result.fold(

@@ -150,14 +150,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
+        elevation: 0,
         actions: [
           if (!_isLoading)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveProfile,
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: FilledButton.icon(
+                icon: const Icon(Icons.check, size: 20),
+                label: const Text('Save'),
+                onPressed: _saveProfile,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+              ),
             ),
         ],
       ),
@@ -168,23 +179,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child: Form(
               key: _formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildAvatar(),
+                  const SizedBox(height: 32),
+                  _buildInfoSection(colorScheme),
+                  const SizedBox(height: 16),
+                  _buildPrivacySection(colorScheme),
                   const SizedBox(height: 24),
-                  _buildBioField(),
-                  const SizedBox(height: 24),
-                  _buildCountryPicker(),
-                  const SizedBox(height: 24),
-                  _buildPrivacySwitches(),
                 ],
               ),
             ),
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              color: Colors.black.withValues(alpha: 0.5),
+              child: Center(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Saving profile...',
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
         ],
@@ -194,6 +220,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildAvatar() {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     ImageProvider? backgroundImage;
 
     if (_selectedImageFile != null) {
@@ -203,28 +230,79 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     return Center(
-      child: Stack(
+      child: Column(
         children: [
-          CircleAvatar(
-            radius: 60,
-            backgroundColor: theme.colorScheme.primaryContainer,
-            backgroundImage: backgroundImage,
-            child: backgroundImage == null
-                ? Text(
-                    widget.user.username[0].toUpperCase(),
-                    style: theme.textTheme.displayMedium?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
+          Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: 2,
                     ),
-                  )
-                : null,
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundColor: colorScheme.primaryContainer,
+                  backgroundImage: backgroundImage,
+                  child: backgroundImage == null
+                      ? Text(
+                          widget.user.username[0].toUpperCase(),
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Material(
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  color: colorScheme.primaryContainer,
+                  child: InkWell(
+                    onTap: _pickImage,
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.primary,
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: colorScheme.onPrimary,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.camera_alt),
-              onPressed: _pickImage,
+          const SizedBox(height: 12),
+          Text(
+            widget.user.username,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Tap the camera icon to change your avatar',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -232,66 +310,259 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildBioField() {
-    return TextFormField(
-      controller: _bioController,
-      decoration: const InputDecoration(
-        labelText: 'Bio',
-        border: OutlineInputBorder(),
+  Widget _buildInfoSection(ColorScheme colorScheme) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
-      maxLines: 3,
-      maxLength: 150,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Profile Information',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _bioController,
+              decoration: InputDecoration(
+                labelText: 'Bio',
+                hintText: 'Tell others about yourself...',
+                prefixIcon: const Icon(Icons.edit_note),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              ),
+              maxLines: 4,
+              maxLength: 150,
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () {
+                showCountryPicker(
+                  context: context,
+                  onSelect: (Country country) {
+                    setState(() {
+                      _selectedCountry = country;
+                    });
+                  },
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.public,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Country',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color:
+                                  colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _selectedCountry?.name ??
+                                _initialCountryName ??
+                                'Select Country',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: colorScheme.onSurface.withValues(alpha: 0.4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildCountryPicker() {
-    return ListTile(
-      title: Text(
-          _selectedCountry?.name ?? _initialCountryName ?? 'Select Country'),
-      trailing: const Icon(Icons.arrow_drop_down),
-      onTap: () {
-        showCountryPicker(
-          context: context,
-          onSelect: (Country country) {
-            setState(() {
-              _selectedCountry = country;
-            });
-          },
-        );
-      },
+  Widget _buildPrivacySection(ColorScheme colorScheme) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.privacy_tip_outlined,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Privacy Settings',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Control what others can see on your profile',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildPrivacySwitch(
+              icon: Icons.public,
+              title: 'Public Profile',
+              subtitle: 'Allow others to view your profile',
+              value: _isProfilePublic,
+              onChanged: (value) => setState(() => _isProfilePublic = value),
+              colorScheme: colorScheme,
+            ),
+            const Divider(height: 24),
+            _buildPrivacySwitch(
+              icon: Icons.favorite_border,
+              title: 'Show Wishlist',
+              subtitle: 'Display games you want to play',
+              value: _showWishlist,
+              onChanged: (value) => setState(() => _showWishlist = value),
+              colorScheme: colorScheme,
+            ),
+            const Divider(height: 24),
+            _buildPrivacySwitch(
+              icon: Icons.star_border,
+              title: 'Show Rated Games',
+              subtitle: 'Display games you have rated',
+              value: _showRatedGames,
+              onChanged: (value) => setState(() => _showRatedGames = value),
+              colorScheme: colorScheme,
+            ),
+            const Divider(height: 24),
+            _buildPrivacySwitch(
+              icon: Icons.recommend_outlined,
+              title: 'Show Recommended Games',
+              subtitle: 'Display your game recommendations',
+              value: _showRecommendedGames,
+              onChanged: (value) =>
+                  setState(() => _showRecommendedGames = value),
+              colorScheme: colorScheme,
+            ),
+            const Divider(height: 24),
+            _buildPrivacySwitch(
+              icon: Icons.emoji_events_outlined,
+              title: 'Show Top Three Games',
+              subtitle: 'Display your favorite games',
+              value: _showTopThree,
+              onChanged: (value) => setState(() => _showTopThree = value),
+              colorScheme: colorScheme,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildPrivacySwitches() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildPrivacySwitch({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required ColorScheme colorScheme,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
       children: [
-        const Text('Privacy Settings',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SwitchListTile(
-          title: const Text('Public Profile'),
-          value: _isProfilePublic,
-          onChanged: (value) => setState(() => _isProfilePublic = value),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: colorScheme.primary,
+            size: 20,
+          ),
         ),
-        SwitchListTile(
-          title: const Text('Show Wishlist'),
-          value: _showWishlist,
-          onChanged: (value) => setState(() => _showWishlist = value),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
         ),
-        SwitchListTile(
-          title: const Text('Show Rated Games'),
-          value: _showRatedGames,
-          onChanged: (value) => setState(() => _showRatedGames = value),
-        ),
-        SwitchListTile(
-          title: const Text('Show Recommended Games'),
-          value: _showRecommendedGames,
-          onChanged: (value) => setState(() => _showRecommendedGames = value),
-        ),
-        SwitchListTile(
-          title: const Text('Show Top Three Games'),
-          value: _showTopThree,
-          onChanged: (value) => setState(() => _showTopThree = value),
+        Switch(
+          value: value,
+          onChanged: onChanged,
         ),
       ],
     );
