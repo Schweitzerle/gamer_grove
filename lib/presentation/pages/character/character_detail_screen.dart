@@ -370,16 +370,15 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             const SizedBox(
                 height: AppConstants.paddingLarge), // Space for floating card
 
-            // Character Information Accordion
-            if (widget.character.hasDescription)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium),
-                child: _buildCharacterInfoAccordion(),
-              ),
+            // Combined Character Information and Details Accordion
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium),
+              child: _buildCombinedCharacterAccordion(),
+            ),
 
-            const SizedBox(height: 16),
-
+            const SizedBox(height: 20),
+            // Bottom spacing
             // Character Games Section
             if (widget.games.isNotEmpty)
               Padding(
@@ -390,41 +389,205 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
               ),
 
             const SizedBox(height: 16),
-
-            // Character Details Accordion
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium),
-              child: _buildCharacterDetailsAccordion(),
-            ),
-
-            const SizedBox(height: 20), // Bottom spacing
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCharacterInfoAccordion() {
+  Widget _buildCombinedCharacterAccordion() {
     return Card(
       elevation: 2,
-      child: AccordionTile(
-        title: 'Character Information',
-        icon: Icons.info_outline,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.character.description!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.5,
+      child: Column(
+        children: [
+          // Character Information (if available)
+          if (widget.character.hasDescription)
+            AccordionTile(
+              title: 'Character Information',
+              icon: Icons.info_outline,
+              isFirst: true,
+              isLast: false,
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingSmall,
+                ),
+                child: Stack(
+                  children: [
+                    // Main content container with gradient background
+                    Container(
+                      constraints: const BoxConstraints(
+                        maxHeight: 200,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.purple.withOpacity(0.05),
+                            Colors.blue.withOpacity(0.05),
+                            Colors.indigo.withOpacity(0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.purple.withOpacity(0.2),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Scrollable text
+                          SingleChildScrollView(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Decorative quote icon
+                                Icon(
+                                  Icons.format_quote,
+                                  size: 24,
+                                  color: Colors.purple.withOpacity(0.3),
+                                ),
+                                const SizedBox(height: 8),
+                                // Description text
+                                Text(
+                                  widget.character.description!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        height: 1.6,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                        fontStyle: FontStyle.italic,
+                                        letterSpacing: 0.2,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Closing quote
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Icon(
+                                    Icons.format_quote,
+                                    size: 24,
+                                    color: Colors.purple.withOpacity(0.3),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Bottom fade effect
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 40,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                  ],
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    // Scroll indicator hint
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.swipe_vertical,
+                              size: 12,
+                              color: Colors.purple.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Scroll',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.purple.withOpacity(0.6),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
+
+          // Identity & Details
+          AccordionTile(
+            title: 'Identity & Details',
+            icon: Icons.person,
+            isFirst: !widget.character.hasDescription,
+            isLast: true,
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingMedium,
+                vertical: AppConstants.paddingSmall,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  _buildEnhancedDetailCard(
+                    'Gender',
+                    widget.character.displayGender,
+                    Icons.person_outline,
+                    Colors.blue,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildEnhancedDetailCard(
+                    'Species',
+                    widget.character.displaySpecies,
+                    Icons.pets_outlined,
+                    Colors.green,
+                  ),
+                  if (widget.character.countryName != null) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedDetailCard(
+                      'Country',
+                      widget.character.countryName!,
+                      Icons.location_on_outlined,
+                      Colors.orange,
+                    ),
+                  ],
+                  if (widget.character.akas.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedDetailCard(
+                      'Also Known As',
+                      widget.character.akas.join(', '),
+                      Icons.label_outline,
+                      Colors.purple,
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -566,72 +729,40 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     );
   }
 
-  Widget _buildCharacterDetailsAccordion() {
-    return Card(
-      elevation: 2,
-      child: Column(
-        children: [
-          // Identity Details
-          AccordionTile(
-            title: 'Identity & Details',
-            icon: Icons.person,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildDetailRow(
-                      'Gender', widget.character.displayGender, Icons.person),
-                  _buildDetailRow(
-                      'Species', widget.character.displaySpecies, Icons.pets),
-                  if (widget.character.countryName != null)
-                    _buildDetailRow('Country', widget.character.countryName!,
-                        Icons.location_on),
-                  if (widget.character.akas.isNotEmpty)
-                    _buildDetailRow(
-                      'Also Known As',
-                      widget.character.akas.join(', '),
-                      Icons.label,
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // Technical Details
-          AccordionTile(
-            title: 'Technical Information',
-            icon: Icons.code,
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.paddingMedium),
-              child: Column(
-                children: [
-                  _buildTechnicalRow(
-                      'Character ID', widget.character.id.toString()),
-                  if (widget.character.slug != null)
-                    _buildTechnicalRow('Slug', widget.character.slug!),
-                  _buildTechnicalRow('Games Count',
-                      widget.character.gameIds.length.toString()),
-                  _buildTechnicalRow('Checksum', widget.character.checksum),
-                ],
-              ),
-            ),
-          ),
-        ],
+  Widget _buildEnhancedDetailCard(
+    String label,
+    String value,
+    IconData icon,
+    Color accentColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: accentColor.withOpacity(0.2),
+          width: 1,
+        ),
       ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // Icon with colored background
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: accentColor,
+            ),
           ),
           const SizedBox(width: 12),
+          // Label and Value
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,13 +772,18 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
+                        fontSize: 11,
                       ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -657,34 +793,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     );
   }
 
-  Widget _buildTechnicalRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _logCharacterData() {
     print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED (BLOC) ===');
