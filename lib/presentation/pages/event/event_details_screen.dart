@@ -421,20 +421,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             const SizedBox(height: AppConstants.paddingLarge),
             // Space for floating card
 
-            // Event Information Accordion
+            // Combined Event Information and Details Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
                   horizontal: AppConstants.paddingMedium),
-              child: _buildEventInfoAccordion(),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Event Details Accordion (ohne Technical Details)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium),
-              child: _buildEventDetailsAccordion(),
+              child: _buildCombinedEventAccordion(),
             ),
 
             const SizedBox(height: 16),
@@ -445,19 +436,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppConstants.paddingMedium),
                 child: _buildTabView(context, _createEventGamesSeriesItem()),
-              ),
-
-            // Event Networks (unchanged!)
-            if (widget.event.hasNetworkObjects)
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.paddingMedium),
-                    child: _buildEventNetworksCard(context),
-                  ),
-                ],
               ),
 
             if (widget.event.hasVideos)
@@ -480,77 +458,233 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return event.games.take(10).toList();
   }
 
-  Widget _buildEventInfoAccordion() {
+  Widget _buildCombinedEventAccordion() {
+    // Count total accordion items to determine isFirst/isLast
+    int accordionCount = 0;
+    if (widget.event.hasDescription) accordionCount++;
+    accordionCount++; // Event Information always present
+    if (widget.event.hasNetworkObjects) accordionCount++;
+
+    int currentIndex = 0;
+
     return Card(
       elevation: 2,
-      child: AccordionTile(
-        title: 'Event Information',
-        icon: Icons.info_outline,
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Event Status
-              _buildInfoRow(
-                Icons.flag,
-                'Status',
-                _getEventStatusText(),
-                statusColor: _getEventStatusColor(),
-              ),
-
-              // Start Time
-              if (widget.event.startTime != null)
-                _buildInfoRow(
-                  Icons.schedule,
-                  'Start Time',
-                  DateFormatter.formatEventDateTime(widget.event.startTime!),
+      child: Column(
+        children: [
+          // Description Accordion (enhanced like Character)
+          if (widget.event.hasDescription) ...[
+            AccordionTile(
+              title: 'Event Description',
+              icon: Icons.description,
+              isFirst: currentIndex == 0,
+              isLast: currentIndex == accordionCount - 1,
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingSmall,
                 ),
-
-              // End Time
-              if (widget.event.endTime != null)
-                _buildInfoRow(
-                  Icons.schedule_send,
-                  'End Time',
-                  DateFormatter.formatEventDateTime(widget.event.endTime!),
-                ),
-
-              // Duration
-              if (widget.event.duration != null)
-                _buildInfoRow(
-                  Icons.timer,
-                  'Duration',
-                  _formatDuration(widget.event.duration!),
-                ),
-
-              // Timezone
-              if (widget.event.timeZone != null)
-                _buildInfoRow(
-                  Icons.public,
-                  'Timezone',
-                  widget.event.timeZone!,
-                ),
-
-              // Games Count
-              if (widget.event.hasGames)
-                _buildInfoRow(
-                  Icons.videogame_asset,
-                  'Featured Games',
-                  '${widget.event.gameCount} games',
-                ),
-
-              // Videos Count
-              if (widget.event.hasVideos)
-                _buildInfoRow(
-                  Icons.play_circle_outline,
-                  'Videos',
-                  '${widget.event.videoCount} videos',
-                ),
-
-              // Live Stream Button (if available)
-              if (widget.event.hasLiveStream)
-                Column(
+                child: Stack(
                   children: [
+                    // Main content container with gradient background
+                    Container(
+                      constraints: const BoxConstraints(
+                        maxHeight: 200,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _getEventStatusColor().withOpacity(0.05),
+                            _getEventStatusColor().withOpacity(0.08),
+                            _getEventStatusColor().withOpacity(0.10),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _getEventStatusColor().withOpacity(0.2),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Scrollable text
+                          SingleChildScrollView(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Decorative quote icon
+                                Icon(
+                                  Icons.format_quote,
+                                  size: 24,
+                                  color: _getEventStatusColor().withOpacity(0.3),
+                                ),
+                                const SizedBox(height: 8),
+                                // Description text
+                                Text(
+                                  widget.event.description!,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        height: 1.6,
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                        fontStyle: FontStyle.italic,
+                                        letterSpacing: 0.2,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Closing quote
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Icon(
+                                    Icons.format_quote,
+                                    size: 24,
+                                    color: _getEventStatusColor().withOpacity(0.3),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Bottom fade effect
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 40,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                  ],
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Scroll indicator hint
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getEventStatusColor().withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.swipe_vertical,
+                              size: 12,
+                              color: _getEventStatusColor().withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Scroll',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: _getEventStatusColor().withOpacity(0.6),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Builder(builder: (context) {
+              currentIndex++;
+              return const SizedBox.shrink();
+            }),
+          ],
+
+          // Event Information Accordion
+          AccordionTile(
+            title: 'Event Information',
+            icon: Icons.info_outline,
+            isFirst: currentIndex == 0,
+            isLast: currentIndex == accordionCount - 1,
+            child: Container(
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingMedium,
+                vertical: AppConstants.paddingSmall,
+              ),
+              child: Column(
+                children: [
+                  _buildEnhancedInfoCard(
+                    'Status',
+                    _getEventStatusText(),
+                    Icons.flag,
+                    _getEventStatusColor(),
+                  ),
+                  if (widget.event.startTime != null) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'Start Time',
+                      DateFormatter.formatEventDateTime(widget.event.startTime!),
+                      Icons.schedule,
+                      Colors.green,
+                    ),
+                  ],
+                  if (widget.event.endTime != null) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'End Time',
+                      DateFormatter.formatEventDateTime(widget.event.endTime!),
+                      Icons.schedule_send,
+                      Colors.orange,
+                    ),
+                  ],
+                  if (widget.event.duration != null) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'Duration',
+                      _formatDuration(widget.event.duration!),
+                      Icons.timer,
+                      Colors.blue,
+                    ),
+                  ],
+                  if (widget.event.timeZone != null) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'Timezone',
+                      widget.event.timeZone!,
+                      Icons.public,
+                      Colors.purple,
+                    ),
+                  ],
+                  if (widget.event.hasGames) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'Featured Games',
+                      '${widget.event.gameCount} games',
+                      Icons.videogame_asset,
+                      Colors.indigo,
+                    ),
+                  ],
+                  if (widget.event.hasVideos) ...[
+                    const SizedBox(height: 8),
+                    _buildEnhancedInfoCard(
+                      'Videos',
+                      '${widget.event.videoCount} videos',
+                      Icons.play_circle_outline,
+                      Colors.red,
+                    ),
+                  ],
+                  if (widget.event.hasLiveStream) ...[
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
@@ -567,57 +701,72 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                     ),
                   ],
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventDetailsAccordion() {
-    return Card(
-      elevation: 2,
-      child: Column(
-        children: [
-          // Accordion Items
-          if (widget.event.hasDescription)
-            AccordionTile(
-              title: 'Description',
-              icon: Icons.description,
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                child: Text(
-                  widget.event.description!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.5,
-                      ),
-                ),
+                  const SizedBox(height: 4),
+                ],
               ),
             ),
+          ),
+          Builder(builder: (context) {
+            currentIndex++;
+            return const SizedBox.shrink();
+          }),
 
-          if (widget.event.hasNetworks)
+          // Links & Networks Accordion
+          if (widget.event.hasNetworkObjects)
             AccordionTile(
               title: 'Links & Networks',
               icon: Icons.link,
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              isFirst: false,
+              isLast: true,
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingMedium,
+                  vertical: AppConstants.paddingSmall,
+                ),
                 child: Column(
-                  children: [
-                    if (widget.event.hasLiveStream)
-                      _buildNetworkLink(
-                        'Live Stream',
-                        widget.event.liveStreamUrl!,
-                        Icons.live_tv,
-                        Colors.red,
+                  children: widget.event.eventNetworks.map((network) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: network.platformColor.withOpacity(0.2),
+                          width: 1,
+                        ),
                       ),
-                    _buildNetworkLink(
-                      'Event Information',
-                      'https://example.com/event/${widget.event.slug ?? widget.event.id}',
-                      Icons.web,
-                      Colors.blue,
-                    ),
-                  ],
+                      child: ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: network.platformColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            network.platformIcon,
+                            color: network.platformColor,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          network.platformName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          network.url,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Icons.open_in_new, size: 20),
+                        onTap: () => _launchUrl(network.url),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -626,23 +775,40 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(
-    IconData icon,
+  Widget _buildEnhancedInfoCard(
     String label,
-    String value, {
-    Color? statusColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    String value,
+    IconData icon,
+    Color accentColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: accentColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color:
-                statusColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+          // Icon with colored background
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: accentColor,
+            ),
           ),
           const SizedBox(width: 12),
+          // Label and Value
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -652,53 +818,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
+                        fontSize: 11,
                       ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: statusColor,
+                        fontSize: 14,
                       ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNetworkLink(
-    String label,
-    String url,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        title: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          url,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 12,
-          ),
-        ),
-        trailing: const Icon(Icons.open_in_new),
-        onTap: () => _launchUrl(url),
       ),
     );
   }
@@ -903,54 +1039,4 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildEventNetworksCard(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Event Links & Networks',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-
-            // Event Networks List
-            ...widget.event.eventNetworks.map((network) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: network.platformColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      network.platformIcon,
-                      color: network.platformColor,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(
-                    network.platformName,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    network.url,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  trailing: const Icon(Icons.open_in_new),
-                  onTap: () => _launchUrl(network.url),
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
 }
