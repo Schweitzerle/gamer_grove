@@ -4,6 +4,7 @@
 
 // lib/presentation/pages/game_engine_detail/game_engine_detail_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
@@ -147,7 +148,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
       tag: 'game_engine_hero_${widget.gameEngine.id}',
       child: widget.gameEngine.hasLogo && widget.gameEngine.logoUrl != null
           ? CachedImageWidget(
-              imageUrl: widget.gameEngine.logoUrl!,
+              imageUrl: ImageUtils.getLargeImageUrl(widget.gameEngine.logoUrl),
               fit: BoxFit.cover,
               placeholder: _buildFallbackHero(),
             )

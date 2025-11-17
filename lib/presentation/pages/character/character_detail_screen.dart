@@ -4,6 +4,7 @@
 
 // lib/presentation/pages/character_detail/character_detail_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/cached_image_widget.dart';
 import '../../../domain/entities/character/character.dart';
@@ -131,7 +132,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       tag: 'character_hero_${widget.character.id}',
       child: widget.character.hasImage
           ? CachedImageWidget(
-              imageUrl: widget.character.largeUrl ?? widget.character.imageUrl!,
+              imageUrl: ImageUtils.getLargeImageUrl(
+                  widget.character.largeUrl ?? widget.character.imageUrl),
               fit: BoxFit.cover,
               placeholder: _buildFallbackHero(),
             )
@@ -453,9 +455,14 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                 // Description text
                                 Text(
                                   widget.character.description!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
                                         height: 1.6,
-                                        color: Theme.of(context).colorScheme.onSurface,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
                                         fontStyle: FontStyle.italic,
                                         letterSpacing: 0.2,
                                       ),
@@ -486,7 +493,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .surface
+                                        .withOpacity(0.8),
                                   ],
                                 ),
                                 borderRadius: const BorderRadius.only(
@@ -504,7 +514,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                       bottom: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.purple.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -738,7 +749,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withOpacity(0.5),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: accentColor.withOpacity(0.2),
@@ -792,7 +806,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       ),
     );
   }
-
 
   void _logCharacterData() {
     print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED (BLOC) ===');
