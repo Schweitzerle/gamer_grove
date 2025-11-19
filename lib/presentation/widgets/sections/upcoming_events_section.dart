@@ -99,21 +99,22 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
 
   Widget _buildEventsCarousel(List<Event> events) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
       child: Card(
         margin: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingMedium,
+          horizontal: AppConstants.paddingSmall,
         ),
         color: Theme.of(context).colorScheme.surface,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding:
+              const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,
+                  horizontal: AppConstants.paddingSmall,
                 ),
                 child: Row(
                   children: [
