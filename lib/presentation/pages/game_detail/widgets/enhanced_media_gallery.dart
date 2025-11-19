@@ -242,7 +242,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
               Hero(
                 tag: 'image_${type}_$index',
                 child: CachedImageWidget(
-                  imageUrl: ImageUtils.getMediumImageUrl(imageUrl),
+                  imageUrl: ImageUtils.getLargeImageUrl(imageUrl),
                   fit: BoxFit.cover,
                   placeholder: Container(
                     color:
@@ -513,6 +513,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
             images: images,
             initialIndex: initialIndex,
             title: type == 'screenshot' ? 'Screenshots' : 'Artworks',
+            gameName: widget.game?.name ?? '',
           ),
         ),
         transitionDuration: const Duration(milliseconds: 300),
@@ -527,6 +528,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
           images: images,
           title: type == 'screenshot' ? 'All Screenshots' : 'All Artworks',
           type: type,
+          gameName: widget.game?.name ?? '',
         ),
       ),
     );
@@ -549,6 +551,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
         builder: (context) => AllVideosGrid(
           videos: videos,
           title: 'All Videos',
+          gameName: widget.game?.name ?? '',
         ),
       ),
     );

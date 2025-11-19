@@ -12,20 +12,65 @@ class AllImagesGrid extends StatelessWidget {
   final List<String> images;
   final String title;
   final String type;
+  final String gameName;
 
   const AllImagesGrid({
     super.key,
     required this.images,
     required this.title,
     required this.type,
+    required this.gameName,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
-        centerTitle: true,
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    gameName,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${images.length}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: false,
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(12),
@@ -54,6 +99,7 @@ class AllImagesGrid extends StatelessWidget {
                           images: images,
                           initialIndex: index,
                           title: title,
+                          gameName: gameName,
                         ),
                       ),
                       transitionDuration: const Duration(milliseconds: 300),
@@ -63,7 +109,7 @@ class AllImagesGrid extends StatelessWidget {
                 child: Hero(
                   tag: 'grid_image_$index',
                   child: CachedImageWidget(
-                    imageUrl: ImageUtils.getMediumImageUrl(images[index]),
+                    imageUrl: ImageUtils.getLargeImageUrl(images[index]),
                     fit: BoxFit.cover,
                     placeholder: Container(
                       color:

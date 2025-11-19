@@ -257,25 +257,30 @@ class _UserGameListPageState extends State<UserGameListPage> {
         horizontal: AppConstants.paddingMedium,
         vertical: AppConstants.paddingSmall,
       ),
-      child: Row(
-        children: [
-          Text(
-            'Showing ${_displayedGames.length} of '
-            '${_filteredAndSortedGames.length} games',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          const Spacer(),
-          TextButton.icon(
-            onPressed: _showSortDialog,
-            icon: const Icon(Icons.sort, size: 16),
-            label: Text(_getCurrentSortName()),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Showing ${_displayedGames.length} of '
+              '${_filteredAndSortedGames.length} games',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            TextButton.icon(
+              onPressed: _showSortDialog,
+              icon: const Icon(Icons.sort, size: 16),
+              label: Text(_getCurrentSortName()),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -300,7 +305,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
 
         // Get logged-in user ID
         final authState = context.read<AuthBloc>().state;
-        final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+        final loggedInUserId =
+            authState is AuthAuthenticated ? authState.user.id : null;
 
         // Only show other user states if viewing a different user's profile
         final isDifferentUser = widget.userId != loggedInUserId;
@@ -314,7 +320,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
           otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
           otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
           otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
-          otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
+          otherUserTopThreePosition:
+              isDifferentUser ? game.topThreePosition : null,
         );
       },
     );
@@ -336,7 +343,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
 
         // Get logged-in user ID
         final authState = context.read<AuthBloc>().state;
-        final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+        final loggedInUserId =
+            authState is AuthAuthenticated ? authState.user.id : null;
 
         // Only show other user states if viewing a different user's profile
         final isDifferentUser = widget.userId != loggedInUserId;
@@ -350,7 +358,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
           otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
           otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
           otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
-          otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
+          otherUserTopThreePosition:
+              isDifferentUser ? game.topThreePosition : null,
         );
       },
     );

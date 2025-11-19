@@ -150,7 +150,7 @@ class ActivityContent extends StatelessWidget {
         _buildTopThreeCircle(context, position),
         const SizedBox(height: 8),
         SizedBox(
-          width: 100,
+          width: 140,
           child: AspectRatio(
             aspectRatio: 2 / 3,
             child: GameCard(
@@ -218,8 +218,8 @@ class ActivityContent extends StatelessWidget {
     final color = ColorScales.getTopThreeColor(position);
 
     return Container(
-      width: 56,
-      height: 56,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.black.withOpacity(0.75),

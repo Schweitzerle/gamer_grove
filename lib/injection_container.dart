@@ -17,6 +17,7 @@ import 'package:gamer_grove/domain/usecases/auth/sign_up.dart';
 import 'package:gamer_grove/domain/usecases/auth/update_password.dart';
 import 'package:gamer_grove/domain/usecases/characters/get_character_with_games.dart';
 import 'package:gamer_grove/domain/usecases/company/get_company_with_games.dart';
+import 'package:gamer_grove/domain/usecases/event/advanced_event_search.dart';
 import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
 import 'package:gamer_grove/domain/usecases/event/get_current_events.dart';
 import 'package:gamer_grove/domain/usecases/event/get_event_details.dart';
@@ -102,11 +103,13 @@ import 'data/repositories/auth_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/game_repository_impl.dart';
 import 'data/repositories/user_repository_impl.dart';
 import 'data/repositories/event_repository_impl.dart';
+import 'data/repositories/character_repository_impl.dart';
 // Domain Layer - Repositories (Interfaces)
 import 'domain/repositories/auth_repository.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'domain/repositories/user_repository.dart';
 import 'domain/repositories/event_repository.dart';
+import 'domain/repositories/character_repository.dart';
 // Presentation Layer - BLoCs
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/collection/collection_bloc.dart';
@@ -257,6 +260,7 @@ Future<void> initDependencies() async {
       () => CharacterBloc(
         getCharacterWithGames: sl(),
         enrichmentService: sl(),
+        characterRepository: sl(),
       ),
     )
     ..registerFactory(
@@ -269,6 +273,7 @@ Future<void> initDependencies() async {
         getEventsByDateRange: sl(),
         getEventsByGames: sl(),
         getCompleteEventDetails: sl(),
+        advancedEventSearch: sl(),
       ),
     )
     ..registerFactory(
@@ -402,6 +407,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetEventsByGames(sl()))
     ..registerLazySingleton(() =>
         GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()))
+    ..registerLazySingleton(() => AdvancedEventSearch(sl()))
 
     // Platform Use Cases
     ..registerLazySingleton(() => GetPlatformWithGames(sl()))
@@ -436,6 +442,12 @@ Future<void> initDependencies() async {
     )
     ..registerLazySingleton<EventRepository>(
       () => EventRepositoryImpl(
+        igdbDataSource: sl(),
+        networkInfo: sl(),
+      ),
+    )
+    ..registerLazySingleton<CharacterRepository>(
+      () => CharacterRepositoryImpl(
         igdbDataSource: sl(),
         networkInfo: sl(),
       ),

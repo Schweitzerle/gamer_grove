@@ -89,109 +89,123 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-          width: 1,
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(_pulseAnimation.value),
-                      shape: BoxShape.circle,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(_pulseAnimation.value),
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
                     ),
-                  );
-                },
-              ),
-              const SizedBox(width: 12),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // Console-style output
-          Container(
-            constraints: const BoxConstraints(maxHeight: 300),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (int i = 0; i <= currentStepIndex && i < widget.steps.length; i++)
-                    _buildLoadingStep(widget.steps[i], i == currentStepIndex),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Progress Bar
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: (currentStepIndex + 1) / widget.steps.length,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                    ],
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                  borderRadius: BorderRadius.circular(2),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Console-style output
+            Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (int i = 0;
+                        i <= currentStepIndex && i < widget.steps.length;
+                        i++)
+                      _buildLoadingStep(widget.steps[i], i == currentStepIndex),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
-          // Progress Text
-          Text(
-            '${currentStepIndex + 1}/${widget.steps.length} steps completed',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 12,
-              fontFamily: 'monospace',
+            // Progress Bar
+            Container(
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: (currentStepIndex + 1) / widget.steps.length,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 8),
+
+            // Progress Text
+            Text(
+              '${currentStepIndex + 1}/${widget.steps.length} steps completed',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 12,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildLoadingStep(LoadingStep step, bool isActive) {
-    final isCompleted = !isActive && widget.steps.indexOf(step) < currentStepIndex;
+    final isCompleted =
+        !isActive && widget.steps.indexOf(step) < currentStepIndex;
+    final stepColor = step.color ?? Theme.of(context).colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -204,31 +218,36 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
             height: 20,
             margin: const EdgeInsets.only(right: 12),
             child: isCompleted
-                ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary, size: 16)
+                ? Icon(Icons.check_circle,
+                    color: Theme.of(context).colorScheme.primary, size: 16)
                 : isActive
-                ? AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) {
-                return Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: step.color.withOpacity(_pulseAnimation.value),
-                    shape: BoxShape.circle,
-                  ),
-                );
-              },
-            )
-                : Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-            ),
+                    ? AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color:
+                                  stepColor.withOpacity(_pulseAnimation.value),
+                              shape: BoxShape.circle,
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
           ),
 
           // Step Content
@@ -239,63 +258,82 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                 // Step Text with Typewriter Effect
                 isActive
                     ? AnimatedBuilder(
-                  animation: _typewriterAnimation,
-                  builder: (context, child) {
-                    final visibleLength = (step.text.length * _typewriterAnimation.value).round();
-                    final visibleText = step.text.substring(0, visibleLength);
+                        animation: _typewriterAnimation,
+                        builder: (context, child) {
+                          final visibleLength =
+                              (step.text.length * _typewriterAnimation.value)
+                                  .round();
+                          final visibleText =
+                              step.text.substring(0, visibleLength);
 
-                    return RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '> ',
-                            style: TextStyle(
-                              color: step.color,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
+                          return RichText(
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '> ',
+                                  style: TextStyle(
+                                    color: stepColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: visibleText,
+                                  style: TextStyle(
+                                    color: stepColor,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                if (visibleLength < step.text.length &&
+                                    _typewriterAnimation.value < 1.0)
+                                  TextSpan(
+                                    text: '▌',
+                                    style: TextStyle(
+                                      color: stepColor,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                              ],
                             ),
-                          ),
-                          TextSpan(
-                            text: visibleText,
-                            style: TextStyle(
-                              color: step.color,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                          if (visibleLength < step.text.length && _typewriterAnimation.value < 1.0)
+                          );
+                        },
+                      )
+                    : RichText(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        text: TextSpan(
+                          children: [
                             TextSpan(
-                              text: '▌',
+                              text: isCompleted ? '✓ ' : '  ',
                               style: TextStyle(
-                                color: step.color,
+                                color: isCompleted
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
                                 fontFamily: 'monospace',
                               ),
                             ),
-                        ],
-                      ),
-                    );
-                  },
-                )
-                    : RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: isCompleted ? '✓ ' : '  ',
-                        style: TextStyle(
-                          color: isCompleted ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'monospace',
+                            TextSpan(
+                              text: step.text,
+                              style: TextStyle(
+                                color: isCompleted
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.8)
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      TextSpan(
-                        text: step.text,
-                        style: TextStyle(
-                          color: isCompleted ? Theme.of(context).colorScheme.primary.withOpacity(0.8) : Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
                 // Substep (if any)
                 if (step.substep != null && isActive)
@@ -304,7 +342,7 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                     child: Text(
                       '  └─ ${step.substep}',
                       style: TextStyle(
-                        color: step.color.withOpacity(0.7),
+                        color: stepColor.withOpacity(0.7),
                         fontSize: 12,
                         fontFamily: 'monospace',
                       ),
@@ -326,13 +364,13 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
 class LoadingStep {
   final String text;
   final String? substep;
-  final Color color;
+  final Color? color;
   final IconData? icon;
 
   const LoadingStep({
     required this.text,
     this.substep,
-    this.color = Colors.green,
+    this.color,
     this.icon,
   });
 }
@@ -343,181 +381,181 @@ class LoadingStep {
 
 class EventLoadingSteps {
   static List<LoadingStep> eventDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Initializing event loader...',
-      substep: 'Setting up data sources',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching event details from IGDB...',
-      substep: 'Retrieving event metadata',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Loading featured games...',
-      substep: 'Processing game collections',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Enriching event data...',
-      substep: 'Fetching networks and media',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing event details...',
-      substep: 'Preparing UI components',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Initializing event loader...',
+          substep: 'Setting up data sources',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching event details from IGDB...',
+          substep: 'Retrieving event metadata',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Loading featured games...',
+          substep: 'Processing game collections',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Enriching event data...',
+          substep: 'Fetching networks and media',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing event details...',
+          substep: 'Preparing UI components',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 
   static List<LoadingStep> gameDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Connecting to game database...',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching game information...',
-      substep: 'Loading metadata and screenshots',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Processing user data...',
-      substep: 'Checking ratings and collections',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Loading related content...',
-      substep: 'Franchises, DLCs, and similar games',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing game details...',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Connecting to game database...',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching game information...',
+          substep: 'Loading metadata and screenshots',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Processing user data...',
+          substep: 'Checking ratings and collections',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Loading related content...',
+          substep: 'Franchises, DLCs, and similar games',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing game details...',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 }
 
 class CharacterLoadingSteps {
   static List<LoadingStep> characterDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Connecting to character database...',
-      substep: 'Initializing IGDB connection',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching character profile...',
-      substep: 'Loading character metadata and images',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Processing character games...',
-      substep: 'Retrieving games featuring this character',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Enriching character data...',
-      substep: 'Loading additional character information',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing character details...',
-      substep: 'Preparing character profile display',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Connecting to character database...',
+          substep: 'Initializing IGDB connection',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching character profile...',
+          substep: 'Loading character metadata and images',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Processing character games...',
+          substep: 'Retrieving games featuring this character',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Enriching character data...',
+          substep: 'Loading additional character information',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing character details...',
+          substep: 'Preparing character profile display',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 }
 
 class PlatformLoadingSteps {
   static List<LoadingStep> platformDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Connecting to platform database...',
-      substep: 'Initializing IGDB connection',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching platform profile...',
-      substep: 'Loading platform metadata',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Processing platform games...',
-      substep: 'Retrieving games published on this platform',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Enriching platform data...',
-      substep: 'Loading additional platform information',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing platform details...',
-      substep: 'Preparing platform profile display',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Connecting to platform database...',
+          substep: 'Initializing IGDB connection',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching platform profile...',
+          substep: 'Loading platform metadata',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Processing platform games...',
+          substep: 'Retrieving games published on this platform',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Enriching platform data...',
+          substep: 'Loading additional platform information',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing platform details...',
+          substep: 'Preparing platform profile display',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 }
 
 class GameEngineLoadingSteps {
   static List<LoadingStep> gameEngineDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Connecting to game engine database...',
-      substep: 'Initializing IGDB connection',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching game engine profile...',
-      substep: 'Loading game engine metadata',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Processing game engine games...',
-      substep: 'Retrieving games published on this game engine',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Enriching game engine data...',
-      substep: 'Loading additional game engine information',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing game engine details...',
-      substep: 'Preparing game engine profile display',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Connecting to game engine database...',
+          substep: 'Initializing IGDB connection',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching game engine profile...',
+          substep: 'Loading game engine metadata',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Processing game engine games...',
+          substep: 'Retrieving games published on this game engine',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Enriching game engine data...',
+          substep: 'Loading additional game engine information',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing game engine details...',
+          substep: 'Preparing game engine profile display',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 }
 
 class CompanyLoadingSteps {
   static List<LoadingStep> companyDetails(BuildContext context) => [
-    LoadingStep(
-      text: 'Connecting to company database...',
-      substep: 'Initializing IGDB connection',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Fetching company profile...',
-      substep: 'Loading company metadata and logo',
-      color: Theme.of(context).colorScheme.tertiary,
-    ),
-    LoadingStep(
-      text: 'Processing developed games...',
-      substep: 'Retrieving games developed by this company',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Processing published games...',
-      substep: 'Retrieving games published by this company',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-    LoadingStep(
-      text: 'Enriching company data...',
-      substep: 'Loading parent company and websites',
-      color: Theme.of(context).colorScheme.secondary,
-    ),
-    LoadingStep(
-      text: 'Finalizing company details...',
-      substep: 'Preparing company profile display',
-      color: Theme.of(context).colorScheme.primary,
-    ),
-  ];
+        LoadingStep(
+          text: 'Connecting to company database...',
+          substep: 'Initializing IGDB connection',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Fetching company profile...',
+          substep: 'Loading company metadata and logo',
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        LoadingStep(
+          text: 'Processing developed games...',
+          substep: 'Retrieving games developed by this company',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Processing published games...',
+          substep: 'Retrieving games published by this company',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        LoadingStep(
+          text: 'Enriching company data...',
+          substep: 'Loading parent company and websites',
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        LoadingStep(
+          text: 'Finalizing company details...',
+          substep: 'Preparing company profile display',
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ];
 }

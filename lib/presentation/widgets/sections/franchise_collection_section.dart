@@ -7,7 +7,7 @@ import '../../../../domain/entities/game/game.dart';
 import '../../../../domain/entities/franchise.dart';
 import '../../../../domain/entities/collection/collection.dart';
 
-class FranchiseCollectionsSection extends StatelessWidget {
+class FranchiseCollectionsSection extends StatefulWidget {
   final Game game;
 
   const FranchiseCollectionsSection({
@@ -16,25 +16,35 @@ class FranchiseCollectionsSection extends StatelessWidget {
   });
 
   @override
+  State<FranchiseCollectionsSection> createState() =>
+      _FranchiseCollectionsSectionState();
+}
+
+class _FranchiseCollectionsSectionState
+    extends State<FranchiseCollectionsSection> {
+  bool _isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
     // Collect all series data
     final seriesItems = <SeriesItem>[];
 
     // Add Main Franchise first (if exists)
-    if (game.mainFranchise != null && game.mainFranchise!.hasGames) {
+    if (widget.game.mainFranchise != null &&
+        widget.game.mainFranchise!.hasGames) {
       seriesItems.add(SeriesItem(
         type: SeriesType.mainFranchise,
-        title: game.mainFranchise!.name,
-        games: _getFranchiseGames(game.mainFranchise!),
-        totalCount: game.mainFranchise!.gameCount,
-        franchise: game.mainFranchise,
+        title: widget.game.mainFranchise!.name,
+        games: _getFranchiseGames(widget.game.mainFranchise!),
+        totalCount: widget.game.mainFranchise!.gameCount,
+        franchise: widget.game.mainFranchise,
         accentColor: Colors.orange,
         icon: Icons.stars,
       ));
     }
 
     // Add Other Franchises
-    for (final franchise in game.franchises) {
+    for (final franchise in widget.game.franchises) {
       if (franchise.hasGames) {
         seriesItems.add(SeriesItem(
           type: SeriesType.franchise,
@@ -49,7 +59,7 @@ class FranchiseCollectionsSection extends StatelessWidget {
     }
 
     // Add Collections
-    for (final collection in game.collections) {
+    for (final collection in widget.game.collections) {
       if (collection.hasGames) {
         seriesItems.add(SeriesItem(
           type: SeriesType.collection,
@@ -67,70 +77,205 @@ class FranchiseCollectionsSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    // Calculate totals for preview
+    final totalGames =
+        seriesItems.fold<int>(0, (sum, item) => sum + item.totalCount);
+
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppConstants.paddingMedium,
         vertical: AppConstants.paddingMedium,
       ),
-      child: Card(
-        elevation: 2,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isExpanded
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            width: _isExpanded ? 1.5 : 1,
+          ),
+          color: _isExpanded
+              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05)
+              : Theme.of(context).colorScheme.surface,
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section Header
-            _buildSectionHeader(context),
-
-            // Individual Tabs for each Series
-            DefaultTabController(
-              length: seriesItems.length,
-              child: Column(
-                children: [
-                  // Tab Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withOpacity(0.2),
-                          width: 1,
+            // Accordion Header (clickable)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _isExpanded = !_isExpanded),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: _isExpanded
+                      ? BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(0.1),
+                              Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
+                        )
+                      : null,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _isExpanded
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.15)
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: _isExpanded
+                              ? [
+                                  BoxShadow(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          Icons.account_tree,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
                         ),
                       ),
-                    ),
-                    child: TabBar(
-                      isScrollable: seriesItems.length >
-                          3, // Scrollable if more than 3 tabs
-                      tabs: seriesItems
-                          .map((item) => _buildTab(context, item))
-                          .toList(),
-                      labelColor: Theme.of(context).colorScheme.primary,
-                      unselectedLabelColor:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                      indicatorColor: Theme.of(context).colorScheme.primary,
-                      indicatorWeight: 2,
-                      labelStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Part of Series',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: _isExpanded
+                                        ? Theme.of(context).colorScheme.primary
+                                        : null,
+                                  ),
+                            ),
+                            if (!_isExpanded) ...[
+                              const SizedBox(height: 4),
+                              _buildPreview(context, seriesItems, totalGames),
+                            ],
+                          ],
+                        ),
                       ),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.normal,
+                      AnimatedRotation(
+                        turns: _isExpanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: _isExpanded
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                ),
+              ),
+            ),
 
-                  // Tab Views
-                  SizedBox(
-                    height:
-                        380, // Etwas mehr Platz für Header + normale GameCard
-                    child: TabBarView(
-                      children: seriesItems
-                          .map((item) => _buildTabView(context, item))
-                          .toList(),
+            // Accordion Content (expandable)
+            ClipRect(
+              child: AnimatedAlign(
+                alignment: Alignment.topCenter,
+                heightFactor: _isExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
                     ),
                   ),
-                ],
+                  child: DefaultTabController(
+                    length: seriesItems.length,
+                    child: Column(
+                      children: [
+                        // Tab Bar
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: TabBar(
+                            isScrollable: seriesItems.length > 3,
+                            tabs: seriesItems
+                                .map((item) => _buildTab(context, item))
+                                .toList(),
+                            labelColor: Theme.of(context).colorScheme.primary,
+                            unselectedLabelColor:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            indicatorColor:
+                                Theme.of(context).colorScheme.primary,
+                            indicatorWeight: 2,
+                            labelStyle: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            unselectedLabelStyle: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+
+                        // Tab Views
+                        SizedBox(
+                          height: 320,
+                          child: TabBarView(
+                            children: seriesItems
+                                .map((item) => _buildTabView(context, item))
+                                .toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -139,32 +284,53 @@ class FranchiseCollectionsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+  // Preview widget for collapsed state
+  Widget _buildPreview(
+      BuildContext context, List<SeriesItem> seriesItems, int totalGames) {
+    // Show tab names as preview
+    final tabNames = seriesItems.map((item) {
+      final icon = item.type == SeriesType.collection ? '📁' : '🎮';
+      return '$icon ${item.title}';
+    }).toList();
+
+    String previewText;
+    if (tabNames.length <= 2) {
+      previewText = tabNames.join(' • ');
+    } else {
+      previewText = '${tabNames.take(2).join(' • ')} • +${tabNames.length - 2}';
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            previewText,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              fontWeight: FontWeight.w500,
             ),
-            child: Icon(
-              Icons.account_tree,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            '$totalGames games',
+            style: TextStyle(
+              fontSize: 10,
               color: Theme.of(context).colorScheme.primary,
-              size: 20,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            'Part of Series',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -192,13 +358,16 @@ class FranchiseCollectionsSection extends StatelessWidget {
   }
 
   Widget _buildTabView(BuildContext context, SeriesItem item) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Series Info Header
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Series Info Header
+        Padding(
+          padding: const EdgeInsets.only(
+              left: AppConstants.paddingMedium,
+              right: AppConstants.paddingMedium,
+              top: AppConstants.paddingSmall),
+          child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -227,12 +396,14 @@ class FranchiseCollectionsSection extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      '${item.type?.displayName} • ${item.totalCount} games',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: item.accentColor,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    FittedBox(
+                      child: Text(
+                        '${item.type?.displayName} • ${item.totalCount} games',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: item.accentColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
                     ),
                   ],
                 ),
@@ -253,32 +424,33 @@ class FranchiseCollectionsSection extends StatelessWidget {
                 ),
             ],
           ),
+        ),
 
-          const SizedBox(height: AppConstants.paddingMedium),
+        const SizedBox(height: AppConstants.paddingMedium),
 
-          // Games List (normale Größe wieder!)
-          SizedBox(
-            height:
-                280, // Feste Höhe wie in base_game_section.dart - nicht stretched!
-            child: item.games.isNotEmpty
-                ? _buildGamesList(item.games)
-                : _buildNoGamesPlaceholder(context),
-          ),
-        ],
-      ),
+        // Games List (normale Größe wieder!)
+        Expanded(
+          child: item.games.isNotEmpty
+              ? _buildGamesList(item.games)
+              : _buildNoGamesPlaceholder(context),
+        ),
+        const SizedBox(height: AppConstants.paddingMedium),
+      ],
     );
   }
 
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        left: AppConstants.paddingMedium,
+      ),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
         return Container(
           width: 160, // Zurück zur normalen Größe! 🎉
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),

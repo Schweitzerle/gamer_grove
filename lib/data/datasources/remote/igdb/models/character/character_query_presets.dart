@@ -94,7 +94,6 @@ class CharacterQueryPresets {
       fields: CharacterFieldSets.standard,
       limit: limit,
       offset: offset,
-      sort: 'name asc',
     );
   }
 

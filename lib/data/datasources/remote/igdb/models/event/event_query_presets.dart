@@ -79,7 +79,7 @@ class EventQueryPresets {
     int limit = 20,
     int offset = 0,
     int daysAhead = 60,
-    int daysBack = 60,
+    int daysBack = 30,
   }) {
     final filter = CombinedFilter([
       EventFilters.between(
@@ -93,7 +93,7 @@ class EventQueryPresets {
       fields: EventFieldSets.cards,
       limit: limit,
       offset: offset,
-      sort: 'start_time asc',
+      sort: 'start_time desc',
     );
   }
 

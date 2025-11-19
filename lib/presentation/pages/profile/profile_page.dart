@@ -37,7 +37,7 @@ class ProfilePage extends StatelessWidget {
           builder: (context, state) {
             if (state is! AuthAuthenticated) {
               return const Center(
-                child: Text('Not logged in'),
+                child: CircularProgressIndicator(),
               );
             }
 

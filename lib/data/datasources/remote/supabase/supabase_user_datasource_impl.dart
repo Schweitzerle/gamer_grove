@@ -108,10 +108,10 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     // Validate username format (if being changed)
     if (updates.containsKey('username')) {
       final username = updates['username'] as String;
-      if (!RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(username)) {
+      if (!RegExp(r'^[a-zA-Z0-9_]{3,20}$').hasMatch(username)) {
         throw const InvalidProfileDataException(
           message:
-              'Username must be 3-20 characters, lowercase alphanumeric and underscores only',
+              'Username must be 3-20 characters, alphanumeric and underscores only',
         );
       }
     }
@@ -819,6 +819,66 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         targetUserId,
       ).build(_supabase);
       return result as Map<String, dynamic>;
+    } catch (e) {
+      throw UserExceptionMapper.map(e);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFollowedUsersGameRatings(
+    String currentUserId,
+    int gameId, {
+    int? limit,
+  }) async {
+    try {
+      // Get users that current user follows
+      final followingData = await getFollowing(
+        currentUserId,
+        limit: limit ?? 100,
+      );
+
+      if (followingData.isEmpty) return [];
+
+      final ratingsWithUsers = <Map<String, dynamic>>[];
+
+      // For each followed user, check if they rated this game
+      for (final followData in followingData) {
+        final userData = followData['users'] as Map<String, dynamic>?;
+        if (userData == null) continue;
+
+        final followedUserId = userData['id'] as String;
+        final showRatedGames = userData['show_rated_games'] as bool? ?? true;
+
+        // Respect privacy settings
+        if (!showRatedGames) continue;
+
+        // Get this user's rating for the specific game
+        final gameData = await _supabase
+            .from('user_games')
+            .select('rating, rated_at')
+            .eq('user_id', followedUserId)
+            .eq('game_id', gameId)
+            .not('rating', 'is', null)
+            .maybeSingle();
+
+        if (gameData != null && gameData['rating'] != null) {
+          ratingsWithUsers.add({
+            'user_id': followedUserId,
+            'username': userData['username'],
+            'display_name': userData['display_name'],
+            'avatar_url': userData['avatar_url'],
+            'rating': gameData['rating'],
+            'rated_at': gameData['rated_at'],
+          });
+        }
+      }
+
+      // Sort by rating descending
+      ratingsWithUsers.sort(
+        (a, b) => (b['rating'] as double).compareTo(a['rating'] as double),
+      );
+
+      return ratingsWithUsers;
     } catch (e) {
       throw UserExceptionMapper.map(e);
     }

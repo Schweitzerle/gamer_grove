@@ -17,6 +17,7 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/entities/event/event.dart';
+import '../../domain/entities/search/event_search_filters.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../datasources/remote/igdb/igdb_datasource.dart';
 import '../datasources/remote/igdb/models/igdb_query.dart';
@@ -111,6 +112,76 @@ class EventRepositoryImpl extends IgdbBaseRepository
         return igdbDataSource.queryEvents(searchQuery);
       },
       errorMessage: 'Failed to search events',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Event>>> advancedEventSearch({
+    required EventSearchFilters filters,
+    String? textQuery,
+    int limit = 20,
+    int offset = 0,
+  }) {
+    return executeIgdbOperation(
+      operation: () async {
+        // Build filters based on EventSearchFilters
+        final filterList = <IgdbFilter>[];
+
+        // Start time filters (we only filter by event start_time)
+        if (filters.startTimeFrom != null) {
+          filterList.add(EventFilters.startsAfter(filters.startTimeFrom!));
+        }
+        if (filters.startTimeTo != null) {
+          filterList.add(EventFilters.startsBefore(filters.startTimeTo!));
+        }
+
+        // Event networks filter
+        if (filters.eventNetworkIds.isNotEmpty) {
+          filterList.add(
+            AnyFilter('event_networks', filters.eventNetworkIds),
+          );
+        }
+
+        // Text search filter
+        if (textQuery != null && textQuery.trim().isNotEmpty) {
+          filterList.add(FieldFilter('name', '~', textQuery.trim()));
+        }
+
+        // Combine all filters (or null if no filters)
+        final combinedFilter = filterList.isEmpty
+            ? null
+            : (filterList.length == 1
+                ? filterList.first
+                : CombinedFilter(filterList));
+
+        // Determine sort order
+        final String sortField;
+        switch (filters.sortBy) {
+          case EventSortBy.startTime:
+            sortField = 'start_time';
+          case EventSortBy.endTime:
+            sortField = 'end_time';
+          case EventSortBy.name:
+            sortField = 'name';
+          case EventSortBy.relevance:
+            sortField = 'start_time';
+        }
+
+        final sortOrder = filters.sortOrder == EventSortOrder.ascending
+            ? 'asc'
+            : 'desc';
+
+        final query = IgdbEventQuery(
+          where: combinedFilter,
+          fields: EventFieldSets.cards,
+          limit: limit,
+          offset: offset,
+          sort: '$sortField $sortOrder',
+        );
+
+        return igdbDataSource.queryEvents(query);
+      },
+      errorMessage: 'Failed to perform advanced event search',
     );
   }
 

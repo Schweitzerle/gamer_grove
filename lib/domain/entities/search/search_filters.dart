@@ -150,6 +150,10 @@ class SearchFilters extends Equatable {
     this.sortOrder = SortOrder.descending,
   });
 
+  /// Returns true if sorting is different from default (relevance/descending)
+  bool get hasNonDefaultSort =>
+      sortBy != GameSortBy.relevance || sortOrder != SortOrder.descending;
+
   bool get hasFilters =>
       genreIds.isNotEmpty ||
       platformIds.isNotEmpty ||
@@ -180,7 +184,8 @@ class SearchFilters extends Equatable {
       gameEngineIds.isNotEmpty ||
       franchiseIds.isNotEmpty ||
       collectionIds.isNotEmpty ||
-      keywordIds.isNotEmpty;
+      keywordIds.isNotEmpty ||
+      hasNonDefaultSort;
 
   bool get hasGenreFilter => genreIds.isNotEmpty;
   bool get hasPlatformFilter => platformIds.isNotEmpty;

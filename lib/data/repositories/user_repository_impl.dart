@@ -1147,4 +1147,27 @@ class UserRepositoryImpl extends SupabaseBaseRepository
       errorMessage: 'Failed to delete user account',
     );
   }
+
+  // ============================================================
+  // FOLLOWED USERS GAME DATA
+  // ============================================================
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>>
+      getFollowedUsersGameRatings({
+    required String currentUserId,
+    required int gameId,
+    int limit = 100,
+  }) {
+    return executeSupabaseOperation(
+      operation: () async {
+        return userDataSource.getFollowedUsersGameRatings(
+          currentUserId,
+          gameId,
+          limit: limit,
+        );
+      },
+      errorMessage: 'Failed to get followed users game ratings',
+    );
+  }
 }

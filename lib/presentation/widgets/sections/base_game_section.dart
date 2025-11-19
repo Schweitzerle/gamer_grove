@@ -63,57 +63,73 @@ abstract class BaseGameSection extends StatelessWidget {
     VoidCallback? onViewAll,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+      child: Card(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingSmall,
+        ),
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingSmall,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                child: Row(
+                  children: [
+                    Icon(
+                      icon,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                    ),
+                    if (showViewAll && onViewAll != null)
+                      TextButton(
+                        onPressed: onViewAll,
+                        child: const Text('View All'),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-                if (showViewAll && onViewAll != null)
-                  TextButton(
-                    onPressed: onViewAll,
-                    child: const Text('View All'),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingSmall),
+              ),
+              const SizedBox(height: AppConstants.paddingSmall),
 
-          // Section Content
-          child,
-        ],
+              // Section Content
+              child,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -124,7 +140,7 @@ abstract class BaseGameSection extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingMedium,
+          horizontal: AppConstants.paddingSmall,
         ),
         itemCount: games.length,
         itemBuilder: (context, index) {
@@ -132,10 +148,12 @@ abstract class BaseGameSection extends StatelessWidget {
 
           // Get logged-in user ID
           final authState = context.read<AuthBloc>().state;
-          final loggedInUserId = authState is AuthAuthenticated ? authState.user.id : null;
+          final loggedInUserId =
+              authState is AuthAuthenticated ? authState.user.id : null;
 
           // Only show other user states if viewing a different user's profile
-          final isDifferentUser = currentUserId != null && currentUserId != loggedInUserId;
+          final isDifferentUser =
+              currentUserId != null && currentUserId != loggedInUserId;
 
           return Container(
             width: 160,
@@ -147,9 +165,11 @@ abstract class BaseGameSection extends StatelessWidget {
               otherUserId: isDifferentUser ? currentUserId : null,
               otherUserRating: isDifferentUser ? game.userRating : null,
               otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
-              otherUserIsRecommended: isDifferentUser ? game.isRecommended : null,
+              otherUserIsRecommended:
+                  isDifferentUser ? game.isRecommended : null,
               otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
-              otherUserTopThreePosition: isDifferentUser ? game.topThreePosition : null,
+              otherUserTopThreePosition:
+                  isDifferentUser ? game.topThreePosition : null,
             ),
           );
         },
