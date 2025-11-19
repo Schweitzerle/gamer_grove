@@ -8,7 +8,6 @@ import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../../domain/entities/game/game.dart';
 
-
 class CommunityInfoContent extends StatelessWidget {
   final Game game;
 
@@ -51,8 +50,8 @@ class CommunityInfoContent extends StatelessWidget {
             Text(
               'Ratings & Reviews',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -131,8 +130,8 @@ class CommunityInfoContent extends StatelessWidget {
             Text(
               'Community Interest',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ],
         ),
@@ -153,7 +152,9 @@ class CommunityInfoContent extends StatelessWidget {
                 ),
               ),
 
-            if (game.hypes != null && game.hypes! > 0 && game.firstReleaseDate != null)
+            if (game.hypes != null &&
+                game.hypes! > 0 &&
+                game.firstReleaseDate != null)
               const SizedBox(width: 8),
 
             // ✅ RELEASE DATE
@@ -175,14 +176,14 @@ class CommunityInfoContent extends StatelessWidget {
 
   // ✅ RATING CARD WIDGET
   Widget _buildRatingCard(
-      BuildContext context, {
-        required String title,
-        required double rating,
-        int? count,
-        required IconData icon,
-        required Color color,
-        required String subtitle,
-      }) {
+    BuildContext context, {
+    required String title,
+    required double rating,
+    int? count,
+    required IconData icon,
+    required Color color,
+    required String subtitle,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -212,36 +213,40 @@ class CommunityInfoContent extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Rating Value
-          Text(
-            '${rating.toStringAsFixed(1)}/100',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
+          FittedBox(
+            child: Text(
+              '${rating.toStringAsFixed(1)}/100',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
 
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
 
           // Title
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
             textAlign: TextAlign.center,
           ),
 
           // Count (if available)
           if (count != null && count > 0) ...[
-            const SizedBox(height: 2),
-            Text(
-              '${_formatNumber(count)} ${count == 1 ? 'review' : 'reviews'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 10,
+            const SizedBox(height: 4),
+            FittedBox(
+              child: Text(
+                '${_formatNumber(count)} ${count == 1 ? 'review' : 'reviews'}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                    ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ],
@@ -251,12 +256,12 @@ class CommunityInfoContent extends StatelessWidget {
 
   // ✅ INFO CARD WIDGET (for non-rating info)
   Widget _buildInfoCard(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -289,9 +294,9 @@ class CommunityInfoContent extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
 
@@ -301,9 +306,9 @@ class CommunityInfoContent extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
