@@ -101,7 +101,10 @@ class GenericPlatformSection extends StatelessWidget {
       children: [
         // Section Header
         Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingSmall),
+          padding: const EdgeInsets.only(
+              left: AppConstants.paddingSmall,
+              right: AppConstants.paddingSmall,
+              top: AppConstants.paddingSmall),
           child: Row(
             children: [
               Icon(
@@ -137,28 +140,23 @@ class GenericPlatformSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         // Platform Cards Horizontal List
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
-          child: SizedBox(
-            height: 200, // Fixed height for cards
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall),
-              itemCount: _platforms.length,
-              itemBuilder: (context, index) {
-                print(
-                    '🔧 Building platform card $index: ${_platforms[index].name}');
-                final platform = _platforms[index];
-                final releases = platformReleases[platform.id] ?? [];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: index < _platforms.length - 1 ? 12 : 0,
-                  ),
-                  child: _buildPlatformCard(context, platform, releases),
-                );
-              },
-            ),
+        SizedBox(
+          height: 200, // Fixed height for cards
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
+            itemCount: _platforms.length,
+            itemBuilder: (context, index) {
+              print(
+                  '🔧 Building platform card $index: ${_platforms[index].name}');
+              final platform = _platforms[index];
+              final releases = platformReleases[platform.id] ?? [];
+              return Padding(
+                padding:
+                    const EdgeInsets.only(right: AppConstants.paddingSmall),
+                child: _buildPlatformCard(context, platform, releases),
+              );
+            },
           ),
         ),
       ],
@@ -378,39 +376,43 @@ class GenericPlatformSection extends StatelessWidget {
 
     if (sortedDates.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.timeline,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Release Timeline',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Row(
+            children: [
+              Icon(
+                Icons.timeline,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Release Timeline',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
-        // Timeline
-        Column(
-          children: sortedDates.asMap().entries.map((entry) {
-            final isLast = entry.key == sortedDates.length - 1;
-            final dateKey = entry.value;
-            final releases = releasesGrouped[dateKey]!;
+          // Timeline
+          Column(
+            children: sortedDates.asMap().entries.map((entry) {
+              final isLast = entry.key == sortedDates.length - 1;
+              final dateKey = entry.value;
+              final releases = releasesGrouped[dateKey]!;
 
-            return _buildTimelineItem(context, releases, isLast);
-          }).toList(),
-        ),
-      ],
+              return _buildTimelineItem(context, releases, isLast);
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -419,105 +421,110 @@ class GenericPlatformSection extends StatelessWidget {
       BuildContext context, List<ReleaseDate> releases, bool isLast) {
     final firstRelease = releases.first;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Timeline indicator
-        Column(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
-            if (!isLast)
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline indicator
+          Column(
+            children: [
               Container(
-                width: 2,
-                height: 40,
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-              ),
-          ],
-        ),
-
-        const SizedBox(width: 12),
-
-        // Timeline content
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Date
-                Text(
-                  firstRelease.human ??
-                      DateFormatter.formatFullDate(firstRelease.date!),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
                 ),
+              ),
+              if (!isLast)
+                Container(
+                  width: 2,
+                  height: 40,
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+            ],
+          ),
 
-                const SizedBox(height: 4),
+          const SizedBox(width: 12),
 
-                // Platforms and regions
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: releases.map((release) {
-                    final platform = _findPlatformById(release.platformId);
+          // Timeline content
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date
+                  Text(
+                    firstRelease.human ??
+                        DateFormatter.formatFullDate(firstRelease.date!),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
 
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getPlatformIcon(platform.name),
-                            size: 12,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSecondaryContainer,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _getSafePlatformName(platform),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                  const SizedBox(height: 4),
+
+                  // Platforms and regions
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: releases.map((release) {
+                      final platform = _findPlatformById(release.platformId);
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getPlatformIcon(platform.name),
+                              size: 12,
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSecondaryContainer,
                             ),
-                          ),
-                          Text(
-                            ' (${_formatRegion(release.regionDisplayName)})',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSecondaryContainer
-                                  .withOpacity(0.7),
+                            const SizedBox(width: 4),
+                            Text(
+                              _getSafePlatformName(platform),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSecondaryContainer,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                            Text(
+                              ' (${_formatRegion(release.regionDisplayName)})',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSecondaryContainer
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -527,52 +534,59 @@ class GenericPlatformSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+    return Padding(
+      padding: const EdgeInsets.only(
+          bottom: AppConstants.paddingSmall,
+          left: AppConstants.paddingSmall,
+          right: AppConstants.paddingSmall),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color:
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.rocket_launch,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
             ),
-            child: Icon(
-              Icons.rocket_launch,
-              color: Theme.of(context).colorScheme.primary,
-              size: 20,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'First Release',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormatter.formatFullDate(_firstReleaseDate!),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'First Release',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  DateFormatter.formatFullDate(_firstReleaseDate!),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

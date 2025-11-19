@@ -20,7 +20,6 @@ import 'platform_section.dart';
 import 'genre_section.dart';
 import 'game_features_section.dart';
 import 'age_ratings_section.dart';
-import 'game_info_section.dart';
 
 class GameDetailsAccordion extends StatelessWidget {
   final Game game;
@@ -51,7 +50,8 @@ class GameDetailsAccordion extends StatelessWidget {
                   return EnhancedAccordionTile(
                     title: 'Your Activity',
                     icon: Icons.person,
-                    preview: _buildUserStatesPreview(context, game, userDataState),
+                    preview:
+                        _buildUserStatesPreview(context, game, userDataState),
                     child: UserStatesContent(
                         game: game), // ✅ Simplified - no callbacks needed
                   );
@@ -64,6 +64,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Community & Ratings',
                   icon: Icons.public,
                   preview: _buildCommunityPreview(context, game),
+                  noPadding: true,
                   child: CommunityInfoContent(game: game),
                 ),
 
@@ -87,21 +88,13 @@ class GameDetailsAccordion extends StatelessWidget {
             icon: Icons.info_outline,
             color: Theme.of(context).colorScheme.secondary,
             children: [
-              // Game Information
-              if (_hasGameInfo(game))
-                EnhancedAccordionTile(
-                  title: 'Game Information',
-                  icon: Icons.info,
-                  preview: _buildGameInfoPreview(context, game),
-                  child: GameInfoSection(game: game),
-                ),
-
               // Development Tools
               if (game.gameEngines.isNotEmpty)
                 EnhancedAccordionTile(
                   title: 'Development Tools',
                   icon: Icons.precision_manufacturing_rounded,
                   preview: _buildEnginesPreview(context, game),
+                  noPadding: true,
                   child: GameEnginesSection(gameEngines: game.gameEngines),
                 ),
 
@@ -111,6 +104,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     title: 'Platforms & Release',
                     icon: Icons.devices,
                     preview: _buildPlatformsPreview(context, game),
+                    noPadding: true,
                     child: GenericPlatformSection(
                       game: game,
                       title: 'Available Platforms',
@@ -153,6 +147,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Age Ratings',
                   icon: Icons.verified_user,
                   preview: _buildAgeRatingsPreview(context, game),
+                  noPadding: true,
                   child: AgeRatingsSection(ageRatings: game.ageRatings),
                 ),
 
@@ -162,6 +157,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     title: 'Companies',
                     icon: Icons.business,
                     preview: _buildCompaniesPreview(context, game),
+                    noPadding: true,
                     child: GenericCompanySection(
                       involvedCompanies: game.involvedCompanies,
                       title: 'Development & Publishing',
@@ -174,6 +170,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'External Links & Stores',
                   icon: Icons.link,
                   preview: _buildExternalLinksPreview(context, game),
+                  noPadding: true,
                   child: ExternalLinksSection(game: game),
                 ),
             ],
@@ -279,14 +276,6 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   // ✅ HELPER METHODS - Check if sections should be shown (unchanged)
-  bool _hasGameInfo(Game game) {
-    return game.gameType != null ||
-        game.gameStatus != null ||
-        (game.versionTitle != null && game.versionTitle!.isNotEmpty) ||
-        game.alternativeNames.isNotEmpty ||
-        (game.url != null && game.url!.isNotEmpty);
-  }
-
   bool _hasCommunityInfo(Game game) {
     return game.totalRating != null ||
         game.rating != null ||
@@ -389,46 +378,6 @@ class GameDetailsAccordion extends StatelessWidget {
 
     return Text(
       activeStates.join(' • '),
-      style: TextStyle(
-        fontSize: 11,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  Widget _buildGameInfoPreview(BuildContext context, Game game) {
-    List<String> info = [];
-
-    if (game.gameType != null) {
-      info.add(_formatLabel(game.gameType!.type));
-    }
-
-    if (game.gameStatus != null) {
-      info.add(_formatLabel(game.gameStatus!.status));
-    }
-
-    if (game.versionTitle != null && game.versionTitle!.isNotEmpty) {
-      info.add(game.versionTitle!);
-    }
-
-    if (game.alternativeNames.isNotEmpty) {
-      info.add('${game.alternativeNames.length} alt names');
-    }
-
-    if (info.isEmpty) {
-      return Text(
-        'Basic information',
-        style: TextStyle(
-          fontSize: 11,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-          fontStyle: FontStyle.italic,
-        ),
-      );
-    }
-
-    return Text(
-      info.join(' • '),
       style: TextStyle(
         fontSize: 11,
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
@@ -677,16 +626,6 @@ class GameDetailsAccordion extends StatelessWidget {
     );
   }
 
-  String _formatLabel(String label) {
-    return label
-        .replaceAll('_', ' ')
-        .replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}')
-        .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join(' ');
-  }
-
   String _formatNumber(int number) {
     if (number >= 1000000) {
       return '${(number / 1000000).toStringAsFixed(1)}M';
@@ -705,6 +644,7 @@ class EnhancedAccordionTile extends StatefulWidget {
   final Widget child;
   final Widget? preview;
   final bool initiallyExpanded;
+  final bool noPadding;
 
   const EnhancedAccordionTile({
     super.key,
@@ -713,6 +653,7 @@ class EnhancedAccordionTile extends StatefulWidget {
     required this.child,
     this.preview,
     this.initiallyExpanded = false,
+    this.noPadding = false,
   });
 
   @override
@@ -848,23 +789,26 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
               ),
             ),
           ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
+          ClipRect(
+            child: AnimatedAlign(
+              alignment: Alignment.topCenter,
+              heightFactor: _isExpanded ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: Container(
+                padding: widget.noPadding
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.all(AppConstants.paddingSmall),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
                 ),
+                child: widget.child,
               ),
-              child: widget.child,
             ),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 200),
           ),
         ],
       ),

@@ -430,6 +430,26 @@ abstract class SupabaseUserDataSource {
   /// ```
   Future<Map<String, dynamic>> getCollectionStats(String userId);
 
+  /// Gets ratings for a specific game from users that current user follows.
+  ///
+  /// Returns list of user data with their rating for the game.
+  /// Only includes users who have rated the game and have
+  /// showRatedGames enabled.
+  ///
+  /// Example:
+  /// ```dart
+  /// final ratings = await userDataSource.getFollowedUsersGameRatings(
+  ///   currentUserId,
+  ///   gameId,
+  ///   limit: 20,
+  /// );
+  /// ```
+  Future<List<Map<String, dynamic>>> getFollowedUsersGameRatings(
+    String currentUserId,
+    int gameId, {
+    int? limit,
+  });
+
   /// Gets user relationship info.
   ///
   /// Returns relationship status between current user and target user.

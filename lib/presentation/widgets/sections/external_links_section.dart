@@ -5,6 +5,7 @@
 // lib/presentation/widgets/sections/enhanced_external_links_section.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
@@ -26,13 +27,17 @@ class ExternalLinksSection extends StatelessWidget {
     final storesWithUrl = game.externalGames
         .where((store) => store.storeUrl != null && store.storeUrl!.isNotEmpty)
         .toList();
+    final hasIgdbUrl = game.url != null && game.url!.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ✅ WEBSITES SECTION (Social Media, Official Sites, etc.)
         if (websites.isNotEmpty) ...[
-          _buildWebsitesSection(context, websites),
+          Padding(
+            padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+            child: _buildWebsitesSection(context, websites),
+          ),
         ],
 
         // ✅ DIGITAL STORES SECTION (Steam, Epic, PlayStation Store, etc.)
@@ -40,6 +45,114 @@ class ExternalLinksSection extends StatelessWidget {
           if (websites.isNotEmpty) const SizedBox(height: 20),
           _buildStoresSection(context, storesWithUrl),
         ],
+
+        // ✅ DATABASE LINKS SECTION (IGDB)
+        if (hasIgdbUrl) ...[
+          if (websites.isNotEmpty || storesWithUrl.isNotEmpty)
+            const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+            child: _buildDatabaseLinksSection(context),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // ✅ DATABASE LINKS SECTION (IGDB)
+  Widget _buildDatabaseLinksSection(BuildContext context) {
+    const igdbColor = Color(0xFF9146FF);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 18,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Database Links',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // IGDB Card
+        SizedBox(
+          height: 100,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
+            children: [
+              Container(
+                width: 90,
+                decoration: BoxDecoration(
+                  color: igdbColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: igdbColor.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => _launchUrl(game.url!),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // IGDB Icon
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: igdbColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              FontAwesomeIcons.database,
+                              color: igdbColor,
+                              size: 20,
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          // IGDB Name
+                          Text(
+                            'IGDB',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: igdbColor,
+                                    ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -50,36 +163,40 @@ class ExternalLinksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.public,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Official & Social Links',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.public,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                '${websites.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                'Official & Social Links',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${websites.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -88,13 +205,13 @@ class ExternalLinksSection extends StatelessWidget {
           height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             itemCount: websites.length,
             itemBuilder: (context, index) {
               final website = websites[index];
               return Padding(
-                padding: EdgeInsets.only(
-                  right: index < websites.length - 1 ? 12 : 0,
+                padding: const EdgeInsets.only(
+                  right: AppConstants.paddingSmall,
                 ),
                 child: _buildWebsiteCard(context, website),
               );
@@ -111,36 +228,40 @@ class ExternalLinksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.shopping_bag,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Digital Stores',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.shopping_bag,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                '${stores.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                'Digital Stores',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${stores.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -149,13 +270,13 @@ class ExternalLinksSection extends StatelessWidget {
           height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             itemCount: stores.length,
             itemBuilder: (context, index) {
               final store = stores[index];
               return Padding(
-                padding: EdgeInsets.only(
-                  right: index < stores.length - 1 ? 12 : 0,
+                padding: const EdgeInsets.only(
+                  right: AppConstants.paddingSmall,
                 ),
                 child: _buildStoreCard(context, store),
               );

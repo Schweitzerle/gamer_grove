@@ -242,7 +242,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
               Hero(
                 tag: 'image_${type}_$index',
                 child: CachedImageWidget(
-                  imageUrl: ImageUtils.getMediumImageUrl(imageUrl),
+                  imageUrl: ImageUtils.getLargeImageUrl(imageUrl),
                   fit: BoxFit.cover,
                   placeholder: Container(
                     color:

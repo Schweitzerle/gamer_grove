@@ -111,8 +111,6 @@ class CharactersSection extends StatelessWidget {
     return Container(
       height: 200,
       padding: const EdgeInsets.only(
-        left: AppConstants.paddingMedium,
-        right: AppConstants.paddingMedium,
         bottom: AppConstants.paddingMedium,
       ),
       child: Row(
@@ -121,11 +119,14 @@ class CharactersSection extends StatelessWidget {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: previewCharacters.length,
+              padding: const EdgeInsets.only(
+                left: AppConstants.paddingMedium,
+              ),
               itemBuilder: (context, index) {
                 final character = previewCharacters[index];
                 return Padding(
-                  padding: EdgeInsets.only(
-                    right: index == previewCharacters.length - 1 ? 0 : 12,
+                  padding: const EdgeInsets.only(
+                    right: AppConstants.paddingMedium,
                   ),
                   child: CharacterCard(
                     character: character,
