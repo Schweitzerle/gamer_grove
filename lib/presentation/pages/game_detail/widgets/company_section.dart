@@ -50,7 +50,11 @@ class GenericCompanySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (developers.isNotEmpty) ...[
-          _buildInvolvedCompanySubsection(context, 'Developer', developers),
+          Padding(
+            padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+            child: _buildInvolvedCompanySubsection(
+                context, 'Developer', developers),
+          ),
           if (publishers.isNotEmpty || others.isNotEmpty)
             const SizedBox(height: 20),
         ],
@@ -59,7 +63,11 @@ class GenericCompanySection extends StatelessWidget {
           if (others.isNotEmpty) const SizedBox(height: 20),
         ],
         if (others.isNotEmpty) ...[
-          _buildInvolvedCompanySubsection(context, 'Other Companies', others),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+            child: _buildInvolvedCompanySubsection(
+                context, 'Other Companies', others),
+          ),
         ],
       ],
     );
@@ -74,7 +82,10 @@ class GenericCompanySection extends StatelessWidget {
         children: [
           // Section Header
           Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingSmall),
+            padding: const EdgeInsets.only(
+                left: AppConstants.paddingSmall,
+                right: AppConstants.paddingSmall,
+                top: AppConstants.paddingSmall),
             child: Row(
               children: [
                 Icon(
@@ -118,13 +129,12 @@ class GenericCompanySection extends StatelessWidget {
               height: 120,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingSmall),
+                padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
                 itemCount: companies!.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: EdgeInsets.only(
-                      right: index < companies!.length - 1 ? 12 : 0,
+                    padding: const EdgeInsets.only(
+                      right: AppConstants.paddingSmall,
                     ),
                     child: _buildDirectCompanyCard(context, companies![index]),
                   );
@@ -147,30 +157,35 @@ class GenericCompanySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Title with Counter
-        Row(
-          children: [
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${companyList.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingSmall,
+          ),
+          child: Row(
+            children: [
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${companyList.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -179,12 +194,12 @@ class GenericCompanySection extends StatelessWidget {
           height: 120, // Fixed height for cards
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             itemCount: companyList.length,
             itemBuilder: (context, index) {
               return Padding(
-                padding: EdgeInsets.only(
-                  right: index < companyList.length - 1 ? 12 : 0,
-                ),
+                padding:
+                    const EdgeInsets.only(right: AppConstants.paddingSmall),
                 child: _buildInvolvedCompanyCard(context, companyList[index]),
               );
             },

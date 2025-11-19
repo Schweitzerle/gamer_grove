@@ -64,6 +64,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Community & Ratings',
                   icon: Icons.public,
                   preview: _buildCommunityPreview(context, game),
+                  noPadding: true,
                   child: CommunityInfoContent(game: game),
                 ),
 
@@ -93,6 +94,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Development Tools',
                   icon: Icons.precision_manufacturing_rounded,
                   preview: _buildEnginesPreview(context, game),
+                  noPadding: true,
                   child: GameEnginesSection(gameEngines: game.gameEngines),
                 ),
 
@@ -102,6 +104,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     title: 'Platforms & Release',
                     icon: Icons.devices,
                     preview: _buildPlatformsPreview(context, game),
+                    noPadding: true,
                     child: GenericPlatformSection(
                       game: game,
                       title: 'Available Platforms',
@@ -144,6 +147,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'Age Ratings',
                   icon: Icons.verified_user,
                   preview: _buildAgeRatingsPreview(context, game),
+                  noPadding: true,
                   child: AgeRatingsSection(ageRatings: game.ageRatings),
                 ),
 
@@ -153,6 +157,7 @@ class GameDetailsAccordion extends StatelessWidget {
                     title: 'Companies',
                     icon: Icons.business,
                     preview: _buildCompaniesPreview(context, game),
+                    noPadding: true,
                     child: GenericCompanySection(
                       involvedCompanies: game.involvedCompanies,
                       title: 'Development & Publishing',
@@ -165,6 +170,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   title: 'External Links & Stores',
                   icon: Icons.link,
                   preview: _buildExternalLinksPreview(context, game),
+                  noPadding: true,
                   child: ExternalLinksSection(game: game),
                 ),
             ],
@@ -638,6 +644,7 @@ class EnhancedAccordionTile extends StatefulWidget {
   final Widget child;
   final Widget? preview;
   final bool initiallyExpanded;
+  final bool noPadding;
 
   const EnhancedAccordionTile({
     super.key,
@@ -646,6 +653,7 @@ class EnhancedAccordionTile extends StatefulWidget {
     required this.child,
     this.preview,
     this.initiallyExpanded = false,
+    this.noPadding = false,
   });
 
   @override
@@ -788,7 +796,9 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: widget.noPadding
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.all(AppConstants.paddingSmall),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
                   borderRadius: const BorderRadius.only(

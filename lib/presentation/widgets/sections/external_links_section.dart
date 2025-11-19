@@ -5,6 +5,7 @@
 // lib/presentation/widgets/sections/enhanced_external_links_section.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/externalGame/external_game.dart';
 import '../../../domain/entities/game/game.dart';
@@ -33,7 +34,10 @@ class ExternalLinksSection extends StatelessWidget {
       children: [
         // ✅ WEBSITES SECTION (Social Media, Official Sites, etc.)
         if (websites.isNotEmpty) ...[
-          _buildWebsitesSection(context, websites),
+          Padding(
+            padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
+            child: _buildWebsitesSection(context, websites),
+          ),
         ],
 
         // ✅ DIGITAL STORES SECTION (Steam, Epic, PlayStation Store, etc.)
@@ -46,7 +50,10 @@ class ExternalLinksSection extends StatelessWidget {
         if (hasIgdbUrl) ...[
           if (websites.isNotEmpty || storesWithUrl.isNotEmpty)
             const SizedBox(height: 20),
-          _buildDatabaseLinksSection(context),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+            child: _buildDatabaseLinksSection(context),
+          ),
         ],
       ],
     );
@@ -60,21 +67,25 @@ class ExternalLinksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 18,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Database Links',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 18,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Database Links',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -83,7 +94,7 @@ class ExternalLinksSection extends StatelessWidget {
           height: 100,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             children: [
               Container(
                 width: 90,
@@ -152,36 +163,40 @@ class ExternalLinksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.public,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Official & Social Links',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.public,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                '${websites.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                'Official & Social Links',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${websites.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -190,13 +205,13 @@ class ExternalLinksSection extends StatelessWidget {
           height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             itemCount: websites.length,
             itemBuilder: (context, index) {
               final website = websites[index];
               return Padding(
-                padding: EdgeInsets.only(
-                  right: index < websites.length - 1 ? 12 : 0,
+                padding: const EdgeInsets.only(
+                  right: AppConstants.paddingSmall,
                 ),
                 child: _buildWebsiteCard(context, website),
               );
@@ -213,36 +228,40 @@ class ExternalLinksSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          children: [
-            Icon(
-              Icons.shopping_bag,
-              size: 18,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Digital Stores',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+          child: Row(
+            children: [
+              Icon(
+                Icons.shopping_bag,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                '${stores.length}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                'Digital Stores',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${stores.length}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -251,13 +270,13 @@ class ExternalLinksSection extends StatelessWidget {
           height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
             itemCount: stores.length,
             itemBuilder: (context, index) {
               final store = stores[index];
               return Padding(
-                padding: EdgeInsets.only(
-                  right: index < stores.length - 1 ? 12 : 0,
+                padding: const EdgeInsets.only(
+                  right: AppConstants.paddingSmall,
                 ),
                 child: _buildStoreCard(context, store),
               );

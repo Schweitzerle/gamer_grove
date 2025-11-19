@@ -1,5 +1,6 @@
 // lib/presentation/pages/game_detail/widgets/sections/age_ratings_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import '../../../domain/entities/ageRating/age_rating.dart';
 import '../../../core/utils/navigations.dart';
 
@@ -20,24 +21,35 @@ class AgeRatingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Age Ratings',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Padding(
+          padding: const EdgeInsets.only(
+              top: AppConstants.paddingSmall,
+              right: AppConstants.paddingSmall,
+              left: AppConstants.paddingSmall),
+          child: Text(
+            'Age Ratings',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 70, // Etwas höher für bessere Darstellung
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: ageRatings.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: AgeRatingChip(rating: ageRatings[index]),
-              );
-            },
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+          child: SizedBox(
+            height: 70, // Etwas höher für bessere Darstellung
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: ageRatings.length,
+              padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(right: AppConstants.paddingSmall),
+                  child: AgeRatingChip(rating: ageRatings[index]),
+                );
+              },
+            ),
           ),
         ),
       ],

@@ -123,7 +123,7 @@ class FranchiseCollectionsSection extends StatelessWidget {
                   // Tab Views
                   SizedBox(
                     height:
-                        380, // Etwas mehr Platz für Header + normale GameCard
+                        320, // Etwas mehr Platz für Header + normale GameCard
                     child: TabBarView(
                       children: seriesItems
                           .map((item) => _buildTabView(context, item))
@@ -192,13 +192,16 @@ class FranchiseCollectionsSection extends StatelessWidget {
   }
 
   Widget _buildTabView(BuildContext context, SeriesItem item) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Series Info Header
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Series Info Header
+        Padding(
+          padding: const EdgeInsets.only(
+              left: AppConstants.paddingMedium,
+              right: AppConstants.paddingMedium,
+              top: AppConstants.paddingSmall),
+          child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
@@ -227,12 +230,14 @@ class FranchiseCollectionsSection extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      '${item.type?.displayName} • ${item.totalCount} games',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: item.accentColor,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    FittedBox(
+                      child: Text(
+                        '${item.type?.displayName} • ${item.totalCount} games',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: item.accentColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
                     ),
                   ],
                 ),
@@ -253,32 +258,33 @@ class FranchiseCollectionsSection extends StatelessWidget {
                 ),
             ],
           ),
+        ),
 
-          const SizedBox(height: AppConstants.paddingMedium),
+        const SizedBox(height: AppConstants.paddingMedium),
 
-          // Games List (normale Größe wieder!)
-          SizedBox(
-            height:
-                280, // Feste Höhe wie in base_game_section.dart - nicht stretched!
-            child: item.games.isNotEmpty
-                ? _buildGamesList(item.games)
-                : _buildNoGamesPlaceholder(context),
-          ),
-        ],
-      ),
+        // Games List (normale Größe wieder!)
+        Expanded(
+          child: item.games.isNotEmpty
+              ? _buildGamesList(item.games)
+              : _buildNoGamesPlaceholder(context),
+        ),
+        const SizedBox(height: AppConstants.paddingMedium),
+      ],
     );
   }
 
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        left: AppConstants.paddingMedium,
+      ),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
         return Container(
           width: 160, // Zurück zur normalen Größe! 🎉
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),

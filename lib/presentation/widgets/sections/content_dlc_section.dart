@@ -43,7 +43,7 @@ class ContentDLCSection extends StatelessWidget {
                 children: [
                   _buildTabBar(context, contentTabs),
                   SizedBox(
-                    height: 380,
+                    height: 320,
                     child: TabBarView(
                       children: contentTabs
                           .map((tab) => _buildTabView(context, tab))
@@ -177,71 +177,79 @@ class ContentDLCSection extends StatelessWidget {
   }
 
   Widget _buildTabView(BuildContext context, ContentTab tab) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTabHeader(context, tab),
-          const SizedBox(height: AppConstants.paddingMedium),
-          Expanded(child: _buildGamesList(tab.games)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTabHeader(context, tab),
+        const SizedBox(height: AppConstants.paddingMedium),
+        Expanded(child: _buildGamesList(tab.games)),
+        const SizedBox(height: AppConstants.paddingMedium),
+      ],
     );
   }
 
   Widget _buildTabHeader(BuildContext context, ContentTab tab) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: tab.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+    return Padding(
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingMedium,
+          right: AppConstants.paddingMedium,
+          top: AppConstants.paddingSmall),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: tab.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(tab.icon, color: tab.color, size: 20),
           ),
-          child: Icon(tab.icon, color: tab.color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tab.displayTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              Text(
-                tab.subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tab.color,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tab.displayTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                FittedBox(
+                  child: Text(
+                    tab.subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: tab.color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        if (tab.games.length > 5)
-          TextButton.icon(
-            onPressed: () => _navigateToContent(context, tab),
-            icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
-            label: Text('View All', style: TextStyle(color: tab.color)),
-          ),
-      ],
+          if (tab.games.length > 5)
+            TextButton.icon(
+              onPressed: () => _navigateToContent(context, tab),
+              icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
+              label: Text('View All', style: TextStyle(color: tab.color)),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        left: AppConstants.paddingMedium,
+      ),
       itemCount: games.take(5).length,
       itemBuilder: (context, index) {
         final game = games[index];
         return Container(
           width: 160,
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
@@ -310,7 +318,7 @@ class VersionsRemakesSection extends StatelessWidget {
                 children: [
                   _buildTabBar(context, versionTabs),
                   SizedBox(
-                    height: 380,
+                    height: 320,
                     child: TabBarView(
                       children: versionTabs
                           .map((tab) => _buildTabView(context, tab))
@@ -456,71 +464,79 @@ class VersionsRemakesSection extends StatelessWidget {
   }
 
   Widget _buildTabView(BuildContext context, VersionTab tab) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTabHeader(context, tab),
-          const SizedBox(height: AppConstants.paddingMedium),
-          Expanded(child: _buildGamesList(tab.games)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTabHeader(context, tab),
+        const SizedBox(height: AppConstants.paddingMedium),
+        Expanded(child: _buildGamesList(tab.games)),
+        const SizedBox(height: AppConstants.paddingMedium),
+      ],
     );
   }
 
   Widget _buildTabHeader(BuildContext context, VersionTab tab) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: tab.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+    return Padding(
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingMedium,
+          right: AppConstants.paddingMedium,
+          top: AppConstants.paddingSmall),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: tab.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(tab.icon, color: tab.color, size: 20),
           ),
-          child: Icon(tab.icon, color: tab.color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tab.displayTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              Text(
-                tab.subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tab.color,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tab.displayTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                FittedBox(
+                  child: Text(
+                    tab.subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: tab.color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        if (tab.games.length > 5)
-          TextButton.icon(
-            onPressed: () => _navigateToVersions(context, tab),
-            icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
-            label: Text('View All', style: TextStyle(color: tab.color)),
-          ),
-      ],
+          if (tab.games.length > 5)
+            TextButton.icon(
+              onPressed: () => _navigateToVersions(context, tab),
+              icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
+              label: Text('View All', style: TextStyle(color: tab.color)),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        left: AppConstants.paddingMedium,
+      ),
       itemCount: games.take(5).length,
       itemBuilder: (context, index) {
         final game = games[index];
         return Container(
           width: 160,
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
@@ -579,7 +595,7 @@ class SimilarRelatedSection extends StatelessWidget {
                 children: [
                   _buildTabBar(context, relatedTabs),
                   SizedBox(
-                    height: 380,
+                    height: 320,
                     child: TabBarView(
                       children: relatedTabs
                           .map((tab) => _buildTabView(context, tab))
@@ -703,71 +719,79 @@ class SimilarRelatedSection extends StatelessWidget {
   }
 
   Widget _buildTabView(BuildContext context, RelatedTab tab) {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTabHeader(context, tab),
-          const SizedBox(height: AppConstants.paddingMedium),
-          Expanded(child: _buildGamesList(tab.games)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildTabHeader(context, tab),
+        const SizedBox(height: AppConstants.paddingMedium),
+        Expanded(child: _buildGamesList(tab.games)),
+        const SizedBox(height: AppConstants.paddingMedium),
+      ],
     );
   }
 
   Widget _buildTabHeader(BuildContext context, RelatedTab tab) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: tab.color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+    return Padding(
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingMedium,
+          right: AppConstants.paddingMedium,
+          top: AppConstants.paddingSmall),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: tab.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(tab.icon, color: tab.color, size: 20),
           ),
-          child: Icon(tab.icon, color: tab.color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tab.displayTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              Text(
-                tab.subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tab.color,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tab.displayTitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                FittedBox(
+                  child: Text(
+                    tab.subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: tab.color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        if (tab.games.length > 5)
-          TextButton.icon(
-            onPressed: () => _navigateToRelated(context, tab),
-            icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
-            label: Text('View All', style: TextStyle(color: tab.color)),
-          ),
-      ],
+          if (tab.games.length > 5)
+            TextButton.icon(
+              onPressed: () => _navigateToRelated(context, tab),
+              icon: Icon(Icons.arrow_forward, size: 16, color: tab.color),
+              label: Text('View All', style: TextStyle(color: tab.color)),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+        left: AppConstants.paddingMedium,
+      ),
       itemCount: games.take(5).length,
       itemBuilder: (context, index) {
         final game = games[index];
         return Container(
           width: 160,
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
+          margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),

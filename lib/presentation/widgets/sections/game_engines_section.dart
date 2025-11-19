@@ -1,6 +1,7 @@
 // lib/presentation/pages/game_detail/widgets/sections/game_engines_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
@@ -32,44 +33,58 @@ class GameEnginesSection extends StatelessWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context) {
-    return Row(
-      children: [
-        Icon(
-          Icons.precision_manufacturing_rounded,
-          size: 18,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'Game Engines',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(
+          top: AppConstants.paddingSmall,
+          right: AppConstants.paddingSmall,
+          left: AppConstants.paddingSmall),
+      child: Row(
+        children: [
+          Icon(
+            Icons.precision_manufacturing_rounded,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Game Engines',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildEnginesContent(BuildContext context) {
     // Einzelne Engine zentriert darstellen
     if (gameEngines.length == 1) {
-      return _buildSingleEngineCard(context, gameEngines.first);
+      return Padding(
+        padding: const EdgeInsets.only(
+            bottom: AppConstants.paddingSmall,
+            left: AppConstants.paddingSmall,
+            right: AppConstants.paddingSmall),
+        child: _buildSingleEngineCard(context, gameEngines.first),
+      );
     }
 
     // Mehrere Engines als horizontal scrollbare Liste
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: gameEngines.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index < gameEngines.length - 1 ? 12 : 0,
-            ),
-            child: _buildEngineCard(context, gameEngines[index]),
-          );
-        },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
+      child: SizedBox(
+        height: 100,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: gameEngines.length,
+          padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(right: AppConstants.paddingSmall),
+              child: _buildEngineCard(context, gameEngines[index]),
+            );
+          },
+        ),
       ),
     );
   }
@@ -229,7 +244,8 @@ class GameEnginesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEngineLogo(BuildContext context, GameEngine engine, {required double size}) {
+  Widget _buildEngineLogo(BuildContext context, GameEngine engine,
+      {required double size}) {
     if (engine.hasLogo) {
       final logoUrl = ImageUtils.getMediumImageUrl(
         engine.logo?.url.toString(),
@@ -259,7 +275,8 @@ class GameEnginesSection extends StatelessWidget {
     return _buildDefaultEngineLogo(context, engine, size);
   }
 
-  Widget _buildDefaultEngineLogo(BuildContext context, GameEngine engine, double size) {
+  Widget _buildDefaultEngineLogo(
+      BuildContext context, GameEngine engine, double size) {
     final iconData = _getEngineIconData(engine);
     final color = _getEngineColor(engine);
 
@@ -288,7 +305,8 @@ class GameEnginesSection extends StatelessWidget {
       return Icons.architecture_rounded;
     } else if (engineName.contains('godot')) {
       return Icons.auto_awesome_rounded;
-    } else if (engineName.contains('custom') || engineName.contains('proprietary')) {
+    } else if (engineName.contains('custom') ||
+        engineName.contains('proprietary')) {
       return Icons.code_rounded;
     } else if (engineName.contains('source')) {
       return Icons.memory_rounded;
@@ -308,7 +326,8 @@ class GameEnginesSection extends StatelessWidget {
       return const Color(0xFF0E1128);
     } else if (engineName.contains('godot')) {
       return const Color(0xFF478CBF);
-    } else if (engineName.contains('custom') || engineName.contains('proprietary')) {
+    } else if (engineName.contains('custom') ||
+        engineName.contains('proprietary')) {
       return const Color(0xFF6B46C1);
     } else if (engineName.contains('source')) {
       return const Color(0xFFFF6B00);
