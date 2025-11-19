@@ -4,6 +4,7 @@
 
 // lib/presentation/pages/event_detail/event_detail_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -147,7 +148,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ),
         child: widget.event.hasLogo
             ? CachedImageWidget(
-                imageUrl: widget.event.eventLogo!.bestUrl,
+                imageUrl: ImageUtils.getLargeImageUrl(
+                    widget.event.eventLogo!.bestUrl),
                 fit: BoxFit.cover,
                 placeholder: Container(
                   decoration: BoxDecoration(
@@ -518,15 +520,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Icon(
                                   Icons.format_quote,
                                   size: 24,
-                                  color: _getEventStatusColor().withOpacity(0.3),
+                                  color:
+                                      _getEventStatusColor().withOpacity(0.3),
                                 ),
                                 const SizedBox(height: 8),
                                 // Description text
                                 Text(
                                   widget.event.description!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
                                         height: 1.6,
-                                        color: Theme.of(context).colorScheme.onSurface,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
                                         fontStyle: FontStyle.italic,
                                         letterSpacing: 0.2,
                                       ),
@@ -538,7 +546,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   child: Icon(
                                     Icons.format_quote,
                                     size: 24,
-                                    color: _getEventStatusColor().withOpacity(0.3),
+                                    color:
+                                        _getEventStatusColor().withOpacity(0.3),
                                   ),
                                 ),
                               ],
@@ -557,7 +566,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .surface
+                                        .withOpacity(0.8),
                                   ],
                                 ),
                                 borderRadius: const BorderRadius.only(
@@ -575,7 +587,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       bottom: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: _getEventStatusColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -634,7 +647,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 8),
                     _buildEnhancedInfoCard(
                       'Start Time',
-                      DateFormatter.formatEventDateTime(widget.event.startTime!),
+                      DateFormatter.formatEventDateTime(
+                          widget.event.startTime!),
                       Icons.schedule,
                       Colors.green,
                     ),
@@ -728,7 +742,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withOpacity(0.5),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: network.platformColor.withOpacity(0.2),
@@ -757,7 +774,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           network.url,
                           style: TextStyle(
                             fontSize: 11,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -784,7 +802,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withOpacity(0.5),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: accentColor.withOpacity(0.2),
@@ -1038,5 +1059,4 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       ),
     );
   }
-
 }
