@@ -51,7 +51,8 @@ class GameDetailsAccordion extends StatelessWidget {
                   return EnhancedAccordionTile(
                     title: 'Your Activity',
                     icon: Icons.person,
-                    preview: _buildUserStatesPreview(context, game, userDataState),
+                    preview:
+                        _buildUserStatesPreview(context, game, userDataState),
                     child: UserStatesContent(
                         game: game), // ✅ Simplified - no callbacks needed
                   );
@@ -851,7 +852,7 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
             secondChild: Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
                 borderRadius: const BorderRadius.only(
