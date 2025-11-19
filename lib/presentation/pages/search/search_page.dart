@@ -607,36 +607,33 @@ class _SearchPageState extends State<SearchPage> {
                   padding:
                       const EdgeInsets.only(top: AppConstants.paddingSmall),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
+                      Column(
+                        children: [
+                          Text(
+                            'Found ${state.games.length} games',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                          ),
+                          if (!state.hasReachedMax) ...[
+                            //const Text(' • '),
                             Text(
-                              'Found ${state.games.length} games',
+                              'Scroll for more',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                             ),
-                            if (!state.hasReachedMax) ...[
-                              const Text(' • '),
-                              Text(
-                                'Scroll for more',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                              ),
-                            ],
                           ],
-                        ),
+                        ],
                       ),
                       if (state.isLoadingMore)
                         Padding(

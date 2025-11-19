@@ -1,24 +1,21 @@
-// lib/presentation/pages/characters/widgets/character_card.dart - UPDATED
+// lib/presentation/pages/characters/widgets/character_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import '../../../../domain/entities/character/character.dart';
 
-// 🎨 MODERNE CHARACTER CARD DESIGNS
-// Verschiedene stilvolle Varianten zur Auswahl
-
-// ==========================================
-// OPTION 1: GRADIENT OVERLAY (Deine Idee)
-// ==========================================
-
-class CharacterCard extends StatelessWidget {
+/// A card widget that displays character information with an image,
+/// name, and optional metadata like gender, species, and games count.
+class CharacterCard extends StatefulWidget {
   final Character character;
   final double? width;
   final double? height;
   final VoidCallback? onTap;
   final bool showDescription;
   final bool isSelected;
+  final bool showGamesCount;
 
   const CharacterCard({
     super.key,
@@ -28,48 +25,124 @@ class CharacterCard extends StatelessWidget {
     this.onTap,
     this.showDescription = true,
     this.isSelected = false,
+    this.showGamesCount = true,
   });
 
   @override
+  State<CharacterCard> createState() => _CharacterCardState();
+}
+
+class _CharacterCardState extends State<CharacterCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.96).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() => _isPressed = true);
+    _animationController.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
+
+  void _onTapCancel() {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
-      onTap: onTap ?? () => _navigateToCharacterDetail(context),
-      child: Container(
-        width: width ?? 140,
-        height: height ?? 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background Image (full card)
-              _buildBackgroundImage(context),
-
-              // Gradient Overlay
-              _buildGradientOverlay(),
-
-              // Selected Border
-              if (isSelected) _buildSelectedBorder(),
-
-              // Content Overlay (bottom third)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: (height ?? 200) * 0.35, // Bottom 35%
-                child: _buildContentOverlay(context),
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        if (widget.onTap != null) {
+          widget.onTap!();
+        } else {
+          _navigateToCharacterDetail(context);
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: Container(
+          width: widget.width ?? 140,
+          height: widget.height ?? 200,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: _isPressed
+                    ? colorScheme.primary.withOpacity(0.2)
+                    : colorScheme.shadow.withOpacity(0.15),
+                blurRadius: _isPressed ? 12 : 8,
+                offset: const Offset(0, 4),
+                spreadRadius: _isPressed ? 1 : 0,
               ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Background Image
+                _buildBackgroundImage(context),
+
+                // Gradient Overlay
+                _buildGradientOverlay(colorScheme),
+
+                // Games Count Badge (top right)
+                if (widget.showGamesCount &&
+                    widget.character.loadedGameCount > 0)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: _buildGamesCountBadge(context),
+                  ),
+
+                // Selected Border
+                if (widget.isSelected) _buildSelectedBorder(colorScheme),
+
+                // Content Overlay (bottom)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildContentOverlay(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -77,11 +150,11 @@ class CharacterCard extends StatelessWidget {
   }
 
   Widget _buildBackgroundImage(BuildContext context) {
-    if (character.hasImage) {
+    if (widget.character.hasImage) {
       return CachedNetworkImage(
-        imageUrl: character.largeUrl!,
+        imageUrl: widget.character.largeUrl!,
         fit: BoxFit.cover,
-        placeholder: (context, url) => _buildImagePlaceholder(),
+        placeholder: (context, url) => _buildImagePlaceholder(context),
         errorWidget: (context, url, error) => _buildFallbackBackground(context),
       );
     } else {
@@ -89,41 +162,56 @@ class CharacterCard extends StatelessWidget {
     }
   }
 
-  Widget _buildImagePlaceholder() {
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.purple,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFallbackBackground(BuildContext context) {
+  Widget _buildImagePlaceholder(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.purple.withOpacity(0.3),
-            Colors.purple.withOpacity(0.6),
+            colorScheme.surfaceContainerHighest,
+            colorScheme.surfaceContainerHigh,
           ],
         ),
       ),
       child: Center(
-        child: Icon(
-          Icons.person,
-          size: 48,
-          color: Colors.white.withOpacity(0.8),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: colorScheme.primary,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildGradientOverlay() {
+  Widget _buildFallbackBackground(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.person_rounded,
+          size: 48,
+          color: colorScheme.onPrimaryContainer.withOpacity(0.6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientOverlay(ColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -132,21 +220,58 @@ class CharacterCard extends StatelessWidget {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withOpacity(0.3),
-            Colors.black.withOpacity(0.7),
+            Colors.black.withOpacity(0.4),
+            Colors.black.withOpacity(0.85),
           ],
-          stops: const [0.0, 0.5, 0.8, 1.0],
+          stops: const [0.0, 0.4, 0.7, 1.0],
         ),
       ),
     );
   }
 
-  Widget _buildSelectedBorder() {
+  Widget _buildGamesCountBadge(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.videogame_asset_rounded,
+            size: 12,
+            color: colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${widget.character.loadedGameCount}',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedBorder(ColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.purple,
+          color: colorScheme.primary,
           width: 3,
         ),
       ),
@@ -158,45 +283,49 @@ class CharacterCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Character Name
           Text(
-            character.name,
+            widget.character.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 14,
-              shadows: [
-                Shadow(
-                  offset: const Offset(0, 1),
-                  blurRadius: 2,
-                  color: Colors.black.withOpacity(0.5),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 13,
+                  letterSpacing: 0.2,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 3,
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                  ],
                 ),
-              ],
-            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
 
-          const SizedBox(height: 4),
-
-          // Character Info
-          if (character.genderEnum != null || character.speciesEnum != null)
+          // Character Info (Gender/Species)
+          if (widget.character.genderEnum != null ||
+              widget.character.speciesEnum != null) ...[
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 12,
-                  color: Colors.white.withOpacity(0.9),
-                ),
-                const SizedBox(width: 4),
+                if (widget.character.genderEnum != null) ...[
+                  Icon(
+                    _getGenderIcon(),
+                    size: 10,
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                  const SizedBox(width: 3),
+                ],
                 Expanded(
                   child: Text(
                     _getCharacterSubtitle(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 11,
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -204,23 +333,36 @@ class CharacterCard extends StatelessWidget {
                 ),
               ],
             ),
+          ],
         ],
       ),
     );
   }
 
+  IconData _getGenderIcon() {
+    switch (widget.character.genderEnum) {
+      case null:
+        return Icons.help_outline;
+      default:
+        final genderValue = widget.character.genderEnum!.value;
+        if (genderValue == 0) return Icons.male_rounded;
+        if (genderValue == 1) return Icons.female_rounded;
+        return Icons.transgender_rounded;
+    }
+  }
+
   String _getCharacterSubtitle() {
     final parts = <String>[];
-    if (character.genderEnum != null) {
-      parts.add(character.displayGender);
+    if (widget.character.genderEnum != null) {
+      parts.add(widget.character.displayGender);
     }
-    if (character.speciesEnum != null) {
-      parts.add(character.displaySpecies);
+    if (widget.character.speciesEnum != null) {
+      parts.add(widget.character.displaySpecies);
     }
     return parts.isNotEmpty ? parts.join(' • ') : 'Character';
   }
 
   void _navigateToCharacterDetail(BuildContext context) {
-    Navigations.navigateToCharacterDetail(context, character.id);
+    Navigations.navigateToCharacterDetail(context, widget.character.id);
   }
 }
