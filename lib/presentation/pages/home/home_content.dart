@@ -7,6 +7,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_events_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_games_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/popular_characters_section.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
@@ -121,6 +122,11 @@ class _HomeContentState extends State<HomeContent> {
                   currentUserId: _currentUserId,
                   gameBloc: _gameBloc,
                 ),
+              ),
+
+              // Popular Characters Section
+              const SliverToBoxAdapter(
+                child: PopularCharactersSection(),
               ),
 
               // Latest Games Section

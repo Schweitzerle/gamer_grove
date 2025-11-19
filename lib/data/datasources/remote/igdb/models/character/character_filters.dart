@@ -28,8 +28,9 @@ class CharacterFilters {
   // ============================================================
 
   /// Filter characters by gender enum
+  /// Uses character_gender field (not deprecated 'gender')
   static IgdbFilter byGender(CharacterGenderEnum gender) =>
-      FieldFilter('gender', '=', gender.value);
+      FieldFilter('character_gender', '=', gender.value);
 
   /// Filter male characters
   static IgdbFilter maleOnly() => byGender(CharacterGenderEnum.male);
@@ -45,8 +46,9 @@ class CharacterFilters {
   // ============================================================
 
   /// Filter characters by species enum
+  /// Uses character_species field (not deprecated 'species')
   static IgdbFilter bySpecies(CharacterSpeciesEnum species) =>
-      FieldFilter('species', '=', species.value);
+      FieldFilter('character_species', '=', species.value);
 
   /// Filter human characters
   static IgdbFilter humanOnly() => bySpecies(CharacterSpeciesEnum.human);

@@ -125,13 +125,17 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                   },
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  widget.title,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
@@ -263,6 +267,8 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                               step.text.substring(0, visibleLength);
 
                           return RichText(
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                             text: TextSpan(
                               children: [
                                 TextSpan(
@@ -295,6 +301,8 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                         },
                       )
                     : RichText(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                         text: TextSpan(
                           children: [
                             TextSpan(
