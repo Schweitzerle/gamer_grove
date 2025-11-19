@@ -823,4 +823,64 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       throw UserExceptionMapper.map(e);
     }
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFollowedUsersGameRatings(
+    String currentUserId,
+    int gameId, {
+    int? limit,
+  }) async {
+    try {
+      // Get users that current user follows
+      final followingData = await getFollowing(
+        currentUserId,
+        limit: limit ?? 100,
+      );
+
+      if (followingData.isEmpty) return [];
+
+      final ratingsWithUsers = <Map<String, dynamic>>[];
+
+      // For each followed user, check if they rated this game
+      for (final followData in followingData) {
+        final userData = followData['users'] as Map<String, dynamic>?;
+        if (userData == null) continue;
+
+        final followedUserId = userData['id'] as String;
+        final showRatedGames = userData['show_rated_games'] as bool? ?? true;
+
+        // Respect privacy settings
+        if (!showRatedGames) continue;
+
+        // Get this user's rating for the specific game
+        final gameData = await _supabase
+            .from('user_games')
+            .select('rating, rated_at')
+            .eq('user_id', followedUserId)
+            .eq('game_id', gameId)
+            .not('rating', 'is', null)
+            .maybeSingle();
+
+        if (gameData != null && gameData['rating'] != null) {
+          ratingsWithUsers.add({
+            'user_id': followedUserId,
+            'username': userData['username'],
+            'display_name': userData['display_name'],
+            'avatar_url': userData['avatar_url'],
+            'rating': gameData['rating'],
+            'rated_at': gameData['rated_at'],
+          });
+        }
+      }
+
+      // Sort by rating descending
+      ratingsWithUsers.sort(
+        (a, b) => (b['rating'] as double).compareTo(a['rating'] as double),
+      );
+
+      return ratingsWithUsers;
+    } catch (e) {
+      throw UserExceptionMapper.map(e);
+    }
+  }
 }

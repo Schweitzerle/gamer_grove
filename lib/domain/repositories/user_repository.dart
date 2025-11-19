@@ -349,4 +349,16 @@ abstract class UserRepository {
     int? limit,
     int? offset,
   });
+
+  // ==========================================
+  // FOLLOWED USERS GAME DATA
+  // ==========================================
+
+  /// Get ratings for a specific game from users that current user follows
+  Future<Either<Failure, List<Map<String, dynamic>>>>
+      getFollowedUsersGameRatings({
+    required String currentUserId,
+    required int gameId,
+    int limit = 100,
+  });
 }
