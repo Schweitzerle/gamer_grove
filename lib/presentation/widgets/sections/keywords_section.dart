@@ -4,15 +4,14 @@
 
 // lib/presentation/pages/game_detail/widgets/sections/keywords_section.dart
 import 'package:flutter/material.dart';
-import '../../../../../domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
 
 class KeywordsSection extends StatelessWidget {
-  final List<Keyword> keywords;
 
   const KeywordsSection({
-    super.key,
-    required this.keywords,
+    required this.keywords, super.key,
   });
+  final List<Keyword> keywords;
 
   @override
   Widget build(BuildContext context) {

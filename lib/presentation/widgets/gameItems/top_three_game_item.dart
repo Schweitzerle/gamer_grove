@@ -1,21 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
-
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class TopThreeGameItem extends StatelessWidget {
-  final Game game;
-  final int index;
-
   const TopThreeGameItem({
-    super.key,
     required this.game,
     required this.index,
+    super.key,
   });
+  final Game game;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +53,7 @@ class TopThreeGameItem extends StatelessWidget {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
-                              placeholder: (context, url) => Container(
+                              placeholder: (context, url) => ColoredBox(
                                 color:
                                     theme.colorScheme.surfaceContainerHighest,
                                 child: Center(
@@ -66,7 +64,7 @@ class TopThreeGameItem extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              errorWidget: (context, url, error) => Container(
+                              errorWidget: (context, url, error) => ColoredBox(
                                 color:
                                     theme.colorScheme.surfaceContainerHighest,
                                 child: Center(
@@ -78,7 +76,7 @@ class TopThreeGameItem extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : Container(
+                          : ColoredBox(
                               color: theme.colorScheme.surfaceContainerHighest,
                               child: Center(
                                 child: Icon(
@@ -132,7 +130,7 @@ class TopThreeGameItem extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],

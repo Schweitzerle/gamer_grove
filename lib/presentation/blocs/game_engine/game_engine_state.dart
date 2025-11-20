@@ -4,9 +4,9 @@
 
 // lib/presentation/blocs/game_engine/game_engine_state.dart
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
-import '../../../domain/entities/game/game.dart';
 
 abstract class GameEngineState extends Equatable {
   const GameEngineState();
@@ -24,13 +24,13 @@ class GameEngineInitial extends GameEngineState {}
 class GameEngineLoading extends GameEngineState {}
 
 class GameEngineDetailsLoaded extends GameEngineState {
-  final GameEngine gameEngine;
-  final List<Game> games;
 
   const GameEngineDetailsLoaded({
     required this.gameEngine,
     required this.games,
   });
+  final GameEngine gameEngine;
+  final List<Game> games;
 
   bool get hasGames => games.isNotEmpty;
   int get gameCount => games.length;
@@ -40,9 +40,9 @@ class GameEngineDetailsLoaded extends GameEngineState {
 }
 
 class GameEngineError extends GameEngineState {
-  final String message;
 
   const GameEngineError({required this.message});
+  final String message;
 
   @override
   List<Object> get props => [message];
@@ -54,29 +54,20 @@ class GameEngineError extends GameEngineState {
 
 /// Loading paginated games (initial load)
 class GameEngineGamesLoading extends GameEngineState {
-  final int gameEngineId;
-  final String gameEngineName;
 
   const GameEngineGamesLoading({
     required this.gameEngineId,
     required this.gameEngineName,
   });
+  final int gameEngineId;
+  final String gameEngineName;
 
   @override
   List<Object> get props => [gameEngineId, gameEngineName];
 }
 
 /// Paginated games loaded
-class GameEngineGamesLoaded extends GameEngineState {
-  final int gameEngineId;
-  final String gameEngineName;
-  final List<Game> games;
-  final bool hasMore;
-  final int currentPage;
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
-  final bool isLoadingMore;
-  final String? userId; // 🆕 Store userId for enrichment
+class GameEngineGamesLoaded extends GameEngineState { // 🆕 Store userId for enrichment
 
   const GameEngineGamesLoaded({
     required this.gameEngineId,
@@ -89,6 +80,15 @@ class GameEngineGamesLoaded extends GameEngineState {
     this.isLoadingMore = false,
     this.userId,
   });
+  final int gameEngineId;
+  final String gameEngineName;
+  final List<Game> games;
+  final bool hasMore;
+  final int currentPage;
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
+  final bool isLoadingMore;
+  final String? userId;
 
   /// Copy with for updating state
   GameEngineGamesLoaded copyWith({
@@ -129,15 +129,15 @@ class GameEngineGamesLoaded extends GameEngineState {
 
 /// Error loading paginated games
 class GameEngineGamesError extends GameEngineState {
-  final int gameEngineId;
-  final String gameEngineName;
-  final String message;
 
   const GameEngineGamesError({
     required this.gameEngineId,
     required this.gameEngineName,
     required this.message,
   });
+  final int gameEngineId;
+  final String gameEngineName;
+  final String message;
 
   @override
   List<Object> get props => [gameEngineId, gameEngineName, message];

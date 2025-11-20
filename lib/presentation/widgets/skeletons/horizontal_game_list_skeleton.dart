@@ -1,7 +1,7 @@
 // lib/presentation/widgets/loading_skeleton_widgets.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
-import '../custom_shimmer.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class HorizontalGameListSkeleton extends StatelessWidget {
   const HorizontalGameListSkeleton({super.key});

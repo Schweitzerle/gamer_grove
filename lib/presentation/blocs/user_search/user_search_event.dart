@@ -12,9 +12,9 @@ abstract class UserSearchEvent extends Equatable {
 
 /// Event to search for users with a query
 class SearchUsersRequested extends UserSearchEvent {
-  final String query;
 
   const SearchUsersRequested(this.query);
+  final String query;
 
   @override
   List<Object?> get props => [query];
@@ -42,9 +42,9 @@ class RetrySearchRequested extends UserSearchEvent {
 
 /// Event to load followers for a user
 class LoadFollowersRequested extends UserSearchEvent {
-  final String userId;
 
   const LoadFollowersRequested(this.userId);
+  final String userId;
 
   @override
   List<Object?> get props => [userId];
@@ -52,9 +52,9 @@ class LoadFollowersRequested extends UserSearchEvent {
 
 /// Event to load following for a user
 class LoadFollowingRequested extends UserSearchEvent {
-  final String userId;
 
   const LoadFollowingRequested(this.userId);
+  final String userId;
 
   @override
   List<Object?> get props => [userId];

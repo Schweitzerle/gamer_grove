@@ -4,15 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameDescriptionContent extends StatelessWidget {
-  final Game game;
 
   const GameDescriptionContent({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   Color _getGameAccentColor(BuildContext context) {
     // Use primary color or customize based on game category
@@ -167,7 +166,7 @@ class GameDescriptionContent extends StatelessWidget {
 
   // ✅ Storyline als eigene Expansion (Nested Accordion)
   Widget _buildStorylineSection(BuildContext context) {
-    final storylineColor = Colors.deepPurple;
+    const storylineColor = Colors.deepPurple;
 
     return Container(
       decoration: BoxDecoration(
@@ -206,7 +205,7 @@ class GameDescriptionContent extends StatelessWidget {
                   color: storylineColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.auto_stories,
                   size: 20,
                   color: storylineColor,
@@ -258,7 +257,6 @@ class GameDescriptionContent extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: storylineColor.withOpacity(0.15),
-                        width: 1,
                       ),
                     ),
                     child: Stack(
@@ -345,7 +343,7 @@ class GameDescriptionContent extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: 8, vertical: 4,),
                       decoration: BoxDecoration(
                         color: storylineColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),

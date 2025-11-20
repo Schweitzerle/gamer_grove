@@ -3,7 +3,7 @@
 // ==================================================
 
 // lib/data/models/event/event_logo_model.dart (ENHANCED)
-import '../../../domain/entities/event/event_logo.dart';
+import 'package:gamer_grove/domain/entities/event/event_logo.dart';
 
 class EventLogoModel extends EventLogo {
   const EventLogoModel({
@@ -19,6 +19,36 @@ class EventLogoModel extends EventLogo {
     super.createdAt,
     super.updatedAt,
   });
+
+  // Factory method for easy creation with IGDB image URL
+  factory EventLogoModel.withImageUrl({
+    required int id,
+    required String checksum,
+    required String imageId,
+    required int height,
+    required int width,
+    bool alphaChannel = false,
+    bool animated = false,
+    int? eventId,
+    String? customUrl,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return EventLogoModel(
+      id: id,
+      checksum: checksum,
+      imageId: imageId,
+      height: height,
+      width: width,
+      alphaChannel: alphaChannel,
+      animated: animated,
+      eventId: eventId,
+      url: customUrl ??
+          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
 
   factory EventLogoModel.fromJson(Map<String, dynamic> json) {
     return EventLogoModel(
@@ -84,35 +114,5 @@ class EventLogoModel extends EventLogo {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
-  }
-
-  // Factory method for easy creation with IGDB image URL
-  factory EventLogoModel.withImageUrl({
-    required int id,
-    required String checksum,
-    required String imageId,
-    required int height,
-    required int width,
-    bool alphaChannel = false,
-    bool animated = false,
-    int? eventId,
-    String? customUrl,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return EventLogoModel(
-      id: id,
-      checksum: checksum,
-      imageId: imageId,
-      height: height,
-      width: width,
-      alphaChannel: alphaChannel,
-      animated: animated,
-      eventId: eventId,
-      url: customUrl ??
-          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
   }
 }

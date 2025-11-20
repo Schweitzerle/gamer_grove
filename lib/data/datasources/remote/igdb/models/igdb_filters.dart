@@ -26,11 +26,11 @@ abstract class IgdbFilter extends Equatable {
 /// // Output: "total_rating > 80"
 /// ```
 class FieldFilter extends IgdbFilter {
+
+  const FieldFilter(this.field, this.operator, this.value);
   final String field;
   final String operator;
   final dynamic value;
-
-  const FieldFilter(this.field, this.operator, this.value);
 
   @override
   String toQueryString() {
@@ -59,10 +59,10 @@ class FieldFilter extends IgdbFilter {
 /// // Output: "platforms = (6,48,49)"
 /// ```
 class ContainsFilter extends IgdbFilter {
-  final String field;
-  final List<dynamic> values;
 
   const ContainsFilter(this.field, this.values);
+  final String field;
+  final List<dynamic> values;
 
   @override
   String toQueryString() {
@@ -85,10 +85,10 @@ class ContainsFilter extends IgdbFilter {
 /// // Output: "platforms = [6,48,49]"
 /// ```
 class AnyFilter extends IgdbFilter {
-  final String field;
-  final List<dynamic> values;
 
   const AnyFilter(this.field, this.values);
+  final String field;
+  final List<dynamic> values;
 
   @override
   String toQueryString() {
@@ -111,10 +111,10 @@ class AnyFilter extends IgdbFilter {
 /// // Output: "genres = {12,31}"
 /// ```
 class AllFilter extends IgdbFilter {
-  final String field;
-  final List<dynamic> values;
 
   const AllFilter(this.field, this.values);
+  final String field;
+  final List<dynamic> values;
 
   @override
   String toQueryString() {
@@ -140,10 +140,10 @@ class AllFilter extends IgdbFilter {
 /// // Output: "parent_game != null"
 /// ```
 class NullFilter extends IgdbFilter {
-  final String field;
-  final bool isNull;
 
   const NullFilter(this.field, {this.isNull = true});
+  final String field;
+  final bool isNull;
 
   @override
   String toQueryString() {
@@ -164,11 +164,11 @@ class NullFilter extends IgdbFilter {
 /// ], operator: '&')
 /// // Output: "total_rating > 80 & platforms = (6)"
 /// ```
-class CombinedFilter extends IgdbFilter {
-  final List<IgdbFilter> filters;
-  final String operator; // '&' for AND, '|' for OR
+class CombinedFilter extends IgdbFilter { // '&' for AND, '|' for OR
 
   const CombinedFilter(this.filters, {this.operator = '&'});
+  final List<IgdbFilter> filters;
+  final String operator;
 
   @override
   String toQueryString() {
@@ -193,9 +193,9 @@ class CombinedFilter extends IgdbFilter {
 /// // Output: "!(genres = (12))"
 /// ```
 class NotFilter extends IgdbFilter {
-  final IgdbFilter filter;
 
   const NotFilter(this.filter);
+  final IgdbFilter filter;
 
   @override
   String toQueryString() => '!(${filter.toQueryString()})';
@@ -238,13 +238,13 @@ class GameFilters {
   /// Filter games by developer company
   static IgdbFilter byDeveloper(int companyId) => CombinedFilter([
         ContainsFilter('involved_companies.company', [companyId]),
-        FieldFilter('involved_companies.developer', '=', true),
+        const FieldFilter('involved_companies.developer', '=', true),
       ]);
 
   /// Filter games by publisher company
   static IgdbFilter byPublisher(int companyId) => CombinedFilter([
         ContainsFilter('involved_companies.company', [companyId]),
-        FieldFilter('involved_companies.publisher', '=', true),
+        const FieldFilter('involved_companies.publisher', '=', true),
       ]);
 
   // Character & Related Entities
@@ -328,7 +328,7 @@ class GameFilters {
 
   /// Filter games released in a specific year
   static IgdbFilter releasedInYear(int year) {
-    final start = DateTime(year, 1, 1);
+    final start = DateTime(year);
     final end = DateTime(year, 12, 31, 23, 59, 59);
     return releasedBetween(start, end);
   }
@@ -386,7 +386,7 @@ class GameFilters {
   // ---------------------------------
 
   /// Filter games that have no parent (standalone games)
-  static IgdbFilter noParentGame() => NullFilter('parent_game', isNull: true);
+  static IgdbFilter noParentGame() => const NullFilter('parent_game');
 
   /// Filter games that ARE DLCs/expansions of a specific game
   static IgdbFilter dlcsOf(int parentGameId) =>
@@ -425,9 +425,9 @@ class GameFilters {
 ///   .build();
 /// ```
 class GameFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   GameFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Platform methods
   GameFilterBuilder withPlatform(int platformId) {

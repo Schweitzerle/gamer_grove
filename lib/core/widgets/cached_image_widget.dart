@@ -1,20 +1,12 @@
 // core/widgets/cached_image_widget.dart
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../presentation/widgets/custom_shimmer.dart';
+import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class CachedImageWidget extends StatelessWidget {
-  final String? imageUrl;
-  final double? width;
-  final double? height;
-  final BoxFit fit;
-  final Widget? placeholder;
-  final Widget? errorWidget;
-  final BorderRadius? borderRadius;
 
   const CachedImageWidget({
-    super.key,
-    required this.imageUrl,
+    required this.imageUrl, super.key,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -22,6 +14,13 @@ class CachedImageWidget extends StatelessWidget {
     this.errorWidget,
     this.borderRadius,
   });
+  final String? imageUrl;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final Widget? placeholder;
+  final Widget? errorWidget;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,6 @@ class CachedImageWidget extends StatelessWidget {
             ),
           ),
       errorWidget: (context, url, error) {
-        print('🖼️ CachedImageWidget: Error loading image $url: $error');
         return errorWidget ?? _buildErrorWidget(context);
       },
     );

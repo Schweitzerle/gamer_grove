@@ -2,13 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class Language extends Equatable {
-  final int id;
-  final String checksum;
-  final String locale;       // e.g., "en-US", "de-DE"
-  final String name;         // English name of the language
-  final String? nativeName;  // Native name of the language
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const Language({
     required this.id,
@@ -19,6 +12,13 @@ class Language extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String locale;       // e.g., "en-US", "de-DE"
+  final String name;         // English name of the language
+  final String? nativeName;  // Native name of the language
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Extract language code from locale (e.g., "en" from "en-US")
   String get languageCode => locale.split('-').first.toLowerCase();
@@ -34,7 +34,7 @@ class Language extends Equatable {
 
   // Check if it's a major language
   bool get isMajorLanguage => [
-    'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh', 'ko'
+    'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh', 'ko',
   ].contains(languageCode);
 
   @override

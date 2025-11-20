@@ -4,25 +4,25 @@
 
 // lib/presentation/widgets/sections/upcoming_events_section.dart
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
-import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
 import 'package:gamer_grove/presentation/pages/event/event_search_page.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
 import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class UpcomingEventsSection extends StatefulWidget {
-  final String? currentUserId;
-  final GameBloc? gameBloc;
-
   const UpcomingEventsSection({
     super.key,
     this.currentUserId,
     this.gameBloc,
   });
+  final String? currentUserId;
+  final GameBloc? gameBloc;
 
   @override
   State<UpcomingEventsSection> createState() => _UpcomingEventsSectionState();
@@ -155,7 +155,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
+                          MaterialPageRoute<void>(
                             builder: (context) => const EventSearchPage(),
                           ),
                         );
@@ -173,7 +173,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                 child: GestureDetector(
                   onPanDown: (_) => _stopAutoScroll(),
                   onPanEnd: (_) => _resumeAutoScroll(),
-                  onPanCancel: () => _resumeAutoScroll(),
+                  onPanCancel: _resumeAutoScroll,
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (index) {
@@ -185,13 +185,11 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     itemBuilder: (context, index) {
                       final event = events[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: EventCard(
                           event: event,
                           onTap: () => _navigateToEventDetails(context, event),
-                          showStatus: true,
                           showGamesCount: true,
-                          compact: false,
                         ),
                       );
                     },
@@ -202,7 +200,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
               // Page indicators
               if (events.length > 1)
                 Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
+                  padding: const EdgeInsets.only(top: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
@@ -297,7 +295,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           SizedBox(
             height: 200,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
                 child: CustomShimmer(
                   child: Container(

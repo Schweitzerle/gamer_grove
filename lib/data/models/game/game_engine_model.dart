@@ -2,14 +2,14 @@
 // ENHANCED GAME ENGINE MODEL (WITH FULL PARSING)
 // ==================================================
 
+import 'package:gamer_grove/data/models/company/company_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_logo_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
 // lib/data/models/game/game_engine_model.dart
-import '../../../domain/entities/game/game_engine.dart';
-import '../../../domain/entities/game/game_engine_logo.dart';
-import '../../../domain/entities/company/company.dart';
-import '../../../domain/entities/platform/platform.dart';
-import 'game_engine_logo_model.dart';
-import '../company/company_model.dart';
-import '../platform/platform_model.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
 
 class GameEngineModel extends GameEngine {
   const GameEngineModel({
@@ -31,52 +31,41 @@ class GameEngineModel extends GameEngine {
 
   factory GameEngineModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔧 GameEngineModel.fromJson: ${json['name']} (ID: ${json['id']})');
-
       // ✅ PARSE GAME ENGINE LOGO OBJECT
       GameEngineLogo? logo;
       if (json['logo'] != null) {
         if (json['logo'] is Map<String, dynamic>) {
           try {
             logo = GameEngineLogoModel.fromJson(json['logo']);
-            print('🔧 Engine Logo parsed: ${logo.logoMedUrl}');
-          } catch (e) {
-            print('❌ Error parsing engine logo: $e');
-          }
+          } catch (e) {}
         }
       }
 
       // ✅ PARSE COMPANIES OBJECTS
-      List<Company> companies = [];
+      final companies = <Company>[];
       if (json['companies'] is List) {
-        for (var companyData in json['companies']) {
+        for (final companyData in json['companies']) {
           if (companyData is Map<String, dynamic>) {
             try {
               final company = CompanyModel.fromJson(companyData);
               companies.add(company);
-            } catch (e) {
-              print('❌ Error parsing company: $e');
-            }
+            } catch (e) {}
           }
         }
       }
 
       // ✅ PARSE PLATFORMS OBJECTS
-      List<Platform> platforms = [];
+      final platforms = <Platform>[];
       if (json['platforms'] is List) {
-        for (var platformData in json['platforms']) {
+        for (final platformData in json['platforms']) {
           if (platformData is Map<String, dynamic>) {
             try {
               final platform = PlatformModel.fromJson(platformData);
               platforms.add(platform);
-            } catch (e) {
-              print('❌ Error parsing platform: $e');
-            }
+            } catch (e) {}
           }
         }
       }
-
-      print('🔧 Parsed ${companies.length} companies and ${platforms.length} platforms');
 
       return GameEngineModel(
         id: _parseInt(json['id']) ?? 0,
@@ -94,10 +83,7 @@ class GameEngineModel extends GameEngine {
         createdAt: _parseDateTime(json['created_at']),
         updatedAt: _parseDateTime(json['updated_at']),
       );
-    } catch (e, stackTrace) {
-      print('❌ GameEngineModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }

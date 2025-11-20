@@ -5,29 +5,28 @@
 // lib/presentation/widgets/sections/game_details_accordion.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/constants/app_constants.dart';
-import '../../../../../core/utils/date_formatter.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website/website_type.dart';
-import '../../blocs/user_game_data/user_game_data_bloc.dart';
-import '../../pages/game_detail/widgets/community_info_section.dart';
-import '../../pages/game_detail/widgets/company_section.dart';
-import '../../pages/game_detail/widgets/game_description_section.dart';
-import '../../pages/game_detail/widgets/user_states_section.dart';
-import 'external_links_section.dart';
-import 'game_engines_section.dart';
-import 'platform_section.dart';
-import 'genre_section.dart';
-import 'game_features_section.dart';
-import 'age_ratings_section.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/community_info_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_description_section.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/age_ratings_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/external_links_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/game_engines_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/game_features_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/genre_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/platform_section.dart';
 
 class GameDetailsAccordion extends StatelessWidget {
-  final Game game;
-
   const GameDetailsAccordion({
-    super.key,
     required this.game,
+    super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +49,12 @@ class GameDetailsAccordion extends StatelessWidget {
                   return EnhancedAccordionTile(
                     title: 'Your Activity',
                     icon: Icons.person,
+                    iconColor: const Color(0xFF6366F1), // Indigo
                     preview:
                         _buildUserStatesPreview(context, game, userDataState),
                     child: UserStatesContent(
-                        game: game), // ✅ Simplified - no callbacks needed
+                      game: game,
+                    ), // ✅ Simplified - no callbacks needed
                   );
                 },
               ),
@@ -63,6 +64,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Community & Ratings',
                   icon: Icons.public,
+                  iconColor: const Color(0xFF8B5CF6), // Purple
                   preview: _buildCommunityPreview(context, game),
                   noPadding: true,
                   child: CommunityInfoContent(game: game),
@@ -73,6 +75,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'About ${game.name}',
                   icon: Icons.description,
+                  iconColor: const Color(0xFFA855F7), // Light Purple
                   preview: _buildDescriptionPreview(context, game),
                   child: GameDescriptionContent(game: game),
                 ),
@@ -86,13 +89,14 @@ class GameDetailsAccordion extends StatelessWidget {
             context,
             title: 'Game Details',
             icon: Icons.info_outline,
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.primary,
             children: [
               // Development Tools
               if (game.gameEngines.isNotEmpty)
                 EnhancedAccordionTile(
                   title: 'Development Tools',
                   icon: Icons.precision_manufacturing_rounded,
+                  iconColor: const Color(0xFF10B981), // Emerald
                   preview: _buildEnginesPreview(context, game),
                   noPadding: true,
                   child: GameEnginesSection(gameEngines: game.gameEngines),
@@ -101,22 +105,22 @@ class GameDetailsAccordion extends StatelessWidget {
               // Platforms & Release
               if (game.platforms.isNotEmpty)
                 EnhancedAccordionTile(
-                    title: 'Platforms & Release',
-                    icon: Icons.devices,
-                    preview: _buildPlatformsPreview(context, game),
-                    noPadding: true,
-                    child: GenericPlatformSection(
-                      game: game,
-                      title: 'Available Platforms',
-                      showReleaseTimeline: true,
-                      showFirstReleaseInfo: true,
-                    )),
+                  title: 'Platforms & Release',
+                  icon: Icons.devices,
+                  iconColor: const Color(0xFF3B82F6), // Blue
+                  preview: _buildPlatformsPreview(context, game),
+                  noPadding: true,
+                  child: GenericPlatformSection(
+                    game: game,
+                  ),
+                ),
 
               // Genres & Categories
               if (game.genres.isNotEmpty || game.themes.isNotEmpty)
                 EnhancedAccordionTile(
                   title: 'Genres & Categories',
                   icon: Icons.category,
+                  iconColor: const Color(0xFF06B6D4), // Cyan
                   preview: _buildGenresPreview(context, game),
                   child: GenreSection(game: game),
                 ),
@@ -130,13 +134,14 @@ class GameDetailsAccordion extends StatelessWidget {
             context,
             title: 'Additional Information',
             icon: Icons.more_horiz,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: Theme.of(context).colorScheme.primary,
             children: [
               // Game Features
               if (_hasGameFeatures(game))
                 EnhancedAccordionTile(
                   title: 'Game Features',
                   icon: Icons.featured_play_list,
+                  iconColor: const Color(0xFFF59E0B), // Amber
                   preview: _buildGameFeaturesPreview(context, game),
                   child: GameFeaturesSection(game: game),
                 ),
@@ -146,6 +151,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Age Ratings',
                   icon: Icons.verified_user,
+                  iconColor: const Color(0xFFEF4444), // Red
                   preview: _buildAgeRatingsPreview(context, game),
                   noPadding: true,
                   child: AgeRatingsSection(ageRatings: game.ageRatings),
@@ -154,21 +160,23 @@ class GameDetailsAccordion extends StatelessWidget {
               // Companies
               if (game.involvedCompanies.isNotEmpty)
                 EnhancedAccordionTile(
-                    title: 'Companies',
-                    icon: Icons.business,
-                    preview: _buildCompaniesPreview(context, game),
-                    noPadding: true,
-                    child: GenericCompanySection(
-                      involvedCompanies: game.involvedCompanies,
-                      title: 'Development & Publishing',
-                      showRoles: true,
-                    )),
+                  title: 'Companies',
+                  icon: Icons.business,
+                  iconColor: const Color(0xFF8B5CF6), // Purple
+                  preview: _buildCompaniesPreview(context, game),
+                  noPadding: true,
+                  child: GenericCompanySection(
+                    involvedCompanies: game.involvedCompanies,
+                    title: 'Development & Publishing',
+                  ),
+                ),
 
               // External Links & Stores
               if (_hasExternalLinks(game))
                 EnhancedAccordionTile(
                   title: 'External Links & Stores',
                   icon: Icons.link,
+                  iconColor: const Color(0xFF14B8A6), // Teal
                   preview: _buildExternalLinksPreview(context, game),
                   noPadding: true,
                   child: ExternalLinksSection(game: game),
@@ -324,13 +332,13 @@ class GameDetailsAccordion extends StatelessWidget {
     Game game,
     UserGameDataState userDataState,
   ) {
-    List<String> activeStates = [];
+    final activeStates = <String>[];
 
     // Read from UserGameDataBloc if available, fallback to Game entity
     double? userRating;
-    bool isWishlisted = false;
-    bool isRecommended = false;
-    bool isInTopThree = false;
+    var isWishlisted = false;
+    var isRecommended = false;
+    var isInTopThree = false;
     int? topThreePosition;
 
     if (userDataState is UserGameDataLoaded) {
@@ -387,7 +395,7 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildCommunityPreview(BuildContext context, Game game) {
-    List<String> info = [];
+    final info = <String>[];
 
     if (game.totalRating != null) {
       info.add('⭐${game.totalRating!.toStringAsFixed(1)}');
@@ -416,7 +424,7 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildDescriptionPreview(BuildContext context, Game game) {
-    String preview = '';
+    var preview = '';
 
     if (game.summary != null && game.summary!.isNotEmpty) {
       preview = game.summary!.length > 80
@@ -443,9 +451,8 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildEnginesPreview(BuildContext context, Game game) {
     if (game.gameEngines.isEmpty) return const SizedBox.shrink();
 
-    List<String> engineNames =
-        game.gameEngines.take(2).map((e) => e.name).toList();
-    String preview = engineNames.join(' • ');
+    final engineNames = game.gameEngines.take(2).map((e) => e.name).toList();
+    var preview = engineNames.join(' • ');
 
     if (game.gameEngines.length > 2) {
       preview += ' • +${game.gameEngines.length - 2} more';
@@ -464,9 +471,9 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildPlatformsPreview(BuildContext context, Game game) {
     if (game.platforms.isEmpty) return const SizedBox.shrink();
 
-    List<String> platformNames =
+    final platformNames =
         game.platforms.take(3).map((p) => p.abbreviation ?? p.name).toList();
-    String preview = platformNames.join(' • ');
+    var preview = platformNames.join(' • ');
 
     if (game.platforms.length > 3) {
       preview += ' • +${game.platforms.length - 3} more';
@@ -483,7 +490,7 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildGenresPreview(BuildContext context, Game game) {
-    List<String> categories = [];
+    final categories = <String>[];
 
     if (game.genres.isNotEmpty) {
       categories.addAll(game.genres.take(2).map((g) => g.name));
@@ -494,9 +501,9 @@ class GameDetailsAccordion extends StatelessWidget {
           .addAll(game.themes.take(2 - categories.length).map((t) => t.name));
     }
 
-    String preview = categories.join(' • ');
+    var preview = categories.join(' • ');
 
-    int totalCount = game.genres.length + game.themes.length;
+    final totalCount = game.genres.length + game.themes.length;
     if (totalCount > 2) {
       preview += ' • +${totalCount - 2} more';
     }
@@ -512,7 +519,7 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildGameFeaturesPreview(BuildContext context, Game game) {
-    List<String> features = [];
+    final features = <String>[];
 
     if (game.gameModes.isNotEmpty) {
       features.addAll(game.gameModes.take(2).map((m) => m.name));
@@ -524,10 +531,11 @@ class GameDetailsAccordion extends StatelessWidget {
 
     if (features.length < 3 && game.playerPerspectives.isNotEmpty) {
       features.addAll(
-          game.playerPerspectives.take(3 - features.length).map((p) => p.name));
+        game.playerPerspectives.take(3 - features.length).map((p) => p.name),
+      );
     }
 
-    String preview = features.take(3).join(' • ');
+    final preview = features.take(3).join(' • ');
 
     return Text(
       preview.isNotEmpty ? preview : 'Game features',
@@ -542,15 +550,15 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildAgeRatingsPreview(BuildContext context, Game game) {
     if (game.ageRatings.isEmpty) return const SizedBox.shrink();
 
-    List<String> ratings = [];
+    final ratings = <String>[];
 
-    for (var rating in game.ageRatings.take(2)) {
-      String orgName = rating.organizationName;
-      String ratingName = rating.displayName;
+    for (final rating in game.ageRatings.take(2)) {
+      final orgName = rating.organizationName;
+      final ratingName = rating.displayName;
       ratings.add('$orgName $ratingName');
     }
 
-    String preview = ratings.join(' • ');
+    var preview = ratings.join(' • ');
 
     if (game.ageRatings.length > 2) {
       preview += ' • +${game.ageRatings.length - 2} more';
@@ -569,13 +577,13 @@ class GameDetailsAccordion extends StatelessWidget {
   Widget _buildCompaniesPreview(BuildContext context, Game game) {
     if (game.involvedCompanies.isEmpty) return const SizedBox.shrink();
 
-    List<String> companies = [];
+    final companies = <String>[];
 
-    for (var involved in game.involvedCompanies.take(2)) {
+    for (final involved in game.involvedCompanies.take(2)) {
       companies.add(involved.company.name);
     }
 
-    String preview = companies.join(' • ');
+    var preview = companies.join(' • ');
 
     if (game.involvedCompanies.length > 2) {
       preview += ' • +${game.involvedCompanies.length - 2} more';
@@ -592,24 +600,24 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 
   Widget _buildExternalLinksPreview(BuildContext context, Game game) {
-    List<String> stores = [];
+    var stores = <String>[];
 
-    for (var extGame in game.externalGames.take(3)) {
-      if (extGame.url?.contains('steam') == true) {
+    for (final extGame in game.externalGames.take(3)) {
+      if (extGame.url?.contains('steam') ?? false) {
         stores.add('Steam');
-      } else if (extGame.url?.contains('epic') == true)
+      } else if (extGame.url?.contains('epic') ?? false)
         stores.add('Epic');
-      else if (extGame.url?.contains('gog') == true)
+      else if (extGame.url?.contains('gog') ?? false)
         stores.add('GOG');
-      else if (extGame.url?.contains('playstation') == true)
+      else if (extGame.url?.contains('playstation') ?? false)
         stores.add('PlayStation');
-      else if (extGame.url?.contains('xbox') == true) stores.add('Xbox');
+      else if (extGame.url?.contains('xbox') ?? false) stores.add('Xbox');
     }
 
     stores = stores.toSet().toList();
-    int totalLinks = game.websites.length + game.externalGames.length;
+    final totalLinks = game.websites.length + game.externalGames.length;
 
-    String preview = stores.take(2).join(' • ');
+    var preview = stores.take(2).join(' • ');
     if (totalLinks > stores.length) {
       preview += preview.isNotEmpty
           ? ' • +${totalLinks - stores.length} more'
@@ -637,24 +645,25 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 }
 
-// ✅ Enhanced Accordion Tile (unchanged)
+// ✅ Enhanced Accordion Tile
 class EnhancedAccordionTile extends StatefulWidget {
-  final String title;
-  final IconData icon;
-  final Widget child;
-  final Widget? preview;
-  final bool initiallyExpanded;
-  final bool noPadding;
-
   const EnhancedAccordionTile({
-    super.key,
     required this.title,
     required this.icon,
     required this.child,
+    super.key,
+    this.iconColor,
     this.preview,
     this.initiallyExpanded = false,
     this.noPadding = false,
   });
+  final String title;
+  final IconData icon;
+  final Color? iconColor;
+  final Widget child;
+  final Widget? preview;
+  final bool initiallyExpanded;
+  final bool noPadding;
 
   @override
   State<EnhancedAccordionTile> createState() => _EnhancedAccordionTileState();
@@ -677,12 +686,14 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _isExpanded
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              ? (widget.iconColor ?? Theme.of(context).colorScheme.primary)
+                  .withOpacity(0.3)
               : Theme.of(context).colorScheme.outline.withOpacity(0.2),
           width: _isExpanded ? 1.5 : 1,
         ),
         color: _isExpanded
-            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05)
+            ? (widget.iconColor ?? Theme.of(context).colorScheme.primary)
+                .withOpacity(0.05)
             : null,
       ),
       child: Column(
@@ -698,13 +709,11 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                     ? BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.1),
-                            Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.05),
                           ],
                           begin: Alignment.topLeft,
@@ -722,18 +731,23 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: _isExpanded
-                            ? Theme.of(context)
-                                .colorScheme
-                                .primary
+                            ? (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primaryContainer,
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(8),
+                        border: !_isExpanded
+                            ? Border.all(
+                                color: (widget.iconColor ??
+                                        Theme.of(context).colorScheme.primary)
+                                    .withOpacity(0.3),
+                              )
+                            : null,
                         boxShadow: _isExpanded
                             ? [
                                 BoxShadow(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
+                                  color: (widget.iconColor ??
+                                          Theme.of(context).colorScheme.primary)
                                       .withOpacity(0.1),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -743,7 +757,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       ),
                       child: Icon(
                         widget.icon,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: widget.iconColor ??
+                            Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                     ),
@@ -760,7 +775,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: _isExpanded
-                                      ? Theme.of(context).colorScheme.primary
+                                      ? (widget.iconColor ??
+                                          Theme.of(context).colorScheme.primary)
                                       : null,
                                 ),
                           ),
@@ -777,7 +793,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       child: Icon(
                         Icons.keyboard_arrow_down,
                         color: _isExpanded
-                            ? Theme.of(context).colorScheme.primary
+                            ? (widget.iconColor ??
+                                Theme.of(context).colorScheme.primary)
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurface

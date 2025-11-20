@@ -40,7 +40,7 @@ class _PopularCharactersSectionState extends State<PopularCharactersSection> {
   }
 
   void _loadCharacters() {
-    _characterBloc.add(const GetPopularCharactersEvent(limit: 10));
+    _characterBloc.add(const GetPopularCharactersEvent());
   }
 
   @override

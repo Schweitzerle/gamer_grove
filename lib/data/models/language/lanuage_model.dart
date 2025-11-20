@@ -1,5 +1,5 @@
 // lib/data/models/language_model.dart
-import '../../../domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
 
 class LanguageModel extends Language {
   const LanguageModel({

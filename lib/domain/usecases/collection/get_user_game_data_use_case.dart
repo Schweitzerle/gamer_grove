@@ -6,8 +6,8 @@ library;
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../../data/repositories/user_repository_impl.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/data/repositories/user_repository_impl.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 // ============================================================
 // GET USER GAME DATA USE CASE (PERFORMANCE-CRITICAL!)
@@ -29,19 +29,16 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
 ///   (data) {
 ///     final game1942Data = data[1942];
-///     print('Is wishlisted: ${game1942Data['is_wishlisted']}');
-///     print('Rating: ${game1942Data['rating']}');
 ///   },
 /// );
 /// ```
 class GetUserGameDataUseCase
     implements UseCase<Map<int, Map<String, dynamic>>, GetUserGameDataParams> {
-  final UserRepositoryImpl repository;
 
   GetUserGameDataUseCase(this.repository);
+  final UserRepositoryImpl repository;
 
   @override
   Future<Either<Failure, Map<int, Map<String, dynamic>>>> call(
@@ -51,18 +48,18 @@ class GetUserGameDataUseCase
       return const Right({});
     }
 
-    return await repository.getUserGameData(params.userId, params.gameIds);
+    return repository.getUserGameData(params.userId, params.gameIds);
   }
 }
 
 class GetUserGameDataParams extends Equatable {
-  final String userId;
-  final List<int> gameIds;
 
   const GetUserGameDataParams({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];

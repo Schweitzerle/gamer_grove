@@ -1,16 +1,15 @@
 // lib/presentation/widgets/error_section_widget.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class ErrorSectionWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
 
   const ErrorSectionWidget({
-    super.key,
-    required this.message,
+    required this.message, super.key,
     this.onRetry,
   });
+  final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {

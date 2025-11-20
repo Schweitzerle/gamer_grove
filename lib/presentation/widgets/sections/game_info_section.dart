@@ -4,16 +4,15 @@
 
 // lib/presentation/widgets/sections/game_info_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../domain/entities/game/game.dart';
 
 class GameInfoSection extends StatelessWidget {
-  final Game game;
 
   const GameInfoSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,7 @@ class GameInfoSection extends StatelessWidget {
   }
 
   Widget _buildInfoCards(BuildContext context) {
-    final List<Widget> cards = [];
+    final cards = <Widget>[];
 
     // Game Type Card
     if (game.gameType != null) {
@@ -92,7 +91,7 @@ class GameInfoSection extends StatelessWidget {
         value: _formatLabel(game.gameType!.type),
         icon: _getTypeIcon(game.gameType!.type),
         color: _getTypeColor(game.gameType!.type),
-      ));
+      ),);
     }
 
     // Game Status Card
@@ -103,7 +102,7 @@ class GameInfoSection extends StatelessWidget {
         value: _formatLabel(game.gameStatus!.status),
         icon: _getStatusIcon(game.gameStatus!.status),
         color: _getStatusColor(game.gameStatus!.status),
-      ));
+      ),);
     }
 
     if (cards.isEmpty) return const SizedBox.shrink();
@@ -297,7 +296,7 @@ class GameInfoSection extends StatelessWidget {
             children: game.alternativeNames
                 .map((name) => Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                          horizontal: 12, vertical: 6,),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
@@ -323,7 +322,7 @@ class GameInfoSection extends StatelessWidget {
                               fontSize: 12,
                             ),
                       ),
-                    ))
+                    ),)
                 .toList(),
           ),
         ),
@@ -475,7 +474,7 @@ class GameInfoSection extends StatelessWidget {
     return label
         .replaceAll('_', ' ')
         .replaceAllMapped(
-            RegExp(r'([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}')
+            RegExp('([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}',)
         .split(' ')
         .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');
@@ -484,7 +483,7 @@ class GameInfoSection extends StatelessWidget {
   String _formatUrl(String url) {
     // Remove protocol and www for cleaner display
     return url
-        .replaceFirst(RegExp(r'^https?://'), '')
+        .replaceFirst(RegExp('^https?://'), '')
         .replaceFirst(RegExp(r'^www\.'), '');
   }
 
@@ -611,7 +610,6 @@ class GameInfoSection extends StatelessWidget {
       }
     } catch (e) {
       // Handle error silently or show snackbar
-      debugPrint('Could not launch $url: $e');
     }
   }
 }

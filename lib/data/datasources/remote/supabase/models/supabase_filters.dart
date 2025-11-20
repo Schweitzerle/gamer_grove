@@ -22,10 +22,10 @@ abstract class SupabaseFilter {
 /// // Generates: WHERE username = 'john_doe'
 /// ```
 class EqualFilter implements SupabaseFilter {
-  final String column;
-  final dynamic value;
 
   const EqualFilter(this.column, this.value);
+  final String column;
+  final dynamic value;
 
   @override
   Map<String, dynamic> toQueryParams() => {column: value};
@@ -42,10 +42,10 @@ class EqualFilter implements SupabaseFilter {
 /// // Generates: WHERE game_id IN (1942, 1905, 113)
 /// ```
 class InFilter implements SupabaseFilter {
-  final String column;
-  final List<dynamic> values;
 
   const InFilter(this.column, this.values);
+  final String column;
+  final List<dynamic> values;
 
   @override
   Map<String, dynamic> toQueryParams() => {column: values};
@@ -62,10 +62,10 @@ class InFilter implements SupabaseFilter {
 /// // Generates: WHERE rating > 8.0
 /// ```
 class GreaterThanFilter implements SupabaseFilter {
-  final String column;
-  final dynamic value;
 
   const GreaterThanFilter(this.column, this.value);
+  final String column;
+  final dynamic value;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_gt': value};
@@ -82,10 +82,10 @@ class GreaterThanFilter implements SupabaseFilter {
 /// // Generates: WHERE rating >= 8.0
 /// ```
 class GreaterThanOrEqualFilter implements SupabaseFilter {
-  final String column;
-  final dynamic value;
 
   const GreaterThanOrEqualFilter(this.column, this.value);
+  final String column;
+  final dynamic value;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_gte': value};
@@ -102,10 +102,10 @@ class GreaterThanOrEqualFilter implements SupabaseFilter {
 /// // Generates: WHERE followers_count < 1000
 /// ```
 class LessThanFilter implements SupabaseFilter {
-  final String column;
-  final dynamic value;
 
   const LessThanFilter(this.column, this.value);
+  final String column;
+  final dynamic value;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_lt': value};
@@ -122,10 +122,10 @@ class LessThanFilter implements SupabaseFilter {
 /// // Generates: WHERE followers_count <= 1000
 /// ```
 class LessThanOrEqualFilter implements SupabaseFilter {
-  final String column;
-  final dynamic value;
 
   const LessThanOrEqualFilter(this.column, this.value);
+  final String column;
+  final dynamic value;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_lte': value};
@@ -142,10 +142,10 @@ class LessThanOrEqualFilter implements SupabaseFilter {
 /// // Generates: WHERE username LIKE '%john%'
 /// ```
 class LikeFilter implements SupabaseFilter {
-  final String column;
-  final String pattern;
 
   const LikeFilter(this.column, this.pattern);
+  final String column;
+  final String pattern;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_like': pattern};
@@ -162,10 +162,10 @@ class LikeFilter implements SupabaseFilter {
 /// // Generates: WHERE username ILIKE '%JOHN%'
 /// ```
 class ILikeFilter implements SupabaseFilter {
-  final String column;
-  final String pattern;
 
   const ILikeFilter(this.column, this.pattern);
+  final String column;
+  final String pattern;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_ilike': pattern};
@@ -182,9 +182,9 @@ class ILikeFilter implements SupabaseFilter {
 /// // Generates: WHERE bio IS NULL
 /// ```
 class IsNullFilter implements SupabaseFilter {
-  final String column;
 
   const IsNullFilter(this.column);
+  final String column;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_is': null};
@@ -201,9 +201,9 @@ class IsNullFilter implements SupabaseFilter {
 /// // Generates: WHERE avatar_url IS NOT NULL
 /// ```
 class NotNullFilter implements SupabaseFilter {
-  final String column;
 
   const NotNullFilter(this.column);
+  final String column;
 
   @override
   Map<String, dynamic> toQueryParams() => {'${column}_not.is': null};
@@ -220,9 +220,9 @@ class NotNullFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = true
 /// ```
 class IsTrueFilter implements SupabaseFilter {
-  final String column;
 
   const IsTrueFilter(this.column);
+  final String column;
 
   @override
   Map<String, dynamic> toQueryParams() => {column: true};
@@ -239,9 +239,9 @@ class IsTrueFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = false
 /// ```
 class IsFalseFilter implements SupabaseFilter {
-  final String column;
 
   const IsFalseFilter(this.column);
+  final String column;
 
   @override
   Map<String, dynamic> toQueryParams() => {column: false};
@@ -261,13 +261,13 @@ class IsFalseFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = true AND followers_count > 100
 /// ```
 class AndFilter implements SupabaseFilter {
-  final List<SupabaseFilter> filters;
 
   const AndFilter(this.filters);
+  final List<SupabaseFilter> filters;
 
   @override
   Map<String, dynamic> toQueryParams() {
-    final Map<String, dynamic> params = {};
+    final params = <String, dynamic>{};
     for (final filter in filters) {
       params.addAll(filter.toQueryParams());
     }
@@ -296,10 +296,10 @@ enum SortOrder {
 /// final sort = SortBy('created_at', SortOrder.descending);
 /// ```
 class SortBy {
-  final String column;
-  final SortOrder order;
 
   const SortBy(this.column, this.order);
+  final String column;
+  final SortOrder order;
 
   /// Converts to Supabase query parameters.
   Map<String, dynamic> toQueryParams() => {
@@ -318,8 +318,6 @@ class SortBy {
 /// final pagination = Pagination(limit: 20, offset: 40);
 /// ```
 class Pagination {
-  final int limit;
-  final int offset;
 
   const Pagination({
     required this.limit,
@@ -338,6 +336,8 @@ class Pagination {
       offset: (page - 1) * pageSize,
     );
   }
+  final int limit;
+  final int offset;
 
   /// Converts to Supabase query parameters.
   Map<String, dynamic> toQueryParams() => {

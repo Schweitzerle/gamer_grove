@@ -11,7 +11,7 @@ class AboutUsPage extends StatelessWidget {
         title: const Text('About Us'),
       ),
       body: const Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

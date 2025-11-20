@@ -4,12 +4,36 @@
 
 // lib/domain/entities/event/event.dart (ENHANCED)
 import 'package:equatable/equatable.dart';
-import '../game/game.dart';
-import '../game/game_video.dart';
-import 'event_logo.dart';
-import 'event_network.dart';
+import 'package:gamer_grove/domain/entities/event/event_logo.dart';
+import 'package:gamer_grove/domain/entities/event/event_network.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
 
 class Event extends Equatable {
+
+  const Event({
+    required this.id,
+    required this.checksum,
+    required this.name,
+    this.description,
+    this.slug,
+    this.createdAt,
+    this.updatedAt,
+    this.startTime,
+    this.endTime,
+    this.timeZone,
+    // Enhanced fields
+    this.eventLogo,
+    this.liveStreamUrl,
+    this.eventNetworks = const [],
+    this.games = const [],
+    this.videos = const [],
+    // Legacy fields
+    this.eventLogoId,
+    this.eventNetworkIds = const [],
+    this.gameIds = const [],
+    this.videoIds = const [],
+  });
   final int id;
   final String checksum;
   final String name;
@@ -35,30 +59,6 @@ class Event extends Equatable {
   final List<int> eventNetworkIds;
   final List<int> gameIds;
   final List<int> videoIds;
-
-  const Event({
-    required this.id,
-    required this.checksum,
-    required this.name,
-    this.description,
-    this.slug,
-    this.createdAt,
-    this.updatedAt,
-    this.startTime,
-    this.endTime,
-    this.timeZone,
-    // Enhanced fields
-    this.eventLogo,
-    this.liveStreamUrl,
-    this.eventNetworks = const [],
-    this.games = const [],
-    this.videos = const [],
-    // Legacy fields
-    this.eventLogoId,
-    this.eventNetworkIds = const [],
-    this.gameIds = const [],
-    this.videoIds = const [],
-  });
 
   // ==========================================
   // ENHANCED HELPER GETTERS
@@ -167,13 +167,13 @@ class Event extends Equatable {
   /// Get upcoming games from featured games
   List<Game> get upcomingGames {
     return games.where((game) => game.firstReleaseDate != null &&
-        game.firstReleaseDate!.isAfter(DateTime.now())).toList();
+        game.firstReleaseDate!.isAfter(DateTime.now()),).toList();
   }
 
   /// Get released games from featured games
   List<Game> get releasedGames {
     return games.where((game) => game.firstReleaseDate != null &&
-        game.firstReleaseDate!.isBefore(DateTime.now())).toList();
+        game.firstReleaseDate!.isBefore(DateTime.now()),).toList();
   }
 
   // ==========================================

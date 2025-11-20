@@ -1,6 +1,6 @@
 // lib/presentation/widgets/empty_top_three_section.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class EmptyTopThreeSection extends StatelessWidget {
   const EmptyTopThreeSection({super.key});

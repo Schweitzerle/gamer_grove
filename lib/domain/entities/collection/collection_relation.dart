@@ -2,13 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CollectionRelation extends Equatable {
-  final int id;
-  final String checksum;
-  final int? childCollectionId;
-  final int? parentCollectionId;
-  final int? typeId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const CollectionRelation({
     required this.id,
@@ -19,6 +12,13 @@ class CollectionRelation extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final int? childCollectionId;
+  final int? parentCollectionId;
+  final int? typeId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   bool get hasParentChild => childCollectionId != null && parentCollectionId != null;
 

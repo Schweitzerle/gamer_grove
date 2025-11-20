@@ -36,8 +36,6 @@ class CharacterFieldSets {
     'country_name',
     'character_gender',
     'character_species',
-    'gender', // deprecated but kept for compatibility
-    'species', // deprecated but kept for compatibility
     // Mug Shot
     'mug_shot.id',
     'mug_shot.url',
@@ -90,8 +88,6 @@ class CharacterFieldSets {
     'mug_shot.image_id',
     'character_gender',
     'character_species',
-    'gender', // deprecated but kept for compatibility
-    'species', // deprecated but kept for compatibility
     'games.id',
     'games.name',
   ];
@@ -107,8 +103,6 @@ class CharacterFieldSets {
     'mug_shot.image_id',
     'character_gender',
     'character_species',
-    'gender', // deprecated but kept for compatibility
-    'species', // deprecated but kept for compatibility
     'country_name',
   ];
 }

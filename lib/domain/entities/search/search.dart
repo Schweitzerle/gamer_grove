@@ -12,22 +12,7 @@ enum SearchResultType {
   unknown,
 }
 
-class Search extends Equatable {
-  final int id;
-  final String checksum;
-  final String? alternativeName;
-  final String name;
-  final String? description;
-  final DateTime? publishedAt;
-
-  // Reference IDs to actual entities
-  final int? characterId;
-  final int? collectionId;
-  final int? companyId;
-  final int? gameId;
-  final int? platformId;
-  final int? themeId;
-  final int? testDummyId; // Usually not relevant for production
+class Search extends Equatable { // Usually not relevant for production
 
   const Search({
     required this.id,
@@ -44,6 +29,21 @@ class Search extends Equatable {
     this.themeId,
     this.testDummyId,
   });
+  final int id;
+  final String checksum;
+  final String? alternativeName;
+  final String name;
+  final String? description;
+  final DateTime? publishedAt;
+
+  // Reference IDs to actual entities
+  final int? characterId;
+  final int? collectionId;
+  final int? companyId;
+  final int? gameId;
+  final int? platformId;
+  final int? themeId;
+  final int? testDummyId;
 
   // Helper getters for determining result type
   SearchResultType get resultType {

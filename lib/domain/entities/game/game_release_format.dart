@@ -2,11 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameReleaseFormat extends Equatable {
-  final int id;
-  final String checksum;
-  final String format;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const GameReleaseFormat({
     required this.id,
@@ -15,6 +10,11 @@ class GameReleaseFormat extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String format;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   @override
   List<Object?> get props => [id, checksum, format, createdAt, updatedAt];

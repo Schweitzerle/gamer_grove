@@ -1,6 +1,6 @@
 // ===== RELEASE DATE STATUS MODEL =====
 // lib/data/models/release_date/release_date_status_model.dart
-import '../../../domain/entities/releaseDate/release_date_status.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date_status.dart';
 
 class ReleaseDateStatusModel extends ReleaseDateStatus {
   const ReleaseDateStatusModel({

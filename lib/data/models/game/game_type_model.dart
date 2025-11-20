@@ -1,7 +1,7 @@
 // ===== GAME TYPE MODEL =====
 // File: lib/data/models/game/game_type_model.dart
 
-import '../../../domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
 
 class GameTypeModel extends GameType {
   const GameTypeModel({

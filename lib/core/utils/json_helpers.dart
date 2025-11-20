@@ -1,8 +1,8 @@
 // ===== UNIVERSAL JSON PARSING HELPERS =====
 // lib/core/utils/json_helpers.dart
 
-import '../../data/models/game/game_model.dart';
-import '../../domain/entities/game/game.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 /// Universal JSON parsing utilities for handling both basic and expanded IGDB API responses
 ///
@@ -40,7 +40,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractId(item))
+          .map(extractId)
           .where((id) => id != null)
           .cast<int>()
           .toList();
@@ -122,7 +122,6 @@ class JsonHelpers {
         // IGDB uses Unix timestamps in seconds
         return DateTime.fromMillisecondsSinceEpoch(date * 1000);
       } catch (e) {
-        print('⚠️ JsonHelpers: Failed to parse timestamp: $date');
         return null;
       }
     }
@@ -162,7 +161,7 @@ class JsonHelpers {
   /// - extractMultipleNested(json, ["user.name", "user.email", "user.id"])
   ///   -> {"user.name": "John", "user.email": "john@example.com", "user.id": 123}
   static Map<String, dynamic> extractMultipleNested(
-      dynamic value, List<String> paths) {
+      dynamic value, List<String> paths,) {
     final result = <String, dynamic>{};
     for (final path in paths) {
       result[path] = extractNested<dynamic>(value, path);
@@ -184,7 +183,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractName(item))
+          .map(extractName)
           .where((name) => name != null && name.isNotEmpty)
           .cast<String>()
           .toList();
@@ -197,7 +196,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractUrl(item))
+          .map(extractUrl)
           .where((url) => url != null && url.isNotEmpty)
           .cast<String>()
           .toList();
@@ -273,12 +272,7 @@ class JsonHelpers {
 
     json.forEach((key, value) {
       if (value is Map<String, dynamic>) {
-        final keys = value.keys.take(8).join(', ');
-        final moreKeys = value.keys.length > 8 ? '...' : '';
-        print('$prefix$key: Map with keys: $keys$moreKeys');
-
         if (value.containsKey('id')) {
-          print('$prefix  └─ Expanded object with ID: ${value['id']}');
         }
 
         // Recurse into nested objects
@@ -286,55 +280,30 @@ class JsonHelpers {
           analyzeJsonStructure(value,
               prefix: '$prefix  ',
               maxDepth: maxDepth,
-              currentDepth: currentDepth + 1);
+              currentDepth: currentDepth + 1,);
         }
       } else if (value is List) {
         if (value.isNotEmpty) {
           final first = value.first;
           if (first is Map<String, dynamic>) {
-            final keys = first.keys.take(6).join(', ');
-            final moreKeys = first.keys.length > 6 ? '...' : '';
-            print(
-                '$prefix$key: List<Map> (${value.length} items) with keys: $keys$moreKeys');
           } else {
-            print(
-                '$prefix$key: List<${first.runtimeType}> (${value.length} items)');
           }
         } else {
-          print('$prefix$key: Empty list');
         }
       } else {
-        final valueStr = value.toString();
-        final displayValue =
-            valueStr.length > 50 ? '${valueStr.substring(0, 50)}...' : valueStr;
-        print('$prefix$key: ${value.runtimeType} = $displayValue');
       }
     });
   }
 
   /// Quick check to see what type of API response you're dealing with
   static void analyzeApiResponseType(Map<String, dynamic> json) {
-    int expandedObjects = 0;
-    int simpleReferences = 0;
-    int totalFields = 0;
-
     json.forEach((key, value) {
-      totalFields++;
       if (isExpandedObject(value)) {
-        expandedObjects++;
       } else if (isSimpleReference(value)) {
-        simpleReferences++;
       } else if (value is List && hasExpandedObjects(value)) {
-        expandedObjects++;
       }
     });
 
-    print('📊 API Response Analysis:');
-    print('   Total fields: $totalFields');
-    print('   Expanded objects: $expandedObjects');
-    print('   Simple references: $simpleReferences');
-    print(
-        '   Response type: ${expandedObjects > simpleReferences ? "COMPLETE" : "BASIC"}');
   }
 
   // ==========================================
@@ -383,7 +352,7 @@ class JsonHelpers {
     if (games is List) {
       return games
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameModel.fromJson(item))
+          .map(GameModel.fromJson)
           .toList();
     }
     return [];

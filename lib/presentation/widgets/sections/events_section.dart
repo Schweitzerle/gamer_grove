@@ -4,26 +4,25 @@
 
 // lib/presentation/widgets/sections/events_section.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../pages/event/widgets/event_card.dart';
-import '../custom_shimmer.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
+import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class EventsSection extends StatelessWidget {
-  final Game game;
-  final String? currentUserId;
-  final bool showViewAll;
-  final int maxDisplayedEvents;
 
   const EventsSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
     this.currentUserId,
     this.showViewAll = true,
     this.maxDisplayedEvents = 6,
   });
+  final Game game;
+  final String? currentUserId;
+  final bool showViewAll;
+  final int maxDisplayedEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +100,6 @@ class EventsSection extends StatelessWidget {
                   child: EventCard(
                     event: event,
                     onTap: () => _navigateToEventDetails(context, event),
-                    showStatus: true,
                     showGamesCount: true,
                   ),
                 );

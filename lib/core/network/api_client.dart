@@ -1,14 +1,14 @@
 // core/network/api_client.dart
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/errors/exceptions.dart';
 import 'package:http/http.dart' as http;
-import '../constants/api_constants.dart';
-import '../errors/exceptions.dart';
 
 class ApiClient {
-  final http.Client client;
-
   ApiClient(this.client);
+  final http.Client client;
 
   Future<dynamic> get(
     String url, {
@@ -27,7 +27,7 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(e.toString(), message: e.toString());
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -53,7 +53,7 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(e.toString(), message: e.toString());
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -79,7 +79,7 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(e.toString(), message: e.toString());
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -100,7 +100,7 @@ class ApiClient {
     } on HttpException {
       throw NetworkException();
     } catch (e) {
-      throw ServerException(e.toString(), message: e.toString());
+      throw ServerException(message: e.toString());
     }
   }
 
@@ -115,7 +115,6 @@ class ApiClient {
         return json.decode(response.body);
       case 400:
         throw ServerException(
-          'Bad request',
           message: 'Bad request',
           statusCode: response.statusCode,
         );
@@ -131,19 +130,16 @@ class ApiClient {
         );
       case 404:
         throw ServerException(
-          'Not found',
           message: 'Not found',
           statusCode: response.statusCode,
         );
       case 500:
         throw ServerException(
-          'Internal server error',
           message: 'Internal server error',
           statusCode: response.statusCode,
         );
       default:
         throw ServerException(
-          'Error occurred with status code: ${response.statusCode}',
           message: 'Error occurred with status code: ${response.statusCode}',
           statusCode: response.statusCode,
         );

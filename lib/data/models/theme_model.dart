@@ -1,5 +1,5 @@
 // lib/data/models/theme_model.dart
-import '../../domain/entities/theme.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
 
 class IGDBThemeModel extends IGDBTheme {
   const IGDBThemeModel({

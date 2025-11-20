@@ -2,11 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class WebsiteType extends Equatable {
-  final int id;
-  final String checksum;
-  final String type;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const WebsiteType({
     required this.id,
@@ -15,6 +10,11 @@ class WebsiteType extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String type;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper to get icon for website type
   String? get iconName {
@@ -59,18 +59,18 @@ class WebsiteType extends Equatable {
   bool get isSocialMedia => [
     'facebook', 'twitter', 'instagram',
     'youtube', 'twitch', 'reddit',
-    'discord', 'bluesky'
+    'discord', 'bluesky',
   ].contains(type.toLowerCase());
 
   // Helper to check if it's a store/marketplace
   bool get isStore => [
     'steam', 'epicgames', 'gog',
-    'iphone', 'ipad', 'android'
+    'iphone', 'ipad', 'android',
   ].contains(type.toLowerCase());
 
   // Helper to check if it's a wiki/info site
   bool get isWiki => [
-    'wikia', 'wikipedia'
+    'wikia', 'wikipedia',
   ].contains(type.toLowerCase());
 
   @override

@@ -2,7 +2,7 @@
 
 // lib/domain/entities/recommendations/recommendation_signal.dart
 enum RecommendationSignal {
-  ratings('ratings', 'User Ratings', 'Based on games you\'ve rated highly'),
+  ratings('ratings', 'User Ratings', "Based on games you've rated highly"),
   wishlist('wishlist', 'Wishlist', 'Based on games in your wishlist'),
   genres('genres', 'Preferred Genres', 'Based on your favorite genres'),
   platforms('platforms', 'Platform Usage', 'Based on your platform preferences'),

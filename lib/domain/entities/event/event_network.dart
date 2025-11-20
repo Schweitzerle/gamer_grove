@@ -5,19 +5,9 @@
 // lib/domain/entities/event/event_network.dart (ENHANCED)
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'network_type.dart';
+import 'package:gamer_grove/domain/entities/event/network_type.dart';
 
-class EventNetwork extends Equatable {
-  final int id;
-  final String checksum;
-  final String url;
-  final int? eventId;
-  final int? networkTypeId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  // Enhanced field
-  final NetworkType? networkType; // 🆕 Full NetworkType object instead of ID
+class EventNetwork extends Equatable { // 🆕 Full NetworkType object instead of ID
 
   const EventNetwork({
     required this.id,
@@ -29,6 +19,16 @@ class EventNetwork extends Equatable {
     this.updatedAt,
     this.networkType, // 🆕 Enhanced field
   });
+  final int id;
+  final String checksum;
+  final String url;
+  final int? eventId;
+  final int? networkTypeId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  // Enhanced field
+  final NetworkType? networkType;
 
   // ==========================================
   // ENHANCED HELPER GETTERS

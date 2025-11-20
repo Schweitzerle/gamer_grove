@@ -1,14 +1,14 @@
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_user_exceptions.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource.dart';
 import 'package:gamer_grove/data/models/user_activity_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'supabase_user_activity_datasource.dart';
 
 class SupabaseUserActivityDataSourceImpl
     implements SupabaseUserActivityDataSource {
-  final SupabaseClient _supabase;
 
   SupabaseUserActivityDataSourceImpl({required SupabaseClient supabase})
       : _supabase = supabase;
+  final SupabaseClient _supabase;
 
   @override
   Future<List<UserActivityModel>> getActivityFeed(String userId) async {
@@ -32,12 +32,12 @@ class SupabaseUserActivityDataSourceImpl
           .select('*, user:users(*)')
           .inFilter('user_id', followingIds)
           .inFilter('activity_type',
-              ['rated', 'updated_top_three', 'recommended', 'wishlisted'])
+              ['rated', 'updated_top_three', 'recommended', 'wishlisted'],)
           .order('created_at', ascending: false)
           .limit(50);
 
       return activityResponse
-          .map((json) => UserActivityModel.fromJson(json))
+          .map(UserActivityModel.fromJson)
           .toList();
     } catch (e) {
       throw UserExceptionMapper.map(e);

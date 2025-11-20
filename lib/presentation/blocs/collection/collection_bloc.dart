@@ -54,16 +54,6 @@ import 'package:gamer_grove/presentation/blocs/collection/collection_state.dart'
 /// );
 /// ```
 class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
-  final GetUserGameDataUseCase getUserGameDataUseCase;
-  final RateGameUseCase rateGameUseCase;
-  final RemoveRatingUseCase removeRatingUseCase;
-  final ToggleWishlistUseCase toggleWishlistUseCase;
-  final ToggleRecommendedUseCase toggleRecommendedUseCase;
-  final UpdateTopThreeUseCase updateTopThreeUseCase;
-  final GetTopThreeUseCase getTopThreeUseCase;
-  final ClearTopThreeUseCase clearTopThreeUseCase;
-  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
-  final GetRatedGamesUseCase getRatedGamesUseCase;
 
   CollectionBloc({
     required this.getUserGameDataUseCase,
@@ -88,6 +78,16 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     on<LoadWishlistedGamesEvent>(_onLoadWishlistedGames);
     on<LoadRatedGamesEvent>(_onLoadRatedGames);
   }
+  final GetUserGameDataUseCase getUserGameDataUseCase;
+  final RateGameUseCase rateGameUseCase;
+  final RemoveRatingUseCase removeRatingUseCase;
+  final ToggleWishlistUseCase toggleWishlistUseCase;
+  final ToggleRecommendedUseCase toggleRecommendedUseCase;
+  final UpdateTopThreeUseCase updateTopThreeUseCase;
+  final GetTopThreeUseCase getTopThreeUseCase;
+  final ClearTopThreeUseCase clearTopThreeUseCase;
+  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
+  final GetRatedGamesUseCase getRatedGamesUseCase;
 
   /// Loads enriched game data for multiple games.
   /// This is the PERFORMANCE-CRITICAL handler!

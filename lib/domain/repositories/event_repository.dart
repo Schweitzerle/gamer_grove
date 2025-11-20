@@ -1,8 +1,8 @@
 // lib/domain/repositories/event_repository.dart
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/event/event.dart';
-import '../entities/search/event_search_filters.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
 
 abstract class EventRepository {
   // Current & Upcoming Events

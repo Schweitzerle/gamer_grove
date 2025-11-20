@@ -1,5 +1,5 @@
 // lib/data/models/language_support_type_model.dart
-import '../../../domain/entities/language/language_support_type.dart';
+import 'package:gamer_grove/domain/entities/language/language_support_type.dart';
 
 class LanguageSupportTypeModel extends LanguageSupportType {
   const LanguageSupportTypeModel({

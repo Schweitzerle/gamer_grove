@@ -1,5 +1,5 @@
 // lib/data/models/platform_family_model.dart
-import '../../../domain/entities/platform/platform_family.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_family.dart';
 
 class PlatformFamilyModel extends PlatformFamily {
   const PlatformFamilyModel({

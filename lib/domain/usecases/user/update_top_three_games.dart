@@ -3,14 +3,14 @@
 // lib/domain/usecases/user/update_top_three_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
-  final UserRepository repository;
 
   UpdateTopThreeGames(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, void>> call(UpdateTopThreeGamesParams params) async {
@@ -27,7 +27,7 @@ class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
       return const Left(ValidationFailure(message: 'All three games must be different'));
     }
 
-    return await repository.updateTopThreeGames(
+    return repository.updateTopThreeGames(
       userId: params.userId,
       gameIds: params.gameIds,
     );
@@ -35,13 +35,13 @@ class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
 }
 
 class UpdateTopThreeGamesParams extends Equatable {
-  final String userId;
-  final List<int> gameIds;
 
   const UpdateTopThreeGamesParams({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];

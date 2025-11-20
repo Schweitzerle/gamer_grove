@@ -1,6 +1,6 @@
 // lib/data/datasources/remote/igdb/models/game/game_filters.dart
 
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Pre-configured filters for common game queries.
 ///
@@ -36,13 +36,13 @@ class GameFilters {
   /// Filter games by developer company
   static IgdbFilter byDeveloper(int companyId) => CombinedFilter([
         ContainsFilter('involved_companies.company', [companyId]),
-        FieldFilter('involved_companies.developer', '=', true),
+        const FieldFilter('involved_companies.developer', '=', true),
       ]);
 
   /// Filter games by publisher company
   static IgdbFilter byPublisher(int companyId) => CombinedFilter([
         ContainsFilter('involved_companies.company', [companyId]),
-        FieldFilter('involved_companies.publisher', '=', true),
+        const FieldFilter('involved_companies.publisher', '=', true),
       ]);
 
   // ============================================================
@@ -132,7 +132,7 @@ class GameFilters {
 
   /// Filter games released in a specific year
   static IgdbFilter releasedInYear(int year) {
-    final start = DateTime(year, 1, 1);
+    final start = DateTime(year);
     final end = DateTime(year, 12, 31, 23, 59, 59);
     return releasedBetween(start, end);
   }
@@ -192,7 +192,7 @@ class GameFilters {
   // ============================================================
 
   /// Filter games that have no parent (standalone games)
-  static IgdbFilter noParentGame() => NullFilter('parent_game', isNull: true);
+  static IgdbFilter noParentGame() => const NullFilter('parent_game');
 
   /// Filter games that ARE DLCs/expansions of a specific game
   static IgdbFilter dlcsOf(int parentGameId) =>
@@ -229,9 +229,9 @@ class GameFilters {
 ///   .build();
 /// ```
 class GameFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   GameFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Platform methods
   GameFilterBuilder withPlatform(int platformId) {

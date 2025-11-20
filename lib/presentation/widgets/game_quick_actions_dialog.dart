@@ -3,23 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../domain/entities/game/game.dart';
-import '../blocs/game/game_bloc.dart';
-import '../blocs/auth/auth_bloc.dart';
-import '../blocs/user_game_data/user_game_data_bloc.dart' as user_data;
-import 'rating_dialog.dart';
-import 'top_three_dialog.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart' as user_data;
+import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
+import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
 class GameQuickActionsDialog extends StatefulWidget {
-  final Game game;
-  final GameBloc gameBloc;
 
   const GameQuickActionsDialog({
-    super.key,
-    required this.game,
-    required this.gameBloc,
+    required this.game, required this.gameBloc, super.key,
   });
+  final Game game;
+  final GameBloc gameBloc;
 
   @override
   State<GameQuickActionsDialog> createState() => _GameQuickActionsDialogState();
@@ -43,11 +41,11 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     return BlocBuilder<user_data.UserGameDataBloc, user_data.UserGameDataState>(
       builder: (context, userDataState) {
         // Extract user-specific data from global state
-        bool isWishlisted = widget.game.isWishlisted;
-        bool isRecommended = widget.game.isRecommended;
-        double? userRating = widget.game.userRating;
-        bool isInTopThree = widget.game.isInTopThree;
-        int? topThreePosition = widget.game.topThreePosition;
+        var isWishlisted = widget.game.isWishlisted;
+        var isRecommended = widget.game.isRecommended;
+        var userRating = widget.game.userRating;
+        var isInTopThree = widget.game.isInTopThree;
+        var topThreePosition = widget.game.topThreePosition;
 
         // Override with UserGameDataBloc data if available
         if (userDataState is user_data.UserGameDataLoaded) {
@@ -193,8 +191,8 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
                           isActive: isInTopThree,
                           onTap: () {
                             _showTopThreeDialog(widget.game);
-                          }),
-                    ]),
+                          },),
+                    ],),
               ),
 
               // Bottom padding for gesture area
@@ -344,19 +342,15 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
       return;
     }
 
-    print('🎯 QuickActions: Opening top three dialog for "${game.name}"');
 
     // Get current top three games from the bloc state
     List<Game>? currentTopThree;
     final currentState = widget.gameBloc.state;
 
-    print('🎯 QuickActions: GameBloc state type: ${currentState.runtimeType}');
 
     if (currentState is GrovePageLoaded) {
       currentTopThree = currentState.userTopThree;
-      print('✅ QuickActions: Found GrovePageLoaded with ${currentTopThree.length} top three games');
     } else {
-      print('⚠️ QuickActions: State is not GrovePageLoaded, currentTopThree will be null');
     }
 
     showDialog<void>(
@@ -375,14 +369,12 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
   void _addToTopThree(int gameId, int position) {
     if (_currentUserId == null) return;
 
-    print('🎯 QuickActions: Adding game $gameId to top three at position $position');
-    print('🎯 QuickActions: User ID: $_currentUserId');
 
     // ✅ Get current top three from UserGameDataBloc
     final userDataBloc = context.read<user_data.UserGameDataBloc>();
     final userDataState = userDataBloc.state;
 
-    List<int> currentTopThreeIds = [];
+    var currentTopThreeIds = <int>[];
     if (userDataState is user_data.UserGameDataLoaded) {
       currentTopThreeIds = userDataState.topThreeGameIds;
     }
@@ -410,7 +402,7 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     userDataBloc.add(user_data.UpdateTopThreeEvent(
       userId: _currentUserId!,
       gameIds: updatedList,
-    ));
+    ),);
 
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(

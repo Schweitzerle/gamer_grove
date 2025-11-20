@@ -62,13 +62,7 @@ enum CompanyWebsiteCategory {
   bool get isApp => [iphone, ipad, android].contains(this);
 }
 
-class CompanyWebsite extends Equatable {
-  final int id;
-  final String checksum;
-  final String url;
-  final bool trusted;
-  final CompanyWebsiteCategory category; // DEPRECATED but still useful
-  final int? typeId; // New reference to Website Type
+class CompanyWebsite extends Equatable { // New reference to Website Type
 
   const CompanyWebsite({
     required this.id,
@@ -78,6 +72,12 @@ class CompanyWebsite extends Equatable {
     this.category = CompanyWebsiteCategory.unknown,
     this.typeId,
   });
+  final int id;
+  final String checksum;
+  final String url;
+  final bool trusted;
+  final CompanyWebsiteCategory category; // DEPRECATED but still useful
+  final int? typeId;
 
   // Helper getters
   bool get isOfficial => category == CompanyWebsiteCategory.official;

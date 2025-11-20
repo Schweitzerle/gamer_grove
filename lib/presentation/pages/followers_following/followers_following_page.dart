@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_event.dart';
+import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_event.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_state.dart';
 import 'package:gamer_grove/presentation/pages/user_detail/user_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/widgets/user_search_item.dart';
-
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import '../../blocs/social_interactions/social_interactions_bloc.dart';
-import '../../blocs/social_interactions/social_interactions_event.dart';
-import '../../blocs/social_interactions/social_interactions_state.dart';
 
 /// Types of follow lists
 enum FollowListType {

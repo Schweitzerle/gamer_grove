@@ -1,5 +1,5 @@
 // lib/data/models/keyword_model.dart
-import '../../domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
 
 class KeywordModel extends Keyword {
   const KeywordModel({

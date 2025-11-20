@@ -4,16 +4,13 @@ import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:intl/intl.dart';
 
 class ActivityCard extends StatelessWidget {
+
+  const ActivityCard({
+    required this.activity, required this.content, required this.title, super.key,
+  });
   final UserActivity activity;
   final Widget content;
   final String title;
-
-  const ActivityCard({
-    super.key,
-    required this.activity,
-    required this.content,
-    required this.title,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +55,7 @@ class ActivityCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(Icons.calendar_today,
-                          size: 12, color: theme.colorScheme.onSurfaceVariant),
+                          size: 12, color: theme.colorScheme.onSurfaceVariant,),
                       const SizedBox(width: 4),
                       Text(
                         DateFormat('dd.MM.yyyy').format(activity.createdAt),
@@ -66,7 +63,7 @@ class ActivityCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 8),

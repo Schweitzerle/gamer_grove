@@ -1,19 +1,18 @@
 // ==================================================
 // GENRE SECTION
 // ==================================================
-import '../../../domain/entities/game/game.dart';
 import 'package:flutter/material.dart';
-import '../../../core/utils/navigations.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 // lib/presentation/pages/game_detail/widgets/sections/genre_section.dart
 
 class GenreSection extends StatelessWidget {
-  final Game game;
 
   const GenreSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +100,8 @@ class GenreSection extends StatelessWidget {
     Color color,
     IconData icon,
   ) {
-    const int maxDisplayed = 8;
-    final bool hasMore = genres.length > maxDisplayed;
+    const maxDisplayed = 8;
+    final hasMore = genres.length > maxDisplayed;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +154,7 @@ class GenreSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                )),
+                ),),
 
             // ✅ SHOW ALL BUTTON
             if (hasMore)
@@ -209,8 +208,8 @@ class GenreSection extends StatelessWidget {
     Color color,
     IconData icon,
   ) {
-    const int maxDisplayed = 8;
-    final bool hasMore = themes.length > maxDisplayed;
+    const maxDisplayed = 8;
+    final hasMore = themes.length > maxDisplayed;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +257,7 @@ class GenreSection extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ))),
+                ),),),
             if (hasMore)
               InkWell(
                 onTap: () =>
@@ -306,8 +305,8 @@ class GenreSection extends StatelessWidget {
     Color color,
     IconData icon,
   ) {
-    const int maxDisplayed = 8;
-    final bool hasMore = keywords.length > maxDisplayed;
+    const maxDisplayed = 8;
+    final hasMore = keywords.length > maxDisplayed;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,11 +355,11 @@ class GenreSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                )),
+                ),),
             if (hasMore)
               InkWell(
                 onTap: () => _showKeywordsBottomSheet(
-                    context, title, keywords, color, icon),
+                    context, title, keywords, color, icon,),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding:
@@ -489,7 +488,7 @@ class GenreSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
+                                    horizontal: 12, vertical: 8,),
                                 decoration: BoxDecoration(
                                   color: color.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(16),
@@ -506,7 +505,7 @@ class GenreSection extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ))
+                            ),)
                         .toList(),
                   ),
                 ),
@@ -611,7 +610,7 @@ class GenreSection extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
+                                  horizontal: 12, vertical: 8,),
                               decoration: BoxDecoration(
                                 color: color.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
@@ -627,7 +626,7 @@ class GenreSection extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            )))
+                            ),),)
                         .toList(),
                   ),
                 ),
@@ -732,7 +731,7 @@ class GenreSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
+                                    horizontal: 12, vertical: 8,),
                                 decoration: BoxDecoration(
                                   color: color.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(16),
@@ -749,7 +748,7 @@ class GenreSection extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ))
+                            ),)
                         .toList(),
                   ),
                 ),

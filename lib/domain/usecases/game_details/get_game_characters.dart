@@ -5,15 +5,15 @@
 // lib/domain/usecases/game_details/get_game_characters.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/character/character.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameCharacters extends UseCase<List<Character>, GetGameCharactersParams> {
-  final GameRepository repository;
 
   GetGameCharacters(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Character>>> call(GetGameCharactersParams params) async {
@@ -21,14 +21,14 @@ class GetGameCharacters extends UseCase<List<Character>, GetGameCharactersParams
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
 
-    return await repository.getGameCharacters(params.gameId);
+    return repository.getGameCharacters(params.gameId);
   }
 }
 
 class GetGameCharactersParams extends Equatable {
-  final int gameId;
 
   const GetGameCharactersParams({required this.gameId});
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];

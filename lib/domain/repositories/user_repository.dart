@@ -1,9 +1,9 @@
 // lib/domain/repositories/user_repository.dart - ENHANCED VERSION
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../entities/user/user.dart';
-import '../entities/user/user_gaming_activity.dart';
-import '../entities/user/user_relationship.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/entities/user/user_gaming_activity.dart';
+import 'package:gamer_grove/domain/entities/user/user_relationship.dart';
 
 abstract class UserRepository {
   // ==========================================

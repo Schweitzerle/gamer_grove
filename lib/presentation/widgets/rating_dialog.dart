@@ -1,20 +1,18 @@
 // lib/presentation/widgets/rating_dialog.dart
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class RatingDialog extends StatefulWidget {
+
+  const RatingDialog({
+    required this.gameName, required this.onRatingChanged, super.key,
+    this.onRatingDeleted,
+    this.currentRating,
+  });
   final String gameName;
   final double? currentRating;
   final void Function(double rating) onRatingChanged;
   final VoidCallback? onRatingDeleted;
-
-  const RatingDialog({
-    super.key,
-    required this.gameName,
-    required this.onRatingChanged,
-    this.onRatingDeleted,
-    this.currentRating,
-  });
 
   @override
   State<RatingDialog> createState() => _RatingDialogState();
@@ -38,11 +36,11 @@ class _RatingDialogState extends State<RatingDialog>
 
     _scaleAnimation = Tween<double>(
       begin: 0.8,
-      end: 1.0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutBack,
-    ));
+    ),);
 
     _animationController.forward();
   }
@@ -75,12 +73,12 @@ class _RatingDialogState extends State<RatingDialog>
   }
 
   List<Widget> _buildStars() {
-    List<Widget> stars = [];
+    final stars = <Widget>[];
 
-    for (int i = 1; i <= 10; i++) {
-      double starValue = i.toDouble();
-      bool isSelected = starValue <= _currentRating;
-      bool isHalfSelected =
+    for (var i = 1; i <= 10; i++) {
+      final starValue = i.toDouble();
+      final isSelected = starValue <= _currentRating;
+      final isHalfSelected =
           (starValue - 0.5) <= _currentRating && starValue > _currentRating;
 
       stars.add(
@@ -207,7 +205,7 @@ class _RatingDialogState extends State<RatingDialog>
               child: Slider(
                 value: _currentRating,
                 min: 0.5,
-                max: 10.0,
+                max: 10,
                 divisions: 19, // 0.5 to 10 in 0.5 increments
                 label: _currentRating.toStringAsFixed(1),
                 onChanged: (value) {

@@ -1,5 +1,5 @@
 // lib/data/models/game_mode_model.dart
-import '../../../domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
 
 class GameModeModel extends GameMode {
   const GameModeModel({

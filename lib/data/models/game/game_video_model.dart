@@ -2,7 +2,7 @@
 // ERWEITERTE GAMEVIDEOMODEL MIT TOJSON
 // ===========================================
 // lib/data/models/game/game_video_model.dart
-import '../../../domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
 
 class GameVideoModel extends GameVideo {
   const GameVideoModel({
@@ -10,6 +10,16 @@ class GameVideoModel extends GameVideo {
     required super.videoId,
     super.title,
   });
+
+  // Factory method to create from YouTube URL
+  factory GameVideoModel.fromYouTubeUrl(String url, {String? title, int? id}) {
+    final videoId = _extractVideoIdFromUrl(url);
+    return GameVideoModel(
+      id: id ?? 0,
+      videoId: videoId,
+      title: title,
+    );
+  }
 
   factory GameVideoModel.fromJson(Map<String, dynamic> json) {
     return GameVideoModel(
@@ -46,16 +56,6 @@ class GameVideoModel extends GameVideo {
 
   // Helper method to get display title
   String get displayTitle => title ?? 'Game Video';
-
-  // Factory method to create from YouTube URL
-  factory GameVideoModel.fromYouTubeUrl(String url, {String? title, int? id}) {
-    final videoId = _extractVideoIdFromUrl(url);
-    return GameVideoModel(
-      id: id ?? 0,
-      videoId: videoId,
-      title: title,
-    );
-  }
 
   // Helper method to extract video ID from various YouTube URL formats
   static String _extractVideoIdFromUrl(String url) {

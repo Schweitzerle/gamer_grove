@@ -2,15 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class Artwork extends Equatable {
-  final int id;
-  final String checksum;
-  final bool alphaChannel;
-  final bool animated;
-  final int? gameId;
-  final int height;
-  final String imageId;
-  final String? url;
-  final int width;
 
   const Artwork({
     required this.id,
@@ -23,6 +14,15 @@ class Artwork extends Equatable {
     this.gameId,
     this.url,
   });
+  final int id;
+  final String checksum;
+  final bool alphaChannel;
+  final bool animated;
+  final int? gameId;
+  final int height;
+  final String imageId;
+  final String? url;
+  final int width;
 
   // Helper getters for different image sizes (IGDB image API)
   String get thumbUrl => 'https://images.igdb.com/igdb/image/upload/t_thumb/$imageId.jpg';

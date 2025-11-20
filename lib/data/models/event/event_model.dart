@@ -2,16 +2,16 @@
 // ENHANCED EVENT MODEL WITH FULL OBJECT PARSING
 // ==================================================
 
+import 'package:gamer_grove/data/models/event/event_logo_model.dart';
+import 'package:gamer_grove/data/models/event/event_network_model.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/data/models/game/game_video_model.dart';
 // lib/data/models/event/event_model.dart (ENHANCED)
-import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/event/event_logo.dart';
-import '../../../domain/entities/event/event_network.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/game/game_video.dart';
-import 'event_logo_model.dart';
-import 'event_network_model.dart';
-import '../game/game_model.dart';
-import '../game/game_video_model.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/event/event_logo.dart';
+import 'package:gamer_grove/domain/entities/event/event_network.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
 
 class EventModel extends Event {
   const EventModel({
@@ -37,6 +37,87 @@ class EventModel extends Event {
     super.gameIds,
     super.videoIds,
   });
+
+  // ==========================================
+  // FACTORY METHODS FOR TESTING
+  // ==========================================
+
+  /// Factory method for creating test events
+  factory EventModel.test({
+    int id = 1,
+    String name = 'Test Event',
+    String? description,
+    DateTime? startTime,
+    DateTime? endTime,
+    EventLogo? eventLogo,
+    List<EventNetwork> eventNetworks = const [],
+    List<Game> games = const [],
+    List<GameVideo> videos = const [],
+    String? liveStreamUrl,
+  }) {
+    return EventModel(
+      id: id,
+      checksum: 'test-checksum',
+      name: name,
+      description: description,
+      slug: name.toLowerCase().replaceAll(' ', '-'),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      startTime: startTime,
+      endTime: endTime,
+      timeZone: 'UTC',
+      eventLogo: eventLogo,
+      liveStreamUrl: liveStreamUrl,
+      eventNetworks: eventNetworks,
+      games: games,
+      videos: videos,
+      eventLogoId: eventLogo?.id,
+      eventNetworkIds: eventNetworks.map((n) => n.id).toList(),
+      gameIds: games.map((g) => g.id).toList(),
+      videoIds: videos.map((v) => v.id).toList(),
+    );
+  }
+
+  /// Factory method for creating live events
+  factory EventModel.live({
+    required int id,
+    required String name,
+    required DateTime startTime, required String liveStreamUrl, String? description,
+    DateTime? endTime,
+    EventLogo? eventLogo,
+    List<Game> games = const [],
+  }) {
+    return EventModel.test(
+      id: id,
+      name: name,
+      description: description,
+      startTime: startTime,
+      endTime: endTime,
+      eventLogo: eventLogo,
+      games: games,
+      liveStreamUrl: liveStreamUrl,
+    );
+  }
+
+  /// Factory method for creating upcoming events
+  factory EventModel.upcoming({
+    required int id,
+    required String name,
+    required DateTime startTime, String? description,
+    DateTime? endTime,
+    EventLogo? eventLogo,
+    List<Game> games = const [],
+  }) {
+    return EventModel.test(
+      id: id,
+      name: name,
+      description: description,
+      startTime: startTime,
+      endTime: endTime,
+      eventLogo: eventLogo,
+      games: games,
+    );
+  }
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
@@ -111,8 +192,6 @@ class EventModel extends Event {
       try {
         return EventLogoModel.fromJson(eventLogo);
       } catch (e) {
-        print(
-            '⚠️ EventModel: Failed to parse event logo: $eventLogo - Error: $e');
         return null;
       }
     }
@@ -128,8 +207,6 @@ class EventModel extends Event {
             try {
               return EventNetworkModel.fromJson(item);
             } catch (e) {
-              print(
-                  '⚠️ EventModel: Failed to parse event network: $item - Error: $e');
               return null;
             }
           })
@@ -149,7 +226,6 @@ class EventModel extends Event {
             try {
               return GameModel.fromJson(item);
             } catch (e) {
-              print('⚠️ EventModel: Failed to parse game: $item - Error: $e');
               return null;
             }
           })
@@ -169,7 +245,6 @@ class EventModel extends Event {
             try {
               return GameVideoModel.fromJson(item);
             } catch (e) {
-              print('⚠️ EventModel: Failed to parse video: $item - Error: $e');
               return null;
             }
           })
@@ -219,7 +294,7 @@ class EventModel extends Event {
                         'name': network.networkType!.name,
                       }
                     : null,
-              })
+              },)
           .toList(),
 
       'games': games
@@ -228,7 +303,7 @@ class EventModel extends Event {
                 'name': game.name,
                 'slug': game.slug,
                 'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
-              })
+              },)
           .toList(),
 
       'videos': videos
@@ -236,7 +311,7 @@ class EventModel extends Event {
                 'id': video.id,
                 'name': video.title,
                 'video_id': video.videoId,
-              })
+              },)
           .toList(),
 
       // Legacy ID fields for backward compatibility
@@ -245,89 +320,5 @@ class EventModel extends Event {
       'game_ids': gameIds,
       'video_ids': videoIds,
     };
-  }
-
-  // ==========================================
-  // FACTORY METHODS FOR TESTING
-  // ==========================================
-
-  /// Factory method for creating test events
-  factory EventModel.test({
-    int id = 1,
-    String name = 'Test Event',
-    String? description,
-    DateTime? startTime,
-    DateTime? endTime,
-    EventLogo? eventLogo,
-    List<EventNetwork> eventNetworks = const [],
-    List<Game> games = const [],
-    List<GameVideo> videos = const [],
-    String? liveStreamUrl,
-  }) {
-    return EventModel(
-      id: id,
-      checksum: 'test-checksum',
-      name: name,
-      description: description,
-      slug: name.toLowerCase().replaceAll(' ', '-'),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      startTime: startTime,
-      endTime: endTime,
-      timeZone: 'UTC',
-      eventLogo: eventLogo,
-      liveStreamUrl: liveStreamUrl,
-      eventNetworks: eventNetworks,
-      games: games,
-      videos: videos,
-      eventLogoId: eventLogo?.id,
-      eventNetworkIds: eventNetworks.map((n) => n.id).toList(),
-      gameIds: games.map((g) => g.id).toList(),
-      videoIds: videos.map((v) => v.id).toList(),
-    );
-  }
-
-  /// Factory method for creating live events
-  factory EventModel.live({
-    required int id,
-    required String name,
-    String? description,
-    required DateTime startTime,
-    DateTime? endTime,
-    required String liveStreamUrl,
-    EventLogo? eventLogo,
-    List<Game> games = const [],
-  }) {
-    return EventModel.test(
-      id: id,
-      name: name,
-      description: description,
-      startTime: startTime,
-      endTime: endTime,
-      eventLogo: eventLogo,
-      games: games,
-      liveStreamUrl: liveStreamUrl,
-    );
-  }
-
-  /// Factory method for creating upcoming events
-  factory EventModel.upcoming({
-    required int id,
-    required String name,
-    String? description,
-    required DateTime startTime,
-    DateTime? endTime,
-    EventLogo? eventLogo,
-    List<Game> games = const [],
-  }) {
-    return EventModel.test(
-      id: id,
-      name: name,
-      description: description,
-      startTime: startTime,
-      endTime: endTime,
-      eventLogo: eventLogo,
-      games: games,
-    );
   }
 }

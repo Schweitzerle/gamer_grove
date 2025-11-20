@@ -3,16 +3,16 @@
 // lib/domain/usecases/user_collections/get_user_recommended_games_with_filters.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../entities/user/user_collection_filters.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_filters.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUserRecommendedGamesWithFilters extends UseCase<List<Game>, GetUserRecommendedGamesWithFiltersParams> {
-  final GameRepository repository;
 
   GetUserRecommendedGamesWithFilters(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Game>>> call(GetUserRecommendedGamesWithFiltersParams params) async {
@@ -20,7 +20,7 @@ class GetUserRecommendedGamesWithFilters extends UseCase<List<Game>, GetUserReco
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserRecommendedGamesWithFilters(
+    return repository.getUserRecommendedGamesWithFilters(
       userId: params.userId,
       filters: params.filters,
       limit: params.limit,
@@ -30,10 +30,6 @@ class GetUserRecommendedGamesWithFilters extends UseCase<List<Game>, GetUserReco
 }
 
 class GetUserRecommendedGamesWithFiltersParams extends Equatable {
-  final String userId;
-  final UserCollectionFilters filters;
-  final int limit;
-  final int offset;
 
   const GetUserRecommendedGamesWithFiltersParams({
     required this.userId,
@@ -41,6 +37,10 @@ class GetUserRecommendedGamesWithFiltersParams extends Equatable {
     this.limit = 20,
     this.offset = 0,
   });
+  final String userId;
+  final UserCollectionFilters filters;
+  final int limit;
+  final int offset;
 
   @override
   List<Object> get props => [userId, filters, limit, offset];

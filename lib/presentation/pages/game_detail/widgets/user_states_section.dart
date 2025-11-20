@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
@@ -16,15 +17,12 @@ import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_blo
 import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
-import '../../../../injection_container.dart';
-
 class UserStatesContent extends StatelessWidget {
-  final Game game;
 
   const UserStatesContent({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +31,11 @@ class UserStatesContent extends StatelessWidget {
       builder: (context, userDataState) {
         // Extract user-specific data from global state
         // 🔄 Fallback to Game entity data if UserGameDataBloc is not loaded yet
-        bool isWishlisted = game.isWishlisted;
-        bool isRecommended = game.isRecommended;
-        double? userRating = game.userRating;
-        bool isInTopThree = game.isInTopThree;
-        int? topThreePosition = game.topThreePosition;
+        var isWishlisted = game.isWishlisted;
+        var isRecommended = game.isRecommended;
+        var userRating = game.userRating;
+        var isInTopThree = game.isInTopThree;
+        var topThreePosition = game.topThreePosition;
 
         // Override with UserGameDataBloc data if available
         if (userDataState is user_data.UserGameDataLoaded) {
@@ -47,15 +45,7 @@ class UserStatesContent extends StatelessWidget {
           isInTopThree = userDataState.isInTopThree(game.id);
           topThreePosition = userDataState.getTopThreePosition(game.id);
 
-          print(
-              '🎯 UserStatesContent: Using UserGameDataBloc data for game ${game.id}');
-          print(
-              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         } else {
-          print(
-              '🎯 UserStatesContent: Using Game entity data (UserGameDataBloc state: ${userDataState.runtimeType})');
-          print(
-              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         }
 
         return Column(
@@ -231,7 +221,7 @@ class UserStatesContent extends StatelessWidget {
   }
 
   void _showTopThreeDialog(
-      BuildContext context, user_data.UserGameDataState userDataState) {
+      BuildContext context, user_data.UserGameDataState userDataState,) {
     final userId = _getCurrentUserId(context);
     if (userId == null) {
       _showLoginRequiredSnackBar(context);
@@ -243,7 +233,7 @@ class UserStatesContent extends StatelessWidget {
     final gameBloc = sl<GameBloc>();
 
     // Get current top three game IDs from the bloc state
-    List<int> currentTopThreeIds = [];
+    var currentTopThreeIds = <int>[];
     if (userDataState is user_data.UserGameDataLoaded) {
       currentTopThreeIds = userDataState.topThreeGameIds;
     }
@@ -253,7 +243,6 @@ class UserStatesContent extends StatelessWidget {
       builder: (dialogContext) => TopThreeDialog(
         game: game,
         gameBloc: gameBloc, // ✅ Pass GameBloc for dialog compatibility
-        currentTopThree: null, // Dialog will load from backend if null
         onPositionSelected: (position) {
           _updateTopThree(context, userDataBloc, userId, position, currentTopThreeIds);
         },
@@ -290,12 +279,12 @@ class UserStatesContent extends StatelessWidget {
       BuildContext context,
       user_data.UserGameDataBloc userDataBloc,
       String userId,
-      double rating) {
+      double rating,) {
     userDataBloc.add(user_data.RateGameEvent(
       gameId: game.id,
       userId: userId,
       rating: rating,
-    ));
+    ),);
 
     HapticFeedback.lightImpact();
 
@@ -310,11 +299,11 @@ class UserStatesContent extends StatelessWidget {
   void _deleteRating(
       BuildContext context,
       user_data.UserGameDataBloc userDataBloc,
-      String userId) {
+      String userId,) {
     userDataBloc.add(user_data.RemoveRatingEvent(
       gameId: game.id,
       userId: userId,
-    ));
+    ),);
 
     HapticFeedback.lightImpact();
 
@@ -335,13 +324,12 @@ class UserStatesContent extends StatelessWidget {
   ) {
     // ✅ Use SetGameTopThreePositionEvent instead of UpdateTopThreeEvent
     // This properly handles the backend logic (removing from old position, etc.)
-    print('🎯 UserStatesSection: Setting game ${game.id} at position $position');
 
     userDataBloc.add(user_data.SetGameTopThreePositionEvent(
       userId: userId,
       gameId: game.id,
       position: position,
-    ));
+    ),);
 
     HapticFeedback.lightImpact();
 

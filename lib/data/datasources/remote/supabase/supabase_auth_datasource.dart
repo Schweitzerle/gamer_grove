@@ -25,9 +25,7 @@ abstract class SupabaseAuthDataSource {
   ///     'user@example.com',
   ///     'password123',
   ///   );
-  ///   print('Signed in: ${user.email}');
   /// } on InvalidCredentialsException {
-  ///   print('Wrong email or password');
   /// }
   /// ```
   Future<User> signIn(String email, String password);
@@ -46,11 +44,8 @@ abstract class SupabaseAuthDataSource {
   ///     'securePassword123',
   ///     'john_doe',
   ///   );
-  ///   print('Signed up: ${user.email}');
   /// } on EmailAlreadyExistsException {
-  ///   print('Email is already registered');
   /// } on UsernameAlreadyExistsException {
-  ///   print('Username is taken');
   /// }
   /// ```
   Future<AuthResponse> signUp(
@@ -68,9 +63,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// try {
   ///   await authDataSource.signOut();
-  ///   print('Signed out successfully');
   /// } on AuthException catch (e) {
-  ///   print('Sign out failed: ${e.message}');
   /// }
   /// ```
   Future<void> signOut();
@@ -84,9 +77,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// try {
   ///   await authDataSource.resetPassword('user@example.com');
-  ///   print('Password reset email sent');
   /// } on InvalidEmailException {
-  ///   print('Invalid email address');
   /// }
   /// ```
   Future<void> resetPassword(String email);
@@ -100,11 +91,8 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// try {
   ///   await authDataSource.updatePassword('newSecurePassword123');
-  ///   print('Password updated successfully');
   /// } on WeakPasswordException {
-  ///   print('Password is too weak');
   /// } on NotAuthenticatedException {
-  ///   print('User is not signed in');
   /// }
   /// ```
   Future<void> updatePassword(String newPassword);
@@ -118,9 +106,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final user = await authDataSource.getCurrentUser();
   /// if (user != null) {
-  ///   print('Current user: ${user.email}');
   /// } else {
-  ///   print('No user signed in');
   /// }
   /// ```
   Future<User?> getCurrentUser();
@@ -134,9 +120,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// try {
   ///   await authDataSource.refreshSession();
-  ///   print('Session refreshed');
   /// } on InvalidSessionException {
-  ///   print('Session expired, please sign in again');
   /// }
   /// ```
   Future<void> refreshSession();
@@ -150,7 +134,6 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final session = await authDataSource.getSession();
   /// if (session != null) {
-  ///   print('Access token expires at: ${session.expiresAt}');
   /// }
   /// ```
   Future<Session?> getSession();
@@ -163,9 +146,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final isValid = await authDataSource.isSessionValid();
   /// if (isValid) {
-  ///   print('Session is valid');
   /// } else {
-  ///   print('Session expired or no user signed in');
   /// }
   /// ```
   Future<bool> isSessionValid();
@@ -179,9 +160,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// try {
   ///   await authDataSource.updateEmail('newemail@example.com');
-  ///   print('Confirmation email sent');
   /// } on EmailAlreadyExistsException {
-  ///   print('Email is already in use');
   /// }
   /// ```
   Future<void> updateEmail(String newEmail);
@@ -194,9 +173,7 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// authDataSource.onAuthStateChange().listen((event) {
   ///   if (event.event == AuthChangeEvent.signedIn) {
-  ///     print('User signed in: ${event.session?.user.email}');
   ///   } else if (event.event == AuthChangeEvent.signedOut) {
-  ///     print('User signed out');
   ///   }
   /// });
   /// ```
@@ -211,7 +188,6 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final isValid = authDataSource.isValidUsername('john_doe');
   /// if (!isValid) {
-  ///   print('Invalid username format');
   /// }
   /// ```
   bool isValidUsername(String username);
@@ -224,7 +200,6 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final isValid = authDataSource.isValidEmail('user@example.com');
   /// if (!isValid) {
-  ///   print('Invalid email format');
   /// }
   /// ```
   bool isValidEmail(String email);
@@ -238,7 +213,6 @@ abstract class SupabaseAuthDataSource {
   /// ```dart
   /// final isValid = authDataSource.isValidPassword('myPassword123');
   /// if (!isValid) {
-  ///   print('Password is too weak');
   /// }
   /// ```
   bool isValidPassword(String password);

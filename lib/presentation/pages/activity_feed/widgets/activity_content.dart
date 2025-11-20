@@ -1,17 +1,17 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import 'package:collection/collection.dart';
 
 class ActivityContent extends StatelessWidget {
-  final UserActivity activity;
-  final List<Game> games;
 
   const ActivityContent(
-      {super.key, required this.activity, required this.games});
+      {required this.activity, required this.games, super.key,});
+  final UserActivity activity;
+  final List<Game> games;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,6 @@ class ActivityContent extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
           width: 160,
@@ -51,7 +50,7 @@ class ActivityContent extends StatelessWidget {
         ),
         if (rating != null)
           Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.only(left: 16),
             child: _buildUserRatingCircle(context, rating),
           ),
       ],
@@ -64,7 +63,6 @@ class ActivityContent extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
           width: 160,
@@ -77,7 +75,7 @@ class ActivityContent extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 16.0),
+          padding: const EdgeInsets.only(left: 16),
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -97,7 +95,6 @@ class ActivityContent extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
           width: 160,
@@ -110,7 +107,7 @@ class ActivityContent extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 16.0),
+          padding: const EdgeInsets.only(left: 16),
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -144,7 +141,7 @@ class ActivityContent extends StatelessWidget {
   }
 
   Widget _buildTopThreeGameColumn(
-      BuildContext context, Game game, int position) {
+      BuildContext context, Game game, int position,) {
     return Column(
       children: [
         _buildTopThreeCircle(context, position),
@@ -165,7 +162,7 @@ class ActivityContent extends StatelessWidget {
 
   Widget _buildUserRatingCircle(BuildContext context, double userRating) {
     final rating = userRating / 10; // 0-1 range
-    final displayRating = (userRating * 10);
+    final displayRating = userRating * 10;
     final color = ColorScales.getRatingColor(displayRating);
 
     return Container(
@@ -176,7 +173,6 @@ class ActivityContent extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Stack(
@@ -225,7 +221,6 @@ class ActivityContent extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: color.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: Center(

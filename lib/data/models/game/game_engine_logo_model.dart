@@ -1,5 +1,5 @@
 // lib/data/models/game/game_engine_logo_model.dart
-import '../../../domain/entities/game/game_engine_logo.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
 
 class GameEngineLogoModel extends GameEngineLogo {
   const GameEngineLogoModel({
@@ -12,6 +12,30 @@ class GameEngineLogoModel extends GameEngineLogo {
     super.animated = false,
     super.url,
   });
+
+  // Factory method for easy creation with IGDB image URL
+  factory GameEngineLogoModel.withImageUrl({
+    required int id,
+    required String checksum,
+    required String imageId,
+    required int height,
+    required int width,
+    bool alphaChannel = false,
+    bool animated = false,
+    String? customUrl,
+  }) {
+    return GameEngineLogoModel(
+      id: id,
+      checksum: checksum,
+      imageId: imageId,
+      height: height,
+      width: width,
+      alphaChannel: alphaChannel,
+      animated: animated,
+      url: customUrl ??
+          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+    );
+  }
 
   factory GameEngineLogoModel.fromJson(Map<String, dynamic> json) {
     final imageId = json['image_id'] ?? '';
@@ -64,29 +88,5 @@ class GameEngineLogoModel extends GameEngineLogo {
       'animated': animated,
       'url': url,
     };
-  }
-
-  // Factory method for easy creation with IGDB image URL
-  factory GameEngineLogoModel.withImageUrl({
-    required int id,
-    required String checksum,
-    required String imageId,
-    required int height,
-    required int width,
-    bool alphaChannel = false,
-    bool animated = false,
-    String? customUrl,
-  }) {
-    return GameEngineLogoModel(
-      id: id,
-      checksum: checksum,
-      imageId: imageId,
-      height: height,
-      width: width,
-      alphaChannel: alphaChannel,
-      animated: animated,
-      url: customUrl ??
-          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
-    );
   }
 }

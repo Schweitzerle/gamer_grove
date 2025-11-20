@@ -3,11 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class ReleaseDateRegion extends Equatable {
-  final int id;
-  final String checksum;
-  final String region;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const ReleaseDateRegion({
     required this.id,
@@ -16,6 +11,11 @@ class ReleaseDateRegion extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String region;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper getters
   bool get isEurope => region.toLowerCase().contains('europe');

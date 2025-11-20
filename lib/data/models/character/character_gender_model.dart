@@ -1,6 +1,6 @@
 // lib/data/models/character_gender_model.dart
 
-import '../../../domain/entities/character/character_gender.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 
 class CharacterGenderModel extends CharacterGender {
   const CharacterGenderModel({

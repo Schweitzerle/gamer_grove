@@ -1,12 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
+import 'package:gamer_grove/domain/usecases/company/get_company_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
-import '../../../domain/usecases/company/get_company_with_games.dart';
 
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
-  final GetCompanyWithGames getCompanyWithGames;
-  final GameEnrichmentService enrichmentService;
 
   CompanyBloc({
     required this.getCompanyWithGames,
@@ -15,6 +13,8 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
     on<GetCompanyDetailsEvent>(_onGetCompanyDetails);
     on<ClearCompanyEvent>(_onClearCompany);
   }
+  final GetCompanyWithGames getCompanyWithGames;
+  final GameEnrichmentService enrichmentService;
 
   Future<void> _onGetCompanyDetails(
     GetCompanyDetailsEvent event,
@@ -45,19 +45,18 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
             emit(CompanyDetailsLoaded(
               company: companyWithGames.company,
               games: enrichedGames,
-            ));
+            ),);
           } catch (e) {
-            print('❌ CompanyBloc: Failed to enrich games: $e');
             emit(CompanyDetailsLoaded(
               company: companyWithGames.company,
               games: companyWithGames.games,
-            ));
+            ),);
           }
         } else {
           emit(CompanyDetailsLoaded(
             company: companyWithGames.company,
             games: companyWithGames.games,
-          ));
+          ),);
         }
       },
     );

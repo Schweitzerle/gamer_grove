@@ -1,14 +1,14 @@
 // lib/domain/usecases/user/remove_from_top_three.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class RemoveFromTopThree extends UseCase<void, RemoveFromTopThreeParams> {
-  final UserRepository repository;
 
   RemoveFromTopThree(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, void>> call(RemoveFromTopThreeParams params) async {
@@ -29,13 +29,13 @@ class RemoveFromTopThree extends UseCase<void, RemoveFromTopThreeParams> {
 }
 
 class RemoveFromTopThreeParams extends Equatable {
-  final String userId;
-  final int gameId;
 
   const RemoveFromTopThreeParams({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];

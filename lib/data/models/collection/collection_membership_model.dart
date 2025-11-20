@@ -1,6 +1,6 @@
 // lib/data/models/collection_membership_model.dart
 
-import '../../../domain/entities/collection/collection_membership.dart';
+import 'package:gamer_grove/domain/entities/collection/collection_membership.dart';
 
 class CollectionMembershipModel extends CollectionMembership {
   const CollectionMembershipModel({

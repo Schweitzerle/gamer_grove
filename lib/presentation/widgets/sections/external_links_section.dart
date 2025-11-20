@@ -6,18 +6,17 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/externalGame/external_game.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../domain/entities/externalGame/external_game.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website/website.dart';
 
 class ExternalLinksSection extends StatelessWidget {
-  final Game game;
 
   const ExternalLinksSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -472,7 +471,6 @@ class ExternalLinksSection extends StatelessWidget {
 
   Widget _getWebsiteIcon(Website website) {
     final typeStr = website.type.type.toLowerCase();
-    print('🌐 Website Type: "$typeStr" (original: "${website.type.type}")');
     IconData iconData;
     Color iconColor;
 
@@ -668,7 +666,7 @@ class ExternalLinksSection extends StatelessWidget {
   }
 
   Color _getStoreColor(
-      BuildContext context, ExternalGameCategoryEnum? category) {
+      BuildContext context, ExternalGameCategoryEnum? category,) {
     if (category == null) return Theme.of(context).colorScheme.primary;
 
     // Use enum's name property for string-based mapping
@@ -723,19 +721,17 @@ class ExternalLinksSection extends StatelessWidget {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
     }
   }
 
   Future<void> _launchStoreUrl(ExternalGame store) async {
     try {
       // Use the storeUrl getter from ExternalGame entity
-      String? url = store.storeUrl;
+      final url = store.storeUrl;
       if (url != null) {
         await _launchUrl(url);
       }
     } catch (e) {
-      print('Error launching store URL: $e');
     }
   }
 }

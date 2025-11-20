@@ -5,26 +5,26 @@
 // lib/presentation/pages/event_detail/event_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../blocs/event/event_bloc.dart';
-import '../../blocs/event/event_event.dart';
-import '../../blocs/event/event_state.dart';
-import '../../widgets/live_loading_progress.dart';
-import 'event_details_screen.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
+import 'package:gamer_grove/presentation/pages/event/event_details_screen.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 // ==================================================
 // ENHANCED EVENT DETAIL PAGE WITH LIVE LOADING
 // ==================================================
 
 // Updated event_detail_page.dart snippet:
 class EventDetailPage extends StatefulWidget {
-  final int eventId;
-  final Game? game;
 
   const EventDetailPage({
-    super.key,
-    required this.eventId,
+    required this.eventId, super.key,
     this.game,
   });
+  final int eventId;
+  final Game? game;
 
   @override
   State<EventDetailPage> createState() => _EventDetailPageState();
@@ -47,12 +47,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
           return EventDetailScreen(
             event: state.eventDetails.event,
             featuredGames: state.eventDetails.featuredGames,
-            showGames: true,
           );
         } else if (state is EventDetailsLoaded) {
           return EventDetailScreen(
             event: state.event,
-            featuredGames: null,
             showGames: false,
           );
         } else if (state is EventError) {
@@ -72,7 +70,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -90,45 +88,40 @@ class _EventDetailPageState extends State<EventDetailPage> {
   }
 
   Widget _buildErrorState(String message) {
+    // Check if it's a network error
+    final isNetworkError = message.toLowerCase().contains('internet') ||
+        message.toLowerCase().contains('network') ||
+        message.toLowerCase().contains('connection') ||
+        message.toLowerCase().contains('timeout');
+
+    // Retry callback
+    void retry() {
+      context.read<EventBloc>().add(
+            GetCompleteEventDetailsEvent(eventId: widget.eventId),
+          );
+    }
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Event Details'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Error Loading Event',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.read<EventBloc>().add(
-                      GetCompleteEventDetailsEvent(eventId: widget.eventId),
-                    );
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        title: Text(
+          'Event Details',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface,),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
+      body: isNetworkError
+          ? NetworkErrorWidget(onRetry: retry)
+          : CustomErrorWidget(
+              message: message,
+              onRetry: retry,
+            ),
     );
   }
 }

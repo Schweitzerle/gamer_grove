@@ -1,5 +1,5 @@
 // lib/data/models/screenshot_model.dart
-import '../../domain/entities/screenshot.dart';
+import 'package:gamer_grove/domain/entities/screenshot.dart';
 
 class ScreenshotModel extends Screenshot {
   const ScreenshotModel({

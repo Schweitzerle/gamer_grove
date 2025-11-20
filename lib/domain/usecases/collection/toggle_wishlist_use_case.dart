@@ -5,8 +5,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../../data/repositories/user_repository_impl.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/data/repositories/user_repository_impl.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for toggling a game in wishlist.
 ///
@@ -21,29 +21,27 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Toggle failed: ${failure.message}'),
-///   (_) => print('Wishlist updated'),
 /// );
 /// ```
 class ToggleWishlistUseCase implements UseCase<void, ToggleWishlistParams> {
-  final UserRepositoryImpl repository;
 
   ToggleWishlistUseCase(this.repository);
+  final UserRepositoryImpl repository;
 
   @override
   Future<Either<Failure, void>> call(ToggleWishlistParams params) async {
-    return await repository.toggleWishlist(params.userId, params.gameId);
+    return repository.toggleWishlist(params.userId, params.gameId);
   }
 }
 
 class ToggleWishlistParams extends Equatable {
-  final String userId;
-  final int gameId;
 
   const ToggleWishlistParams({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];

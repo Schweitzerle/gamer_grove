@@ -5,10 +5,10 @@
 // lib/presentation/pages/all_events/all_events_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/event/event.dart';
-import '../../../../domain/entities/game/game.dart';
-import 'event_card.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
 
 enum EventSortOption {
   nameAZ,
@@ -27,22 +27,20 @@ enum EventStatusFilter {
 }
 
 class AllEventsScreen extends StatefulWidget {
+
+  const AllEventsScreen({
+    required this.title, required this.events, super.key,
+    this.subtitle,
+    this.game,
+    this.showFilters = true,
+    this.showSearch = true,
+  });
   final String title;
   final String? subtitle;
   final List<Event> events;
   final Game? game; // Optional - für Kontext
   final bool showFilters;
   final bool showSearch;
-
-  const AllEventsScreen({
-    super.key,
-    required this.title,
-    this.subtitle,
-    required this.events,
-    this.game,
-    this.showFilters = true,
-    this.showSearch = true,
-  });
 
   @override
   State<AllEventsScreen> createState() => _AllEventsScreenState();
@@ -270,7 +268,6 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
           child: EventCard(
             event: event,
             onTap: () => _navigateToEventDetails(event),
-            showStatus: true,
             showGamesCount: true,
           ),
         );
@@ -293,7 +290,6 @@ class _AllEventsScreenState extends State<AllEventsScreen> {
         return EventCard(
           event: event,
           onTap: () => _navigateToEventDetails(event),
-          showStatus: true,
           showGamesCount: true,
           compact: true,
         );

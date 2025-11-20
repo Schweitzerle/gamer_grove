@@ -1,6 +1,6 @@
 // lib/data/datasources/remote/igdb/models/game_engine/game_engine_filters.dart
 
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Pre-configured filters for common game engine queries.
 class GameEngineFilters {
@@ -43,27 +43,27 @@ class GameEngineFilters {
   // ============================================================
 
   /// Filter game engines that have a logo
-  static IgdbFilter hasLogo() => NullFilter('logo', isNull: false);
+  static IgdbFilter hasLogo() => const NullFilter('logo', isNull: false);
 
   /// Filter game engines that have a description
   static IgdbFilter hasDescription() =>
-      NullFilter('description', isNull: false);
+      const NullFilter('description', isNull: false);
 
   /// Filter game engines that have a URL
-  static IgdbFilter hasUrl() => NullFilter('url', isNull: false);
+  static IgdbFilter hasUrl() => const NullFilter('url', isNull: false);
 
   /// Filter game engines that support platforms
-  static IgdbFilter hasPlatforms() => NullFilter('platforms', isNull: false);
+  static IgdbFilter hasPlatforms() => const NullFilter('platforms', isNull: false);
 
   /// Filter game engines that have associated companies
-  static IgdbFilter hasCompanies() => NullFilter('companies', isNull: false);
+  static IgdbFilter hasCompanies() => const NullFilter('companies', isNull: false);
 }
 
 /// Builder for creating complex game engine filters.
 class GameEngineFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   GameEngineFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Company methods
   GameEngineFilterBuilder byCompany(int companyId) {

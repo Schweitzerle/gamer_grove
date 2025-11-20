@@ -1,6 +1,6 @@
 // lib/data/models/collection_relation_model.dart
 
-import '../../../domain/entities/collection/collection_relation.dart';
+import 'package:gamer_grove/domain/entities/collection/collection_relation.dart';
 
 class CollectionRelationModel extends CollectionRelation {
   const CollectionRelationModel({

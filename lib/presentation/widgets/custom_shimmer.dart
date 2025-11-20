@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomShimmer extends StatefulWidget {
-  final Widget child;
 
-  const CustomShimmer({super.key, required this.child});
+  const CustomShimmer({required this.child, super.key});
+  final Widget child;
 
   @override
   State<CustomShimmer> createState() => _CustomShimmerState();

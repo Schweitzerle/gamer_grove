@@ -7,12 +7,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class NetworkType extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final List<int> eventNetworkIds;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const NetworkType({
     required this.id,
@@ -22,6 +16,12 @@ class NetworkType extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final List<int> eventNetworkIds;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // ==========================================
   // ENHANCED HELPER GETTERS

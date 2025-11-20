@@ -1,6 +1,6 @@
 // lib/data/datasources/remote/igdb/models/company/company_filters.dart
 
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Pre-configured filters for common company queries.
 class CompanyFilters {
@@ -12,11 +12,11 @@ class CompanyFilters {
 
   /// Filter companies that have developed games
   static IgdbFilter hasDevelopedGames() =>
-      NullFilter('developed', isNull: false);
+      const NullFilter('developed', isNull: false);
 
   /// Filter companies that have published games
   static IgdbFilter hasPublishedGames() =>
-      NullFilter('published', isNull: false);
+      const NullFilter('published', isNull: false);
 
   /// Filter companies that are developers
   static IgdbFilter developersOnly() => hasDevelopedGames();
@@ -33,10 +33,10 @@ class CompanyFilters {
       FieldFilter('parent', '=', parentCompanyId);
 
   /// Filter independent companies (no parent)
-  static IgdbFilter independentOnly() => NullFilter('parent', isNull: true);
+  static IgdbFilter independentOnly() => const NullFilter('parent');
 
   /// Filter subsidiary companies (has parent)
-  static IgdbFilter subsidiariesOnly() => NullFilter('parent', isNull: false);
+  static IgdbFilter subsidiariesOnly() => const NullFilter('parent', isNull: false);
 
   // ============================================================
   // LOCATION FILTERS
@@ -71,11 +71,11 @@ class CompanyFilters {
   // ============================================================
 
   /// Filter companies that have a logo
-  static IgdbFilter hasLogo() => NullFilter('logo', isNull: false);
+  static IgdbFilter hasLogo() => const NullFilter('logo', isNull: false);
 
   /// Filter companies that have a description
   static IgdbFilter hasDescription() =>
-      NullFilter('description', isNull: false);
+      const NullFilter('description', isNull: false);
 
   // ============================================================
   // HELPER METHODS
@@ -87,9 +87,9 @@ class CompanyFilters {
 
 /// Builder for creating complex company filters.
 class CompanyFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   CompanyFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Type methods
   CompanyFilterBuilder developersOnly() {

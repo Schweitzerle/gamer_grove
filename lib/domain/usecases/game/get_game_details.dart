@@ -1,26 +1,26 @@
 // domain/usecases/game/get_game_details.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameDetails extends UseCase<Game, GameDetailsParams> {
-  final GameRepository repository;
 
   GetGameDetails(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, Game>> call(GameDetailsParams params) async {
-    return await repository.getGameDetails(params.gameId);
+    return repository.getGameDetails(params.gameId);
   }
 }
 
 class GameDetailsParams extends Equatable {
-  final int gameId;
 
   const GameDetailsParams({required this.gameId});
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];

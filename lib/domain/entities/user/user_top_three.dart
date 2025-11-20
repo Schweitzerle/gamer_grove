@@ -2,9 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class UserTopThree extends Equatable {
-  final int? firstGameId;
-  final int? secondGameId;
-  final int? thirdGameId;
 
   const UserTopThree({
     this.firstGameId,
@@ -13,6 +10,26 @@ class UserTopThree extends Equatable {
   });
 
   const UserTopThree.empty() : this();
+
+  // Factory methods
+  factory UserTopThree.fromList(List<int> gameIds) {
+    return UserTopThree(
+      firstGameId: gameIds.isNotEmpty ? gameIds[0] : null,
+      secondGameId: gameIds.length > 1 ? gameIds[1] : null,
+      thirdGameId: gameIds.length > 2 ? gameIds[2] : null,
+    );
+  }
+
+  factory UserTopThree.fromMap(Map<int, int> positionToGameId) {
+    return UserTopThree(
+      firstGameId: positionToGameId[1],
+      secondGameId: positionToGameId[2],
+      thirdGameId: positionToGameId[3],
+    );
+  }
+  final int? firstGameId;
+  final int? secondGameId;
+  final int? thirdGameId;
 
   // Helper getters
   bool get isComplete =>
@@ -52,23 +69,6 @@ class UserTopThree extends Equatable {
       firstGameId: firstGameId ?? this.firstGameId,
       secondGameId: secondGameId ?? this.secondGameId,
       thirdGameId: thirdGameId ?? this.thirdGameId,
-    );
-  }
-
-  // Factory methods
-  factory UserTopThree.fromList(List<int> gameIds) {
-    return UserTopThree(
-      firstGameId: gameIds.isNotEmpty ? gameIds[0] : null,
-      secondGameId: gameIds.length > 1 ? gameIds[1] : null,
-      thirdGameId: gameIds.length > 2 ? gameIds[2] : null,
-    );
-  }
-
-  factory UserTopThree.fromMap(Map<int, int> positionToGameId) {
-    return UserTopThree(
-      firstGameId: positionToGameId[1],
-      secondGameId: positionToGameId[2],
-      thirdGameId: positionToGameId[3],
     );
   }
 

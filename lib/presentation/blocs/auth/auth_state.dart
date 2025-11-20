@@ -24,9 +24,9 @@ class AuthLoading extends AuthState {
 
 /// State when user is authenticated.
 class AuthAuthenticated extends AuthState {
-  final User user;
 
   const AuthAuthenticated(this.user);
+  final User user;
 
   @override
   List<Object> get props => [user];
@@ -39,9 +39,9 @@ class AuthUnauthenticated extends AuthState {
 
 /// State when auth operation fails.
 class AuthError extends AuthState {
-  final String message;
 
   const AuthError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

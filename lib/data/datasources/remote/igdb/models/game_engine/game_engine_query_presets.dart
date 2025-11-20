@@ -1,9 +1,9 @@
 // lib/data/datasources/remote/igdb/models/game_engine/game_engine_query_presets.dart
 
-import '../igdb_query.dart';
-import '../igdb_filters.dart';
-import 'game_engine_field_sets.dart';
-import 'game_engine_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game_engine/game_engine_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game_engine/game_engine_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 
 /// Pre-configured query presets for common game engine queries.
 class GameEngineQueryPresets {

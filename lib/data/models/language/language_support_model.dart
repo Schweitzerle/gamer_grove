@@ -1,10 +1,9 @@
 // lib/data/models/language_support_model.dart
-import '../../../domain/entities/language/language.dart';
-import '../../../domain/entities/language/language_support.dart';
-
-import '../../../domain/entities/language/language_support_type.dart';
-import 'language_support_type_model.dart';
-import 'lanuage_model.dart';
+import 'package:gamer_grove/data/models/language/language_support_type_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/language/language_support.dart';
+import 'package:gamer_grove/domain/entities/language/language_support_type.dart';
 
 class LanguageSupportModel extends LanguageSupport {
   const LanguageSupportModel({

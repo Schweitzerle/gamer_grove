@@ -5,16 +5,16 @@
 // lib/domain/usecases/characters/get_character_with_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/character/character.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWithGamesParams> {
-  final GameRepository repository;
 
   GetCharacterWithGames(this.repository);
+  final GameRepository repository;
 
   // 🆕 USE CASE DEBUGGING ENHANCEMENT
 // ==========================================
@@ -24,8 +24,6 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
   @override
   Future<Either<Failure, CharacterWithGames>> call(GetCharacterWithGamesParams params) async {
     try {
-      print('🎭 UseCase: Getting character details for ID: ${params.characterId}');
-      print('🎭 UseCase: Include games: ${params.includeGames}');
 
       // Get character details (this should include enriched games from repository)
       final characterResult = await repository.getCharacterDetails(params.characterId);
@@ -33,7 +31,6 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
       if (characterResult.isLeft()) {
         return characterResult.fold(
               (failure) {
-            print('❌ UseCase: Repository failed: ${failure.message}');
             return Left(failure);
           },
               (character) => throw Exception('Unexpected success'),
@@ -45,31 +42,23 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
             (r) => r,
       );
 
-      print('✅ UseCase: Character loaded: ${character.name}');
-      print('🎮 UseCase: Character has ${character.loadedGameCount} loaded games');
-      print('🔢 UseCase: Character has ${character.gameIds.length} game IDs');
 
       // The character should already have games loaded from repository
-      List<Game> games = character.games ?? [];
+      var games = character.games ?? [];
 
       if (games.isEmpty && character.gameIds.isNotEmpty && params.includeGames) {
-        print('⚠️ UseCase: Character has no loaded games, attempting manual load...');
-        print('🔍 UseCase: Trying to load ${character.gameIds.length} games manually');
 
         final gamesResult = await repository.getGamesByIds(character.gameIds);
         if (gamesResult.isRight()) {
           games = gamesResult.fold(
                 (failure) {
-              print('❌ UseCase: Manual game loading failed: ${failure.message}');
               return <Game>[];
             },
                 (gamesList) {
-              print('✅ UseCase: Manually loaded ${gamesList.length} games');
               return gamesList;
             },
           );
         } else {
-          print('❌ UseCase: Manual game loading returned error');
         }
       }
 
@@ -78,38 +67,35 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
         games: games,
       );
 
-      print('🎯 UseCase: Final result - ${result.character.name} with ${result.games.length} games');
       return Right(result);
 
     } catch (e) {
-      print('❌ UseCase: Exception occurred: $e');
-      print('📍 UseCase: Exception type: ${e.runtimeType}');
       return Left(ServerFailure(message: 'Failed to load character with games: $e'));
     }
   }
 }
 
 class GetCharacterWithGamesParams extends Equatable {
-  final int characterId;
-  final bool includeGames;
 
   const GetCharacterWithGamesParams({
     required this.characterId,
     this.includeGames = true,
   });
+  final int characterId;
+  final bool includeGames;
 
   @override
   List<Object> get props => [characterId, includeGames];
 }
 
 class CharacterWithGames extends Equatable {
-  final Character character;
-  final List<Game> games;
 
   const CharacterWithGames({
     required this.character,
     required this.games,
   });
+  final Character character;
+  final List<Game> games;
 
   bool get hasGames => games.isNotEmpty;
   int get gameCount => games.length;

@@ -2,10 +2,10 @@
 // FIXED PLATFORM MODEL - MIT LOGO MAPPING
 // ==================================================
 
+import 'package:gamer_grove/data/models/platform/platform_logo_model.dart';
 // lib/data/models/platform/platform_model.dart
-import '../../../domain/entities/platform/platform.dart';
-import '../../../domain/entities/platform/platform_logo.dart';
-import 'platform_logo_model.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_logo.dart';
 
 class PlatformModel extends Platform {
   const PlatformModel({
@@ -32,8 +32,6 @@ class PlatformModel extends Platform {
 
   factory PlatformModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔧 PlatformModel.fromJson: ${json['name']} (ID: ${json['id']})');
-
       // ✅ PARSE PLATFORM LOGO OBJECT
       PlatformLogo? logo;
       if (json['platform_logo'] != null) {
@@ -41,10 +39,7 @@ class PlatformModel extends Platform {
           // Full logo object from API
           try {
             logo = PlatformLogoModel.fromJson(json['platform_logo']);
-            print('🔧 Logo parsed: ${logo.url}');
-          } catch (e) {
-            print('❌ Error parsing logo: $e');
-          }
+          } catch (e) {}
         }
       }
 
@@ -69,10 +64,7 @@ class PlatformModel extends Platform {
         categoryEnum: _parseCategoryEnum(json['category']),
         category: json['category'], // Keep raw for debugging
       );
-    } catch (e, stackTrace) {
-      print('❌ PlatformModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }
@@ -127,7 +119,6 @@ class PlatformModel extends Platform {
             return null;
         }
       } catch (e) {
-        print('🔧 Error parsing category enum: $e');
         return null;
       }
     }
@@ -135,22 +126,23 @@ class PlatformModel extends Platform {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'name': name,
-    'abbreviation': abbreviation,
-    'alternative_name': alternativeName,
-    'generation': generation,
-    'platform_family': platformFamilyId,
-    'platform_logo': platformLogoId,
-    'platform_type': platformTypeId,
-    'slug': slug,
-    'summary': summary,
-    'url': url,
-    'versions': versionIds,
-    'websites': websiteIds,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-    'category': categoryEnum?.index != null ? categoryEnum!.index + 1 : null,
-  };
+        'id': id,
+        'checksum': checksum,
+        'name': name,
+        'abbreviation': abbreviation,
+        'alternative_name': alternativeName,
+        'generation': generation,
+        'platform_family': platformFamilyId,
+        'platform_logo': platformLogoId,
+        'platform_type': platformTypeId,
+        'slug': slug,
+        'summary': summary,
+        'url': url,
+        'versions': versionIds,
+        'websites': websiteIds,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+        'category':
+            categoryEnum?.index != null ? categoryEnum!.index + 1 : null,
+      };
 }

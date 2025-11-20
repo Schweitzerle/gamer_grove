@@ -1,22 +1,9 @@
 // lib/domain/entities/user/user_collection_filters.dart
 import 'package:equatable/equatable.dart';
-import '../game/game_sort_options.dart';
-import 'user_collection_sort_options.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
 
 class UserCollectionFilters extends Equatable {
-  final List<int> genreIds;
-  final List<int> platformIds;
-  final double? minRating; // Game rating
-  final double? maxRating; // Game rating
-  final double? minUserRating; // User's own rating
-  final double? maxUserRating; // User's own rating
-  final DateTime? releaseDateFrom;
-  final DateTime? releaseDateTo;
-  final DateTime? addedDateFrom;
-  final DateTime? addedDateTo;
-  final List<int> releaseYears;
-  final UserCollectionSortBy sortBy;
-  final SortOrder sortOrder;
 
   const UserCollectionFilters({
     this.genreIds = const [],
@@ -33,6 +20,19 @@ class UserCollectionFilters extends Equatable {
     this.sortBy = UserCollectionSortBy.dateAdded,
     this.sortOrder = SortOrder.descending,
   });
+  final List<int> genreIds;
+  final List<int> platformIds;
+  final double? minRating; // Game rating
+  final double? maxRating; // Game rating
+  final double? minUserRating; // User's own rating
+  final double? maxUserRating; // User's own rating
+  final DateTime? releaseDateFrom;
+  final DateTime? releaseDateTo;
+  final DateTime? addedDateFrom;
+  final DateTime? addedDateTo;
+  final List<int> releaseYears;
+  final UserCollectionSortBy sortBy;
+  final SortOrder sortOrder;
 
   // Helper methods
   bool get hasFilters =>
@@ -97,22 +97,19 @@ class UserCollectionFilters extends Equatable {
   // Get appropriate filters for collection type
   static UserCollectionFilters forWishlist() {
     return const UserCollectionFilters(
-      sortBy: UserCollectionSortBy.dateAdded,
-      sortOrder: SortOrder.descending,
+      
     );
   }
 
   static UserCollectionFilters forRated() {
     return const UserCollectionFilters(
       sortBy: UserCollectionSortBy.rating,
-      sortOrder: SortOrder.descending,
     );
   }
 
   static UserCollectionFilters forRecommended() {
     return const UserCollectionFilters(
-      sortBy: UserCollectionSortBy.dateAdded,
-      sortOrder: SortOrder.descending,
+      
     );
   }
 

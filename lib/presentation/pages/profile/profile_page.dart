@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
@@ -10,9 +10,6 @@ import 'package:gamer_grove/presentation/pages/followers_following/followers_fol
 import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_statistics_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
-
-import '../../blocs/auth/auth_bloc.dart';
-import '../test/igdb_test_page.dart';
 
 /// Profile page showing the current user's profile
 class ProfilePage extends StatelessWidget {
@@ -61,7 +58,7 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.logout),
                       onPressed: () {
-                        context.read<AuthBloc>().add(SignOutEvent());
+                        context.read<AuthBloc>().add(const SignOutEvent());
                       },
                     ),
                   ],
@@ -69,49 +66,6 @@ class ProfilePage extends StatelessWidget {
                 _buildProfileHeader(context, user),
                 _buildStats(context, user),
                 _buildStatisticsButton(context, user),
-
-                // Debug info
-                if (kDebugMode) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Debug Info',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Text('User ID: ${user.id}'),
-                              Text('Created: ${user.createdAt}'),
-                              Text(
-                                'Wishlisted Games: ${user.totalGamesWishlisted}',
-                              ),
-                              Text('Rated Games: ${user.totalGamesRated}'),
-                              const SizedBox(height: 16),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (context) =>
-                                          const IGDBTestPage(),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.api),
-                                label: const Text('Test IGDB API'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             );
           },
@@ -177,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                           );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Icon(
                             Icons.edit,
                             color: theme.colorScheme.onSecondary,

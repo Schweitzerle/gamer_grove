@@ -5,28 +5,18 @@
 /// Handles JSON serialization/deserialization for user statistics.
 library;
 
-import '../../domain/entities/user/user_stats.dart';
+import 'package:gamer_grove/domain/entities/user/user_stats.dart';
 
 /// User statistics model for data layer.
 ///
 /// Represents aggregated user statistics from Supabase database.
-class UserStatsModel {
-  final int totalGamesRated;
-  final int totalGamesWishlisted;
-  final int totalGamesRecommended;
-  final double? averageRating;
-  final int followersCount;
-  final int followingCount;
-  final int? totalPlaytime; // Optional: if tracking playtime
-  final int? totalAchievements; // Optional: if tracking achievements
+class UserStatsModel { // Optional: if tracking achievements
 
   const UserStatsModel({
     required this.totalGamesRated,
     required this.totalGamesWishlisted,
     required this.totalGamesRecommended,
-    this.averageRating,
-    required this.followersCount,
-    required this.followingCount,
+    required this.followersCount, required this.followingCount, this.averageRating,
     this.totalPlaytime,
     this.totalAchievements,
   });
@@ -55,6 +45,28 @@ class UserStatsModel {
     );
   }
 
+  /// Creates a UserStatsModel from domain UserStats entity.
+  factory UserStatsModel.fromEntity(UserStats stats) {
+    return UserStatsModel(
+      totalGamesRated: stats.totalGamesRated,
+      totalGamesWishlisted: stats.totalGamesWishlisted,
+      totalGamesRecommended: stats.totalGamesRecommended,
+      averageRating: stats.averageRating,
+      followersCount: stats.followersCount,
+      followingCount: stats.followingCount,
+      totalPlaytime: stats.totalPlaytime,
+      totalAchievements: stats.totalAchievements,
+    );
+  }
+  final int totalGamesRated;
+  final int totalGamesWishlisted;
+  final int totalGamesRecommended;
+  final double? averageRating;
+  final int followersCount;
+  final int followingCount;
+  final int? totalPlaytime; // Optional: if tracking playtime
+  final int? totalAchievements;
+
   /// Converts UserStatsModel to JSON.
   Map<String, dynamic> toJson() {
     return {
@@ -80,20 +92,6 @@ class UserStatsModel {
       followingCount: followingCount,
       totalPlaytime: totalPlaytime,
       totalAchievements: totalAchievements,
-    );
-  }
-
-  /// Creates a UserStatsModel from domain UserStats entity.
-  factory UserStatsModel.fromEntity(UserStats stats) {
-    return UserStatsModel(
-      totalGamesRated: stats.totalGamesRated,
-      totalGamesWishlisted: stats.totalGamesWishlisted,
-      totalGamesRecommended: stats.totalGamesRecommended,
-      averageRating: stats.averageRating,
-      followersCount: stats.followersCount,
-      followingCount: stats.followingCount,
-      totalPlaytime: stats.totalPlaytime,
-      totalAchievements: stats.totalAchievements,
     );
   }
 

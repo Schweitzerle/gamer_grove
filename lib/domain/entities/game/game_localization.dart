@@ -17,15 +17,15 @@ enum LocalizationRegion {
 }
 
 class GameLocalization extends Equatable {
-  final int id;
-  final String name;
-  final LocalizationRegion region;
 
   const GameLocalization({
     required this.id,
     required this.name,
     this.region = LocalizationRegion.unknown,
   });
+  final int id;
+  final String name;
+  final LocalizationRegion region;
 
   @override
   List<Object?> get props => [id, name, region];

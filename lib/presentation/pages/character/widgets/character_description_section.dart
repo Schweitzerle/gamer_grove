@@ -1,15 +1,14 @@
 // lib/presentation/pages/characters/widgets/character_description_section.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/character/character.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
 
 class CharacterDescriptionSection extends StatefulWidget {
-  final Character character;
 
   const CharacterDescriptionSection({
-    super.key,
-    required this.character,
+    required this.character, super.key,
   });
+  final Character character;
 
   @override
   State<CharacterDescriptionSection> createState() =>
@@ -123,7 +122,6 @@ class _CharacterDescriptionSectionState
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: Colors.indigo.withOpacity(0.3),
-                  width: 1,
                 ),
               ),
               child: Row(
@@ -183,7 +181,7 @@ class _CharacterDescriptionSectionState
               ),
               const SizedBox(height: 4),
               Text(
-                'This character doesn\'t have a detailed description yet.',
+                "This character doesn't have a detailed description yet.",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey.shade500,
                     ),

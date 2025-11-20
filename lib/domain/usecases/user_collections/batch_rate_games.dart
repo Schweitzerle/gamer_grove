@@ -3,14 +3,14 @@
 // lib/domain/usecases/user_collections/batch_rate_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class BatchRateGames extends UseCase<void, BatchRateGamesParams> {
-  final GameRepository repository;
 
   BatchRateGames(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, void>> call(BatchRateGamesParams params) async {
@@ -28,21 +28,21 @@ class BatchRateGames extends UseCase<void, BatchRateGamesParams> {
       }
     }
 
-    return await repository.batchRateGames(
+    return repository.batchRateGames(
       userId: params.userId,
       gameRatings: params.gameRatings,
     );
   }
 }
 
-class BatchRateGamesParams extends Equatable {
-  final String userId;
-  final Map<int, double> gameRatings; // gameId -> rating
+class BatchRateGamesParams extends Equatable { // gameId -> rating
 
   const BatchRateGamesParams({
     required this.userId,
     required this.gameRatings,
   });
+  final String userId;
+  final Map<int, double> gameRatings;
 
   @override
   List<Object> get props => [userId, gameRatings];

@@ -1,5 +1,5 @@
 // lib/data/models/player_perspective_model.dart
-import '../../domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
 
 class PlayerPerspectiveModel extends PlayerPerspective {
   const PlayerPerspectiveModel({

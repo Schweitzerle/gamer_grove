@@ -6,8 +6,8 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for updating a user profile.
 ///
@@ -23,15 +23,13 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Update failed: ${failure.message}'),
-///   (user) => print('Profile updated for ${user.username}'),
 /// );
 /// ```
 class UpdateUserProfileUseCase
     implements UseCase<User, UpdateUserProfileParams> {
-  final UserRepository repository;
 
   UpdateUserProfileUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, User>> call(UpdateUserProfileParams params) async {
@@ -42,7 +40,7 @@ class UpdateUserProfileUseCase
           (displayName.isEmpty || displayName.length > 50)) {
         return const Left(ValidationFailure(
           message: 'Display name must be 1-50 characters',
-        ));
+        ),);
       }
     }
 
@@ -52,7 +50,7 @@ class UpdateUserProfileUseCase
       if (bio != null && bio.length > 500) {
         return const Left(ValidationFailure(
           message: 'Bio must be 500 characters or less',
-        ));
+        ),);
       }
     }
 
@@ -64,11 +62,11 @@ class UpdateUserProfileUseCase
         return const Left(ValidationFailure(
           message:
               'Username must be 3-20 characters, alphanumeric and underscores only',
-        ));
+        ),);
       }
     }
 
-    return await repository.updateUserProfile(
+    return repository.updateUserProfile(
       userId: params.userId,
       username: params.updates['username'] as String?,
       bio: params.updates['bio'] as String?,
@@ -83,13 +81,13 @@ class UpdateUserProfileUseCase
 }
 
 class UpdateUserProfileParams extends Equatable {
-  final String userId;
-  final Map<String, dynamic> updates;
 
   const UpdateUserProfileParams({
     required this.userId,
     required this.updates,
   });
+  final String userId;
+  final Map<String, dynamic> updates;
 
   @override
   List<Object> get props => [userId, updates];

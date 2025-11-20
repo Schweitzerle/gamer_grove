@@ -7,12 +7,12 @@ import 'package:gamer_grove/domain/usecases/collection/get_recommended_games_use
 import 'package:gamer_grove/domain/usecases/collection/get_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_wishlisted_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/rate_game_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_recommended_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_wishlist_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/update_top_three_use_case.dart';
-import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
-import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
 
 part 'user_game_data_event.dart';
 part 'user_game_data_state.dart';
@@ -44,17 +44,6 @@ part 'user_game_data_state.dart';
 /// }
 /// ```
 class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
-  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
-  final GetRatedGamesUseCase getRatedGamesUseCase;
-  final GetRecommendedGamesUseCase getRecommendedGamesUseCase;
-  final GetTopThreeUseCase getTopThreeUseCase;
-  final ToggleWishlistUseCase toggleWishlistUseCase;
-  final ToggleRecommendedUseCase toggleRecommendedUseCase;
-  final RateGameUseCase rateGameUseCase;
-  final RemoveRatingUseCase removeRatingUseCase;
-  final UpdateTopThreeUseCase updateTopThreeUseCase;
-  final SetTopThreeGameAtPositionUseCase setTopThreeGameAtPositionUseCase;
-  final RemoveFromTopThreeUseCase removeFromTopThreeUseCase;
 
   UserGameDataBloc({
     required this.getWishlistedGamesUseCase,
@@ -80,32 +69,43 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     on<ClearUserGameDataEvent>(_onClearUserGameData);
     on<RefreshUserGameDataEvent>(_onRefreshUserGameData);
   }
+  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
+  final GetRatedGamesUseCase getRatedGamesUseCase;
+  final GetRecommendedGamesUseCase getRecommendedGamesUseCase;
+  final GetTopThreeUseCase getTopThreeUseCase;
+  final ToggleWishlistUseCase toggleWishlistUseCase;
+  final ToggleRecommendedUseCase toggleRecommendedUseCase;
+  final RateGameUseCase rateGameUseCase;
+  final RemoveRatingUseCase removeRatingUseCase;
+  final UpdateTopThreeUseCase updateTopThreeUseCase;
+  final SetTopThreeGameAtPositionUseCase setTopThreeGameAtPositionUseCase;
+  final RemoveFromTopThreeUseCase removeFromTopThreeUseCase;
 
   /// Load all user game data from backend
   Future<void> _onLoadUserGameData(
     LoadUserGameDataEvent event,
     Emitter<UserGameDataState> emit,
   ) async {
-    print('🎯 UserGameDataBloc: Loading user game data for user ${event.userId}');
     emit(const UserGameDataLoading());
 
     try {
-      print('🎯 UserGameDataBloc: Fetching wishlist, ratings, recommendations, and top three...');
       // Load all user game data in parallel
       // ✅ FIX: Load ALL ratings/wishlist/recommendations with high limit (no pagination)
       final results = await Future.wait([
         getWishlistedGamesUseCase(
-          GetWishlistedGamesParams(userId: event.userId, limit: 10000), // All wishlist
+          GetWishlistedGamesParams(
+              userId: event.userId, limit: 10000,), // All wishlist
         ),
         getRatedGamesUseCase(
-          GetRatedGamesParams(userId: event.userId, limit: 10000), // All ratings
+          GetRatedGamesParams(
+              userId: event.userId, limit: 10000,), // All ratings
         ),
         getRecommendedGamesUseCase(
-          GetRecommendedGamesParams(userId: event.userId, limit: 10000), // All recommendations
+          GetRecommendedGamesParams(
+              userId: event.userId, limit: 10000,), // All recommendations
         ),
         getTopThreeUseCase(GetTopThreeParams(userId: event.userId)),
       ]);
-      print('🎯 UserGameDataBloc: Received ${results.length} results');
 
       // Extract results
       final wishlistResult = results[0];
@@ -113,41 +113,30 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       final recommendedResult = results[2];
       final topThreeResult = results[3];
 
-      print('🎯 UserGameDataBloc: Processing results...');
-      print('   Wishlist result type: ${wishlistResult.runtimeType}');
-      print('   Rated result type: ${ratedResult.runtimeType}');
-      print('   Recommended result type: ${recommendedResult.runtimeType}');
-      print('   TopThree result type: ${topThreeResult.runtimeType}');
-
       // Check for failures
       String? errorMessage;
       if (wishlistResult.isLeft()) {
         wishlistResult.fold((l) {
           errorMessage = l.message;
-          print('❌ UserGameDataBloc: Wishlist error: ${l.message}');
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (ratedResult.isLeft()) {
         ratedResult.fold((l) {
           errorMessage = l.message;
-          print('❌ UserGameDataBloc: Rated error: ${l.message}');
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (recommendedResult.isLeft()) {
         recommendedResult.fold((l) {
           errorMessage = l.message;
-          print('❌ UserGameDataBloc: Recommended error: ${l.message}');
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (topThreeResult.isLeft()) {
         topThreeResult.fold((l) {
           errorMessage = l.message;
-          print('❌ UserGameDataBloc: TopThree error: ${l.message}');
-        }, (r) => null);
+        }, (r) => null,);
       }
 
       if (errorMessage != null) {
-        print('❌ UserGameDataBloc: Emitting error state: $errorMessage');
         emit(UserGameDataError(errorMessage!));
         return;
       }
@@ -157,13 +146,9 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       wishlistResult.fold(
         (l) => null,
         (gameIds) {
-          print('🎯 UserGameDataBloc: Processing wishlist data: $gameIds');
           if (gameIds is List<int>) {
             wishlistedGameIds.addAll(gameIds);
-            print('   Added ${gameIds.length} wishlisted games');
-          } else {
-            print('   ⚠️ Unexpected wishlist type: ${gameIds.runtimeType}');
-          }
+          } else {}
         },
       );
 
@@ -171,19 +156,13 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       ratedResult.fold(
         (l) => null,
         (games) {
-          print('🎯 UserGameDataBloc: Processing rated data: $games');
           if (games is List<Map<String, dynamic>>) {
             for (final game in games) {
               final gameId = game['game_id'] as int;
               final rating = (game['rating'] as num).toDouble();
               ratedGames[gameId] = rating;
-              print('   📊 Loaded rating: Game ID $gameId = $rating');
             }
-            print('   ✅ Added ${games.length} rated games');
-            print('   🎮 Game IDs with ratings: ${ratedGames.keys.toList()}');
-          } else {
-            print('   ⚠️ Unexpected rated type: ${games.runtimeType}');
-          }
+          } else {}
         },
       );
 
@@ -191,13 +170,9 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedResult.fold(
         (l) => null,
         (gameIds) {
-          print('🎯 UserGameDataBloc: Processing recommended data: $gameIds');
           if (gameIds is List<int>) {
             recommendedGameIds.addAll(gameIds);
-            print('   Added ${gameIds.length} recommended games');
-          } else {
-            print('   ⚠️ Unexpected recommended type: ${gameIds.runtimeType}');
-          }
+          } else {}
         },
       );
 
@@ -205,16 +180,12 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       topThreeResult.fold(
         (l) => null,
         (games) {
-          print('🎯 UserGameDataBloc: Processing top three data: $games');
           if (games is List<Map<String, dynamic>>) {
             for (final game in games) {
               final gameId = game['game_id'] as int;
               topThreeGameIds.add(gameId);
             }
-            print('   Added ${games.length} top three games');
-          } else {
-            print('   ⚠️ Unexpected top three type: ${games.runtimeType}');
-          }
+          } else {}
         },
       );
 
@@ -224,7 +195,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         recommendedGameIds: recommendedGameIds,
         ratedGames: ratedGames,
         topThreeGameIds: topThreeGameIds,
-      ));
+      ),);
     } on Exception catch (e) {
       emit(UserGameDataError('Failed to load user game data: $e'));
     }
@@ -256,7 +227,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await toggleWishlistUseCase(
@@ -283,18 +254,15 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     ToggleRecommendationEvent event,
     Emitter<UserGameDataState> emit,
   ) async {
-    print('🎯 UserGameDataBloc: Toggle recommendation for game ${event.gameId}');
     final currentState = state;
     if (currentState is! UserGameDataLoaded) {
-      print('❌ UserGameDataBloc: Cannot toggle - state is not loaded');
       return;
     }
 
     // Optimistic update
-    final updatedRecommendations = Set<int>.from(currentState.recommendedGameIds);
+    final updatedRecommendations =
+        Set<int>.from(currentState.recommendedGameIds);
     final isNowRecommended = !updatedRecommendations.contains(event.gameId);
-
-    print('🎯 UserGameDataBloc: isNowRecommended=$isNowRecommended');
 
     if (isNowRecommended) {
       updatedRecommendations.add(event.gameId);
@@ -302,7 +270,6 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       updatedRecommendations.remove(event.gameId);
     }
 
-    print('🎯 UserGameDataBloc: Emitting RecommendationToggled state');
     emit(RecommendationToggled(
       gameId: event.gameId,
       isNowRecommended: isNowRecommended,
@@ -311,10 +278,9 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: updatedRecommendations,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
-    print('🎯 UserGameDataBloc: Calling backend toggle...');
     final result = await toggleRecommendedUseCase(
       ToggleRecommendedParams(
         userId: event.userId,
@@ -325,16 +291,13 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     result.fold(
       (failure) {
         // Revert on error
-        print('❌ UserGameDataBloc: Toggle failed: ${failure.message}');
         emit(currentState);
         emit(UserGameDataError(failure.message));
       },
       (_) {
         // Success - state already updated
-        print('✅ UserGameDataBloc: Toggle successful, keeping RecommendationToggled state');
       },
     );
-    print('🎯 UserGameDataBloc: Toggle recommendation completed');
   }
 
   /// Rate a game
@@ -357,7 +320,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: updatedRatings,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await rateGameUseCase(
@@ -399,7 +362,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: updatedRatings,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await removeRatingUseCase(
@@ -436,7 +399,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: List.from(event.gameIds),
-    ));
+    ),);
 
     // Backend update
     final result = await updateTopThreeUseCase(
@@ -463,7 +426,6 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     RemoveFromTopThreeEvent event,
     Emitter<UserGameDataState> emit,
   ) async {
-    print('🗑️ UserGameDataBloc: Removing game ${event.gameId} from top three');
     final currentState = state;
     if (currentState is! UserGameDataLoaded) return;
 
@@ -478,37 +440,30 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     // ✅ Handle result BEFORE returning (not in async callback)
     await result.fold(
       (failure) async {
-        print('❌ UserGameDataBloc: Failed to remove from top three: ${failure.message}');
         emit(UserGameDataError(failure.message));
       },
       (_) async {
-        print('✅ UserGameDataBloc: Successfully removed from top three');
         // Reload top three from backend to get the correct state
         final topThreeResult = await getTopThreeUseCase(
           GetTopThreeParams(userId: event.userId),
         );
 
         topThreeResult.fold(
-          (failure) {
-            print('❌ UserGameDataBloc: Failed to reload top three: ${failure.message}');
-          },
+          (failure) {},
           (games) {
             final topThreeGameIds = <int>[];
-            if (games is List<Map<String, dynamic>>) {
-              for (final game in games) {
-                final gameId = game['game_id'] as int;
-                topThreeGameIds.add(gameId);
-              }
+            for (final game in games) {
+              final gameId = game['game_id'] as int;
+              topThreeGameIds.add(gameId);
             }
 
-            print('🎯 UserGameDataBloc: Reloaded top three: $topThreeGameIds');
             emit(TopThreeUpdated(
               userId: currentState.userId,
               wishlistedGameIds: currentState.wishlistedGameIds,
               recommendedGameIds: currentState.recommendedGameIds,
               ratedGames: currentState.ratedGames,
               topThreeGameIds: topThreeGameIds,
-            ));
+            ),);
           },
         );
       },
@@ -520,7 +475,6 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     SetGameTopThreePositionEvent event,
     Emitter<UserGameDataState> emit,
   ) async {
-    print('🎯 UserGameDataBloc: Setting game ${event.gameId} at position ${event.position}');
     final currentState = state;
     if (currentState is! UserGameDataLoaded) return;
 
@@ -536,37 +490,30 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     // ✅ Handle result BEFORE returning (not in async callback)
     await result.fold(
       (failure) async {
-        print('❌ UserGameDataBloc: Failed to set top three position: ${failure.message}');
         emit(UserGameDataError(failure.message));
       },
       (_) async {
-        print('✅ UserGameDataBloc: Successfully set top three position');
         // Reload top three from backend to get the correct state
         final topThreeResult = await getTopThreeUseCase(
           GetTopThreeParams(userId: event.userId),
         );
 
         topThreeResult.fold(
-          (failure) {
-            print('❌ UserGameDataBloc: Failed to reload top three: ${failure.message}');
-          },
+          (failure) {},
           (games) {
             final topThreeGameIds = <int>[];
-            if (games is List<Map<String, dynamic>>) {
-              for (final game in games) {
-                final gameId = game['game_id'] as int;
-                topThreeGameIds.add(gameId);
-              }
+            for (final game in games) {
+              final gameId = game['game_id'] as int;
+              topThreeGameIds.add(gameId);
             }
 
-            print('🎯 UserGameDataBloc: Reloaded top three: $topThreeGameIds');
             emit(TopThreeUpdated(
               userId: currentState.userId,
               wishlistedGameIds: currentState.wishlistedGameIds,
               recommendedGameIds: currentState.recommendedGameIds,
               ratedGames: currentState.ratedGames,
               topThreeGameIds: topThreeGameIds,
-            ));
+            ),);
           },
         );
       },
@@ -675,7 +622,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         recommendedGameIds: recommendedGameIds,
         ratedGames: ratedGames,
         topThreeGameIds: topThreeGameIds,
-      ));
+      ),);
     } on Exception catch (e) {
       emit(UserGameDataError('Failed to refresh user game data: $e'));
     }

@@ -2,7 +2,7 @@
 // lib/domain/entities/ageRating/age_rating.dart
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
-import 'age_rating_organization.dart'; // Import für AgeRatingOrganization
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_organization.dart'; // Import für AgeRatingOrganization
 
 // Age Rating Category Enum (DEPRECATED but still used)
 enum AgeRatingCategoryEnum {
@@ -144,6 +144,21 @@ enum AgeRatingRatingEnum {
 }
 
 class AgeRating extends Equatable {
+
+  const AgeRating({
+    required this.id,
+    required this.checksum,
+    this.contentDescriptions = const [],
+    this.organizationId,
+    this.organization, // NEU
+    this.ratingCategory,
+    this.ratingString, // NEU
+    this.ratingContentDescriptions = const [],
+    this.ratingCoverUrl,
+    this.synopsis,
+    this.categoryEnum,
+    this.ratingEnum,
+  });
   final int id;
   final String checksum;
   final List<int> contentDescriptions;
@@ -160,21 +175,6 @@ class AgeRating extends Equatable {
   // DEPRECATED fields but still useful
   final AgeRatingCategoryEnum? categoryEnum;
   final AgeRatingRatingEnum? ratingEnum;
-
-  const AgeRating({
-    required this.id,
-    required this.checksum,
-    this.contentDescriptions = const [],
-    this.organizationId,
-    this.organization, // NEU
-    this.ratingCategory,
-    this.ratingString, // NEU
-    this.ratingContentDescriptions = const [],
-    this.ratingCoverUrl,
-    this.synopsis,
-    this.categoryEnum,
-    this.ratingEnum,
-  });
 
   String get displayName {
     // Priority 1: Use ratingString if available

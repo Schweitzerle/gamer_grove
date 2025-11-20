@@ -1,16 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/user/get_activity_feed.dart';
+import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_event.dart';
 import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_loading_steps.dart';
+import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_state.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import 'activity_feed_event.dart';
-import 'activity_feed_state.dart';
 
 class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
-  final GetActivityFeedUseCase getActivityFeed;
-  final GameRepository gameRepository;
-  final AuthBloc authBloc;
 
   ActivityFeedBloc({
     required this.getActivityFeed,
@@ -19,6 +16,9 @@ class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
   }) : super(ActivityFeedInitial()) {
     on<LoadActivityFeed>(_onLoadActivityFeed);
   }
+  final GetActivityFeedUseCase getActivityFeed;
+  final GameRepository gameRepository;
+  final AuthBloc authBloc;
 
   Future<void> _onLoadActivityFeed(
     LoadActivityFeed event,
@@ -27,13 +27,13 @@ class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
     final authState = authBloc.state;
     if (authState is AuthAuthenticated) {
       emit(const ActivityFeedLoading(
-          ActivityFeedLoadingStep.loadingActivities, 0.0));
+          ActivityFeedLoadingStep.loadingActivities, 0,),);
       final activityResult = await getActivityFeed(authState.user.id);
       await activityResult.fold(
         (failure) async => emit(ActivityFeedError(failure.message)),
         (activities) async {
           emit(const ActivityFeedLoading(
-              ActivityFeedLoadingStep.loadingGames, 0.5));
+              ActivityFeedLoadingStep.loadingGames, 0.5,),);
           final gameIds = activities
               .map((activity) {
                 if (activity.gameId != null) {
@@ -60,7 +60,7 @@ class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
               .toList();
 
           if (gameIds.isEmpty) {
-            emit(ActivityFeedLoaded(activities, []));
+            emit(ActivityFeedLoaded(activities, const []));
             return;
           }
 

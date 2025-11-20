@@ -11,53 +11,15 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 ///
 /// Represents user data from Supabase database with JSON conversion.
 class UserModel {
-  final String id;
-  final String username;
-  final String? displayName;
-  final String? bio;
-  final String? avatarUrl;
-  final String? country;
-
-  // Privacy settings
-  final bool isProfilePublic;
-  final bool showWishlist;
-  final bool showRatedGames;
-  final bool showRecommendedGames;
-  final bool showTopThree;
-
-  // Stats
-  final int totalGamesRated;
-  final int totalGamesWishlisted;
-  final int totalGamesRecommended;
-  final double? averageRating;
-  final int followersCount;
-  final int followingCount;
-
-  // Timestamps
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final DateTime? lastActiveAt;
 
   const UserModel({
     required this.id,
     required this.username,
-    this.displayName,
+    required this.isProfilePublic, required this.showWishlist, required this.showRatedGames, required this.showRecommendedGames, required this.showTopThree, required this.totalGamesRated, required this.totalGamesWishlisted, required this.totalGamesRecommended, required this.followersCount, required this.followingCount, required this.createdAt, required this.updatedAt, this.displayName,
     this.bio,
     this.avatarUrl,
     this.country,
-    required this.isProfilePublic,
-    required this.showWishlist,
-    required this.showRatedGames,
-    required this.showRecommendedGames,
-    required this.showTopThree,
-    required this.totalGamesRated,
-    required this.totalGamesWishlisted,
-    required this.totalGamesRecommended,
     this.averageRating,
-    required this.followersCount,
-    required this.followingCount,
-    required this.createdAt,
-    required this.updatedAt,
     this.lastActiveAt,
   });
 
@@ -99,6 +61,63 @@ class UserModel {
           : null,
     );
   }
+
+  /// Creates a UserModel from domain User entity.
+  ///
+  /// Example:
+  /// ```dart
+  /// final model = UserModel.fromEntity(user);
+  /// ```
+  factory UserModel.fromEntity(User user) {
+    return UserModel(
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      country: user.country,
+      isProfilePublic: user.isProfilePublic,
+      showWishlist: user.showWishlist,
+      showRatedGames: user.showRatedGames,
+      showRecommendedGames: user.showRecommendedGames,
+      showTopThree: user.showTopThree,
+      totalGamesRated: user.totalGamesRated,
+      totalGamesWishlisted: user.totalGamesWishlisted,
+      totalGamesRecommended: user.totalGamesRecommended,
+      averageRating: user.averageRating,
+      followersCount: user.followersCount,
+      followingCount: user.followingCount,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastActiveAt: user.lastActiveAt,
+    );
+  }
+  final String id;
+  final String username;
+  final String? displayName;
+  final String? bio;
+  final String? avatarUrl;
+  final String? country;
+
+  // Privacy settings
+  final bool isProfilePublic;
+  final bool showWishlist;
+  final bool showRatedGames;
+  final bool showRecommendedGames;
+  final bool showTopThree;
+
+  // Stats
+  final int totalGamesRated;
+  final int totalGamesWishlisted;
+  final int totalGamesRecommended;
+  final double? averageRating;
+  final int followersCount;
+  final int followingCount;
+
+  // Timestamps
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? lastActiveAt;
 
   /// Converts UserModel to JSON.
   ///
@@ -159,37 +178,6 @@ class UserModel {
       createdAt: createdAt,
       updatedAt: updatedAt,
       lastActiveAt: lastActiveAt,
-    );
-  }
-
-  /// Creates a UserModel from domain User entity.
-  ///
-  /// Example:
-  /// ```dart
-  /// final model = UserModel.fromEntity(user);
-  /// ```
-  factory UserModel.fromEntity(User user) {
-    return UserModel(
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      bio: user.bio,
-      avatarUrl: user.avatarUrl,
-      country: user.country,
-      isProfilePublic: user.isProfilePublic,
-      showWishlist: user.showWishlist,
-      showRatedGames: user.showRatedGames,
-      showRecommendedGames: user.showRecommendedGames,
-      showTopThree: user.showTopThree,
-      totalGamesRated: user.totalGamesRated,
-      totalGamesWishlisted: user.totalGamesWishlisted,
-      totalGamesRecommended: user.totalGamesRecommended,
-      averageRating: user.averageRating,
-      followersCount: user.followersCount,
-      followingCount: user.followingCount,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastActiveAt: user.lastActiveAt,
     );
   }
 

@@ -1,10 +1,10 @@
 // core/utils/image_utils.dart
-import '../constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class ImageUtils {
   // Build IGDB image URL with proper size
   static String buildIgdbImageUrl(String? baseUrl,
-      {String size = AppConstants.mediumImageSize}) {
+      {String size = AppConstants.mediumImageSize,}) {
     if (baseUrl == null || baseUrl.isEmpty) return '';
 
     // IGDB URLs come without https: prefix
@@ -21,12 +21,11 @@ class ImageUtils {
     // We need to replace the size part in the path, not just the t_thumb part
 
     // Find and replace any existing size parameter
-    final RegExp sizeRegex = RegExp(r't_[a-zA-Z0-9_]+');
+    final sizeRegex = RegExp('t_[a-zA-Z0-9_]+');
     if (sizeRegex.hasMatch(baseUrl)) {
       baseUrl = baseUrl.replaceAll(sizeRegex, size);
     }
 
-    print('🖼️ ImageUtils: Built URL: $baseUrl');
     return baseUrl;
   }
 
@@ -36,7 +35,7 @@ class ImageUtils {
   }
 
   static String getMediumImageUrl(String? baseUrl) {
-    return buildIgdbImageUrl(baseUrl, size: AppConstants.mediumImageSize);
+    return buildIgdbImageUrl(baseUrl);
   }
 
   static String getLargeImageUrl(String? baseUrl) {
@@ -86,7 +85,7 @@ class ImageUtils {
 
   // Resize image URL for better performance
   static String getOptimizedImageUrl(String? originalUrl,
-      {int? width, int? height}) {
+      {int? width, int? height,}) {
     if (originalUrl == null || originalUrl.isEmpty) return '';
 
     // For IGDB images, use appropriate size

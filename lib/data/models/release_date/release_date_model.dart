@@ -1,6 +1,6 @@
 // ===== RELEASE DATE MODEL (FIXED FOR COMPLETE FIELDS) =====
 // lib/data/models/release_date/release_date_model.dart
-import '../../../domain/entities/releaseDate/release_date.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
 
 class ReleaseDateModel extends ReleaseDate {
   const ReleaseDateModel({
@@ -20,6 +20,103 @@ class ReleaseDateModel extends ReleaseDate {
     super.categoryEnum,
     super.regionEnum,
   });
+
+  // Factory method for creating from simple date
+  factory ReleaseDateModel.fromSimpleDate({
+    required int id,
+    required String checksum,
+    required DateTime date,
+    String? human,
+    int? gameId,
+    int? platformId,
+    ReleaseDateRegionEnum? region,
+  }) {
+    return ReleaseDateModel(
+      id: id,
+      checksum: checksum,
+      date: date,
+      human: human,
+      month: date.month,
+      year: date.year,
+      gameId: gameId,
+      platformId: platformId,
+      categoryEnum: ReleaseDateCategory.yyyymmdd,
+      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
+    );
+  }
+
+  // Factory method for creating from year only
+  factory ReleaseDateModel.fromYear({
+    required int id,
+    required String checksum,
+    required int year,
+    String? human,
+    int? gameId,
+    int? platformId,
+    ReleaseDateRegionEnum? region,
+  }) {
+    return ReleaseDateModel(
+      id: id,
+      checksum: checksum,
+      year: year,
+      human: human,
+      gameId: gameId,
+      platformId: platformId,
+      categoryEnum: ReleaseDateCategory.yyyy,
+      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
+    );
+  }
+
+  // Factory method for creating quarterly release
+  factory ReleaseDateModel.fromQuarter({
+    required int id,
+    required String checksum,
+    required int year,
+    required int quarter, // 1-4
+    String? human,
+    int? gameId,
+    int? platformId,
+    ReleaseDateRegionEnum? region,
+  }) {
+    ReleaseDateCategory category;
+    switch (quarter) {
+      case 1: category = ReleaseDateCategory.yyyyq1;
+      case 2: category = ReleaseDateCategory.yyyyq2;
+      case 3: category = ReleaseDateCategory.yyyyq3;
+      case 4: category = ReleaseDateCategory.yyyyq4;
+      default: category = ReleaseDateCategory.yyyy;
+    }
+
+    return ReleaseDateModel(
+      id: id,
+      checksum: checksum,
+      year: year,
+      human: human ?? 'Q$quarter $year',
+      gameId: gameId,
+      platformId: platformId,
+      categoryEnum: category,
+      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
+    );
+  }
+
+  // Factory method for TBD release
+  factory ReleaseDateModel.tbd({
+    required int id,
+    required String checksum,
+    int? gameId,
+    int? platformId,
+    ReleaseDateRegionEnum? region,
+  }) {
+    return ReleaseDateModel(
+      id: id,
+      checksum: checksum,
+      human: 'TBD',
+      gameId: gameId,
+      platformId: platformId,
+      categoryEnum: ReleaseDateCategory.tbd,
+      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
+    );
+  }
 
   factory ReleaseDateModel.fromJson(Map<String, dynamic> json) {
     return ReleaseDateModel(
@@ -93,102 +190,5 @@ class ReleaseDateModel extends ReleaseDate {
       'category': categoryEnum?.value,
       'region': regionEnum?.value,
     };
-  }
-
-  // Factory method for creating from simple date
-  factory ReleaseDateModel.fromSimpleDate({
-    required int id,
-    required String checksum,
-    required DateTime date,
-    String? human,
-    int? gameId,
-    int? platformId,
-    ReleaseDateRegionEnum? region,
-  }) {
-    return ReleaseDateModel(
-      id: id,
-      checksum: checksum,
-      date: date,
-      human: human,
-      month: date.month,
-      year: date.year,
-      gameId: gameId,
-      platformId: platformId,
-      categoryEnum: ReleaseDateCategory.yyyymmdd,
-      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
-    );
-  }
-
-  // Factory method for creating from year only
-  factory ReleaseDateModel.fromYear({
-    required int id,
-    required String checksum,
-    required int year,
-    String? human,
-    int? gameId,
-    int? platformId,
-    ReleaseDateRegionEnum? region,
-  }) {
-    return ReleaseDateModel(
-      id: id,
-      checksum: checksum,
-      year: year,
-      human: human,
-      gameId: gameId,
-      platformId: platformId,
-      categoryEnum: ReleaseDateCategory.yyyy,
-      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
-    );
-  }
-
-  // Factory method for creating quarterly release
-  factory ReleaseDateModel.fromQuarter({
-    required int id,
-    required String checksum,
-    required int year,
-    required int quarter, // 1-4
-    String? human,
-    int? gameId,
-    int? platformId,
-    ReleaseDateRegionEnum? region,
-  }) {
-    ReleaseDateCategory category;
-    switch (quarter) {
-      case 1: category = ReleaseDateCategory.yyyyq1; break;
-      case 2: category = ReleaseDateCategory.yyyyq2; break;
-      case 3: category = ReleaseDateCategory.yyyyq3; break;
-      case 4: category = ReleaseDateCategory.yyyyq4; break;
-      default: category = ReleaseDateCategory.yyyy;
-    }
-
-    return ReleaseDateModel(
-      id: id,
-      checksum: checksum,
-      year: year,
-      human: human ?? 'Q$quarter $year',
-      gameId: gameId,
-      platformId: platformId,
-      categoryEnum: category,
-      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
-    );
-  }
-
-  // Factory method for TBD release
-  factory ReleaseDateModel.tbd({
-    required int id,
-    required String checksum,
-    int? gameId,
-    int? platformId,
-    ReleaseDateRegionEnum? region,
-  }) {
-    return ReleaseDateModel(
-      id: id,
-      checksum: checksum,
-      human: 'TBD',
-      gameId: gameId,
-      platformId: platformId,
-      categoryEnum: ReleaseDateCategory.tbd,
-      regionEnum: region ?? ReleaseDateRegionEnum.unknown,
-    );
   }
 }

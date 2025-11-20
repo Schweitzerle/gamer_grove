@@ -5,8 +5,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../../data/repositories/user_repository_impl.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/data/repositories/user_repository_impl.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for getting user's wishlisted games.
 ///
@@ -21,21 +21,19 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (gameIds) => print('${gameIds.length} games in wishlist'),
 /// );
 /// ```
 class GetWishlistedGamesUseCase
     implements UseCase<List<int>, GetWishlistedGamesParams> {
-  final UserRepositoryImpl repository;
 
   GetWishlistedGamesUseCase(this.repository);
+  final UserRepositoryImpl repository;
 
   @override
   Future<Either<Failure, List<int>>> call(
     GetWishlistedGamesParams params,
   ) async {
-    return await repository.getWishlistedGames(
+    return repository.getWishlistedGames(
       params.userId,
       limit: params.limit,
       offset: params.offset,
@@ -44,15 +42,15 @@ class GetWishlistedGamesUseCase
 }
 
 class GetWishlistedGamesParams extends Equatable {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const GetWishlistedGamesParams({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];

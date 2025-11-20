@@ -4,17 +4,16 @@
 
 // lib/presentation/pages/game_detail/widgets/game_info_card.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/date_formatter.dart';
-import '../../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameInfoCard extends StatelessWidget {
-  final Game game;
 
   const GameInfoCard({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +141,7 @@ class GameInfoCard extends StatelessWidget {
                         visualDensity: VisualDensity.compact,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                    ))
+                    ),)
                         .toList(),
                   ),
                 ),

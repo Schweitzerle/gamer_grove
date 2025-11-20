@@ -1,6 +1,6 @@
 // ===== COMPANY STATUS MODEL =====
 // lib/data/models/company/company_status_model.dart
-import '../../../../domain/entities/company/company_status.dart';
+import 'package:gamer_grove/domain/entities/company/company_status.dart';
 
 class CompanyStatusModel extends CompanyStatus {
   const CompanyStatusModel({

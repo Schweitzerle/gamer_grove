@@ -5,16 +5,17 @@
 /// Provides common functionality and error handling for Supabase repositories.
 library;
 
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/network/network_info.dart';
-import '../../datasources/remote/supabase/models/supabase_auth_exceptions.dart'
+import 'package:gamer_grove/core/network/network_info.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_auth_exceptions.dart'
     as auth_ex;
-import '../../datasources/remote/supabase/models/supabase_user_exceptions.dart'
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_user_exceptions.dart'
     as user_ex;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Abstract base class for all Supabase-based repositories.
 ///
@@ -42,13 +43,13 @@ import '../../datasources/remote/supabase/models/supabase_user_exceptions.dart'
 /// }
 /// ```
 abstract class SupabaseBaseRepository {
-  final SupabaseClient supabase;
-  final NetworkInfo networkInfo;
 
   SupabaseBaseRepository({
     required this.supabase,
     required this.networkInfo,
   });
+  final SupabaseClient supabase;
+  final NetworkInfo networkInfo;
 
   /// Executes a Supabase operation with unified error handling.
   ///
@@ -83,7 +84,7 @@ abstract class SupabaseBaseRepository {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure(
           message: 'No internet connection. Please check your network.',
-        ));
+        ),);
       }
 
       // Execute the operation
@@ -99,27 +100,27 @@ abstract class SupabaseBaseRepository {
       // Handle Supabase database exceptions
       return Left(ServerFailure(
         message: _extractPostgrestError(e),
-      ));
+      ),);
     } on StorageException catch (e) {
       // Handle Supabase storage exceptions
       return Left(ServerFailure(
         message: 'Storage error: ${e.message}',
-      ));
+      ),);
     } on SocketException {
       // Handle network socket errors
       return const Left(NetworkFailure(
         message: 'Connection failed. Please check your network.',
-      ));
+      ),);
     } on TimeoutException {
       // Handle timeout errors
       return const Left(NetworkFailure(
         message: 'Request timed out. Please try again.',
-      ));
+      ),);
     } catch (e) {
       // Handle any other unexpected errors
       return Left(ServerFailure(
-        message: '$errorMessage: ${e.toString()}',
-      ));
+        message: '$errorMessage: $e',
+      ),);
     }
   }
 
@@ -142,7 +143,7 @@ abstract class SupabaseBaseRepository {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure(
           message: 'No internet connection. Please check your network.',
-        ));
+        ),);
       }
 
       await operation();
@@ -154,23 +155,23 @@ abstract class SupabaseBaseRepository {
     } on PostgrestException catch (e) {
       return Left(ServerFailure(
         message: _extractPostgrestError(e),
-      ));
+      ),);
     } on StorageException catch (e) {
       return Left(ServerFailure(
         message: 'Storage error: ${e.message}',
-      ));
+      ),);
     } on SocketException {
       return const Left(NetworkFailure(
         message: 'Connection failed. Please check your network.',
-      ));
+      ),);
     } on TimeoutException {
       return const Left(NetworkFailure(
         message: 'Request timed out. Please try again.',
-      ));
+      ),);
     } catch (e) {
       return Left(ServerFailure(
-        message: '$errorMessage: ${e.toString()}',
-      ));
+        message: '$errorMessage: $e',
+      ),);
     }
   }
 
@@ -290,10 +291,10 @@ abstract class SupabaseBaseRepository {
       if (!await networkInfo.isConnected) {
         return const Left(NetworkFailure(
           message: 'No internet connection. Please check your network.',
-        ));
+        ),);
       }
 
-      final List<T> results = [];
+      final results = <T>[];
       for (final operation in operations) {
         final result = await operation();
         results.add(result);
@@ -307,11 +308,11 @@ abstract class SupabaseBaseRepository {
     } on PostgrestException catch (e) {
       return Left(ServerFailure(
         message: _extractPostgrestError(e),
-      ));
+      ),);
     } catch (e) {
       return Left(ServerFailure(
-        message: '$errorMessage: ${e.toString()}',
-      ));
+        message: '$errorMessage: $e',
+      ),);
     }
   }
 

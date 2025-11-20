@@ -3,15 +3,15 @@
 // lib/domain/usecases/game_details/get_game_videos.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game_video.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameVideos extends UseCase<List<GameVideo>, GetGameVideosParams> {
-  final GameRepository repository;
 
   GetGameVideos(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<GameVideo>>> call(GetGameVideosParams params) async {
@@ -19,14 +19,14 @@ class GetGameVideos extends UseCase<List<GameVideo>, GetGameVideosParams> {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
 
-    return await repository.getGameVideos(params.gameId);
+    return repository.getGameVideos(params.gameId);
   }
 }
 
 class GetGameVideosParams extends Equatable {
-  final int gameId;
 
   const GetGameVideosParams({required this.gameId});
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];
