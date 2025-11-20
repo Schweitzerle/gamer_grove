@@ -170,96 +170,106 @@ class _PopularCharactersSectionState extends State<PopularCharactersSection> {
 
   Widget _buildLoadingSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Loading
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: Row(
-              children: [
-                CustomShimmer(
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+      child: Card(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingSmall,
+        ),
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Loading
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingSmall,
+                ),
+                child: Row(
+                  children: [
+                    CustomShimmer(
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomShimmer(
-                        child: Container(
-                          height: 20,
-                          width: 150,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(4),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomShimmer(
+                            child: Container(
+                              height: 20,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      CustomShimmer(
-                        child: Container(
-                          height: 14,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(4),
+                          const SizedBox(height: 4),
+                          CustomShimmer(
+                            child: Container(
+                              height: 14,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingSmall),
-
-          // Loading Cards
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.paddingMedium,
               ),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: CustomShimmer(
-                    child: Container(
-                      width: 140,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+              const SizedBox(height: AppConstants.paddingSmall),
+
+              // Loading Cards
+              SizedBox(
+                height: 200,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingSmall,
                   ),
-                );
-              },
-            ),
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: CustomShimmer(
+                        child: Container(
+                          width: 140,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

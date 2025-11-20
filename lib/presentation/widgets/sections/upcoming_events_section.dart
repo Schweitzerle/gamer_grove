@@ -231,85 +231,95 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
 
   Widget _buildLoadingSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingMedium),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Loading
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-            ),
-            child: Row(
-              children: [
-                CustomShimmer(
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+      child: Card(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingSmall,
+        ),
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Loading
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.paddingSmall,
+                ),
+                child: Row(
+                  children: [
+                    CustomShimmer(
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomShimmer(
-                        child: Container(
-                          height: 20,
-                          width: 200,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(4),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomShimmer(
+                            child: Container(
+                              height: 20,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      CustomShimmer(
-                        child: Container(
-                          height: 14,
-                          width: 120,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(4),
+                          const SizedBox(height: 4),
+                          CustomShimmer(
+                            child: Container(
+                              height: 14,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppConstants.paddingSmall),
+              ),
+              const SizedBox(height: AppConstants.paddingSmall),
 
-          // Loading Card
-          SizedBox(
-            height: 200,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Card(
-                child: CustomShimmer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
+              // Loading Card
+              SizedBox(
+                height: 200,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: CustomShimmer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
