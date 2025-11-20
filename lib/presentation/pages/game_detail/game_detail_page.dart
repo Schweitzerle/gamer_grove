@@ -10,6 +10,7 @@ import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'; //
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../core/widgets/cached_image_widget.dart';
+import '../../../core/widgets/error_widget.dart';
 import '../../../domain/entities/game/game.dart';
 import '../../../injection_container.dart';
 import '../../blocs/game/game_bloc.dart';
@@ -175,8 +176,14 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  // ✅ NEW: Enhanced Error State
+  // ✅ NEW: Enhanced Error State with Smart Error Detection
   Widget _buildErrorState(String message) {
+    // Check if it's a network error
+    final isNetworkError = message.toLowerCase().contains('internet') ||
+        message.toLowerCase().contains('network') ||
+        message.toLowerCase().contains('connection') ||
+        message.toLowerCase().contains('timeout');
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -192,104 +199,12 @@ class _GameDetailPageState extends State<GameDetailPage>
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Error Icon with Theme Color
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Error Title
-              Text(
-                'Failed to Load Game',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 12),
-
-              // Error Message
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color:
-                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                  ),
-                ),
-                child: Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontFamily:
-                            'monospace', // ✅ Console-style for error messages
-                      ),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Retry Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _loadGameDetails,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry Loading'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Go Back Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Go Back'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onSurface,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: isNetworkError
+          ? NetworkErrorWidget(onRetry: _loadGameDetails)
+          : CustomErrorWidget(
+              message: message,
+              onRetry: _loadGameDetails,
+            ),
     );
   }
 

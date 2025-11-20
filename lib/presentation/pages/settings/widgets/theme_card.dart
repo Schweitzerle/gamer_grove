@@ -1,4 +1,3 @@
-
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
@@ -45,12 +44,14 @@ class ThemeCard extends StatelessWidget {
                 ),
                 child: Align(
                   alignment: Alignment.topLeft,
-                  child: Text(
-                    scheme.name.substring(0, 1).toUpperCase() +
-                        scheme.name.substring(1),
-                    style: TextStyle(
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
+                  child: FittedBox(
+                    child: Text(
+                      scheme.name.substring(0, 1).toUpperCase() +
+                          scheme.name.substring(1),
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

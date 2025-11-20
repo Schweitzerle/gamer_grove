@@ -50,6 +50,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   return EnhancedAccordionTile(
                     title: 'Your Activity',
                     icon: Icons.person,
+                    iconColor: const Color(0xFF6366F1), // Indigo
                     preview:
                         _buildUserStatesPreview(context, game, userDataState),
                     child: UserStatesContent(
@@ -63,6 +64,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Community & Ratings',
                   icon: Icons.public,
+                  iconColor: const Color(0xFF8B5CF6), // Purple
                   preview: _buildCommunityPreview(context, game),
                   noPadding: true,
                   child: CommunityInfoContent(game: game),
@@ -73,6 +75,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'About ${game.name}',
                   icon: Icons.description,
+                  iconColor: const Color(0xFFA855F7), // Light Purple
                   preview: _buildDescriptionPreview(context, game),
                   child: GameDescriptionContent(game: game),
                 ),
@@ -86,13 +89,14 @@ class GameDetailsAccordion extends StatelessWidget {
             context,
             title: 'Game Details',
             icon: Icons.info_outline,
-            color: Theme.of(context).colorScheme.secondary,
+            color: Theme.of(context).colorScheme.primary,
             children: [
               // Development Tools
               if (game.gameEngines.isNotEmpty)
                 EnhancedAccordionTile(
                   title: 'Development Tools',
                   icon: Icons.precision_manufacturing_rounded,
+                  iconColor: const Color(0xFF10B981), // Emerald
                   preview: _buildEnginesPreview(context, game),
                   noPadding: true,
                   child: GameEnginesSection(gameEngines: game.gameEngines),
@@ -103,6 +107,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                     title: 'Platforms & Release',
                     icon: Icons.devices,
+                    iconColor: const Color(0xFF3B82F6), // Blue
                     preview: _buildPlatformsPreview(context, game),
                     noPadding: true,
                     child: GenericPlatformSection(
@@ -117,6 +122,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Genres & Categories',
                   icon: Icons.category,
+                  iconColor: const Color(0xFF06B6D4), // Cyan
                   preview: _buildGenresPreview(context, game),
                   child: GenreSection(game: game),
                 ),
@@ -130,13 +136,14 @@ class GameDetailsAccordion extends StatelessWidget {
             context,
             title: 'Additional Information',
             icon: Icons.more_horiz,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: Theme.of(context).colorScheme.primary,
             children: [
               // Game Features
               if (_hasGameFeatures(game))
                 EnhancedAccordionTile(
                   title: 'Game Features',
                   icon: Icons.featured_play_list,
+                  iconColor: const Color(0xFFF59E0B), // Amber
                   preview: _buildGameFeaturesPreview(context, game),
                   child: GameFeaturesSection(game: game),
                 ),
@@ -146,6 +153,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Age Ratings',
                   icon: Icons.verified_user,
+                  iconColor: const Color(0xFFEF4444), // Red
                   preview: _buildAgeRatingsPreview(context, game),
                   noPadding: true,
                   child: AgeRatingsSection(ageRatings: game.ageRatings),
@@ -156,6 +164,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                     title: 'Companies',
                     icon: Icons.business,
+                    iconColor: const Color(0xFF8B5CF6), // Purple
                     preview: _buildCompaniesPreview(context, game),
                     noPadding: true,
                     child: GenericCompanySection(
@@ -169,6 +178,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'External Links & Stores',
                   icon: Icons.link,
+                  iconColor: const Color(0xFF14B8A6), // Teal
                   preview: _buildExternalLinksPreview(context, game),
                   noPadding: true,
                   child: ExternalLinksSection(game: game),
@@ -637,10 +647,11 @@ class GameDetailsAccordion extends StatelessWidget {
   }
 }
 
-// ✅ Enhanced Accordion Tile (unchanged)
+// ✅ Enhanced Accordion Tile
 class EnhancedAccordionTile extends StatefulWidget {
   final String title;
   final IconData icon;
+  final Color? iconColor;
   final Widget child;
   final Widget? preview;
   final bool initiallyExpanded;
@@ -650,6 +661,7 @@ class EnhancedAccordionTile extends StatefulWidget {
     super.key,
     required this.title,
     required this.icon,
+    this.iconColor,
     required this.child,
     this.preview,
     this.initiallyExpanded = false,
@@ -677,12 +689,14 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _isExpanded
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              ? (widget.iconColor ?? Theme.of(context).colorScheme.primary)
+                  .withOpacity(0.3)
               : Theme.of(context).colorScheme.outline.withOpacity(0.2),
           width: _isExpanded ? 1.5 : 1,
         ),
         color: _isExpanded
-            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05)
+            ? (widget.iconColor ?? Theme.of(context).colorScheme.primary)
+                .withOpacity(0.05)
             : null,
       ),
       child: Column(
@@ -698,13 +712,11 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                     ? BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.1),
-                            Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.05),
                           ],
                           begin: Alignment.topLeft,
@@ -722,18 +734,24 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: _isExpanded
-                            ? Theme.of(context)
-                                .colorScheme
-                                .primary
+                            ? (widget.iconColor ??
+                                    Theme.of(context).colorScheme.primary)
                                 .withOpacity(0.15)
-                            : Theme.of(context).colorScheme.primaryContainer,
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(8),
+                        border: !_isExpanded
+                            ? Border.all(
+                                color: (widget.iconColor ??
+                                        Theme.of(context).colorScheme.primary)
+                                    .withOpacity(0.3),
+                                width: 1,
+                              )
+                            : null,
                         boxShadow: _isExpanded
                             ? [
                                 BoxShadow(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
+                                  color: (widget.iconColor ??
+                                          Theme.of(context).colorScheme.primary)
                                       .withOpacity(0.1),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
@@ -743,7 +761,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       ),
                       child: Icon(
                         widget.icon,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: widget.iconColor ??
+                            Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                     ),
@@ -760,7 +779,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: _isExpanded
-                                      ? Theme.of(context).colorScheme.primary
+                                      ? (widget.iconColor ??
+                                          Theme.of(context).colorScheme.primary)
                                       : null,
                                 ),
                           ),
@@ -777,7 +797,8 @@ class _EnhancedAccordionTileState extends State<EnhancedAccordionTile> {
                       child: Icon(
                         Icons.keyboard_arrow_down,
                         color: _isExpanded
-                            ? Theme.of(context).colorScheme.primary
+                            ? (widget.iconColor ??
+                                Theme.of(context).colorScheme.primary)
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurface

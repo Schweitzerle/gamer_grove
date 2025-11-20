@@ -5,6 +5,7 @@
 // lib/presentation/pages/event_detail/event_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../core/widgets/error_widget.dart';
 import '../../../../domain/entities/game/game.dart';
 import '../../blocs/event/event_bloc.dart';
 import '../../blocs/event/event_event.dart';
@@ -90,45 +91,40 @@ class _EventDetailPageState extends State<EventDetailPage> {
   }
 
   Widget _buildErrorState(String message) {
+    // Check if it's a network error
+    final isNetworkError = message.toLowerCase().contains('internet') ||
+        message.toLowerCase().contains('network') ||
+        message.toLowerCase().contains('connection') ||
+        message.toLowerCase().contains('timeout');
+
+    // Retry callback
+    void retry() {
+      context.read<EventBloc>().add(
+            GetCompleteEventDetailsEvent(eventId: widget.eventId),
+          );
+    }
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Event Details'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Error Loading Event',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.read<EventBloc>().add(
-                      GetCompleteEventDetailsEvent(eventId: widget.eventId),
-                    );
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
-          ],
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        title: Text(
+          'Event Details',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
+      body: isNetworkError
+          ? NetworkErrorWidget(onRetry: retry)
+          : CustomErrorWidget(
+              message: message,
+              onRetry: retry,
+            ),
     );
   }
 }
