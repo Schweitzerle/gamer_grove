@@ -47,7 +47,6 @@ class CachedImageWidget extends StatelessWidget {
             ),
           ),
       errorWidget: (context, url, error) {
-        print('🖼️ CachedImageWidget: Error loading image $url: $error');
         return errorWidget ?? _buildErrorWidget(context);
       },
     );

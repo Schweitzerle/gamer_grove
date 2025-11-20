@@ -41,7 +41,6 @@ class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteE
         gamesResult.fold(
               (failure) {
             // Log failure but don't fail the entire operation
-            print('Warning: Failed to load featured games for event ${event.id}: ${failure.message}');
           },
               (games) => featuredGames = games,
         );

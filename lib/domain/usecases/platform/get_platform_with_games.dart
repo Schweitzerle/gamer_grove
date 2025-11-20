@@ -19,8 +19,6 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
   @override
   Future<Either<Failure, PlatformWithGames>> call(GetPlatformWithGamesParams params) async {
     try {
-      print('🎮 UseCase: Getting platform details for ID: ${params.platformId}');
-      print('🎮 UseCase: Include games: ${params.includeGames}');
 
       // Get platform details first
       final platformResult = await repository.getPlatformDetails(params.platformId);
@@ -28,7 +26,6 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
       if (platformResult.isLeft()) {
         return platformResult.fold(
               (failure) {
-            print('❌ UseCase: Repository failed: ${failure.message}');
             return Left(failure);
           },
               (platform) => throw Exception('Unexpected success'),
@@ -40,13 +37,11 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
             (r) => r,
       );
 
-      print('✅ UseCase: Platform loaded: ${platform.name}');
 
       List<Game> games = [];
 
       // Load games for this platform if requested
       if (params.includeGames) {
-        print('🎮 UseCase: Loading games for platform: ${platform.name}');
 
         final gamesResult = await repository.getGamesByPlatform(
           platformIds: [platform.id],
@@ -56,11 +51,9 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
 
         games = gamesResult.fold(
               (failure) {
-            print('❌ UseCase: Failed to load games: ${failure.message}');
             return <Game>[];
           },
               (gamesList) {
-            print('✅ UseCase: Loaded ${gamesList.length} games for platform');
             return gamesList;
           },
         );
@@ -71,12 +64,9 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
         games: games,
       );
 
-      print('🎯 UseCase: Final result - ${result.platform.name} with ${result.games.length} games');
       return Right(result);
 
     } catch (e) {
-      print('❌ UseCase: Exception occurred: $e');
-      print('📍 UseCase: Exception type: ${e.runtimeType}');
       return Left(ServerFailure(message: 'Failed to load platform with games: $e'));
     }
   }

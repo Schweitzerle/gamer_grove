@@ -21,8 +21,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Signup failed: ${failure.message}'),
-///   (user) => print('Account created for ${user.username}'),
 /// );
 /// ```
 class SignUpUseCase implements UseCase<User, SignUpParams> {

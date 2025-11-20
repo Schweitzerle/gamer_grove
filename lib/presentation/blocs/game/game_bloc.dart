@@ -163,7 +163,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   /// Updates a game in the cache
   void _updateGameCache(int gameId, Game updatedGame) {
     _gameCache[gameId] = updatedGame;
-    print('📦 Game $gameId cached: ${updatedGame.name}');
   }
 
   /// Updates multiple games in the cache
@@ -171,7 +170,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     for (final game in games) {
       _gameCache[game.id] = game;
     }
-    print('📦 Cached ${games.length} games');
   }
 
   /// Applies cached updates to a list of games
@@ -187,7 +185,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final cachedGame = _gameCache[gameId];
     if (cachedGame != null) {
       _gameCache[gameId] = updateFn(cachedGame);
-      print('📦 Updated game $gameId in cache');
     }
   }
 
@@ -606,7 +603,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
               }
             } catch (e) {
               // If user data fails, still show game without user data
-              print('❌ Failed to load user data: $e');
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(game));
               }
@@ -951,7 +947,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
     }
 
-    print('✅ Game $gameId updated in state: ${currentState.runtimeType}');
   }
 
 // Fix for _onGetGameDetails
@@ -979,11 +974,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     LoadHomePageDataEvent event,
     Emitter<GameState> emit,
   ) async {
-    print('🏠 GameBloc: Loading home page data (userId: ${event.userId})');
     emit(HomePageLoading());
 
     try {
-      print('🏠 GameBloc: Starting parallel data fetch...');
       // Load all data in parallel
       final results = await Future.wait([
         getPopularGames(const GetPopularGamesParams(limit: 10)),
@@ -993,56 +986,45 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getUpcomingEvents(const GetUpcomingEventsParams(limit: 10)),
       ]);
 
-      print('🏠 GameBloc: Parallel data fetch complete! Processing results...');
 
       // Extract results
       final popularGames = results[0].fold<List<Game>>(
         (l) {
-          print('❌ GameBloc: Popular games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
-          print('✅ GameBloc: Popular games: ${r.length} games');
           return r as List<Game>;
         },
       );
       final upcomingGames = results[1].fold<List<Game>>(
         (l) {
-          print('❌ GameBloc: Upcoming games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
-          print('✅ GameBloc: Upcoming games: ${r.length} games');
           return r as List<Game>;
         },
       );
       final latestGames = results[2].fold<List<Game>>(
         (l) {
-          print('❌ GameBloc: Latest games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
-          print('✅ GameBloc: Latest games: ${r.length} games');
           return r as List<Game>;
         },
       );
       final topRatedGames = results[3].fold<List<Game>>(
         (l) {
-          print('❌ GameBloc: Top rated games failed: ${l.message}');
           return <Game>[];
         },
         (r) {
-          print('✅ GameBloc: Top rated games: ${r.length} games');
           return r as List<Game>;
         },
       );
       final upcomingEvents = results[4].fold<List<Event>>(
         (l) {
-          print('❌ GameBloc: Upcoming events failed: ${l.message}');
           return <Event>[];
         },
         (r) {
-          print('✅ GameBloc: Upcoming events: ${r.length} events');
           return r as List<Event>;
         },
       );
@@ -1173,7 +1155,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         userTopThree: _applyCache(enrichedTopThree),
       ));
     } catch (e) {
-      print('❌ Failed to load grove page data: $e');
       emit(GameError('Failed to load grove page data: $e'));
     }
   }
@@ -1183,19 +1164,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     String userId, {
     int? enrichLimit,
   }) async {
-    print(
-        '🎮 enrichGamesWithUserData: Enriching ${games.length} games for user $userId');
     final enrichedGames = await enrichmentService.enrichGames(games, userId);
-    print('🎮 enrichGamesWithUserData: Enriched ${enrichedGames.length} games');
-    // Debug: print first game enrichment status
-    if (enrichedGames.isNotEmpty) {
-      final firstGame = enrichedGames.first;
-      print('🎮 First game: ${firstGame.name}');
-      print('  - isWishlisted: ${firstGame.isWishlisted}');
-      print('  - isRecommended: ${firstGame.isRecommended}');
-      print('  - userRating: ${firstGame.userRating}');
-      print('  - isInTopThree: ${firstGame.isInTopThree}');
-    }
     return enrichedGames;
   }
 
@@ -1251,9 +1220,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-      print(
-          '🎮 GameBloc: Loading ENHANCED game details with characters & events...');
-      print('📋 GameBloc: gameId = ${event.gameId}, userId = ${event.userId}');
 
       // 🆕 Use GetEnhancedGameDetails instead of GetCompleteGameDetails
       final result = await getEnhancedGameDetails(
@@ -1266,20 +1232,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       await result.fold(
         (failure) async {
           if (!emit.isDone) {
-            print(
-                '❌ GameBloc: Failed to load enhanced game details: ${failure.message}');
             emit(GameError(_mapFailureToMessage(failure)));
           }
         },
         (game) async {
-          print('✅ GameBloc: Enhanced game details loaded successfully!');
-          print('📊 GameBloc: Characters: ${game.characters.length}');
-          print('📊 GameBloc: Events: ${game.events.length}');
 
           // Add user data enrichment if userId provided
           if (event.userId != null && !emit.isDone) {
             try {
-              print('🔄 GameBloc: Enriching with user data...');
               final enrichedMainGames =
                   await enrichGamesWithUserData([game], event.userId!);
               Game enrichedGame = enrichedMainGames[0];
@@ -1291,7 +1251,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 emit(GameDetailsLoaded(enrichedGame));
               }
             } catch (e) {
-              print('❌ GameBloc: Failed to enrich with user data: $e');
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(game)); // Fallback without user data
               }
@@ -1302,7 +1261,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         },
       );
     } catch (e) {
-      print('❌ GameBloc: Exception in _onGetCompleteGameDetails: $e');
       if (!emit.isDone) {
         emit(GameError('Failed to load game details: $e'));
       }
@@ -1337,13 +1295,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           if (event.userId != null && !emit.isDone) {
             try {
               // 🔧 FIX 1: Main game enrichen
-              print('🔄 Enriching main game...');
               final enrichedMainGames =
                   await _enrichGamesWithUserData([game], event.userId!);
               Game enrichedGame = enrichedMainGames[0];
 
               // 🔧 FIX 2: DANN nested games enrichen (mit dem enriched main game!)
-              print('🔄 Enriching nested games...');
               enrichedGame = await _enrichGameWithAllNestedUserData(
                   enrichedGame, event.userId!);
 
@@ -1352,7 +1308,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
                 emit(GameDetailsLoaded(enrichedGame));
               }
             } catch (e) {
-              print('❌ Failed to enrich game with user data: $e');
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(game)); // ✅ Fallback ohne User-Daten
               }
@@ -1452,7 +1407,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       Franchise? enrichedMainFranchise = game.mainFranchise;
       if (game.mainFranchise?.games != null &&
           game.mainFranchise!.games!.isNotEmpty) {
-        print('🔄 Enriching main franchise games (limit: $franchiseLimit)...');
         final enrichedFranchiseGames = await enrichGamesWithUserData(
             game.mainFranchise!.games!, userId,
             enrichLimit: franchiseLimit // 🎯 NUR ERSTE 10!
@@ -1474,7 +1428,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // 9. 🌳 OTHER FRANCHISES (🆕 MIT LIMIT!)
       List<Franchise> enrichedFranchises = game.franchises;
       if (game.franchises.isNotEmpty) {
-        print('🔄 Enriching other franchise games (limit: $franchiseLimit)...');
         enrichedFranchises = [];
 
         for (final franchise in game.franchises) {
@@ -1504,7 +1457,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // 10. 📚 COLLECTIONS (🆕 MIT LIMIT!)
       List<Collection> enrichedCollections = game.collections;
       if (game.collections.isNotEmpty) {
-        print('🔄 Enriching collection games (limit: $collectionLimit)...');
         enrichedCollections = [];
 
         for (final collection in game.collections) {
@@ -1555,11 +1507,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           parentGame:
               enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null);
 
-      print(
-          '✅ Successfully enriched nested games with limits (franchise: $franchiseLimit, collection: $collectionLimit)');
       return enrichedGame;
     } catch (e) {
-      print('❌ Error enriching nested games: $e');
       return game;
     }
   }
@@ -1604,10 +1553,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     AddToTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
-    print('🎮 GameBloc: _onAddToTopThree called');
-    print('   User ID: ${event.userId}');
-    print('   Game ID: ${event.gameId}');
-    print('   Position: ${event.position}');
 
     final result = await addToTopThree(AddToTopThreeParams(
       userId: event.userId,
@@ -1617,13 +1562,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
-        print('❌ GameBloc: Failed to add to top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
       (_) async {
-        print('✅ GameBloc: Successfully added to top three');
 
         // 🎯 UPDATE CACHE FIRST
         _updateGameInCache(event.gameId, (game) {
@@ -1660,9 +1603,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     RemoveFromTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
-    print('🎮 GameBloc: _onRemoveFromTopThree called');
-    print('   User ID: ${event.userId}');
-    print('   Game ID: ${event.gameId}');
 
     final result = await removeFromTopThree(RemoveFromTopThreeParams(
       userId: event.userId,
@@ -1671,14 +1611,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) {
-        print(
-            '❌ GameBloc: Failed to remove from top three: ${failure.message}');
         if (!emit.isDone) {
           emit(GameError(_mapFailureToMessage(failure)));
         }
       },
       (_) async {
-        print('✅ GameBloc: Successfully removed from top three');
 
         // 🎯 UPDATE CACHE FIRST
         _updateGameInCache(event.gameId, (game) {
@@ -1732,8 +1669,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-      print(
-          '🔄 Enriching ${event.games.length} franchise games with user data...');
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
@@ -1758,8 +1693,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-      print(
-          '🔄 Enriching ${event.games.length} collection games with user data...');
 
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
@@ -1816,7 +1749,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       // Optional: emit success state if needed
     } catch (e) {
       // Silently fail - search query saving is not critical
-      print('Failed to save search query: $e');
     }
   }
 
@@ -1825,18 +1757,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     RefreshCacheEvent event,
     Emitter<GameState> emit,
   ) {
-    print('🔄 RefreshCacheEvent: Applying cache to current state');
     final currentState = state;
 
     // Apply cache to the current state and re-emit it
     final refreshedState = _applyCacheToState(currentState);
 
     if (refreshedState != currentState) {
-      print(
-          '✅ Cache applied, re-emitting state: ${refreshedState.runtimeType}');
       emit(refreshedState);
     } else {
-      print('ℹ️ No cache changes to apply');
     }
   }
 

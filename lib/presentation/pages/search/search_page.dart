@@ -86,84 +86,64 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _loadFilterOptions() async {
-    print('📦 SearchPage: Loading filter options...');
     try {
       final repository = sl<GameRepository>();
 
       // Load Genres
-      print('📦 SearchPage: Loading genres...');
       final genresResult = await repository.getAllGenres();
       genresResult.fold(
-        (failure) =>
-            print('❌ SearchPage: Failed to load genres: ${failure.message}'),
+        (failure) => null,
         (genres) {
           setState(() => _availableGenres = genres);
-          print('✅ SearchPage: Loaded ${genres.length} genres');
         },
       );
 
       // Load Player Perspectives
-      print('📦 SearchPage: Loading player perspectives...');
       final playerPerspectivesResult =
           await repository.getAllPlayerPerspectives();
       playerPerspectivesResult.fold(
-        (failure) => print(
-            '❌ SearchPage: Failed to load player perspectives: ${failure.message}'),
+        (failure) => null,
         (perspectives) {
           setState(() => _availablePlayerPerspectives = perspectives);
-          print(
-              '✅ SearchPage: Loaded ${perspectives.length} player perspectives');
         },
       );
 
       // Load Game Types
-      print('📦 SearchPage: Loading game types...');
       final gameTypesResult = await repository.getAllGameTypes();
       gameTypesResult.fold(
-        (failure) => print(
-            '❌ SearchPage: Failed to load game types: ${failure.message}'),
+        (failure) => null,
         (types) {
           setState(() => _availableGameTypes = types);
-          print('✅ SearchPage: Loaded ${types.length} game types');
         },
       );
 
       // Load Game Statuses
-      print('📦 SearchPage: Loading game statuses...');
       final gameStatusesResult = await repository.getAllGameStatuses();
       gameStatusesResult.fold(
-        (failure) => print(
-            '❌ SearchPage: Failed to load game statuses: ${failure.message}'),
+        (failure) => null,
         (statuses) {
           setState(() => _availableGameStatuses = statuses);
-          print('✅ SearchPage: Loaded ${statuses.length} game statuses');
         },
       );
 
       // Load Game Modes
-      print('📦 SearchPage: Loading game modes...');
       final gameModesResult = await repository.getAllGameModes();
       gameModesResult.fold(
-        (failure) => print(
-            '❌ SearchPage: Failed to load game modes: ${failure.message}'),
+        (failure) => null,
         (modes) {
           setState(() => _availableGameModes = modes);
-          print('✅ SearchPage: Loaded ${modes.length} game modes');
         },
       );
 
-      print('✅ SearchPage: All filter options loaded');
       setState(() => _isLoadingFilterOptions = false);
 
       // If we have initial filters, trigger search automatically AFTER filters are loaded
       if (widget.initialFilters != null && widget.initialFilters!.hasFilters) {
-        print('🔍 SearchPage: Auto-triggering search with initial filters');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _performSearch('');
         });
       }
     } catch (e) {
-      print('❌ SearchPage: Exception loading filter options: $e');
       setState(() => _isLoadingFilterOptions = false);
     }
   }
@@ -249,185 +229,145 @@ class _SearchPageState extends State<SearchPage> {
 
   // Dynamic search callbacks for filter bottom sheet
   Future<List<Company>> _searchCompanies(String query) async {
-    print('🔍 SearchPage: Searching companies with query: "$query"');
     try {
       final result = await sl<GameRepository>().getCompanies(search: query);
       return result.fold(
         (failure) {
-          print('❌ SearchPage: Failed to search companies: ${failure.message}');
           return <Company>[];
         },
         (companies) {
-          print('✅ SearchPage: Found ${companies.length} companies');
           return companies;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching companies: $e');
       return [];
     }
   }
 
   Future<List<GameEngine>> _searchGameEngines(String query) async {
-    print('🔍 SearchPage: Searching game engines with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchGameEngines(query);
       return result.fold(
         (failure) {
-          print(
-              '❌ SearchPage: Failed to search game engines: ${failure.message}');
           return <GameEngine>[];
         },
         (engines) {
-          print('✅ SearchPage: Found ${engines.length} game engines');
           return engines;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching game engines: $e');
       return [];
     }
   }
 
   Future<List<Franchise>> _searchFranchises(String query) async {
-    print('🔍 SearchPage: Searching franchises with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchFranchises(query);
       return result.fold(
         (failure) {
-          print(
-              '❌ SearchPage: Failed to search franchises: ${failure.message}');
           return <Franchise>[];
         },
         (franchises) {
-          print('✅ SearchPage: Found ${franchises.length} franchises');
           return franchises;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching franchises: $e');
       return [];
     }
   }
 
   Future<List<Collection>> _searchCollections(String query) async {
-    print('🔍 SearchPage: Searching collections with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchCollections(query);
       return result.fold(
         (failure) {
-          print(
-              '❌ SearchPage: Failed to search collections: ${failure.message}');
           return <Collection>[];
         },
         (collections) {
-          print('✅ SearchPage: Found ${collections.length} collections');
           return collections;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching collections: $e');
       return [];
     }
   }
 
   Future<List<Keyword>> _searchKeywords(String query) async {
-    print('🔍 SearchPage: Searching keywords with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchKeywords(query);
       return result.fold(
         (failure) {
-          print('❌ SearchPage: Failed to search keywords: ${failure.message}');
           return <Keyword>[];
         },
         (keywords) {
-          print('✅ SearchPage: Found ${keywords.length} keywords');
           return keywords;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching keywords: $e');
       return [];
     }
   }
 
   Future<List<AgeRatingCategory>> _searchAgeRatings(String query) async {
-    print('🔍 SearchPage: Searching age ratings with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchAgeRatings(query);
       return result.fold(
         (failure) {
-          print(
-              '❌ SearchPage: Failed to search age ratings: ${failure.message}');
           return <AgeRatingCategory>[];
         },
         (ageRatings) {
-          print('✅ SearchPage: Found ${ageRatings.length} age ratings');
           return ageRatings;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching age ratings: $e');
       return [];
     }
   }
 
   Future<List<Language>> _searchLanguages(String query) async {
-    print('🔍 SearchPage: Searching languages with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchLanguages(query);
       return result.fold(
         (failure) {
-          print('❌ SearchPage: Failed to search languages: ${failure.message}');
           return <Language>[];
         },
         (languages) {
-          print('✅ SearchPage: Found ${languages.length} languages');
           return languages;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching languages: $e');
       return [];
     }
   }
 
   Future<List<Platform>> _searchPlatforms(String query) async {
-    print('🔍 SearchPage: Searching platforms with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchPlatforms(query);
       return result.fold(
         (failure) {
-          print('❌ SearchPage: Failed to search platforms: ${failure.message}');
           return <Platform>[];
         },
         (platforms) {
-          print('✅ SearchPage: Found ${platforms.length} platforms');
           return platforms;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching platforms: $e');
       return [];
     }
   }
 
   Future<List<gg_theme.IGDBTheme>> _searchThemes(String query) async {
-    print('🔍 SearchPage: Searching themes with query: "$query"');
     try {
       final result = await sl<GameRepository>().searchThemes(query);
       return result.fold(
         (failure) {
-          print('❌ SearchPage: Failed to search themes: ${failure.message}');
           return <gg_theme.IGDBTheme>[];
         },
         (themes) {
-          print('✅ SearchPage: Found ${themes.length} themes');
           return themes;
         },
       );
     } catch (e) {
-      print('❌ SearchPage: Exception searching themes: $e');
       return [];
     }
   }

@@ -472,7 +472,6 @@ class ExternalLinksSection extends StatelessWidget {
 
   Widget _getWebsiteIcon(Website website) {
     final typeStr = website.type.type.toLowerCase();
-    print('🌐 Website Type: "$typeStr" (original: "${website.type.type}")');
     IconData iconData;
     Color iconColor;
 
@@ -723,7 +722,6 @@ class ExternalLinksSection extends StatelessWidget {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
     }
   }
 
@@ -735,7 +733,6 @@ class ExternalLinksSection extends StatelessWidget {
         await _launchUrl(url);
       }
     } catch (e) {
-      print('Error launching store URL: $e');
     }
   }
 }

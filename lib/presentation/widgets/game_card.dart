@@ -71,12 +71,9 @@ class GameCard extends StatelessWidget {
           child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
             buildWhen: (previous, current) {
               // 🐛 DEBUG: Log buildWhen checks
-              print('🎮 GameCard(${game.name}): buildWhen check');
-              print('   Previous: ${previous.runtimeType}, Current: ${current.runtimeType}');
 
               // Rebuild if state type changes OR if it's UserGameDataLoaded with different data
               if (previous.runtimeType != current.runtimeType) {
-                print('   → Rebuild: State type changed');
                 return true;
               }
 
@@ -97,14 +94,10 @@ class GameCard extends StatelessWidget {
                     prevRating != currRating ||
                     prevTopThree != currTopThree;
 
-                print('   → Rebuild: ${hasChanges ? "YES (data changed)" : "NO (no changes)"}');
-                print('      Recommended: $prevRecommended → $currRecommended');
-                print('      Rating: $prevRating → $currRating');
 
                 return hasChanges;
               }
 
-              print('   → Rebuild: YES (default)');
               return true; // Rebuild for other state changes
             },
             builder: (context, userDataState) {
@@ -117,8 +110,6 @@ class GameCard extends StatelessWidget {
               int? topThreePosition;
 
               // 🐛 DEBUG: Log builder state
-              print('🎮 GameCard(${game.name}): builder called');
-              print('   State: ${userDataState.runtimeType}');
 
               // Read from UserGameDataBloc if loaded
               if (userDataState is UserGameDataLoaded) {
@@ -128,9 +119,7 @@ class GameCard extends StatelessWidget {
                 isInTopThree = userDataState.isInTopThree(game.id);
                 topThreePosition = userDataState.getTopThreePosition(game.id);
 
-                print('   Loaded data: recommended=$isRecommended, rating=$userRating');
               } else {
-                print('   State not loaded - showing defaults');
               }
 
               return Stack(

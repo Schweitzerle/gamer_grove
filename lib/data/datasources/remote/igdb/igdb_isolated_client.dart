@@ -21,8 +21,6 @@ class IsolatedIGDBClient {
       // Hole Token vom SharedPrefs Manager
       final token = await SharedPrefsTokenManager.instance.getValidToken();
 
-      print('📡 IGDB: Making request to $endpoint');
-      print('🔧 IGDB: Using managed token: ${token.substring(0, 10)}...');
 
       final request = http.Request(
           'POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
@@ -34,16 +32,13 @@ class IsolatedIGDBClient {
 
       request.body = body.trim();
 
-      print('🔧 IGDB: Request body: ${request.body}');
 
       final streamedResponse = await _httpClient.send(request);
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('📨 IGDB: Response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
-        print('✅ IGDB: Successfully parsed ${jsonList.length} items');
         return jsonList;
       } else {
         throw ServerException(
@@ -53,7 +48,6 @@ class IsolatedIGDBClient {
         );
       }
     } catch (e) {
-      print('💥 IGDB: Request error: $e');
       throw ServerException('IGDB request failed: $e',
           message: 'IGDB request failed: $e');
     }

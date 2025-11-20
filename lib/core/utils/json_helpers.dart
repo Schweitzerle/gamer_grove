@@ -122,7 +122,6 @@ class JsonHelpers {
         // IGDB uses Unix timestamps in seconds
         return DateTime.fromMillisecondsSinceEpoch(date * 1000);
       } catch (e) {
-        print('⚠️ JsonHelpers: Failed to parse timestamp: $date');
         return null;
       }
     }
@@ -273,12 +272,7 @@ class JsonHelpers {
 
     json.forEach((key, value) {
       if (value is Map<String, dynamic>) {
-        final keys = value.keys.take(8).join(', ');
-        final moreKeys = value.keys.length > 8 ? '...' : '';
-        print('$prefix$key: Map with keys: $keys$moreKeys');
-
         if (value.containsKey('id')) {
-          print('$prefix  └─ Expanded object with ID: ${value['id']}');
         }
 
         // Recurse into nested objects
@@ -292,49 +286,24 @@ class JsonHelpers {
         if (value.isNotEmpty) {
           final first = value.first;
           if (first is Map<String, dynamic>) {
-            final keys = first.keys.take(6).join(', ');
-            final moreKeys = first.keys.length > 6 ? '...' : '';
-            print(
-                '$prefix$key: List<Map> (${value.length} items) with keys: $keys$moreKeys');
           } else {
-            print(
-                '$prefix$key: List<${first.runtimeType}> (${value.length} items)');
           }
         } else {
-          print('$prefix$key: Empty list');
         }
       } else {
-        final valueStr = value.toString();
-        final displayValue =
-            valueStr.length > 50 ? '${valueStr.substring(0, 50)}...' : valueStr;
-        print('$prefix$key: ${value.runtimeType} = $displayValue');
       }
     });
   }
 
   /// Quick check to see what type of API response you're dealing with
   static void analyzeApiResponseType(Map<String, dynamic> json) {
-    int expandedObjects = 0;
-    int simpleReferences = 0;
-    int totalFields = 0;
-
     json.forEach((key, value) {
-      totalFields++;
       if (isExpandedObject(value)) {
-        expandedObjects++;
       } else if (isSimpleReference(value)) {
-        simpleReferences++;
       } else if (value is List && hasExpandedObjects(value)) {
-        expandedObjects++;
       }
     });
 
-    print('📊 API Response Analysis:');
-    print('   Total fields: $totalFields');
-    print('   Expanded objects: $expandedObjects');
-    print('   Simple references: $simpleReferences');
-    print(
-        '   Response type: ${expandedObjects > simpleReferences ? "COMPLETE" : "BASIC"}');
   }
 
   // ==========================================

@@ -19,8 +19,6 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
   @override
   Future<Either<Failure, GameEngineWithGames>> call(GetGameEngineWithGamesParams params) async {
     try {
-      print('🎮 UseCase: Getting game engine details for ID: ${params.gameEngineId}');
-      print('🎮 UseCase: Include games: ${params.includeGames}');
 
       // Get gameEngine details first
       final gameEngineResult = await repository.getGameEngineDetails(params.gameEngineId);
@@ -28,7 +26,6 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
       if (gameEngineResult.isLeft()) {
         return gameEngineResult.fold(
               (failure) {
-            print('❌ UseCase: Repository failed: ${failure.message}');
             return Left(failure);
           },
               (gameEngine) => throw Exception('Unexpected success'),
@@ -40,13 +37,11 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
             (r) => r,
       );
 
-      print('✅ UseCase: GameEngine loaded: ${gameEngine.name}');
 
       List<Game> games = [];
 
       // Load games for this gameEngine if requested
       if (params.includeGames) {
-        print('🎮 UseCase: Loading games for gameEngine: ${gameEngine.name}');
 
         final gamesResult = await repository.getGamesByGameEngine( //TODO: ändfern in gmaeengine
           gameEngineIds: [gameEngine.id],
@@ -56,11 +51,9 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
 
         games = gamesResult.fold(
               (failure) {
-            print('❌ UseCase: Failed to load games: ${failure.message}');
             return <Game>[];
           },
               (gamesList) {
-            print('✅ UseCase: Loaded ${gamesList.length} games for gameEngine');
             return gamesList;
           },
         );
@@ -71,12 +64,9 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
         games: games,
       );
 
-      print('🎯 UseCase: Final result - ${result.gameEngine.name} with ${result.games.length} games');
       return Right(result);
 
     } catch (e) {
-      print('❌ UseCase: Exception occurred: $e');
-      print('📍 UseCase: Exception type: ${e.runtimeType}');
       return Left(ServerFailure(message: 'Failed to load gameEngine with games: $e'));
     }
   }

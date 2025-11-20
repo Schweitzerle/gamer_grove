@@ -25,8 +25,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Login failed: ${failure.message}'),
-///   (user) => print('Welcome ${user.username}!'),
 /// );
 /// ```
 class SignInUseCase implements UseCase<User, SignInParams> {

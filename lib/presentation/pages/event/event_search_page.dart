@@ -39,7 +39,6 @@ class _EventSearchPageState extends State<EventSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late EventBloc _eventBloc;
-  String? _currentUserId;
 
   // Recent searches
   List<String> _recentSearches = [];
@@ -59,33 +58,27 @@ class _EventSearchPageState extends State<EventSearchPage> {
 
     // Get current user ID from AuthBloc
     final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      _currentUserId = authState.user.id;
-    }
+    if (authState is AuthAuthenticated) {}
 
     // Load filter options first, then trigger search if we have initial filters
     _loadFilterOptions();
   }
 
   Future<void> _loadFilterOptions() async {
-    print('📦 EventSearchPage: Loading filter options...');
     setState(() => _isLoadingFilterOptions = true);
 
     try {
       // For now, event networks will be loaded dynamically when needed
       // We don't have a getAllEventNetworks method yet
-      print('✅ EventSearchPage: Filter options ready');
       setState(() => _isLoadingFilterOptions = false);
 
       // If we have initial filters, trigger search automatically AFTER filters are loaded
       if (widget.initialFilters != null && widget.initialFilters!.hasFilters) {
-        print('🔍 EventSearchPage: Auto-triggering search with initial filters');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _performSearch('');
         });
       }
     } catch (e) {
-      print('❌ EventSearchPage: Exception loading filter options: $e');
       setState(() => _isLoadingFilterOptions = false);
     }
   }
@@ -126,9 +119,8 @@ class _EventSearchPageState extends State<EventSearchPage> {
           _recentSearches = decoded.map((e) => e.toString()).toList();
         });
       }
-    } on Exception catch (e) {
+    } on Exception {
       // If there's an error loading, just keep the empty list
-      debugPrint('Error loading recent event searches: $e');
     }
   }
 
@@ -150,9 +142,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
         StorageConstants.recentEventSearchesKey,
         jsonString,
       );
-    } on Exception catch (e) {
-      debugPrint('Error saving recent event searches: $e');
-    }
+    } on Exception {}
   }
 
   void _performSearch(String query) {
@@ -254,7 +244,8 @@ class _EventSearchPageState extends State<EventSearchPage> {
                           return _buildLoadingView();
                         } else if (state is EventSearchLoaded) {
                           return _buildSearchResults(state);
-                        } else if (state is EventError && state.events.isEmpty) {
+                        } else if (state is EventError &&
+                            state.events.isEmpty) {
                           return CustomErrorWidget(
                             message: state.message,
                             onRetry: () {
@@ -556,9 +547,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
         StorageConstants.recentEventSearchesKey,
         jsonString,
       );
-    } on Exception catch (e) {
-      debugPrint('Error removing recent event search: $e');
-    }
+    } on Exception {}
   }
 
   Widget _buildPopularSearchChip(String search) {

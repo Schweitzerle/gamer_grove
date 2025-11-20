@@ -73,11 +73,9 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   Future<List<CharacterModel>> queryCharacters(IgdbCharacterQuery query) async {
     // Debug log: show the constructed IGDB query for characters
     try {
-      final q = query.buildQuery();
-      print('🔍 IGDB Characters Query:\n$q');
+      query.buildQuery();
     } catch (e) {
       // If buildQuery throws for any reason, still proceed but log the error
-      print('⚠️ Failed to build characters query for debug logging: $e');
     }
 
     return await _executeQuery<CharacterModel>(
@@ -276,11 +274,9 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     required T Function(Map<String, dynamic>) parser,
   }) async {
     try {
-      print('🎮 IGDB DataSource: Starting query to endpoint "$endpoint"');
 
       // Ensure we have a valid access token
       await _ensureValidToken();
-      print('✅ IGDB DataSource: Auth token valid');
 
       // Build the query string
       final queryString = query.buildQuery();
@@ -295,18 +291,8 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       };
 
       // LOG COMPLETE REQUEST DETAILS
-      print('\n' + '=' * 80);
-      print('🔍 COMPLETE IGDB REQUEST DETAILS');
-      print('=' * 80);
-      print('📍 Endpoint: $fullUrl');
-      print('🔑 Client-ID: $clientId');
-      print('🎫 Access Token: $_cachedAccessToken');
-      print('📋 Query String:\n$queryString');
-      print('📄 Headers:');
       headers.forEach((key, value) {
-        print('   $key: $value');
       });
-      print('=' * 80 + '\n');
 
       // Make the API request
       final response = await dio.post<dynamic>(
@@ -317,11 +303,9 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         ),
       );
 
-      print('📥 IGDB DataSource: Response status ${response.statusCode}');
 
       // Check response status
       if (response.statusCode != 200) {
-        print('❌ IGDB DataSource: Bad response status ${response.statusCode}');
         throw ServerException(
           'IGDB API returned status ${response.statusCode}',
           message: 'IGDB API returned status ${response.statusCode}',
@@ -330,7 +314,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
       // Parse response data
       final List<dynamic> data = response.data ?? [];
-      print('✅ IGDB DataSource: Received ${data.length} items from IGDB');
 
       // Convert to Model instances
       final results = data
@@ -339,21 +322,16 @@ class IgdbDataSourceImpl implements IgdbDataSource {
               return parser(json as Map<String, dynamic>);
             } catch (e) {
               // Log the error but continue processing other items
-              print('⚠️ IGDB DataSource: Failed to parse $endpoint item: $e');
               return null;
             }
           })
           .whereType<T>()
           .toList();
 
-      print('✅ IGDB DataSource: Successfully parsed ${results.length} items');
       return results;
     } on DioException catch (e) {
-      print('❌ IGDB DataSource: DioException - ${e.message}');
-      print('❌ IGDB DataSource: Response: ${e.response?.data}');
       throw _handleDioException(e);
     } catch (e) {
-      print('❌ IGDB DataSource: Unexpected error querying $endpoint: $e');
       throw ServerException(
         'Unexpected error querying $endpoint: $e',
         message: 'Unexpected error querying $endpoint: $e',
@@ -383,8 +361,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   /// Fetches a new access token from Twitch OAuth.
   Future<void> _refreshAccessToken() async {
     try {
-      print('🔑 IGDB Auth: Requesting new access token from Twitch OAuth');
-      print('🔑 IGDB Auth: Client ID: ${_getClientId()}');
 
       final response = await dio.post<dynamic>(
         'https://id.twitch.tv/oauth2/token',
@@ -395,25 +371,19 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         },
       );
 
-      print('🔑 IGDB Auth: Token response status ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = response.data;
         _cachedAccessToken = data['access_token'];
         final expiresIn = data['expires_in'] as int;
         _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
-        print(
-            '✅ IGDB Auth: Token acquired successfully (expires in $expiresIn seconds)');
       } else {
-        print('❌ IGDB Auth: Failed with status ${response.statusCode}');
         throw ServerException(
           'Failed to get access token: ${response.statusCode}',
           message: 'Failed to get access token: ${response.statusCode}',
         );
       }
     } on DioException catch (e) {
-      print('❌ IGDB Auth: DioException - ${e.message}');
-      print('❌ IGDB Auth: Response: ${e.response?.data}');
       throw _handleDioException(e);
     }
   }

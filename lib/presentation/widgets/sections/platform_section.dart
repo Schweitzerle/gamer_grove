@@ -58,8 +58,6 @@ class GenericPlatformSection extends StatelessWidget {
     }
 
     // Debug Print
-    print(
-        '🔧 GenericPlatformSection: Building with ${_platforms.length} platforms');
 
     // Group release dates by platform (only if game is provided)
     final platformReleases =
@@ -93,8 +91,6 @@ class GenericPlatformSection extends StatelessWidget {
   // ✅ PLATFORM CARDS SECTION
   Widget _buildPlatformCardsSection(
       BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
-    print(
-        '🔧 Building platform cards section with ${_platforms.length} platforms');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,8 +145,6 @@ class GenericPlatformSection extends StatelessWidget {
                 bottom: AppConstants.paddingSmall),
             itemCount: _platforms.length,
             itemBuilder: (context, index) {
-              print(
-                  '🔧 Building platform card $index: ${_platforms[index].name}');
               final platform = _platforms[index];
               final releases = platformReleases[platform.id] ?? [];
               return Padding(
@@ -168,8 +162,6 @@ class GenericPlatformSection extends StatelessWidget {
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
   Widget _buildPlatformCard(
       BuildContext context, Platform platform, List<ReleaseDate> releases) {
-    print(
-        '🔧 Building card for platform: ${platform.name} (ID: ${platform.id})');
 
     final earliestRelease = releases.isNotEmpty
         ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
@@ -656,7 +648,6 @@ class GenericPlatformSection extends StatelessWidget {
           return 'Platform';
       }
     } catch (e) {
-      print('🔧 Error formatting platform category: $e');
       return 'Platform';
     }
   }

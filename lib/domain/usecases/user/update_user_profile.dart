@@ -23,8 +23,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Update failed: ${failure.message}'),
-///   (user) => print('Profile updated for ${user.username}'),
 /// );
 /// ```
 class UpdateUserProfileUseCase

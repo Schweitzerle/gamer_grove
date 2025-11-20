@@ -19,8 +19,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Unfollow failed: ${failure.message}'),
-///   (_) => print('Unfollowed user'),
 /// );
 /// ```
 class UnfollowUserUseCase implements UseCase<void, UnfollowUserParams> {

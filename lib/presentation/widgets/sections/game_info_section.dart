@@ -611,7 +611,6 @@ class GameInfoSection extends StatelessWidget {
       }
     } catch (e) {
       // Handle error silently or show snackbar
-      debugPrint('Could not launch $url: $e');
     }
   }
 }

@@ -59,8 +59,6 @@ class EventNetworkModel extends EventNetwork {
       try {
         return NetworkTypeModel.fromJson(networkType);
       } catch (e) {
-        print(
-            '⚠️ EventNetworkModel: Failed to parse network type: $networkType - Error: $e');
         return null;
       }
     }

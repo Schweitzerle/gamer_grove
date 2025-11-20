@@ -67,7 +67,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               games: enrichedGames,
             ));
           } catch (e) {
-            print('❌ GameEngineBloc: Failed to enrich games: $e');
             emit(GameEngineDetailsLoaded(
               gameEngine: gameEngineWithGames.gameEngine,
               games: gameEngineWithGames.games,
@@ -98,12 +97,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     LoadGameEngineGamesEvent event,
     Emitter<GameEngineState> emit,
   ) async {
-    print(
-        '🎮 GameEngineBloc: Loading paginated games for engine ${event.gameEngineId}');
-    print(
-        '🎮 Sort: ${event.sortBy.displayName} ${event.sortOrder.displayName}');
-    print('🎮 Refresh: ${event.refresh}');
-    print('🎮 UserId: ${event.userId ?? "none"}');
 
     // Show loading state
     emit(GameEngineGamesLoading(
@@ -122,7 +115,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     await result.fold(
       (failure) async {
-        print('❌ GameEngineBloc: Failed to load games: ${failure.message}');
         emit(GameEngineGamesError(
           gameEngineId: event.gameEngineId,
           gameEngineName: event.gameEngineName,
@@ -130,7 +122,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         ));
       },
       (games) async {
-        print('✅ GameEngineBloc: Loaded ${games.length} games');
 
         // Enrich games if userId is provided
         List<Game> enrichedGames = games;
@@ -140,9 +131,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               games,
               event.userId!,
             );
-            print('✅ GameEngineBloc: Enriched ${enrichedGames.length} games');
           } catch (e) {
-            print('❌ GameEngineBloc: Failed to enrich games: $e');
           }
         }
 
@@ -174,13 +163,9 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     // Don't load if already loading or no more games
     if (currentState.isLoadingMore || !currentState.hasMore) {
-      print(
-          '⏭️ GameEngineBloc: Skipping load more (loading: ${currentState.isLoadingMore}, hasMore: ${currentState.hasMore})');
       return;
     }
 
-    print(
-        '🎮 GameEngineBloc: Loading more games (page ${currentState.currentPage + 1})');
 
     // Set loading more flag
     emit(currentState.copyWith(isLoadingMore: true));
@@ -199,13 +184,10 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     await result.fold(
       (failure) async {
-        print(
-            '❌ GameEngineBloc: Failed to load more games: ${failure.message}');
         // Keep current state but clear loading flag
         emit(currentState.copyWith(isLoadingMore: false));
       },
       (newGames) async {
-        print('✅ GameEngineBloc: Loaded ${newGames.length} more games');
 
         // Enrich new games if userId is available
         List<Game> enrichedNewGames = newGames;
@@ -215,10 +197,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               newGames,
               currentState.userId!,
             );
-            print(
-                '✅ GameEngineBloc: Enriched ${enrichedNewGames.length} new games');
           } catch (e) {
-            print('❌ GameEngineBloc: Failed to enrich new games: $e');
           }
         }
 
@@ -250,10 +229,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     final currentState = state as GameEngineGamesLoaded;
 
-    print(
-        '🔄 GameEngineBloc: Changing sort to ${event.sortBy.displayName} ${event.sortOrder.displayName}');
-    print(
-        '🔄 GameEngineBloc: UserId from state: ${currentState.userId ?? "none"}');
 
     // Show loading state
     emit(GameEngineGamesLoading(
@@ -272,8 +247,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     await result.fold(
       (failure) async {
-        print(
-            '❌ GameEngineBloc: Failed to reload with new sort: ${failure.message}');
         emit(GameEngineGamesError(
           gameEngineId: currentState.gameEngineId,
           gameEngineName: currentState.gameEngineName,
@@ -281,7 +254,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         ));
       },
       (games) async {
-        print('✅ GameEngineBloc: Reloaded ${games.length} games with new sort');
 
         // 🆕 Enrich games if userId is available
         List<Game> enrichedGames = games;
@@ -291,10 +263,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               games,
               currentState.userId!,
             );
-            print(
-                '✅ GameEngineBloc: Enriched ${enrichedGames.length} games after sort change');
           } catch (e) {
-            print('❌ GameEngineBloc: Failed to enrich games after sort: $e');
           }
         }
 

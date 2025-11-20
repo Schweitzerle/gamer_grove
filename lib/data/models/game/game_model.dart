@@ -356,7 +356,6 @@ class GameModel extends Game {
             try {
               return GenreModel.fromJson(item as Map<String, dynamic>);
             } catch (e) {
-              print('⚠️ GameModel: Failed to parse genre: $item - Error: $e');
               return null;
             }
           })
@@ -375,8 +374,6 @@ class GameModel extends Game {
             try {
               return PlatformModel.fromJson(item);
             } catch (e) {
-              print(
-                  '⚠️ GameModel: Failed to parse platform: $item - Error: $e');
               return null;
             }
           })
@@ -395,8 +392,6 @@ class GameModel extends Game {
             try {
               return GameModeModel.fromJson(item as Map<String, dynamic>);
             } catch (e) {
-              print(
-                  '⚠️ GameModel: Failed to parse game mode: $item - Error: $e');
               return null;
             }
           })
@@ -545,7 +540,6 @@ class GameModel extends Game {
 
   static List<Franchise> _extractFranchises(dynamic franchises) {
     if (franchises is List) {
-      print(franchises.length);
       return franchises
           .whereType<Map<String, dynamic>>()
           .map((item) => FranchiseModel.fromJson(item))
@@ -556,7 +550,6 @@ class GameModel extends Game {
 
   static List<Collection> _extractCollections(dynamic collections) {
     if (collections is List) {
-      print(collections.length);
       return collections
           .whereType<Map<String, dynamic>>()
           .map((item) => CollectionModel.fromJson(item))

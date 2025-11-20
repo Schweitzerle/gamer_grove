@@ -29,17 +29,14 @@ class CharacterDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🎭 CharacterDetailPage: Building for character ID: $characterId');
 
     return BlocProvider<CharacterBloc>(
       create: (context) {
-        print('🎭 CharacterDetailPage: Creating CharacterBloc');
         final bloc = sl<CharacterBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        print('🎭 CharacterDetailPage: Adding GetCharacterDetailsEvent');
         bloc.add(GetCharacterDetailsEvent(
             characterId: characterId,
             includeGames: true, // 🆕 Explicitly set to true
@@ -48,25 +45,18 @@ class CharacterDetailPage extends StatelessWidget {
       },
       child: BlocBuilder<CharacterBloc, CharacterState>(
         builder: (context, state) {
-          print(
-              '🎭 CharacterDetailPage: State changed to ${state.runtimeType}');
 
           if (state is CharacterLoading) {
-            print('🔄 CharacterDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is CharacterDetailsLoaded) {
-            print(
-                '✅ CharacterDetailPage: Loaded state - ${state.character.name} with ${state.games.length} games');
             return CharacterDetailScreen(
               character: state.character,
               games: state.games,
             );
           } else if (state is CharacterError) {
-            print('❌ CharacterDetailPage: Error state - ${state.message}');
             return _buildErrorState(context, state.message);
           }
 
-          print('🔄 CharacterDetailPage: Default loading state');
           return _buildLiveLoadingState(context);
         },
       ),

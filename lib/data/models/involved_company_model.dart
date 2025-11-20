@@ -23,10 +23,7 @@ class InvolvedCompanyModel extends InvolvedCompany {
         isPorting: _parseBool(json['porting']),
         isSupporting: _parseBool(json['supporting']),
       );
-    } catch (e, stackTrace) {
-      print('❌ InvolvedCompanyModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }
@@ -57,7 +54,6 @@ class InvolvedCompanyModel extends InvolvedCompany {
       try {
         return CompanyModel.fromJson(companyData);
       } catch (e) {
-        print('⚠️ Failed to parse company object: $e');
         return _createFallbackCompany();
       }
     }

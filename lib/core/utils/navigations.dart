@@ -27,8 +27,6 @@ import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_pag
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/search/search_page.dart';
-import 'package:gamer_grove/presentation/pages/test/igdb_test_page.dart';
-import 'package:gamer_grove/presentation/pages/test/supabase_test_page.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -384,26 +382,6 @@ class Navigations {
     );
   }
 
-  // ==========================================
-  // 🧪 TEST SCREENS
-  // ==========================================
-
-  static void navigateToSupabaseTest(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => const SupabaseTestPage(),
-      ),
-    );
-  }
-
-  static void navigateToIGDBTest(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => const IGDBTestPage(),
-      ),
-    );
-  }
-
   static void navigateToAllEvents(
     BuildContext context, {
     required Game game,
@@ -488,8 +466,6 @@ class Navigations {
 
   static void navigateToCharacterDetail(BuildContext context, int characterId,
       {Character? character}) {
-    print('🎭 Navigation: Opening character detail for ID: $characterId');
-    print('🎭 Navigation: Pre-loaded character: ${character?.name ?? "none"}');
 
     Navigator.push(
       context,
@@ -498,8 +474,6 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print(
-                    '🎭 Navigation: Creating CharacterBloc for ID: $characterId');
                 return sl<CharacterBloc>();
               },
             ),
@@ -529,8 +503,6 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print(
-                    '🎭 Navigation: Creating PlatformBloc for ID: $platformId');
                 return sl<PlatformBloc>();
               },
             ),
@@ -559,8 +531,6 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print(
-                    '🎭 Navigation: Creating GameEngineBloc for ID: $gameEngineId');
                 return sl<GameEngineBloc>();
               },
             ),
@@ -589,7 +559,6 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) {
-                print('🏢 Navigation: Creating CompanyBloc for ID: $companyId');
                 return sl<CompanyBloc>();
               },
             ),

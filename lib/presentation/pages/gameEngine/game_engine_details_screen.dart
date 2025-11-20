@@ -928,7 +928,6 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not open $url')),
@@ -938,18 +937,5 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
   }
 
   void _logGameEngineData() {
-    print('\n=== ⚙️ GAME ENGINE DETAIL SCREEN LOADED ===');
-    print('🎯 Engine: ${widget.gameEngine.name} (ID: ${widget.gameEngine.id})');
-    print('🏢 Companies: ${widget.gameEngine.companyCount} using this engine');
-    print('🎮 Platforms: ${widget.gameEngine.platformCount} supported');
-    print('🎲 Games: ${widget.games.length} built with this engine');
-    print(
-        '🖼️ Logo: ${widget.gameEngine.hasLogo && widget.gameEngine.logoUrl != null ? 'Available' : 'Fallback'}');
-    print(
-        '📄 Description: ${widget.gameEngine.hasDescription ? 'Available' : 'None'}');
-    print(
-        '🔗 URL: ${widget.gameEngine.hasUrl ? widget.gameEngine.url : 'None'}');
-    print('🔑 Slug: ${widget.gameEngine.slug ?? 'None'}');
-    print('=== END GAME ENGINE DETAIL LOG ===\n');
   }
 }

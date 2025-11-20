@@ -812,13 +812,5 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
   }
 
   void _logCharacterData() {
-    print('\n=== 🎭 CHARACTER DETAIL SCREEN LOADED (BLOC) ===');
-    print(
-        '🎯 Character: ${widget.character.name} (ID: ${widget.character.id})');
-    print('🎮 Games: ${widget.games.length} loaded');
-    print('🖼️ Image: ${widget.character.hasImage ? 'Available' : 'Fallback'}');
-    print(
-        '📝 Description: ${widget.character.hasDescription ? 'Available' : 'None'}');
-    print('=== END CHARACTER DETAIL LOG ===\n');
   }
 }

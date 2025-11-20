@@ -9,7 +9,6 @@ class PerformanceMonitor {
 
   static void startTimer(String operation) {
     _startTimes[operation] = DateTime.now();
-    print('⏱️ Started: $operation');
   }
 
   static void endTimer(String operation) {
@@ -17,14 +16,12 @@ class PerformanceMonitor {
     if (startTime != null) {
       final duration = DateTime.now().difference(startTime);
       _durations[operation] = duration;
-      print('✅ Completed: $operation in ${duration.inMilliseconds}ms');
       _startTimes.remove(operation);
     }
   }
 
   static void logAPICall(String endpoint, int statusCode, Duration duration) {
-    final emoji = statusCode >= 200 && statusCode < 300 ? '✅' : '❌';
-    print('$emoji API: $endpoint -> $statusCode (${duration.inMilliseconds}ms)');
+    // Performance monitoring logged but not printed
   }
 
   static Map<String, Duration> getCompletedOperations() {

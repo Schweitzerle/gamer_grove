@@ -15,8 +15,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// final result = await useCase(NoParams());
 ///
 /// result.fold(
-///   (failure) => print('Signout failed: ${failure.message}'),
-///   (_) => print('Signed out successfully'),
 /// );
 /// ```
 class SignOutUseCase implements UseCase<void, NoParams> {

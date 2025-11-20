@@ -20,8 +20,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (following) => print('Following ${following.length} users'),
 /// );
 /// ```
 class GetFollowingUseCase implements UseCase<List<User>, GetFollowingParams> {

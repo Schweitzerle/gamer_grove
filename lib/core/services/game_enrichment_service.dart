@@ -273,7 +273,6 @@ class GameEnrichmentService {
   /// Logs a message if logging is enabled.
   void _log(String message) {
     if (enableLogging) {
-      print('🎮 GameEnrichment: $message');
     }
   }
 }

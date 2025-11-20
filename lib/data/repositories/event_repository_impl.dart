@@ -42,8 +42,6 @@ import 'base/igdb_base_repository.dart';
 /// // Get current events
 /// final result = await eventRepo.getCurrentEvents(limit: 10);
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (events) => print('Found ${events.length} current events'),
 /// );
 /// ```
 class EventRepositoryImpl extends IgdbBaseRepository

@@ -43,15 +43,10 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
     // 🆕 UPDATED: Prefer character.games over passed games parameter
     if (widget.character.hasLoadedGames) {
       _displayGames = widget.character.games!;
-      print(
-          '🎮 CharacterGamesSection: Using character.games (${_displayGames.length} games)');
     } else if (widget.games != null && widget.games!.isNotEmpty) {
       _displayGames = widget.games!;
-      print(
-          '🎮 CharacterGamesSection: Using passed games parameter (${_displayGames.length} games)');
     } else {
       // No games loaded yet - let parent component handle loading
-      print('🎮 CharacterGamesSection: No games available yet');
       _displayGames = [];
     }
   }

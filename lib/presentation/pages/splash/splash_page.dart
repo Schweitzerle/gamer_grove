@@ -94,18 +94,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     // Check auth status with timeout
     if (mounted) {
-      print('🚀 SplashPage: Checking auth status...');
       context.read<AuthBloc>().add(const CheckAuthStatusEvent());
 
       // Add a safety timeout
       Future<void>.delayed(const Duration(seconds: 5), () {
         if (mounted) {
           final currentState = context.read<AuthBloc>().state;
-          print(
-              '⏰ SplashPage: Timeout reached, current state: ${currentState.runtimeType}');
           if (currentState is AuthLoading) {
-            print(
-                '🔧 SplashPage: Still loading after timeout, forcing navigation to login');
             _navigateToLogin();
           }
         }
@@ -125,16 +120,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        print('🔥 SplashPage: Auth state changed to ${state.runtimeType}');
 
         if (state is AuthAuthenticated) {
-          print('✅ SplashPage: User authenticated, navigating to home');
           _navigateToHome();
         } else if (state is AuthUnauthenticated) {
-          print('❌ SplashPage: User not authenticated, navigating to login');
           _navigateToLogin();
         } else if (state is AuthError) {
-          print('💥 SplashPage: Auth error: ${state.message}');
           _navigateToLogin(); // Navigate to login on error
         }
         // Don't navigate on AuthLoading - let it complete

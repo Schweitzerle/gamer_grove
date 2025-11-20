@@ -141,7 +141,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) {
-        print('Sign up error: ${failure.message}');
         if (failure.message.contains('User already exists')) {
           emit(const AuthError('Email already in use.'));
         } else {

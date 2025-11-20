@@ -39,8 +39,6 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
       userId = authState.user.id;
     }
 
-    print('🏢 CompanyDetailPage: Loading company ID: ${widget.companyId}');
-    print('👤 CompanyDetailPage: User ID: ${userId ?? "Not authenticated"}');
 
     context.read<CompanyBloc>().add(
           GetCompanyDetailsEvent(
@@ -56,19 +54,15 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
     return Scaffold(
       body: BlocBuilder<CompanyBloc, CompanyState>(
         builder: (context, state) {
-          print('🏢 CompanyDetailPage: Current state: ${state.runtimeType}');
 
           if (state is CompanyLoading) {
             return _buildLoadingState();
           } else if (state is CompanyDetailsLoaded) {
-            print('✅ CompanyDetailPage: Loaded company: ${state.company.name}');
-            print('🎮 CompanyDetailPage: Games count: ${state.games.length}');
             return CompanyDetailScreen(
               company: state.company,
               games: state.games,
             );
           } else if (state is CompanyError) {
-            print('❌ CompanyDetailPage: Error: ${state.message}');
             return _buildErrorState(state.message);
           }
 

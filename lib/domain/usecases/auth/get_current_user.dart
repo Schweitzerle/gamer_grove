@@ -16,12 +16,9 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// final result = await useCase(NoParams());
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
 ///   (user) {
 ///     if (user != null) {
-///       print('Current user: ${user.username}');
 ///     } else {
-///       print('No user signed in');
 ///     }
 ///   },
 /// );

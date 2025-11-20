@@ -216,7 +216,6 @@ class EventBloc extends Bloc<EventEvent, EventState> {
                 await _enrichEventWithUserData(eventDetails, event.userId!);
             emit(EventDetailsLoaded(event: enrichedEvent));
           } catch (e) {
-            print('❌ EventBloc: Failed to enrich event games: $e');
             emit(EventDetailsLoaded(event: eventDetails)); // Fallback
           }
         } else {
@@ -255,7 +254,6 @@ class EventBloc extends Bloc<EventEvent, EventState> {
             emit(
                 CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails));
           } catch (e) {
-            print('❌ EventBloc: Failed to enrich event games: $e');
             emit(CompleteEventDetailsLoaded(
                 eventDetails: eventDetails)); // Fallback
           }
@@ -372,10 +370,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         videoIds: event.videoIds,
       );
 
-      print('✅ EventBloc: Event enriched with ${enrichedGames.length} games');
       return enrichedEvent;
     } catch (e) {
-      print('❌ EventBloc: Error enriching event games: $e');
       return event;
     }
   }

@@ -21,8 +21,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (gameIds) => print('${gameIds.length} games in wishlist'),
 /// );
 /// ```
 class GetWishlistedGamesUseCase

@@ -6,7 +6,6 @@ import '../grove/grove_page.dart';
 import '../search/search_page.dart';
 import 'home_content.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -59,7 +58,6 @@ class _HomePageState extends State<HomePage> {
 
             // ✅ Markiere Page als besucht und logge beim ersten Besuch
             if (!_visitedPages.contains(index)) {
-              print('🎮 Loading ${_getPageName(index)} page for first time');
               _visitedPages.add(index);
             }
           });
@@ -122,8 +120,11 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Loading $pageName...',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                    ),
               ),
               const SizedBox(height: 24),
               const CircularProgressIndicator(),
@@ -135,16 +136,4 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ✅ Helper für Debug-Logs
-  String _getPageName(int index) {
-    switch (index) {
-      case 0: return 'Grove';
-      case 1: return 'Social';
-      case 2: return 'Home';
-      case 3: return 'Search';
-      case 4: return 'Profile';
-      default: return 'Unknown';
-    }
-  }
 }
-
-

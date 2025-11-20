@@ -47,15 +47,7 @@ class UserStatesContent extends StatelessWidget {
           isInTopThree = userDataState.isInTopThree(game.id);
           topThreePosition = userDataState.getTopThreePosition(game.id);
 
-          print(
-              '🎯 UserStatesContent: Using UserGameDataBloc data for game ${game.id}');
-          print(
-              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         } else {
-          print(
-              '🎯 UserStatesContent: Using Game entity data (UserGameDataBloc state: ${userDataState.runtimeType})');
-          print(
-              '   Wishlisted: $isWishlisted, Recommended: $isRecommended, Rating: $userRating');
         }
 
         return Column(
@@ -335,7 +327,6 @@ class UserStatesContent extends StatelessWidget {
   ) {
     // ✅ Use SetGameTopThreePositionEvent instead of UpdateTopThreeEvent
     // This properly handles the backend logic (removing from old position, etc.)
-    print('🎯 UserStatesSection: Setting game ${game.id} at position $position');
 
     userDataBloc.add(user_data.SetGameTopThreePositionEvent(
       userId: userId,

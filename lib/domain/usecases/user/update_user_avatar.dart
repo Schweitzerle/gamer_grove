@@ -19,8 +19,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Upload failed: ${failure.message}'),
-///   (url) => print('Avatar uploaded: $url'),
 /// );
 /// ```
 class UpdateUserAvatarUseCase

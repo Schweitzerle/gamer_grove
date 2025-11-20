@@ -61,20 +61,14 @@ class _GameDetailPageState extends State<GameDetailPage>
     _gameBloc = sl<GameBloc>();
     final authState = context.read<AuthBloc>().state;
 
-    print('🔍 DEBUG: AuthState = ${authState.runtimeType}');
 
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-      print('✅ DEBUG: User authenticated, ID = $_currentUserId');
     } else {
-      print('❌ DEBUG: User not authenticated, _currentUserId = null');
     }
   }
 
   void _loadGameDetails() {
-    print('🎮 DEBUG: Loading game details...');
-    print('📋 DEBUG: gameId = ${widget.gameId}');
-    print('👤 DEBUG: userId = $_currentUserId');
 
     _gameBloc.add(GetCompleteGameDetailsEvent(
       gameId: widget.gameId,
@@ -210,61 +204,29 @@ class _GameDetailPageState extends State<GameDetailPage>
 
   // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
   void _logGameDetailsData(Game game) {
-    print('\n=== 🎮 ENHANCED GAME DETAILS LOADED ===');
-    print('🎯 Game: ${game.name} (ID: ${game.id})');
 
     // 🆕 UPDATED: Characters data with detailed image info
     if (game.characters.isNotEmpty) {
-      print(
-          '\n👥 CHARACTERS (${game.characters.length}): ✅ CHARACTERS SECTION WILL SHOW');
-      print('   📱 UI: Container with Card elevation, preview of 4 characters');
-      print(
-          '   🔗 Navigation: Tap "View All" → CharactersScreen with filter/sort');
 
       for (var i = 0; i < game.characters.length && i < 5; i++) {
         final char = game.characters[i];
-        print('  • ${char.name} (ID: ${char.id})');
 
         // 🆕 NEW: Log image information
         if (char.hasImage) {
-          print('    🖼️ Image: ✅ Has mugShotImageId: ${char.mugShotImageId}');
-          print('    🔗 URL: ${char.imageUrl}');
-          print('    📏 Sizes Available: thumb, micro, medium, large');
         } else if (char.hasMugShot) {
-          print(
-              '    🖼️ Image: ⚠️ Has mugShotId: ${char.mugShot} but no imageId (needs separate fetch)');
         } else {
-          print('    🖼️ Image: ❌ No image data available');
         }
 
         if (char.description != null) {
-          print(
-              '    📝 Description: ${char.description!.length > 50 ? '${char.description!.substring(0, 50)}...' : char.description}');
         }
       }
 
       if (game.characters.length > 5) {
-        print('  ... and ${game.characters.length - 5} more characters');
       }
 
-      // 🆕 NEW: Summary of image availability
-      final charactersWithImages =
-          game.characters.where((c) => c.hasImage).length;
-      final charactersWithMugShotIds =
-          game.characters.where((c) => c.hasMugShot).length;
-
-      print('\n📊 CHARACTER IMAGE SUMMARY:');
-      print(
-          '   ✅ With Images: $charactersWithImages/${game.characters.length}');
-      print(
-          '   🔗 With MugShot IDs: $charactersWithMugShotIds/${game.characters.length}');
-      print(
-          '   📱 UI Ready: ${charactersWithImages > 0 ? 'YES - Images will display' : 'PARTIAL - Fallback icons will show'}');
     } else {
-      print('\n👥 CHARACTERS: None found ❌ Characters section hidden');
     }
 
-    print('=== END GAME DETAILS LOG ===\n');
   }
 
   Widget _buildSliverAppBar(Game game) {

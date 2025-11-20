@@ -36,10 +36,7 @@ class MultiplayerModeModel extends MultiplayerMode {
         onlineCoopMax: _parseInt(json['onlinecoopmax']) ?? 0,
         onlineMax: _parseInt(json['onlinemax']) ?? 0,
       );
-    } catch (e, stackTrace) {
-      print('❌ MultiplayerModeModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }

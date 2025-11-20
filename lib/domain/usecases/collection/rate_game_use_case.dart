@@ -22,8 +22,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Rating failed: ${failure.message}'),
-///   (_) => print('Game rated successfully'),
 /// );
 /// ```
 class RateGameUseCase implements UseCase<void, RateGameParams> {

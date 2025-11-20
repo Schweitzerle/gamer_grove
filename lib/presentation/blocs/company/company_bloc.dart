@@ -47,7 +47,6 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
               games: enrichedGames,
             ));
           } catch (e) {
-            print('❌ CompanyBloc: Failed to enrich games: $e');
             emit(CompanyDetailsLoaded(
               company: companyWithGames.company,
               games: companyWithGames.games,

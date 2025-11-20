@@ -111,8 +111,6 @@ class EventModel extends Event {
       try {
         return EventLogoModel.fromJson(eventLogo);
       } catch (e) {
-        print(
-            '⚠️ EventModel: Failed to parse event logo: $eventLogo - Error: $e');
         return null;
       }
     }
@@ -128,8 +126,6 @@ class EventModel extends Event {
             try {
               return EventNetworkModel.fromJson(item);
             } catch (e) {
-              print(
-                  '⚠️ EventModel: Failed to parse event network: $item - Error: $e');
               return null;
             }
           })
@@ -149,7 +145,6 @@ class EventModel extends Event {
             try {
               return GameModel.fromJson(item);
             } catch (e) {
-              print('⚠️ EventModel: Failed to parse game: $item - Error: $e');
               return null;
             }
           })
@@ -169,7 +164,6 @@ class EventModel extends Event {
             try {
               return GameVideoModel.fromJson(item);
             } catch (e) {
-              print('⚠️ EventModel: Failed to parse video: $item - Error: $e');
               return null;
             }
           })

@@ -100,13 +100,9 @@ class _UserGameDataListener extends StatelessWidget {
 
         if (authState is app_auth.AuthAuthenticated) {
           // User logged in - load their game data
-          debugPrint(
-            '🎮 User authenticated, loading game data for: ${authState.user.id}',
-          );
           userGameDataBloc.add(LoadUserGameDataEvent(authState.user.id));
         } else if (authState is app_auth.AuthUnauthenticated) {
           // User logged out - clear game data
-          debugPrint('🚪 User logged out, clearing game data');
           userGameDataBloc.add(const ClearUserGameDataEvent());
         }
       },

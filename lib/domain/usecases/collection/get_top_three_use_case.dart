@@ -16,12 +16,9 @@ import '../usecase.dart';
 /// final result = await useCase(GetTopThreeParams(userId: 'uuid'));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
 ///   (games) {
 ///     if (games.isNotEmpty) {
-///       print('Top 3: $games');
 ///     } else {
-///       print('User hasn\'t set top 3');
 ///     }
 ///   },
 /// );

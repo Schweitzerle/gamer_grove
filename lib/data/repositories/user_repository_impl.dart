@@ -751,29 +751,21 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        print('🗄️ Repository: removeFromTopThree called');
-        print('   User ID: $userId');
-        print('   Game ID: $gameId');
 
         // Get current top three (already normalized to 3 elements with 0s)
         final currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
-        print('   Current top three: $currentTopThree');
 
         // Find and remove the game (set to 0, which will be converted to null)
         final index = currentTopThree.indexOf(gameId);
         if (index != -1) {
-          print('   Found game at index $index, removing...');
           currentTopThree[index] = 0;
         } else {
-          print('   Game not found in top three');
         }
 
-        print('   Updated top three: $currentTopThree');
 
         // Use unified update method
         await userDataSource.updateTopThree(userId, currentTopThree);
 
-        print('✅ Repository: Successfully removed from top three');
       },
       errorMessage: 'Failed to remove from top three',
     );
@@ -1081,18 +1073,12 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        print('🗄️ Repository: setTopThreeGameAtPosition called');
-        print('   User ID: $userId');
-        print('   Game ID: $gameId');
-        print('   Position: $position');
 
         var currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
-        print('🗄️ Repository: Current top three from DB: $currentTopThree');
 
         // Check if the game is already in the top three at a different position
         final existingIndex = currentTopThree.indexOf(gameId);
         if (existingIndex != -1) {
-          print('🗄️ Repository: Game already at position ${existingIndex + 1}, removing it');
           // Remove from old position (set to 0)
           currentTopThree[existingIndex] = 0;
         }
@@ -1100,13 +1086,10 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         // Set the game at the new position
         if (position >= 1 && position <= 3) {
           currentTopThree[position - 1] = gameId;
-          print('🗄️ Repository: New top three: $currentTopThree');
         } else {
-          print('⚠️ Repository: Invalid position $position');
         }
 
         await userDataSource.updateTopThree(userId, currentTopThree);
-        print('✅ Repository: Top three updated successfully');
       },
       errorMessage: 'Failed to set top three game at position',
     );

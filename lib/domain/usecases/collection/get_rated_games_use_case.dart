@@ -21,10 +21,8 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
 ///   (games) {
 ///     for (final game in games) {
-///       print('Game ${game['game_id']}: ${game['rating']}');
 ///     }
 ///   },
 /// );

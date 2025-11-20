@@ -22,7 +22,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final profile = await userDataSource.getUserProfile(userId);
-  /// print('Username: ${profile['username']}');
   /// ```
   Future<Map<String, dynamic>> getUserProfile(String userId);
 
@@ -33,7 +32,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final profile = await userDataSource.getUserProfileByUsername('john_doe');
-  /// if (profile != null) print('Found user: ${profile['display_name']}');
   /// ```
   Future<Map<String, dynamic>?> getUserProfileByUsername(String username);
 
@@ -68,7 +66,6 @@ abstract class SupabaseUserDataSource {
   ///   userId,
   ///   base64ImageData,
   /// );
-  /// print('Avatar uploaded: $avatarUrl');
   /// ```
   Future<String> updateUserAvatar(String userId, String imageData);
 
@@ -109,7 +106,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final data = await userDataSource.getUserGameData(userId, [1942, 1905]);
-  /// print('Game 1942 is wishlisted: ${data[1942]['is_wishlisted']}');
   /// ```
   Future<Map<int, Map<String, dynamic>>> getUserGameData(
     String userId,
@@ -174,7 +170,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final topThree = await userDataSource.getTopThree(userId);
-  /// if (topThree != null) print('Top game: ${topThree[0]}');
   /// ```
   Future<List<int>?> getTopThree(String userId);
 
@@ -193,7 +188,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final wishlist = await userDataSource.getWishlistedGames(userId);
-  /// print('${wishlist.length} games in wishlist');
   /// ```
   Future<List<Map<String, dynamic>>> getWishlistedGames(
     String userId, {
@@ -416,7 +410,6 @@ abstract class SupabaseUserDataSource {
   /// Example:
   /// ```dart
   /// final stats = await userDataSource.getUserStats(userId);
-  /// print('Total ratings: ${stats['total_games_rated']}');
   /// ```
   Future<Map<String, dynamic>> getUserStats(String userId);
 
@@ -460,7 +453,6 @@ abstract class SupabaseUserDataSource {
   ///   currentUserId,
   ///   targetUserId,
   /// );
-  /// print('Following: ${relationship['is_following']}');
   /// ```
   Future<Map<String, dynamic>> getUserRelationship(
     String currentUserId,

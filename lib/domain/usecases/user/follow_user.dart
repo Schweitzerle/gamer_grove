@@ -19,8 +19,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Follow failed: ${failure.message}'),
-///   (_) => print('Now following user'),
 /// );
 /// ```
 class FollowUserUseCase implements UseCase<void, FollowUserParams> {

@@ -941,7 +941,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not open $url')),
@@ -951,28 +950,10 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
   }
 
   void _logPlatformData() {
-    print('\n=== 🎮 PLATFORM DETAIL SCREEN LOADED ===');
-    print('🎯 Platform: ${widget.platform.name} (ID: ${widget.platform.id})');
-    print('🔤 Abbreviation: ${widget.platform.abbreviation ?? 'None'}');
-    print('📝 Alternative Name: ${widget.platform.alternativeName ?? 'None'}');
-    print('📊 Generation: ${widget.platform.generation ?? 'Unknown'}');
-    print('🎮 Games COUNT: ${widget.games.length}');
-    print('🎮 Games EMPTY: ${widget.games.isEmpty}');
     if (widget.games.isNotEmpty) {
-      print('🎮 First 3 Games:');
       for (var i = 0; i < widget.games.length && i < 3; i++) {
-        print(
-            '   ${i + 1}. ${widget.games[i].name} (ID: ${widget.games[i].id})');
       }
     } else {
-      print('⚠️  NO GAMES LOADED - This might be the issue!');
     }
-    print('🖼️ Logo: ${widget.platform.hasLogo ? 'Available' : 'Fallback'}');
-    print(
-        '📄 Summary: ${widget.platform.summary != null ? 'Available' : 'None'}');
-    print('🔗 URL: ${widget.platform.url ?? 'None'}');
-    print('🏷️ Platform Type: ${_getPlatformTypeDisplay()}');
-    print('🔑 Slug: ${widget.platform.slug}');
-    print('=== END PLATFORM DETAIL LOG ===\n');
   }
 }

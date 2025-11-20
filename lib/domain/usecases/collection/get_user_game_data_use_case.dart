@@ -29,11 +29,8 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
 ///   (data) {
 ///     final game1942Data = data[1942];
-///     print('Is wishlisted: ${game1942Data['is_wishlisted']}');
-///     print('Rating: ${game1942Data['rating']}');
 ///   },
 /// );
 /// ```

@@ -22,8 +22,6 @@ import '../usecase.dart';
 /// final result = await useCase(GetUserProfileParams(userId: 'uuid'));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (user) => print('Found user: ${user.username}'),
 /// );
 /// ```
 class GetUserProfileUseCase implements UseCase<User, GetUserProfileParams> {

@@ -17,8 +17,6 @@ class GetCompanyWithGames
   Future<Either<Failure, CompanyWithGames>> call(
       GetCompanyWithGamesParams params) async {
     try {
-      print('🎮 UseCase: Getting company details for ID: ${params.companyId}');
-      print('🎮 UseCase: Include games: ${params.includeGames}');
 
       final companyResult =
           await repository.getCompanyDetails(params.companyId, params.userId);
@@ -26,7 +24,6 @@ class GetCompanyWithGames
       if (companyResult.isLeft()) {
         return companyResult.fold(
           (failure) {
-            print('❌ UseCase: Repository failed: ${failure.message}');
             return Left(failure);
           },
           (company) => throw Exception('Unexpected success'),
@@ -38,12 +35,10 @@ class GetCompanyWithGames
         (r) => r,
       );
 
-      print('✅ UseCase: Company loaded: ${company.name}');
 
       List<Game> games = [];
 
       if (params.includeGames) {
-        print('🎮 UseCase: Loading games for company: ${company.name}');
 
         final gamesResult = await repository.getGamesByCompany(
           companyIds: [company.id],
@@ -53,11 +48,9 @@ class GetCompanyWithGames
 
         games = gamesResult.fold(
           (failure) {
-            print('❌ UseCase: Failed to load games: ${failure.message}');
             return <Game>[];
           },
           (gamesList) {
-            print('✅ UseCase: Loaded ${gamesList.length} games for company');
             return gamesList;
           },
         );
@@ -68,12 +61,8 @@ class GetCompanyWithGames
         games: games,
       );
 
-      print(
-          '🎯 UseCase: Final result - ${result.company.name} with ${result.games.length} games');
       return Right(result);
     } catch (e) {
-      print('❌ UseCase: Exception occurred: $e');
-      print('📍 UseCase: Exception type: ${e.runtimeType}');
       return Left(
           ServerFailure(message: 'Failed to load company with games: $e'));
     }

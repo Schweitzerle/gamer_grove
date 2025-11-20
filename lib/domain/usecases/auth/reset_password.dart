@@ -18,8 +18,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Failed: ${failure.message}'),
-///   (_) => print('Password reset email sent'),
 /// );
 /// ```
 class ResetPasswordUseCase implements UseCase<void, ResetPasswordParams> {

@@ -27,17 +27,14 @@ class GameEngineDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🎭 GameEngineDetailPage: Building for gameEngine ID: $gameEngineId');
 
     return BlocProvider<GameEngineBloc>(
       create: (context) {
-        print('🎭 GameEngineDetailPage: Creating GameEngineBloc');
         final bloc = sl<GameEngineBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        print('🎭 GameEngineDetailPage: Adding GetGameEngineDetailsEvent');
         bloc.add(GetGameEngineDetailsEvent(
             gameEngineId: gameEngineId,
             includeGames: true, // 🆕 Explicitly set to true
@@ -46,25 +43,18 @@ class GameEngineDetailPage extends StatelessWidget {
       },
       child: BlocBuilder<GameEngineBloc, GameEngineState>(
         builder: (context, state) {
-          print(
-              '🎭 GameEngineDetailPage: State changed to ${state.runtimeType}');
 
           if (state is GameEngineLoading) {
-            print('🔄 GameEngineDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is GameEngineDetailsLoaded) {
-            print(
-                '✅ GameEngineDetailPage: Loaded state - ${state.gameEngine.name} with ${state.games.length} games');
             return GameEngineDetailScreen(
               gameEngine: state.gameEngine,
               games: state.games,
             );
           } else if (state is GameEngineError) {
-            print('❌ GameEngineDetailPage: Error state - ${state.message}');
             return _buildErrorState(context, state.message);
           }
 
-          print('🔄 GameEngineDetailPage: Default loading state');
           return _buildLiveLoadingState(context);
         },
       ),

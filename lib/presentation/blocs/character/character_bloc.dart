@@ -67,7 +67,6 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
               games: enrichedGames,
             ));
           } catch (e) {
-            print('CharacterBloc: Failed to enrich games: $e');
             emit(CharacterDetailsLoaded(
               character: characterWithGames.character,
               games: characterWithGames.games,

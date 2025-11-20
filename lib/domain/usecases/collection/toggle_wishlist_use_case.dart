@@ -21,8 +21,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Toggle failed: ${failure.message}'),
-///   (_) => print('Wishlist updated'),
 /// );
 /// ```
 class ToggleWishlistUseCase implements UseCase<void, ToggleWishlistParams> {

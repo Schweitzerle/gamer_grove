@@ -66,7 +66,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               games: enrichedGames,
             ));
           } catch (e) {
-            print('❌ PlatformBloc: Failed to enrich games: $e');
             emit(PlatformDetailsLoaded(
               platform: platformWithGames.platform,
               games: platformWithGames.games,
@@ -97,12 +96,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     LoadPlatformGamesEvent event,
     Emitter<PlatformState> emit,
   ) async {
-    print(
-        '🎮 PlatformBloc: Loading paginated games for platform ${event.platformId}');
-    print(
-        '🎮 Sort: ${event.sortBy.displayName} ${event.sortOrder.displayName}');
-    print('🎮 Refresh: ${event.refresh}');
-    print('🎮 UserId: ${event.userId ?? "none"}');
 
     // Show loading state
     emit(PlatformGamesLoading(
@@ -121,7 +114,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     await result.fold(
       (failure) async {
-        print('❌ PlatformBloc: Failed to load games: ${failure.message}');
         emit(PlatformGamesError(
           platformId: event.platformId,
           platformName: event.platformName,
@@ -129,7 +121,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         ));
       },
       (games) async {
-        print('✅ PlatformBloc: Loaded ${games.length} games');
 
         // Enrich games if userId is provided
         List<Game> enrichedGames = games;
@@ -139,9 +130,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               games,
               event.userId!,
             );
-            print('✅ PlatformBloc: Enriched ${enrichedGames.length} games');
           } catch (e) {
-            print('❌ PlatformBloc: Failed to enrich games: $e');
           }
         }
 
@@ -173,13 +162,9 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     // Don't load if already loading or no more games
     if (currentState.isLoadingMore || !currentState.hasMore) {
-      print(
-          '⏭️ PlatformBloc: Skipping load more (loading: ${currentState.isLoadingMore}, hasMore: ${currentState.hasMore})');
       return;
     }
 
-    print(
-        '🎮 PlatformBloc: Loading more games (page ${currentState.currentPage + 1})');
 
     // Set loading more flag
     emit(currentState.copyWith(isLoadingMore: true));
@@ -198,12 +183,10 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     await result.fold(
       (failure) async {
-        print('❌ PlatformBloc: Failed to load more games: ${failure.message}');
         // Keep current state but clear loading flag
         emit(currentState.copyWith(isLoadingMore: false));
       },
       (newGames) async {
-        print('✅ PlatformBloc: Loaded ${newGames.length} more games');
 
         // Enrich new games if userId is available
         List<Game> enrichedNewGames = newGames;
@@ -213,10 +196,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               newGames,
               currentState.userId!,
             );
-            print(
-                '✅ PlatformBloc: Enriched ${enrichedNewGames.length} new games');
           } catch (e) {
-            print('❌ PlatformBloc: Failed to enrich new games: $e');
           }
         }
 
@@ -248,10 +228,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     final currentState = state as PlatformGamesLoaded;
 
-    print(
-        '🔄 PlatformBloc: Changing sort to ${event.sortBy.displayName} ${event.sortOrder.displayName}');
-    print(
-        '🔄 PlatformBloc: UserId from state: ${currentState.userId ?? "none"}');
 
     // Show loading state
     emit(PlatformGamesLoading(
@@ -270,8 +246,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     await result.fold(
       (failure) async {
-        print(
-            '❌ PlatformBloc: Failed to reload with new sort: ${failure.message}');
         emit(PlatformGamesError(
           platformId: currentState.platformId,
           platformName: currentState.platformName,
@@ -279,7 +253,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         ));
       },
       (games) async {
-        print('✅ PlatformBloc: Reloaded ${games.length} games with new sort');
 
         // Enrich games if userId is available
         List<Game> enrichedGames = games;
@@ -289,10 +262,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               games,
               currentState.userId!,
             );
-            print(
-                '✅ PlatformBloc: Enriched ${enrichedGames.length} games after sort change');
           } catch (e) {
-            print('❌ PlatformBloc: Failed to enrich games after sort: $e');
           }
         }
 

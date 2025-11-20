@@ -90,7 +90,6 @@ class CompanyModel extends Company {
       try {
         return CompanyModel.fromJson(parentData);
       } catch (e) {
-        print('Error parsing parent company: $e');
         return null;
       }
     }
@@ -113,16 +112,12 @@ class CompanyModel extends Company {
       try {
         // Validate that image_id exists and is not empty
         final imageId = logoData['image_id'];
-        print('🖼️ CompanyModel: Parsing logo with image_id: $imageId');
         if (imageId == null || (imageId is String && imageId.isEmpty)) {
-          print('⚠️ CompanyModel: Company logo has no valid image_id, skipping');
           return null;
         }
         final logo = CompanyLogoModel.fromJson(logoData);
-        print('✅ CompanyModel: Logo parsed successfully - URL: ${logo.logoMedUrl}');
         return logo;
       } catch (e) {
-        print('❌ CompanyModel: Error parsing company logo: $e');
         return null;
       }
     }

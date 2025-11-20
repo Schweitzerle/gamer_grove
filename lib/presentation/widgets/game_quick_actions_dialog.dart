@@ -344,19 +344,15 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
       return;
     }
 
-    print('🎯 QuickActions: Opening top three dialog for "${game.name}"');
 
     // Get current top three games from the bloc state
     List<Game>? currentTopThree;
     final currentState = widget.gameBloc.state;
 
-    print('🎯 QuickActions: GameBloc state type: ${currentState.runtimeType}');
 
     if (currentState is GrovePageLoaded) {
       currentTopThree = currentState.userTopThree;
-      print('✅ QuickActions: Found GrovePageLoaded with ${currentTopThree.length} top three games');
     } else {
-      print('⚠️ QuickActions: State is not GrovePageLoaded, currentTopThree will be null');
     }
 
     showDialog<void>(
@@ -375,8 +371,6 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
   void _addToTopThree(int gameId, int position) {
     if (_currentUserId == null) return;
 
-    print('🎯 QuickActions: Adding game $gameId to top three at position $position');
-    print('🎯 QuickActions: User ID: $_currentUserId');
 
     // ✅ Get current top three from UserGameDataBloc
     final userDataBloc = context.read<user_data.UserGameDataBloc>();

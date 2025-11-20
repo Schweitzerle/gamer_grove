@@ -26,7 +26,6 @@ class ImageUtils {
       baseUrl = baseUrl.replaceAll(sizeRegex, size);
     }
 
-    print('🖼️ ImageUtils: Built URL: $baseUrl');
     return baseUrl;
   }
 

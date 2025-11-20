@@ -31,18 +31,13 @@ class GameEngineModel extends GameEngine {
 
   factory GameEngineModel.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔧 GameEngineModel.fromJson: ${json['name']} (ID: ${json['id']})');
-
       // ✅ PARSE GAME ENGINE LOGO OBJECT
       GameEngineLogo? logo;
       if (json['logo'] != null) {
         if (json['logo'] is Map<String, dynamic>) {
           try {
             logo = GameEngineLogoModel.fromJson(json['logo']);
-            print('🔧 Engine Logo parsed: ${logo.logoMedUrl}');
-          } catch (e) {
-            print('❌ Error parsing engine logo: $e');
-          }
+          } catch (e) {}
         }
       }
 
@@ -54,9 +49,7 @@ class GameEngineModel extends GameEngine {
             try {
               final company = CompanyModel.fromJson(companyData);
               companies.add(company);
-            } catch (e) {
-              print('❌ Error parsing company: $e');
-            }
+            } catch (e) {}
           }
         }
       }
@@ -69,14 +62,10 @@ class GameEngineModel extends GameEngine {
             try {
               final platform = PlatformModel.fromJson(platformData);
               platforms.add(platform);
-            } catch (e) {
-              print('❌ Error parsing platform: $e');
-            }
+            } catch (e) {}
           }
         }
       }
-
-      print('🔧 Parsed ${companies.length} companies and ${platforms.length} platforms');
 
       return GameEngineModel(
         id: _parseInt(json['id']) ?? 0,
@@ -94,10 +83,7 @@ class GameEngineModel extends GameEngine {
         createdAt: _parseDateTime(json['created_at']),
         updatedAt: _parseDateTime(json['updated_at']),
       );
-    } catch (e, stackTrace) {
-      print('❌ GameEngineModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }

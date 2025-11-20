@@ -19,8 +19,6 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Update failed: ${failure.message}'),
-///   (_) => print('Top 3 updated'),
 /// );
 /// ```
 class UpdateTopThreeUseCase implements UseCase<void, UpdateTopThreeParams> {

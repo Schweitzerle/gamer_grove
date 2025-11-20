@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
 import '../../blocs/auth/auth_bloc.dart';
 
 class HeaderSection extends StatelessWidget {
@@ -51,64 +50,7 @@ class HeaderSection extends StatelessWidget {
       },
     );
   }
-
-  Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onSearchPressed ?? () => _navigateToSearch(context),
-            icon: const Icon(Icons.search),
-            label: const Text('Search Games'),
-          ),
-        ),
-        const SizedBox(width: AppConstants.paddingMedium),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.favorite_outline),
-            label: const Text('My Wishlist'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDebugActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed:
-                onSupabaseTestPressed ?? () => _navigateToSupabaseTest(context),
-            icon: const Icon(Icons.storage),
-            label: const Text('Test Supabase'),
-          ),
-        ),
-        const SizedBox(width: AppConstants.paddingMedium),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onIGDBTestPressed ?? () => _navigateToIGDBTest(context),
-            icon: const Icon(Icons.bug_report),
-            label: const Text('Test IGDB'),
-          ),
-        ),
-      ],
-    );
-  }
-
   // Default navigation methods
-  void _navigateToSearch(BuildContext context) {
-    Navigations.navigateToSearch(context);
-  }
-
-  void _navigateToSupabaseTest(BuildContext context) {
-    Navigations.navigateToSupabaseTest(context);
-  }
-
-  void _navigateToIGDBTest(BuildContext context) {
-    Navigations.navigateToIGDBTest(context);
-  }
 }
 
 // Private sub-widgets for better organization

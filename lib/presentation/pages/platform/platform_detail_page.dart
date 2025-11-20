@@ -27,17 +27,14 @@ class PlatformDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🎭 PlatformDetailPage: Building for platform ID: $platformId');
 
     return BlocProvider<PlatformBloc>(
       create: (context) {
-        print('🎭 PlatformDetailPage: Creating PlatformBloc');
         final bloc = sl<PlatformBloc>();
         // 🆕 Hole userId von AuthBloc
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        print('🎭 PlatformDetailPage: Adding GetPlatformDetailsEvent');
         bloc.add(GetPlatformDetailsEvent(
             platformId: platformId,
             includeGames: true, // 🆕 Explicitly set to true
@@ -46,24 +43,18 @@ class PlatformDetailPage extends StatelessWidget {
       },
       child: BlocBuilder<PlatformBloc, PlatformState>(
         builder: (context, state) {
-          print('🎭 PlatformDetailPage: State changed to ${state.runtimeType}');
 
           if (state is PlatformLoading) {
-            print('🔄 PlatformDetailPage: Loading state');
             return _buildLiveLoadingState(context);
           } else if (state is PlatformDetailsLoaded) {
-            print(
-                '✅ PlatformDetailPage: Loaded state - ${state.platform.name} with ${state.games.length} games');
             return PlatformDetailScreen(
               platform: state.platform,
               games: state.games,
             );
           } else if (state is PlatformError) {
-            print('❌ PlatformDetailPage: Error state - ${state.message}');
             return _buildErrorState(context, state.message);
           }
 
-          print('🔄 PlatformDetailPage: Default loading state');
           return _buildLiveLoadingState(context);
         },
       ),

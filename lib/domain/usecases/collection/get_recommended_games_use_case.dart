@@ -16,8 +16,6 @@ import '../usecase.dart';
 /// final result = await useCase(GetRecommendedGamesParams(userId: 'uuid'));
 ///
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (gameIds) => print('Recommended games: $gameIds'),
 /// );
 /// ```
 class GetRecommendedGamesUseCase

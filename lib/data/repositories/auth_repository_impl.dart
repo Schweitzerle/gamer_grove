@@ -32,8 +32,6 @@ import 'base/supabase_base_repository.dart';
 /// // Sign in
 /// final result = await authRepo.signIn('user@example.com', 'password');
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (user) => print('Welcome ${user.username}!'),
 /// );
 /// ```
 class AuthRepositoryImpl extends SupabaseBaseRepository

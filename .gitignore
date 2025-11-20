@@ -10,6 +10,11 @@
 .svn/
 migrate_working_dir/
 
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.*.local
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -41,3 +46,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Keystore files - NEVER commit these!
+*.jks
+*.keystore
+/android/key.properties
+key.properties

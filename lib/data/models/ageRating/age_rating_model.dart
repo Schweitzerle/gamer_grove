@@ -55,7 +55,6 @@ class AgeRatingModel extends AgeRating {
       try {
         return AgeRatingOrganizationModel.fromJson(orgData);
       } catch (e) {
-        print('Error parsing age rating organization: $e');
         return null;
       }
     }
@@ -68,7 +67,6 @@ class AgeRatingModel extends AgeRating {
       try {
         return AgeRatingCategoryModel.fromJson(categoryData);
       } catch (e) {
-        print('Error parsing age rating category: $e');
         return null;
       }
     }

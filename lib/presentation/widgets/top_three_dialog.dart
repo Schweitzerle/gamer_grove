@@ -44,19 +44,12 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   }
 
   Future<void> _loadTopThreeGames() async {
-    print('🔍 TopThreeDialog: Loading top three games...');
-    print(
-        '🔍 TopThreeDialog: currentTopThree provided: ${widget.currentTopThree != null}');
 
     if (widget.currentTopThree != null) {
-      print(
-          '🔍 TopThreeDialog: currentTopThree length: ${widget.currentTopThree!.length}');
 
       // Sort by position and fill the array
       final sortedGames = List<Game?>.filled(3, null);
       for (final game in widget.currentTopThree!) {
-        print(
-            '🔍 TopThreeDialog: Game "${game.name}" position: ${game.topThreePosition}');
         if (game.topThreePosition != null &&
             game.topThreePosition! >= 1 &&
             game.topThreePosition! <= 3) {
@@ -64,9 +57,7 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
         }
       }
 
-      print('🔍 TopThreeDialog: Sorted games:');
       for (int i = 0; i < sortedGames.length; i++) {
-        print('   Position ${i + 1}: ${sortedGames[i]?.name ?? "Empty"}');
       }
 
       setState(() {
@@ -74,32 +65,24 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
         _isLoading = false;
       });
     } else {
-      print(
-          '⚠️ TopThreeDialog: No currentTopThree provided - loading from backend');
 
       // Load top three directly from backend
       final userId = _getCurrentUserId();
       if (userId != null) {
         try {
-          print('🔄 TopThreeDialog: Loading top three for user $userId');
           final getUserTopThree = sl<GetUserTopThree>();
           final result =
               await getUserTopThree(GetUserTopThreeParams(userId: userId));
 
           result.fold(
             (failure) {
-              print(
-                  '❌ TopThreeDialog: Failed to load top three: ${failure.message}');
               setState(() {
                 _isLoading = false;
               });
             },
             (games) {
-              print('✅ TopThreeDialog: Loaded ${games.length} top three games');
               final sortedGames = List<Game?>.filled(3, null);
               for (final game in games) {
-                print(
-                    '   Game: ${game.name} at position ${game.topThreePosition}');
                 if (game.topThreePosition != null &&
                     game.topThreePosition! >= 1 &&
                     game.topThreePosition! <= 3) {
@@ -113,13 +96,11 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
             },
           );
         } catch (e) {
-          print('❌ TopThreeDialog: Error loading top three: $e');
           setState(() {
             _isLoading = false;
           });
         }
       } else {
-        print('⚠️ TopThreeDialog: No user ID available');
         setState(() {
           _isLoading = false;
         });
@@ -139,7 +120,6 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
     final userId = _getCurrentUserId();
     if (userId == null) return;
 
-    print('🗑️ TopThreeDialog: Removing game ${game.id} from top three');
 
     // ✅ UPDATE BOTH BLOCS!
     // 1. Update GameBloc (for game detail pages)

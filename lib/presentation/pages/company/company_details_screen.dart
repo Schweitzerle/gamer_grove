@@ -1429,7 +1429,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not open $url')),
@@ -1439,24 +1438,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   void _logCompanyData() {
-    print('\n=== 🏢 COMPANY DETAIL SCREEN LOADED ===');
-    print('🎯 Company: ${widget.company.name} (ID: ${widget.company.id})');
-    print('🎮 Games: ${widget.games.length}');
-    print('💼 Developer: ${widget.company.isDeveloper}');
-    print('📦 Publisher: ${widget.company.isPublisher}');
-    print('🏢 Has Parent: ${widget.company.hasParent}');
     if (widget.company.hasParent) {
-      print('   Parent: ${widget.company.parentCompany!.name}');
     }
-    print('🌐 Websites: ${widget.company.websites?.length ?? 0}');
-    print('🖼️ Logo: ${widget.company.hasLogo ? 'Available' : 'Fallback'}');
-    print(
-        '📄 Description: ${widget.company.hasDescription ? 'Available' : 'None'}');
-    print('🔗 URL: ${widget.company.url ?? 'None'}');
-    print('🏳️ Country: ${widget.company.country ?? 'Unknown'}');
-    print(
-        '📅 Founded: ${widget.company.hasFoundingDate ? _formatDate(widget.company.startDate!) : 'Unknown'}');
-    print('🔑 Slug: ${widget.company.slug ?? 'None'}');
-    print('=== END COMPANY DETAIL LOG ===\n');
   }
 }

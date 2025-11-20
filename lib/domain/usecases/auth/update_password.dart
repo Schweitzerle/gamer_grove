@@ -18,8 +18,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Failed: ${failure.message}'),
-///   (_) => print('Password updated successfully'),
 /// );
 /// ```
 class UpdatePasswordUseCase implements UseCase<void, UpdatePasswordParams> {
