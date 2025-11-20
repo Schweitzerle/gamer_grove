@@ -116,7 +116,7 @@ class _HomeContentState extends State<HomeContent> {
 
               // Bottom padding
               const SliverToBoxAdapter(
-                child: SizedBox(height: AppConstants.paddingXLarge),
+                child: SizedBox(height: AppConstants.paddingSmall),
               ),
             ],
           ),
