@@ -56,6 +56,7 @@ class _UserSearchContentState extends State<_UserSearchContent> {
   final _scrollController = ScrollController();
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
+  final Set<String> _loadedFollowStatuses = {};
 
   @override
   void initState() {
@@ -85,11 +86,13 @@ class _UserSearchContentState extends State<_UserSearchContent> {
   }
 
   void _onSearchChanged(String query) {
+    _loadedFollowStatuses.clear();
     context.read<UserSearchBloc>().add(SearchUsersRequested(query));
   }
 
   void _clearSearch() {
     _searchController.clear();
+    _loadedFollowStatuses.clear();
     context.read<UserSearchBloc>().add(const ClearSearchRequested());
   }
 
@@ -166,7 +169,20 @@ class _UserSearchContentState extends State<_UserSearchContent> {
   }
 
   Widget _buildSearchResults() {
-    return BlocBuilder<UserSearchBloc, UserSearchState>(
+    return BlocConsumer<UserSearchBloc, UserSearchState>(
+      listener: (context, state) {
+        // Load follow status for each user when search results are loaded
+        if (state.users.isNotEmpty && !state.isLoading) {
+          final socialBloc = context.read<SocialInteractionsBloc>();
+          for (final user in state.users) {
+            // Only load follow status once per user
+            if (!_loadedFollowStatuses.contains(user.id)) {
+              _loadedFollowStatuses.add(user.id);
+              socialBloc.add(LoadFollowStatusRequested(user.id));
+            }
+          }
+        }
+      },
       builder: (context, state) {
         if (state.isLoading) {
           return const Center(
