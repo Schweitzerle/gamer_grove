@@ -29,13 +29,17 @@ class CharacterModel extends Character {
   });
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
+    // Parse the new character_gender and character_species IDs
+    final characterGenderId = json['character_gender'] as int?;
+    final characterSpeciesId = json['character_species'] as int?;
+
     return CharacterModel(
       id: json['id'] ?? 0,
       checksum: json['checksum'] ?? '',
       name: json['name'] ?? '',
       akas: _parseStringList(json['akas']),
-      characterGenderId: json['character_gender'],
-      characterSpeciesId: json['character_species'],
+      characterGenderId: characterGenderId,
+      characterSpeciesId: characterSpeciesId,
       countryName: json['country_name'],
       description: json['description'],
       gameIds: _parseIdList(json['games']),
@@ -44,8 +48,14 @@ class CharacterModel extends Character {
       url: json['url'],
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
-      genderEnum: _parseGenderEnum(json['gender']),
-      speciesEnum: _parseSpeciesEnum(json['species']),
+      // Use character_gender/character_species IDs to determine enum values
+      // If they're not available, fall back to deprecated gender/species fields
+      genderEnum: characterGenderId != null
+          ? _parseGenderEnum(characterGenderId)
+          : _parseGenderEnum(json['gender']),
+      speciesEnum: characterSpeciesId != null
+          ? _parseSpeciesEnum(characterSpeciesId)
+          : _parseSpeciesEnum(json['species']),
       // 🆕 NEW: Extract image ID from nested mug_shot object
       mugShotImageId: _extractMugShotImageId(json['mug_shot']),
     );
