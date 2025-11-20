@@ -1,9 +1,9 @@
 // ===== COMPANY ENTITY (UPDATED WITH LOGO URL) =====
 // lib/domain/entities/company/company.dart
 import 'package:equatable/equatable.dart';
-import '../game/game.dart';
-import '../website/website.dart';
-import 'company_logo.dart'; // Import für CompanyLogo
+import 'package:gamer_grove/domain/entities/company/company_logo.dart'; // Import für CompanyLogo
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
 
 enum CompanyChangeDateCategory {
   yyyymmdd(0),
@@ -28,6 +28,32 @@ enum CompanyChangeDateCategory {
 }
 
 class Company extends Equatable {
+
+  const Company({
+    required this.id,
+    required this.checksum,
+    required this.name,
+    this.description,
+    this.slug,
+    this.url,
+    this.country,
+    this.createdAt,
+    this.updatedAt,
+    this.changeDate,
+    this.changeDateCategory,
+    this.changeDateFormatId,
+    this.changedCompanyId,
+    this.parentCompany,
+    this.logoId,
+    this.logo, // NEU
+    this.statusId,
+    this.startDate,
+    this.startDateCategory,
+    this.startDateFormatId,
+    this.developedGames = const [],
+    this.publishedGames = const [],
+    this.websites = const [],
+  });
   final int id;
   final String checksum;
   final String name;
@@ -57,32 +83,6 @@ class Company extends Equatable {
   final List<Game>? publishedGames;
   final List<Website>? websites;
   final Company? parentCompany;
-
-  const Company({
-    required this.id,
-    required this.checksum,
-    required this.name,
-    this.description,
-    this.slug,
-    this.url,
-    this.country,
-    this.createdAt,
-    this.updatedAt,
-    this.changeDate,
-    this.changeDateCategory,
-    this.changeDateFormatId,
-    this.changedCompanyId,
-    this.parentCompany,
-    this.logoId,
-    this.logo, // NEU
-    this.statusId,
-    this.startDate,
-    this.startDateCategory,
-    this.startDateFormatId,
-    this.developedGames = const [],
-    this.publishedGames = const [],
-    this.websites = const [],
-  });
 
   // Helper getters
   bool get hasLogo => logo != null && logo!.imageId.isNotEmpty;

@@ -2,21 +2,20 @@
 // LIVE LOADING PROGRESS - CONSOLE-STYLE LOADING
 // ==================================================
 
-// lib/presentation/widgets/live_loading_progress.dart
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+// lib/presentation/widgets/live_loading_progress.dart
+import 'package:flutter/material.dart';
+
 class LiveLoadingProgress extends StatefulWidget {
+
+  const LiveLoadingProgress({
+    required this.title, required this.steps, super.key,
+    this.stepDuration = const Duration(milliseconds: 800),
+  });
   final String title;
   final List<LoadingStep> steps;
   final Duration stepDuration;
-
-  const LiveLoadingProgress({
-    super.key,
-    required this.title,
-    required this.steps,
-    this.stepDuration = const Duration(milliseconds: 800),
-  });
 
   @override
   State<LiveLoadingProgress> createState() => _LiveLoadingProgressState();
@@ -47,19 +46,19 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
 
     _pulseAnimation = Tween<double>(
       begin: 0.4,
-      end: 1.0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,
-    ));
+    ),);
 
     _typewriterAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _typewriterController,
       curve: Curves.easeOut,
-    ));
+    ),);
 
     _startLoading();
   }
@@ -98,7 +97,6 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            width: 1,
           ),
         ),
         child: Column(
@@ -219,7 +217,7 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
             margin: const EdgeInsets.only(right: 12),
             child: isCompleted
                 ? Icon(Icons.check_circle,
-                    color: Theme.of(context).colorScheme.primary, size: 16)
+                    color: Theme.of(context).colorScheme.primary, size: 16,)
                 : isActive
                     ? AnimatedBuilder(
                         animation: _pulseAnimation,
@@ -256,8 +254,7 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Step Text with Typewriter Effect
-                isActive
-                    ? AnimatedBuilder(
+                if (isActive) AnimatedBuilder(
                         animation: _typewriterAnimation,
                         builder: (context, child) {
                           final visibleLength =
@@ -299,8 +296,7 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
                             ),
                           );
                         },
-                      )
-                    : RichText(
+                      ) else RichText(
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                         text: TextSpan(
@@ -362,10 +358,6 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
 // ==================================================
 
 class LoadingStep {
-  final String text;
-  final String? substep;
-  final Color? color;
-  final IconData? icon;
 
   const LoadingStep({
     required this.text,
@@ -373,6 +365,10 @@ class LoadingStep {
     this.color,
     this.icon,
   });
+  final String text;
+  final String? substep;
+  final Color? color;
+  final IconData? icon;
 }
 
 // ==================================================

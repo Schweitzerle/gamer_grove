@@ -8,8 +8,8 @@
 /// - Tier 3: PostgreSQL function for large lists (>= 50 games)
 library;
 
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../domain/entities/game/game.dart';
 
 /// Service for enriching games with user collection data.
 ///
@@ -19,13 +19,13 @@ import '../../domain/entities/game/game.dart';
 /// final enrichedGames = await service.enrichGames(games, userId);
 /// ```
 class GameEnrichmentService {
-  final SupabaseClient supabase;
-  final bool enableLogging;
 
   GameEnrichmentService({
     required this.supabase,
     this.enableLogging = false,
   });
+  final SupabaseClient supabase;
+  final bool enableLogging;
 
   /// Enriches a list of games with user-specific data.
   ///
@@ -86,7 +86,7 @@ class GameEnrichmentService {
     } catch (e, stackTrace) {
       _log('Error enriching games: $e\n$stackTrace');
       // Return games without enrichment on error
-      return games.map((game) => _createUnenrichedGame(game)).toList();
+      return games.map(_createUnenrichedGame).toList();
     }
   }
 
@@ -247,9 +247,7 @@ class GameEnrichmentService {
     return game.copyWith(
       isWishlisted: false,
       isRecommended: false,
-      userRating: null,
       isInTopThree: false,
-      topThreePosition: null,
     );
   }
 

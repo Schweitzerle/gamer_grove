@@ -5,6 +5,8 @@
 /// Defines the contract for all user-related operations with Supabase backend.
 library;
 
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_user_exceptions.dart' show AlreadyFollowingException, AvatarUploadException, CannotFollowSelfException, InvalidRatingException, InvalidTopThreeException, NotFollowingException, UserException, UserNotFoundException;
+
 /// Abstract interface for user data operations.
 ///
 /// Implementations should handle all low-level user operations

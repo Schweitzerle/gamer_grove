@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class LeaderboardRank extends StatelessWidget {
-  final int rank;
 
-  const LeaderboardRank({super.key, required this.rank});
+  const LeaderboardRank({required this.rank, super.key});
+  final int rank;
 
   @override
   Widget build(BuildContext context) {

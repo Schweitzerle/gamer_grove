@@ -1,24 +1,23 @@
 // presentation/widgets/rating_widget.dart
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class RatingWidget extends StatefulWidget {
+
+  const RatingWidget({
+    required this.onRatingChanged, super.key,
+    this.initialRating,
+    this.isReadOnly = false,
+    this.size = 32.0,
+    this.activeColor,
+    this.inactiveColor,
+  });
   final double? initialRating;
   final void Function(double) onRatingChanged;
   final bool isReadOnly;
   final double size;
   final Color? activeColor;
   final Color? inactiveColor;
-
-  const RatingWidget({
-    super.key,
-    this.initialRating,
-    required this.onRatingChanged,
-    this.isReadOnly = false,
-    this.size = 32.0,
-    this.activeColor,
-    this.inactiveColor,
-  });
 
   @override
   State<RatingWidget> createState() => _RatingWidgetState();
@@ -65,10 +64,6 @@ class _RatingWidgetState extends State<RatingWidget> {
 }
 
 class GameRatingCard extends StatelessWidget {
-  final double? igdbRating;
-  final int? ratingCount;
-  final double? userRating;
-  final VoidCallback? onRatePressed;
 
   const GameRatingCard({
     super.key,
@@ -77,6 +72,10 @@ class GameRatingCard extends StatelessWidget {
     this.userRating,
     this.onRatePressed,
   });
+  final double? igdbRating;
+  final int? ratingCount;
+  final double? userRating;
+  final VoidCallback? onRatePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +127,7 @@ class GameRatingCard extends StatelessWidget {
     BuildContext context, {
     required double rating,
     required String title,
-    String? subtitle,
-    required Color color,
+    required Color color, String? subtitle,
   }) {
     return Column(
       children: [
@@ -194,23 +192,21 @@ class GameRatingCard extends StatelessWidget {
 }
 
 class RatingDialog extends StatefulWidget {
+
+  const RatingDialog({
+    required this.gameTitle, required this.onRatingSubmitted, super.key,
+    this.initialRating,
+  });
   final String gameTitle;
   final double? initialRating;
   final void Function(double rating) onRatingSubmitted;
-
-  const RatingDialog({
-    super.key,
-    required this.gameTitle,
-    this.initialRating,
-    required this.onRatingSubmitted,
-  });
 
   @override
   State<RatingDialog> createState() => _RatingDialogState();
 }
 
 class _RatingDialogState extends State<RatingDialog> {
-  double _rating = 0.0;
+  double _rating = 0;
 
   @override
   void initState() {
@@ -300,16 +296,15 @@ class _RatingDialogState extends State<RatingDialog> {
 
 // Compact rating display for cards
 class CompactRatingWidget extends StatelessWidget {
-  final double rating;
-  final bool showLabel;
-  final double size;
 
   const CompactRatingWidget({
-    super.key,
-    required this.rating,
+    required this.rating, super.key,
     this.showLabel = true,
     this.size = 16,
   });
+  final double rating;
+  final bool showLabel;
+  final double size;
 
   @override
   Widget build(BuildContext context) {

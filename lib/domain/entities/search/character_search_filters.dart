@@ -1,7 +1,7 @@
 // lib/domain/entities/search/character_search_filters.dart
 import 'package:equatable/equatable.dart';
-import '../character/character_gender.dart';
-import '../character/character_species.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
 
 enum CharacterSortBy {
   relevance,
@@ -15,6 +15,22 @@ enum CharacterSortOrder {
 }
 
 class CharacterSearchFilters extends Equatable {
+  const CharacterSearchFilters({
+    // Gender Filter
+    this.gender,
+
+    // Species Filter
+    this.species,
+
+    // Existence Filters
+    this.hasMugShot,
+    this.hasDescription,
+    this.hasGames,
+
+    // Sorting
+    this.sortBy = CharacterSortBy.relevance,
+    this.sortOrder = CharacterSortOrder.descending,
+  });
   // ============================================================
   // GENDER FILTER
   // ============================================================
@@ -38,29 +54,12 @@ class CharacterSearchFilters extends Equatable {
   final CharacterSortBy sortBy;
   final CharacterSortOrder sortOrder;
 
-  const CharacterSearchFilters({
-    // Gender Filter
-    this.gender,
-
-    // Species Filter
-    this.species,
-
-    // Existence Filters
-    this.hasMugShot,
-    this.hasDescription,
-    this.hasGames,
-
-    // Sorting
-    this.sortBy = CharacterSortBy.relevance,
-    this.sortOrder = CharacterSortOrder.descending,
-  });
-
   bool get hasFilters =>
       gender != null ||
       species != null ||
-      hasMugShot == true ||
-      hasDescription == true ||
-      hasGames == true ||
+      (hasMugShot ?? false) ||
+      (hasDescription ?? false) ||
+      (hasGames ?? false) ||
       sortBy != CharacterSortBy.relevance;
 
   bool get hasGenderFilter => gender != null;
@@ -68,7 +67,7 @@ class CharacterSearchFilters extends Equatable {
   bool get hasSpeciesFilter => species != null;
 
   bool get hasExistenceFilters =>
-      hasMugShot == true || hasDescription == true || hasGames == true;
+      (hasMugShot ?? false) || (hasDescription ?? false) || (hasGames ?? false);
 
   CharacterSearchFilters copyWith({
     CharacterGenderEnum? gender,

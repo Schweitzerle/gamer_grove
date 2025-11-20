@@ -2,15 +2,11 @@
 
 // lib/domain/entities/game/game_media_collection.dart
 import 'package:equatable/equatable.dart';
-import '../game/game_video.dart';
-import '../screenshot.dart';
-import '../artwork.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/entities/screenshot.dart';
 
 class GameMediaCollection extends Equatable {
-  final int gameId;
-  final List<GameVideo> videos;
-  final List<Screenshot> screenshots;
-  final List<Artwork> artworks;
 
   const GameMediaCollection({
     required this.gameId,
@@ -18,6 +14,10 @@ class GameMediaCollection extends Equatable {
     required this.screenshots,
     required this.artworks,
   });
+  final int gameId;
+  final List<GameVideo> videos;
+  final List<Screenshot> screenshots;
+  final List<Artwork> artworks;
 
   // Helper getters
   bool get hasVideos => videos.isNotEmpty;

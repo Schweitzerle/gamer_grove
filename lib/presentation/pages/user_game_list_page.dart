@@ -104,15 +104,12 @@ class _UserGameListPageState extends State<UserGameListPage> {
     switch (widget.type) {
       case GameListType.rated:
         context.read<GameBloc>().add(LoadAllUserRatedEvent(widget.userId));
-        break;
       case GameListType.wishlist:
         context.read<GameBloc>().add(LoadAllUserWishlistEvent(widget.userId));
-        break;
       case GameListType.recommended:
         context
             .read<GameBloc>()
             .add(LoadAllUserRecommendationsEvent(widget.userId));
-        break;
     }
   }
 
@@ -157,8 +154,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
-                      'All your games are loaded. Filtering and sorting is done locally.'),
-                  duration: Duration(seconds: 4),
+                      'All your games are loaded. Filtering and sorting is done locally.',),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -238,9 +234,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                  },
+                  onPressed: _searchController.clear,
                 )
               : null,
           border: OutlineInputBorder(
@@ -286,7 +280,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
   }
 
   Widget _buildGridView(List<Game> games) {
-    final bool hasMore = games.length < _filteredAndSortedGames.length;
+    final hasMore = games.length < _filteredAndSortedGames.length;
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -328,7 +322,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
   }
 
   Widget _buildListView(List<Game> games) {
-    final bool hasMore = games.length < _filteredAndSortedGames.length;
+    final hasMore = games.length < _filteredAndSortedGames.length;
     return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -412,8 +406,7 @@ class _UserGameListPageState extends State<UserGameListPage> {
       case SortCategory.name:
         result.sort((a, b) => _sortDirection == SortDirection.ascending
             ? a.name.compareTo(b.name)
-            : b.name.compareTo(a.name));
-        break;
+            : b.name.compareTo(a.name),);
       case SortCategory.totalRating:
         result.sort((a, b) {
           final aRating = a.totalRating ?? 0;
@@ -422,7 +415,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.igdbUserRating:
         result.sort((a, b) {
           final aRating = a.rating ?? 0;
@@ -431,7 +423,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.aggregatedRating:
         result.sort((a, b) {
           final aRating = a.aggregatedRating ?? 0;
@@ -440,7 +431,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.userRating:
         result.sort((a, b) {
           final aRating = a.userRating ?? 0;
@@ -449,7 +439,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.totalRatingCount:
         result.sort((a, b) {
           final aRating = a.totalRatingCount ?? 0;
@@ -458,7 +447,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.igdbUserRatingCount:
         result.sort((a, b) {
           final aRating = a.ratingCount ?? 0;
@@ -467,7 +455,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.aggregatedRatingCount:
         result.sort((a, b) {
           final aRating = a.aggregatedRatingCount ?? 0;
@@ -476,7 +463,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aRating.compareTo(bRating)
               : bRating.compareTo(aRating);
         });
-        break;
       case SortCategory.hypes:
         result.sort((a, b) {
           final aHypes = a.hypes ?? 0;
@@ -485,7 +471,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? aHypes.compareTo(bHypes)
               : bHypes.compareTo(aHypes);
         });
-        break;
       case SortCategory.releaseDate:
         result.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
@@ -497,7 +482,6 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ? a.firstReleaseDate!.compareTo(b.firstReleaseDate!)
               : b.firstReleaseDate!.compareTo(a.firstReleaseDate!);
         });
-        break;
     }
 
     return result;

@@ -2,10 +2,10 @@
 // ENHANCED EVENT NETWORK MODEL
 // ==================================================
 
+import 'package:gamer_grove/data/models/event/network_type_model.dart';
 // lib/data/models/event/event_network_model.dart (ENHANCED)
-import '../../../domain/entities/event/event_network.dart';
-import '../../../domain/entities/event/network_type.dart';
-import 'network_type_model.dart';
+import 'package:gamer_grove/domain/entities/event/event_network.dart';
+import 'package:gamer_grove/domain/entities/event/network_type.dart';
 
 class EventNetworkModel extends EventNetwork {
   const EventNetworkModel({

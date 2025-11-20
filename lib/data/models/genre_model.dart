@@ -1,5 +1,5 @@
 // lib/data/models/genre_model.dart
-import '../../domain/entities/genre.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
 
 class GenreModel extends Genre {
   const GenreModel({

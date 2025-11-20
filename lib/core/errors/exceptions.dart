@@ -1,69 +1,69 @@
 // exceptions.dart
 class ServerException implements Exception {
-  final String message;
-  final int? statusCode;
 
   ServerException(
-    String s, {
+    {
     required this.message,
     this.statusCode,
   });
+  final String message;
+  final int? statusCode;
 }
 
 class NetworkException implements Exception {
-  final String message;
 
   NetworkException({
     this.message = 'No internet connection',
   });
+  final String message;
 }
 
 class CacheException implements Exception {
-  final String message;
 
   CacheException({
     this.message = 'Cache error',
   });
+  final String message;
 }
 
 class AuthException implements Exception {
-  final String message;
-  final String? code;
 
   AuthException({
     required this.message,
     this.code,
   });
+  final String message;
+  final String? code;
 }
 
 class ValidationException implements Exception {
-  final String message;
-  final Map<String, String>? errors;
 
   ValidationException({
     required this.message,
     this.errors,
   });
+  final String message;
+  final Map<String, String>? errors;
 }
 
 class UnauthorizedException implements Exception {
-  final String message;
-  final String? code;
 
   UnauthorizedException({
     required this.message,
     this.code,
   });
+  final String message;
+  final String? code;
 }
 
 class NotFoundException implements Exception {
-  final String message;
-  final String? code;
 
   NotFoundException({
     required this.message,
     this.code,
   });
+  final String message;
+  final String? code;
 
   @override
   String toString() => 'NotFoundException: $message';

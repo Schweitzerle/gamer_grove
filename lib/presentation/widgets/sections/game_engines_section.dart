@@ -2,17 +2,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
-import 'package:gamer_grove/domain/entities/game/game_engine.dart';
-import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 
 class GameEnginesSection extends StatelessWidget {
-  final List<GameEngine> gameEngines;
 
   const GameEnginesSection({
-    super.key,
-    required this.gameEngines,
+    required this.gameEngines, super.key,
   });
+  final List<GameEngine> gameEngines;
 
   static const Color _engineColor = Color(0xFF6366F1); // Indigo
 
@@ -37,7 +36,7 @@ class GameEnginesSection extends StatelessWidget {
       padding: const EdgeInsets.only(
           top: AppConstants.paddingSmall,
           right: AppConstants.paddingSmall,
-          left: AppConstants.paddingSmall),
+          left: AppConstants.paddingSmall,),
       child: Row(
         children: [
           Icon(
@@ -64,7 +63,7 @@ class GameEnginesSection extends StatelessWidget {
         padding: const EdgeInsets.only(
             bottom: AppConstants.paddingSmall,
             left: AppConstants.paddingSmall,
-            right: AppConstants.paddingSmall),
+            right: AppConstants.paddingSmall,),
         child: _buildSingleEngineCard(context, gameEngines.first),
       );
     }
@@ -245,7 +244,7 @@ class GameEnginesSection extends StatelessWidget {
   }
 
   Widget _buildEngineLogo(BuildContext context, GameEngine engine,
-      {required double size}) {
+      {required double size,}) {
     if (engine.hasLogo) {
       final logoUrl = ImageUtils.getMediumImageUrl(
         engine.logo?.url.toString(),
@@ -276,7 +275,7 @@ class GameEnginesSection extends StatelessWidget {
   }
 
   Widget _buildDefaultEngineLogo(
-      BuildContext context, GameEngine engine, double size) {
+      BuildContext context, GameEngine engine, double size,) {
     final iconData = _getEngineIconData(engine);
     final color = _getEngineColor(engine);
 

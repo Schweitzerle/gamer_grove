@@ -4,42 +4,42 @@
 // Composite Use Case for efficient Game Detail page loading
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../entities/character/character.dart';
-import '../../entities/event/event.dart';
-import '../../entities/game/game_media_collection.dart';
-import '../base_usecase.dart';
-import 'get_enhanced_game_details.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_media_collection.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
+import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_details.dart';
 
 class GetCompleteGameDetailPageData
     extends UseCase<GameDetailPageData, GetCompleteGameDetailPageDataParams> {
-  final GetEnhancedGameDetails getEnhancedGameDetails;
 
   GetCompleteGameDetailPageData({
     required this.getEnhancedGameDetails,
   });
+  final GetEnhancedGameDetails getEnhancedGameDetails;
 
   @override
   Future<Either<Failure, GameDetailPageData>> call(
-      GetCompleteGameDetailPageDataParams params) async {
+      GetCompleteGameDetailPageDataParams params,) async {
     try {
       // Get enhanced game details with all content
       final gameResult =
           await getEnhancedGameDetails(GetEnhancedGameDetailsParams.fullDetails(
         gameId: params.gameId,
         userId: params.userId,
-      ));
+      ),);
 
       if (gameResult.isLeft()) {
         return gameResult.fold(
-          (failure) => Left(failure),
+          Left.new,
           (game) => throw Exception('Unexpected success'),
         );
       }
 
       final game = gameResult.fold(
-          (l) => throw Exception('Unexpected failure'), (r) => r);
+          (l) => throw Exception('Unexpected failure'), (r) => r,);
 
       return Right(GameDetailPageData(
         game: game,
@@ -51,32 +51,28 @@ class GetCompleteGameDetailPageData
           screenshots: game.screenshots,
           artworks: game.artworks,
         ),
-      ));
+      ),);
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to load game detail page data: $e'));
+          ServerFailure(message: 'Failed to load game detail page data: $e'),);
     }
   }
 }
 
 class GetCompleteGameDetailPageDataParams extends Equatable {
-  final int gameId;
-  final String? userId;
 
   const GetCompleteGameDetailPageDataParams({
     required this.gameId,
     this.userId,
   });
+  final int gameId;
+  final String? userId;
 
   @override
   List<Object?> get props => [gameId, userId];
 }
 
 class GameDetailPageData extends Equatable {
-  final Game game;
-  final List<Character> characters;
-  final List<Event> events;
-  final GameMediaCollection mediaCollection;
 
   const GameDetailPageData({
     required this.game,
@@ -84,6 +80,10 @@ class GameDetailPageData extends Equatable {
     required this.events,
     required this.mediaCollection,
   });
+  final Game game;
+  final List<Character> characters;
+  final List<Event> events;
+  final GameMediaCollection mediaCollection;
 
   // Helper getters
   bool get hasCharacters => characters.isNotEmpty;

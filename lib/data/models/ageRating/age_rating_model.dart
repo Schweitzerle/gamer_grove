@@ -1,11 +1,10 @@
 // ===== UPDATED AGE RATING MODEL =====
 // lib/data/models/ageRating/age_rating_model.dart
 import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
+import 'package:gamer_grove/data/models/ageRating/age_rating_organization.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
-
-import '../../../domain/entities/ageRating/age_rating.dart';
-import '../../../domain/entities/ageRating/age_rating_organization.dart';
-import 'age_rating_organization.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingModel extends AgeRating {
   const AgeRatingModel({

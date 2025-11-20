@@ -3,8 +3,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for getting user's recommended game IDs.
 ///
@@ -20,15 +20,15 @@ import '../usecase.dart';
 /// ```
 class GetRecommendedGamesUseCase
     implements UseCase<List<int>, GetRecommendedGamesParams> {
-  final UserRepository repository;
 
   GetRecommendedGamesUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<int>>> call(
     GetRecommendedGamesParams params,
   ) async {
-    return await repository.getRecommendedGames(
+    return repository.getRecommendedGames(
       params.userId,
       limit: params.limit,
       offset: params.offset,
@@ -37,15 +37,15 @@ class GetRecommendedGamesUseCase
 }
 
 class GetRecommendedGamesParams extends Equatable {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const GetRecommendedGamesParams({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];

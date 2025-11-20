@@ -1,7 +1,7 @@
 // ===== POPULARITY TYPE MODEL =====
 // lib/data/models/popularity/popularity_type_model.dart
-import '../../../domain/entities/popularity/popularity_primitive.dart';
-import '../../../domain/entities/popularity/popularity_type.dart';
+import 'package:gamer_grove/domain/entities/popularity/popularity_primitive.dart';
+import 'package:gamer_grove/domain/entities/popularity/popularity_type.dart';
 
 class PopularityTypeModel extends PopularityType {
   const PopularityTypeModel({
@@ -13,46 +13,6 @@ class PopularityTypeModel extends PopularityType {
     super.externalPopularitySourceId,
     super.popularitySourceEnum,
   });
-
-  factory PopularityTypeModel.fromJson(Map<String, dynamic> json) {
-    return PopularityTypeModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
-      createdAt: _parseDateTime(json['created_at']),
-      updatedAt: _parseDateTime(json['updated_at']),
-      externalPopularitySourceId: json['external_popularity_source'],
-      popularitySourceEnum: _parsePopularitySourceEnum(json['popularity_source']),
-    );
-  }
-
-  static DateTime? _parseDateTime(dynamic date) {
-    if (date is String) {
-      return DateTime.tryParse(date);
-    } else if (date is int) {
-      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
-    }
-    return null;
-  }
-
-  static PopularitySourceEnum? _parsePopularitySourceEnum(dynamic source) {
-    if (source is int) {
-      return PopularitySourceEnum.fromValue(source);
-    }
-    return null;
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'checksum': checksum,
-      'name': name,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-      'external_popularity_source': externalPopularitySourceId,
-      'popularity_source': popularitySourceEnum?.value,
-    };
-  }
 
   // Factory method for creating common popularity types
   factory PopularityTypeModel.userRating({
@@ -123,5 +83,45 @@ class PopularityTypeModel extends PopularityType {
       popularitySourceEnum: source,
       createdAt: DateTime.now(),
     );
+  }
+
+  factory PopularityTypeModel.fromJson(Map<String, dynamic> json) {
+    return PopularityTypeModel(
+      id: json['id'] ?? 0,
+      checksum: json['checksum'] ?? '',
+      name: json['name'] ?? '',
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+      externalPopularitySourceId: json['external_popularity_source'],
+      popularitySourceEnum: _parsePopularitySourceEnum(json['popularity_source']),
+    );
+  }
+
+  static DateTime? _parseDateTime(dynamic date) {
+    if (date is String) {
+      return DateTime.tryParse(date);
+    } else if (date is int) {
+      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
+    }
+    return null;
+  }
+
+  static PopularitySourceEnum? _parsePopularitySourceEnum(dynamic source) {
+    if (source is int) {
+      return PopularitySourceEnum.fromValue(source);
+    }
+    return null;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'checksum': checksum,
+      'name': name,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'external_popularity_source': externalPopularitySourceId,
+      'popularity_source': popularitySourceEnum?.value,
+    };
   }
 }

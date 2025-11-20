@@ -5,17 +5,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/utils/image_utils.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
 
 class ImageGalleryPage extends StatefulWidget {
-  final List<String> images;
-  final int initialIndex;
 
   const ImageGalleryPage({
-    super.key,
-    required this.images,
-    required this.initialIndex,
+    required this.images, required this.initialIndex, super.key,
   });
+  final List<String> images;
+  final int initialIndex;
 
   @override
   State<ImageGalleryPage> createState() => _ImageGalleryPageState();

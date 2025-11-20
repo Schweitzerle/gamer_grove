@@ -2,10 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformFamily extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final String? slug;
 
   const PlatformFamily({
     required this.id,
@@ -13,6 +9,10 @@ class PlatformFamily extends Equatable {
     required this.name,
     this.slug,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final String? slug;
 
   @override
   List<Object?> get props => [id, checksum, name, slug];

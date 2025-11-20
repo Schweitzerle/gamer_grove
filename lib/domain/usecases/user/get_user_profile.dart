@@ -7,8 +7,8 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 // ============================================================
 // GET USER PROFILE USE CASE
@@ -25,30 +25,30 @@ import '../usecase.dart';
 /// );
 /// ```
 class GetUserProfileUseCase implements UseCase<User, GetUserProfileParams> {
-  final UserRepository repository;
 
   GetUserProfileUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, User>> call(GetUserProfileParams params) async {
     if (params.userId != null) {
-      return await repository.getUserProfile(userId: params.userId!);
+      return repository.getUserProfile(userId: params.userId!);
     } else {
       return const Left(ValidationFailure(
         message: 'userId must be provided',
-      ));
+      ),);
     }
   }
 }
 
 class GetUserProfileParams extends Equatable {
-  final String? userId;
-  final String? username;
 
   const GetUserProfileParams({
     this.userId,
     this.username,
   });
+  final String? userId;
+  final String? username;
 
   @override
   List<Object?> get props => [userId, username];

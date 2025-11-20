@@ -1,5 +1,5 @@
 // lib/data/models/platform_type_model.dart
-import '../../../domain/entities/platform/platform_type.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_type.dart';
 
 class PlatformTypeModel extends PlatformType {
   const PlatformTypeModel({

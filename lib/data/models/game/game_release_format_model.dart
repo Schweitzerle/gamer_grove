@@ -1,6 +1,6 @@
 // lib/data/models/game_release_format_model.dart
 
-import '../../../domain/entities/game/game_release_format.dart';
+import 'package:gamer_grove/domain/entities/game/game_release_format.dart';
 
 class GameReleaseFormatModel extends GameReleaseFormat {
   const GameReleaseFormatModel({

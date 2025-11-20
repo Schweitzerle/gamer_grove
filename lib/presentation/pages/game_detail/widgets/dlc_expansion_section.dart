@@ -4,20 +4,18 @@
 
 // lib/presentation/pages/game_detail/widgets/dlc_expansion_section.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/navigations.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../../widgets/game_card.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class DLCExpansionSection extends StatelessWidget {
-  final List<Game> dlcs;
-  final List<Game> expansions;
 
   const DLCExpansionSection({
-    super.key,
-    required this.dlcs,
-    required this.expansions,
+    required this.dlcs, required this.expansions, super.key,
   });
+  final List<Game> dlcs;
+  final List<Game> expansions;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +50,7 @@ class DLCExpansionSection extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: AppConstants.paddingSmall),
-            buildHorizontalGameList(dlcs)
+            buildHorizontalGameList(dlcs),
           ],
         ],
       ),
@@ -76,7 +74,7 @@ class DLCExpansionSection extends StatelessWidget {
             child: GameCard(
                 game: game,
                 onTap: () =>
-                    Navigations.navigateToGameDetail(game.id, context)),
+                    Navigations.navigateToGameDetail(game.id, context),),
           );
         },
       ),

@@ -1,33 +1,105 @@
 // lib/domain/entities/game.dart (VOLLSTÄNDIG ERWEITERT)
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
 import 'package:gamer_grove/domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/externalGame/external_game.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_localization.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_time_to_beat.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
+import 'package:gamer_grove/domain/entities/involved_company.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/language/language_support.dart';
+import 'package:gamer_grove/domain/entities/multiplayer_mode.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
+import 'package:gamer_grove/domain/entities/screenshot.dart';
 import 'package:gamer_grove/domain/entities/theme.dart';
-import '../character/character.dart';
-import '../collection/collection.dart';
-import '../event/event.dart';
-import '../genre.dart';
-import '../language/language_support.dart';
-import '../platform/platform.dart';
-import '../screenshot.dart';
-import '../website/website_type.dart';
-import 'game_mode.dart';
-import '../involved_company.dart';
-import '../website/website.dart';
-import 'game_status.dart';
-import 'game_time_to_beat.dart';
-import 'game_type.dart';
-import 'game_video.dart';
-import '../ageRating/age_rating.dart';
-import 'game_engine.dart';
-import '../keyword.dart';
-import '../multiplayer_mode.dart';
-import '../player_perspective.dart';
-import '../franchise.dart';
-import '../externalGame/external_game.dart';
-import '../releaseDate/release_date.dart';
-import 'game_localization.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class Game extends Equatable {
+
+  Game({
+    required this.id,
+    required this.name,
+    this.summary,
+    this.storyline,
+    this.slug,
+    this.url,
+    this.checksum,
+    this.createdAt,
+    this.updatedAt,
+    this.totalRating,
+    this.totalRatingCount,
+    this.rating,
+    this.ratingCount,
+    this.aggregatedRating,
+    this.aggregatedRatingCount,
+    this.firstReleaseDate,
+    this.releaseDates = const [],
+    this.gameStatusId,
+    this.gameTypeId,
+    this.gameStatus,
+    this.gameType,
+    this.timeToBeat,
+    this.versionTitle,
+    this.versionParentId,
+    this.versionParent,
+    this.hypes,
+    this.follows,
+    this.tags = const [],
+    this.dlcs = const [],
+    this.expansions = const [],
+    this.standaloneExpansions = const [],
+    this.remakes = const [],
+    this.remasters = const [],
+    this.ports = const [],
+    this.bundles = const [],
+    this.similarGames = const [],
+    this.expandedGames = const [],
+    this.forks = const [],
+    this.gameLocalizations = const [],
+    this.parentGame,
+    this.childGames = const [],
+    this.coverUrl,
+    this.screenshots = const [],
+    this.artworks = const [],
+    this.videos = const [],
+    this.genres = const [],
+    this.platforms = const [],
+    this.gameModes = const [],
+    this.themes = const [],
+    this.keywords = const [],
+    this.playerPerspectives = const [],
+    this.involvedCompanies = const [],
+    this.gameEngines = const [],
+    this.websites = const [],
+    this.externalGames = const [],
+    this.ageRatings = const [],
+    this.multiplayerModes = const [],
+    this.languageSupports = const [],
+    this.mainFranchise,
+    this.franchises = const [],
+    this.collections = const [],
+    this.alternativeNames = const [],
+    this.isWishlisted = false,
+    this.isRecommended = false,
+    this.userRating,
+    this.isInTopThree = false,
+    this.topThreePosition,
+    this.characters = const [],
+    this.events = const [],
+  });
   // ===== GRUNDLEGENDE DATEN =====
   final int id;
   final String name;
@@ -137,78 +209,6 @@ class Game extends Equatable {
   List<Character> characters;
   List<Event> events;
 
-  Game({
-    required this.id,
-    required this.name,
-    this.summary,
-    this.storyline,
-    this.slug,
-    this.url,
-    this.checksum,
-    this.createdAt,
-    this.updatedAt,
-    this.totalRating,
-    this.totalRatingCount,
-    this.rating,
-    this.ratingCount,
-    this.aggregatedRating,
-    this.aggregatedRatingCount,
-    this.firstReleaseDate,
-    this.releaseDates = const [],
-    this.gameStatusId,
-    this.gameTypeId,
-    this.gameStatus,
-    this.gameType,
-    this.timeToBeat,
-    this.versionTitle,
-    this.versionParentId,
-    this.versionParent,
-    this.hypes,
-    this.follows,
-    this.tags = const [],
-    this.dlcs = const [],
-    this.expansions = const [],
-    this.standaloneExpansions = const [],
-    this.remakes = const [],
-    this.remasters = const [],
-    this.ports = const [],
-    this.bundles = const [],
-    this.similarGames = const [],
-    this.expandedGames = const [],
-    this.forks = const [],
-    this.gameLocalizations = const [],
-    this.parentGame,
-    this.childGames = const [],
-    this.coverUrl,
-    this.screenshots = const [],
-    this.artworks = const [],
-    this.videos = const [],
-    this.genres = const [],
-    this.platforms = const [],
-    this.gameModes = const [],
-    this.themes = const [],
-    this.keywords = const [],
-    this.playerPerspectives = const [],
-    this.involvedCompanies = const [],
-    this.gameEngines = const [],
-    this.websites = const [],
-    this.externalGames = const [],
-    this.ageRatings = const [],
-    this.multiplayerModes = const [],
-    this.languageSupports = const [],
-    this.mainFranchise,
-    this.franchises = const [],
-    this.collections = const [],
-    this.alternativeNames = const [],
-    this.isWishlisted = false,
-    this.isRecommended = false,
-    this.userRating,
-    this.isInTopThree = false,
-    this.topThreePosition,
-    this.characters = const [],
-    this.events = const [],
-  });
-
   // ===== COMPUTED PROPERTIES =====
 
   bool get isMainGame => gameType?.id == 0 || gameTypeId == 0;
@@ -269,15 +269,15 @@ class Game extends Equatable {
 
   /// Prüft ob das Spiel Online-Multiplayer unterstützt
   bool get hasOnlineMultiplayer => multiplayerModes.any((mode) =>
-      mode.onlineCoop || mode.onlineMax > 1 || mode.splitscreenOnline);
+      mode.onlineCoop || mode.onlineMax > 1 || mode.splitscreenOnline,);
 
   /// Prüft ob das Spiel lokalen Multiplayer unterstützt
   bool get hasLocalMultiplayer => multiplayerModes.any(
-      (mode) => mode.offlineCoop || mode.offlineMax > 1 || mode.splitscreen);
+      (mode) => mode.offlineCoop || mode.offlineMax > 1 || mode.splitscreen,);
 
   /// Prüft ob das Spiel Co-op unterstützt
   bool get hasCooperative => multiplayerModes.any((mode) =>
-      mode.campaignCoop || mode.onlineCoop || mode.offlineCoop || mode.lancoop);
+      mode.campaignCoop || mode.onlineCoop || mode.offlineCoop || mode.lancoop,);
 
   /// Prüft ob das Spiel Split-Screen unterstützt
   bool get hasSplitScreen => multiplayerModes
@@ -314,12 +314,12 @@ class Game extends Equatable {
   /// Prüft ob das Spiel auf PC verfügbar ist
   bool get isAvailableOnPC => platforms.any((platform) =>
       platform.name.toLowerCase().contains('pc') ||
-      platform.name.toLowerCase().contains('windows'));
+      platform.name.toLowerCase().contains('windows'),);
 
   /// Prüft ob das Spiel auf Konsolen verfügbar ist
   bool get isAvailableOnConsoles => platforms.any((platform) =>
       !platform.name.toLowerCase().contains('pc') &&
-      !platform.name.toLowerCase().contains('windows'));
+      !platform.name.toLowerCase().contains('windows'),);
 
   // ===== CONTENT PROPERTIES =====
 
@@ -374,7 +374,7 @@ class Game extends Equatable {
       developers.isNotEmpty &&
       publishers.isNotEmpty &&
       !developers.any(
-          (dev) => publishers.any((pub) => dev.company.id == pub.company.id));
+          (dev) => publishers.any((pub) => dev.company.id == pub.company.id),);
 
   // ===== GAME MODE PROPERTIES =====
 
@@ -403,7 +403,7 @@ class Game extends Equatable {
   /// Top-Down/Isometric Perspektive verfügbar
   bool get hasTopDownPerspective => playerPerspectives.any((pp) =>
       pp.name.toLowerCase().contains('bird') ||
-      pp.name.toLowerCase().contains('isometric'));
+      pp.name.toLowerCase().contains('isometric'),);
 
   bool get hasEvents => events.isNotEmpty;
   int get eventsCount => events.length;

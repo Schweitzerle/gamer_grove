@@ -1,5 +1,5 @@
 // lib/data/models/platform_logo_model.dart
-import '../../../domain/entities/platform/platform_logo.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_logo.dart';
 
 class PlatformLogoModel extends PlatformLogo {
   const PlatformLogoModel({

@@ -1,7 +1,7 @@
 // ===== REGION MODEL =====
 // File: lib/data/models/region_model.dart
 
-import '../../domain/entities/region.dart';
+import 'package:gamer_grove/domain/entities/region.dart';
 
 class RegionModel extends Region {
   const RegionModel({
@@ -13,6 +13,17 @@ class RegionModel extends Region {
     super.createdAt,
     super.updatedAt,
   });
+
+  // Factory for creating from legacy enum
+  factory RegionModel.fromEnum(RegionEnum regionEnum) {
+    return RegionModel(
+      id: regionEnum.value,
+      checksum: '',
+      category: 'locale',
+      identifier: regionEnum.name.toUpperCase(),
+      name: regionEnum.displayName,
+    );
+  }
 
   factory RegionModel.fromJson(Map<String, dynamic> json) {
     return RegionModel(
@@ -45,17 +56,6 @@ class RegionModel extends Region {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
-  }
-
-  // Factory for creating from legacy enum
-  factory RegionModel.fromEnum(RegionEnum regionEnum) {
-    return RegionModel(
-      id: regionEnum.value,
-      checksum: '',
-      category: 'locale',
-      identifier: regionEnum.name.toUpperCase(),
-      name: regionEnum.displayName,
-    );
   }
 }
 

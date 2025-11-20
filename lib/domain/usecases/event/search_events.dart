@@ -3,15 +3,15 @@
 // lib/domain/usecases/events/search_events.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/event/event.dart';
-import '../../repositories/event_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/repositories/event_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchEvents extends UseCase<List<Event>, SearchEventsParams> {
-  final EventRepository repository;
 
   SearchEvents(this.repository);
+  final EventRepository repository;
 
   @override
   Future<Either<Failure, List<Event>>> call(SearchEventsParams params) async {
@@ -19,14 +19,14 @@ class SearchEvents extends UseCase<List<Event>, SearchEventsParams> {
       return const Left(ValidationFailure(message: 'Search query cannot be empty'));
     }
 
-    return await repository.searchEvents(params.query.trim());
+    return repository.searchEvents(params.query.trim());
   }
 }
 
 class SearchEventsParams extends Equatable {
-  final String query;
 
   const SearchEventsParams({required this.query});
+  final String query;
 
   @override
   List<Object> get props => [query];

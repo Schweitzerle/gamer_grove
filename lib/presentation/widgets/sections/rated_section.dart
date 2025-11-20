@@ -1,11 +1,10 @@
 // lib/presentation/widgets/rated_section.dart
 import 'package:flutter/material.dart';
-import '../../../core/utils/navigations.dart';
-import '../../blocs/game/game_bloc.dart';
-import 'base_game_section.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
 class RatedSection extends BaseGameSection {
-  final String? username;
 
   const RatedSection({
     super.key,
@@ -13,6 +12,7 @@ class RatedSection extends BaseGameSection {
     super.gameBloc,
     this.username,
   });
+  final String? username;
 
   @override
   String get title => username != null ? "$username's Rated" : 'My Rated';
@@ -49,13 +49,13 @@ class RatedSection extends BaseGameSection {
     } else if (state is UserRatedLoaded) {
       if (state.games.isEmpty) {
         return buildEmptySection(
-            'Your ratings are empty', Icons.star_border, context);
+            'Your ratings are empty', Icons.star_border, context,);
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRated.isEmpty) {
         return buildEmptySection(
-            'Your ratings are empty', Icons.star_border, context);
+            'Your ratings are empty', Icons.star_border, context,);
       }
       return buildHorizontalGameList(state.userRated.take(10).toList());
     } else if (state is GameError) {

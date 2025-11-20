@@ -6,24 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_event.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_details_screen.dart';
-import '../../../injection_container.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import '../../widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
-class GameEngineDetailPage extends StatelessWidget {
-  final int gameEngineId;
-  final GameEngine? gameEngine; // Optional pre-loaded gameEngine
+class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded gameEngine
 
   const GameEngineDetailPage({
-    super.key,
-    required this.gameEngineId,
+    required this.gameEngineId, super.key,
     this.gameEngine,
   });
+  final int gameEngineId;
+  final GameEngine? gameEngine;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +36,7 @@ class GameEngineDetailPage extends StatelessWidget {
             authState is AuthAuthenticated ? authState.user.id : null;
         bloc.add(GetGameEngineDetailsEvent(
             gameEngineId: gameEngineId,
-            includeGames: true, // 🆕 Explicitly set to true
-            userId: userId));
+            userId: userId,),);
         return bloc;
       },
       child: BlocBuilder<GameEngineBloc, GameEngineState>(
@@ -69,7 +67,7 @@ class GameEngineDetailPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -100,7 +98,6 @@ class GameEngineDetailPage extends StatelessWidget {
       context.read<GameEngineBloc>().add(
             GetGameEngineDetailsEvent(
               gameEngineId: gameEngineId,
-              includeGames: true,
               userId: userId,
             ),
           );
@@ -117,7 +114,7 @@ class GameEngineDetailPage extends StatelessWidget {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),

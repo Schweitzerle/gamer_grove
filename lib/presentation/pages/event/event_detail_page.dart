@@ -5,27 +5,26 @@
 // lib/presentation/pages/event_detail/event_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/widgets/error_widget.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../blocs/event/event_bloc.dart';
-import '../../blocs/event/event_event.dart';
-import '../../blocs/event/event_state.dart';
-import '../../widgets/live_loading_progress.dart';
-import 'event_details_screen.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
+import 'package:gamer_grove/presentation/pages/event/event_details_screen.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 // ==================================================
 // ENHANCED EVENT DETAIL PAGE WITH LIVE LOADING
 // ==================================================
 
 // Updated event_detail_page.dart snippet:
 class EventDetailPage extends StatefulWidget {
-  final int eventId;
-  final Game? game;
 
   const EventDetailPage({
-    super.key,
-    required this.eventId,
+    required this.eventId, super.key,
     this.game,
   });
+  final int eventId;
+  final Game? game;
 
   @override
   State<EventDetailPage> createState() => _EventDetailPageState();
@@ -48,12 +47,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
           return EventDetailScreen(
             event: state.eventDetails.event,
             featuredGames: state.eventDetails.featuredGames,
-            showGames: true,
           );
         } else if (state is EventDetailsLoaded) {
           return EventDetailScreen(
             event: state.event,
-            featuredGames: null,
             showGames: false,
           );
         } else if (state is EventError) {
@@ -73,7 +70,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -115,7 +112,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),

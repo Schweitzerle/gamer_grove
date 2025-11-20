@@ -1,16 +1,15 @@
 // lib/presentation/pages/event/widgets/event_filter_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/search/event_search_filters.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
 
 class EventFilterBottomSheet extends StatefulWidget {
-  final EventSearchFilters currentFilters;
 
   const EventFilterBottomSheet({
-    super.key,
-    required this.currentFilters,
+    required this.currentFilters, super.key,
   });
+  final EventSearchFilters currentFilters;
 
   @override
   State<EventFilterBottomSheet> createState() => _EventFilterBottomSheetState();
@@ -116,7 +115,7 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
   }
 
   int _getActiveFilterCount() {
-    int count = 0;
+    var count = 0;
     if (_eventTimeFrom != null || _eventTimeTo != null || _singleEventTime != null) {
       count++;
     }
@@ -132,7 +131,7 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
       height: screenHeight * 0.85,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.vertical(
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppConstants.borderRadius * 2),
         ),
       ),
@@ -182,7 +181,6 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
         border: Border(
           bottom: BorderSide(
             color: theme.colorScheme.outlineVariant,
-            width: 1,
           ),
         ),
       ),
@@ -233,7 +231,6 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
         border: Border(
           bottom: BorderSide(
             color: theme.colorScheme.outlineVariant,
-            width: 1,
           ),
         ),
       ),
@@ -267,7 +264,7 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
           ),
           const SizedBox(height: AppConstants.paddingMedium),
           InkWell(
-            onTap: () => _showEventTimeFilterDialog(),
+            onTap: _showEventTimeFilterDialog,
             borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -315,17 +312,14 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
     } else if (_eventTimeTo != null) {
       return 'Until ${_formatDate(_eventTimeTo!)}';
     } else if (_singleEventTime != null && _eventTimeOperator != null) {
-      String operator = '';
+      var operator = '';
       switch (_eventTimeOperator) {
         case 'before':
           operator = 'Before';
-          break;
         case 'after':
           operator = 'After';
-          break;
         case 'on':
           operator = 'On';
-          break;
       }
       return '$operator ${_formatDate(_singleEventTime!)}';
     }
@@ -467,7 +461,6 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
         border: Border(
           top: BorderSide(
             color: theme.colorScheme.outlineVariant,
-            width: 1,
           ),
         ),
         boxShadow: [
@@ -512,20 +505,19 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
 // ==========================================
 
 class EventTimeFilterDialog extends StatefulWidget {
+
+  const EventTimeFilterDialog({
+    required this.onApply, super.key,
+    this.initialDateFrom,
+    this.initialDateTo,
+    this.initialSingleDate,
+    this.initialOperator,
+  });
   final DateTime? initialDateFrom;
   final DateTime? initialDateTo;
   final DateTime? initialSingleDate;
   final String? initialOperator;
   final void Function(DateTime?, DateTime?, DateTime?, String?) onApply;
-
-  const EventTimeFilterDialog({
-    super.key,
-    this.initialDateFrom,
-    this.initialDateTo,
-    this.initialSingleDate,
-    this.initialOperator,
-    required this.onApply,
-  });
 
   @override
   State<EventTimeFilterDialog> createState() => _EventTimeFilterDialogState();

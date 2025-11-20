@@ -1,11 +1,10 @@
 // lib/presentation/widgets/recommendations_section.dart
 import 'package:flutter/material.dart';
-import '../../../core/utils/navigations.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../sections/base_game_section.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
 class RecommendationsSection extends BaseGameSection {
-  final String? username;
 
   const RecommendationsSection({
     super.key,
@@ -13,10 +12,11 @@ class RecommendationsSection extends BaseGameSection {
     super.gameBloc,
     this.username,
   });
+  final String? username;
 
   @override
   String get title =>
-      username != null ? "Recommended by $username" : 'Recommended by You';
+      username != null ? 'Recommended by $username' : 'Recommended by You';
 
   @override
   String get subtitle =>
@@ -50,16 +50,16 @@ class RecommendationsSection extends BaseGameSection {
     } else if (state is UserRecommendationsLoaded) {
       if (state.games.isEmpty) {
         return buildEmptySection(
-            'No recommendations yet', Icons.lightbulb_outline, context);
+            'No recommendations yet', Icons.lightbulb_outline, context,);
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRecommendations.isEmpty) {
         return buildEmptySection(
-            'No recommendations yet', Icons.lightbulb_outline, context);
+            'No recommendations yet', Icons.lightbulb_outline, context,);
       }
       return buildHorizontalGameList(
-          state.userRecommendations.take(10).toList());
+          state.userRecommendations.take(10).toList(),);
     } else if (state is GameError) {
       return buildErrorSection('Failed to load recommendations', context);
     }

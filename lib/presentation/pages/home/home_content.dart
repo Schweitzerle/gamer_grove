@@ -1,18 +1,18 @@
 // presentation/pages/home/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/widgets/sections/latest_games_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/popular_characters_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/popular_games_section.dart';
 //import 'package:gamer_grove/presentation/widgets/sections/header_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_events_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/upcoming_games_section.dart';
-import 'package:gamer_grove/presentation/widgets/sections/popular_characters_section.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../injection_container.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../../widgets/sections/latest_games_section.dart';
-import '../../widgets/sections/popular_games_section.dart';
 
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
@@ -63,7 +63,6 @@ class _HomeContentState extends State<HomeContent> {
               // App Bar
               SliverAppBar(
                 floating: true,
-                pinned: false,
                 title: Row(
                   children: [
                     Icon(

@@ -6,8 +6,8 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for getting users that a user follows.
 ///
@@ -23,13 +23,13 @@ import '../usecase.dart';
 /// );
 /// ```
 class GetFollowingUseCase implements UseCase<List<User>, GetFollowingParams> {
-  final UserRepository repository;
 
   GetFollowingUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<User>>> call(GetFollowingParams params) async {
-    return await repository.getUserFollowing(
+    return repository.getUserFollowing(
       userId: params.userId,
       limit: params.limit ?? 50,
       offset: params.offset ?? 0,
@@ -38,15 +38,15 @@ class GetFollowingUseCase implements UseCase<List<User>, GetFollowingParams> {
 }
 
 class GetFollowingParams extends Equatable {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const GetFollowingParams({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];

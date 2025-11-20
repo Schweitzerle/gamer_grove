@@ -3,25 +3,25 @@
 // lib/domain/usecases/game_details/get_enhanced_game_details.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetEnhancedGameDetails
     extends UseCase<Game, GetEnhancedGameDetailsParams> {
-  final GameRepository repository;
 
   GetEnhancedGameDetails(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, Game>> call(
-      GetEnhancedGameDetailsParams params) async {
+      GetEnhancedGameDetailsParams params,) async {
     if (params.gameId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
 
-    return await repository.getEnhancedGameDetails(
+    return repository.getEnhancedGameDetails(
       gameId: params.gameId,
       userId: params.userId,
       includeCharacters: params.includeCharacters,
@@ -32,11 +32,6 @@ class GetEnhancedGameDetails
 }
 
 class GetEnhancedGameDetailsParams extends Equatable {
-  final int gameId;
-  final String? userId;
-  final bool includeCharacters;
-  final bool includeEvents;
-  final bool includeMedia;
 
   const GetEnhancedGameDetailsParams({
     required this.gameId,
@@ -67,6 +62,11 @@ class GetEnhancedGameDetailsParams extends Equatable {
   })  : includeCharacters = true,
         includeEvents = true,
         includeMedia = false;
+  final int gameId;
+  final String? userId;
+  final bool includeCharacters;
+  final bool includeEvents;
+  final bool includeMedia;
 
   @override
   List<Object?> get props =>

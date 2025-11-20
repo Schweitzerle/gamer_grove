@@ -66,7 +66,7 @@ void main() {
     });
 
     print(
-        '\n💡 Empfehlung: Diese Methoden sollten entweder implementiert oder gelöscht werden.\n');
+        '\n💡 Empfehlung: Diese Methoden sollten entweder implementiert oder gelöscht werden.\n',);
     exit(1);
   }
 }

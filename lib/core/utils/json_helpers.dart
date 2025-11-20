@@ -1,8 +1,8 @@
 // ===== UNIVERSAL JSON PARSING HELPERS =====
 // lib/core/utils/json_helpers.dart
 
-import '../../data/models/game/game_model.dart';
-import '../../domain/entities/game/game.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 /// Universal JSON parsing utilities for handling both basic and expanded IGDB API responses
 ///
@@ -40,7 +40,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractId(item))
+          .map(extractId)
           .where((id) => id != null)
           .cast<int>()
           .toList();
@@ -161,7 +161,7 @@ class JsonHelpers {
   /// - extractMultipleNested(json, ["user.name", "user.email", "user.id"])
   ///   -> {"user.name": "John", "user.email": "john@example.com", "user.id": 123}
   static Map<String, dynamic> extractMultipleNested(
-      dynamic value, List<String> paths) {
+      dynamic value, List<String> paths,) {
     final result = <String, dynamic>{};
     for (final path in paths) {
       result[path] = extractNested<dynamic>(value, path);
@@ -183,7 +183,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractName(item))
+          .map(extractName)
           .where((name) => name != null && name.isNotEmpty)
           .cast<String>()
           .toList();
@@ -196,7 +196,7 @@ class JsonHelpers {
     if (value == null) return [];
     if (value is List) {
       return value
-          .map((item) => extractUrl(item))
+          .map(extractUrl)
           .where((url) => url != null && url.isNotEmpty)
           .cast<String>()
           .toList();
@@ -280,7 +280,7 @@ class JsonHelpers {
           analyzeJsonStructure(value,
               prefix: '$prefix  ',
               maxDepth: maxDepth,
-              currentDepth: currentDepth + 1);
+              currentDepth: currentDepth + 1,);
         }
       } else if (value is List) {
         if (value.isNotEmpty) {
@@ -352,7 +352,7 @@ class JsonHelpers {
     if (games is List) {
       return games
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameModel.fromJson(item))
+          .map(GameModel.fromJson)
           .toList();
     }
     return [];

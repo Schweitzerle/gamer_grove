@@ -2,14 +2,14 @@
 // ENHANCED GAME ENGINE MODEL (WITH FULL PARSING)
 // ==================================================
 
+import 'package:gamer_grove/data/models/company/company_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_logo_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
 // lib/data/models/game/game_engine_model.dart
-import '../../../domain/entities/game/game_engine.dart';
-import '../../../domain/entities/game/game_engine_logo.dart';
-import '../../../domain/entities/company/company.dart';
-import '../../../domain/entities/platform/platform.dart';
-import 'game_engine_logo_model.dart';
-import '../company/company_model.dart';
-import '../platform/platform_model.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
 
 class GameEngineModel extends GameEngine {
   const GameEngineModel({
@@ -42,9 +42,9 @@ class GameEngineModel extends GameEngine {
       }
 
       // ✅ PARSE COMPANIES OBJECTS
-      List<Company> companies = [];
+      final companies = <Company>[];
       if (json['companies'] is List) {
-        for (var companyData in json['companies']) {
+        for (final companyData in json['companies']) {
           if (companyData is Map<String, dynamic>) {
             try {
               final company = CompanyModel.fromJson(companyData);
@@ -55,9 +55,9 @@ class GameEngineModel extends GameEngine {
       }
 
       // ✅ PARSE PLATFORMS OBJECTS
-      List<Platform> platforms = [];
+      final platforms = <Platform>[];
       if (json['platforms'] is List) {
-        for (var platformData in json['platforms']) {
+        for (final platformData in json['platforms']) {
           if (platformData is Map<String, dynamic>) {
             try {
               final platform = PlatformModel.fromJson(platformData);

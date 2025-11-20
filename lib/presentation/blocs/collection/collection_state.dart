@@ -24,9 +24,9 @@ class CollectionLoading extends CollectionState {
 /// State when game enrichment data is loaded.
 /// This is the PERFORMANCE-CRITICAL state!
 class GameEnrichmentLoaded extends CollectionState {
-  final Map<int, Map<String, dynamic>> enrichmentData;
 
   const GameEnrichmentLoaded(this.enrichmentData);
+  final Map<int, Map<String, dynamic>> enrichmentData;
 
   @override
   List<Object> get props => [enrichmentData];
@@ -34,13 +34,13 @@ class GameEnrichmentLoaded extends CollectionState {
 
 /// State when rating succeeds.
 class RatingSuccess extends CollectionState {
-  final int gameId;
-  final double rating;
 
   const RatingSuccess({
     required this.gameId,
     required this.rating,
   });
+  final int gameId;
+  final double rating;
 
   @override
   List<Object> get props => [gameId, rating];
@@ -48,9 +48,9 @@ class RatingSuccess extends CollectionState {
 
 /// State when rating is removed.
 class RatingRemoved extends CollectionState {
-  final int gameId;
 
   const RatingRemoved(this.gameId);
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];
@@ -58,9 +58,9 @@ class RatingRemoved extends CollectionState {
 
 /// State when wishlist toggle succeeds.
 class WishlistToggled extends CollectionState {
-  final int gameId;
 
   const WishlistToggled(this.gameId);
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];
@@ -68,9 +68,9 @@ class WishlistToggled extends CollectionState {
 
 /// State when recommended toggle succeeds.
 class RecommendedToggled extends CollectionState {
-  final int gameId;
 
   const RecommendedToggled(this.gameId);
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];
@@ -78,9 +78,9 @@ class RecommendedToggled extends CollectionState {
 
 /// State when top 3 is updated.
 class TopThreeUpdated extends CollectionState {
-  final List<int> gameIds;
 
   const TopThreeUpdated(this.gameIds);
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [gameIds];
@@ -88,9 +88,9 @@ class TopThreeUpdated extends CollectionState {
 
 /// State when top 3 is loaded.
 class TopThreeLoaded extends CollectionState {
-  final List<int>? gameIds;
 
   const TopThreeLoaded(this.gameIds);
+  final List<int>? gameIds;
 
   @override
   List<Object?> get props => [gameIds];
@@ -103,9 +103,9 @@ class TopThreeCleared extends CollectionState {
 
 /// State when wishlisted games are loaded.
 class WishlistedGamesLoaded extends CollectionState {
-  final List<int> gameIds;
 
   const WishlistedGamesLoaded(this.gameIds);
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [gameIds];
@@ -113,9 +113,9 @@ class WishlistedGamesLoaded extends CollectionState {
 
 /// State when rated games are loaded.
 class RatedGamesLoaded extends CollectionState {
-  final List<Map<String, dynamic>> games;
 
   const RatedGamesLoaded(this.games);
+  final List<Map<String, dynamic>> games;
 
   @override
   List<Object> get props => [games];
@@ -123,9 +123,9 @@ class RatedGamesLoaded extends CollectionState {
 
 /// State when operation fails.
 class CollectionError extends CollectionState {
-  final String message;
 
   const CollectionError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

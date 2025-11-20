@@ -20,9 +20,9 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class IsAuthenticatedUseCase implements UseCase<bool, NoParams> {
-  final AuthRepository repository;
 
   IsAuthenticatedUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {

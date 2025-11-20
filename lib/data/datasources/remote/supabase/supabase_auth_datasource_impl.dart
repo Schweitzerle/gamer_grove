@@ -4,14 +4,17 @@
 library;
 
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_auth_exceptions.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_auth_datasource.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
-import 'supabase_auth_datasource.dart';
 
 /// Concrete implementation of [SupabaseAuthDataSource].
 ///
 /// Uses Supabase client for all authentication operations and
 /// maps errors to custom exceptions.
 class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
+
+  SupabaseAuthDataSourceImpl({required SupabaseClient supabase})
+      : _supabase = supabase;
   final SupabaseClient _supabase;
 
   /// Regular expression for username validation.
@@ -28,9 +31,6 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
 
   /// Minimum password length requirement.
   static const int _minPasswordLength = 6;
-
-  SupabaseAuthDataSourceImpl({required SupabaseClient supabase})
-      : _supabase = supabase;
 
   @override
   Future<User> signIn(String email, String password) async {

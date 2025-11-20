@@ -3,15 +3,15 @@
 // lib/domain/usecases/user/search_users.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/user/user.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchUsers extends UseCase<List<User>, SearchUsersParams> {
-  final UserRepository repository;
 
   SearchUsers(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<User>>> call(SearchUsersParams params) async {
@@ -23,7 +23,7 @@ class SearchUsers extends UseCase<List<User>, SearchUsersParams> {
       return const Left(ValidationFailure(message: 'Search query must be at least 2 characters'));
     }
 
-    return await repository.searchUsers(
+    return repository.searchUsers(
       query: params.query.trim(),
       currentUserId: params.currentUserId,
       limit: params.limit,
@@ -33,10 +33,6 @@ class SearchUsers extends UseCase<List<User>, SearchUsersParams> {
 }
 
 class SearchUsersParams extends Equatable {
-  final String query;
-  final String? currentUserId;
-  final int limit;
-  final int offset;
 
   const SearchUsersParams({
     required this.query,
@@ -44,6 +40,10 @@ class SearchUsersParams extends Equatable {
     this.limit = 20,
     this.offset = 0,
   });
+  final String query;
+  final String? currentUserId;
+  final int limit;
+  final int offset;
 
   @override
   List<Object?> get props => [query, currentUserId, limit, offset];

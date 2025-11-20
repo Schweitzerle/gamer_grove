@@ -3,11 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class AgeRatingOrganization extends Equatable {
-  final int id;
-  final String checksum;
-  final DateTime? createdAt;
-  final String name;
-  final DateTime? updatedAt;
 
   const AgeRatingOrganization({
     required this.id,
@@ -16,6 +11,11 @@ class AgeRatingOrganization extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final DateTime? createdAt;
+  final String name;
+  final DateTime? updatedAt;
 
   // NEU: Helper getters für verschiedene Rating-Systeme
   bool get esrb => id == 1 || name.toLowerCase().contains('esrb');

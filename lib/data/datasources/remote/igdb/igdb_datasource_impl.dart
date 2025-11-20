@@ -1,28 +1,28 @@
 // lib/data/datasources/remote/igdb/igdb_datasource_impl.dart
 
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/errors/exceptions.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
+import 'package:gamer_grove/data/models/character/character_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/company/company_model.dart';
+import 'package:gamer_grove/data/models/event/event_model.dart';
+import 'package:gamer_grove/data/models/franchise_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/data/models/game/game_mode_model.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
 import 'package:gamer_grove/data/models/game/game_status_model.dart';
 import 'package:gamer_grove/data/models/game/game_type_model.dart';
+import 'package:gamer_grove/data/models/genre_model.dart';
+import 'package:gamer_grove/data/models/keyword_model.dart';
 import 'package:gamer_grove/data/models/language/lanuage_model.dart';
+import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/player_perspective_model.dart';
 import 'package:gamer_grove/data/models/theme_model.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/errors/exceptions.dart';
-import '../../../models/game/game_model.dart';
-import '../../../models/character/character_model.dart';
-import '../../../models/platform/platform_model.dart';
-import '../../../models/company/company_model.dart';
-import '../../../models/event/event_model.dart';
-import '../../../models/game/game_engine_model.dart';
-import '../../../models/genre_model.dart';
-import '../../../models/franchise_model.dart';
-import '../../../models/collection/collection_model.dart';
-import '../../../models/keyword_model.dart';
-import '../../../models/multiplayer_mode_model.dart';
-import 'igdb_datasource.dart';
-import 'models/igdb_query.dart';
 
 /// Implementation of [IgdbDataSource] using Dio HTTP client.
 ///
@@ -40,6 +40,10 @@ import 'models/igdb_query.dart';
 /// 4. Parse JSON response to typed models
 /// 5. Handle errors appropriately
 class IgdbDataSourceImpl implements IgdbDataSource {
+  IgdbDataSourceImpl({
+    required this.dio,
+    this.baseUrl = 'https://api.igdb.com/v4',
+  });
   final Dio dio;
   final String baseUrl;
 
@@ -47,21 +51,16 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   String? _cachedAccessToken;
   DateTime? _tokenExpiryTime;
 
-  IgdbDataSourceImpl({
-    required this.dio,
-    this.baseUrl = 'https://api.igdb.com/v4',
-  });
-
   // ============================================================
   // GAME QUERIES IMPLEMENTATION
   // ============================================================
 
   @override
   Future<List<GameModel>> queryGames(IgdbGameQuery query) async {
-    return await _executeQuery<GameModel>(
+    return _executeQuery<GameModel>(
       endpoint: 'games',
       query: query,
-      parser: (json) => GameModel.fromJson(json),
+      parser: GameModel.fromJson,
     );
   }
 
@@ -78,10 +77,10 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       // If buildQuery throws for any reason, still proceed but log the error
     }
 
-    return await _executeQuery<CharacterModel>(
+    return _executeQuery<CharacterModel>(
       endpoint: 'characters',
       query: query,
-      parser: (json) => CharacterModel.fromJson(json),
+      parser: CharacterModel.fromJson,
     );
   }
 
@@ -91,10 +90,10 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<PlatformModel>> queryPlatforms(IgdbPlatformQuery query) async {
-    return await _executeQuery<PlatformModel>(
+    return _executeQuery<PlatformModel>(
       endpoint: 'platforms',
       query: query,
-      parser: (json) => PlatformModel.fromJson(json),
+      parser: PlatformModel.fromJson,
     );
   }
 
@@ -104,10 +103,10 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<CompanyModel>> queryCompanies(IgdbCompanyQuery query) async {
-    return await _executeQuery<CompanyModel>(
+    return _executeQuery<CompanyModel>(
       endpoint: 'companies',
       query: query,
-      parser: (json) => CompanyModel.fromJson(json),
+      parser: CompanyModel.fromJson,
     );
   }
 
@@ -117,10 +116,10 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<EventModel>> queryEvents(IgdbEventQuery query) async {
-    return await _executeQuery<EventModel>(
+    return _executeQuery<EventModel>(
       endpoint: 'events',
       query: query,
-      parser: (json) => EventModel.fromJson(json),
+      parser: EventModel.fromJson,
     );
   }
 
@@ -130,11 +129,12 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<GameEngineModel>> queryGameEngines(
-      IgdbGameEngineQuery query) async {
-    return await _executeQuery<GameEngineModel>(
+    IgdbGameEngineQuery query,
+  ) async {
+    return _executeQuery<GameEngineModel>(
       endpoint: 'game_engines',
       query: query,
-      parser: (json) => GameEngineModel.fromJson(json),
+      parser: GameEngineModel.fromJson,
     );
   }
 
@@ -144,114 +144,119 @@ class IgdbDataSourceImpl implements IgdbDataSource {
 
   @override
   Future<List<GenreModel>> queryGenres(IgdbGenreQuery query) async {
-    return await _executeQuery<GenreModel>(
+    return _executeQuery<GenreModel>(
       endpoint: 'genres',
       query: query,
-      parser: (json) => GenreModel.fromJson(json),
+      parser: GenreModel.fromJson,
     );
   }
 
   @override
   Future<List<FranchiseModel>> queryFranchises(IgdbFranchiseQuery query) async {
-    return await _executeQuery<FranchiseModel>(
+    return _executeQuery<FranchiseModel>(
       endpoint: 'franchises',
       query: query,
-      parser: (json) => FranchiseModel.fromJson(json),
+      parser: FranchiseModel.fromJson,
     );
   }
 
   @override
   Future<List<CollectionModel>> queryCollections(
-      IgdbCollectionQuery query) async {
-    return await _executeQuery<CollectionModel>(
+    IgdbCollectionQuery query,
+  ) async {
+    return _executeQuery<CollectionModel>(
       endpoint: 'collections',
       query: query,
-      parser: (json) => CollectionModel.fromJson(json),
+      parser: CollectionModel.fromJson,
     );
   }
 
   @override
   Future<List<KeywordModel>> queryKeywords(IgdbKeywordQuery query) async {
-    return await _executeQuery<KeywordModel>(
+    return _executeQuery<KeywordModel>(
       endpoint: 'keywords',
       query: query,
-      parser: (json) => KeywordModel.fromJson(json),
+      parser: KeywordModel.fromJson,
     );
   }
 
   @override
   Future<List<AgeRatingCategoryModel>> queryAgeRatings(
-      IgdbAgeRatingQuery query) async {
+    IgdbAgeRatingQuery query,
+  ) async {
     return _executeQuery<AgeRatingCategoryModel>(
       endpoint: 'age_rating_categories',
       query: query,
-      parser: (json) => AgeRatingCategoryModel.fromJson(json),
+      parser: AgeRatingCategoryModel.fromJson,
     );
   }
 
   @override
   Future<List<MultiplayerModeModel>> queryMultiplayerModes(
-      IgdbMultiplayerModeQuery query) async {
-    return await _executeQuery<MultiplayerModeModel>(
+    IgdbMultiplayerModeQuery query,
+  ) async {
+    return _executeQuery<MultiplayerModeModel>(
       endpoint: 'multiplayer_modes',
       query: query,
-      parser: (json) => MultiplayerModeModel.fromJson(json),
+      parser: MultiplayerModeModel.fromJson,
     );
   }
 
   @override
   Future<List<LanguageModel>> queryLanguages(IgdbLanguageQuery query) async {
-    return await _executeQuery<LanguageModel>(
+    return _executeQuery<LanguageModel>(
       endpoint: 'languages',
       query: query,
-      parser: (json) => LanguageModel.fromJson(json),
+      parser: LanguageModel.fromJson,
     );
   }
 
   @override
   Future<List<GameModeModel>> queryGameModes(IgdbGameModeQuery query) async {
-    return await _executeQuery<GameModeModel>(
+    return _executeQuery<GameModeModel>(
       endpoint: 'game_modes',
       query: query,
-      parser: (json) => GameModeModel.fromJson(json),
+      parser: GameModeModel.fromJson,
     );
   }
 
   @override
   Future<List<GameStatusModel>> queryGameStatuses(
-      IgdbGameStatusQuery query) async {
-    return await _executeQuery<GameStatusModel>(
+    IgdbGameStatusQuery query,
+  ) async {
+    return _executeQuery<GameStatusModel>(
       endpoint: 'game_statuses',
       query: query,
-      parser: (json) => GameStatusModel.fromJson(json),
+      parser: GameStatusModel.fromJson,
     );
   }
 
   @override
   Future<List<GameTypeModel>> queryGameTypes(IgdbGameTypeQuery query) async {
-    return await _executeQuery<GameTypeModel>(
+    return _executeQuery<GameTypeModel>(
       endpoint: 'game_types',
       query: query,
-      parser: (json) => GameTypeModel.fromJson(json),
+      parser: GameTypeModel.fromJson,
     );
   }
 
   @override
   Future<List<PlayerPerspectiveModel>> queryPlayerPerspectives(
-      IgdbPlayerPerspectiveQuery query) async {
-    return await _executeQuery<PlayerPerspectiveModel>(
+    IgdbPlayerPerspectiveQuery query,
+  ) async {
+    return _executeQuery<PlayerPerspectiveModel>(
       endpoint: 'player_perspectives',
       query: query,
-      parser: (json) => PlayerPerspectiveModel.fromJson(json),
+      parser: PlayerPerspectiveModel.fromJson,
     );
   }
 
   @override
   Future<List<IGDBThemeModel>> queryThemes(IgdbThemeQuery query) async {
-    return await _executeQuery<IGDBThemeModel>(
+    return _executeQuery<IGDBThemeModel>(
       endpoint: 'themes',
       query: query,
-      parser: (json) => IGDBThemeModel.fromJson(json),
+      parser: IGDBThemeModel.fromJson,
     );
   }
 
@@ -274,7 +279,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     required T Function(Map<String, dynamic>) parser,
   }) async {
     try {
-
       // Ensure we have a valid access token
       await _ensureValidToken();
 
@@ -291,8 +295,7 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       };
 
       // LOG COMPLETE REQUEST DETAILS
-      headers.forEach((key, value) {
-      });
+      headers.forEach((key, value) {});
 
       // Make the API request
       final response = await dio.post<dynamic>(
@@ -303,11 +306,9 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         ),
       );
 
-
       // Check response status
       if (response.statusCode != 200) {
         throw ServerException(
-          'IGDB API returned status ${response.statusCode}',
           message: 'IGDB API returned status ${response.statusCode}',
         );
       }
@@ -333,7 +334,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       throw _handleDioException(e);
     } catch (e) {
       throw ServerException(
-        'Unexpected error querying $endpoint: $e',
         message: 'Unexpected error querying $endpoint: $e',
       );
     }
@@ -361,7 +361,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
   /// Fetches a new access token from Twitch OAuth.
   Future<void> _refreshAccessToken() async {
     try {
-
       final response = await dio.post<dynamic>(
         'https://id.twitch.tv/oauth2/token',
         queryParameters: {
@@ -371,7 +370,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         },
       );
 
-
       if (response.statusCode == 200) {
         final data = response.data;
         _cachedAccessToken = data['access_token'];
@@ -379,7 +377,6 @@ class IgdbDataSourceImpl implements IgdbDataSource {
         _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
       } else {
         throw ServerException(
-          'Failed to get access token: ${response.statusCode}',
           message: 'Failed to get access token: ${response.statusCode}',
         );
       }
@@ -413,25 +410,21 @@ class IgdbDataSourceImpl implements IgdbDataSource {
           return AuthException(message: 'Authentication failed.');
         } else if (statusCode == 429) {
           return ServerException(
-            'Rate limit exceeded.',
             message: 'Rate limit exceeded.',
           );
         } else {
           return ServerException(
-            'Server error: $statusCode',
             message: 'Server error: $statusCode',
           );
         }
 
       case DioExceptionType.cancel:
         return ServerException(
-          'Request cancelled.',
           message: 'Request cancelled.',
         );
 
       default:
         return ServerException(
-          'Unexpected error: ${e.message}',
           message: 'Unexpected error: ${e.message}',
         );
     }

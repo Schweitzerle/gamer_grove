@@ -4,12 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameStatus extends Equatable {
-  final int id;
-  final String checksum;
-  final String status;
-  final String? description;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const GameStatus({
     required this.id,
@@ -19,6 +13,12 @@ class GameStatus extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String status;
+  final String? description;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   @override
   List<Object?> get props =>

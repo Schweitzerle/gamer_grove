@@ -120,23 +120,6 @@ enum ExternalGameMediaEnum {
 }
 
 class ExternalGame extends Equatable {
-  final int id;
-  final String checksum;
-  final List<int> countries;
-  final int? externalGameSourceId;
-  final int? gameId;
-  final int? gameReleaseFormatId;
-  final String name;
-  final int? platformId;
-  final String uid;
-  final String? url;
-  final int? year;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  // DEPRECATED fields but still very useful
-  final ExternalGameCategoryEnum? categoryEnum;
-  final ExternalGameMediaEnum? mediaEnum;
 
   const ExternalGame({
     required this.id,
@@ -155,6 +138,23 @@ class ExternalGame extends Equatable {
     this.categoryEnum,
     this.mediaEnum,
   });
+  final int id;
+  final String checksum;
+  final List<int> countries;
+  final int? externalGameSourceId;
+  final int? gameId;
+  final int? gameReleaseFormatId;
+  final String name;
+  final int? platformId;
+  final String uid;
+  final String? url;
+  final int? year;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  // DEPRECATED fields but still very useful
+  final ExternalGameCategoryEnum? categoryEnum;
+  final ExternalGameMediaEnum? mediaEnum;
 
   // Helper getters
   String get displayStore {

@@ -1,17 +1,10 @@
 // lib/presentation/blocs/user_search/user_search_state.dart
 
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 
 /// Represents the state of user search
 class UserSearchState extends Equatable {
-  final List<User> users;
-  final bool isLoading;
-  final bool isLoadingMore;
-  final bool hasReachedMax;
-  final String? errorMessage;
-  final String currentQuery;
-  final int currentPage;
 
   const UserSearchState({
     this.users = const [],
@@ -25,17 +18,22 @@ class UserSearchState extends Equatable {
 
   /// Initial state
   factory UserSearchState.initial() => const UserSearchState();
+  final List<User> users;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final bool hasReachedMax;
+  final String? errorMessage;
+  final String currentQuery;
+  final int currentPage;
 
   /// Loading state (first page)
   UserSearchState loading() => copyWith(
         isLoading: true,
-        errorMessage: null,
       );
 
   /// Loading more state (pagination)
   UserSearchState loadingMore() => copyWith(
         isLoadingMore: true,
-        errorMessage: null,
       );
 
   /// Success state with users
@@ -50,7 +48,6 @@ class UserSearchState extends Equatable {
         isLoading: false,
         isLoadingMore: false,
         hasReachedMax: hasReachedMax,
-        errorMessage: null,
         currentQuery: query,
         currentPage: page,
       );

@@ -17,10 +17,7 @@ import 'package:shimmer/shimmer.dart';
 
 class TopThreeDialog extends StatefulWidget {
   const TopThreeDialog({
-    super.key,
-    required this.game,
-    required this.onPositionSelected,
-    required this.gameBloc,
+    required this.game, required this.onPositionSelected, required this.gameBloc, super.key,
     this.currentTopThree,
   });
 
@@ -57,7 +54,7 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
         }
       }
 
-      for (int i = 0; i < sortedGames.length; i++) {
+      for (var i = 0; i < sortedGames.length; i++) {
       }
 
       setState(() {
@@ -251,9 +248,9 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
               ],
 
               // Position Selection Instructions
-              Text(
+              const Text(
                 'Select position:',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

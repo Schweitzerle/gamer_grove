@@ -4,12 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformVersionCompany extends Equatable {
-  final int id;
-  final String checksum;
-  final String? comment;
-  final int? companyId;
-  final bool developer;
-  final bool manufacturer;
 
   const PlatformVersionCompany({
     required this.id,
@@ -19,6 +13,12 @@ class PlatformVersionCompany extends Equatable {
     this.developer = false,
     this.manufacturer = false,
   });
+  final int id;
+  final String checksum;
+  final String? comment;
+  final int? companyId;
+  final bool developer;
+  final bool manufacturer;
 
   bool get isDeveloper => developer;
   bool get isManufacturer => manufacturer;

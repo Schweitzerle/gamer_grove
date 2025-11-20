@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/event/event.dart';
@@ -27,10 +26,9 @@ import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_pag
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/search/search_page.dart';
+import 'package:gamer_grove/presentation/pages/user_game_list_page.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../../presentation/pages/user_game_list_page.dart';
 
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
@@ -59,8 +57,7 @@ class Navigations {
   static void navigateToLocalAllGames(
     BuildContext context, {
     required String title,
-    String? subtitle,
-    required List<Game> games,
+    required List<Game> games, String? subtitle,
     bool showFilters = true,
     bool showSearch = true,
     bool blurRated = false,
@@ -87,7 +84,7 @@ class Navigations {
   }
 
   /// Navigate to all games in a franchise
-  static void navigateToFranchiseGames(
+  static Future<void> navigateToFranchiseGames(
     BuildContext context, {
     required int franchiseId,
     required String franchiseName,
@@ -107,7 +104,7 @@ class Navigations {
   }
 
   /// Navigate to all games in a collection
-  static void navigateToCollectionGames(
+  static Future<void> navigateToCollectionGames(
     BuildContext context, {
     required int collectionId,
     required String collectionName,
@@ -127,7 +124,7 @@ class Navigations {
   }
 
   /// Navigate to all games by a company (developer or publisher)
-  static void navigateToCompanyGames(
+  static Future<void> navigateToCompanyGames(
     BuildContext context, {
     required int companyId,
     required String companyName,
@@ -151,26 +148,22 @@ class Navigations {
   }
 
   static void navigateToEventGames(
-      BuildContext context, SeriesItem item, Event event) {
+      BuildContext context, SeriesItem item, Event event,) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
       subtitle: 'Games featured at this event',
       games: event.games,
-      showFilters: true,
-      blurRated: false,
     );
   }
 
   static void navigateToCharacterGames(
-      BuildContext context, SeriesItem item, Character character) {
+      BuildContext context, SeriesItem item, Character character,) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
       subtitle: 'Games ${character.name} is a part of',
       games: character.games ?? [],
-      showFilters: true,
-      blurRated: false,
     );
   }
 
@@ -190,9 +183,7 @@ class Navigations {
       title: 'Similar to $gameName',
       subtitle: '${similarGames.length} similar games',
       games: similarGames,
-      blurRated: false,
       showFilters: false, // Simpler version for similar games
-      showSearch: true,
     );
   }
 
@@ -207,7 +198,6 @@ class Navigations {
       title: '$gameName DLCs',
       subtitle: '${dlcs.length} downloadable content',
       games: dlcs,
-      blurRated: false,
       showFilters: false,
     );
   }
@@ -223,7 +213,6 @@ class Navigations {
       title: '$gameName Expansions',
       subtitle: '${expansions.length} expansions',
       games: expansions,
-      blurRated: false,
       showFilters: false,
     );
   }
@@ -287,7 +276,6 @@ class Navigations {
             releaseDateFrom: sixMonthsAgo,
             releaseDateTo: sixMonthsFromNow,
             sortBy: GameSortBy.popularity,
-            sortOrder: SortOrder.descending,
           ),
           initialTitle: 'Popular Right Now',
         ),
@@ -298,11 +286,10 @@ class Navigations {
   static void navigateToTopRatedGames(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => SearchPage(
-          initialFilters: const SearchFilters(
+        builder: (context) => const SearchPage(
+          initialFilters: SearchFilters(
             minTotalRatingCount: 50,
             sortBy: GameSortBy.rating,
-            sortOrder: SortOrder.descending,
           ),
           initialTitle: 'Top Rated',
         ),
@@ -334,7 +321,6 @@ class Navigations {
           initialFilters: SearchFilters(
             releaseDateTo: now,
             sortBy: GameSortBy.releaseDate,
-            sortOrder: SortOrder.descending,
           ),
           initialTitle: 'New Releases',
         ),
@@ -351,8 +337,6 @@ class Navigations {
       title: 'My Recommendations',
       subtitle: '${recommendedGames.length} games',
       games: recommendedGames,
-      blurRated: false, // Highlight which recommended games are already rated
-      showFilters: true,
     );
   }
 
@@ -375,7 +359,7 @@ class Navigations {
   }
 
   static void navigateToCollectionDetail(
-      BuildContext context, int collectionId) {
+      BuildContext context, int collectionId,) {
     // TODO: Implement collection detail screen
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Collection detail screen coming soon!')),
@@ -396,8 +380,6 @@ class Navigations {
           subtitle: customSubtitle ?? '${events.length} gaming events',
           events: events,
           game: game,
-          showFilters: true,
-          showSearch: true,
         ),
       ),
     );
@@ -407,8 +389,7 @@ class Navigations {
   static void navigateToAllEventsGeneric(
     BuildContext context, {
     required String title,
-    String? subtitle,
-    required List<Event> events,
+    required List<Event> events, String? subtitle,
     Game? game,
     bool showFilters = true,
     bool showSearch = true,
@@ -449,7 +430,7 @@ class Navigations {
                 ..add(GetCompleteEventDetailsWithUserDataEvent(
                   eventId: eventId,
                   userId: userId, // 🎯 User ID mitgeben!
-                )),
+                ),),
             ),
             BlocProvider.value(
               value: context.read<AuthBloc>(),
@@ -465,7 +446,7 @@ class Navigations {
   }
 
   static void navigateToCharacterDetail(BuildContext context, int characterId,
-      {Character? character}) {
+      {Character? character,}) {
 
     Navigator.push(
       context,
@@ -586,7 +567,6 @@ class Navigations {
         builder: (context) => EventDetailScreen(
           event: event,
           featuredGames: featuredGames,
-          showGames: true,
         ),
       ),
     );
@@ -709,7 +689,7 @@ class Navigations {
     if (!event.hasLiveStream) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('No live stream available for this event')),
+            content: Text('No live stream available for this event'),),
       );
       return;
     }
@@ -756,7 +736,7 @@ class Navigations {
     // TODO: Implement event notifications settings
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('Event notifications settings coming soon!')),
+          content: Text('Event notifications settings coming soon!'),),
     );
   }
 

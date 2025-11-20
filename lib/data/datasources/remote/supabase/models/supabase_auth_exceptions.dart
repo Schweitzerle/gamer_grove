@@ -7,15 +7,15 @@ library;
 
 /// Base class for all authentication exceptions.
 abstract class AuthException implements Exception {
-  final String message;
-  final String? code;
-  final dynamic originalError;
 
   const AuthException({
     required this.message,
     this.code,
     this.originalError,
   });
+  final String message;
+  final String? code;
+  final dynamic originalError;
 
   @override
   String toString() =>
@@ -25,10 +25,10 @@ abstract class AuthException implements Exception {
 /// Thrown when user credentials are invalid.
 class InvalidCredentialsException extends AuthException {
   const InvalidCredentialsException({
-    String message = 'Invalid email or password',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Invalid email or password',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidCredentialsException: $message';
@@ -37,10 +37,10 @@ class InvalidCredentialsException extends AuthException {
 /// Thrown when user email already exists during signup.
 class EmailAlreadyExistsException extends AuthException {
   const EmailAlreadyExistsException({
-    String message = 'An account with this email already exists',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'An account with this email already exists',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'EmailAlreadyExistsException: $message';
@@ -49,10 +49,10 @@ class EmailAlreadyExistsException extends AuthException {
 /// Thrown when username is already taken during signup.
 class UsernameAlreadyExistsException extends AuthException {
   const UsernameAlreadyExistsException({
-    String message = 'This username is already taken',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'This username is already taken',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'UsernameAlreadyExistsException: $message';
@@ -61,10 +61,10 @@ class UsernameAlreadyExistsException extends AuthException {
 /// Thrown when email format is invalid.
 class InvalidEmailException extends AuthException {
   const InvalidEmailException({
-    String message = 'Invalid email format',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Invalid email format',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidEmailException: $message';
@@ -73,10 +73,10 @@ class InvalidEmailException extends AuthException {
 /// Thrown when password doesn't meet requirements.
 class WeakPasswordException extends AuthException {
   const WeakPasswordException({
-    String message = 'Password must be at least 6 characters',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Password must be at least 6 characters',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'WeakPasswordException: $message';
@@ -85,11 +85,11 @@ class WeakPasswordException extends AuthException {
 /// Thrown when username doesn't meet requirements.
 class InvalidUsernameException extends AuthException {
   const InvalidUsernameException({
-    String message =
+    super.message =
         'Username must be 3-20 characters, alphanumeric and underscores only',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidUsernameException: $message';
@@ -98,10 +98,10 @@ class InvalidUsernameException extends AuthException {
 /// Thrown when user session is invalid or expired.
 class InvalidSessionException extends AuthException {
   const InvalidSessionException({
-    String message = 'Your session has expired. Please sign in again',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Your session has expired. Please sign in again',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidSessionException: $message';
@@ -110,10 +110,10 @@ class InvalidSessionException extends AuthException {
 /// Thrown when user is not authenticated.
 class NotAuthenticatedException extends AuthException {
   const NotAuthenticatedException({
-    String message = 'You must be signed in to perform this action',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'You must be signed in to perform this action',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'NotAuthenticatedException: $message';
@@ -122,10 +122,10 @@ class NotAuthenticatedException extends AuthException {
 /// Thrown when email verification is required.
 class EmailNotVerifiedException extends AuthException {
   const EmailNotVerifiedException({
-    String message = 'Please verify your email address',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Please verify your email address',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'EmailNotVerifiedException: $message';
@@ -134,10 +134,10 @@ class EmailNotVerifiedException extends AuthException {
 /// Thrown when too many authentication attempts are made.
 class TooManyRequestsException extends AuthException {
   const TooManyRequestsException({
-    String message = 'Too many requests. Please try again later',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Too many requests. Please try again later',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'TooManyRequestsException: $message';
@@ -146,10 +146,10 @@ class TooManyRequestsException extends AuthException {
 /// Thrown when network connection is unavailable during auth operation.
 class NetworkException extends AuthException {
   const NetworkException({
-    String message = 'No internet connection. Please check your network',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'No internet connection. Please check your network',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'NetworkException: $message';
@@ -158,10 +158,10 @@ class NetworkException extends AuthException {
 /// Thrown when an unknown authentication error occurs.
 class UnknownAuthException extends AuthException {
   const UnknownAuthException({
-    String message = 'An unexpected error occurred',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'An unexpected error occurred',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'UnknownAuthException: $message';

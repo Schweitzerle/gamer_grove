@@ -1,13 +1,13 @@
 // lib/presentation/pages/all_games/enriched_all_games_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/genre.dart';
-import '../../../domain/entities/platform/platform.dart';
-import '../../../injection_container.dart';
 
 // Die alte SortOption wird durch zwei neue Enums ersetzt,
 // um Kategorie und Richtung zu trennen.
@@ -34,6 +34,17 @@ enum RatingFilter {
 }
 
 class EnrichedAllGamesScreen extends StatefulWidget {
+
+  const EnrichedAllGamesScreen({
+    required this.title, required this.games, super.key,
+    this.subtitle,
+    this.userId,
+    this.showFilters = true,
+    this.showSearch = true,
+    this.blurRated = false,
+    this.showViewToggle = true,
+    this.loadMore,
+  });
   final String title;
   final String? subtitle;
   final List<Game> games; // Alle Games (non-enriched)
@@ -42,19 +53,6 @@ class EnrichedAllGamesScreen extends StatefulWidget {
   final bool showSearch;
   final bool blurRated;
   final bool showViewToggle;
-
-  const EnrichedAllGamesScreen({
-    super.key,
-    required this.title,
-    this.subtitle,
-    required this.games,
-    this.userId,
-    this.showFilters = true,
-    this.showSearch = true,
-    this.blurRated = false,
-    this.showViewToggle = true,
-    this.loadMore,
-  });
 
   final Future<List<Game>> Function(int offset)? loadMore;
 
@@ -86,7 +84,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
   // Enrichment progress
   bool _isEnriching = false;
-  int _enrichmentProgress = 0;
+  final int _enrichmentProgress = 0;
   int _totalGames = 0;
   bool _isLoadingMore = false;
   bool _hasReachedMax = false;
@@ -206,13 +204,13 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
 
   //TODO: maybe implement filtering with dynamic data from api like in search screen and then use it for local filtering of the games
   void _applyFiltersAndSort() {
-    List<Game> filtered = List.from(_allGames);
+    var filtered = List<Game>.from(_allGames);
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
           .where((game) =>
-              game.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+              game.name.toLowerCase().contains(_searchQuery.toLowerCase()),)
           .toList();
     }
 
@@ -220,7 +218,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     if (_selectedGenres.isNotEmpty) {
       filtered = filtered
           .where((game) =>
-              game.genres.any((genre) => _selectedGenres.contains(genre)))
+              game.genres.any(_selectedGenres.contains),)
           .toList();
     }
 
@@ -228,7 +226,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     if (_selectedPlatforms.isNotEmpty) {
       filtered = filtered
           .where((game) => game.platforms
-              .any((platform) => _selectedPlatforms.contains(platform)))
+              .any(_selectedPlatforms.contains),)
           .toList();
     }
 
@@ -246,15 +244,12 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     switch (_ratingFilter) {
       case RatingFilter.rated:
         filtered = filtered.where((game) => game.userRating != null).toList();
-        break;
       case RatingFilter.unrated:
         filtered = filtered.where((game) => game.userRating == null).toList();
-        break;
       case RatingFilter.highRated:
         filtered = filtered
             .where((game) => game.userRating != null && game.userRating! >= 7.0)
             .toList();
-        break;
       case RatingFilter.all:
         break;
     }
@@ -264,8 +259,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
       case SortCategory.name:
         filtered.sort((a, b) => _sortDirection == SortDirection.ascending
             ? a.name.compareTo(b.name)
-            : b.name.compareTo(a.name));
-        break;
+            : b.name.compareTo(a.name),);
       case SortCategory.totalRating:
         filtered.sort((a, b) {
           final aRating = a.totalRating ?? 0;
@@ -274,7 +268,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.igdbUserRating:
         filtered.sort((a, b) {
           final aRating = a.rating ?? 0;
@@ -283,7 +276,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.aggregatedRating:
         filtered.sort((a, b) {
           final aRating = a.aggregatedRating ?? 0;
@@ -292,7 +284,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.userRating:
         filtered.sort((a, b) {
           final aRating = a.userRating ?? 0;
@@ -301,7 +292,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.totalRatingCount:
         filtered.sort((a, b) {
           final aRating = a.totalRatingCount ?? 0;
@@ -310,7 +300,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.igdbUserRatingCount:
         filtered.sort((a, b) {
           final aRating = a.ratingCount ?? 0;
@@ -319,7 +308,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.aggregatedRatingCount:
         filtered.sort((a, b) {
           final aRating = a.aggregatedRatingCount ?? 0;
@@ -328,7 +316,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aRating.compareTo(bRating) // Low to High
               : bRating.compareTo(aRating); // High to Low
         });
-        break;
       case SortCategory.hypes:
         filtered.sort((a, b) {
           final aHypes = a.hypes ?? 0;
@@ -337,7 +324,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? aHypes.compareTo(bHypes) // Low to High
               : bHypes.compareTo(aHypes); // High to Low
         });
-        break;
       case SortCategory.releaseDate:
         filtered.sort((a, b) {
           if (a.firstReleaseDate == null && b.firstReleaseDate == null) {
@@ -350,7 +336,6 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               : b.firstReleaseDate!
                   .compareTo(a.firstReleaseDate!); // New to Old
         });
-        break;
     }
 
     setState(() {
@@ -433,7 +418,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   }
 
   Widget _buildEnrichmentProgress() {
-    final double progress =
+    final progress =
         _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
 
     return Padding(
@@ -546,7 +531,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
               ? _buildEmptyState()
               : Stack(
                   children: [
-                    _isGridView ? _buildGridView() : _buildListView(),
+                    if (_isGridView) _buildGridView() else _buildListView(),
                     if (_isLoadingMore)
                       const Align(
                         alignment: Alignment.bottomCenter,
@@ -707,7 +692,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sort by'),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -803,8 +788,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     required String ascText,
     required String descText,
   }) {
-    final bool isSelected = _sortCategory == category;
-    final bool isAscending = _sortDirection == SortDirection.ascending;
+    final isSelected = _sortCategory == category;
+    final isAscending = _sortDirection == SortDirection.ascending;
 
     // Diese Funktion steuert die Auswahl und das Umschalten
     void handleTap() {

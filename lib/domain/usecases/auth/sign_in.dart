@@ -7,8 +7,8 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
-import '../../repositories/auth_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/auth_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 // ============================================================
 // SIGN IN USE CASE
@@ -28,9 +28,9 @@ import '../usecase.dart';
 /// );
 /// ```
 class SignInUseCase implements UseCase<User, SignInParams> {
-  final AuthRepository repository;
 
   SignInUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, User>> call(SignInParams params) async {
@@ -38,16 +38,16 @@ class SignInUseCase implements UseCase<User, SignInParams> {
     if (!_isValidEmail(params.email)) {
       return const Left(ValidationFailure(
         message: 'Invalid email format',
-      ));
+      ),);
     }
 
     if (!_isValidPassword(params.password)) {
       return const Left(ValidationFailure(
         message: 'Password must be at least 6 characters',
-      ));
+      ),);
     }
 
-    return await repository.signIn(
+    return repository.signIn(
       email: params.email,
       password: params.password,
     );
@@ -68,13 +68,13 @@ class SignInUseCase implements UseCase<User, SignInParams> {
 }
 
 class SignInParams extends Equatable {
-  final String email;
-  final String password;
 
   const SignInParams({
     required this.email,
     required this.password,
   });
+  final String email;
+  final String password;
 
   @override
   List<Object> get props => [email, password];

@@ -3,16 +3,16 @@
 // lib/domain/usecases/user_collections/get_user_collection_summary.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/user/user_collection_sort_options.dart';
-import '../../entities/user/user_collection_summary.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_summary.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUserCollectionSummary extends UseCase<UserCollectionSummary, GetUserCollectionSummaryParams> {
-  final GameRepository repository;
 
   GetUserCollectionSummary(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, UserCollectionSummary>> call(GetUserCollectionSummaryParams params) async {
@@ -20,7 +20,7 @@ class GetUserCollectionSummary extends UseCase<UserCollectionSummary, GetUserCol
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserCollectionSummary(
+    return repository.getUserCollectionSummary(
       userId: params.userId,
       collectionType: params.collectionType,
     );
@@ -28,13 +28,13 @@ class GetUserCollectionSummary extends UseCase<UserCollectionSummary, GetUserCol
 }
 
 class GetUserCollectionSummaryParams extends Equatable {
-  final String userId;
-  final UserCollectionType collectionType;
 
   const GetUserCollectionSummaryParams({
     required this.userId,
     required this.collectionType,
   });
+  final String userId;
+  final UserCollectionType collectionType;
 
   @override
   List<Object> get props => [userId, collectionType];

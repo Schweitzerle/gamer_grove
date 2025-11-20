@@ -3,12 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class ReleaseDateStatus extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final String? description;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const ReleaseDateStatus({
     required this.id,
@@ -18,6 +12,12 @@ class ReleaseDateStatus extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final String? description;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper getters
   bool get hasDescription => description != null && description!.isNotEmpty;

@@ -1,10 +1,9 @@
 // lib/data/models/character/character_model.dart - UPDATED VERSION
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
-
-import '../../../domain/entities/character/character.dart';
-import '../../../domain/entities/character/character_gender.dart';
-import '../../../domain/entities/character/character_species.dart';
-import '../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class CharacterModel extends Character {
   const CharacterModel({
@@ -27,6 +26,38 @@ class CharacterModel extends Character {
     super.mugShotImageId, // 🆕 ADD this
     super.games, // 🆕 ADD this
   });
+
+  // 🆕 NEW: Factory method when we have separate mugShot data and games
+  factory CharacterModel.fromJsonWithMugShot(
+    Map<String, dynamic> characterJson,
+    Map<String, dynamic>? mugShotJson, {
+    List<Game>? games, // 🆕 ADD this parameter
+  }) {
+    final character = CharacterModel.fromJson(characterJson);
+
+    final mugShotImageId = mugShotJson?['image_id']?.toString();
+
+    return CharacterModel(
+      id: character.id,
+      checksum: character.checksum,
+      name: character.name,
+      akas: character.akas,
+      characterGenderId: character.characterGenderId,
+      characterSpeciesId: character.characterSpeciesId,
+      countryName: character.countryName,
+      description: character.description,
+      gameIds: character.gameIds,
+      mugShot: character.mugShot,
+      slug: character.slug,
+      url: character.url,
+      createdAt: character.createdAt,
+      updatedAt: character.updatedAt,
+      genderEnum: character.genderEnum,
+      speciesEnum: character.speciesEnum,
+      mugShotImageId: mugShotImageId, // 🆕 Set the actual image ID
+      games: games, // 🆕 Set the actual games
+    );
+  }
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) {
     // Parse the new character_gender and character_species IDs
@@ -75,42 +106,10 @@ class CharacterModel extends Character {
     return null;
   }
 
-  // 🆕 NEW: Factory method when we have separate mugShot data and games
-  factory CharacterModel.fromJsonWithMugShot(
-    Map<String, dynamic> characterJson,
-    Map<String, dynamic>? mugShotJson, {
-    List<Game>? games, // 🆕 ADD this parameter
-  }) {
-    final character = CharacterModel.fromJson(characterJson);
-
-    final mugShotImageId = mugShotJson?['image_id']?.toString();
-
-    return CharacterModel(
-      id: character.id,
-      checksum: character.checksum,
-      name: character.name,
-      akas: character.akas,
-      characterGenderId: character.characterGenderId,
-      characterSpeciesId: character.characterSpeciesId,
-      countryName: character.countryName,
-      description: character.description,
-      gameIds: character.gameIds,
-      mugShot: character.mugShot,
-      slug: character.slug,
-      url: character.url,
-      createdAt: character.createdAt,
-      updatedAt: character.updatedAt,
-      genderEnum: character.genderEnum,
-      speciesEnum: character.speciesEnum,
-      mugShotImageId: mugShotImageId, // 🆕 Set the actual image ID
-      games: games, // 🆕 Set the actual games
-    );
-  }
-
   // Existing helper methods (unchanged)
   static List<String> _parseStringList(dynamic data) {
     if (data is List) {
-      return data.whereType<String>().map((item) => item.toString()).toList();
+      return data.whereType<String>().map((item) => item).toList();
     }
     return [];
   }

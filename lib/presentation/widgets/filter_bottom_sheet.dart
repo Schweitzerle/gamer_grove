@@ -2,30 +2,43 @@
 // 2. VOLLSTÄNDIGES FILTER BOTTOM SHEET
 // ==========================================
 
+import 'dart:async';
+import 'dart:ui';
+
 // lib/presentation/widgets/filter_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
 import 'package:gamer_grove/domain/entities/keyword.dart';
 import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
-import 'dart:async';
-import 'dart:ui';
-import '../../core/constants/app_constants.dart';
-import '../../domain/entities/genre.dart';
-import '../../domain/entities/platform/platform.dart';
-import '../../domain/entities/company/company.dart';
-import '../../domain/entities/game/game_engine.dart';
-import '../../domain/entities/franchise.dart';
-import '../../domain/entities/collection/collection.dart';
-import '../../domain/entities/search/search_filters.dart';
-import '../../domain/entities/game/game_sort_options.dart';
-import '../../domain/entities/game/game_mode.dart';
-import '../../domain/entities/player_perspective.dart';
 
 class FilterBottomSheet extends StatefulWidget {
+  const FilterBottomSheet({
+    required this.currentFilters, required this.availableGenres, required this.availableGameTypes, required this.availableGameStatuses, required this.availableGameModes, required this.availablePlayerPerspectives, super.key,
+    this.onSearchCompanies,
+    this.onSearchGameEngines,
+    this.onSearchFranchises,
+    this.onSearchCollections,
+    this.onSearchKeywords,
+    this.onSearchLanguages,
+    this.onSearchPlatforms,
+    this.onSearchThemes,
+    this.onSearchAgeRatings,
+  });
   final SearchFilters currentFilters;
   final List<Genre> availableGenres;
   final List<GameMode> availableGameModes;
@@ -44,24 +57,6 @@ class FilterBottomSheet extends StatefulWidget {
   final Future<List<gg_theme.IGDBTheme>> Function(String query)? onSearchThemes;
   final Future<List<AgeRatingCategory>> Function(String query)?
       onSearchAgeRatings;
-  const FilterBottomSheet({
-    super.key,
-    required this.currentFilters,
-    required this.availableGenres,
-    required this.availableGameTypes,
-    required this.availableGameStatuses,
-    required this.availableGameModes,
-    required this.availablePlayerPerspectives,
-    this.onSearchCompanies,
-    this.onSearchGameEngines,
-    this.onSearchFranchises,
-    this.onSearchCollections,
-    this.onSearchKeywords,
-    this.onSearchLanguages,
-    this.onSearchPlatforms,
-    this.onSearchThemes,
-    this.onSearchAgeRatings,
-  });
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
@@ -353,7 +348,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   // ==========================================
 
   int _getGameTabFilterCount() {
-    int count = 0;
+    var count = 0;
 
     // Genres
     if (_selectedGenres.isNotEmpty) count++;
@@ -374,7 +369,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   int _getQualityTabFilterCount() {
-    int count = 0;
+    var count = 0;
 
     // Total Rating
     if (_minTotalRating > 0.0 || _maxTotalRating < 10.0 || _minTotalRatingCount != null) count++;
@@ -391,7 +386,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   int _getMetaTabFilterCount() {
-    int count = 0;
+    var count = 0;
 
     // Themes
     if (_selectedThemeIds.isNotEmpty) count++;
@@ -539,7 +534,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               // Tab Bar
               TabBar(
                 controller: _tabController,
-                isScrollable: false,
                 tabAlignment: TabAlignment.fill,
                 tabs: [
                   _buildTabWithBadge(
@@ -603,7 +597,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                       BoxShadow(
                         color: theme.colorScheme.primary.withOpacity(0.3),
                         blurRadius: 20,
-                        spreadRadius: 0,
                         offset: const Offset(0, 8),
                       ),
                     ],
@@ -1125,7 +1118,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 Row(
                   children: [
                     Icon(icon,
-                        size: 20, color: Theme.of(context).colorScheme.primary),
+                        size: 20, color: Theme.of(context).colorScheme.primary,),
                     const SizedBox(width: 8),
                     Text(
                       title,
@@ -1525,7 +1518,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         const SizedBox(height: AppConstants.paddingSmall),
         RangeSlider(
           values: RangeValues(_minTotalRating, _maxTotalRating),
-          min: 0,
           max: 10,
           divisions: 20,
           labels: RangeLabels(
@@ -1628,7 +1620,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         const SizedBox(height: AppConstants.paddingSmall),
         RangeSlider(
           values: RangeValues(_minUserRating, _maxUserRating),
-          min: 0,
           max: 10,
           divisions: 20,
           labels: RangeLabels(
@@ -1731,7 +1722,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         const SizedBox(height: AppConstants.paddingSmall),
         RangeSlider(
           values: RangeValues(_minAggregatedRating, _maxAggregatedRating),
-          min: 0,
           max: 100,
           divisions: 20,
           labels: RangeLabels(
@@ -2016,7 +2006,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () => _showDateFilterDialog(),
+            onTap: _showDateFilterDialog,
             borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -2109,7 +2099,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   Widget _buildDateChip(
-      {required String label, required VoidCallback onRemove}) {
+      {required String label, required VoidCallback onRemove,}) {
     final theme = Theme.of(context);
     return Chip(
       label: Text(label),
@@ -2347,9 +2337,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                       title: itemBuilder(item),
                       trailing: isSelected
                           ? Icon(Icons.check_circle,
-                              color: theme.colorScheme.primary)
+                              color: theme.colorScheme.primary,)
                           : Icon(Icons.add_circle_outline,
-                              color: theme.colorScheme.primary),
+                              color: theme.colorScheme.primary,),
                       onTap: () {
                         if (isSelected) {
                           onRemove(itemId);
@@ -2803,7 +2793,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           ? _singleReleaseDate
           : _singleReleaseDate != null && _dateOperator == 'on'
               ? DateTime(_singleReleaseDate!.year, _singleReleaseDate!.month,
-                  _singleReleaseDate!.day, 23, 59, 59)
+                  _singleReleaseDate!.day, 23, 59, 59,)
               : _releaseDateTo,
       sortBy: _sortBy,
       sortOrder: _sortOrder,
@@ -2814,7 +2804,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   int _getActiveFilterCount() {
-    int count = 0;
+    var count = 0;
     if (_selectedGenres.isNotEmpty) count++;
     if (_selectedGameModes.isNotEmpty) count++;
     if (_selectedPlayerPerspectives.isNotEmpty) count++;
@@ -2835,15 +2825,21 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     if (_minTotalRating > 0 ||
         _maxTotalRating < 10 ||
         _minTotalRatingCount != null ||
-        _maxTotalRatingCount != null) count++;
+        _maxTotalRatingCount != null) {
+      count++;
+    }
     if (_minUserRating > 0 ||
         _maxUserRating < 10 ||
         _minUserRatingCount != null ||
-        _maxUserRatingCount != null) count++;
+        _maxUserRatingCount != null) {
+      count++;
+    }
     if (_minAggregatedRating > 0 ||
         _maxAggregatedRating < 100 ||
         _minAggregatedRatingCount != null ||
-        _maxAggregatedRatingCount != null) count++;
+        _maxAggregatedRatingCount != null) {
+      count++;
+    }
 
     // Popularity filters
     if (_minHypes != null || _maxHypes != null) count++;
@@ -2852,7 +2848,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     // Date filters
     if (_releaseDateFrom != null ||
         _releaseDateTo != null ||
-        _singleReleaseDate != null) count++;
+        _singleReleaseDate != null) {
+      count++;
+    }
     return count;
   }
 
@@ -2900,20 +2898,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 // ==========================================
 
 class DateFilterDialog extends StatefulWidget {
+
+  const DateFilterDialog({
+    required this.onApply, super.key,
+    this.initialDateFrom,
+    this.initialDateTo,
+    this.initialSingleDate,
+    this.initialOperator,
+  });
   final DateTime? initialDateFrom;
   final DateTime? initialDateTo;
   final DateTime? initialSingleDate;
   final String? initialOperator;
   final void Function(DateTime?, DateTime?, DateTime?, String?) onApply;
-
-  const DateFilterDialog({
-    super.key,
-    this.initialDateFrom,
-    this.initialDateTo,
-    this.initialSingleDate,
-    this.initialOperator,
-    required this.onApply,
-  });
 
   @override
   State<DateFilterDialog> createState() => _DateFilterDialogState();
@@ -3225,7 +3222,7 @@ class _DateFilterDialogState extends State<DateFilterDialog>
                       ),
                     const SizedBox(width: 8),
                     Icon(Icons.calendar_today,
-                        color: theme.colorScheme.primary),
+                        color: theme.colorScheme.primary,),
                   ],
                 ),
               ],

@@ -3,21 +3,21 @@
 // lib/domain/usecases/events/get_complete_event_details.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/event/event.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/event_repository.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/event_repository.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteEventDetailsParams> {
-  final EventRepository eventRepository;
-  final GameRepository gameRepository;
 
   GetCompleteEventDetails({
     required this.eventRepository,
     required this.gameRepository,
   });
+  final EventRepository eventRepository;
+  final GameRepository gameRepository;
 
   @override
   Future<Either<Failure, CompleteEventDetails>> call(GetCompleteEventDetailsParams params) async {
@@ -27,7 +27,7 @@ class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteE
 
       if (eventResult.isLeft()) {
         return eventResult.fold(
-              (failure) => Left(failure),
+              Left.new,
               (event) => throw Exception('Unexpected success'),
         );
       }
@@ -35,7 +35,7 @@ class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteE
       final event = eventResult.fold((l) => throw Exception('Unexpected failure'), (r) => r);
 
       // Get featured games if event has games
-      List<Game> featuredGames = [];
+      var featuredGames = <Game>[];
       if (event.hasGames && params.includeGames) {
         final gamesResult = await gameRepository.getGamesByIds(event.gameIds);
         gamesResult.fold(
@@ -49,7 +49,7 @@ class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteE
       return Right(CompleteEventDetails(
         event: event,
         featuredGames: featuredGames,
-      ));
+      ),);
     } catch (e) {
       return Left(ServerFailure(message: 'Failed to load complete event details: $e'));
     }
@@ -57,13 +57,13 @@ class GetCompleteEventDetails extends UseCase<CompleteEventDetails, GetCompleteE
 }
 
 class GetCompleteEventDetailsParams extends Equatable {
-  final int eventId;
-  final bool includeGames;
 
   const GetCompleteEventDetailsParams({
     required this.eventId,
     this.includeGames = true,
   });
+  final int eventId;
+  final bool includeGames;
 
   @override
   List<Object> get props => [eventId, includeGames];
@@ -72,13 +72,13 @@ class GetCompleteEventDetailsParams extends Equatable {
 // Füge diese copyWith Methode zu deiner CompleteEventDetails Klasse hinzu
 
 class CompleteEventDetails extends Equatable {
-  final Event event;
-  final List<Game> featuredGames;
 
   const CompleteEventDetails({
     required this.event,
     required this.featuredGames,
   });
+  final Event event;
+  final List<Game> featuredGames;
 
   // Helper getters
   bool get hasFeaturedGames => featuredGames.isNotEmpty;

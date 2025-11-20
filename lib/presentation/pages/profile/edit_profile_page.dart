@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/data/models/user_model.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
@@ -13,10 +13,10 @@ import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class EditProfilePage extends StatefulWidget {
+
+  const EditProfilePage({required this.user, super.key});
   static const String routeName = 'edit_profile';
   final User user;
-
-  const EditProfilePage({super.key, required this.user});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -87,7 +87,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               filePath,
               file,
               fileOptions: const supabase.FileOptions(
-                  cacheControl: '3600', upsert: true),
+                  upsert: true,),
             );
 
         avatarUrl =
@@ -160,7 +160,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         actions: [
           if (!_isLoading)
             Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsets.only(right: 8),
               child: FilledButton.icon(
                 icon: const Icon(Icons.check, size: 20),
                 label: const Text('Save'),
@@ -175,7 +175,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Form(
               key: _formKey,
               child: Column(
@@ -192,12 +192,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
           if (_isLoading)
-            Container(
+            ColoredBox(
               color: Colors.black.withValues(alpha: 0.5),
               child: Center(
                 child: Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

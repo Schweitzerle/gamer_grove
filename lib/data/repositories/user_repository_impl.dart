@@ -7,14 +7,13 @@ library;
 
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import 'package:gamer_grove/domain/entities/user/user.dart';
-import 'package:gamer_grove/domain/entities/user/user_gaming_activity.dart';
-import 'package:gamer_grove/domain/entities/user/user_relationship.dart';
-
-import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_datasource.dart';
 import 'package:gamer_grove/data/models/user_model.dart';
 import 'package:gamer_grove/data/repositories/base/supabase_base_repository.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/entities/user/user_gaming_activity.dart';
+import 'package:gamer_grove/domain/entities/user/user_relationship.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
 
 /// Concrete implementation of [UserRepository].
 ///
@@ -37,8 +36,6 @@ import 'package:gamer_grove/data/repositories/base/supabase_base_repository.dart
 /// ```
 class UserRepositoryImpl extends SupabaseBaseRepository
     implements UserRepository {
-  /// The data source for user-related operations.
-  final SupabaseUserDataSource userDataSource;
 
   /// Creates an instance of [UserRepositoryImpl].
   UserRepositoryImpl({
@@ -46,6 +43,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     required super.supabase,
     required super.networkInfo,
   });
+  /// The data source for user-related operations.
+  final SupabaseUserDataSource userDataSource;
 
   // ============================================================
   // PROFILE OPERATIONS
@@ -69,7 +68,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, User>> getCurrentUserProfile() {
     return executeSupabaseOperation(
       operation: () async {
-        final currentUser = this.supabase.auth.currentUser;
+        final currentUser = supabase.auth.currentUser;
         if (currentUser == null) {
           throw Exception('No authenticated user');
         }
@@ -249,6 +248,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }
 
   /// Gets the user's wishlisted games.
+  @override
   Future<Either<Failure, List<int>>> getWishlistedGames(
     String userId, {
     int? limit,
@@ -268,6 +268,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }
 
   /// Gets the user's rated games.
+  @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getRatedGames(
     String userId, {
     int? limit,
@@ -284,6 +285,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }
 
   /// Gets the user's recommended games.
+  @override
   Future<Either<Failure, List<int>>> getRecommendedGames(
     String userId, {
     int? limit,
@@ -471,8 +473,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
-        final response = await this
-            .supabase
+        final response = await supabase
             .from('users')
             .select()
             .order('created_at', ascending: false)
@@ -808,7 +809,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
           return <Map<String, dynamic>>[];
         }
         return userDataSource.getRatedGames(userId,
-            limit: limit, offset: offset);
+            limit: limit, offset: offset,);
       },
       errorMessage: 'Failed to get public rated games',
     );
@@ -829,7 +830,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
           return <Map<String, dynamic>>[];
         }
         final games = await userDataSource.getRecommendedGames(userId,
-            limit: limit, offset: offset);
+            limit: limit, offset: offset,);
         return games.cast<Map<String, dynamic>>();
       },
       errorMessage: 'Failed to get public recommended games',
@@ -877,7 +878,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await this.supabase.from('blocked_users').insert({
+        await supabase.from('blocked_users').insert({
           'blocker_id': currentUserId,
           'blocked_id': targetUserId,
         });
@@ -893,8 +894,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await this
-            .supabase
+        await supabase
             .from('blocked_users')
             .delete()
             .eq('blocker_id', currentUserId)
@@ -910,8 +910,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
-        final response = await this
-            .supabase
+        final response = await supabase
             .from('blocked_users')
             .select('blocked_id, users!blocked_users_blocked_id_fkey(*)')
             .eq('blocker_id', userId);
@@ -931,8 +930,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
-        final response = await this
-            .supabase
+        final response = await supabase
             .from('blocked_users')
             .select()
             .eq('blocker_id', currentUserId)
@@ -972,7 +970,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response =
-            await this.supabase.from('users').select().inFilter('id', userIds);
+            await supabase.from('users').select().inFilter('id', userIds);
 
         return (response as List)
             .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
@@ -995,7 +993,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await this.supabase.from('user_reports').insert({
+        await supabase.from('user_reports').insert({
           'reporter_id': reporterId,
           'reported_user_id': reportedUserId,
           'reason': reason,
@@ -1010,8 +1008,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, bool>> isUsernameAvailable(String username) {
     return executeSupabaseOperation(
       operation: () async {
-        final response = await this
-            .supabase
+        final response = await supabase
             .from('users')
             .select('id')
             .eq('username', username)
@@ -1028,7 +1025,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final suggestions = <String>[];
-        for (int i = 1; i <= 5; i++) {
+        for (var i = 1; i <= 5; i++) {
           final suggestion = '$baseUsername$i';
           final isAvailable = await isUsernameAvailable(suggestion);
           isAvailable.fold(
@@ -1074,7 +1071,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseVoidOperation(
       operation: () async {
 
-        var currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
+        final currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
 
         // Check if the game is already in the top three at a different position
         final existingIndex = currentTopThree.indexOf(gameId);
@@ -1099,7 +1096,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, void>> deactivateUserAccount(String userId) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await this.supabase.from('users').update({
+        await supabase.from('users').update({
           'is_active': false,
           'deactivated_at': DateTime.now().toIso8601String(),
         }).eq('id', userId);
@@ -1112,7 +1109,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, void>> reactivateUserAccount(String userId) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await this.supabase.from('users').update({
+        await supabase.from('users').update({
           'is_active': true,
           'deactivated_at': null,
         }).eq('id', userId);

@@ -12,9 +12,9 @@ abstract class SocialInteractionsEvent extends Equatable {
 
 /// Event to follow a user
 class FollowUserRequested extends SocialInteractionsEvent {
-  final String targetUserId;
 
   const FollowUserRequested(this.targetUserId);
+  final String targetUserId;
 
   @override
   List<Object?> get props => [targetUserId];
@@ -22,9 +22,9 @@ class FollowUserRequested extends SocialInteractionsEvent {
 
 /// Event to unfollow a user
 class UnfollowUserRequested extends SocialInteractionsEvent {
-  final String targetUserId;
 
   const UnfollowUserRequested(this.targetUserId);
+  final String targetUserId;
 
   @override
   List<Object?> get props => [targetUserId];
@@ -32,10 +32,10 @@ class UnfollowUserRequested extends SocialInteractionsEvent {
 
 /// Event to toggle follow status (smart follow/unfollow)
 class ToggleFollowRequested extends SocialInteractionsEvent {
-  final String targetUserId;
-  final bool isCurrentlyFollowing;
 
   const ToggleFollowRequested(this.targetUserId, this.isCurrentlyFollowing);
+  final String targetUserId;
+  final bool isCurrentlyFollowing;
 
   @override
   List<Object?> get props => [targetUserId, isCurrentlyFollowing];
@@ -43,9 +43,9 @@ class ToggleFollowRequested extends SocialInteractionsEvent {
 
 /// Event to load initial follow status for a user
 class LoadFollowStatusRequested extends SocialInteractionsEvent {
-  final String targetUserId;
 
   const LoadFollowStatusRequested(this.targetUserId);
+  final String targetUserId;
 
   @override
   List<Object?> get props => [targetUserId];

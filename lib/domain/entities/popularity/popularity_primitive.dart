@@ -27,6 +27,19 @@ enum PopularitySourceEnum {
 }
 
 class PopularityPrimitive extends Equatable {
+
+  const PopularityPrimitive({
+    required this.id,
+    required this.checksum,
+    required this.gameId,
+    required this.value,
+    this.createdAt,
+    this.updatedAt,
+    this.calculatedAt,
+    this.popularityTypeId,
+    this.externalPopularitySourceId,
+    this.popularitySourceEnum,
+  });
   final int id;
   final String checksum;
   final DateTime? createdAt;
@@ -43,19 +56,6 @@ class PopularityPrimitive extends Equatable {
 
   // DEPRECATED but still useful
   final PopularitySourceEnum? popularitySourceEnum;
-
-  const PopularityPrimitive({
-    required this.id,
-    required this.checksum,
-    required this.gameId,
-    required this.value,
-    this.createdAt,
-    this.updatedAt,
-    this.calculatedAt,
-    this.popularityTypeId,
-    this.externalPopularitySourceId,
-    this.popularitySourceEnum,
-  });
 
   // Helper getters
   bool get hasPopularityType => popularityTypeId != null;

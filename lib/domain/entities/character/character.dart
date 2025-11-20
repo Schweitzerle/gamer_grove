@@ -1,11 +1,32 @@
 // lib/domain/entities/character/character.dart - UPDATED VERSION
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
-import '../game/game.dart';
-import 'character_gender.dart';
-import 'character_species.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
-class Character extends Equatable {
+class Character extends Equatable { // The actual Game objects this character appears in
+
+  const Character({
+    required this.id,
+    required this.checksum,
+    required this.name,
+    this.akas = const [],
+    this.characterGenderId,
+    this.characterSpeciesId,
+    this.countryName,
+    this.description,
+    this.gameIds = const [],
+    this.mugShot,
+    this.slug,
+    this.url,
+    this.createdAt,
+    this.updatedAt,
+    this.genderEnum,
+    this.speciesEnum,
+    this.mugShotImageId, // 🆕 ADD this
+    this.games, // 🆕 ADD this - actual Game objects
+  });
   final int id;
   final String checksum;
   final String name;
@@ -29,28 +50,7 @@ class Character extends Equatable {
   final String? mugShotImageId; // The actual image ID for URL construction
 
   // 🆕 NEW: Games property (populated when fetched for UI, similar to Game.similarGames)
-  final List<Game>? games; // The actual Game objects this character appears in
-
-  const Character({
-    required this.id,
-    required this.checksum,
-    required this.name,
-    this.akas = const [],
-    this.characterGenderId,
-    this.characterSpeciesId,
-    this.countryName,
-    this.description,
-    this.gameIds = const [],
-    this.mugShot,
-    this.slug,
-    this.url,
-    this.createdAt,
-    this.updatedAt,
-    this.genderEnum,
-    this.speciesEnum,
-    this.mugShotImageId, // 🆕 ADD this
-    this.games, // 🆕 ADD this - actual Game objects
-  });
+  final List<Game>? games;
 
   // 🆕 NEW: Helper getters for image URLs (similar to Cover, Screenshot entities)
   String? get imageUrl => mugShotImageId != null ? thumbUrl : null;

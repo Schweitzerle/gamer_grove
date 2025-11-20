@@ -1,5 +1,5 @@
 // lib/data/models/website_type_model.dart
-import '../../../domain/entities/website/website_type.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class WebsiteTypeModel extends WebsiteType {
   const WebsiteTypeModel({
@@ -9,6 +9,15 @@ class WebsiteTypeModel extends WebsiteType {
     super.createdAt,
     super.updatedAt,
   });
+
+  // Helper factory for creating from category enum (legacy support)
+  factory WebsiteTypeModel.fromCategory(WebsiteCategory category) {
+    return WebsiteTypeModel(
+      id: category.value,
+      checksum: '',
+      type: category.typeName,
+    );
+  }
 
   factory WebsiteTypeModel.fromJson(Map<String, dynamic> json) {
     return WebsiteTypeModel(
@@ -37,14 +46,5 @@ class WebsiteTypeModel extends WebsiteType {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
-  }
-
-  // Helper factory for creating from category enum (legacy support)
-  factory WebsiteTypeModel.fromCategory(WebsiteCategory category) {
-    return WebsiteTypeModel(
-      id: category.value,
-      checksum: '',
-      type: category.typeName,
-    );
   }
 }

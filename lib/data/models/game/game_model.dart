@@ -1,56 +1,53 @@
 // lib/data/models/game_model.dart (VOLLSTÄNDIG ERWEITERT)
-import 'package:gamer_grove/data/models/theme_model.dart';
-import 'package:gamer_grove/domain/entities/theme.dart';
-
-import '../../../domain/entities/artwork.dart';
-import '../../../domain/entities/character/character.dart';
-import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/game/game_status.dart';
-import '../../../domain/entities/game/game_type.dart';
-import '../../../domain/entities/genre.dart';
-import '../../../domain/entities/language/language_support.dart';
-import '../../../domain/entities/platform/platform.dart';
-import '../../../domain/entities/game/game_mode.dart';
-import '../../../domain/entities/involved_company.dart';
-import '../../../domain/entities/screenshot.dart';
-import '../../../domain/entities/website/website.dart';
-import '../../../domain/entities/game/game_video.dart';
-import '../../../domain/entities/ageRating/age_rating.dart';
-import '../../../domain/entities/game/game_engine.dart';
-import '../../../domain/entities/keyword.dart';
-import '../../../domain/entities/multiplayer_mode.dart';
-import '../../../domain/entities/player_perspective.dart';
-import '../../../domain/entities/franchise.dart';
-
-// FIX: Correct import path
-import '../../../domain/entities/collection/collection.dart';
-import '../../../domain/entities/externalGame/external_game.dart';
-import '../../../domain/entities/releaseDate/release_date.dart';
-import '../../../domain/entities/game/game_localization.dart';
-
+import 'package:gamer_grove/data/models/ageRating/age_rating_model.dart';
 // Imports für Models
-import '../artwork_model.dart';
-import '../character/character_model.dart';
-import '../collection/collection_model.dart';
-import '../event/event_model.dart';
-import '../genre_model.dart';
-import '../language/language_support_model.dart';
-import '../platform/platform_model.dart';
-import '../screenshot_model.dart';
-import 'game_mode_model.dart';
-import '../involved_company_model.dart';
-import '../website/website_model.dart';
-import 'game_video_model.dart';
-import '../ageRating/age_rating_model.dart';
-import 'game_engine_model.dart';
-import '../keyword_model.dart';
-import '../multiplayer_mode_model.dart';
-import '../player_perspective_model.dart';
-import '../franchise_model.dart';
-import '../externalGame/external_game_model.dart';
-import '../release_date/release_date_model.dart';
-import 'game_localization_model.dart';
+import 'package:gamer_grove/data/models/artwork_model.dart';
+import 'package:gamer_grove/data/models/character/character_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/event/event_model.dart';
+import 'package:gamer_grove/data/models/externalGame/external_game_model.dart';
+import 'package:gamer_grove/data/models/franchise_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_model.dart';
+import 'package:gamer_grove/data/models/game/game_localization_model.dart';
+import 'package:gamer_grove/data/models/game/game_mode_model.dart';
+import 'package:gamer_grove/data/models/game/game_video_model.dart';
+import 'package:gamer_grove/data/models/genre_model.dart';
+import 'package:gamer_grove/data/models/involved_company_model.dart';
+import 'package:gamer_grove/data/models/keyword_model.dart';
+import 'package:gamer_grove/data/models/language/language_support_model.dart';
+import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
+import 'package:gamer_grove/data/models/player_perspective_model.dart';
+import 'package:gamer_grove/data/models/release_date/release_date_model.dart';
+import 'package:gamer_grove/data/models/screenshot_model.dart';
+import 'package:gamer_grove/data/models/theme_model.dart';
+import 'package:gamer_grove/data/models/website/website_model.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+// FIX: Correct import path
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/externalGame/external_game.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_localization.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
+import 'package:gamer_grove/domain/entities/involved_company.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/language/language_support.dart';
+import 'package:gamer_grove/domain/entities/multiplayer_mode.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
+import 'package:gamer_grove/domain/entities/screenshot.dart';
+import 'package:gamer_grove/domain/entities/theme.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
 
 class GameModel extends Game {
   GameModel({
@@ -300,7 +297,7 @@ class GameModel extends Game {
     if (characters is List) {
       return characters
           .whereType<Map<String, dynamic>>()
-          .map((item) => CharacterModel.fromJson(item))
+          .map(CharacterModel.fromJson)
           .toList();
     }
     return [];
@@ -310,7 +307,7 @@ class GameModel extends Game {
     if (events is List) {
       return events
           .whereType<Map<String, dynamic>>()
-          .map((item) => EventModel.fromJson(item))
+          .map(EventModel.fromJson)
           .toList();
     }
     return [];
@@ -321,7 +318,7 @@ class GameModel extends Game {
     if (screenshots is List) {
       return screenshots
           .whereType<Map<String, dynamic>>()
-          .map((item) => ScreenshotModel.fromJson(item))
+          .map(ScreenshotModel.fromJson)
           .toList();
     }
     return [];
@@ -332,7 +329,7 @@ class GameModel extends Game {
     if (artworks is List) {
       return artworks
           .whereType<Map<String, dynamic>>()
-          .map((item) => ArtworkModel.fromJson(item))
+          .map(ArtworkModel.fromJson)
           .toList();
     }
     return [];
@@ -342,7 +339,7 @@ class GameModel extends Game {
     if (videos is List) {
       return videos
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameVideoModel.fromJson(item))
+          .map(GameVideoModel.fromJson)
           .toList();
     }
     return [];
@@ -406,7 +403,7 @@ class GameModel extends Game {
     if (themes is List) {
       return themes
           .whereType<Map<String, dynamic>>()
-          .map((item) => IGDBThemeModel.fromJson(item))
+          .map(IGDBThemeModel.fromJson)
           .toList();
     }
     return [];
@@ -416,18 +413,18 @@ class GameModel extends Game {
     if (keywords is List) {
       return keywords
           .whereType<Map<String, dynamic>>()
-          .map((item) => KeywordModel.fromJson(item))
+          .map(KeywordModel.fromJson)
           .toList();
     }
     return [];
   }
 
   static List<PlayerPerspective> _extractPlayerPerspectives(
-      dynamic perspectives) {
+      dynamic perspectives,) {
     if (perspectives is List) {
       return perspectives
           .whereType<Map<String, dynamic>>()
-          .map((item) => PlayerPerspectiveModel.fromJson(item))
+          .map(PlayerPerspectiveModel.fromJson)
           .toList();
     }
     return [];
@@ -444,7 +441,7 @@ class GameModel extends Game {
     if (companies is List) {
       return companies
           .whereType<Map<String, dynamic>>()
-          .map((item) => InvolvedCompanyModel.fromJson(item))
+          .map(InvolvedCompanyModel.fromJson)
           .toList();
     }
     return [];
@@ -454,7 +451,7 @@ class GameModel extends Game {
     if (engines is List) {
       return engines
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameEngineModel.fromJson(item))
+          .map(GameEngineModel.fromJson)
           .toList();
     }
     return [];
@@ -464,7 +461,7 @@ class GameModel extends Game {
     if (websites is List) {
       return websites
           .whereType<Map<String, dynamic>>()
-          .map((item) => WebsiteModel.fromJson(item))
+          .map(WebsiteModel.fromJson)
           .toList();
     }
     return [];
@@ -474,7 +471,7 @@ class GameModel extends Game {
     if (external is List) {
       return external
           .whereType<Map<String, dynamic>>()
-          .map((item) => ExternalGameModel.fromJson(item))
+          .map(ExternalGameModel.fromJson)
           .toList();
     }
     return [];
@@ -484,7 +481,7 @@ class GameModel extends Game {
     if (ratings is List) {
       return ratings
           .whereType<Map<String, dynamic>>()
-          .map((item) => AgeRatingModel.fromJson(item))
+          .map(AgeRatingModel.fromJson)
           .toList();
     }
     return [];
@@ -494,7 +491,7 @@ class GameModel extends Game {
     if (modes is List) {
       return modes
           .whereType<Map<String, dynamic>>()
-          .map((item) => MultiplayerModeModel.fromJson(item))
+          .map(MultiplayerModeModel.fromJson)
           .toList();
     }
     return [];
@@ -504,18 +501,18 @@ class GameModel extends Game {
     if (supports is List) {
       return supports
           .whereType<Map<String, dynamic>>()
-          .map((item) => LanguageSupportModel.fromJson(item))
+          .map(LanguageSupportModel.fromJson)
           .toList();
     }
     return [];
   }
 
   static List<GameLocalization> _extractGameLocalizations(
-      dynamic localizations) {
+      dynamic localizations,) {
     if (localizations is List) {
       return localizations
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameLocalizationModel.fromJson(item))
+          .map(GameLocalizationModel.fromJson)
           .toList();
     }
     return [];
@@ -525,7 +522,7 @@ class GameModel extends Game {
     if (dates is List) {
       return dates
           .whereType<Map<String, dynamic>>()
-          .map((item) => ReleaseDateModel.fromJson(item))
+          .map(ReleaseDateModel.fromJson)
           .toList();
     }
     return [];
@@ -542,7 +539,7 @@ class GameModel extends Game {
     if (franchises is List) {
       return franchises
           .whereType<Map<String, dynamic>>()
-          .map((item) => FranchiseModel.fromJson(item))
+          .map(FranchiseModel.fromJson)
           .toList();
     }
     return [];
@@ -552,7 +549,7 @@ class GameModel extends Game {
     if (collections is List) {
       return collections
           .whereType<Map<String, dynamic>>()
-          .map((item) => CollectionModel.fromJson(item))
+          .map(CollectionModel.fromJson)
           .toList();
     }
     return [];
@@ -587,7 +584,7 @@ class GameModel extends Game {
     if (games is List) {
       return games
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameModel.fromJson(item))
+          .map(GameModel.fromJson)
           .toList();
     }
     return [];
@@ -641,14 +638,14 @@ class GameModel extends Game {
                 'id': genre.id,
                 'name': genre.name,
                 'slug': genre.slug,
-              })
+              },)
           .toList(),
       'platforms': platforms
           .map((platform) => {
                 'id': platform.id,
                 'name': platform.name,
                 'abbreviation': platform.abbreviation,
-              })
+              },)
           .toList(),
       'themes': themes.map((theme) => {'name': theme}).toList(),
       'hypes': hypes,

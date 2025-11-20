@@ -1,15 +1,15 @@
 // domain/usecases/game/search_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
-  final GameRepository repository;
 
   SearchGames(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Game>>> call(SearchGamesParams params) async {
@@ -17,7 +17,7 @@ class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
       return const Left(ValidationFailure(message: 'Search query cannot be empty'));
     }
 
-    return await repository.searchGames(
+    return repository.searchGames(
       params.query,
       params.limit,
       params.offset,
@@ -26,15 +26,15 @@ class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
 }
 
 class SearchGamesParams extends Equatable {
-  final String query;
-  final int limit;
-  final int offset;
 
   const SearchGamesParams({
     required this.query,
     this.limit = 20,
     this.offset = 0,
   });
+  final String query;
+  final int limit;
+  final int offset;
 
   @override
   List<Object> get props => [query, limit, offset];

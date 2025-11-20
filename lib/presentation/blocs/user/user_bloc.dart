@@ -39,13 +39,6 @@ import 'package:gamer_grove/presentation/blocs/user/user_state.dart';
 /// );
 /// ```
 class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
-  final GetUserProfileUseCase getUserProfileUseCase;
-  final UpdateUserProfileUseCase updateUserProfileUseCase;
-  final UpdateUserAvatarUseCase updateUserAvatarUseCase;
-  final FollowUserUseCase followUserUseCase;
-  final UnfollowUserUseCase unfollowUserUseCase;
-  final GetFollowersUseCase getFollowersUseCase;
-  final GetFollowingUseCase getFollowingUseCase;
 
   UserProfileBloc({
     required this.getUserProfileUseCase,
@@ -64,6 +57,13 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     on<LoadFollowersEvent>(_onLoadFollowers);
     on<LoadFollowingEvent>(_onLoadFollowing);
   }
+  final GetUserProfileUseCase getUserProfileUseCase;
+  final UpdateUserProfileUseCase updateUserProfileUseCase;
+  final UpdateUserAvatarUseCase updateUserAvatarUseCase;
+  final FollowUserUseCase followUserUseCase;
+  final UnfollowUserUseCase unfollowUserUseCase;
+  final GetFollowersUseCase getFollowersUseCase;
+  final GetFollowingUseCase getFollowingUseCase;
 
   /// Loads a user profile by ID or username.
   Future<void> _onLoadUserProfile(

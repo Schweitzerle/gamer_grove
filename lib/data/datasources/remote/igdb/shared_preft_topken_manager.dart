@@ -2,17 +2,17 @@
 // Production-ready Token Manager mit SharedPreferences
 
 import 'dart:convert';
+
+import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/errors/exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/errors/exceptions.dart';
 
 class SharedPrefsTokenManager {
+  SharedPrefsTokenManager._();
   static SharedPrefsTokenManager? _instance;
   static SharedPrefsTokenManager get instance =>
       _instance ??= SharedPrefsTokenManager._();
-
-  SharedPrefsTokenManager._();
 
   static const String _tokenKey = 'igdb_access_token';
   static const String _expiryKey = 'igdb_token_expiry';
@@ -25,7 +25,6 @@ class SharedPrefsTokenManager {
   bool _isRefreshing = false;
 
   Future<String> getValidToken() async {
-
     // Prüfe Cache zuerst (ultra-schnell)
     if (_cachedToken != null &&
         _cachedExpiry != null &&
@@ -76,8 +75,7 @@ class SharedPrefsTokenManager {
         _cachedExpiry = DateTime.parse(expiryString);
       }
 
-      if (_cachedToken != null && _cachedExpiry != null) {
-      }
+      if (_cachedToken != null && _cachedExpiry != null) {}
     } catch (e) {
       _cachedToken = null;
       _cachedExpiry = null;
@@ -86,7 +84,6 @@ class SharedPrefsTokenManager {
 
   Future<void> _refreshAndStoreToken() async {
     try {
-
       // Hole neuen Token von Twitch
       final request =
           http.Request('POST', Uri.parse('https://id.twitch.tv/oauth2/token'));
@@ -102,7 +99,6 @@ class SharedPrefsTokenManager {
 
       if (response.statusCode != 200) {
         throw ServerException(
-          'Failed to refresh token: ${response.body}',
           message: 'Failed to refresh token: ${response.body}',
           statusCode: response.statusCode,
         );
@@ -115,7 +111,6 @@ class SharedPrefsTokenManager {
       // IGDB Tokens sind normalerweise 60 Tage gültig
       final expiryDate = DateTime.now().add(Duration(seconds: expiresIn));
 
-
       // Speichere in SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_tokenKey, accessToken);
@@ -124,10 +119,10 @@ class SharedPrefsTokenManager {
       // Update Cache
       _cachedToken = accessToken;
       _cachedExpiry = expiryDate;
-
     } catch (e) {
-      throw ServerException('Token refresh failed: $e',
-          message: 'Token refresh failed: $e');
+      throw ServerException(
+        message: 'Token refresh failed: $e',
+      );
     }
   }
 
@@ -140,9 +135,7 @@ class SharedPrefsTokenManager {
 
       _cachedToken = null;
       _cachedExpiry = null;
-
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   // Für Debugging

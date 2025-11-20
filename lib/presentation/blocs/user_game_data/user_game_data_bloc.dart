@@ -7,12 +7,12 @@ import 'package:gamer_grove/domain/usecases/collection/get_recommended_games_use
 import 'package:gamer_grove/domain/usecases/collection/get_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_wishlisted_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/rate_game_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
+import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_recommended_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/toggle_wishlist_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/update_top_three_use_case.dart';
-import 'package:gamer_grove/domain/usecases/collection/set_top_three_game_at_position_use_case.dart';
-import 'package:gamer_grove/domain/usecases/collection/remove_from_top_three_use_case.dart';
 
 part 'user_game_data_event.dart';
 part 'user_game_data_state.dart';
@@ -44,17 +44,6 @@ part 'user_game_data_state.dart';
 /// }
 /// ```
 class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
-  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
-  final GetRatedGamesUseCase getRatedGamesUseCase;
-  final GetRecommendedGamesUseCase getRecommendedGamesUseCase;
-  final GetTopThreeUseCase getTopThreeUseCase;
-  final ToggleWishlistUseCase toggleWishlistUseCase;
-  final ToggleRecommendedUseCase toggleRecommendedUseCase;
-  final RateGameUseCase rateGameUseCase;
-  final RemoveRatingUseCase removeRatingUseCase;
-  final UpdateTopThreeUseCase updateTopThreeUseCase;
-  final SetTopThreeGameAtPositionUseCase setTopThreeGameAtPositionUseCase;
-  final RemoveFromTopThreeUseCase removeFromTopThreeUseCase;
 
   UserGameDataBloc({
     required this.getWishlistedGamesUseCase,
@@ -80,6 +69,17 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     on<ClearUserGameDataEvent>(_onClearUserGameData);
     on<RefreshUserGameDataEvent>(_onRefreshUserGameData);
   }
+  final GetWishlistedGamesUseCase getWishlistedGamesUseCase;
+  final GetRatedGamesUseCase getRatedGamesUseCase;
+  final GetRecommendedGamesUseCase getRecommendedGamesUseCase;
+  final GetTopThreeUseCase getTopThreeUseCase;
+  final ToggleWishlistUseCase toggleWishlistUseCase;
+  final ToggleRecommendedUseCase toggleRecommendedUseCase;
+  final RateGameUseCase rateGameUseCase;
+  final RemoveRatingUseCase removeRatingUseCase;
+  final UpdateTopThreeUseCase updateTopThreeUseCase;
+  final SetTopThreeGameAtPositionUseCase setTopThreeGameAtPositionUseCase;
+  final RemoveFromTopThreeUseCase removeFromTopThreeUseCase;
 
   /// Load all user game data from backend
   Future<void> _onLoadUserGameData(
@@ -94,15 +94,15 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       final results = await Future.wait([
         getWishlistedGamesUseCase(
           GetWishlistedGamesParams(
-              userId: event.userId, limit: 10000), // All wishlist
+              userId: event.userId, limit: 10000,), // All wishlist
         ),
         getRatedGamesUseCase(
           GetRatedGamesParams(
-              userId: event.userId, limit: 10000), // All ratings
+              userId: event.userId, limit: 10000,), // All ratings
         ),
         getRecommendedGamesUseCase(
           GetRecommendedGamesParams(
-              userId: event.userId, limit: 10000), // All recommendations
+              userId: event.userId, limit: 10000,), // All recommendations
         ),
         getTopThreeUseCase(GetTopThreeParams(userId: event.userId)),
       ]);
@@ -118,22 +118,22 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       if (wishlistResult.isLeft()) {
         wishlistResult.fold((l) {
           errorMessage = l.message;
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (ratedResult.isLeft()) {
         ratedResult.fold((l) {
           errorMessage = l.message;
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (recommendedResult.isLeft()) {
         recommendedResult.fold((l) {
           errorMessage = l.message;
-        }, (r) => null);
+        }, (r) => null,);
       }
       if (topThreeResult.isLeft()) {
         topThreeResult.fold((l) {
           errorMessage = l.message;
-        }, (r) => null);
+        }, (r) => null,);
       }
 
       if (errorMessage != null) {
@@ -195,7 +195,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         recommendedGameIds: recommendedGameIds,
         ratedGames: ratedGames,
         topThreeGameIds: topThreeGameIds,
-      ));
+      ),);
     } on Exception catch (e) {
       emit(UserGameDataError('Failed to load user game data: $e'));
     }
@@ -227,7 +227,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await toggleWishlistUseCase(
@@ -278,7 +278,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: updatedRecommendations,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await toggleRecommendedUseCase(
@@ -320,7 +320,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: updatedRatings,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await rateGameUseCase(
@@ -362,7 +362,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: updatedRatings,
       topThreeGameIds: currentState.topThreeGameIds,
-    ));
+    ),);
 
     // Backend update
     final result = await removeRatingUseCase(
@@ -399,7 +399,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
       recommendedGameIds: currentState.recommendedGameIds,
       ratedGames: currentState.ratedGames,
       topThreeGameIds: List.from(event.gameIds),
-    ));
+    ),);
 
     // Backend update
     final result = await updateTopThreeUseCase(
@@ -463,7 +463,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
               recommendedGameIds: currentState.recommendedGameIds,
               ratedGames: currentState.ratedGames,
               topThreeGameIds: topThreeGameIds,
-            ));
+            ),);
           },
         );
       },
@@ -513,7 +513,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
               recommendedGameIds: currentState.recommendedGameIds,
               ratedGames: currentState.ratedGames,
               topThreeGameIds: topThreeGameIds,
-            ));
+            ),);
           },
         );
       },
@@ -622,7 +622,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         recommendedGameIds: recommendedGameIds,
         ratedGames: ratedGames,
         topThreeGameIds: topThreeGameIds,
-      ));
+      ),);
     } on Exception catch (e) {
       emit(UserGameDataError('Failed to refresh user game data: $e'));
     }

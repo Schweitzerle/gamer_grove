@@ -18,15 +18,15 @@ abstract class PlatformEvent extends Equatable {
 // ==========================================
 
 class GetPlatformDetailsEvent extends PlatformEvent {
-  final int platformId;
-  final bool includeGames;
-  final String? userId;
 
   const GetPlatformDetailsEvent({
     required this.platformId,
     this.includeGames = true,
     this.userId,
   });
+  final int platformId;
+  final bool includeGames;
+  final String? userId;
 
   @override
   List<Object?> get props => [platformId, includeGames, userId];
@@ -39,13 +39,7 @@ class ClearPlatformEvent extends PlatformEvent {}
 // ==========================================
 
 /// Load paginated games for a platform
-class LoadPlatformGamesEvent extends PlatformEvent {
-  final int platformId;
-  final String platformName;
-  final String? userId;
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
-  final bool refresh; // If true, reset pagination
+class LoadPlatformGamesEvent extends PlatformEvent { // If true, reset pagination
 
   const LoadPlatformGamesEvent({
     required this.platformId,
@@ -55,6 +49,12 @@ class LoadPlatformGamesEvent extends PlatformEvent {
     this.sortOrder = SortOrder.descending,
     this.refresh = false,
   });
+  final int platformId;
+  final String platformName;
+  final String? userId;
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
+  final bool refresh;
 
   @override
   List<Object?> get props => [
@@ -74,13 +74,13 @@ class LoadMorePlatformGamesEvent extends PlatformEvent {
 
 /// Change sorting for paginated games
 class ChangePlatformSortEvent extends PlatformEvent {
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
 
   const ChangePlatformSortEvent({
     required this.sortBy,
     required this.sortOrder,
   });
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
 
   @override
   List<Object> get props => [sortBy, sortOrder];

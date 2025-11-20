@@ -3,7 +3,7 @@
 // ==================================================
 
 // lib/core/error/error_handler.dart
-import 'failures.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
 
 class ErrorHandler {
   static String getErrorMessage(Failure failure) {

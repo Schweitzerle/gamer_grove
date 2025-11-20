@@ -8,19 +8,10 @@ import 'package:gamer_grove/core/services/game_enrichment_service.dart';
 import 'package:gamer_grove/domain/entities/search/character_search_filters.dart';
 import 'package:gamer_grove/domain/repositories/character_repository.dart';
 import 'package:gamer_grove/domain/usecases/characters/get_character_with_games.dart';
-import 'character_event.dart';
-import 'character_state.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
-  final GetCharacterWithGames getCharacterWithGames;
-  final GameEnrichmentService enrichmentService;
-  final CharacterRepository characterRepository;
-
-  // Pagination state
-  String _currentQuery = '';
-  CharacterSearchFilters _currentFilters = const CharacterSearchFilters();
-  int _currentOffset = 0;
-  static const int _pageSize = 20;
 
   CharacterBloc({
     required this.getCharacterWithGames,
@@ -35,6 +26,15 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     on<LoadMoreCharactersEvent>(_onLoadMoreCharacters);
     on<ClearCharacterSearchEvent>(_onClearCharacterSearch);
   }
+  final GetCharacterWithGames getCharacterWithGames;
+  final GameEnrichmentService enrichmentService;
+  final CharacterRepository characterRepository;
+
+  // Pagination state
+  String _currentQuery = '';
+  CharacterSearchFilters _currentFilters = const CharacterSearchFilters();
+  int _currentOffset = 0;
+  static const int _pageSize = 20;
 
   Future<void> _onGetCharacterDetails(
     GetCharacterDetailsEvent event,
@@ -65,18 +65,18 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
             emit(CharacterDetailsLoaded(
               character: characterWithGames.character,
               games: enrichedGames,
-            ));
+            ),);
           } catch (e) {
             emit(CharacterDetailsLoaded(
               character: characterWithGames.character,
               games: characterWithGames.games,
-            ));
+            ),);
           }
         } else {
           emit(CharacterDetailsLoaded(
             character: characterWithGames.character,
             games: characterWithGames.games,
-          ));
+          ),);
         }
       },
     );
@@ -123,7 +123,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       (characters) => emit(CharacterSearchLoaded(
         characters: characters,
         query: event.query,
-      )),
+      ),),
     );
   }
 
@@ -153,7 +153,7 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
           characters: characters,
           query: event.query,
           hasReachedMax: characters.length < event.limit,
-        ));
+        ),);
       },
     );
   }
@@ -171,7 +171,6 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     final result = await characterRepository.advancedCharacterSearch(
       filters: _currentFilters,
       textQuery: _currentQuery.isNotEmpty ? _currentQuery : null,
-      limit: _pageSize,
       offset: _currentOffset,
     );
 
@@ -179,14 +178,14 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       (failure) => emit(CharacterError(
         message: failure.message,
         characters: currentState.characters,
-      )),
+      ),),
       (newCharacters) {
         _currentOffset += newCharacters.length;
         emit(currentState.copyWith(
           characters: [...currentState.characters, ...newCharacters],
           hasReachedMax: newCharacters.length < _pageSize,
           isLoadingMore: false,
-        ));
+        ),);
       },
     );
   }

@@ -14,12 +14,11 @@ import 'package:gamer_grove/presentation/pages/company/company_details_screen.da
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
 class CompanyDetailPage extends StatefulWidget {
-  final int companyId;
 
   const CompanyDetailPage({
-    super.key,
-    required this.companyId,
+    required this.companyId, super.key,
   });
+  final int companyId;
 
   @override
   State<CompanyDetailPage> createState() => _CompanyDetailPageState();
@@ -43,7 +42,6 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
     context.read<CompanyBloc>().add(
           GetCompanyDetailsEvent(
             companyId: widget.companyId,
-            includeGames: true,
             userId: userId,
           ),
         );
@@ -73,12 +71,12 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: LiveLoadingProgress(
               title: 'Loading Company Details',
               steps: CompanyLoadingSteps.companyDetails(context),
@@ -108,7 +106,7 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),

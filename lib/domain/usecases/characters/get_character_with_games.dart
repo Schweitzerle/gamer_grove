@@ -5,16 +5,16 @@
 // lib/domain/usecases/characters/get_character_with_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/character/character.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWithGamesParams> {
-  final GameRepository repository;
 
   GetCharacterWithGames(this.repository);
+  final GameRepository repository;
 
   // 🆕 USE CASE DEBUGGING ENHANCEMENT
 // ==========================================
@@ -44,7 +44,7 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
 
 
       // The character should already have games loaded from repository
-      List<Game> games = character.games ?? [];
+      var games = character.games ?? [];
 
       if (games.isEmpty && character.gameIds.isNotEmpty && params.includeGames) {
 
@@ -76,26 +76,26 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
 }
 
 class GetCharacterWithGamesParams extends Equatable {
-  final int characterId;
-  final bool includeGames;
 
   const GetCharacterWithGamesParams({
     required this.characterId,
     this.includeGames = true,
   });
+  final int characterId;
+  final bool includeGames;
 
   @override
   List<Object> get props => [characterId, includeGames];
 }
 
 class CharacterWithGames extends Equatable {
-  final Character character;
-  final List<Game> games;
 
   const CharacterWithGames({
     required this.character,
     required this.games,
   });
+  final Character character;
+  final List<Game> games;
 
   bool get hasGames => games.isNotEmpty;
   int get gameCount => games.length;

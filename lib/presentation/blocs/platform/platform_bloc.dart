@@ -5,19 +5,12 @@
 // lib/presentation/blocs/platform/platform_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
-import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/platform/get_platform_with_games.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 
 class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
-  final GetPlatformWithGames getPlatformWithGames;
-  final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
-  final GameEnrichmentService enrichmentService;
-
-  // Pagination constants
-  static const int _pageSize = 20;
 
   PlatformBloc({
     required this.getPlatformWithGames,
@@ -31,6 +24,12 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     on<LoadMorePlatformGamesEvent>(_onLoadMorePlatformGames);
     on<ChangePlatformSortEvent>(_onChangePlatformSort);
   }
+  final GetPlatformWithGames getPlatformWithGames;
+  final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
+  final GameEnrichmentService enrichmentService;
+
+  // Pagination constants
+  static const int _pageSize = 20;
 
   // ==========================================
   // EXISTING EVENT HANDLERS
@@ -64,18 +63,18 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
             emit(PlatformDetailsLoaded(
               platform: platformWithGames.platform,
               games: enrichedGames,
-            ));
+            ),);
           } catch (e) {
             emit(PlatformDetailsLoaded(
               platform: platformWithGames.platform,
               games: platformWithGames.games,
-            ));
+            ),);
           }
         } else {
           emit(PlatformDetailsLoaded(
             platform: platformWithGames.platform,
             games: platformWithGames.games,
-          ));
+          ),);
         }
       },
     );
@@ -101,13 +100,11 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     emit(PlatformGamesLoading(
       platformId: event.platformId,
       platformName: event.platformName,
-    ));
+    ),);
 
     // Fetch first page
     final result = await gameRepository.getGamesByPlatform(
       platformIds: [event.platformId],
-      limit: _pageSize,
-      offset: 0,
       sortBy: event.sortBy,
       sortOrder: event.sortOrder,
     );
@@ -118,12 +115,12 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
           platformId: event.platformId,
           platformName: event.platformName,
           message: failure.message,
-        ));
+        ),);
       },
       (games) async {
 
         // Enrich games if userId is provided
-        List<Game> enrichedGames = games;
+        var enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
           try {
             enrichedGames = await enrichmentService.enrichGames(
@@ -142,11 +139,10 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
           platformName: event.platformName,
           games: enrichedGames,
           hasMore: hasMore,
-          currentPage: 0,
           sortBy: event.sortBy,
           sortOrder: event.sortOrder,
           userId: event.userId,
-        ));
+        ),);
       },
     );
   }
@@ -175,7 +171,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     // Fetch next page
     final result = await gameRepository.getGamesByPlatform(
       platformIds: [currentState.platformId],
-      limit: _pageSize,
       offset: offset,
       sortBy: currentState.sortBy,
       sortOrder: currentState.sortOrder,
@@ -189,7 +184,7 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
       (newGames) async {
 
         // Enrich new games if userId is available
-        List<Game> enrichedNewGames = newGames;
+        var enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
           try {
             enrichedNewGames = await enrichmentService.enrichGames(
@@ -212,9 +207,8 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
           currentPage: nextPage,
           sortBy: currentState.sortBy,
           sortOrder: currentState.sortOrder,
-          isLoadingMore: false,
           userId: currentState.userId,
-        ));
+        ),);
       },
     );
   }
@@ -233,13 +227,11 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     emit(PlatformGamesLoading(
       platformId: currentState.platformId,
       platformName: currentState.platformName,
-    ));
+    ),);
 
     // Fetch first page with new sort
     final result = await gameRepository.getGamesByPlatform(
       platformIds: [currentState.platformId],
-      limit: _pageSize,
-      offset: 0,
       sortBy: event.sortBy,
       sortOrder: event.sortOrder,
     );
@@ -250,12 +242,12 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
           platformId: currentState.platformId,
           platformName: currentState.platformName,
           message: failure.message,
-        ));
+        ),);
       },
       (games) async {
 
         // Enrich games if userId is available
-        List<Game> enrichedGames = games;
+        var enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
           try {
             enrichedGames = await enrichmentService.enrichGames(
@@ -274,11 +266,10 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
           platformName: currentState.platformName,
           games: enrichedGames,
           hasMore: hasMore,
-          currentPage: 0,
           sortBy: event.sortBy,
           sortOrder: event.sortOrder,
           userId: currentState.userId,
-        ));
+        ),);
       },
     );
   }

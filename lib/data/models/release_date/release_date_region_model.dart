@@ -1,7 +1,7 @@
 // ===== RELEASE DATE REGION MODEL =====
 // lib/data/models/release_date/release_date_region_model.dart
 
-import '../../../domain/entities/releaseDate/release_date_region.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date_region.dart';
 
 class ReleaseDateRegionModel extends ReleaseDateRegion {
   const ReleaseDateRegionModel({

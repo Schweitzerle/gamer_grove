@@ -1,5 +1,5 @@
 // core/utils/input_validator.dart
-import '../constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class InputValidator {
   // Email validation

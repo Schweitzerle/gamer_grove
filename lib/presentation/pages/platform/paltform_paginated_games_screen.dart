@@ -5,25 +5,23 @@
 // lib/presentation/pages/platform/platform_paginated_games_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
 
 class PlatformPaginatedGamesScreen extends StatefulWidget {
+
+  const PlatformPaginatedGamesScreen({
+    required this.platformId, required this.platformName, super.key,
+    this.userId,
+  });
   final int platformId;
   final String platformName;
   final String? userId;
-
-  const PlatformPaginatedGamesScreen({
-    super.key,
-    required this.platformId,
-    required this.platformName,
-    this.userId,
-  });
 
   @override
   State<PlatformPaginatedGamesScreen> createState() =>
@@ -58,7 +56,7 @@ class _PlatformPaginatedGamesScreenState
           platformId: widget.platformId,
           platformName: widget.platformName,
           userId: widget.userId,
-        ));
+        ),);
   }
 
   @override
@@ -199,7 +197,7 @@ class _PlatformPaginatedGamesScreenState
                       platformName: widget.platformName,
                       userId: widget.userId,
                       refresh: true,
-                    ));
+                    ),);
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
@@ -468,11 +466,11 @@ class _PlatformPaginatedGamesScreenState
     if (currentState is! PlatformGamesLoaded) return;
 
     // Ensure current sortBy is in available options
-    final GameSortBy initialSortBy =
+    final initialSortBy =
         _availableSortOptions.contains(currentState.sortBy)
             ? currentState.sortBy
             : GameSortBy.ratingCount;
-    final SortOrder initialOrder = currentState.sortOrder;
+    final initialOrder = currentState.sortOrder;
 
     showDialog<void>(
       context: context,
@@ -494,15 +492,15 @@ class _PlatformPaginatedGamesScreenState
 
 // Separate StatefulWidget for the dialog
 class _SortDialog extends StatefulWidget {
-  final GameSortBy initialSortBy;
-  final SortOrder initialOrder;
-  final void Function(GameSortBy, SortOrder) onApply;
 
   const _SortDialog({
     required this.initialSortBy,
     required this.initialOrder,
     required this.onApply,
   });
+  final GameSortBy initialSortBy;
+  final SortOrder initialOrder;
+  final void Function(GameSortBy, SortOrder) onApply;
 
   @override
   State<_SortDialog> createState() => _SortDialogState();

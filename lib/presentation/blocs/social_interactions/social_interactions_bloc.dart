@@ -2,19 +2,15 @@
 
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/repositories/user_repository.dart';
-import '../../../domain/usecases/user/follow_user.dart';
-import '../../../domain/usecases/user/unfollow_user.dart';
-import 'social_interactions_event.dart';
-import 'social_interactions_state.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/user/follow_user.dart';
+import 'package:gamer_grove/domain/usecases/user/unfollow_user.dart';
+import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_event.dart';
+import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_state.dart';
 
 /// BLoC for handling social interactions (follow/unfollow)
 class SocialInteractionsBloc
     extends Bloc<SocialInteractionsEvent, SocialInteractionsState> {
-  final FollowUserUseCase followUser;
-  final UnfollowUserUseCase unfollowUser;
-  final UserRepository userRepository;
-  final String? currentUserId;
 
   SocialInteractionsBloc({
     required this.followUser,
@@ -27,6 +23,10 @@ class SocialInteractionsBloc
     on<ToggleFollowRequested>(_onToggleFollowRequested);
     on<LoadFollowStatusRequested>(_onLoadFollowStatusRequested);
   }
+  final FollowUserUseCase followUser;
+  final UnfollowUserUseCase unfollowUser;
+  final UserRepository userRepository;
+  final String? currentUserId;
 
   /// Handle follow user request
   Future<void> _onFollowUserRequested(

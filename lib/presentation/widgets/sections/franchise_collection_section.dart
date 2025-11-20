@@ -1,19 +1,18 @@
 // lib/presentation/pages/game_detail/widgets/franchise_collections_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/navigations.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../../../domain/entities/franchise.dart';
-import '../../../../domain/entities/collection/collection.dart';
 
 class FranchiseCollectionsSection extends StatefulWidget {
-  final Game game;
 
   const FranchiseCollectionsSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   State<FranchiseCollectionsSection> createState() =>
@@ -40,7 +39,7 @@ class _FranchiseCollectionsSectionState
         franchise: widget.game.mainFranchise,
         accentColor: Colors.orange,
         icon: Icons.stars,
-      ));
+      ),);
     }
 
     // Add Other Franchises
@@ -54,7 +53,7 @@ class _FranchiseCollectionsSectionState
           franchise: franchise,
           accentColor: Colors.orange,
           icon: Icons.account_tree,
-        ));
+        ),);
       }
     }
 
@@ -69,7 +68,7 @@ class _FranchiseCollectionsSectionState
           collection: collection,
           accentColor: Colors.blue,
           icon: Icons.collections,
-        ));
+        ),);
       }
     }
 
@@ -237,7 +236,6 @@ class _FranchiseCollectionsSectionState
                                     .colorScheme
                                     .outline
                                     .withOpacity(0.2),
-                                width: 1,
                               ),
                             ),
                           ),
@@ -251,7 +249,6 @@ class _FranchiseCollectionsSectionState
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                             indicatorColor:
                                 Theme.of(context).colorScheme.primary,
-                            indicatorWeight: 2,
                             labelStyle: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -286,7 +283,7 @@ class _FranchiseCollectionsSectionState
 
   // Preview widget for collapsed state
   Widget _buildPreview(
-      BuildContext context, List<SeriesItem> seriesItems, int totalGames) {
+      BuildContext context, List<SeriesItem> seriesItems, int totalGames,) {
     // Show tab names as preview
     final tabNames = seriesItems.map((item) {
       final icon = item.type == SeriesType.collection ? '📁' : '🎮';
@@ -366,7 +363,7 @@ class _FranchiseCollectionsSectionState
           padding: const EdgeInsets.only(
               left: AppConstants.paddingMedium,
               right: AppConstants.paddingMedium,
-              top: AppConstants.paddingSmall),
+              top: AppConstants.paddingSmall,),
           child: Row(
             children: [
               Container(
@@ -413,7 +410,7 @@ class _FranchiseCollectionsSectionState
                 TextButton.icon(
                   onPressed: () => _navigateToSeries(context, item),
                   icon: Icon(Icons.arrow_forward,
-                      size: 16, color: item.accentColor),
+                      size: 16, color: item.accentColor,),
                   label: Text(
                     'View All',
                     style: TextStyle(color: item.accentColor),
@@ -506,11 +503,11 @@ class _FranchiseCollectionsSectionState
   void _navigateToSeries(BuildContext context, SeriesItem item) {
     if (item.franchise != null) {
       Navigations.navigateToFranchiseGames(context,
-          franchiseId: item.franchise!.id, franchiseName: item.franchise!.name);
+          franchiseId: item.franchise!.id, franchiseName: item.franchise!.name,);
     } else if (item.collection != null) {
       Navigations.navigateToCollectionGames(context,
           collectionId: item.collection!.id,
-          collectionName: item.collection!.name);
+          collectionName: item.collection!.name,);
     } else if (item.companyId != null && item.companyName != null) {
       Navigations.navigateToCompanyGames(
         context,
@@ -545,6 +542,16 @@ enum SeriesType {
 }
 
 class SeriesItem {
+
+  SeriesItem({
+    required this.title, required this.games, required this.totalCount, required this.accentColor, required this.icon, this.type,
+    this.franchise,
+    this.collection,
+    this.companyId,
+    this.companyName,
+    this.isDeveloper,
+    this.isPublisher,
+  });
   final SeriesType? type;
   final String title;
   final List<Game> games;
@@ -557,19 +564,4 @@ class SeriesItem {
   final String? companyName;
   final bool? isDeveloper;
   final bool? isPublisher;
-
-  SeriesItem({
-    this.type,
-    required this.title,
-    required this.games,
-    required this.totalCount,
-    required this.accentColor,
-    required this.icon,
-    this.franchise,
-    this.collection,
-    this.companyId,
-    this.companyName,
-    this.isDeveloper,
-    this.isPublisher,
-  });
 }

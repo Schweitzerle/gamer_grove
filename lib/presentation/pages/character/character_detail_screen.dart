@@ -4,25 +4,23 @@
 
 // lib/presentation/pages/character_detail/character_detail_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/character/character.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../widgets/accordion_tile.dart';
-import '../../widgets/game_card.dart';
-import '../../../core/utils/navigations.dart';
-import '../../widgets/sections/franchise_collection_section.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/widgets/accordion_tile.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 
 class CharacterDetailScreen extends StatefulWidget {
-  final Character character;
-  final List<Game> games;
 
   const CharacterDetailScreen({
-    super.key,
-    required this.character,
-    required this.games,
+    required this.character, required this.games, super.key,
   });
+  final Character character;
+  final List<Game> games;
 
   @override
   State<CharacterDetailScreen> createState() => _CharacterDetailScreenState();
@@ -65,8 +63,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       totalCount: widget.games.length,
       accentColor: _getEventStatusColor(),
       icon: Icons.videogame_asset,
-      franchise: null,
-      collection: null,
     );
   }
 
@@ -133,8 +129,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       child: widget.character.hasImage
           ? CachedImageWidget(
               imageUrl: ImageUtils.getLargeImageUrl(
-                  widget.character.largeUrl ?? widget.character.imageUrl),
-              fit: BoxFit.cover,
+                  widget.character.largeUrl ?? widget.character.imageUrl,),
               placeholder: _buildFallbackHero(),
             )
           : _buildFallbackHero(),
@@ -164,8 +159,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
               stops: const [0.0, 0.05, 0.95, 1.0],
               colors: [
                 Theme.of(context).colorScheme.surface,
@@ -230,10 +223,9 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                       borderRadius: BorderRadius.circular(28),
                       child: widget.character.hasImage
                           ? CachedImageWidget(
-                              imageUrl: widget.character.thumbUrl!,
-                              fit: BoxFit.cover,
+                              imageUrl: widget.character.thumbUrl,
                             )
-                          : Container(
+                          : ColoredBox(
                               color: Colors.purple.withOpacity(0.1),
                               child: const Icon(
                                 Icons.person,
@@ -364,18 +356,18 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
 
   Widget _buildCharacterContent() {
     return SliverToBoxAdapter(
-      child: Container(
+      child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge), // Space for floating card
+                height: AppConstants.paddingLarge,), // Space for floating card
 
             // Combined Character Information and Details Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium),
+                  horizontal: AppConstants.paddingMedium,),
               child: _buildCombinedCharacterAccordion(),
             ),
 
@@ -385,7 +377,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             if (widget.games.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium),
+                    horizontal: AppConstants.paddingMedium,),
                 child:
                     _buildTabView(context, _createCharacterGamesSeriesItem()),
               ),
@@ -407,7 +399,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             AccordionTile(
               title: 'Character Information',
               icon: Icons.info_outline,
-              isFirst: true,
               isLast: false,
               child: Container(
                 margin: const EdgeInsets.symmetric(
@@ -515,7 +506,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 8, vertical: 4,),
                         decoration: BoxDecoration(
                           color: Colors.purple.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -551,7 +542,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             title: 'Identity & Details',
             icon: Icons.person,
             isFirst: !widget.character.hasDescription,
-            isLast: true,
             child: Container(
               margin: const EdgeInsets.symmetric(
                 horizontal: AppConstants.paddingMedium,
@@ -614,7 +604,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             padding: const EdgeInsets.only(
                 left: AppConstants.paddingSmall,
                 right: AppConstants.paddingSmall,
-                top: AppConstants.paddingSmall),
+                top: AppConstants.paddingSmall,),
             child: Row(
               children: [
                 Container(
@@ -662,7 +652,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                   TextButton.icon(
                     onPressed: () => _navigateToSeries(context, item),
                     icon: Icon(Icons.arrow_forward,
-                        size: 16, color: item.accentColor),
+                        size: 16, color: item.accentColor,),
                     label: Text(
                       'View All',
                       style: TextStyle(color: item.accentColor),
@@ -697,7 +687,7 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(
-          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall),
+          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall,),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
@@ -760,7 +750,6 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: accentColor.withOpacity(0.2),
-          width: 1,
         ),
       ),
       child: Row(

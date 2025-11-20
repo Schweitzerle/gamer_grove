@@ -2,17 +2,17 @@
 // UPDATED - verwendet SharedPrefsTokenManager
 
 import 'dart:convert';
+
+import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/errors/exceptions.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/shared_preft_topken_manager.dart';
 import 'package:http/http.dart' as http;
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/errors/exceptions.dart';
 
 class IsolatedIGDBClient {
+  IsolatedIGDBClient._();
   static IsolatedIGDBClient? _instance;
   static IsolatedIGDBClient get instance =>
       _instance ??= IsolatedIGDBClient._();
-
-  IsolatedIGDBClient._();
 
   final http.Client _httpClient = http.Client();
 
@@ -21,9 +21,10 @@ class IsolatedIGDBClient {
       // Hole Token vom SharedPrefs Manager
       final token = await SharedPrefsTokenManager.instance.getValidToken();
 
-
       final request = http.Request(
-          'POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
+        'POST',
+        Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'),
+      );
 
       request.headers['Client-ID'] = ApiConstants.igdbClientId;
       request.headers['Authorization'] = 'Bearer $token';
@@ -32,24 +33,22 @@ class IsolatedIGDBClient {
 
       request.body = body.trim();
 
-
       final streamedResponse = await _httpClient.send(request);
       final response = await http.Response.fromStream(streamedResponse);
-
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList;
       } else {
         throw ServerException(
-          'IGDB request failed: ${response.body}',
           message: 'IGDB request failed: ${response.body}',
           statusCode: response.statusCode,
         );
       }
     } catch (e) {
-      throw ServerException('IGDB request failed: $e',
-          message: 'IGDB request failed: $e');
+      throw ServerException(
+        message: 'IGDB request failed: $e',
+      );
     }
   }
 
@@ -58,7 +57,9 @@ class IsolatedIGDBClient {
       final token = await SharedPrefsTokenManager.instance.getValidToken();
 
       final request = http.Request(
-          'POST', Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'));
+        'POST',
+        Uri.parse('${ApiConstants.igdbBaseUrl}/$endpoint'),
+      );
       request.headers['Client-ID'] = ApiConstants.igdbClientId;
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Content-Type'] = 'text/plain';
@@ -70,7 +71,6 @@ class IsolatedIGDBClient {
 
       if (response.statusCode != 200) {
         throw ServerException(
-          'IGDB request failed: ${response.body}',
           message: 'IGDB request failed: ${response.body}',
           statusCode: response.statusCode,
         );
@@ -79,8 +79,9 @@ class IsolatedIGDBClient {
       return response;
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('IGDB raw request failed: $e',
-          message: 'IGDB raw request failed: $e');
+      throw ServerException(
+        message: 'IGDB raw request failed: $e',
+      );
     }
   }
 }

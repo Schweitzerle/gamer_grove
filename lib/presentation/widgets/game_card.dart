@@ -1,20 +1,35 @@
 // presentation/widgets/game_card.dart
 import 'dart:ui'; // Für BackdropFilter
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
-import '../../domain/entities/game/game.dart';
-import '../../core/utils/date_formatter.dart';
-import '../../core/utils/image_utils.dart';
-import '../../core/widgets/cached_image_widget.dart';
 
 class GameCard extends StatelessWidget {
+  const GameCard({
+    required this.game,
+    required this.onTap,
+    super.key,
+    this.blurRated = false,
+    this.width,
+    this.height,
+    this.otherUserId,
+    this.otherUserRating,
+    this.otherUserIsWishlisted,
+    this.otherUserIsRecommended,
+    this.otherUserIsInTopThree,
+    this.otherUserTopThreePosition,
+  });
   final Game game;
   final VoidCallback onTap;
   final bool blurRated;
@@ -27,29 +42,14 @@ class GameCard extends StatelessWidget {
   final bool? otherUserIsInTopThree;
   final int? otherUserTopThreePosition;
 
-  const GameCard({
-    super.key,
-    required this.game,
-    required this.onTap,
-    this.blurRated = false,
-    this.width,
-    this.height,
-    this.otherUserId,
-    this.otherUserRating,
-    this.otherUserIsWishlisted,
-    this.otherUserIsRecommended,
-    this.otherUserIsInTopThree,
-    this.otherUserTopThreePosition,
-  });
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
+      onTap: () async {
+        await HapticFeedback.lightImpact();
+        onTap.call();
       },
-      onLongPress: () {
+      onLongPress: () async {
         HapticFeedback.vibrate();
         _showUserStatesDialog(context);
       },
@@ -78,7 +78,8 @@ class GameCard extends StatelessWidget {
               }
 
               // Always rebuild when UserGameDataLoaded state changes
-              if (current is UserGameDataLoaded && previous is UserGameDataLoaded) {
+              if (current is UserGameDataLoaded &&
+                  previous is UserGameDataLoaded) {
                 // Check if THIS game's data has changed
                 final prevWishlisted = previous.isWishlisted(game.id);
                 final currWishlisted = current.isWishlisted(game.id);
@@ -94,7 +95,6 @@ class GameCard extends StatelessWidget {
                     prevRating != currRating ||
                     prevTopThree != currTopThree;
 
-
                 return hasChanges;
               }
 
@@ -103,10 +103,10 @@ class GameCard extends StatelessWidget {
             builder: (context, userDataState) {
               // ✅ ALWAYS read from UserGameDataBloc as single source of truth
               // Default to false/null if not loaded yet
-              bool isWishlisted = false;
-              bool isRecommended = false;
+              var isWishlisted = false;
+              var isRecommended = false;
               double? userRating;
-              bool isInTopThree = false;
+              var isInTopThree = false;
               int? topThreePosition;
 
               // 🐛 DEBUG: Log builder state
@@ -118,9 +118,7 @@ class GameCard extends StatelessWidget {
                 userRating = userDataState.getRating(game.id);
                 isInTopThree = userDataState.isInTopThree(game.id);
                 topThreePosition = userDataState.getTopThreePosition(game.id);
-
-              } else {
-              }
+              } else {}
 
               return Stack(
                 fit: StackFit.expand,
@@ -196,7 +194,6 @@ class GameCard extends StatelessWidget {
     if (game.coverUrl != null && game.coverUrl!.isNotEmpty) {
       return CachedImageWidget(
         imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-        fit: BoxFit.cover,
       );
     } else {
       return _buildFallbackBackground(context);
@@ -210,8 +207,8 @@ class GameCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            Theme.of(context).colorScheme.primary.withOpacity(0.6),
+            Theme.of(context).colorScheme.primary.withAlpha(77),
+            Theme.of(context).colorScheme.primary.withAlpha(153),
           ],
         ),
       ),
@@ -219,7 +216,7 @@ class GameCard extends StatelessWidget {
         child: Icon(
           Icons.videogame_asset,
           size: 48,
-          color: Colors.white.withOpacity(0.8),
+          color: Colors.white.withAlpha(204),
         ),
       ),
     );
@@ -228,10 +225,10 @@ class GameCard extends StatelessWidget {
   Widget _buildBlurOverlay() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withAlpha(51),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+        filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
         child: Container(
           color: Colors.black.withOpacity(0.1),
         ),
@@ -248,8 +245,8 @@ class GameCard extends StatelessWidget {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withOpacity(0.7),
-            Colors.black.withOpacity(0.9),
+            Colors.black.withAlpha(179),
+            Colors.black.withAlpha(230),
           ],
           stops: const [0.0, 0.6, 0.8, 1.0],
         ),
@@ -282,12 +279,12 @@ class GameCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: RadialGradient(
-            center: isLeft ? const Alignment(-1.0, -1.0) : const Alignment(1.0, -1.0),
+            center: isLeft ? const Alignment(-1, -1) : const Alignment(1, -1),
             radius: 2.8,
             colors: [
-              Colors.black.withOpacity(0.7),
-              Colors.black.withOpacity(0.4),
-              Colors.black.withOpacity(0.1),
+              Colors.black.withAlpha(179),
+              Colors.black.withAlpha(102),
+              Colors.black.withAlpha(26),
               Colors.transparent,
             ],
             stops: const [0.0, 0.4, 0.7, 1.0],
@@ -335,13 +332,13 @@ class GameCard extends StatelessWidget {
                 Icon(
                   Icons.calendar_today,
                   size: 10,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withAlpha(230),
                 ),
                 const SizedBox(width: 2),
                 Text(
                   DateFormatter.formatYearOnly(game.firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withAlpha(230),
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
@@ -363,7 +360,7 @@ class GameCard extends StatelessWidget {
                   child: Text(
                     game.genres.take(2).map((g) => g.name).join(', '),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withAlpha(204),
                           fontSize: 10,
                         ),
                     maxLines: 1,
@@ -418,7 +415,7 @@ class GameCard extends StatelessWidget {
 
   Widget _buildUserRatingCircle(BuildContext context, double userRating) {
     final rating = userRating / 10; // 0-1 range
-    final displayRating = (userRating * 10);
+    final displayRating = userRating * 10;
     final color = ColorScales.getRatingColor(displayRating);
 
     return Container(
@@ -429,7 +426,6 @@ class GameCard extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Stack(
@@ -438,7 +434,7 @@ class GameCard extends StatelessWidget {
           Positioned.fill(
             child: CircularProgressIndicator(
               value: rating,
-              strokeWidth: 2,
+              strokeWidth: 2.0,
               backgroundColor: Colors.white.withOpacity(0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
@@ -488,7 +484,6 @@ class GameCard extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: color.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: Center(
@@ -524,7 +519,6 @@ class GameCard extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.red.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: const Icon(
@@ -544,7 +538,6 @@ class GameCard extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.green.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: const Icon(
@@ -567,7 +560,6 @@ class GameCard extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Stack(
@@ -576,7 +568,7 @@ class GameCard extends StatelessWidget {
           Positioned.fill(
             child: CircularProgressIndicator(
               value: rating,
-              strokeWidth: 3,
+              strokeWidth: 3.0,
               backgroundColor: Colors.white.withOpacity(0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
@@ -680,20 +672,19 @@ class GameCard extends StatelessWidget {
           ],
 
           // Other User Top Three
-          if (otherUserIsInTopThree == true &&
-              otherUserTopThreePosition != null) ...[
+          if (otherUserIsInTopThree ?? false) ...[
             _buildTopThreeCircle(context, otherUserTopThreePosition!),
             const SizedBox(height: 4),
           ],
 
           // Other User Wishlist
-          if (otherUserIsWishlisted == true) ...[
+          if (otherUserIsWishlisted ?? false) ...[
             _buildWishlistCircle(context),
             const SizedBox(height: 4),
           ],
 
           // Other User Recommend
-          if (otherUserIsRecommended == true) _buildRecommendCircle(context),
+          if (otherUserIsRecommended ?? false) _buildRecommendCircle(context),
         ],
       ),
     );
@@ -711,9 +702,9 @@ class GameCard extends StatelessWidget {
 
   bool _hasOtherUserElements() {
     return otherUserRating != null ||
-        otherUserIsWishlisted == true ||
-        otherUserIsRecommended == true ||
-        otherUserIsInTopThree == true;
+        (otherUserIsWishlisted ?? false) ||
+        (otherUserIsRecommended ?? false) ||
+        (otherUserIsInTopThree ?? false);
   }
 
   int _getUserElementsCount(
@@ -722,23 +713,24 @@ class GameCard extends StatelessWidget {
     bool isRecommended,
     bool isInTopThree,
   ) {
-    int count = 0;
-    if (userRating != null) count++;
-    if (isInTopThree) count++;
-    if (isWishlisted) count++;
-    if (isRecommended) count++;
-    return count;
+    var elementCount = 0;
+    if (userRating != null) elementCount++;
+    if (isInTopThree) elementCount++;
+    if (isWishlisted) elementCount++;
+    if (isRecommended) elementCount++;
+    return elementCount;
   }
 
   double _calculateUserElementsHeight(int count, double? userRating) {
     if (count == 0) return 0;
 
     double height = 16; // Base padding (oben und unten)
+    var localCount = count;
 
     if (userRating != null) {
       height += 32; // User rating ist größer
-      count--;
-      if (count > 0) height += 4; // Spacing nach User Rating
+      localCount--;
+      if (localCount > 0) height += 4; // Spacing nach User Rating
     }
 
     height += count * 24; // Andere Elemente sind 24px
@@ -751,14 +743,13 @@ class GameCard extends StatelessWidget {
 
 // Shimmer Loading Version
 class GameCardShimmer extends StatelessWidget {
-  final double? width;
-  final double? height;
-
   const GameCardShimmer({
     super.key,
     this.width,
     this.height,
   });
+  final double? width;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {

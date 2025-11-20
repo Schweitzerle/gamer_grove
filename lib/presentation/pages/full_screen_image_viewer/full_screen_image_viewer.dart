@@ -7,24 +7,20 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/utils/image_utils.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
+
+  const FullScreenImageViewer({
+    required this.images, required this.initialIndex, required this.title, required this.gameName, super.key,
+  });
   final List<String> images;
   final int initialIndex;
   final String title;
   final String gameName;
-
-  const FullScreenImageViewer({
-    super.key,
-    required this.images,
-    required this.initialIndex,
-    required this.title,
-    required this.gameName,
-  });
 
   @override
   State<FullScreenImageViewer> createState() => _FullScreenImageViewerState();
@@ -55,7 +51,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
     });
   }
 
-  void _downloadImage(String imageUrl) async {
+  Future<void> _downloadImage(String imageUrl) async {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -64,7 +60,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
               SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: CircularProgressIndicator(strokeWidth: 2),),
               SizedBox(width: 16),
               Text('Downloading image...'),
             ],
@@ -76,7 +72,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
       // ✅ Vereinfachte Permission-Logik
       if (Platform.isAndroid) {
         // Erst photos, dann storage als fallback
-        bool hasPermission = false;
+        var hasPermission = false;
 
         try {
           final photosPermission = await Permission.photos.request();
@@ -119,7 +115,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
         _showErrorSnackBar('Failed to download image');
       }
     } catch (e) {
-      _showErrorSnackBar('Download failed: ${e.toString()}');
+      _showErrorSnackBar('Download failed: $e');
     }
   }
 
@@ -200,7 +196,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
           itemBuilder: (context, index) {
             return InteractiveViewer(
               minScale: 0.5,
-              maxScale: 4.0,
+              maxScale: 4,
               child: Center(
                 child: Hero(
                   tag: 'image_fullscreen_$index',
@@ -239,7 +235,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward_ios,
-                        color: Colors.white),
+                        color: Colors.white,),
                     onPressed: _currentIndex < widget.images.length - 1
                         ? () => _pageController.nextPage(
                               duration: const Duration(milliseconds: 300),

@@ -1,7 +1,7 @@
 // ===== PLATFORM VERSION COMPANY MODEL =====
 // File: lib/data/models/platform/platform_version_company_model.dart
 
-import '../../../domain/entities/platform/platform_version_company.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_version_company.dart';
 
 class PlatformVersionCompanyModel extends PlatformVersionCompany {
   const PlatformVersionCompanyModel({

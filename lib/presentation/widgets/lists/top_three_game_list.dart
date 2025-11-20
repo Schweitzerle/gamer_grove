@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/gameItems/top_three_game_item.dart';
 
-import '../../../core/constants/app_constants.dart';
-import '../../../domain/entities/game/game.dart';
-
 class TopThreeGameList extends StatelessWidget {
-  final List<Game> games;
 
   const TopThreeGameList({
-    super.key,
-    required this.games,
+    required this.games, super.key,
   });
+  final List<Game> games;
 
   @override
   Widget build(BuildContext context) {

@@ -18,12 +18,12 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class SignOutUseCase implements UseCase<void, NoParams> {
-  final AuthRepository repository;
 
   SignOutUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, void>> call(NoParams params) async {
-    return await repository.signOut();
+    return repository.signOut();
   }
 }

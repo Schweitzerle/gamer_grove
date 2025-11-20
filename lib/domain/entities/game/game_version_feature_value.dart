@@ -4,12 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameVersionFeatureValue extends Equatable {
-  final int id;
-  final String checksum;
-  final int? gameId;
-  final int? gameFeatureId;
-  final String? includedFeature; // NO, YES, UNKNOWN
-  final String? note;
 
   const GameVersionFeatureValue({
     required this.id,
@@ -19,6 +13,12 @@ class GameVersionFeatureValue extends Equatable {
     this.includedFeature,
     this.note,
   });
+  final int id;
+  final String checksum;
+  final int? gameId;
+  final int? gameFeatureId;
+  final String? includedFeature; // NO, YES, UNKNOWN
+  final String? note;
 
   bool get isIncluded => includedFeature == 'YES';
   bool get isExcluded => includedFeature == 'NO';

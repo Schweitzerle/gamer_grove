@@ -3,14 +3,14 @@
 // lib/domain/usecases/user_collections/batch_manage_wishlist.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class BatchAddToWishlist extends UseCase<void, BatchAddToWishlistParams> {
-  final GameRepository repository;
 
   BatchAddToWishlist(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, void>> call(BatchAddToWishlistParams params) async {
@@ -21,7 +21,7 @@ class BatchAddToWishlist extends UseCase<void, BatchAddToWishlistParams> {
       return const Left(ValidationFailure(message: 'Game IDs cannot be empty'));
     }
 
-    return await repository.batchAddToWishlist(
+    return repository.batchAddToWishlist(
       userId: params.userId,
       gameIds: params.gameIds,
     );
@@ -29,13 +29,13 @@ class BatchAddToWishlist extends UseCase<void, BatchAddToWishlistParams> {
 }
 
 class BatchAddToWishlistParams extends Equatable {
-  final String userId;
-  final List<int> gameIds;
 
   const BatchAddToWishlistParams({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];

@@ -1,9 +1,9 @@
 // lib/data/datasources/remote/igdb/models/company/company_query_presets.dart
 
-import '../igdb_query.dart';
-import '../igdb_filters.dart';
-import 'company_field_sets.dart';
-import 'company_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/company/company_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/company/company_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 
 /// Pre-configured query presets for common company queries.
 class CompanyQueryPresets {

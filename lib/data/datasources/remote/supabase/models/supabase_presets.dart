@@ -4,8 +4,8 @@
 /// reducing code duplication and ensuring consistency.
 library;
 
-import 'supabase_filters.dart';
-import 'supabase_query.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_query.dart';
 
 /// Preset queries for the `users` table.
 class UserQueries {
@@ -91,10 +91,10 @@ class UserQueries {
   }) {
     return SupabaseQuery('users')
         .select(
-            'id, username, display_name, avatar_url, country, followers_count, total_games_rated')
-        .filter(IsTrueFilter('is_profile_public'))
-        .sort(sortBy ?? SortBy('followers_count', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+            'id, username, display_name, avatar_url, country, followers_count, total_games_rated',)
+        .filter(const IsTrueFilter('is_profile_public'))
+        .sort(sortBy ?? const SortBy('followers_count', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to search users by username pattern.
@@ -111,9 +111,9 @@ class UserQueries {
     return SupabaseQuery('users')
         .select('id, username, display_name, avatar_url, followers_count')
         .filter(ILikeFilter('username', '%$searchTerm%'))
-        .filter(IsTrueFilter('is_profile_public'))
-        .sort(SortBy('followers_count', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .filter(const IsTrueFilter('is_profile_public'))
+        .sort(const SortBy('followers_count', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to get users with most followers.
@@ -128,10 +128,10 @@ class UserQueries {
   }) {
     return SupabaseQuery('users')
         .select(
-            'id, username, display_name, avatar_url, followers_count, total_games_rated')
-        .filter(IsTrueFilter('is_profile_public'))
-        .filter(GreaterThanFilter('followers_count', 0))
-        .sort(SortBy('followers_count', SortOrder.desc))
+            'id, username, display_name, avatar_url, followers_count, total_games_rated',)
+        .filter(const IsTrueFilter('is_profile_public'))
+        .filter(const GreaterThanFilter('followers_count', 0))
+        .sort(const SortBy('followers_count', SortOrder.desc))
         .paginate(Pagination(limit: limit));
   }
 }
@@ -159,13 +159,13 @@ class UserGameQueries {
   /// final games = await query.build(supabase);
   /// ```
   static SupabaseQuery getWishlistedGames(String userId,
-      {Pagination? pagination}) {
+      {Pagination? pagination,}) {
     return SupabaseQuery('user_games')
         .select('game_id, wishlisted_at')
         .filter(EqualFilter('user_id', userId))
-        .filter(IsTrueFilter('is_wishlisted'))
-        .sort(SortBy('wishlisted_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 50));
+        .filter(const IsTrueFilter('is_wishlisted'))
+        .sort(const SortBy('wishlisted_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 50));
   }
 
   /// Query to get rated games for a user.
@@ -179,9 +179,9 @@ class UserGameQueries {
     return SupabaseQuery('user_games')
         .select('game_id, rating, rated_at')
         .filter(EqualFilter('user_id', userId))
-        .filter(IsTrueFilter('is_rated'))
-        .sort(SortBy('rated_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 50));
+        .filter(const IsTrueFilter('is_rated'))
+        .sort(const SortBy('rated_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 50));
   }
 
   /// Query to get recommended games for a user.
@@ -192,13 +192,13 @@ class UserGameQueries {
   /// final games = await query.build(supabase);
   /// ```
   static SupabaseQuery getRecommendedGames(String userId,
-      {Pagination? pagination}) {
+      {Pagination? pagination,}) {
     return SupabaseQuery('user_games')
         .select('game_id, recommended_at')
         .filter(EqualFilter('user_id', userId))
-        .filter(IsTrueFilter('is_recommended'))
-        .sort(SortBy('recommended_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 50));
+        .filter(const IsTrueFilter('is_recommended'))
+        .sort(const SortBy('recommended_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 50));
   }
 
   /// Query to get highly rated games (rating >= threshold).
@@ -216,10 +216,10 @@ class UserGameQueries {
     return SupabaseQuery('user_games')
         .select('game_id, rating, rated_at')
         .filter(EqualFilter('user_id', userId))
-        .filter(IsTrueFilter('is_rated'))
+        .filter(const IsTrueFilter('is_rated'))
         .filter(GreaterThanOrEqualFilter('rating', minRating))
-        .sort(SortBy('rating', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 50));
+        .sort(const SortBy('rating', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 50));
   }
 
   /// Query to check if a specific game exists in user's collections.
@@ -310,8 +310,8 @@ class FollowQueries {
           )
         ''')
         .filter(EqualFilter('following_id', userId))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to get users that a user is following.
@@ -353,8 +353,8 @@ class FollowQueries {
           )
         ''')
         .filter(EqualFilter('follower_id', userId))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to check if user A follows user B.
@@ -396,7 +396,7 @@ class FollowQueries {
           )
         ''')
         .filter(EqualFilter('following_id', userId))
-        .sort(SortBy('created_at', SortOrder.desc))
+        .sort(const SortBy('created_at', SortOrder.desc))
         .paginate(Pagination(limit: limit));
   }
 }
@@ -417,8 +417,8 @@ class ActivityQueries {
     return SupabaseQuery('user_activity')
         .select('*')
         .filter(EqualFilter('user_id', userId))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to get public activities from users that current user follows.
@@ -448,9 +448,9 @@ class ActivityQueries {
             avatar_url
           )
         ''')
-        .filter(IsTrueFilter('is_public'))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .filter(const IsTrueFilter('is_public'))
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to get activities of a specific type.
@@ -469,8 +469,8 @@ class ActivityQueries {
         .select('*')
         .filter(EqualFilter('user_id', userId))
         .filter(EqualFilter('activity_type', activityType))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 20));
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 20));
   }
 
   /// Query to get activities for a specific game.
@@ -489,8 +489,8 @@ class ActivityQueries {
         .select('*')
         .filter(EqualFilter('user_id', userId))
         .filter(EqualFilter('game_id', gameId))
-        .sort(SortBy('created_at', SortOrder.desc))
-        .paginate(pagination ?? Pagination(limit: 10));
+        .sort(const SortBy('created_at', SortOrder.desc))
+        .paginate(pagination ?? const Pagination(limit: 10));
   }
 }
 

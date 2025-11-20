@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SetTopThreeGameAtPositionUseCase extends UseCase<void, SetTopThreeGameAtPositionParams> {
-  final UserRepository repository;
 
   SetTopThreeGameAtPositionUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, void>> call(SetTopThreeGameAtPositionParams params) async {
@@ -18,7 +18,7 @@ class SetTopThreeGameAtPositionUseCase extends UseCase<void, SetTopThreeGameAtPo
       return const Left(ValidationFailure(message: 'Position must be 1, 2, or 3'));
     }
 
-    return await repository.setTopThreeGameAtPosition(
+    return repository.setTopThreeGameAtPosition(
       userId: params.userId,
       position: params.position,
       gameId: params.gameId,
@@ -27,15 +27,15 @@ class SetTopThreeGameAtPositionUseCase extends UseCase<void, SetTopThreeGameAtPo
 }
 
 class SetTopThreeGameAtPositionParams extends Equatable {
-  final String userId;
-  final int gameId;
-  final int position;
 
   const SetTopThreeGameAtPositionParams({
     required this.userId,
     required this.gameId,
     required this.position,
   });
+  final String userId;
+  final int gameId;
+  final int position;
 
   @override
   List<Object> get props => [userId, gameId, position];

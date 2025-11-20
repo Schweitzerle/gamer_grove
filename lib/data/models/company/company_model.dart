@@ -1,12 +1,12 @@
 // ===== COMPANY MODEL (UPDATED WITH LOGO SUPPORT) =====
 // lib/data/models/company/company_model.dart
-import '../../../../domain/entities/company/company.dart';
-import '../../../../domain/entities/company/company_logo.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website/website.dart';
-import '../game/game_model.dart';
-import '../website/website_model.dart';
-import 'company_model_logo.dart';
+import 'package:gamer_grove/data/models/company/company_model_logo.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/data/models/website/website_model.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/company/company_logo.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
 
 class CompanyModel extends Company {
   const CompanyModel({
@@ -68,7 +68,7 @@ class CompanyModel extends Company {
     if (websites is List) {
       return websites
           .whereType<Map<String, dynamic>>()
-          .map((item) => WebsiteModel.fromJson(item))
+          .map(WebsiteModel.fromJson)
           .toList();
     }
     return [];
@@ -78,7 +78,7 @@ class CompanyModel extends Company {
     if (games is List) {
       return games
           .whereType<Map<String, dynamic>>()
-          .map((item) => GameModel.fromJson(item))
+          .map(GameModel.fromJson)
           .toList();
     }
     return [];

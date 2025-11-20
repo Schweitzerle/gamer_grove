@@ -1,5 +1,5 @@
 // lib/data/models/alternative_name_model.dart
-import '../../domain/entities/alternative_name.dart';
+import 'package:gamer_grove/domain/entities/alternative_name.dart';
 
 class AlternativeNameModel extends AlternativeName {
   const AlternativeNameModel({

@@ -109,7 +109,7 @@ class DateFormatter {
   // Get age from birth date
   static int getAge(DateTime birthDate) {
     final now = DateTime.now();
-    int age = now.year - birthDate.year;
+    var age = now.year - birthDate.year;
 
     if (now.month < birthDate.month ||
         (now.month == birthDate.month && now.day < birthDate.day)) {
@@ -395,7 +395,7 @@ class DateFormatter {
 
   /// Format live event indicator
   static String formatLiveEventIndicator(
-      DateTime startTime, DateTime? endTime) {
+      DateTime startTime, DateTime? endTime,) {
     final now = DateTime.now();
 
     if (endTime != null && endTime.isAfter(now) && startTime.isBefore(now)) {
@@ -434,7 +434,7 @@ class DateFormatter {
       'Thursday',
       'Friday',
       'Saturday',
-      'Sunday'
+      'Sunday',
     ];
     return days[weekday - 1];
   }
@@ -457,7 +457,7 @@ class DateFormatter {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return months[month - 1];
   }
@@ -475,7 +475,7 @@ class DateFormatter {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return months[month - 1];
   }

@@ -1,6 +1,6 @@
 // ===== COMPANY LOGO MODEL =====
 // lib/data/models/company/company_logo_model.dart
-import '../../../../domain/entities/company/company_logo.dart';
+import 'package:gamer_grove/domain/entities/company/company_logo.dart';
 
 class CompanyLogoModel extends CompanyLogo {
   const CompanyLogoModel({
@@ -13,6 +13,29 @@ class CompanyLogoModel extends CompanyLogo {
     super.animated = false,
     super.url,
   });
+
+  // Factory method for easy creation with IGDB image URL
+  factory CompanyLogoModel.withImageUrl({
+    required int id,
+    required String checksum,
+    required String imageId,
+    required int height,
+    required int width,
+    bool alphaChannel = false,
+    bool animated = false,
+    String? customUrl,
+  }) {
+    return CompanyLogoModel(
+      id: id,
+      checksum: checksum,
+      imageId: imageId,
+      height: height,
+      width: width,
+      alphaChannel: alphaChannel,
+      animated: animated,
+      url: customUrl ?? 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+    );
+  }
 
   factory CompanyLogoModel.fromJson(Map<String, dynamic> json) {
     return CompanyLogoModel(
@@ -38,29 +61,6 @@ class CompanyLogoModel extends CompanyLogo {
       'animated': animated,
       'url': url,
     };
-  }
-
-  // Factory method for easy creation with IGDB image URL
-  factory CompanyLogoModel.withImageUrl({
-    required int id,
-    required String checksum,
-    required String imageId,
-    required int height,
-    required int width,
-    bool alphaChannel = false,
-    bool animated = false,
-    String? customUrl,
-  }) {
-    return CompanyLogoModel(
-      id: id,
-      checksum: checksum,
-      imageId: imageId,
-      height: height,
-      width: width,
-      alphaChannel: alphaChannel,
-      animated: animated,
-      url: customUrl ?? 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
-    );
   }
 }
 

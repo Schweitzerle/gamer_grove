@@ -1,78 +1,48 @@
 // presentation/blocs/game/game_bloc.dart
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
-import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
-import '../../../data/models/game/game_model.dart';
-import '../../../domain/entities/collection/collection.dart';
-import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/franchise.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/search/search_filters.dart';
-import '../../../domain/repositories/game_repository.dart';
-import '../../../domain/usecases/game/get_user_rated.dart';
-import '../../../domain/usecases/game/get_game_dlcs.dart';
-import '../../../domain/usecases/game/get_game_expansions.dart';
-import '../../../domain/usecases/game/get_latest_games.dart';
-import '../../../domain/usecases/game/get_similar_games.dart';
-import '../../../domain/usecases/game/get_user_top_three.dart';
-import '../../../domain/usecases/game_details/get_complete_game_details_page_data.dart';
-import '../../../domain/usecases/game_details/get_enhanced_game_details.dart';
-import '../../../domain/usecases/user/add_to_top_three.dart';
-import '../../../domain/usecases/user/remove_from_top_three.dart';
-import '../../../domain/usecases/game/search_games.dart';
-import '../../../domain/usecases/game/get_game_details.dart';
-import '../../../domain/usecases/game/rate_game.dart';
-import '../../../domain/usecases/game/toggle_recommend.dart';
-import '../../../domain/usecases/game/toggle_wishlist.dart';
-import '../../../domain/usecases/game/get_popular_games.dart';
-import '../../../domain/usecases/game/get_upcoming_games.dart';
-import '../../../domain/usecases/game/get_user_wishlist.dart';
-import '../../../domain/usecases/game/get_user_recommendations.dart';
-import '../../../domain/usecases/user/get_user_top_three.dart';
-import '../../../domain/usecases/event/get_upcoming_events.dart';
-import '../../../domain/usecases/game/get_user_rated_game_ids.dart';
-import 'game_extensions.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/collection/remove_rating_use_case.dart';
+import 'package:gamer_grove/domain/usecases/event/get_upcoming_events.dart';
+import 'package:gamer_grove/domain/usecases/game/get_game_details.dart';
+import 'package:gamer_grove/domain/usecases/game/get_game_dlcs.dart';
+import 'package:gamer_grove/domain/usecases/game/get_game_expansions.dart';
+import 'package:gamer_grove/domain/usecases/game/get_latest_games.dart';
+import 'package:gamer_grove/domain/usecases/game/get_popular_games.dart';
+import 'package:gamer_grove/domain/usecases/game/get_similar_games.dart';
+import 'package:gamer_grove/domain/usecases/game/get_top_rated_games.dart';
+import 'package:gamer_grove/domain/usecases/game/get_upcoming_games.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_rated.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_rated_game_ids.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_recommendations.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_top_three.dart';
+import 'package:gamer_grove/domain/usecases/game/get_user_wishlist.dart';
+import 'package:gamer_grove/domain/usecases/game/rate_game.dart';
+import 'package:gamer_grove/domain/usecases/game/search_games.dart';
+import 'package:gamer_grove/domain/usecases/game/toggle_recommend.dart';
+import 'package:gamer_grove/domain/usecases/game/toggle_wishlist.dart';
+import 'package:gamer_grove/domain/usecases/game_details/get_complete_game_details_page_data.dart';
+import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_details.dart';
+import 'package:gamer_grove/domain/usecases/user/add_to_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/get_user_top_three.dart';
+import 'package:gamer_grove/domain/usecases/user/remove_from_top_three.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_extensions.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'game_event.dart';
-
 part 'game_state.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
-  final SearchGames searchGames;
-  final GetGameDetails getGameDetails;
-  final RateGame rateGame;
-  final RemoveRatingUseCase removeRating;
-  final ToggleWishlist toggleWishlist;
-  final ToggleRecommend toggleRecommend;
-  final AddToTopThree addToTopThree;
-  final RemoveFromTopThree removeFromTopThree;
-  final GetPopularGames getPopularGames;
-  final GetUpcomingGames getUpcomingGames;
-  final GetLatestGames getLatestGames;
-  final GetTopRatedGames getTopRatedGames;
-  final GetUserWishlist getUserWishlist;
-  final GetUserRecommendations getUserRecommendations;
-  final GetUserTopThreeGames getUserTopThreeGames;
-  final GetUserTopThree getUserTopThree;
-  final GetUserRated getUserRated;
-  final GetSimilarGames getSimilarGames;
-  final GetGameDLCs getGameDLCs;
-  final GetGameExpansions getGameExpansions;
-  final GetEnhancedGameDetails getEnhancedGameDetails;
-  final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
-  final GetUpcomingEvents getUpcomingEvents;
-  final GetUserRatedGameIds getUserRatedGameIds;
-  final GameRepository gameRepository;
-  final GameEnrichmentService enrichmentService;
-
-  // 🎯 PERSISTENT GAME CACHE - survives state changes!
-  final Map<int, Game> _gameCache = {};
-
   GameBloc({
     required this.searchGames,
     required this.getGameDetails,
@@ -152,6 +122,35 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     on<SaveSearchQueryEvent>(_onSaveSearchQuery);
     on<RefreshCacheEvent>(_onRefreshCache);
   }
+  final SearchGames searchGames;
+  final GetGameDetails getGameDetails;
+  final RateGame rateGame;
+  final RemoveRatingUseCase removeRating;
+  final ToggleWishlist toggleWishlist;
+  final ToggleRecommend toggleRecommend;
+  final AddToTopThree addToTopThree;
+  final RemoveFromTopThree removeFromTopThree;
+  final GetPopularGames getPopularGames;
+  final GetUpcomingGames getUpcomingGames;
+  final GetLatestGames getLatestGames;
+  final GetTopRatedGames getTopRatedGames;
+  final GetUserWishlist getUserWishlist;
+  final GetUserRecommendations getUserRecommendations;
+  final GetUserTopThreeGames getUserTopThreeGames;
+  final GetUserTopThree getUserTopThree;
+  final GetUserRated getUserRated;
+  final GetSimilarGames getSimilarGames;
+  final GetGameDLCs getGameDLCs;
+  final GetGameExpansions getGameExpansions;
+  final GetEnhancedGameDetails getEnhancedGameDetails;
+  final GetCompleteGameDetailPageData getCompleteGameDetailPageData;
+  final GetUpcomingEvents getUpcomingEvents;
+  final GetUserRatedGameIds getUserRatedGameIds;
+  final GameRepository gameRepository;
+  final GameEnrichmentService enrichmentService;
+
+  // 🎯 PERSISTENT GAME CACHE - survives state changes!
+  final Map<int, Game> _gameCache = {};
 
   // Debounce transformer for search
   EventTransformer<T> debounce<T>(Duration duration) {
@@ -255,8 +254,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final result = await searchGames(
       SearchGamesParams(
         query: event.query,
-        limit: 20,
-        offset: 0,
       ),
     );
 
@@ -268,11 +265,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             ? await enrichGamesWithUserData(games, event.userId!)
             : games;
 
-        emit(GameSearchLoaded(
-          games: enrichedGames,
-          hasReachedMax: games.length < 20,
-          currentQuery: event.query,
-        ));
+        emit(
+          GameSearchLoaded(
+            games: enrichedGames,
+            hasReachedMax: games.length < 20,
+            currentQuery: event.query,
+          ),
+        );
       },
     );
   }
@@ -294,13 +293,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           ? await gameRepository.searchGamesWithFilters(
               query: currentState.currentQuery,
               filters: currentState.currentFilters!,
-              limit: 20,
               offset: currentState.games.length,
             )
           : await searchGames(
               SearchGamesParams(
                 query: currentState.currentQuery,
-                limit: 20,
                 offset: currentState.games.length,
               ),
             );
@@ -309,16 +306,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         (failure) => emit(GameError(failure.message)),
         (games) {
           if (games.isEmpty) {
-            emit(currentState.copyWith(
-              hasReachedMax: true,
-              isLoadingMore: false,
-            ));
+            emit(
+              currentState.copyWith(
+                hasReachedMax: true,
+                isLoadingMore: false,
+              ),
+            );
           } else {
-            emit(currentState.copyWith(
-              games: List.of(currentState.games)..addAll(games),
-              hasReachedMax: games.length < 20,
-              isLoadingMore: false,
-            ));
+            emit(
+              currentState.copyWith(
+                games: List.of(currentState.games)..addAll(games),
+                hasReachedMax: games.length < 20,
+                isLoadingMore: false,
+              ),
+            );
           }
         },
       );
@@ -357,18 +358,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (games) {
         if (event.offset == 0) {
           // Initial load
-          emit(PopularGamesLoaded(
-            games: games,
-            hasReachedMax: games.length < event.limit,
-          ));
+          emit(
+            PopularGamesLoaded(
+              games: games,
+              hasReachedMax: games.length < event.limit,
+            ),
+          );
         } else if (state is PopularGamesLoaded) {
           // Load more
           final currentState = state as PopularGamesLoaded;
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(games),
-            hasReachedMax: games.length < event.limit,
-            isLoadingMore: false,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(games),
+              hasReachedMax: games.length < event.limit,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
     );
@@ -397,17 +402,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (failure) => emit(GameError(failure.message)),
       (games) {
         if (event.offset == 0) {
-          emit(UpcomingGamesLoaded(
-            games: games,
-            hasReachedMax: games.length < event.limit,
-          ));
+          emit(
+            UpcomingGamesLoaded(
+              games: games,
+              hasReachedMax: games.length < event.limit,
+            ),
+          );
         } else if (state is UpcomingGamesLoaded) {
           final currentState = state as UpcomingGamesLoaded;
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(games),
-            hasReachedMax: games.length < event.limit,
-            isLoadingMore: false,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(games),
+              hasReachedMax: games.length < event.limit,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
     );
@@ -437,18 +446,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (games) {
         if (event.offset == 0) {
           // Initial load
-          emit(TopRatedGamesLoaded(
-            games: games,
-            hasReachedMax: games.length < event.limit,
-          ));
+          emit(
+            TopRatedGamesLoaded(
+              games: games,
+              hasReachedMax: games.length < event.limit,
+            ),
+          );
         } else if (state is TopRatedGamesLoaded) {
           // Load more
           final currentState = state as TopRatedGamesLoaded;
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(games),
-            hasReachedMax: games.length < event.limit,
-            isLoadingMore: false,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(games),
+              hasReachedMax: games.length < event.limit,
+              isLoadingMore: false,
+            ),
+          );
         }
       },
     );
@@ -467,10 +480,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(UserWishlistLoaded(
-        games: games,
-        userId: event.userId,
-      )),
+      (games) => emit(
+        UserWishlistLoaded(
+          games: games,
+          userId: event.userId,
+        ),
+      ),
     );
   }
 
@@ -487,10 +502,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(UserRecommendationsLoaded(
-        games: games,
-        userId: event.userId,
-      )),
+      (games) => emit(
+        UserRecommendationsLoaded(
+          games: games,
+          userId: event.userId,
+        ),
+      ),
     );
   }
 
@@ -507,10 +524,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(UserRatedLoaded(
-        games: games,
-        userId: event.userId,
-      )),
+      (games) => emit(
+        UserRatedLoaded(
+          games: games,
+          userId: event.userId,
+        ),
+      ),
     );
   }
 
@@ -527,9 +546,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(AllUserRatedLoaded(
-        games,
-      )),
+      (games) => emit(
+        AllUserRatedLoaded(
+          games,
+        ),
+      ),
     );
   }
 
@@ -546,9 +567,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(AllUserWishlistedLoaded(
-        games,
-      )),
+      (games) => emit(
+        AllUserWishlistedLoaded(
+          games,
+        ),
+      ),
     );
   }
 
@@ -565,9 +588,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     result.fold(
       (failure) => emit(GameError(failure.message)),
-      (games) => emit(AllUserRecommendationsLoaded(
-        games,
-      )),
+      (games) => emit(
+        AllUserRecommendationsLoaded(
+          games,
+        ),
+      ),
     );
   }
 
@@ -652,15 +677,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
             final updatedGame =
                 currentGame.copyWith(isWishlisted: !currentGame.isWishlisted);
             _updateGameCache(
-                event.gameId, updatedGame); // Cache the updated game
+              event.gameId,
+              updatedGame,
+            ); // Cache the updated game
             emit(GameDetailsLoaded(updatedGame));
           }
         }
 
         // Auch andere States updaten
-        _updateGameInAllStates(event.gameId, (game) {
-          return game.copyWith(isWishlisted: !game.isWishlisted);
-        }, emit);
+        _updateGameInAllStates(
+          event.gameId,
+          (game) {
+            return game.copyWith(isWishlisted: !game.isWishlisted);
+          },
+          emit,
+        );
       },
     );
   }
@@ -700,9 +731,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
 
         // Auch andere States updaten
-        _updateGameInAllStates(event.gameId, (game) {
-          return game.copyWith(isRecommended: !game.isRecommended);
-        }, emit);
+        _updateGameInAllStates(
+          event.gameId,
+          (game) {
+            return game.copyWith(isRecommended: !game.isRecommended);
+          },
+          emit,
+        );
       },
     );
   }
@@ -729,9 +764,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         });
 
         // Update in allen States
-        _updateGameInHomePageState(event.gameId, (game) {
-          return game.copyWith(userRating: event.rating);
-        }, emit);
+        _updateGameInHomePageState(
+          event.gameId,
+          (game) {
+            return game.copyWith(userRating: event.rating);
+          },
+          emit,
+        );
 
         // Falls aktueller State GameDetailsLoaded ist
         if (state is GameDetailsLoaded) {
@@ -762,19 +801,23 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (_) {
         // 🎯 UPDATE CACHE FIRST
         _updateGameInCache(event.gameId, (game) {
-          return game.copyWith(userRating: null);
+          return game.copyWith();
         });
 
         // Update in allen States
-        _updateGameInHomePageState(event.gameId, (game) {
-          return game.copyWith(userRating: null);
-        }, emit);
+        _updateGameInHomePageState(
+          event.gameId,
+          (game) {
+            return game.copyWith();
+          },
+          emit,
+        );
 
         // Falls aktueller State GameDetailsLoaded ist
         if (state is GameDetailsLoaded) {
           final currentGame = (state as GameDetailsLoaded).game;
           if (currentGame.id == event.gameId) {
-            final updatedGame = currentGame.copyWith(userRating: null);
+            final updatedGame = currentGame.copyWith();
             _updateGameCache(event.gameId, updatedGame);
             emit(GameDetailsLoaded(updatedGame));
           }
@@ -785,7 +828,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
 // ✅ COMPREHENSIVE Helper method to update a game in ALL possible states
   void _updateGameInAllStates(
-      int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
+    int gameId,
+    Game Function(Game) updateFunction,
+    Emitter<GameState> emit,
+  ) {
     final currentState = state;
 
     // 1. PopularGamesLoaded
@@ -847,14 +893,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
-      emit(currentState.copyWith(
-        popularGames: _applyCache(updatedPopular),
-        upcomingGames: _applyCache(updatedUpcoming),
-        latestGames: _applyCache(updatedLatest),
-        topRatedGames: _applyCache(updatedTopRated),
-        userWishlist: updatedWishlist != null ? _applyCache(updatedWishlist) : null,
-        userRecommendations: updatedRecommendations != null ? _applyCache(updatedRecommendations) : null,
-      ));
+      emit(
+        currentState.copyWith(
+          popularGames: _applyCache(updatedPopular),
+          upcomingGames: _applyCache(updatedUpcoming),
+          latestGames: _applyCache(updatedLatest),
+          topRatedGames: _applyCache(updatedTopRated),
+          userWishlist:
+              updatedWishlist != null ? _applyCache(updatedWishlist) : null,
+          userRecommendations: updatedRecommendations != null
+              ? _applyCache(updatedRecommendations)
+              : null,
+        ),
+      );
     }
 
     // 6. GrovePageLoaded - Update ALL user collections
@@ -876,12 +927,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
-      emit(currentState.copyWith(
-        userRated: _applyCache(updatedRated),
-        userWishlist: _applyCache(updatedWishlist),
-        userRecommendations: _applyCache(updatedRecommendations),
-        userTopThree: _applyCache(updatedTopThree),
-      ));
+      emit(
+        currentState.copyWith(
+          userRated: _applyCache(updatedRated),
+          userWishlist: _applyCache(updatedWishlist),
+          userRecommendations: _applyCache(updatedRecommendations),
+          userTopThree: _applyCache(updatedTopThree),
+        ),
+      );
     }
 
     // 7. GameSearchLoaded
@@ -946,7 +999,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         emit(GameDetailsLoaded(updateFunction(currentState.game)));
       }
     }
-
   }
 
 // Fix for _onGetGameDetails
@@ -983,9 +1035,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         getUpcomingGames(const GetUpcomingGamesParams(limit: 10)),
         getLatestGames(const GetLatestGamesParams(limit: 10)),
         getTopRatedGames(const GetTopRatedGamesParams(limit: 10)),
-        getUpcomingEvents(const GetUpcomingEventsParams(limit: 10)),
+        getUpcomingEvents(const GetUpcomingEventsParams()),
       ]);
-
 
       // Extract results
       final popularGames = results[0].fold<List<Game>>(
@@ -1037,20 +1088,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // 🔥 WICHTIG: Alle Games mit User Data anreichern
       if (event.userId != null) {
-        final List<Game> enrichedPopular =
+        final enrichedPopular =
             await enrichGamesWithUserData(popularGames, event.userId!);
-        final List<Game> enrichedUpcoming =
+        final enrichedUpcoming =
             await enrichGamesWithUserData(upcomingGames, event.userId!);
-        final List<Game> enrichLatest =
+        final enrichLatest =
             await enrichGamesWithUserData(latestGames, event.userId!);
-        final List<Game> enrichedTopRated =
+        final enrichedTopRated =
             await enrichGamesWithUserData(topRatedGames, event.userId!);
         // ✅ NEU: Auch Wishlist und Recommendations anreichern (für Top 3, etc.)
-        final List<Game> enrichedWishlist = userWishlist.isNotEmpty
+        final enrichedWishlist = userWishlist.isNotEmpty
             ? await enrichGamesWithUserData(userWishlist, event.userId!)
             : <Game>[];
-        final List<Game> enrichedRecommendations = userRecommendations
-                .isNotEmpty
+        final enrichedRecommendations = userRecommendations.isNotEmpty
             ? await enrichGamesWithUserData(userRecommendations, event.userId!)
             : <Game>[];
 
@@ -1063,15 +1113,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         _updateGamesCacheList(enrichedRecommendations);
 
         // 🎯 APPLY CACHE - this ensures any user actions are reflected!
-        emit(HomePageLoaded(
-          popularGames: _applyCache(enrichedPopular),
-          upcomingGames: _applyCache(enrichedUpcoming),
-          latestGames: _applyCache(enrichLatest),
-          topRatedGames: _applyCache(enrichedTopRated),
-          userWishlist: _applyCache(enrichedWishlist),
-          userRecommendations: _applyCache(enrichedRecommendations),
-          upcomingEvents: upcomingEvents,
-        ));
+        emit(
+          HomePageLoaded(
+            popularGames: _applyCache(enrichedPopular),
+            upcomingGames: _applyCache(enrichedUpcoming),
+            latestGames: _applyCache(enrichLatest),
+            topRatedGames: _applyCache(enrichedTopRated),
+            userWishlist: _applyCache(enrichedWishlist),
+            userRecommendations: _applyCache(enrichedRecommendations),
+            upcomingEvents: upcomingEvents,
+          ),
+        );
       } else {
         // 🎯 CACHE GAMES even without user data
         _updateGamesCacheList(popularGames);
@@ -1079,13 +1131,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         _updateGamesCacheList(latestGames);
         _updateGamesCacheList(topRatedGames);
 
-        emit(HomePageLoaded(
-          popularGames: _applyCache(popularGames),
-          upcomingGames: _applyCache(upcomingGames),
-          latestGames: _applyCache(latestGames),
-          topRatedGames: _applyCache(topRatedGames),
-          upcomingEvents: upcomingEvents,
-        ));
+        emit(
+          HomePageLoaded(
+            popularGames: _applyCache(popularGames),
+            upcomingGames: _applyCache(upcomingGames),
+            latestGames: _applyCache(latestGames),
+            topRatedGames: _applyCache(topRatedGames),
+            upcomingEvents: upcomingEvents,
+          ),
+        );
       }
     } catch (e) {
       emit(GameError('Failed to load home page data: $e'));
@@ -1101,23 +1155,32 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     try {
       if (event.userId == null) {
         // Wenn kein User eingeloggt ist, leere Listen zurückgeben
-        emit(const GrovePageLoaded(
-          userRated: <Game>[],
-          userWishlist: <Game>[],
-          userRecommendations: <Game>[],
-          userTopThree: <Game>[],
-        ));
+        emit(
+          const GrovePageLoaded(
+            userRated: <Game>[],
+            userWishlist: <Game>[],
+            userRecommendations: <Game>[],
+            userTopThree: <Game>[],
+          ),
+        );
         return;
       }
 
       // Alle Daten parallel laden
       final results = await Future.wait([
         getUserRated(
-            GetUserRatedParams(userId: event.userId!, limit: 20, offset: 0)),
+          GetUserRatedParams(userId: event.userId!, limit: 20, offset: 0),
+        ),
         getUserWishlist(
-            GetUserWishlistParams(userId: event.userId!, limit: 20, offset: 0)),
-        getUserRecommendations(GetUserRecommendationsParams(
-            userId: event.userId!, limit: 20, offset: 0)),
+          GetUserWishlistParams(userId: event.userId!, limit: 20, offset: 0),
+        ),
+        getUserRecommendations(
+          GetUserRecommendationsParams(
+            userId: event.userId!,
+            limit: 20,
+            offset: 0,
+          ),
+        ),
         getUserTopThree(GetUserTopThreeParams(userId: event.userId!)),
       ]);
 
@@ -1148,12 +1211,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       _updateGamesCacheList(enrichedTopThree);
 
       // 🎯 APPLY CACHE - this ensures any user actions are reflected!
-      emit(GrovePageLoaded(
-        userRated: _applyCache(enrichedRated),
-        userWishlist: _applyCache(enrichedWishlist),
-        userRecommendations: _applyCache(enrichedRecommendations),
-        userTopThree: _applyCache(enrichedTopThree),
-      ));
+      emit(
+        GrovePageLoaded(
+          userRated: _applyCache(enrichedRated),
+          userWishlist: _applyCache(enrichedWishlist),
+          userRecommendations: _applyCache(enrichedRecommendations),
+          userTopThree: _applyCache(enrichedTopThree),
+        ),
+      );
     } catch (e) {
       emit(GameError('Failed to load grove page data: $e'));
     }
@@ -1170,7 +1235,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   // ✅ UPDATED: Now includes latestGames and topRatedGames
   void _updateGameInHomePageState(
-      int gameId, Game Function(Game) updateFunction, Emitter<GameState> emit) {
+    int gameId,
+    Game Function(Game) updateFunction,
+    Emitter<GameState> emit,
+  ) {
     final currentState = state;
 
     if (currentState is HomePageLoaded) {
@@ -1200,14 +1268,16 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         return game.id == gameId ? updateFunction(game) : game;
       }).toList();
 
-      emit(currentState.copyWith(
-        popularGames: updatedPopular,
-        upcomingGames: updatedUpcoming,
-        latestGames: updatedLatest,
-        topRatedGames: updatedTopRated,
-        userWishlist: updatedWishlist,
-        userRecommendations: updatedRecommendations,
-      ));
+      emit(
+        currentState.copyWith(
+          popularGames: updatedPopular,
+          upcomingGames: updatedUpcoming,
+          latestGames: updatedLatest,
+          topRatedGames: updatedTopRated,
+          userWishlist: updatedWishlist,
+          userRecommendations: updatedRecommendations,
+        ),
+      );
     }
   }
 
@@ -1220,7 +1290,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-
       // 🆕 Use GetEnhancedGameDetails instead of GetCompleteGameDetails
       final result = await getEnhancedGameDetails(
         GetEnhancedGameDetailsParams.fullDetails(
@@ -1236,16 +1305,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           }
         },
         (game) async {
-
           // Add user data enrichment if userId provided
           if (event.userId != null && !emit.isDone) {
             try {
               final enrichedMainGames =
                   await enrichGamesWithUserData([game], event.userId!);
-              Game enrichedGame = enrichedMainGames[0];
+              var enrichedGame = enrichedMainGames[0];
 
               enrichedGame = await _enrichGameWithAllNestedUserData(
-                  enrichedGame, event.userId!);
+                enrichedGame,
+                event.userId!,
+              );
 
               if (!emit.isDone) {
                 emit(GameDetailsLoaded(enrichedGame));
@@ -1327,90 +1397,96 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
 // 🆕 UPDATED: Limits für Franchise/Collection
   Future<Game> _enrichGameWithAllNestedUserData(
-      Game game, String userId) async {
+    Game game,
+    String userId,
+  ) async {
     try {
       // ⚡ PERFORMANCE LIMITS für große Listen
-      const int franchiseLimit = 10; // Nur erste 10 Franchise Games enrichen
-      const int collectionLimit = 10; // Nur erste 10 Collection Games enrichen
+      const franchiseLimit = 10; // Nur erste 10 Franchise Games enrichen
+      const collectionLimit = 10; // Nur erste 10 Collection Games enrichen
 
       // 1-7. Normale Listen (wie vorher, ohne Limit)
-      List<Game> enrichedSimilarGames = game.similarGames;
+      var enrichedSimilarGames = game.similarGames;
       if (game.similarGames.isNotEmpty) {
         enrichedSimilarGames =
             await enrichGamesWithUserData(game.similarGames, userId);
       }
 
-      List<Game> enrichedDLCs = game.dlcs;
+      var enrichedDLCs = game.dlcs;
       if (game.dlcs.isNotEmpty) {
         enrichedDLCs = await enrichGamesWithUserData(game.dlcs, userId);
       }
 
-      List<Game> enrichedExpansions = game.expansions;
+      var enrichedExpansions = game.expansions;
       if (game.expansions.isNotEmpty) {
         enrichedExpansions =
             await enrichGamesWithUserData(game.expansions, userId);
       }
 
-      List<Game> enrichedStandaloneExpansions = game.standaloneExpansions;
+      var enrichedStandaloneExpansions = game.standaloneExpansions;
       if (game.standaloneExpansions.isNotEmpty) {
         enrichedStandaloneExpansions =
             await enrichGamesWithUserData(game.standaloneExpansions, userId);
       }
 
-      List<Game> enrichedBundles = game.bundles;
+      var enrichedBundles = game.bundles;
       if (game.bundles.isNotEmpty) {
         enrichedBundles = await enrichGamesWithUserData(game.bundles, userId);
       }
 
-      List<Game> enrichedRemakes = game.remakes;
+      var enrichedRemakes = game.remakes;
       if (game.remakes.isNotEmpty) {
         enrichedRemakes = await enrichGamesWithUserData(game.remakes, userId);
       }
 
-      List<Game> enrichedRemasters = game.remasters;
+      var enrichedRemasters = game.remasters;
       if (game.remasters.isNotEmpty) {
         enrichedRemasters =
             await enrichGamesWithUserData(game.remasters, userId);
       }
 
-      List<Game> enrichedPorts = game.ports;
+      var enrichedPorts = game.ports;
       if (game.ports.isNotEmpty) {
         enrichedPorts = await enrichGamesWithUserData(game.ports, userId);
       }
 
-      List<Game> enrichedExpandedGames = game.expandedGames;
+      var enrichedExpandedGames = game.expandedGames;
       if (game.expandedGames.isNotEmpty) {
         enrichedExpandedGames =
             await enrichGamesWithUserData(game.expandedGames, userId);
       }
 
-      List<Game> enrichedVersionParent =
+      var enrichedVersionParent =
           game.versionParent != null ? [game.versionParent!] : [];
       if (game.versionParent != null) {
         enrichedVersionParent = await enrichGamesWithUserData(
-            game.versionParent != null ? [game.versionParent!] : [], userId);
+          game.versionParent != null ? [game.versionParent!] : [],
+          userId,
+        );
       }
 
-      List<Game> enrichedForks = game.forks;
+      var enrichedForks = game.forks;
       if (game.forks.isNotEmpty) {
         enrichedForks = await enrichGamesWithUserData(game.forks, userId);
       }
 
-      List<Game> enrichedParentGames =
+      var enrichedParentGames =
           game.parentGame != null ? [game.parentGame!] : [];
       if (game.versionParent != null) {
         enrichedParentGames = await enrichGamesWithUserData(
-            game.parentGame != null ? [game.parentGame!] : [], userId);
+          game.parentGame != null ? [game.parentGame!] : [],
+          userId,
+        );
       }
 
       // 8. 🌟 MAIN FRANCHISE (🆕 MIT LIMIT!)
-      Franchise? enrichedMainFranchise = game.mainFranchise;
+      var enrichedMainFranchise = game.mainFranchise;
       if (game.mainFranchise?.games != null &&
           game.mainFranchise!.games!.isNotEmpty) {
         final enrichedFranchiseGames = await enrichGamesWithUserData(
-            game.mainFranchise!.games!, userId,
-            enrichLimit: franchiseLimit // 🎯 NUR ERSTE 10!
-            );
+          game.mainFranchise!.games!, userId,
+          enrichLimit: franchiseLimit, // 🎯 NUR ERSTE 10!
+        );
 
         enrichedMainFranchise = Franchise(
           id: game.mainFranchise!.id,
@@ -1426,28 +1502,30 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
 
       // 9. 🌳 OTHER FRANCHISES (🆕 MIT LIMIT!)
-      List<Franchise> enrichedFranchises = game.franchises;
+      var enrichedFranchises = game.franchises;
       if (game.franchises.isNotEmpty) {
         enrichedFranchises = [];
 
         for (final franchise in game.franchises) {
           if (franchise.games != null && franchise.games!.isNotEmpty) {
             final enrichedGames = await enrichGamesWithUserData(
-                franchise.games!, userId,
-                enrichLimit: franchiseLimit // 🎯 NUR ERSTE 10!
-                );
+              franchise.games!, userId,
+              enrichLimit: franchiseLimit, // 🎯 NUR ERSTE 10!
+            );
 
-            enrichedFranchises.add(Franchise(
-              id: franchise.id,
-              checksum: franchise.checksum,
-              name: franchise.name,
-              slug: franchise.slug,
-              url: franchise.url,
-              gameIds: franchise.gameIds,
-              createdAt: franchise.createdAt,
-              updatedAt: franchise.updatedAt,
-              games: enrichedGames,
-            ));
+            enrichedFranchises.add(
+              Franchise(
+                id: franchise.id,
+                checksum: franchise.checksum,
+                name: franchise.name,
+                slug: franchise.slug,
+                url: franchise.url,
+                gameIds: franchise.gameIds,
+                createdAt: franchise.createdAt,
+                updatedAt: franchise.updatedAt,
+                games: enrichedGames,
+              ),
+            );
           } else {
             enrichedFranchises.add(franchise);
           }
@@ -1455,31 +1533,33 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
 
       // 10. 📚 COLLECTIONS (🆕 MIT LIMIT!)
-      List<Collection> enrichedCollections = game.collections;
+      var enrichedCollections = game.collections;
       if (game.collections.isNotEmpty) {
         enrichedCollections = [];
 
         for (final collection in game.collections) {
           if (collection.games != null && collection.games!.isNotEmpty) {
             final enrichedGames = await enrichGamesWithUserData(
-                collection.games!, userId,
-                enrichLimit: collectionLimit // 🎯 NUR ERSTE 10!
-                );
+              collection.games!, userId,
+              enrichLimit: collectionLimit, // 🎯 NUR ERSTE 10!
+            );
 
-            enrichedCollections.add(Collection(
-              id: collection.id,
-              checksum: collection.checksum,
-              name: collection.name,
-              slug: collection.slug,
-              url: collection.url,
-              asChildRelationIds: collection.asChildRelationIds,
-              asParentRelationIds: collection.asParentRelationIds,
-              gameIds: collection.gameIds,
-              typeId: collection.typeId,
-              createdAt: collection.createdAt,
-              updatedAt: collection.updatedAt,
-              games: enrichedGames,
-            ));
+            enrichedCollections.add(
+              Collection(
+                id: collection.id,
+                checksum: collection.checksum,
+                name: collection.name,
+                slug: collection.slug,
+                url: collection.url,
+                asChildRelationIds: collection.asChildRelationIds,
+                asParentRelationIds: collection.asParentRelationIds,
+                gameIds: collection.gameIds,
+                typeId: collection.typeId,
+                createdAt: collection.createdAt,
+                updatedAt: collection.updatedAt,
+                games: enrichedGames,
+              ),
+            );
           } else {
             enrichedCollections.add(collection);
           }
@@ -1488,24 +1568,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
       // Rest wie vorher...
       final enrichedGame = game.copyWith(
-          similarGames: enrichedSimilarGames,
-          dlcs: enrichedDLCs,
-          expansions: enrichedExpansions,
-          standaloneExpansions: enrichedStandaloneExpansions,
-          bundles: enrichedBundles,
-          remakes: enrichedRemakes,
-          remasters: enrichedRemasters,
-          mainFranchise: enrichedMainFranchise,
-          franchises: enrichedFranchises,
-          collections: enrichedCollections,
-          ports: enrichedPorts,
-          expandedGames: enrichedExpandedGames,
-          versionParent: enrichedVersionParent.isNotEmpty
-              ? enrichedVersionParent[0]
-              : null,
-          forks: enrichedForks,
-          parentGame:
-              enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null);
+        similarGames: enrichedSimilarGames,
+        dlcs: enrichedDLCs,
+        expansions: enrichedExpansions,
+        standaloneExpansions: enrichedStandaloneExpansions,
+        bundles: enrichedBundles,
+        remakes: enrichedRemakes,
+        remasters: enrichedRemasters,
+        mainFranchise: enrichedMainFranchise,
+        franchises: enrichedFranchises,
+        collections: enrichedCollections,
+        ports: enrichedPorts,
+        expandedGames: enrichedExpandedGames,
+        versionParent:
+            enrichedVersionParent.isNotEmpty ? enrichedVersionParent[0] : null,
+        forks: enrichedForks,
+        parentGame:
+            enrichedParentGames.isNotEmpty ? enrichedParentGames[0] : null,
+      );
 
       return enrichedGame;
     } catch (e) {
@@ -1553,12 +1633,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     AddToTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
-
-    final result = await addToTopThree(AddToTopThreeParams(
-      userId: event.userId,
-      gameId: event.gameId,
-      position: event.position,
-    ));
+    final result = await addToTopThree(
+      AddToTopThreeParams(
+        userId: event.userId,
+        gameId: event.gameId,
+        position: event.position,
+      ),
+    );
 
     result.fold(
       (failure) {
@@ -1567,7 +1648,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       },
       (_) async {
-
         // 🎯 UPDATE CACHE FIRST
         _updateGameInCache(event.gameId, (game) {
           return game.copyWith(
@@ -1577,17 +1657,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         });
 
         // Update the specific game in all relevant states
-        _updateGameInAllStates(event.gameId, (game) {
-          return game.copyWith(
-            isInTopThree: true,
-            topThreePosition: event.position,
-          );
-        }, emit);
+        _updateGameInAllStates(
+          event.gameId,
+          (game) {
+            return game.copyWith(
+              isInTopThree: true,
+              topThreePosition: event.position,
+            );
+          },
+          emit,
+        );
 
         // If the current state is GrovePageLoaded, update its userTopThree list
         if (state is GrovePageLoaded) {
-          final result =
-              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          final result = await getUserTopThree(
+              GetUserTopThreeParams(userId: event.userId));
           result.fold(
             (failure) => emit(GameError(_mapFailureToMessage(failure))),
             (games) {
@@ -1603,11 +1687,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     RemoveFromTopThreeEvent event,
     Emitter<GameState> emit,
   ) async {
-
-    final result = await removeFromTopThree(RemoveFromTopThreeParams(
-      userId: event.userId,
-      gameId: event.gameId,
-    ));
+    final result = await removeFromTopThree(
+      RemoveFromTopThreeParams(
+        userId: event.userId,
+        gameId: event.gameId,
+      ),
+    );
 
     result.fold(
       (failure) {
@@ -1616,27 +1701,28 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         }
       },
       (_) async {
-
         // 🎯 UPDATE CACHE FIRST
         _updateGameInCache(event.gameId, (game) {
           return game.copyWith(
             isInTopThree: false,
-            topThreePosition: null,
           );
         });
 
         // Update the specific game in all relevant states
-        _updateGameInAllStates(event.gameId, (game) {
-          return game.copyWith(
-            isInTopThree: false,
-            topThreePosition: null,
-          );
-        }, emit);
+        _updateGameInAllStates(
+          event.gameId,
+          (game) {
+            return game.copyWith(
+              isInTopThree: false,
+            );
+          },
+          emit,
+        );
 
         // If the current state is GrovePageLoaded, update its userTopThree list
         if (state is GrovePageLoaded) {
-          final result =
-              await getUserTopThree(GetUserTopThreeParams(userId: event.userId));
+          final result = await getUserTopThree(
+              GetUserTopThreeParams(userId: event.userId));
           result.fold(
             (failure) => emit(GameError(_mapFailureToMessage(failure))),
             (games) {
@@ -1669,17 +1755,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
           ? await enrichGamesWithUserData(event.games, event.userId!)
           : event.games;
 
-      emit(CompleteFranchiseGamesLoaded(
-        franchiseId: event.franchiseId,
-        franchiseName: event.franchiseName,
-        games: enrichedGames,
-      ));
+      emit(
+        CompleteFranchiseGamesLoaded(
+          franchiseId: event.franchiseId,
+          franchiseName: event.franchiseName,
+          games: enrichedGames,
+        ),
+      );
     } catch (e) {
       emit(GameError('Failed to enrich franchise games: $e'));
     }
@@ -1693,17 +1780,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameDetailsLoading());
 
     try {
-
       // ✅ Einfach die übergebenen Games enrichen, keine Repository-Calls!
       final enrichedGames = event.userId != null
           ? await enrichGamesWithUserData(event.games, event.userId!)
           : event.games;
 
-      emit(CompleteCollectionGamesLoaded(
-        collectionId: event.collectionId,
-        collectionName: event.collectionName,
-        games: enrichedGames,
-      ));
+      emit(
+        CompleteCollectionGamesLoaded(
+          collectionId: event.collectionId,
+          collectionName: event.collectionName,
+          games: enrichedGames,
+        ),
+      );
     } catch (e) {
       emit(GameError('Failed to enrich collection games: $e'));
     }
@@ -1724,18 +1812,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     final result = await gameRepository.searchGamesWithFilters(
       query: event.query,
       filters: event.filters,
-      limit: 20,
-      offset: 0,
     );
 
     result.fold(
       (failure) => emit(GameSearchError(message: failure.message)),
-      (games) => emit(GameSearchLoaded(
-        games: games,
-        hasReachedMax: games.length < 20,
-        currentQuery: event.query,
-        currentFilters: event.filters,
-      )),
+      (games) => emit(
+        GameSearchLoaded(
+          games: games,
+          hasReachedMax: games.length < 20,
+          currentQuery: event.query,
+          currentFilters: event.filters,
+        ),
+      ),
     );
   }
 
@@ -1764,8 +1852,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (refreshedState != currentState) {
       emit(refreshedState);
-    } else {
-    }
+    } else {}
   }
 
   Future<void> _onLoadAllUserRatedPaginated(
@@ -1781,10 +1868,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
       (failure) => emit(AllUserRatedPaginatedError(failure.message)),
       (games) {
-        emit(AllUserRatedPaginatedLoaded(
-          games: games,
-          hasReachedMax: games.length < 20,
-        ));
+        emit(
+          AllUserRatedPaginatedLoaded(
+            games: games,
+            hasReachedMax: games.length < 20,
+          ),
+        );
       },
     );
   }
@@ -1806,10 +1895,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       result.fold(
         (failure) => emit(AllUserRatedPaginatedError(failure.message)),
         (newGames) {
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(newGames),
-            hasReachedMax: newGames.length < 20,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(newGames),
+              hasReachedMax: newGames.length < 20,
+            ),
+          );
         },
       );
     }
@@ -1828,10 +1919,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
       (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
       (games) {
-        emit(AllUserWishlistPaginatedLoaded(
-          games: games,
-          hasReachedMax: games.length < 20,
-        ));
+        emit(
+          AllUserWishlistPaginatedLoaded(
+            games: games,
+            hasReachedMax: games.length < 20,
+          ),
+        );
       },
     );
   }
@@ -1853,10 +1946,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       result.fold(
         (failure) => emit(AllUserWishlistPaginatedError(failure.message)),
         (newGames) {
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(newGames),
-            hasReachedMax: newGames.length < 20,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(newGames),
+              hasReachedMax: newGames.length < 20,
+            ),
+          );
         },
       );
     }
@@ -1875,10 +1970,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     result.fold(
       (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
       (games) {
-        emit(AllUserRecommendedPaginatedLoaded(
-          games: games,
-          hasReachedMax: games.length < 20,
-        ));
+        emit(
+          AllUserRecommendedPaginatedLoaded(
+            games: games,
+            hasReachedMax: games.length < 20,
+          ),
+        );
       },
     );
   }
@@ -1895,16 +1992,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final offset = currentState.games.length;
       final result = await getUserRecommendations(
         GetUserRecommendationsParams(
-            userId: event.userId, limit: 20, offset: offset),
+          userId: event.userId,
+          limit: 20,
+          offset: offset,
+        ),
       );
 
       result.fold(
         (failure) => emit(AllUserRecommendedPaginatedError(failure.message)),
         (newGames) {
-          emit(currentState.copyWith(
-            games: List.of(currentState.games)..addAll(newGames),
-            hasReachedMax: newGames.length < 20,
-          ));
+          emit(
+            currentState.copyWith(
+              games: List.of(currentState.games)..addAll(newGames),
+              hasReachedMax: newGames.length < 20,
+            ),
+          );
         },
       );
     }

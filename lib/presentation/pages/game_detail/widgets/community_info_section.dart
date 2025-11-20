@@ -6,19 +6,18 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/utils/date_formatter.dart';
-import '../../../../domain/entities/game/game.dart';
 
 class CommunityInfoContent extends StatelessWidget {
-  final Game game;
 
   const CommunityInfoContent({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +48,7 @@ class CommunityInfoContent extends StatelessWidget {
       padding: const EdgeInsets.only(
           top: AppConstants.paddingSmall,
           left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall),
+          right: AppConstants.paddingSmall,),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -135,7 +134,7 @@ class CommunityInfoContent extends StatelessWidget {
       padding: const EdgeInsets.only(
           bottom: AppConstants.paddingSmall,
           left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall),
+          right: AppConstants.paddingSmall,),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -202,10 +201,7 @@ class CommunityInfoContent extends StatelessWidget {
     BuildContext context, {
     required String title,
     required double rating,
-    int? count,
-    required IconData icon,
-    required Color color,
-    required String subtitle,
+    required IconData icon, required Color color, required String subtitle, int? count,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -214,7 +210,6 @@ class CommunityInfoContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Column(
@@ -292,7 +287,6 @@ class CommunityInfoContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Column(
@@ -349,7 +343,7 @@ class CommunityInfoContent extends StatelessWidget {
   }
 
   bool _hasOtherRatings() {
-    int ratingCount = 0;
+    var ratingCount = 0;
     if (game.totalRating != null) ratingCount++;
     if (game.rating != null) ratingCount++;
     if (game.aggregatedRating != null) ratingCount++;
@@ -436,7 +430,7 @@ class _FollowedUsersRatingsSectionState
             // Section Header
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall),
+                  horizontal: AppConstants.paddingSmall,),
               child: Row(
                 children: [
                   Icon(

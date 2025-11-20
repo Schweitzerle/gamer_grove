@@ -4,13 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformTrend extends Equatable {
-  final int platformId;
-  final String platformName;
-  final double trendScore;
-  final double adoptionRate;
-  final int gameCount;
-  final double averageRating;
-  final DateTime? calculatedAt;
 
   const PlatformTrend({
     required this.platformId,
@@ -21,6 +14,13 @@ class PlatformTrend extends Equatable {
     required this.averageRating,
     this.calculatedAt,
   });
+  final int platformId;
+  final String platformName;
+  final double trendScore;
+  final double adoptionRate;
+  final int gameCount;
+  final double averageRating;
+  final DateTime? calculatedAt;
 
   bool get isGrowing => adoptionRate > 5;
   bool get isTrending => trendScore > 70;
@@ -28,7 +28,7 @@ class PlatformTrend extends Equatable {
   @override
   List<Object?> get props => [
     platformId, platformName, trendScore, adoptionRate,
-    gameCount, averageRating, calculatedAt
+    gameCount, averageRating, calculatedAt,
   ];
 }
 

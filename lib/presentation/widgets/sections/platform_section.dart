@@ -6,20 +6,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
-import '../../../core/utils/date_formatter.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/platform/platform.dart';
-import '../../../domain/entities/releaseDate/release_date.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
 
 class GenericPlatformSection extends StatelessWidget {
-  // ✅ FLEXIBLE CONSTRUCTOR - Entweder Game oder Platform List
-  final Game? game;
-  final List<Platform>? platforms;
-  final String title;
-  final bool showReleaseTimeline;
-  final bool showFirstReleaseInfo;
 
   const GenericPlatformSection({
     super.key,
@@ -29,7 +23,13 @@ class GenericPlatformSection extends StatelessWidget {
     this.showReleaseTimeline = true,
     this.showFirstReleaseInfo = true,
   }) : assert(game != null || platforms != null,
-            'Either game or platforms must be provided');
+            'Either game or platforms must be provided',);
+  // ✅ FLEXIBLE CONSTRUCTOR - Entweder Game oder Platform List
+  final Game? game;
+  final List<Platform>? platforms;
+  final String title;
+  final bool showReleaseTimeline;
+  final bool showFirstReleaseInfo;
 
   // ✅ GETTER FÜR PLATFORM LIST
   List<Platform> get _platforms {
@@ -90,7 +90,7 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ PLATFORM CARDS SECTION
   Widget _buildPlatformCardsSection(
-      BuildContext context, Map<int, List<ReleaseDate>> platformReleases) {
+      BuildContext context, Map<int, List<ReleaseDate>> platformReleases,) {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +100,7 @@ class GenericPlatformSection extends StatelessWidget {
           padding: const EdgeInsets.only(
               left: AppConstants.paddingSmall,
               right: AppConstants.paddingSmall,
-              top: AppConstants.paddingSmall),
+              top: AppConstants.paddingSmall,),
           child: Row(
             children: [
               Icon(
@@ -142,7 +142,7 @@ class GenericPlatformSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(
                 left: AppConstants.paddingSmall,
-                bottom: AppConstants.paddingSmall),
+                bottom: AppConstants.paddingSmall,),
             itemCount: _platforms.length,
             itemBuilder: (context, index) {
               final platform = _platforms[index];
@@ -161,13 +161,13 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
   Widget _buildPlatformCard(
-      BuildContext context, Platform platform, List<ReleaseDate> releases) {
+      BuildContext context, Platform platform, List<ReleaseDate> releases,) {
 
     final earliestRelease = releases.isNotEmpty
         ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
                 (b.date?.millisecondsSinceEpoch ?? 0)
             ? a
-            : b)
+            : b,)
         : null;
 
     final platformColor = _getPlatformColor(platform.name);
@@ -189,7 +189,6 @@ class GenericPlatformSection extends StatelessWidget {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Platform Logo/Icon - SIMPLIFIED
             Container(
@@ -207,7 +206,6 @@ class GenericPlatformSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: CachedImageWidget(
                         imageUrl: platform.logo!.logoMed2xUrl,
-                        fit: BoxFit.cover,
                         errorWidget: Icon(
                           _getPlatformIcon(platform.name),
                           color: platformColor,
@@ -412,7 +410,7 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ TIMELINE ITEM (nur für Game Context)
   Widget _buildTimelineItem(
-      BuildContext context, List<ReleaseDate> releases, bool isLast) {
+      BuildContext context, List<ReleaseDate> releases, bool isLast,) {
     final firstRelease = releases.first;
 
     return Padding(
@@ -471,7 +469,7 @@ class GenericPlatformSection extends StatelessWidget {
 
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 8, vertical: 4,),
                         decoration: BoxDecoration(
                           color:
                               Theme.of(context).colorScheme.secondaryContainer,
@@ -532,7 +530,7 @@ class GenericPlatformSection extends StatelessWidget {
       padding: const EdgeInsets.only(
           bottom: AppConstants.paddingSmall,
           left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall),
+          right: AppConstants.paddingSmall,),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -590,7 +588,7 @@ class GenericPlatformSection extends StatelessWidget {
   Map<int, List<ReleaseDate>> _groupReleasesByPlatform() {
     if (game == null) return {};
 
-    final Map<int, List<ReleaseDate>> grouped = {};
+    final grouped = <int, List<ReleaseDate>>{};
 
     for (final release in _releaseDates) {
       if (release.platformId != null) {
@@ -605,14 +603,14 @@ class GenericPlatformSection extends StatelessWidget {
   Platform _findPlatformById(int? platformId) {
     if (platformId == null) {
       return const Platform(
-          id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
+          id: 0, name: 'Unknown', slug: '', checksum: '',);
     }
 
     try {
       return _platforms.firstWhere((p) => p.id == platformId);
     } catch (e) {
       return const Platform(
-          id: 0, name: 'Unknown', abbreviation: null, slug: '', checksum: '');
+          id: 0, name: 'Unknown', slug: '', checksum: '',);
     }
   }
 

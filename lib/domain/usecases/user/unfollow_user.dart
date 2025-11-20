@@ -5,8 +5,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for unfollowing a user.
 ///
@@ -22,9 +22,9 @@ import '../usecase.dart';
 /// );
 /// ```
 class UnfollowUserUseCase implements UseCase<void, UnfollowUserParams> {
-  final UserRepository repository;
 
   UnfollowUserUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, void>> call(UnfollowUserParams params) async {
@@ -32,7 +32,7 @@ class UnfollowUserUseCase implements UseCase<void, UnfollowUserParams> {
     if (params.currentUserId == params.targetUserId) {
       return const Left(ValidationFailure(
         message: 'Invalid operation',
-      ));
+      ),);
     }
 
     // Check if currently following (optional - repository handles this)
@@ -49,10 +49,10 @@ class UnfollowUserUseCase implements UseCase<void, UnfollowUserParams> {
     if (!isFollowing) {
       return const Left(ValidationFailure(
         message: 'You are not following this user',
-      ));
+      ),);
     }
 
-    return await repository.unfollowUser(
+    return repository.unfollowUser(
       currentUserId: params.currentUserId,
       targetUserId: params.targetUserId,
     );
@@ -60,13 +60,13 @@ class UnfollowUserUseCase implements UseCase<void, UnfollowUserParams> {
 }
 
 class UnfollowUserParams extends Equatable {
-  final String currentUserId;
-  final String targetUserId;
 
   const UnfollowUserParams({
     required this.currentUserId,
     required this.targetUserId,
   });
+  final String currentUserId;
+  final String targetUserId;
 
   @override
   List<Object> get props => [currentUserId, targetUserId];

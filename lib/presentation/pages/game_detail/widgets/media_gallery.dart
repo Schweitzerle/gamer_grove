@@ -4,23 +4,20 @@
 
 // lib/presentation/pages/game_detail/widgets/media_gallery.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/image_utils.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/game/game_video.dart';
-import '../../imageGallery/image_gallery_page.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/presentation/pages/imageGallery/image_gallery_page.dart';
 
 class MediaGallery extends StatelessWidget {
+
+  const MediaGallery({
+    required this.screenshots, required this.videos, required this.artworks, super.key,
+  });
   final List<String> screenshots;
   final List<GameVideo> videos;
   final List<String> artworks;
-
-  const MediaGallery({
-    super.key,
-    required this.screenshots,
-    required this.videos,
-    required this.artworks,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +72,7 @@ class MediaGallery extends StatelessWidget {
                 itemCount: screenshots.length,
                 itemBuilder: (context, index) {
                   return _buildScreenshotThumbnail(
-                      context, screenshots[index], index);
+                      context, screenshots[index], index,);
                 },
               ),
             ),
@@ -98,7 +95,7 @@ class MediaGallery extends StatelessWidget {
                 itemCount: artworks.length,
                 itemBuilder: (context, index) {
                   return _buildArtworkThumbnail(
-                      context, artworks[index], index);
+                      context, artworks[index], index,);
                 },
               ),
             ),
@@ -122,7 +119,6 @@ class MediaGallery extends StatelessWidget {
                 imageUrl: video.thumbnailUrl,
                 width: 300,
                 height: 200,
-                fit: BoxFit.cover,
               ),
               const Center(
                 child: Icon(
@@ -166,7 +162,7 @@ class MediaGallery extends StatelessWidget {
   }
 
   Widget _buildScreenshotThumbnail(
-      BuildContext context, String imageUrl, int index) {
+      BuildContext context, String imageUrl, int index,) {
     return Container(
       width: 300,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -178,7 +174,6 @@ class MediaGallery extends StatelessWidget {
             imageUrl: ImageUtils.getMediumImageUrl(imageUrl),
             width: 300,
             height: 200,
-            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -186,7 +181,7 @@ class MediaGallery extends StatelessWidget {
   }
 
   Widget _buildArtworkThumbnail(
-      BuildContext context, String imageUrl, int index) {
+      BuildContext context, String imageUrl, int index,) {
     return Container(
       width: 200,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -198,7 +193,6 @@ class MediaGallery extends StatelessWidget {
             imageUrl: ImageUtils.getMediumImageUrl(imageUrl),
             width: 200,
             height: 200,
-            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -223,7 +217,7 @@ class MediaGallery extends StatelessWidget {
   }
 
   void _openImageGallery(
-      BuildContext context, List<String> images, int initialIndex) {
+      BuildContext context, List<String> images, int initialIndex,) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => ImageGalleryPage(

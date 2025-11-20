@@ -3,7 +3,7 @@
 // ==================================================
 
 // lib/data/models/event/network_type_model.dart (ENHANCED)
-import '../../../domain/entities/event/network_type.dart';
+import 'package:gamer_grove/domain/entities/event/network_type.dart';
 
 class NetworkTypeModel extends NetworkType {
   const NetworkTypeModel({

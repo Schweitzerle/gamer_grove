@@ -1,20 +1,18 @@
 // lib/presentation/pages/game_detail/widgets/video_player_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/game/game_video.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  final GameVideo video;
-  final int videoIndex;
 
   const VideoPlayerScreen({
-    super.key,
-    required this.video,
-    required this.videoIndex,
+    required this.video, required this.videoIndex, super.key,
   });
+  final GameVideo video;
+  final int videoIndex;
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
@@ -37,11 +35,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         initialVideoId: widget.video.videoId,
         flags: const YoutubePlayerFlags(
           autoPlay: false,
-          mute: false,
-          loop: false,
-          isLive: false,
-          forceHD: false,
-          enableCaption: true,
         ),
       );
     } catch (e) {
@@ -162,7 +155,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               ),
             ],
           ),
-          body: Container(
+          body: ColoredBox(
             color: Theme.of(context).colorScheme.surface,
             child: Column(
               children: [
@@ -340,7 +333,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           // Thumbnail Background
           CachedImageWidget(
             imageUrl: widget.video.thumbnailUrl,
-            fit: BoxFit.cover,
             errorWidget: Container(
               color: Colors.grey[900],
               child: const Icon(

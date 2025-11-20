@@ -4,21 +4,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/game/game_video.dart';
-import '../videoPlayer/video_player_screen.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/presentation/pages/videoPlayer/video_player_screen.dart';
 
 class AllVideosGrid extends StatelessWidget {
+
+  const AllVideosGrid({
+    required this.videos, required this.title, required this.gameName, super.key,
+  });
   final List<GameVideo> videos;
   final String title;
   final String gameName;
-
-  const AllVideosGrid({
-    super.key,
-    required this.videos,
-    required this.title,
-    required this.gameName,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +115,7 @@ class AllVideosGrid extends StatelessWidget {
                           children: [
                             CachedImageWidget(
                               imageUrl: video.thumbnailUrl,
-                              fit: BoxFit.cover,
-                              placeholder: Container(
+                              placeholder: ColoredBox(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest,
@@ -193,7 +189,6 @@ class AllVideosGrid extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black,
                                         blurRadius: 4,
                                       ),
                                     ],

@@ -1,22 +1,17 @@
 // lib/presentation/blocs/user_search/user_search_bloc.dart
 
 import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/entities/user/user.dart';
-import '../../../domain/usecases/user/search_users.dart';
-import '../../../domain/usecases/user/get_user_followers.dart';
-import '../../../domain/usecases/user/get_user_following.dart';
-import 'user_search_event.dart';
-import 'user_search_state.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/usecases/user/get_user_followers.dart';
+import 'package:gamer_grove/domain/usecases/user/get_user_following.dart';
+import 'package:gamer_grove/domain/usecases/user/search_users.dart';
+import 'package:gamer_grove/presentation/blocs/user_search/user_search_event.dart';
+import 'package:gamer_grove/presentation/blocs/user_search/user_search_state.dart';
 
 /// BLoC for handling user search with pagination
 class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
-  final SearchUsers searchUsers;
-  final GetFollowersUseCase? getFollowers;
-  final GetFollowingUseCase? getFollowing;
-  final String? currentUserId;
-
-  static const int _pageSize = 20;
 
   UserSearchBloc({
     required this.searchUsers,
@@ -32,6 +27,12 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
     on<LoadFollowersRequested>(_onLoadFollowersRequested);
     on<LoadFollowingRequested>(_onLoadFollowingRequested);
   }
+  final SearchUsers searchUsers;
+  final GetFollowersUseCase? getFollowers;
+  final GetFollowingUseCase? getFollowing;
+  final String? currentUserId;
+
+  static const int _pageSize = 20;
 
   /// Handle initial search request
   Future<void> _onSearchUsersRequested(
@@ -54,8 +55,6 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
       SearchUsersParams(
         query: event.query.trim(),
         currentUserId: currentUserId,
-        limit: _pageSize,
-        offset: 0,
       ),
     );
 
@@ -88,7 +87,6 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
       SearchUsersParams(
         query: state.currentQuery,
         currentUserId: currentUserId,
-        limit: _pageSize,
         offset: nextPage * _pageSize,
       ),
     );
@@ -122,8 +120,6 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
       SearchUsersParams(
         query: state.currentQuery,
         currentUserId: currentUserId,
-        limit: _pageSize,
-        offset: 0,
       ),
     );
 

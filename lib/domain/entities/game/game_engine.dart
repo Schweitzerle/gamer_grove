@@ -4,11 +4,28 @@
 
 // lib/domain/entities/game/game_engine.dart
 import 'package:equatable/equatable.dart';
-import 'game_engine_logo.dart';
-import '../company/company.dart';
-import '../platform/platform.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
 
 class GameEngine extends Equatable {
+
+  const GameEngine({
+    required this.id,
+    required this.checksum,
+    required this.name,
+    this.description,
+    this.logoId,
+    this.logo, // ✅ NEU
+    this.slug,
+    this.url,
+    this.companyIds = const [],
+    this.platformIds = const [],
+    this.companies = const [], // ✅ NEU
+    this.platforms = const [], // ✅ NEU
+    this.createdAt,
+    this.updatedAt,
+  });
   final int id;
   final String checksum;
   final String name;
@@ -28,23 +45,6 @@ class GameEngine extends Equatable {
 
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
-  const GameEngine({
-    required this.id,
-    required this.checksum,
-    required this.name,
-    this.description,
-    this.logoId,
-    this.logo, // ✅ NEU
-    this.slug,
-    this.url,
-    this.companyIds = const [],
-    this.platformIds = const [],
-    this.companies = const [], // ✅ NEU
-    this.platforms = const [], // ✅ NEU
-    this.createdAt,
-    this.updatedAt,
-  });
 
   // Helper getters
   bool get hasDescription => description != null && description!.isNotEmpty;

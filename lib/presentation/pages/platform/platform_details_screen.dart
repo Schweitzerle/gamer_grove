@@ -5,25 +5,23 @@
 // lib/presentation/pages/platform_detail/platform_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/presentation/widgets/accordion_tile.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../widgets/accordion_tile.dart';
-import '../../widgets/game_card.dart';
-import '../../../core/utils/navigations.dart';
-import '../../widgets/sections/franchise_collection_section.dart';
 
 class PlatformDetailScreen extends StatefulWidget {
-  final Platform platform;
-  final List<Game> games;
 
   const PlatformDetailScreen({
-    super.key,
-    required this.platform,
-    required this.games,
+    required this.platform, required this.games, super.key,
   });
+  final Platform platform;
+  final List<Game> games;
 
   @override
   State<PlatformDetailScreen> createState() => _PlatformDetailScreenState();
@@ -66,8 +64,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
       totalCount: widget.games.length,
       accentColor: _getPlatformAccentColor(),
       icon: Icons.videogame_asset,
-      franchise: null,
-      collection: null,
     );
   }
 
@@ -146,7 +142,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
       child: widget.platform.hasLogo
           ? CachedImageWidget(
               imageUrl: widget.platform.logo!.logoMed2xUrl,
-              fit: BoxFit.cover,
               placeholder: _buildFallbackHero(),
             )
           : _buildFallbackHero(),
@@ -176,8 +171,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
               stops: const [0.0, 0.05, 0.95, 1.0],
               colors: [
                 Theme.of(context).colorScheme.surface,
@@ -243,9 +236,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                       child: widget.platform.hasLogo
                           ? CachedImageWidget(
                               imageUrl: widget.platform.logo!.logoMed2xUrl,
-                              fit: BoxFit.cover,
                             )
-                          : Container(
+                          : ColoredBox(
                               color: _getPlatformAccentColor().withOpacity(0.1),
                               child: Icon(
                                 Icons.videogame_asset,
@@ -338,18 +330,18 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
   Widget _buildPlatformContent() {
     return SliverToBoxAdapter(
-      child: Container(
+      child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge), // Space for floating card
+                height: AppConstants.paddingLarge,), // Space for floating card
 
             // Platform Information Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium),
+                  horizontal: AppConstants.paddingMedium,),
               child: _buildPlatformInformationAccordion(),
             ),
 
@@ -372,12 +364,12 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
   Widget _buildPlatformInformationAccordion() {
     // Count total accordion items to determine isFirst/isLast
-    int accordionCount = 0;
+    var accordionCount = 0;
     if (widget.platform.summary != null) accordionCount++;
     accordionCount++; // Platform Details always present
     if (widget.platform.url != null) accordionCount++;
 
-    int currentIndex = 0;
+    var currentIndex = 0;
 
     return Card(
       elevation: 2,
@@ -498,7 +490,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 8, vertical: 4,),
                         decoration: BoxDecoration(
                           color: _getPlatformAccentColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -617,7 +609,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
               title: 'External Links',
               icon: Icons.link,
               isFirst: false,
-              isLast: true,
               child: Container(
                 margin: const EdgeInsets.symmetric(
                   horizontal: AppConstants.paddingMedium,
@@ -662,7 +653,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: accentColor.withOpacity(0.2),
-          width: 1,
         ),
       ),
       child: Row(
@@ -784,7 +774,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
             // Series Info Header
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall),
+                  horizontal: AppConstants.paddingSmall,),
               child: Row(
                 children: [
                   Container(
@@ -832,7 +822,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                     TextButton.icon(
                       onPressed: () => _navigateToSeries(context, item),
                       icon: Icon(Icons.arrow_forward,
-                          size: 16, color: item.accentColor),
+                          size: 16, color: item.accentColor,),
                       label: Text(
                         'View All',
                         style: TextStyle(color: item.accentColor),

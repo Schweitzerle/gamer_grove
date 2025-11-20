@@ -24,12 +24,12 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class GetCurrentUserUseCase implements UseCase<User?, NoParams> {
-  final AuthRepository repository;
 
   GetCurrentUserUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, User?>> call(NoParams params) async {
-    return await repository.getCurrentUser();
+    return repository.getCurrentUser();
   }
 }

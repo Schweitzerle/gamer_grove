@@ -2,14 +2,15 @@
 // Diese Datei zeigt, wie du die GameCard aktualisieren kannst
 
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
-import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/core/utils/date_formatter.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 
 /// Aktualisierte GameCard mit UserGameDataBloc Integration
@@ -28,20 +29,18 @@ import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_blo
 /// )
 /// ```
 class GameCardWithBloc extends StatelessWidget {
+
+  const GameCardWithBloc({
+    required this.game, required this.onTap, super.key,
+    this.blurRated = false,
+    this.width,
+    this.height,
+  });
   final Game game;
   final VoidCallback onTap;
   final bool blurRated;
   final double? width;
   final double? height;
-
-  const GameCardWithBloc({
-    super.key,
-    required this.game,
-    required this.onTap,
-    this.blurRated = false,
-    this.width,
-    this.height,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +67,10 @@ class GameCardWithBloc extends StatelessWidget {
           child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
             builder: (context, userDataState) {
               // Extract user-specific data from global state
-              bool isWishlisted = false;
-              bool isRecommended = false;
+              var isWishlisted = false;
+              var isRecommended = false;
               double? userRating;
-              bool isInTopThree = false;
+              var isInTopThree = false;
               int? topThreePosition;
 
               if (userDataState is UserGameDataLoaded) {
@@ -141,7 +140,6 @@ class GameCardWithBloc extends StatelessWidget {
     if (game.coverUrl != null && game.coverUrl!.isNotEmpty) {
       return CachedImageWidget(
         imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-        fit: BoxFit.cover,
       );
     } else {
       return _buildFallbackBackground(context);
@@ -176,7 +174,7 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.white.withOpacity(0.2),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+        filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
         child: Container(
           color: Colors.black.withOpacity(0.1),
         ),
@@ -225,7 +223,7 @@ class GameCardWithBloc extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: RadialGradient(
-            center: const Alignment(1.0, -1.0),
+            center: const Alignment(1, -1),
             radius: 2.8,
             colors: [
               Colors.black.withOpacity(0.7),
@@ -355,7 +353,7 @@ class GameCardWithBloc extends StatelessWidget {
 
   Widget _buildUserRatingCircle(BuildContext context, double userRating) {
     final rating = userRating / 10; // 0-1 range
-    final displayRating = (userRating * 10);
+    final displayRating = userRating * 10;
     final color = ColorScales.getRatingColor(displayRating);
 
     return Container(
@@ -366,7 +364,6 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Stack(
@@ -422,7 +419,6 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: color.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: Center(
@@ -458,7 +454,6 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.red.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: const Icon(
@@ -478,7 +473,6 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.green.withOpacity(0.8),
-          width: 1,
         ),
       ),
       child: const Icon(
@@ -501,7 +495,6 @@ class GameCardWithBloc extends StatelessWidget {
         color: Colors.black.withOpacity(0.75),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
-          width: 1,
         ),
       ),
       child: Stack(
@@ -566,7 +559,7 @@ class GameCardWithBloc extends StatelessWidget {
     bool isRecommended,
     bool isInTopThree,
   ) {
-    int count = 0;
+    var count = 0;
     if (userRating != null) count++;
     if (isInTopThree) count++;
     if (isWishlisted) count++;

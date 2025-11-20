@@ -24,13 +24,13 @@ class CheckAuthStatusEvent extends AuthEvent {
 
 /// Event to sign in with email and password.
 class SignInEvent extends AuthEvent {
-  final String email;
-  final String password;
 
   const SignInEvent({
     required this.email,
     required this.password,
   });
+  final String email;
+  final String password;
 
   @override
   List<Object> get props => [email, password];
@@ -38,15 +38,15 @@ class SignInEvent extends AuthEvent {
 
 /// Event to sign up a new user.
 class SignUpEvent extends AuthEvent {
-  final String email;
-  final String password;
-  final String username;
 
   const SignUpEvent({
     required this.email,
     required this.password,
     required this.username,
   });
+  final String email;
+  final String password;
+  final String username;
 
   @override
   List<Object> get props => [email, password, username];
@@ -59,9 +59,9 @@ class SignOutEvent extends AuthEvent {
 
 /// Event to send password reset email.
 class ResetPasswordEvent extends AuthEvent {
-  final String email;
 
   const ResetPasswordEvent({required this.email});
+  final String email;
 
   @override
   List<Object> get props => [email];
@@ -69,9 +69,9 @@ class ResetPasswordEvent extends AuthEvent {
 
 /// Event to update password.
 class UpdatePasswordEvent extends AuthEvent {
-  final String newPassword;
 
   const UpdatePasswordEvent({required this.newPassword});
+  final String newPassword;
 
   @override
   List<Object> get props => [newPassword];
@@ -79,9 +79,9 @@ class UpdatePasswordEvent extends AuthEvent {
 
 /// Event triggered when auth state changes (from stream).
 class AuthStateChangedEvent extends AuthEvent {
-  final User? user;
 
   const AuthStateChangedEvent(this.user);
+  final User? user;
 
   @override
   List<Object?> get props => [user];
@@ -89,9 +89,9 @@ class AuthStateChangedEvent extends AuthEvent {
 
 /// Event to update user data in the auth state.
 class UserDataUpdated extends AuthEvent {
-  final User user;
 
   const UserDataUpdated(this.user);
+  final User user;
 
   @override
   List<Object> get props => [user];

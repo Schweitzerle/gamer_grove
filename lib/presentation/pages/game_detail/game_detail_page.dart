@@ -1,29 +1,29 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
-import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'; // ✅ Import Live Loading
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/image_utils.dart';
-import '../../../core/widgets/cached_image_widget.dart';
-import '../../../core/widgets/error_widget.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../injection_container.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../widgets/sections/character_section.dart';
-import '../../widgets/sections/content_dlc_section.dart';
-import '../../widgets/sections/events_section.dart';
-import '../../widgets/sections/franchise_collection_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/content_dlc_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/events_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 
 class GameDetailPage extends StatefulWidget {
-  final int gameId;
 
-  const GameDetailPage({super.key, required this.gameId});
+  const GameDetailPage({required this.gameId, super.key});
+  final int gameId;
 
   @override
   State<GameDetailPage> createState() => _GameDetailPageState();
@@ -73,11 +73,11 @@ class _GameDetailPageState extends State<GameDetailPage>
     _gameBloc.add(GetCompleteGameDetailsEvent(
       gameId: widget.gameId,
       userId: _currentUserId,
-    ));
+    ),);
   }
 
   void _initializeMediaTabs(Game game) {
-    int tabCount = 0;
+    var tabCount = 0;
     if (game.screenshots.isNotEmpty) tabCount++;
     if (game.videos.isNotEmpty) tabCount++;
     if (game.artworks.isNotEmpty) tabCount++;
@@ -152,7 +152,7 @@ class _GameDetailPageState extends State<GameDetailPage>
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -163,7 +163,7 @@ class _GameDetailPageState extends State<GameDetailPage>
             title: 'Loading Game Details',
             steps: EventLoadingSteps.gameDetails(context),
             stepDuration: const Duration(
-                milliseconds: 1000), // ✅ Slightly faster for games
+                milliseconds: 1000,), // ✅ Slightly faster for games
           ),
         ),
       ),
@@ -189,7 +189,7 @@ class _GameDetailPageState extends State<GameDetailPage>
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -260,7 +260,6 @@ class _GameDetailPageState extends State<GameDetailPage>
       tag: 'game_cover_${game.id}',
       child: CachedImageWidget(
         imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-        fit: BoxFit.cover,
         placeholder: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -284,8 +283,6 @@ class _GameDetailPageState extends State<GameDetailPage>
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
               stops: const [0.0, 0.05, 0.95, 1.0],
               colors: [
                 Theme.of(context).colorScheme.surface,
@@ -330,7 +327,7 @@ class _GameDetailPageState extends State<GameDetailPage>
   //Game Content
   Widget _buildGameContent(Game game) {
     return SliverToBoxAdapter(
-      child: Container(
+      child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,8 +351,6 @@ class _GameDetailPageState extends State<GameDetailPage>
                   child: EventsSection(
                     game: game,
                     currentUserId: _currentUserId,
-                    showViewAll: true,
-                    maxDisplayedEvents: 6,
                   ),
                 ),
               ),

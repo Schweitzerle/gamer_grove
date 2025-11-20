@@ -2,10 +2,10 @@
 // FIXED PLATFORM MODEL - MIT LOGO MAPPING
 // ==================================================
 
+import 'package:gamer_grove/data/models/platform/platform_logo_model.dart';
 // lib/data/models/platform/platform_model.dart
-import '../../../domain/entities/platform/platform.dart';
-import '../../../domain/entities/platform/platform_logo.dart';
-import 'platform_logo_model.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_logo.dart';
 
 class PlatformModel extends Platform {
   const PlatformModel({

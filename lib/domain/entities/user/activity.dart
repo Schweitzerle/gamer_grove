@@ -16,6 +16,18 @@ enum ActivityType {
 ///
 /// Represents actions performed by users that can be displayed in activity feeds.
 class Activity extends Equatable {
+
+  const Activity({
+    required this.id,
+    required this.userId,
+    required this.activityType,
+    required this.createdAt, this.gameId,
+    this.metadata,
+    this.isPublic = true,
+    this.username,
+    this.userAvatarUrl,
+    this.userDisplayName,
+  });
   final String id;
   final String userId;
   final ActivityType activityType;
@@ -28,19 +40,6 @@ class Activity extends Equatable {
   final String? username;
   final String? userAvatarUrl;
   final String? userDisplayName;
-
-  const Activity({
-    required this.id,
-    required this.userId,
-    required this.activityType,
-    this.gameId,
-    this.metadata,
-    this.isPublic = true,
-    required this.createdAt,
-    this.username,
-    this.userAvatarUrl,
-    this.userDisplayName,
-  });
 
   /// Gets the display name or falls back to username
   String get displayName => userDisplayName ?? username ?? 'Unknown User';

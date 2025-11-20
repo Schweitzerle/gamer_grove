@@ -4,13 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GenreTrend extends Equatable {
-  final int genreId;
-  final String genreName;
-  final double trendScore; // How trending this genre is (0-100)
-  final double growthRate; // Percentage growth in popularity
-  final int gameCount; // Number of games in this genre
-  final double averageRating; // Average rating of games in genre
-  final DateTime? calculatedAt;
 
   const GenreTrend({
     required this.genreId,
@@ -21,6 +14,13 @@ class GenreTrend extends Equatable {
     required this.averageRating,
     this.calculatedAt,
   });
+  final int genreId;
+  final String genreName;
+  final double trendScore; // How trending this genre is (0-100)
+  final double growthRate; // Percentage growth in popularity
+  final int gameCount; // Number of games in this genre
+  final double averageRating; // Average rating of games in genre
+  final DateTime? calculatedAt;
 
   bool get isRising => growthRate > 10.0;
   bool get isHot => trendScore > 75.0;
@@ -29,7 +29,7 @@ class GenreTrend extends Equatable {
   @override
   List<Object?> get props => [
     genreId, genreName, trendScore, growthRate,
-    gameCount, averageRating, calculatedAt
+    gameCount, averageRating, calculatedAt,
   ];
 }
 

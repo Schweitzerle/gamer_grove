@@ -3,15 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
 
 class UserCollectionSummary extends Equatable {
-  final UserCollectionType type;
-  final int totalCount;
-  final double? averageRating; // User's average rating for rated games
-  final double? averageGameRating; // Average game rating in collection
-  final Map<String, int> genreBreakdown; // Genre name -> count
-  final Map<String, int> platformBreakdown; // Platform name -> count
-  final Map<int, int> yearBreakdown; // Year -> count
-  final int recentlyAddedCount; // Added in last 30 days
-  final DateTime? lastUpdated;
 
   const UserCollectionSummary({
     required this.type,
@@ -24,6 +15,15 @@ class UserCollectionSummary extends Equatable {
     this.recentlyAddedCount = 0,
     this.lastUpdated,
   });
+  final UserCollectionType type;
+  final int totalCount;
+  final double? averageRating; // User's average rating for rated games
+  final double? averageGameRating; // Average game rating in collection
+  final Map<String, int> genreBreakdown; // Genre name -> count
+  final Map<String, int> platformBreakdown; // Platform name -> count
+  final Map<int, int> yearBreakdown; // Year -> count
+  final int recentlyAddedCount; // Added in last 30 days
+  final DateTime? lastUpdated;
 
   // Helper getters
   String get mostPlayedGenre =>

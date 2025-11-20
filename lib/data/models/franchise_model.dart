@@ -1,7 +1,7 @@
 // lib/data/models/franchise_model.dart
 import 'package:gamer_grove/core/utils/json_helpers.dart';
 
-import '../../domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
 
 class FranchiseModel extends Franchise {
   const FranchiseModel({
@@ -13,7 +13,7 @@ class FranchiseModel extends Franchise {
     super.gameIds = const [],
     super.createdAt,
     super.updatedAt,
-    super.games
+    super.games,
   });
 
   factory FranchiseModel.fromJson(Map<String, dynamic> json) {
@@ -26,7 +26,7 @@ class FranchiseModel extends Franchise {
       gameIds: _parseIdList(json['games']),
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
-      games: JsonHelpers.extractGameList(json['games'])
+      games: JsonHelpers.extractGameList(json['games']),
     );
   }
 

@@ -1,16 +1,11 @@
 // lib/presentation/widgets/header_section.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../blocs/auth/auth_bloc.dart';
 
 class HeaderSection extends StatelessWidget {
-  final VoidCallback? onSearchPressed;
-  final VoidCallback? onWishlistPressed;
-  final VoidCallback? onSupabaseTestPressed;
-  final VoidCallback? onIGDBTestPressed;
 
   const HeaderSection({
     super.key,
@@ -19,6 +14,10 @@ class HeaderSection extends StatelessWidget {
     this.onSupabaseTestPressed,
     this.onIGDBTestPressed,
   });
+  final VoidCallback? onSearchPressed;
+  final VoidCallback? onWishlistPressed;
+  final VoidCallback? onSupabaseTestPressed;
+  final VoidCallback? onIGDBTestPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +53,10 @@ class HeaderSection extends StatelessWidget {
 }
 
 // Private sub-widgets for better organization
-class _AuthenticatedWelcome extends StatelessWidget {
-  final dynamic user; // Replace with your User model
+class _AuthenticatedWelcome extends StatelessWidget { // Replace with your User model
 
   const _AuthenticatedWelcome({required this.user});
+  final dynamic user;
 
   @override
   Widget build(BuildContext context) {

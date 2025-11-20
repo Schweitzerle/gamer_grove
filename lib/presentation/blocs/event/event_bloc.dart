@@ -5,29 +5,20 @@
 // lib/presentation/blocs/event/event_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
-import '../../../domain/entities/event/event.dart';
-import '../../../domain/entities/search/event_search_filters.dart';
-import '../../../domain/usecases/event/advanced_event_search.dart';
-import '../../../domain/usecases/event/get_complete_event_details.dart';
-import '../../../domain/usecases/event/get_current_events.dart';
-import '../../../domain/usecases/event/get_event_details.dart';
-import '../../../domain/usecases/event/get_events_by_date_range.dart';
-import '../../../domain/usecases/event/get_events_by_games.dart';
-import '../../../domain/usecases/event/get_upcoming_events.dart';
-import '../../../domain/usecases/event/search_events.dart';
-import 'event_event.dart';
-import 'event_state.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
+import 'package:gamer_grove/domain/usecases/event/advanced_event_search.dart';
+import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
+import 'package:gamer_grove/domain/usecases/event/get_current_events.dart';
+import 'package:gamer_grove/domain/usecases/event/get_event_details.dart';
+import 'package:gamer_grove/domain/usecases/event/get_events_by_date_range.dart';
+import 'package:gamer_grove/domain/usecases/event/get_events_by_games.dart';
+import 'package:gamer_grove/domain/usecases/event/get_upcoming_events.dart';
+import 'package:gamer_grove/domain/usecases/event/search_events.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
 
 class EventBloc extends Bloc<EventEvent, EventState> {
-  final GetEventDetails getEventDetails;
-  final GetCurrentEvents getCurrentEvents;
-  final GetUpcomingEvents getUpcomingEvents;
-  final SearchEvents searchEvents;
-  final GetEventsByDateRange getEventsByDateRange;
-  final GetEventsByGames getEventsByGames;
-  final GetCompleteEventDetails getCompleteEventDetails;
-  final AdvancedEventSearch advancedEventSearch;
-  final GameEnrichmentService enrichmentService;
 
   EventBloc({
     required this.getEventDetails,
@@ -50,11 +41,20 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<ClearEventsEvent>(_onClearEvents);
     on<GetEventDetailsWithUserDataEvent>(_onGetEventDetailsWithUserData);
     on<GetCompleteEventDetailsWithUserDataEvent>(
-        _onGetCompleteEventDetailsWithUserData);
+        _onGetCompleteEventDetailsWithUserData,);
     on<SearchEventsWithFiltersEvent>(_onSearchEventsWithFilters);
     on<LoadMoreEventsEvent>(_onLoadMoreEvents);
     on<ClearEventSearchEvent>(_onClearEventSearch);
   }
+  final GetEventDetails getEventDetails;
+  final GetCurrentEvents getCurrentEvents;
+  final GetUpcomingEvents getUpcomingEvents;
+  final SearchEvents searchEvents;
+  final GetEventsByDateRange getEventsByDateRange;
+  final GetEventsByGames getEventsByGames;
+  final GetCompleteEventDetails getCompleteEventDetails;
+  final AdvancedEventSearch advancedEventSearch;
+  final GameEnrichmentService enrichmentService;
 
   Future<void> _onGetEventDetails(
     GetEventDetailsEvent event,
@@ -119,7 +119,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       (events) => emit(EventsSearchLoaded(
         events: events,
         query: event.query,
-      )),
+      ),),
     );
   }
 
@@ -143,7 +143,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         events: events,
         startDate: event.startDate,
         endDate: event.endDate,
-      )),
+      ),),
     );
   }
 
@@ -162,7 +162,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       (events) => emit(EventsByGamesLoaded(
         events: events,
         gameIds: event.gameIds,
-      )),
+      ),),
     );
   }
 
@@ -248,14 +248,14 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         if (event.userId != null && eventDetails.event.games.isNotEmpty) {
           try {
             final enrichedEvent = await _enrichEventWithUserData(
-                eventDetails.event, event.userId!);
+                eventDetails.event, event.userId!,);
             final enrichedEventDetails =
                 eventDetails.copyWith(event: enrichedEvent);
             emit(
-                CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails));
+                CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails),);
           } catch (e) {
             emit(CompleteEventDetailsLoaded(
-                eventDetails: eventDetails)); // Fallback
+                eventDetails: eventDetails,),); // Fallback
           }
         } else {
           emit(CompleteEventDetailsLoaded(eventDetails: eventDetails));
@@ -278,8 +278,6 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       AdvancedEventSearchParams(
         textQuery: event.query.trim().isEmpty ? null : event.query.trim(),
         filters: event.filters as EventSearchFilters,
-        limit: 20,
-        offset: 0,
       ),
     );
 
@@ -289,7 +287,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         events: events,
         query: event.query,
         hasReachedMax: events.length < 20,
-      )),
+      ),),
     );
   }
 
@@ -309,7 +307,6 @@ class EventBloc extends Bloc<EventEvent, EventState> {
             ? null
             : currentState.query.trim(),
         filters: const EventSearchFilters(),
-        limit: 20,
         offset: currentState.events.length,
       ),
     );
@@ -318,15 +315,14 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       (failure) => emit(EventError(
         message: failure.message,
         events: currentState.events,
-      )),
+      ),),
       (newEvents) {
         final hasReachedMax = newEvents.length < 20;
         emit(EventSearchLoaded(
           events: List.of(currentState.events)..addAll(newEvents),
           query: currentState.query,
           hasReachedMax: hasReachedMax,
-          isLoadingMore: false,
-        ));
+        ),);
       },
     );
   }

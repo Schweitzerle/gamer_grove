@@ -5,39 +5,39 @@
 // ZUSÄTZLICHE EVENTS FÜR SEARCH
 // ==========================================
 
-import '../../../domain/entities/search/search_filters.dart';
-import 'game_bloc.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 
 class SearchGamesWithFiltersEvent extends GameEvent {
-  final String query;
-  final SearchFilters filters;
 
   const SearchGamesWithFiltersEvent({
     required this.query,
     required this.filters,
   });
+  final String query;
+  final SearchFilters filters;
 
   @override
   List<Object> get props => [query, filters];
 }
 
 class LoadRecentSearchesEvent extends GameEvent {
-  final String userId;
 
   const LoadRecentSearchesEvent({required this.userId});
+  final String userId;
 
   @override
   List<Object> get props => [userId];
 }
 
 class SaveSearchQueryEvent extends GameEvent {
-  final String userId;
-  final String query;
 
   const SaveSearchQueryEvent({
     required this.userId,
     required this.query,
   });
+  final String userId;
+  final String query;
 
   @override
   List<Object> get props => [userId, query];
@@ -48,9 +48,9 @@ class SaveSearchQueryEvent extends GameEvent {
 // ==========================================
 
 class RecentSearchesLoaded extends GameState {
-  final List<String> queries;
 
   const RecentSearchesLoaded({required this.queries});
+  final List<String> queries;
 
   @override
   List<Object> get props => [queries];
@@ -60,9 +60,9 @@ class SearchQuerySaved extends GameState {}
 
 // GameSearchError gibt es bereits als GameError, aber für Konsistenz:
 class GameSearchError extends GameState {
-  final String message;
 
   const GameSearchError({required this.message});
+  final String message;
 
   @override
   List<Object> get props => [message];

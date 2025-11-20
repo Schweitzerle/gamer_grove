@@ -1,9 +1,9 @@
 // lib/data/datasources/remote/igdb/models/platform/platform_query_presets.dart
 
-import '../igdb_query.dart';
-import '../igdb_filters.dart';
-import 'platform_field_sets.dart';
-import 'platform_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/platform/platform_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/platform/platform_filters.dart';
 
 /// Pre-configured query presets for common platform queries.
 class PlatformQueryPresets {

@@ -5,27 +5,26 @@
 // lib/presentation/pages/character_detail/character_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/widgets/error_widget.dart';
-import '../../../domain/entities/character/character.dart';
-import '../../../injection_container.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/character/character_bloc.dart';
-import '../../blocs/character/character_event.dart';
-import '../../blocs/character/character_state.dart';
-import '../../widgets/character_laoding_steps.dart';
-import '../../widgets/live_loading_progress.dart' hide CharacterLoadingSteps;
-import 'character_detail_screen.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
+import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
+import 'package:gamer_grove/presentation/pages/character/character_detail_screen.dart';
+import 'package:gamer_grove/presentation/widgets/character_laoding_steps.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart' hide CharacterLoadingSteps;
 
-class CharacterDetailPage extends StatelessWidget {
-  final int characterId;
-  final Character? character; // Optional pre-loaded character
+class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded character
 
   const CharacterDetailPage({
-    super.key,
-    required this.characterId,
+    required this.characterId, super.key,
     this.character,
   });
+  final int characterId;
+  final Character? character;
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +38,7 @@ class CharacterDetailPage extends StatelessWidget {
             authState is AuthAuthenticated ? authState.user.id : null;
         bloc.add(GetCharacterDetailsEvent(
             characterId: characterId,
-            includeGames: true, // 🆕 Explicitly set to true
-            userId: userId));
+            userId: userId,),);
         return bloc;
       },
       child: BlocBuilder<CharacterBloc, CharacterState>(
@@ -71,7 +69,7 @@ class CharacterDetailPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -102,7 +100,6 @@ class CharacterDetailPage extends StatelessWidget {
       context.read<CharacterBloc>().add(
             GetCharacterDetailsEvent(
               characterId: characterId,
-              includeGames: true,
               userId: userId,
             ),
           );
@@ -119,7 +116,7 @@ class CharacterDetailPage extends StatelessWidget {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),

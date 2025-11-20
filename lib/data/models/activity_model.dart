@@ -5,31 +5,19 @@
 /// Handles JSON serialization/deserialization for user activity feed.
 library;
 
-import '../../domain/entities/user/activity.dart';
+import 'package:gamer_grove/domain/entities/user/activity.dart';
 
 /// Activity model for data layer.
 ///
 /// Represents user activity from Supabase database with JSON conversion.
 class ActivityModel {
-  final String id;
-  final String userId;
-  final String activityType;
-  final int? gameId;
-  final Map<String, dynamic>? metadata;
-  final bool isPublic;
-  final DateTime createdAt;
-
-  // Optional: nested user data from join
-  final Map<String, dynamic>? userData;
 
   const ActivityModel({
     required this.id,
     required this.userId,
     required this.activityType,
-    this.gameId,
+    required this.isPublic, required this.createdAt, this.gameId,
     this.metadata,
-    required this.isPublic,
-    required this.createdAt,
     this.userData,
   });
 
@@ -59,6 +47,36 @@ class ActivityModel {
       userData: json['users'] as Map<String, dynamic>?,
     );
   }
+
+  /// Creates an ActivityModel from domain Activity entity.
+  factory ActivityModel.fromEntity(Activity activity) {
+    return ActivityModel(
+      id: activity.id,
+      userId: activity.userId,
+      activityType: _mapActivityTypeToString(activity.activityType),
+      gameId: activity.gameId,
+      metadata: activity.metadata,
+      isPublic: activity.isPublic,
+      createdAt: activity.createdAt,
+      userData: activity.username != null
+          ? {
+              'username': activity.username,
+              'avatar_url': activity.userAvatarUrl,
+              'display_name': activity.userDisplayName,
+            }
+          : null,
+    );
+  }
+  final String id;
+  final String userId;
+  final String activityType;
+  final int? gameId;
+  final Map<String, dynamic>? metadata;
+  final bool isPublic;
+  final DateTime createdAt;
+
+  // Optional: nested user data from join
+  final Map<String, dynamic>? userData;
 
   /// Converts ActivityModel to JSON.
   Map<String, dynamic> toJson() {
@@ -92,26 +110,6 @@ class ActivityModel {
       username: userData?['username'] as String?,
       userAvatarUrl: userData?['avatar_url'] as String?,
       userDisplayName: userData?['display_name'] as String?,
-    );
-  }
-
-  /// Creates an ActivityModel from domain Activity entity.
-  factory ActivityModel.fromEntity(Activity activity) {
-    return ActivityModel(
-      id: activity.id,
-      userId: activity.userId,
-      activityType: _mapActivityTypeToString(activity.activityType),
-      gameId: activity.gameId,
-      metadata: activity.metadata,
-      isPublic: activity.isPublic,
-      createdAt: activity.createdAt,
-      userData: activity.username != null
-          ? {
-              'username': activity.username,
-              'avatar_url': activity.userAvatarUrl,
-              'display_name': activity.userDisplayName,
-            }
-          : null,
     );
   }
 

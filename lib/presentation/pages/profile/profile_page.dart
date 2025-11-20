@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
@@ -9,8 +10,6 @@ import 'package:gamer_grove/presentation/pages/followers_following/followers_fol
 import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_statistics_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
-
-import '../../blocs/auth/auth_bloc.dart';
 
 /// Profile page showing the current user's profile
 class ProfilePage extends StatelessWidget {
@@ -59,7 +58,7 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.logout),
                       onPressed: () {
-                        context.read<AuthBloc>().add(SignOutEvent());
+                        context.read<AuthBloc>().add(const SignOutEvent());
                       },
                     ),
                   ],
@@ -132,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                           );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Icon(
                             Icons.edit,
                             color: theme.colorScheme.onSecondary,

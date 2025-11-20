@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/user_activity.dart';
 
 class ActivityFeedItem extends StatelessWidget {
-  final UserActivity activity;
 
-  const ActivityFeedItem({super.key, required this.activity});
+  const ActivityFeedItem({required this.activity, super.key});
+  final UserActivity activity;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class ActivityFeedItem extends StatelessWidget {
             ),
             if (activity.gameId != null)
               Padding(
-                padding: const EdgeInsets.only(top: 8.0),
+                padding: const EdgeInsets.only(top: 8),
                 child: Text('Game ID: ${activity.gameId}'),
               ),
             const SizedBox(height: 8),

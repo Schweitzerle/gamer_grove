@@ -1,7 +1,7 @@
 // lib/data/models/external_game_model.dart
 
-import '../../../domain/entities/externalGame/external_game.dart';
-import '../../../core/utils/json_helpers.dart';
+import 'package:gamer_grove/core/utils/json_helpers.dart';
+import 'package:gamer_grove/domain/entities/externalGame/external_game.dart';
 
 class ExternalGameModel extends ExternalGame {
   const ExternalGameModel({
@@ -21,6 +21,11 @@ class ExternalGameModel extends ExternalGame {
     super.categoryEnum,
     super.mediaEnum,
   });
+
+  /// Alternative constructor that can handle expanded objects and store them
+  factory ExternalGameModel.fromJsonWithExpanded(Map<String, dynamic> json) {
+    return ExternalGameModelExpanded.fromJson(json);
+  }
 
   factory ExternalGameModel.fromJson(Map<String, dynamic> json) {
     final sourceId = JsonHelpers.extractId(json['external_game_source']);
@@ -110,21 +115,10 @@ class ExternalGameModel extends ExternalGame {
     // For now, just return null since we only store the ID
     return null;
   }
-
-  /// Alternative constructor that can handle expanded objects and store them
-  factory ExternalGameModel.fromJsonWithExpanded(Map<String, dynamic> json) {
-    return ExternalGameModelExpanded.fromJson(json);
-  }
 }
 
 /// Extended version that can store expanded reference data
 class ExternalGameModelExpanded extends ExternalGameModel {
-  @override
-  final String? platformName;
-  @override
-  final String? sourceName;
-  @override
-  final String? formatName;
 
   const ExternalGameModelExpanded({
     required super.id,
@@ -176,4 +170,10 @@ class ExternalGameModelExpanded extends ExternalGameModel {
           JsonHelpers.extractNested<String>(json, 'game_release_format.format'),
     );
   }
+  @override
+  final String? platformName;
+  @override
+  final String? sourceName;
+  @override
+  final String? formatName;
 }

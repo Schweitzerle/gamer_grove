@@ -5,18 +5,17 @@
 // 1. CONTENT & DLCS SECTION
 // lib/presentation/pages/game_detail/widgets/content_dlc_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/navigations.dart';
-import '../../../../domain/entities/game/game.dart';
 
 class ContentDLCSection extends StatefulWidget {
-  final Game game;
 
   const ContentDLCSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   State<ContentDLCSection> createState() => _ContentDLCSectionState();
@@ -198,22 +197,18 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
 
   // Preview widget for collapsed state
   Widget _buildPreview(
-      BuildContext context, List<ContentTab> contentTabs, int totalGames) {
+      BuildContext context, List<ContentTab> contentTabs, int totalGames,) {
     final tabNames = contentTabs.map((tab) {
       String icon;
       switch (tab.type) {
         case ContentType.dlc:
           icon = '⬇️';
-          break;
         case ContentType.expansion:
           icon = '📦';
-          break;
         case ContentType.standaloneExpansion:
           icon = '🚀';
-          break;
         case ContentType.bundle:
           icon = '📋';
-          break;
       }
       return '$icon ${tab.title}';
     }).toList();
@@ -270,7 +265,7 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
         games: widget.game.dlcs,
         icon: Icons.download,
         color: Colors.green,
-      ));
+      ),);
     }
 
     // Expansions Tab
@@ -281,7 +276,7 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
         games: widget.game.expansions,
         icon: Icons.expand_more,
         color: Colors.teal,
-      ));
+      ),);
     }
 
     // Standalone Expansions Tab
@@ -292,7 +287,7 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
         games: widget.game.standaloneExpansions,
         icon: Icons.launch,
         color: Colors.indigo,
-      ));
+      ),);
     }
 
     // Bundles Tab
@@ -303,7 +298,7 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
         games: widget.game.bundles,
         icon: Icons.inventory,
         color: Colors.orange,
-      ));
+      ),);
     }
 
     return tabs;
@@ -315,7 +310,6 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: 1,
           ),
         ),
       ),
@@ -333,12 +327,12 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
                         children: [
                           Text(tab.title, maxLines: 1),
                           Text('(${tab.games.length})',
-                              style: TextStyle(fontSize: 10, color: tab.color)),
+                              style: TextStyle(fontSize: 10, color: tab.color),),
                         ],
                       ),
                     ],
                   ),
-                ))
+                ),)
             .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -364,7 +358,7 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
       padding: const EdgeInsets.only(
           left: AppConstants.paddingMedium,
           right: AppConstants.paddingMedium,
-          top: AppConstants.paddingSmall),
+          top: AppConstants.paddingSmall,),
       child: Row(
         children: [
           Container(
@@ -424,7 +418,6 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: false,
           ),
         );
       },
@@ -435,20 +428,16 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
     switch (tab.type) {
       case ContentType.dlc:
         Navigations.navigateToGameDLCs(context, widget.game.name, tab.games);
-        break;
       case ContentType.expansion:
         Navigations.navigateToGameExpansions(
-            context, widget.game.name, tab.games);
-        break;
+            context, widget.game.name, tab.games,);
       default:
         Navigations.navigateToLocalAllGames(
           context,
           title: '${widget.game.name} ${tab.displayTitle}',
           subtitle: tab.subtitle,
           games: tab.games,
-          blurRated: false,
         );
-        break;
     }
   }
 }
@@ -458,12 +447,11 @@ class _ContentDLCSectionState extends State<ContentDLCSection> {
 // ==========================================
 
 class VersionsRemakesSection extends StatefulWidget {
-  final Game game;
 
   const VersionsRemakesSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   State<VersionsRemakesSection> createState() => _VersionsRemakesSectionState();
@@ -645,25 +633,20 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
 
   // Preview widget for collapsed state
   Widget _buildPreview(
-      BuildContext context, List<VersionTab> versionTabs, int totalGames) {
+      BuildContext context, List<VersionTab> versionTabs, int totalGames,) {
     final tabNames = versionTabs.map((tab) {
       String icon;
       switch (tab.type) {
         case VersionType.remake:
           icon = '🔄';
-          break;
         case VersionType.remaster:
           icon = '✨';
-          break;
         case VersionType.port:
           icon = '📱';
-          break;
         case VersionType.expandedGame:
           icon = '🔍';
-          break;
         case VersionType.versionParent:
           icon = '📜';
-          break;
       }
       return '$icon ${tab.title}';
     }).toList();
@@ -720,7 +703,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         games: widget.game.remakes,
         icon: Icons.refresh,
         color: Colors.teal,
-      ));
+      ),);
     }
 
     // Remasters Tab
@@ -731,7 +714,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         games: widget.game.remasters,
         icon: Icons.auto_fix_high,
         color: Colors.cyan,
-      ));
+      ),);
     }
 
     // Ports Tab
@@ -742,7 +725,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         games: widget.game.ports,
         icon: Icons.devices,
         color: Colors.brown,
-      ));
+      ),);
     }
 
     // Expanded Games Tab
@@ -753,7 +736,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         games: widget.game.expandedGames,
         icon: Icons.zoom_out_map,
         color: Colors.deepOrange,
-      ));
+      ),);
     }
 
     // Version Parent (falls aktuelles Spiel eine Version ist)
@@ -764,7 +747,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         games: [widget.game.versionParent!],
         icon: Icons.source,
         color: Colors.indigo,
-      ));
+      ),);
     }
 
     return tabs;
@@ -776,7 +759,6 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: 1,
           ),
         ),
       ),
@@ -794,12 +776,12 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
                         children: [
                           Text(tab.title, maxLines: 1),
                           Text('(${tab.games.length})',
-                              style: TextStyle(fontSize: 10, color: tab.color)),
+                              style: TextStyle(fontSize: 10, color: tab.color),),
                         ],
                       ),
                     ],
                   ),
-                ))
+                ),)
             .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -825,7 +807,7 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
       padding: const EdgeInsets.only(
           left: AppConstants.paddingMedium,
           right: AppConstants.paddingMedium,
-          top: AppConstants.paddingSmall),
+          top: AppConstants.paddingSmall,),
       child: Row(
         children: [
           Container(
@@ -885,7 +867,6 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: false,
           ),
         );
       },
@@ -898,7 +879,6 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
       title: '${widget.game.name} ${tab.displayTitle}',
       subtitle: tab.subtitle,
       games: tab.games,
-      blurRated: false,
     );
   }
 }
@@ -908,12 +888,11 @@ class _VersionsRemakesSectionState extends State<VersionsRemakesSection> {
 // ==========================================
 
 class SimilarRelatedSection extends StatefulWidget {
-  final Game game;
 
   const SimilarRelatedSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   State<SimilarRelatedSection> createState() => _SimilarRelatedSectionState();
@@ -1095,19 +1074,16 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
 
   // Preview widget for collapsed state
   Widget _buildPreview(
-      BuildContext context, List<RelatedTab> relatedTabs, int totalGames) {
+      BuildContext context, List<RelatedTab> relatedTabs, int totalGames,) {
     final tabNames = relatedTabs.map((tab) {
       String icon;
       switch (tab.type) {
         case RelatedType.similar:
           icon = '💡';
-          break;
         case RelatedType.fork:
           icon = '🔀';
-          break;
         case RelatedType.parentGame:
           icon = '🏠';
-          break;
       }
       return '$icon ${tab.title}';
     }).toList();
@@ -1164,7 +1140,7 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
         games: widget.game.similarGames,
         icon: Icons.lightbulb_outline,
         color: Colors.blue,
-      ));
+      ),);
     }
 
     // Forks Tab
@@ -1175,7 +1151,7 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
         games: widget.game.forks,
         icon: Icons.call_split,
         color: Colors.red,
-      ));
+      ),);
     }
 
     // Parent Game (falls aktuelles Spiel ein DLC/Expansion ist)
@@ -1186,7 +1162,7 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
         games: [widget.game.parentGame!],
         icon: Icons.home,
         color: Colors.green,
-      ));
+      ),);
     }
 
     return tabs;
@@ -1198,7 +1174,6 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: 1,
           ),
         ),
       ),
@@ -1216,12 +1191,12 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
                         children: [
                           Text(tab.title, maxLines: 1),
                           Text('(${tab.games.length})',
-                              style: TextStyle(fontSize: 10, color: tab.color)),
+                              style: TextStyle(fontSize: 10, color: tab.color),),
                         ],
                       ),
                     ],
                   ),
-                ))
+                ),)
             .toList(),
         labelColor: Theme.of(context).colorScheme.primary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -1247,7 +1222,7 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
       padding: const EdgeInsets.only(
           left: AppConstants.paddingMedium,
           right: AppConstants.paddingMedium,
-          top: AppConstants.paddingSmall),
+          top: AppConstants.paddingSmall,),
       child: Row(
         children: [
           Container(
@@ -1307,7 +1282,6 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
           child: GameCard(
             game: game,
             onTap: () => Navigations.navigateToGameDetail(game.id, context),
-            blurRated: false,
           ),
         );
       },
@@ -1323,7 +1297,6 @@ class _SimilarRelatedSectionState extends State<SimilarRelatedSection> {
         title: '${widget.game.name} ${tab.displayTitle}',
         subtitle: tab.subtitle,
         games: tab.games,
-        blurRated: false,
       );
     }
   }
@@ -1340,11 +1313,6 @@ enum VersionType { remake, remaster, port, expandedGame, versionParent }
 enum RelatedType { similar, fork, parentGame }
 
 class ContentTab {
-  final ContentType type;
-  final String title;
-  final List<Game> games;
-  final IconData icon;
-  final Color color;
 
   ContentTab({
     required this.type,
@@ -1353,6 +1321,11 @@ class ContentTab {
     required this.icon,
     required this.color,
   });
+  final ContentType type;
+  final String title;
+  final List<Game> games;
+  final IconData icon;
+  final Color color;
 
   String get displayTitle {
     switch (type) {
@@ -1382,11 +1355,6 @@ class ContentTab {
 }
 
 class VersionTab {
-  final VersionType type;
-  final String title;
-  final List<Game> games;
-  final IconData icon;
-  final Color color;
 
   VersionTab({
     required this.type,
@@ -1395,6 +1363,11 @@ class VersionTab {
     required this.icon,
     required this.color,
   });
+  final VersionType type;
+  final String title;
+  final List<Game> games;
+  final IconData icon;
+  final Color color;
 
   String get displayTitle {
     switch (type) {
@@ -1428,11 +1401,6 @@ class VersionTab {
 }
 
 class RelatedTab {
-  final RelatedType type;
-  final String title;
-  final List<Game> games;
-  final IconData icon;
-  final Color color;
 
   RelatedTab({
     required this.type,
@@ -1441,6 +1409,11 @@ class RelatedTab {
     required this.icon,
     required this.color,
   });
+  final RelatedType type;
+  final String title;
+  final List<Game> games;
+  final IconData icon;
+  final Color color;
 
   String get displayTitle {
     switch (type) {

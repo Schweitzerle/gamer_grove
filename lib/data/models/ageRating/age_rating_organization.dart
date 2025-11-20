@@ -1,6 +1,6 @@
 // ===== UPDATED AGE RATING ORGANIZATION MODEL =====
 // lib/data/models/ageRating/age_rating_organization_model.dart
-import '../../../domain/entities/ageRating/age_rating_organization.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingOrganizationModel extends AgeRatingOrganization {
   const AgeRatingOrganizationModel({

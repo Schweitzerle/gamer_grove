@@ -21,19 +21,19 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class ResetPasswordUseCase implements UseCase<void, ResetPasswordParams> {
-  final AuthRepository repository;
 
   ResetPasswordUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, void>> call(ResetPasswordParams params) async {
     if (!_isValidEmail(params.email)) {
       return const Left(ValidationFailure(
         message: 'Invalid email format',
-      ));
+      ),);
     }
 
-    return await repository.resetPassword(email: params.email);
+    return repository.resetPassword(email: params.email);
   }
 
   /// Validates email format using a simple regex pattern.
@@ -46,9 +46,9 @@ class ResetPasswordUseCase implements UseCase<void, ResetPasswordParams> {
 }
 
 class ResetPasswordParams extends Equatable {
-  final String email;
 
   const ResetPasswordParams({required this.email});
+  final String email;
 
   @override
   List<Object> get props => [email];

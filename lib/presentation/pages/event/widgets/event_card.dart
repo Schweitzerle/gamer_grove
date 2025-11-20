@@ -4,24 +4,17 @@
 
 // lib/presentation/widgets/event_card.dart
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/utils/date_formatter.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/utils/date_formatter.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/event/event.dart';
 
 class EventCard extends StatelessWidget {
-  final Event event;
-  final VoidCallback? onTap;
-  final bool showStatus;
-  final bool showGamesCount;
-  final bool showFullDescription;
-  final bool showNetworks;
-  final bool compact;
 
   const EventCard({
-    super.key,
-    required this.event,
+    required this.event, super.key,
     this.onTap,
     this.showStatus = true,
     this.showGamesCount = false,
@@ -29,6 +22,13 @@ class EventCard extends StatelessWidget {
     this.showNetworks = true,
     this.compact = false,
   });
+  final Event event;
+  final VoidCallback? onTap;
+  final bool showStatus;
+  final bool showGamesCount;
+  final bool showFullDescription;
+  final bool showNetworks;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class EventCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 4),
+                          horizontal: 16, vertical: 4,),
                       child: _buildEventContent(context),
                     ),
                   ),

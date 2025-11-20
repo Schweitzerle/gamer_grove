@@ -2,13 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CollectionMembership extends Equatable {
-  final int id;
-  final String checksum;
-  final int? collectionId;
-  final int? gameId;
-  final int? typeId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const CollectionMembership({
     required this.id,
@@ -19,6 +12,13 @@ class CollectionMembership extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final int? collectionId;
+  final int? gameId;
+  final int? typeId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   @override
   List<Object?> get props => [

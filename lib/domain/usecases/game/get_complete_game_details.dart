@@ -4,30 +4,30 @@
 
 // lib/domain/usecases/game/get_complete_game_details.dart
 import 'package:dartz/dartz.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetCompleteGameDetails implements UseCase<Game, GetCompleteGameDetailsParams> {
-  final GameRepository repository;
 
   GetCompleteGameDetails(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, Game>> call(GetCompleteGameDetailsParams params) async {
-    return await repository.getCompleteGameDetails(params.gameId, params.userId);
+    return repository.getCompleteGameDetails(params.gameId, params.userId);
   }
 }
 
 class GetCompleteGameDetailsParams {
-  final int gameId;
-  final String? userId;
 
   GetCompleteGameDetailsParams({
     required this.gameId,
     this.userId,
   });
+  final int gameId;
+  final String? userId;
 }
 
 

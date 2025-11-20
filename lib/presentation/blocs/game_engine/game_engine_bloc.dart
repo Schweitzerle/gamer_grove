@@ -5,19 +5,12 @@
 // lib/presentation/blocs/game_engine/game_engine_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
-import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/gameEngine/get_game_engine_with_games.dart';
-import 'game_engine_event.dart';
-import 'game_engine_state.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_event.dart';
+import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dart';
 
 class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
-  final GetGameEngineWithGames getGameEngineWithGames;
-  final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
-  final GameEnrichmentService enrichmentService;
-
-  // Pagination constants
-  static const int _pageSize = 20;
 
   GameEngineBloc({
     required this.getGameEngineWithGames,
@@ -31,6 +24,12 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     on<LoadMoreGameEngineGamesEvent>(_onLoadMoreGameEngineGames);
     on<ChangeGameEngineSortEvent>(_onChangeGameEngineSort);
   }
+  final GetGameEngineWithGames getGameEngineWithGames;
+  final GameRepository gameRepository; // 🆕 Repository für paginierte Anfragen
+  final GameEnrichmentService enrichmentService;
+
+  // Pagination constants
+  static const int _pageSize = 20;
 
   // ==========================================
   // EXISTING EVENT HANDLERS
@@ -65,18 +64,18 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
             emit(GameEngineDetailsLoaded(
               gameEngine: gameEngineWithGames.gameEngine,
               games: enrichedGames,
-            ));
+            ),);
           } catch (e) {
             emit(GameEngineDetailsLoaded(
               gameEngine: gameEngineWithGames.gameEngine,
               games: gameEngineWithGames.games,
-            ));
+            ),);
           }
         } else {
           emit(GameEngineDetailsLoaded(
             gameEngine: gameEngineWithGames.gameEngine,
             games: gameEngineWithGames.games,
-          ));
+          ),);
         }
       },
     );
@@ -102,13 +101,11 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     emit(GameEngineGamesLoading(
       gameEngineId: event.gameEngineId,
       gameEngineName: event.gameEngineName,
-    ));
+    ),);
 
     // Fetch first page
     final result = await gameRepository.getGamesByGameEngine(
       gameEngineIds: [event.gameEngineId],
-      limit: _pageSize,
-      offset: 0,
       sortBy: event.sortBy,
       sortOrder: event.sortOrder,
     );
@@ -119,12 +116,12 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
           gameEngineId: event.gameEngineId,
           gameEngineName: event.gameEngineName,
           message: failure.message,
-        ));
+        ),);
       },
       (games) async {
 
         // Enrich games if userId is provided
-        List<Game> enrichedGames = games;
+        var enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
           try {
             enrichedGames = await enrichmentService.enrichGames(
@@ -143,11 +140,10 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
           gameEngineName: event.gameEngineName,
           games: enrichedGames,
           hasMore: hasMore,
-          currentPage: 0,
           sortBy: event.sortBy,
           sortOrder: event.sortOrder,
           userId: event.userId, // 🆕 Store userId in state
-        ));
+        ),);
       },
     );
   }
@@ -176,7 +172,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     // Fetch next page
     final result = await gameRepository.getGamesByGameEngine(
       gameEngineIds: [currentState.gameEngineId],
-      limit: _pageSize,
       offset: offset,
       sortBy: currentState.sortBy,
       sortOrder: currentState.sortOrder,
@@ -190,7 +185,7 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
       (newGames) async {
 
         // Enrich new games if userId is available
-        List<Game> enrichedNewGames = newGames;
+        var enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
           try {
             enrichedNewGames = await enrichmentService.enrichGames(
@@ -213,9 +208,8 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
           currentPage: nextPage,
           sortBy: currentState.sortBy,
           sortOrder: currentState.sortOrder,
-          isLoadingMore: false,
           userId: currentState.userId, // 🆕 Keep userId
-        ));
+        ),);
       },
     );
   }
@@ -234,13 +228,11 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     emit(GameEngineGamesLoading(
       gameEngineId: currentState.gameEngineId,
       gameEngineName: currentState.gameEngineName,
-    ));
+    ),);
 
     // Fetch first page with new sort
     final result = await gameRepository.getGamesByGameEngine(
       gameEngineIds: [currentState.gameEngineId],
-      limit: _pageSize,
-      offset: 0,
       sortBy: event.sortBy,
       sortOrder: event.sortOrder,
     );
@@ -251,12 +243,12 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
           gameEngineId: currentState.gameEngineId,
           gameEngineName: currentState.gameEngineName,
           message: failure.message,
-        ));
+        ),);
       },
       (games) async {
 
         // 🆕 Enrich games if userId is available
-        List<Game> enrichedGames = games;
+        var enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
           try {
             enrichedGames = await enrichmentService.enrichGames(
@@ -275,11 +267,10 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
           gameEngineName: currentState.gameEngineName,
           games: enrichedGames, // 🆕 Use enriched games
           hasMore: hasMore,
-          currentPage: 0,
           sortBy: event.sortBy,
           sortOrder: event.sortOrder,
           userId: currentState.userId, // 🆕 Keep userId
-        ));
+        ),);
       },
     );
   }

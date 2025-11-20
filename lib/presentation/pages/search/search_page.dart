@@ -1,46 +1,47 @@
 // presentation/pages/search/search_page.dart
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/input_validator.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_mode.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
 import 'package:gamer_grove/domain/entities/keyword.dart';
 import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_extensions.dart'; // For SearchGamesWithFiltersEvent
+import 'package:gamer_grove/presentation/widgets/filter_bottom_sheet.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import '../../../injection_container.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/input_validator.dart';
-import '../../../domain/entities/search/search_filters.dart';
-import '../../../domain/entities/company/company.dart';
-import '../../../domain/entities/game/game_engine.dart';
-import '../../../domain/entities/franchise.dart';
-import '../../../domain/entities/genre.dart';
-import '../../../domain/entities/platform/platform.dart';
-import '../../../domain/entities/game/game_mode.dart';
-import '../../../domain/entities/player_perspective.dart';
-import '../../../domain/repositories/game_repository.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../../blocs/game/game_extensions.dart'; // For SearchGamesWithFiltersEvent
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import '../../widgets/game_card.dart';
-import '../../widgets/game_list_shimmer.dart';
-import '../../widgets/filter_bottom_sheet.dart';
-import '../../../core/widgets/error_widget.dart';
 
 class SearchPage extends StatefulWidget {
-  final SearchFilters? initialFilters;
-  final String? initialTitle;
 
   const SearchPage({
     super.key,
     this.initialFilters,
     this.initialTitle,
   });
+  final SearchFilters? initialFilters;
+  final String? initialTitle;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -221,7 +222,7 @@ class _SearchPageState extends State<SearchPage> {
       _gameBloc.add(SearchGamesWithFiltersEvent(
         query: query.trim(),
         filters: _currentFilters,
-      ));
+      ),);
     } else {
       _gameBloc.add(SearchGamesEvent(query.trim(), userId: _currentUserId));
     }
@@ -382,17 +383,25 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   int _getActiveFilterCount() {
-    int count = 0;
+    var count = 0;
     if (_currentFilters.genreIds.isNotEmpty) count++;
     if (_currentFilters.platformIds.isNotEmpty) count++;
     if (_currentFilters.minTotalRating != null ||
-        _currentFilters.maxTotalRating != null) count++;
+        _currentFilters.maxTotalRating != null) {
+      count++;
+    }
     if (_currentFilters.minUserRating != null ||
-        _currentFilters.maxUserRating != null) count++;
+        _currentFilters.maxUserRating != null) {
+      count++;
+    }
     if (_currentFilters.minAggregatedRating != null ||
-        _currentFilters.maxAggregatedRating != null) count++;
+        _currentFilters.maxAggregatedRating != null) {
+      count++;
+    }
     if (_currentFilters.releaseDateFrom != null ||
-        _currentFilters.releaseDateTo != null) count++;
+        _currentFilters.releaseDateTo != null) {
+      count++;
+    }
     if (_currentFilters.themesIds.isNotEmpty) count++;
     if (_currentFilters.gameModesIds.isNotEmpty) count++;
     if (_currentFilters.playerPerspectiveIds.isNotEmpty) count++;
@@ -577,7 +586,7 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                       if (state.isLoadingMore)
                         Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
+                          padding: const EdgeInsets.only(right: 8),
                           child: SizedBox(
                             width: 16,
                             height: 16,
@@ -696,7 +705,7 @@ class _SearchPageState extends State<SearchPage> {
               spacing: 8,
               runSpacing: 8,
               children: _recentSearches
-                  .map((search) => _buildSearchChip(search))
+                  .map(_buildSearchChip)
                   .toList(),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
@@ -719,7 +728,7 @@ class _SearchPageState extends State<SearchPage> {
               'Elden Ring',
               'God of War',
               'Red Dead Redemption',
-            ].map((search) => _buildPopularSearchChip(search)).toList(),
+            ].map(_buildPopularSearchChip).toList(),
           ),
         ],
       ),
@@ -794,7 +803,7 @@ class _SearchPageState extends State<SearchPage> {
       onRefresh: () async {
         if (_searchController.text.isNotEmpty) {
           _gameBloc.add(
-              SearchGamesEvent(_searchController.text, userId: _currentUserId));
+              SearchGamesEvent(_searchController.text, userId: _currentUserId),);
         }
       },
       child: GridView.builder(
@@ -854,7 +863,6 @@ class _SearchPageState extends State<SearchPage> {
                   BoxShadow(
                     color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 20,
-                    spreadRadius: 0,
                     offset: const Offset(0, 8),
                   ),
                 ],
@@ -922,7 +930,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  void _showFilters() async {
+  Future<void> _showFilters() async {
     final result = await FilterBottomSheet.show(
       context: context,
       currentFilters: _currentFilters,

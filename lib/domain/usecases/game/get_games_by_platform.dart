@@ -3,16 +3,16 @@
 // lib/domain/usecases/game/get_games_by_platform.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/game/game.dart';
-import '../../entities/game/game_sort_options.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGamesByPlatform extends UseCase<List<Game>, GetGamesByPlatformParams> {
-  final GameRepository repository;
 
   GetGamesByPlatform(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Game>>> call(GetGamesByPlatformParams params) async {
@@ -20,7 +20,7 @@ class GetGamesByPlatform extends UseCase<List<Game>, GetGamesByPlatformParams> {
       return const Left(ValidationFailure(message: 'At least one platform ID required'));
     }
 
-    return await repository.getGamesByPlatform(
+    return repository.getGamesByPlatform(
       platformIds: params.platformIds,
       limit: params.limit,
       offset: params.offset,
@@ -31,11 +31,6 @@ class GetGamesByPlatform extends UseCase<List<Game>, GetGamesByPlatformParams> {
 }
 
 class GetGamesByPlatformParams extends Equatable {
-  final List<int> platformIds;
-  final int limit;
-  final int offset;
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
 
   const GetGamesByPlatformParams({
     required this.platformIds,
@@ -44,6 +39,11 @@ class GetGamesByPlatformParams extends Equatable {
     this.sortBy = GameSortBy.popularity,
     this.sortOrder = SortOrder.descending,
   });
+  final List<int> platformIds;
+  final int limit;
+  final int offset;
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
 
   @override
   List<Object> get props => [platformIds, limit, offset, sortBy, sortOrder];

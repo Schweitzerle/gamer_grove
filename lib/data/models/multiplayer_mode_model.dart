@@ -1,5 +1,5 @@
 // lib/data/models/multiplayer_mode_model.dart
-import '../../domain/entities/multiplayer_mode.dart';
+import 'package:gamer_grove/domain/entities/multiplayer_mode.dart';
 
 class MultiplayerModeModel extends MultiplayerMode {
   const MultiplayerModeModel({

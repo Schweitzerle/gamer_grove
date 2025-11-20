@@ -1,9 +1,9 @@
 // lib/presentation/pages/characters/characters_screen.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_filter_bar.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/character/character.dart';
-import 'widgets/character_card.dart';
 
 enum CharacterSortBy {
   nameAZ,
@@ -18,16 +18,14 @@ enum CharacterViewMode {
 }
 
 class CharactersScreen extends StatefulWidget {
+
+  const CharactersScreen({
+    required this.characters, required this.gameTitle, super.key,
+    this.initialCharacter,
+  });
   final List<Character> characters;
   final String gameTitle;
   final Character? initialCharacter;
-
-  const CharactersScreen({
-    super.key,
-    required this.characters,
-    required this.gameTitle,
-    this.initialCharacter,
-  });
 
   @override
   State<CharactersScreen> createState() => _CharactersScreenState();
@@ -364,24 +362,20 @@ class _CharactersScreenState extends State<CharactersScreen> {
       switch (_currentSort) {
         case CharacterSortBy.nameAZ:
           _filteredCharacters.sort((a, b) => a.name.compareTo(b.name));
-          break;
         case CharacterSortBy.nameZA:
           _filteredCharacters.sort((a, b) => b.name.compareTo(a.name));
-          break;
         case CharacterSortBy.mostDescriptions:
           _filteredCharacters.sort((a, b) {
             final aHasDesc = a.description != null ? 1 : 0;
             final bHasDesc = b.description != null ? 1 : 0;
             return bHasDesc.compareTo(aHasDesc);
           });
-          break;
         case CharacterSortBy.leastDescriptions:
           _filteredCharacters.sort((a, b) {
             final aHasDesc = a.description != null ? 1 : 0;
             final bHasDesc = b.description != null ? 1 : 0;
             return aHasDesc.compareTo(bHasDesc);
           });
-          break;
       }
     });
   }

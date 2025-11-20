@@ -1,5 +1,5 @@
 // lib/data/models/artwork_model.dart
-import '../../domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
 
 class ArtworkModel extends Artwork {
   const ArtworkModel({

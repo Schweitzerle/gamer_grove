@@ -3,30 +3,29 @@
 /// Main query file that exports generic base and defines type aliases
 library;
 
-// Export generic base
-export 'base/igdb_query.dart';
-
+import 'package:gamer_grove/data/datasources/remote/igdb/models/base/igdb_query.dart';
 // Import models for type aliases
 import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
 import 'package:gamer_grove/data/models/character/character_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/company/company_model.dart';
+import 'package:gamer_grove/data/models/event/event_model.dart';
+import 'package:gamer_grove/data/models/franchise_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/data/models/game/game_mode_model.dart';
 import 'package:gamer_grove/data/models/game/game_model.dart';
 import 'package:gamer_grove/data/models/game/game_status_model.dart';
 import 'package:gamer_grove/data/models/game/game_type_model.dart';
-import 'package:gamer_grove/data/models/language/lanuage_model.dart';
-import 'package:gamer_grove/data/models/platform/platform_model.dart';
-import 'package:gamer_grove/data/models/company/company_model.dart';
-import 'package:gamer_grove/data/models/event/event_model.dart';
-import 'package:gamer_grove/data/models/game/game_engine_model.dart';
 import 'package:gamer_grove/data/models/genre_model.dart';
-import 'package:gamer_grove/data/models/franchise_model.dart';
-import 'package:gamer_grove/data/models/collection/collection_model.dart';
 import 'package:gamer_grove/data/models/keyword_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
 import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/player_perspective_model.dart';
 import 'package:gamer_grove/data/models/theme_model.dart';
 
-import 'base/igdb_query.dart';
+// Export generic base
+export 'base/igdb_query.dart';
 
 // ============================================================
 // TYPE ALIASES FOR ENTITY-SPECIFIC QUERIES

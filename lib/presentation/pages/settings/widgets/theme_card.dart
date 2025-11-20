@@ -2,20 +2,17 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class ThemeCard extends StatelessWidget {
+
+  const ThemeCard({
+    required this.scheme, required this.isSelected, required this.onSelect, super.key,
+  });
   final FlexScheme scheme;
   final bool isSelected;
   final ValueChanged<FlexScheme> onSelect;
 
-  const ThemeCard({
-    super.key,
-    required this.scheme,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = FlexThemeData.light(scheme: scheme);
+    final theme = FlexThemeData.light(scheme: scheme);
     final colorScheme = theme.colorScheme;
 
     return GestureDetector(

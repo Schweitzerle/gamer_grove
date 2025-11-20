@@ -1,7 +1,7 @@
 // lib/data/models/involved_company_model.dart
-import '../../domain/entities/involved_company.dart';
-import '../../domain/entities/company/company.dart';
-import 'company/company_model.dart';
+import 'package:gamer_grove/data/models/company/company_model.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/involved_company.dart';
 
 class InvolvedCompanyModel extends InvolvedCompany {
   const InvolvedCompanyModel({

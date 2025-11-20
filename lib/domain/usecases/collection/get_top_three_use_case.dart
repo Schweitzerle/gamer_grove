@@ -5,8 +5,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for getting user's top 3 games.
 ///
@@ -25,21 +25,21 @@ import '../usecase.dart';
 /// ```
 class GetTopThreeUseCase
     implements UseCase<List<Map<String, dynamic>>, GetTopThreeParams> {
-  final UserRepository repository;
 
   GetTopThreeUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetTopThreeParams params) async {
-    return await repository.getUserTopThreeGames(userId: params.userId);
+      GetTopThreeParams params,) async {
+    return repository.getUserTopThreeGames(userId: params.userId);
   }
 }
 
 class GetTopThreeParams extends Equatable {
-  final String userId;
 
   const GetTopThreeParams({required this.userId});
+  final String userId;
 
   @override
   List<Object> get props => [userId];

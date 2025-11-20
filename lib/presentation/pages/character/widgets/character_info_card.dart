@@ -1,17 +1,16 @@
 // lib/presentation/pages/characters/widgets/character_info_card.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/character/character.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
 
-class CharacterInfoCard extends StatelessWidget {
-  final Character character;
-  final int? loadedGamesCount; // 🆕 ADD this parameter
+class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
 
   const CharacterInfoCard({
-    super.key,
-    required this.character,
+    required this.character, super.key,
     this.loadedGamesCount, // 🆕 ADD this
   });
+  final Character character;
+  final int? loadedGamesCount;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +170,6 @@ class CharacterInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: color.withOpacity(0.2),
-          width: 1,
         ),
       ),
       child: Column(
@@ -237,7 +235,6 @@ class CharacterInfoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Colors.grey.shade300,
-                  width: 1,
                 ),
               ),
               child: Text(

@@ -1,11 +1,8 @@
 // core/widgets/loading_widget.dart
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class CustomLoadingWidget extends StatelessWidget {
-  final String? message;
-  final double? size;
-  final Color? color;
 
   const CustomLoadingWidget({
     super.key,
@@ -13,13 +10,15 @@ class CustomLoadingWidget extends StatelessWidget {
     this.size,
     this.color,
   });
+  final String? message;
+  final double? size;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: size ?? 40,
@@ -81,14 +80,14 @@ class ProfileLoadingWidget extends StatelessWidget {
 
 // Inline loading widget for buttons
 class InlineLoadingWidget extends StatelessWidget {
-  final double size;
-  final Color? color;
 
   const InlineLoadingWidget({
     super.key,
     this.size = 16,
     this.color,
   });
+  final double size;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -105,16 +104,14 @@ class InlineLoadingWidget extends StatelessWidget {
 
 // Overlay loading widget
 class OverlayLoadingWidget extends StatelessWidget {
+
+  const OverlayLoadingWidget({
+    required this.child, required this.isLoading, super.key,
+    this.loadingMessage,
+  });
   final Widget child;
   final bool isLoading;
   final String? loadingMessage;
-
-  const OverlayLoadingWidget({
-    super.key,
-    required this.child,
-    required this.isLoading,
-    this.loadingMessage,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +119,7 @@ class OverlayLoadingWidget extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          Container(
+          ColoredBox(
             color: Colors.black.withOpacity(0.5),
             child: CustomLoadingWidget(
               message: loadingMessage,
@@ -136,9 +133,6 @@ class OverlayLoadingWidget extends StatelessWidget {
 
 // Skeleton loading widget for lists
 class SkeletonLoadingWidget extends StatelessWidget {
-  final double width;
-  final double height;
-  final BorderRadius? borderRadius;
 
   const SkeletonLoadingWidget({
     super.key,
@@ -146,6 +140,9 @@ class SkeletonLoadingWidget extends StatelessWidget {
     this.height = 20,
     this.borderRadius,
   });
+  final double width;
+  final double height;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +191,6 @@ class SkeletonGameCard extends StatelessWidget {
           ),
           // Content placeholder
           Expanded(
-            flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(AppConstants.paddingSmall),
               child: Column(

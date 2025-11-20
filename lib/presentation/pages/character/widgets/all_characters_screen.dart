@@ -14,7 +14,7 @@ import 'package:gamer_grove/domain/entities/search/character_search_filters.dart
 import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
-import 'character_card.dart';
+import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
 
 enum CharacterSortOption {
   defaultSort, // No sorting, IGDB default order
@@ -24,11 +24,6 @@ enum CharacterSortOption {
 }
 
 class AllCharactersScreen extends StatefulWidget {
-  final String title;
-  final String? subtitle;
-  final List<Character>? initialCharacters;
-  final bool showFilters;
-  final bool showSearch;
 
   const AllCharactersScreen({
     super.key,
@@ -38,6 +33,11 @@ class AllCharactersScreen extends StatefulWidget {
     this.showFilters = true,
     this.showSearch = true,
   });
+  final String title;
+  final String? subtitle;
+  final List<Character>? initialCharacters;
+  final bool showFilters;
+  final bool showSearch;
 
   @override
   State<AllCharactersScreen> createState() => _AllCharactersScreenState();
@@ -335,7 +335,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
                                       setState(() => _genderFilter = gender);
                                       _performSearch();
                                     },
-                                  )),
+                                  ),),
                         ],
                       ),
                     ),
@@ -370,7 +370,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
                                       setState(() => _speciesFilter = species);
                                       _performSearch();
                                     },
-                                  )),
+                                  ),),
                         ],
                       ),
                     ),
@@ -408,7 +408,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
   Widget _buildCharactersHeader() {
     return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
-        int count = 0;
+        var count = 0;
         if (widget.initialCharacters != null) {
           count = widget.initialCharacters!.length;
         } else if (state is CharacterSearchLoaded) {
@@ -462,8 +462,8 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
           return _buildErrorState(state.message);
         }
 
-        List<Character> characters = [];
-        bool isLoadingMore = false;
+        var characters = <Character>[];
+        var isLoadingMore = false;
 
         if (state is CharacterSearchLoaded) {
           characters = state.characters;
@@ -489,7 +489,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
   }
 
   Widget _buildCharactersContent(
-      List<Character> characters, bool isLoadingMore) {
+      List<Character> characters, bool isLoadingMore,) {
     return _buildCharactersGrid(characters, isLoadingMore);
   }
 

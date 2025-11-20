@@ -4,26 +4,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
+import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_details_screen.dart';
-import '../../../core/widgets/error_widget.dart';
-import '../../../domain/entities/platform/platform.dart';
-import '../../../injection_container.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/platform/platform_event.dart';
-import '../../blocs/platform/platform_state.dart';
-import '../../widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
-class PlatformDetailPage extends StatelessWidget {
-  final int platformId;
-  final Platform? platform; // Optional pre-loaded platform
+class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platform
 
   const PlatformDetailPage({
-    super.key,
-    required this.platformId,
+    required this.platformId, super.key,
     this.platform,
   });
+  final int platformId;
+  final Platform? platform;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +36,7 @@ class PlatformDetailPage extends StatelessWidget {
             authState is AuthAuthenticated ? authState.user.id : null;
         bloc.add(GetPlatformDetailsEvent(
             platformId: platformId,
-            includeGames: true, // 🆕 Explicitly set to true
-            userId: userId));
+            userId: userId,),);
         return bloc;
       },
       child: BlocBuilder<PlatformBloc, PlatformState>(
@@ -69,7 +67,7 @@ class PlatformDetailPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -100,7 +98,6 @@ class PlatformDetailPage extends StatelessWidget {
       context.read<PlatformBloc>().add(
             GetPlatformDetailsEvent(
               platformId: platformId,
-              includeGames: true,
               userId: userId,
             ),
           );
@@ -117,7 +114,7 @@ class PlatformDetailPage extends StatelessWidget {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface),
+              color: Theme.of(context).colorScheme.onSurface,),
           onPressed: () => Navigator.pop(context),
         ),
       ),

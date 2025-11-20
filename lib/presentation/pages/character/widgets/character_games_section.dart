@@ -1,20 +1,19 @@
 // lib/presentation/pages/characters/widgets/character_games_section.dart
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/navigations.dart';
-import '../../../../domain/entities/character/character.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../../widgets/game_card.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class CharacterGamesSection extends StatefulWidget {
-  final Character character;
-  final List<Game>? games;
 
   const CharacterGamesSection({
-    super.key,
-    required this.character,
+    required this.character, super.key,
     this.games,
   });
+  final Character character;
+  final List<Game>? games;
 
   @override
   State<CharacterGamesSection> createState() => _CharacterGamesSectionState();
@@ -341,7 +340,7 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
             ),
             const SizedBox(height: 4),
             Text(
-              'This character doesn\'t appear in any games yet.',
+              "This character doesn't appear in any games yet.",
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey.shade500,
                   ),
@@ -360,7 +359,7 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
       builder: (context) => AlertDialog(
         title: Text('${widget.character.name} Games'),
         content: Text(
-            'Show all ${_displayGames.length} games featuring this character.'),
+            'Show all ${_displayGames.length} games featuring this character.',),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
