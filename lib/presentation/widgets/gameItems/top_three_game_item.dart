@@ -7,9 +7,10 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class TopThreeGameItem extends StatelessWidget {
-
   const TopThreeGameItem({
-    required this.game, required this.index, super.key,
+    required this.game,
+    required this.index,
+    super.key,
   });
   final Game game;
   final int index;
@@ -129,7 +130,7 @@ class TopThreeGameItem extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],
