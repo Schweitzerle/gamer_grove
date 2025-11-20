@@ -75,7 +75,7 @@ class GenericPlatformSection extends StatelessWidget {
         if (game != null &&
             showReleaseTimeline &&
             _releaseDates.isNotEmpty) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.paddingSmall),
           _buildReleaseTimelineSection(context),
         ],
 
@@ -83,7 +83,7 @@ class GenericPlatformSection extends StatelessWidget {
         if (game != null &&
             showFirstReleaseInfo &&
             _firstReleaseDate != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.paddingSmall),
           _buildFirstReleaseInfo(context),
         ],
       ],
@@ -141,10 +141,12 @@ class GenericPlatformSection extends StatelessWidget {
 
         // Platform Cards Horizontal List
         SizedBox(
-          height: 200, // Fixed height for cards
+          height: 210, // Fixed height for cards
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
+            padding: const EdgeInsets.only(
+                left: AppConstants.paddingSmall,
+                bottom: AppConstants.paddingSmall),
             itemCount: _platforms.length,
             itemBuilder: (context, index) {
               print(

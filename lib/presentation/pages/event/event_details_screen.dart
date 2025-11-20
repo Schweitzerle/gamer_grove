@@ -926,13 +926,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildTabView(BuildContext context, SeriesItem item) {
     return Card(
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Series Info Header
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Series Info Header
+          Padding(
+            padding: const EdgeInsets.only(
+                left: AppConstants.paddingSmall,
+                right: AppConstants.paddingSmall,
+                top: AppConstants.paddingSmall),
+            child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -990,18 +993,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
               ],
             ),
+          ),
 
-            const SizedBox(height: AppConstants.paddingMedium),
+          const SizedBox(height: AppConstants.paddingMedium),
 
-            // Games List (unverändert!)
-            SizedBox(
-              height: 280,
-              child: item.games.isNotEmpty
-                  ? _buildGamesList(item.games)
-                  : _buildNoGamesPlaceholder(context),
-            ),
-          ],
-        ),
+          // Games List (unverändert!)
+          SizedBox(
+            height: 280,
+            child: item.games.isNotEmpty
+                ? _buildGamesList(item.games)
+                : _buildNoGamesPlaceholder(context),
+          ),
+        ],
       ),
     );
   }
@@ -1013,7 +1016,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];

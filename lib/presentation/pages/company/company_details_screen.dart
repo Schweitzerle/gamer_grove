@@ -678,7 +678,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   bool _hasAnyLinks() {
-    return (widget.company.websites != null && widget.company.websites!.isNotEmpty) ||
+    return (widget.company.websites != null &&
+            widget.company.websites!.isNotEmpty) ||
         widget.company.url != null;
   }
 
@@ -1177,8 +1178,10 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
           children: [
             // Series Info Header
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall),
+              padding: const EdgeInsets.only(
+                  left: AppConstants.paddingSmall,
+                  right: AppConstants.paddingSmall,
+                  top: AppConstants.paddingSmall),
               child: Row(
                 children: [
                   Container(
@@ -1264,8 +1267,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];

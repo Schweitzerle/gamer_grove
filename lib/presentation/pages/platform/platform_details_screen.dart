@@ -871,7 +871,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(left: AppConstants.paddingSmall),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
