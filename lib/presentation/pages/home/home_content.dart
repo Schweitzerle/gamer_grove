@@ -70,7 +70,7 @@ class _HomeContentState extends State<HomeContent> {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
-                    const Text('Gamer Grove'),
+                    const Text('GamerGrove'),
                   ],
                 ),
                 actions: const [],

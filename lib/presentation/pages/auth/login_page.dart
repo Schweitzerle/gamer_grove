@@ -78,7 +78,8 @@ class _LoginPageState extends State<LoginPage> {
 
                       // App Icon/Logo
                       Container(
-                        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                        padding:
+                            const EdgeInsets.all(AppConstants.paddingLarge),
                         decoration: BoxDecoration(
                           color: colorScheme.primaryContainer,
                           shape: BoxShape.circle,
@@ -230,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                               horizontal: AppConstants.paddingMedium,
                             ),
                             child: Text(
-                              'New to Gamer Grove?',
+                              'New to GamerGrove?',
                               style: textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),

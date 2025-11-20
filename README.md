@@ -1,4 +1,4 @@
-# Gamer Grove
+# GamerGrove
 
 <div align="center">
   <img src="assets/icon/app_icon.png" alt="Gamer Grove Logo" width="200"/>
@@ -13,7 +13,7 @@
 
 ## Overview
 
-Gamer Grove is a comprehensive gaming social platform built with Flutter that allows users to discover, rate, and share their favorite video games. Connect with fellow gamers, track your gaming journey, and explore an extensive database of games powered by the IGDB API.
+GamerGrove is a comprehensive gaming social platform built with Flutter that allows users to discover, rate, and share their favorite video games. Connect with fellow gamers, track your gaming journey, and explore an extensive database of games powered by the IGDB API.
 
 ## Features
 
@@ -50,7 +50,7 @@ Gamer Grove is a comprehensive gaming social platform built with Flutter that al
 
 ## Architecture
 
-Gamer Grove follows **Clean Architecture** principles with clear separation of concerns:
+GamerGrove follows **Clean Architecture** principles with clear separation of concerns:
 
 ```
 lib/
@@ -241,5 +241,5 @@ Project Link: [https://github.com/Schweitzerle/gamer_grove](https://github.com/S
 ---
 
 <div align="center">
-  Made with ❤️ by the Gamer Grove team
+  Made with ❤️ by the GamerGrove team
 </div>

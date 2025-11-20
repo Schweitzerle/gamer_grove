@@ -41,14 +41,12 @@ class _GrovePageState extends State<GrovePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-    } else {
-    }
+    } else {}
 
     // Load all data at once
     if (_currentUserId != null) {
       _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
-    } else {
-    }
+    } else {}
   }
 
   @override
@@ -74,7 +72,7 @@ class _GrovePageState extends State<GrovePage> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Gamer Grove'),
+                        const Text('GamerGrove'),
                       ],
                     ),
                     actions: [
@@ -148,9 +146,8 @@ class _GrovePageState extends State<GrovePage> {
       child: CircleAvatar(
         radius: 18,
         backgroundColor: theme.colorScheme.primaryContainer,
-        backgroundImage: user.hasAvatar
-            ? CachedNetworkImageProvider(user.avatarUrl!)
-            : null,
+        backgroundImage:
+            user.hasAvatar ? CachedNetworkImageProvider(user.avatarUrl!) : null,
         child: !user.hasAvatar
             ? Text(
                 user.username[0].toUpperCase(),

@@ -10,7 +10,7 @@
     <!-- Media access for Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <application
-        android:label="Gamer Grove"
+        android:label="GamerGrove"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

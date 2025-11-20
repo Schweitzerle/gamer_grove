@@ -87,7 +87,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       // App Icon/Logo
                       Container(
-                        padding: const EdgeInsets.all(AppConstants.paddingLarge),
+                        padding:
+                            const EdgeInsets.all(AppConstants.paddingLarge),
                         decoration: BoxDecoration(
                           color: colorScheme.primaryContainer,
                           shape: BoxShape.circle,
@@ -103,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       // Header
                       Text(
-                        'Join Gamer Grove',
+                        'Join GamerGrove',
                         style: textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
@@ -214,7 +215,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),

@@ -13,9 +13,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
-
   const FullScreenImageViewer({
-    required this.images, required this.initialIndex, required this.title, required this.gameName, super.key,
+    required this.images,
+    required this.initialIndex,
+    required this.title,
+    required this.gameName,
+    super.key,
   });
   final List<String> images;
   final int initialIndex;
@@ -58,9 +61,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
           content: Row(
             children: [
               SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),),
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
               SizedBox(width: 16),
               Text('Downloading image...'),
             ],
@@ -105,7 +109,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
         await tempFile.writeAsBytes(imageResponse.data!);
 
         // In Galerie speichern
-        await Gal.putImage(tempFile.path, album: 'Gamer Grove');
+        await Gal.putImage(tempFile.path, album: 'GamerGrove');
 
         // Temp file löschen
         await tempFile.delete();
@@ -234,8 +238,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
                     style: const TextStyle(color: Colors.white),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios,
-                        color: Colors.white,),
+                    icon: const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white,
+                    ),
                     onPressed: _currentIndex < widget.images.length - 1
                         ? () => _pageController.nextPage(
                               duration: const Duration(milliseconds: 300),
