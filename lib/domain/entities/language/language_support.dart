@@ -1,18 +1,9 @@
 // lib/domain/entities/language_support.dart
 import 'package:equatable/equatable.dart';
-import 'language.dart';
-import 'language_support_type.dart';
+import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/language/language_support_type.dart';
 
 class LanguageSupport extends Equatable {
-  final int id;
-  final String checksum;
-  final int? gameId;
-  final int? languageId;
-  final int? languageSupportTypeId;
-  final Language? language;
-  final LanguageSupportType? supportType;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const LanguageSupport({
     required this.id,
@@ -25,6 +16,15 @@ class LanguageSupport extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final int? gameId;
+  final int? languageId;
+  final int? languageSupportTypeId;
+  final Language? language;
+  final LanguageSupportType? supportType;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper getters
   String get languageName => language?.displayName ?? 'Unknown';

@@ -5,17 +5,12 @@
 // lib/presentation/widgets/sections/generic_company_section.dart
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
-import '../../../../core/utils/navigations.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/company/company.dart';
-import '../../../../domain/entities/involved_company.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/involved_company.dart';
 
 class GenericCompanySection extends StatelessWidget {
-  // ✅ FLEXIBLE CONSTRUCTOR - Entweder InvolvedCompanies oder direkte Companies
-  final List<InvolvedCompany>? involvedCompanies;
-  final List<Company>? companies;
-  final String title;
-  final bool showRoles;
 
   const GenericCompanySection({
     super.key,
@@ -24,7 +19,12 @@ class GenericCompanySection extends StatelessWidget {
     this.title = 'Related Companies',
     this.showRoles = true,
   }) : assert(involvedCompanies != null || companies != null,
-            'Either involvedCompanies or companies must be provided');
+            'Either involvedCompanies or companies must be provided',);
+  // ✅ FLEXIBLE CONSTRUCTOR - Entweder InvolvedCompanies oder direkte Companies
+  final List<InvolvedCompany>? involvedCompanies;
+  final List<Company>? companies;
+  final String title;
+  final bool showRoles;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class GenericCompanySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
             child: _buildInvolvedCompanySubsection(
-                context, 'Developer', developers),
+                context, 'Developer', developers,),
           ),
           if (publishers.isNotEmpty || others.isNotEmpty)
             const SizedBox(height: 20),
@@ -66,7 +66,7 @@ class GenericCompanySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
             child: _buildInvolvedCompanySubsection(
-                context, 'Other Companies', others),
+                context, 'Other Companies', others,),
           ),
         ],
       ],
@@ -85,7 +85,7 @@ class GenericCompanySection extends StatelessWidget {
             padding: const EdgeInsets.only(
                 left: AppConstants.paddingSmall,
                 right: AppConstants.paddingSmall,
-                top: AppConstants.paddingSmall),
+                top: AppConstants.paddingSmall,),
             child: Row(
               children: [
                 Icon(
@@ -211,7 +211,7 @@ class GenericCompanySection extends StatelessWidget {
 
   // ✅ INVOLVED COMPANY CARD (mit Rollen)
   Widget _buildInvolvedCompanyCard(
-      BuildContext context, InvolvedCompany involvedCompany) {
+      BuildContext context, InvolvedCompany involvedCompany,) {
     final company = involvedCompany.company;
     final roles = _getRoles(involvedCompany);
 
@@ -244,7 +244,6 @@ class GenericCompanySection extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Company Logo
                 Expanded(
@@ -262,7 +261,7 @@ class GenericCompanySection extends StatelessWidget {
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedImageWidget(
-                              imageUrl: company.logoUrl!,
+                              imageUrl: company.logoUrl,
                               fit: BoxFit.contain,
                               errorWidget: Container(
                                 decoration: BoxDecoration(
@@ -365,7 +364,6 @@ class GenericCompanySection extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Company Logo
                 Expanded(
@@ -383,7 +381,7 @@ class GenericCompanySection extends StatelessWidget {
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedImageWidget(
-                              imageUrl: company.logoUrl!,
+                              imageUrl: company.logoUrl,
                               fit: BoxFit.contain,
                               errorWidget: Container(
                                 decoration: BoxDecoration(

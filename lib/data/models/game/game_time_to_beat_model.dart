@@ -1,7 +1,7 @@
 // ===== GAME TIME TO BEAT MODEL =====
 // File: lib/data/models/game/game_time_to_beat_model.dart
 
-import '../../../domain/entities/game/game_time_to_beat.dart';
+import 'package:gamer_grove/domain/entities/game/game_time_to_beat.dart';
 
 class GameTimeToBeatModel extends GameTimeToBeat {
   const GameTimeToBeatModel({

@@ -1,17 +1,16 @@
 // lib/presentation/pages/characters/widgets/character_details_accordion.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/entities/character/character.dart';
-import '../../../widgets/sections/game_details_accordion.dart';
 
 class CharacterDetailsAccordion extends StatelessWidget {
-  final Character character;
 
   const CharacterDetailsAccordion({
-    super.key,
-    required this.character,
+    required this.character, super.key,
   });
+  final Character character;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +110,7 @@ class CharacterDetailsAccordion extends StatelessWidget {
           .map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: item,
-              ))
+              ),)
           .toList(),
     );
   }
@@ -271,7 +270,7 @@ class CharacterDetailsAccordion extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: const Icon(Icons.alternate_email,
-                size: 16, color: Colors.amber),
+                size: 16, color: Colors.amber,),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -292,13 +291,12 @@ class CharacterDetailsAccordion extends StatelessWidget {
                   children: character.akas.map((name) {
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                          horizontal: 6, vertical: 2,),
                       decoration: BoxDecoration(
                         color: Colors.amber.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Colors.amber.withOpacity(0.3),
-                          width: 1,
                         ),
                       ),
                       child: Text(

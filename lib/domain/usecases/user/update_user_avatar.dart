@@ -5,8 +5,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../usecase.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/usecase.dart';
 
 /// Use case for uploading a user avatar.
 ///
@@ -19,15 +19,13 @@ import '../usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Upload failed: ${failure.message}'),
-///   (url) => print('Avatar uploaded: $url'),
 /// );
 /// ```
 class UpdateUserAvatarUseCase
     implements UseCase<String, UpdateUserAvatarParams> {
-  final UserRepository repository;
 
   UpdateUserAvatarUseCase(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, String>> call(UpdateUserAvatarParams params) async {
@@ -35,10 +33,10 @@ class UpdateUserAvatarUseCase
     if (params.imageData.isEmpty) {
       return const Left(ValidationFailure(
         message: 'Image data cannot be empty',
-      ));
+      ),);
     }
 
-    return await repository.updateUserAvatar(
+    return repository.updateUserAvatar(
       userId: params.userId,
       imageData: params.imageData,
     );
@@ -46,13 +44,13 @@ class UpdateUserAvatarUseCase
 }
 
 class UpdateUserAvatarParams extends Equatable {
-  final String userId;
-  final String imageData;
 
   const UpdateUserAvatarParams({
     required this.userId,
     required this.imageData,
   });
+  final String userId;
+  final String imageData;
 
   @override
   List<Object> get props => [userId, imageData];

@@ -1,11 +1,10 @@
 // presentation/pages/home/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/pages/grove/grove_page.dart';
+import 'package:gamer_grove/presentation/pages/home/home_content.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_page.dart';
+import 'package:gamer_grove/presentation/pages/search/search_page.dart';
 import 'package:gamer_grove/presentation/pages/social/social_page.dart';
-import '../grove/grove_page.dart';
-import '../search/search_page.dart';
-import 'home_content.dart';
-
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,27 +27,19 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         children: [
           // Index 0 - Grove
-          _visitedPages.contains(0)
-              ? const GrovePage()
-              : _buildPlaceholder('Grove', Icons.gamepad_rounded),
+          if (_visitedPages.contains(0)) const GrovePage() else _buildPlaceholder('Grove', Icons.gamepad_rounded),
 
           // Index 1 - Social
-          _visitedPages.contains(1)
-              ? const SocialPage()
-              : _buildPlaceholder('Social', Icons.people),
+          if (_visitedPages.contains(1)) const SocialPage() else _buildPlaceholder('Social', Icons.people),
 
           // Index 2 - Home (Landing Page)
           const HomeContent(), // Immer geladen da Landing Page
 
           // Index 3 - Search
-          _visitedPages.contains(3)
-              ? const SearchPage()
-              : _buildPlaceholder('Search', Icons.search),
+          if (_visitedPages.contains(3)) const SearchPage() else _buildPlaceholder('Search', Icons.search),
 
           // Index 4 - Profile
-          _visitedPages.contains(4)
-              ? const ProfilePage()
-              : _buildPlaceholder('Profile', Icons.person),
+          if (_visitedPages.contains(4)) const ProfilePage() else _buildPlaceholder('Profile', Icons.person),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -59,7 +50,6 @@ class _HomePageState extends State<HomePage> {
 
             // ✅ Markiere Page als besucht und logge beim ersten Besuch
             if (!_visitedPages.contains(index)) {
-              print('🎮 Loading ${_getPageName(index)} page for first time');
               _visitedPages.add(index);
             }
           });
@@ -107,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(pageName),
         centerTitle: true,
       ),
-      body: Container(
+      body: ColoredBox(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Center(
           child: Column(
@@ -122,8 +112,11 @@ class _HomePageState extends State<HomePage> {
               Text(
                 'Loading $pageName...',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                    ),
               ),
               const SizedBox(height: 24),
               const CircularProgressIndicator(),
@@ -135,16 +128,4 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ✅ Helper für Debug-Logs
-  String _getPageName(int index) {
-    switch (index) {
-      case 0: return 'Grove';
-      case 1: return 'Social';
-      case 2: return 'Home';
-      case 3: return 'Search';
-      case 4: return 'Profile';
-      default: return 'Unknown';
-    }
-  }
 }
-
-

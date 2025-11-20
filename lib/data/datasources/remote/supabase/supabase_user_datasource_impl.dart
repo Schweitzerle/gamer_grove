@@ -6,15 +6,19 @@
 library;
 
 import 'dart:convert';
+
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_presets.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_query.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_user_exceptions.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_datasource.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'supabase_user_datasource.dart';
-import 'models/supabase_query.dart';
-import 'models/supabase_presets.dart';
-import 'models/supabase_filters.dart';
 
 /// Concrete implementation of [SupabaseUserDataSource].
 class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
+
+  SupabaseUserDataSourceImpl({required SupabaseClient supabase})
+      : _supabase = supabase;
   final SupabaseClient _supabase;
 
   /// Storage bucket name for avatars.
@@ -22,9 +26,6 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
   /// Maximum avatar file size (5MB).
   static const int _maxAvatarSize = 5 * 1024 * 1024;
-
-  SupabaseUserDataSourceImpl({required SupabaseClient supabase})
-      : _supabase = supabase;
 
   // ============================================================
   // PROFILE OPERATIONS
@@ -42,7 +43,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
   @override
   Future<Map<String, dynamic>?> getUserProfileByUsername(
-      String username) async {
+      String username,) async {
     try {
       final result =
           await UserQueries.getProfileByUsername(username).build(_supabase);
@@ -205,7 +206,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       final result =
           await RpcQueries.getGameEnrichment(userId, gameIds).build(_supabase);
 
-      final Map<int, Map<String, dynamic>> enrichmentMap = {};
+      final enrichmentMap = <int, Map<String, dynamic>>{};
       for (final data in result as List) {
         final gameId = data['game_id'] as int;
         enrichmentMap[gameId] = data as Map<String, dynamic>;
@@ -616,7 +617,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
         targetUserIds,
       ).build(_supabase);
 
-      final Map<String, bool> statusMap = {};
+      final statusMap = <String, bool>{};
       for (final data in result as List) {
         final userId = data['target_user_id'] as String;
         final isFollowing = data['is_following'] as bool;
@@ -659,7 +660,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
       final result = await _supabase
           .from('users')
-          .select('*')
+          .select()
           .or('username.ilike.$searchPattern,display_name.ilike.$searchPattern')
           .eq('is_profile_public', true)
           .order('followers_count', ascending: false)
@@ -707,7 +708,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     try {
       final result = await _supabase
           .from('users')
-          .select('*')
+          .select()
           .order('total_games_rated', ascending: false)
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 100) - 1);
 

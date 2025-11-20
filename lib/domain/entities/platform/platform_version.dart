@@ -4,26 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformVersion extends Equatable {
-  final int id;
-  final String checksum;
-  final String? connectivity;
-  final String? cpu;
-  final String? graphics;
-  final int? mainManufacturerId;
-  final String? media;
-  final String? memory;
-  final String name;
-  final String? os;
-  final String? output;
-  final int? platformLogoId;
-  final List<int> platformVersionReleaseDateIds;
-  final String? resolutions;
-  final String? slug;
-  final String? sound;
-  final String? storage;
-  final String? summary;
-  final String? url;
-  final List<int> companyIds;
 
   const PlatformVersion({
     required this.id,
@@ -47,6 +27,26 @@ class PlatformVersion extends Equatable {
     this.url,
     this.companyIds = const [],
   });
+  final int id;
+  final String checksum;
+  final String? connectivity;
+  final String? cpu;
+  final String? graphics;
+  final int? mainManufacturerId;
+  final String? media;
+  final String? memory;
+  final String name;
+  final String? os;
+  final String? output;
+  final int? platformLogoId;
+  final List<int> platformVersionReleaseDateIds;
+  final String? resolutions;
+  final String? slug;
+  final String? sound;
+  final String? storage;
+  final String? summary;
+  final String? url;
+  final List<int> companyIds;
 
   // Helper to check if it's a revision/slim model
   bool get isRevision => name.toLowerCase().contains('slim') ||

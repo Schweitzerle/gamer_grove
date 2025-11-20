@@ -3,7 +3,7 @@
 // Extension for GameSortBy enum to provide IGDB field names
 // ============================================================
 
-import 'game_sort_options.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 
 /// Extension on GameSortBy to provide IGDB API field names
 extension GameSortByExtension on GameSortBy {

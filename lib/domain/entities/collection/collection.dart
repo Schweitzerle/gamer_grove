@@ -1,22 +1,8 @@
 // lib/domain/entities/collection/collection.dart
 import 'package:equatable/equatable.dart';
-import '../game/game.dart'; // 🆕 Add this import
+import 'package:gamer_grove/domain/entities/game/game.dart'; // 🆕 Add this import
 
-class Collection extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final String? slug;
-  final String? url;
-  final List<int> asChildRelationIds;
-  final List<int> asParentRelationIds;
-  final List<int> gameIds;
-  final int? typeId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  // 🆕 NEW: Add games property for UI display
-  final List<Game>? games; // Populated when fetched for UI
+class Collection extends Equatable { // Populated when fetched for UI
 
   const Collection({
     required this.id,
@@ -32,6 +18,20 @@ class Collection extends Equatable {
     this.updatedAt,
     this.games, // 🆕 Add this parameter
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final String? slug;
+  final String? url;
+  final List<int> asChildRelationIds;
+  final List<int> asParentRelationIds;
+  final List<int> gameIds;
+  final int? typeId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  // 🆕 NEW: Add games property for UI display
+  final List<Game>? games;
 
   // Helper getters
   bool get hasGames => gameIds.isNotEmpty;

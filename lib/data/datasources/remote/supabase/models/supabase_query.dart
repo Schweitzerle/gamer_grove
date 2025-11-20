@@ -3,8 +3,8 @@
 /// Provides a fluent interface for building type-safe queries.
 library;
 
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_filters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide SortBy;
-import 'supabase_filters.dart';
 
 /// Builder class for constructing Supabase queries with a fluent API.
 ///
@@ -20,14 +20,14 @@ import 'supabase_filters.dart';
 /// final result = await query;
 /// ```
 class SupabaseQuery {
+
+  SupabaseQuery(this.table);
   final String table;
   String? _selectColumns;
   final List<SupabaseFilter> _filters = [];
   SortBy? _sortBy;
   Pagination? _pagination;
   int? _single;
-
-  SupabaseQuery(this.table);
 
   /// Specifies which columns to select.
   ///
@@ -217,10 +217,10 @@ class SupabaseQuery {
 ///   .build(supabase);
 /// ```
 class SupabaseRpcQuery {
-  final String functionName;
-  final Map<String, dynamic> _params = {};
 
   SupabaseRpcQuery(this.functionName);
+  final String functionName;
+  final Map<String, dynamic> _params = {};
 
   /// Adds a parameter to the RPC call.
   ///
@@ -281,13 +281,13 @@ class SupabaseRpcQuery {
 ///   .build(supabase);
 /// ```
 class SupabaseInsert {
+
+  SupabaseInsert(this.table);
   final String table;
   Map<String, dynamic>? _values;
   List<Map<String, dynamic>>? _multipleValues;
   String? _returning;
   bool _upsert = false;
-
-  SupabaseInsert(this.table);
 
   /// Sets the values to insert (single row).
   ///
@@ -376,12 +376,12 @@ class SupabaseInsert {
 ///   .build(supabase);
 /// ```
 class SupabaseUpdate {
+
+  SupabaseUpdate(this.table);
   final String table;
   Map<String, dynamic>? _values;
   final List<SupabaseFilter> _filters = [];
   String? _returning;
-
-  SupabaseUpdate(this.table);
 
   /// Sets the values to update.
   ///
@@ -460,11 +460,11 @@ class SupabaseUpdate {
 ///   .build(supabase);
 /// ```
 class SupabaseDelete {
+
+  SupabaseDelete(this.table);
   final String table;
   final List<SupabaseFilter> _filters = [];
   String? _returning;
-
-  SupabaseDelete(this.table);
 
   /// Adds a filter to specify which rows to delete.
   ///
@@ -492,7 +492,7 @@ class SupabaseDelete {
   Future<dynamic> build(SupabaseClient supabase) async {
     if (_filters.isEmpty) {
       throw ArgumentError(
-          'No filters provided for delete - this would delete all rows!');
+          'No filters provided for delete - this would delete all rows!',);
     }
 
     var query = supabase.from(table).delete();

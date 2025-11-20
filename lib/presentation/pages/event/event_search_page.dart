@@ -1,35 +1,36 @@
 // presentation/pages/event/event_search_page.dart
 import 'dart:convert';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/storage_constants.dart';
+import 'package:gamer_grove/core/utils/input_validator.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/error_widget.dart';
 import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
+import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
+import 'package:gamer_grove/presentation/pages/event/widgets/event_filter_bottom_sheet.dart';
+import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../injection_container.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/constants/storage_constants.dart';
-import '../../../core/utils/input_validator.dart';
-import '../../blocs/event/event_bloc.dart';
-import '../../blocs/event/event_event.dart';
-import '../../blocs/event/event_state.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import 'widgets/event_card.dart';
-import 'widgets/event_filter_bottom_sheet.dart';
-import '../../widgets/custom_shimmer.dart';
-import '../../../core/widgets/error_widget.dart';
 
 class EventSearchPage extends StatefulWidget {
-  final EventSearchFilters? initialFilters;
-  final String? initialTitle;
 
   const EventSearchPage({
     super.key,
     this.initialFilters,
     this.initialTitle,
   });
+  final EventSearchFilters? initialFilters;
+  final String? initialTitle;
 
   @override
   State<EventSearchPage> createState() => _EventSearchPageState();
@@ -39,7 +40,6 @@ class _EventSearchPageState extends State<EventSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
   late EventBloc _eventBloc;
-  String? _currentUserId;
 
   // Recent searches
   List<String> _recentSearches = [];
@@ -59,33 +59,27 @@ class _EventSearchPageState extends State<EventSearchPage> {
 
     // Get current user ID from AuthBloc
     final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      _currentUserId = authState.user.id;
-    }
+    if (authState is AuthAuthenticated) {}
 
     // Load filter options first, then trigger search if we have initial filters
     _loadFilterOptions();
   }
 
   Future<void> _loadFilterOptions() async {
-    print('📦 EventSearchPage: Loading filter options...');
     setState(() => _isLoadingFilterOptions = true);
 
     try {
       // For now, event networks will be loaded dynamically when needed
       // We don't have a getAllEventNetworks method yet
-      print('✅ EventSearchPage: Filter options ready');
       setState(() => _isLoadingFilterOptions = false);
 
       // If we have initial filters, trigger search automatically AFTER filters are loaded
       if (widget.initialFilters != null && widget.initialFilters!.hasFilters) {
-        print('🔍 EventSearchPage: Auto-triggering search with initial filters');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _performSearch('');
         });
       }
     } catch (e) {
-      print('❌ EventSearchPage: Exception loading filter options: $e');
       setState(() => _isLoadingFilterOptions = false);
     }
   }
@@ -126,9 +120,8 @@ class _EventSearchPageState extends State<EventSearchPage> {
           _recentSearches = decoded.map((e) => e.toString()).toList();
         });
       }
-    } on Exception catch (e) {
+    } on Exception {
       // If there's an error loading, just keep the empty list
-      debugPrint('Error loading recent event searches: $e');
     }
   }
 
@@ -150,9 +143,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
         StorageConstants.recentEventSearchesKey,
         jsonString,
       );
-    } on Exception catch (e) {
-      debugPrint('Error saving recent event searches: $e');
-    }
+    } on Exception {}
   }
 
   void _performSearch(String query) {
@@ -161,7 +152,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
       setState(() {
         _showRecentSearches = true;
       });
-      _eventBloc.add(ClearEventSearchEvent());
+      _eventBloc.add(const ClearEventSearchEvent());
       return;
     }
 
@@ -186,7 +177,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
       _eventBloc.add(SearchEventsWithFiltersEvent(
         query: query.trim(),
         filters: _currentFilters,
-      ));
+      ),);
     } else {
       _eventBloc.add(SearchEventsEvent(query: query.trim()));
     }
@@ -202,7 +193,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
   }
 
   int _getActiveFilterCount() {
-    int count = 0;
+    var count = 0;
     if (_currentFilters.startTimeFrom != null ||
         _currentFilters.startTimeTo != null) {
       count++;
@@ -254,7 +245,8 @@ class _EventSearchPageState extends State<EventSearchPage> {
                           return _buildLoadingView();
                         } else if (state is EventSearchLoaded) {
                           return _buildSearchResults(state);
-                        } else if (state is EventError && state.events.isEmpty) {
+                        } else if (state is EventError &&
+                            state.events.isEmpty) {
                           return CustomErrorWidget(
                             message: state.message,
                             onRetry: () {
@@ -382,7 +374,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
                       ),
                       if (state.isLoadingMore)
                         Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
+                          padding: const EdgeInsets.only(right: 8),
                           child: SizedBox(
                             width: 16,
                             height: 16,
@@ -501,7 +493,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
               spacing: 8,
               runSpacing: 8,
               children: _recentSearches
-                  .map((search) => _buildSearchChip(search))
+                  .map(_buildSearchChip)
                   .toList(),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
@@ -524,7 +516,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
               'The Game Awards',
               'PAX',
               'Tokyo Game Show',
-            ].map((search) => _buildPopularSearchChip(search)).toList(),
+            ].map(_buildPopularSearchChip).toList(),
           ),
         ],
       ),
@@ -556,9 +548,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
         StorageConstants.recentEventSearchesKey,
         jsonString,
       );
-    } on Exception catch (e) {
-      debugPrint('Error removing recent event search: $e');
-    }
+    } on Exception {}
   }
 
   Widget _buildPopularSearchChip(String search) {
@@ -661,7 +651,6 @@ class _EventSearchPageState extends State<EventSearchPage> {
                 context,
                 eventId: event.id,
               ),
-              showStatus: true,
               showGamesCount: true,
             ),
           );
@@ -700,7 +689,6 @@ class _EventSearchPageState extends State<EventSearchPage> {
                   BoxShadow(
                     color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 20,
-                    spreadRadius: 0,
                     offset: const Offset(0, 8),
                   ),
                 ],

@@ -1,6 +1,6 @@
 // lib/data/datasources/remote/igdb/models/event/event_filters.dart
 
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Pre-configured filters for common event queries.
 class EventFilters {
@@ -71,21 +71,21 @@ class EventFilters {
   // ============================================================
 
   /// Filter events that have a logo
-  static IgdbFilter hasLogo() => NullFilter('event_logo', isNull: false);
+  static IgdbFilter hasLogo() => const NullFilter('event_logo', isNull: false);
 
   /// Filter events that have a description
   static IgdbFilter hasDescription() =>
-      NullFilter('description', isNull: false);
+      const NullFilter('description', isNull: false);
 
   /// Filter events that have a live stream URL
   static IgdbFilter hasLiveStream() =>
-      NullFilter('live_stream_url', isNull: false);
+      const NullFilter('live_stream_url', isNull: false);
 
   /// Filter events that have videos
-  static IgdbFilter hasVideos() => NullFilter('videos', isNull: false);
+  static IgdbFilter hasVideos() => const NullFilter('videos', isNull: false);
 
   /// Filter events that feature games
-  static IgdbFilter hasGames() => NullFilter('games', isNull: false);
+  static IgdbFilter hasGames() => const NullFilter('games', isNull: false);
 
   // ============================================================
   // HELPER METHODS
@@ -97,9 +97,9 @@ class EventFilters {
 
 /// Builder for creating complex event filters.
 class EventFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   EventFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Time methods
   EventFilterBuilder startsAfter(DateTime date) {

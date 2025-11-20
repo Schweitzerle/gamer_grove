@@ -4,14 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameTimeToBeat extends Equatable {
-  final int id;
-  final String checksum;
-  final int? gameId;
-  final int? hastily;      // Rushed playthrough time in seconds
-  final int? normally;     // Normal playthrough time in seconds
-  final int? completely;   // Completionist time in seconds
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const GameTimeToBeat({
     required this.id,
@@ -23,6 +15,14 @@ class GameTimeToBeat extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final int? gameId;
+  final int? hastily;      // Rushed playthrough time in seconds
+  final int? normally;     // Normal playthrough time in seconds
+  final int? completely;   // Completionist time in seconds
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper getters for hours
   double? get hastilyHours => hastily != null ? hastily! / 3600 : null;

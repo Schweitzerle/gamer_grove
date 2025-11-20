@@ -1,19 +1,18 @@
 // lib/presentation/widgets/sections/characters_section.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
-import '../../../domain/entities/character/character.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../pages/character/character_screen.dart';
-import '../../pages/character/widgets/character_card.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/pages/character/character_screen.dart';
+import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
 
 class CharactersSection extends StatelessWidget {
-  final Game game;
 
   const CharactersSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +103,7 @@ class CharactersSection extends StatelessWidget {
   }
 
   Widget _buildCharactersPreview(
-      BuildContext context, List<Character> characters) {
+      BuildContext context, List<Character> characters,) {
     // Show first 4 characters in a horizontal scroll
     final previewCharacters = characters.take(4).toList();
 

@@ -11,18 +11,18 @@ abstract class ThemeEvent extends Equatable {
 }
 
 class ThemeModeChanged extends ThemeEvent {
-  final ThemeMode themeMode;
 
   const ThemeModeChanged(this.themeMode);
+  final ThemeMode themeMode;
 
   @override
   List<Object> get props => [themeMode];
 }
 
 class ThemeSchemeChanged extends ThemeEvent {
-  final FlexScheme flexScheme;
 
   const ThemeSchemeChanged(this.flexScheme);
+  final FlexScheme flexScheme;
 
   @override
   List<Object> get props => [flexScheme];

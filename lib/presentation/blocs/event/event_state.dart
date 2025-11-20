@@ -4,8 +4,8 @@
 
 // lib/presentation/blocs/event/event_state.dart
 import 'package:equatable/equatable.dart';
-import '../../../../domain/entities/event/event.dart';
-import '../../../domain/usecases/event/get_complete_event_details.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/usecases/event/get_complete_event_details.dart';
 
 abstract class EventState extends Equatable {
   const EventState();
@@ -23,77 +23,77 @@ class EventLoading extends EventState {}
 // ==========================================
 
 class EventDetailsLoaded extends EventState {
-  final Event event;
 
   const EventDetailsLoaded({required this.event});
+  final Event event;
 
   @override
   List<Object> get props => [event];
 }
 
 class CompleteEventDetailsLoaded extends EventState {
-  final CompleteEventDetails eventDetails;
 
   const CompleteEventDetailsLoaded({required this.eventDetails});
+  final CompleteEventDetails eventDetails;
 
   @override
   List<Object> get props => [eventDetails];
 }
 
 class CurrentEventsLoaded extends EventState {
-  final List<Event> events;
 
   const CurrentEventsLoaded({required this.events});
+  final List<Event> events;
 
   @override
   List<Object> get props => [events];
 }
 
 class UpcomingEventsLoaded extends EventState {
-  final List<Event> events;
 
   const UpcomingEventsLoaded({required this.events});
+  final List<Event> events;
 
   @override
   List<Object> get props => [events];
 }
 
 class EventsSearchLoaded extends EventState {
-  final List<Event> events;
-  final String query;
 
   const EventsSearchLoaded({
     required this.events,
     required this.query,
   });
+  final List<Event> events;
+  final String query;
 
   @override
   List<Object> get props => [events, query];
 }
 
 class EventsByDateRangeLoaded extends EventState {
-  final List<Event> events;
-  final DateTime? startDate;
-  final DateTime? endDate;
 
   const EventsByDateRangeLoaded({
     required this.events,
     this.startDate,
     this.endDate,
   });
+  final List<Event> events;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   @override
   List<Object?> get props => [events, startDate, endDate];
 }
 
 class EventsByGamesLoaded extends EventState {
-  final List<Event> events;
-  final List<int> gameIds;
 
   const EventsByGamesLoaded({
     required this.events,
     required this.gameIds,
   });
+  final List<Event> events;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [events, gameIds];
@@ -104,23 +104,19 @@ class EventsByGamesLoaded extends EventState {
 // ==========================================
 
 class EventSearchLoading extends EventState {
-  final List<Event> events;
-  final bool isLoadingMore;
 
   const EventSearchLoading({
     this.events = const [],
     this.isLoadingMore = false,
   });
+  final List<Event> events;
+  final bool isLoadingMore;
 
   @override
   List<Object> get props => [events, isLoadingMore];
 }
 
 class EventSearchLoaded extends EventState {
-  final List<Event> events;
-  final String query;
-  final bool hasReachedMax;
-  final bool isLoadingMore;
 
   const EventSearchLoaded({
     required this.events,
@@ -128,6 +124,10 @@ class EventSearchLoaded extends EventState {
     this.hasReachedMax = false,
     this.isLoadingMore = false,
   });
+  final List<Event> events;
+  final String query;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
 
   EventSearchLoaded copyWith({
     List<Event>? events,
@@ -148,13 +148,13 @@ class EventSearchLoaded extends EventState {
 }
 
 class EventError extends EventState {
-  final String message;
-  final List<Event> events;
 
   const EventError({
     required this.message,
     this.events = const [],
   });
+  final String message;
+  final List<Event> events;
 
   @override
   List<Object> get props => [message, events];

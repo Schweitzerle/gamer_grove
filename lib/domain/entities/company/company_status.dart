@@ -3,11 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class CompanyStatus extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const CompanyStatus({
     required this.id,
@@ -16,6 +11,11 @@ class CompanyStatus extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper getters
   bool get isActive => name.toLowerCase().contains('active');

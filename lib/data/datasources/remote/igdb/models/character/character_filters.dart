@@ -1,9 +1,8 @@
 // lib/data/datasources/remote/igdb/models/character/character_filters.dart
 
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
-
-import '../igdb_filters.dart';
 
 /// Pre-configured filters for common character queries.
 ///
@@ -83,14 +82,14 @@ class CharacterFilters {
   // ============================================================
 
   /// Filter characters that have a mug shot image
-  static IgdbFilter hasMugShot() => NullFilter('mug_shot', isNull: false);
+  static IgdbFilter hasMugShot() => const NullFilter('mug_shot', isNull: false);
 
   /// Filter characters that have a description
   static IgdbFilter hasDescription() =>
-      NullFilter('description', isNull: false);
+      const NullFilter('description', isNull: false);
 
   /// Filter characters that appear in at least one game
-  static IgdbFilter hasGames() => NullFilter('games', isNull: false);
+  static IgdbFilter hasGames() => const NullFilter('games', isNull: false);
 }
 
 /// Builder for creating complex character filters step by step.
@@ -104,9 +103,9 @@ class CharacterFilters {
 ///   .build();
 /// ```
 class CharacterFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   CharacterFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Game methods
   CharacterFilterBuilder inGame(int gameId) {

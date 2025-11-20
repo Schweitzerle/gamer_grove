@@ -4,23 +4,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/utils/image_utils.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../full_screen_image_viewer/full_screen_image_viewer.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_screen_image_viewer.dart';
 
 class AllImagesGrid extends StatelessWidget {
+
+  const AllImagesGrid({
+    required this.images, required this.title, required this.type, required this.gameName, super.key,
+  });
   final List<String> images;
   final String title;
   final String type;
   final String gameName;
-
-  const AllImagesGrid({
-    super.key,
-    required this.images,
-    required this.title,
-    required this.type,
-    required this.gameName,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +98,6 @@ class AllImagesGrid extends StatelessWidget {
                           gameName: gameName,
                         ),
                       ),
-                      transitionDuration: const Duration(milliseconds: 300),
                     ),
                   );
                 },
@@ -110,8 +105,7 @@ class AllImagesGrid extends StatelessWidget {
                   tag: 'grid_image_$index',
                   child: CachedImageWidget(
                     imageUrl: ImageUtils.getLargeImageUrl(images[index]),
-                    fit: BoxFit.cover,
-                    placeholder: Container(
+                    placeholder: ColoredBox(
                       color:
                           Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: const Center(child: CircularProgressIndicator()),

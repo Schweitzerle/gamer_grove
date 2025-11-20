@@ -2,14 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformLogo extends Equatable {
-  final int id;
-  final String checksum;
-  final bool alphaChannel;
-  final bool animated;
-  final int height;
-  final String imageId;
-  final String? url;
-  final int width;
 
   const PlatformLogo({
     required this.id,
@@ -21,6 +13,14 @@ class PlatformLogo extends Equatable {
     this.animated = false,
     this.url,
   });
+  final int id;
+  final String checksum;
+  final bool alphaChannel;
+  final bool animated;
+  final int height;
+  final String imageId;
+  final String? url;
+  final int width;
 
   // Helper getters for different logo sizes (IGDB image API)
   String get thumbUrl => 'https://images.igdb.com/igdb/image/upload/t_thumb/$imageId.jpg';

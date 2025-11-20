@@ -1,7 +1,7 @@
 
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/pages/settings/widgets/theme_card.dart';

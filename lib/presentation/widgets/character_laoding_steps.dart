@@ -1,7 +1,7 @@
 // lib/presentation/widgets/character_loading_steps.dart (add to live_loading_progress.dart)
 import 'package:flutter/material.dart';
 
-import 'live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
 class CharacterLoadingSteps {
   static List<LoadingStep> characterDetails(BuildContext context) => [

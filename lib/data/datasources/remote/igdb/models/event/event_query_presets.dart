@@ -1,9 +1,9 @@
 // lib/data/datasources/remote/igdb/models/event/event_query_presets.dart
 
-import '../igdb_query.dart';
-import '../igdb_filters.dart';
-import 'event_field_sets.dart';
-import 'event_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 
 /// Pre-configured query presets for common event queries.
 class EventQueryPresets {
@@ -146,7 +146,7 @@ class EventQueryPresets {
   }) {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final endOfWeek = startOfWeek.add(Duration(days: 7));
+    final endOfWeek = startOfWeek.add(const Duration(days: 7));
 
     final filter = EventFilters.between(startOfWeek, endOfWeek);
 
@@ -165,7 +165,7 @@ class EventQueryPresets {
     int offset = 0,
   }) {
     final now = DateTime.now();
-    final startOfMonth = DateTime(now.year, now.month, 1);
+    final startOfMonth = DateTime(now.year, now.month);
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
 
     final filter = EventFilters.between(startOfMonth, endOfMonth);

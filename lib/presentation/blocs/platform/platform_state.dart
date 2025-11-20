@@ -4,9 +4,9 @@
 
 // lib/presentation/blocs/platform/platform_state.dart
 import 'package:equatable/equatable.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/domain/entities/platform/platform.dart';
-import '../../../domain/entities/game/game.dart';
 
 abstract class PlatformState extends Equatable {
   const PlatformState();
@@ -24,13 +24,13 @@ class PlatformInitial extends PlatformState {}
 class PlatformLoading extends PlatformState {}
 
 class PlatformDetailsLoaded extends PlatformState {
-  final Platform platform;
-  final List<Game> games;
 
   const PlatformDetailsLoaded({
     required this.platform,
     required this.games,
   });
+  final Platform platform;
+  final List<Game> games;
 
   bool get hasGames => games.isNotEmpty;
   int get gameCount => games.length;
@@ -40,9 +40,9 @@ class PlatformDetailsLoaded extends PlatformState {
 }
 
 class PlatformError extends PlatformState {
-  final String message;
 
   const PlatformError({required this.message});
+  final String message;
 
   @override
   List<Object> get props => [message];
@@ -54,13 +54,13 @@ class PlatformError extends PlatformState {
 
 /// Loading paginated games (initial load)
 class PlatformGamesLoading extends PlatformState {
-  final int platformId;
-  final String platformName;
 
   const PlatformGamesLoading({
     required this.platformId,
     required this.platformName,
   });
+  final int platformId;
+  final String platformName;
 
   @override
   List<Object> get props => [platformId, platformName];
@@ -68,15 +68,6 @@ class PlatformGamesLoading extends PlatformState {
 
 /// Paginated games loaded
 class PlatformGamesLoaded extends PlatformState {
-  final int platformId;
-  final String platformName;
-  final List<Game> games;
-  final bool hasMore;
-  final int currentPage;
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
-  final bool isLoadingMore;
-  final String? userId;
 
   const PlatformGamesLoaded({
     required this.platformId,
@@ -89,6 +80,15 @@ class PlatformGamesLoaded extends PlatformState {
     this.isLoadingMore = false,
     this.userId,
   });
+  final int platformId;
+  final String platformName;
+  final List<Game> games;
+  final bool hasMore;
+  final int currentPage;
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
+  final bool isLoadingMore;
+  final String? userId;
 
   /// Copy with for updating state
   PlatformGamesLoaded copyWith({
@@ -129,15 +129,15 @@ class PlatformGamesLoaded extends PlatformState {
 
 /// Error loading paginated games
 class PlatformGamesError extends PlatformState {
-  final int platformId;
-  final String platformName;
-  final String message;
 
   const PlatformGamesError({
     required this.platformId,
     required this.platformName,
     required this.message,
   });
+  final int platformId;
+  final String platformName;
+  final String message;
 
   @override
   List<Object> get props => [platformId, platformName, message];

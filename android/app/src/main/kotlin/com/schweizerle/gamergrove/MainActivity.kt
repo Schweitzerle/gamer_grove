@@ -1,4 +1,4 @@
-package com.example.gamer_grove_rework
+package com.schweizerle.gamergrove
 
 import io.flutter.embedding.android.FlutterActivity
 

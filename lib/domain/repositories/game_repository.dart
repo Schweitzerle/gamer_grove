@@ -1,36 +1,36 @@
 // lib/domain/repositories/game_repository.dart
 import 'package:dartz/dartz.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/collection/collection.dart';
+import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/franchise.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
+import 'package:gamer_grove/domain/entities/game/game_media_collection.dart';
 import 'package:gamer_grove/domain/entities/game/game_mode.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/domain/entities/game/game_status.dart';
 import 'package:gamer_grove/domain/entities/game/game_type.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/domain/entities/genre.dart';
+import 'package:gamer_grove/domain/entities/keyword.dart';
 import 'package:gamer_grove/domain/entities/language/language.dart';
+import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:gamer_grove/domain/entities/player_perspective.dart';
+import 'package:gamer_grove/domain/entities/screenshot.dart';
+import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/domain/entities/theme.dart';
-import '../../core/errors/failures.dart';
-import '../entities/artwork.dart';
-import '../entities/character/character_gender.dart';
-import '../entities/character/character_species.dart';
-import '../entities/event/event.dart';
-import '../entities/game/game.dart';
-import '../entities/company/company.dart';
-import '../entities/game/game_media_collection.dart';
-import '../entities/game/game_sort_options.dart';
-import '../entities/game/game_video.dart';
-import '../entities/genre.dart';
-import '../entities/platform/platform.dart';
-import '../entities/screenshot.dart';
-import '../entities/search/search_filters.dart';
-import '../entities/user/user_collection_filters.dart';
-import '../entities/user/user_collection_sort_options.dart';
-import '../entities/user/user_collection_summary.dart';
-import '../entities/website/website.dart';
-import '../entities/ageRating/age_rating.dart';
-import '../entities/franchise.dart';
-import '../entities/collection/collection.dart';
-import '../entities/keyword.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_filters.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
+import 'package:gamer_grove/domain/entities/user/user_collection_summary.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
 
 /// Game Repository Interface
 ///
@@ -43,18 +43,18 @@ abstract class GameRepository {
 
   /// Search for games by query with pagination
   Future<Either<Failure, List<Game>>> searchGames(
-      String query, int limit, int offset);
+      String query, int limit, int offset,);
 
   /// Get basic game details by ID
   Future<Either<Failure, Game>> getGameDetails(int gameId);
 
   /// Get complete game details with all related data
   Future<Either<Failure, Game>> getCompleteGameDetails(
-      int gameId, String? userId);
+      int gameId, String? userId,);
 
   /// Get game details enriched with user-specific data
   Future<Either<Failure, Game>> getGameDetailsWithUserData(
-      int gameId, String? userId);
+      int gameId, String? userId,);
 
   /// Get multiple games by their IDs (batch operation)
   Future<Either<Failure, List<Game>>> getGamesByIds(List<int> gameIds);
@@ -102,15 +102,15 @@ abstract class GameRepository {
 
   /// Get user's wishlist games with pagination
   Future<Either<Failure, List<Game>>> getUserWishlist(
-      String userId, int limit, int offset);
+      String userId, int limit, int offset,);
 
   /// Get user's recommended games with pagination
   Future<Either<Failure, List<Game>>> getUserRecommendations(
-      String userId, int limit, int offset);
+      String userId, int limit, int offset,);
 
   /// Get user's rated games with pagination
   Future<Either<Failure, List<Game>>> getUserRated(
-      String userId, int limit, int offset);
+      String userId, int limit, int offset,);
 
   /// Get user's top three favorite games
   Future<Either<Failure, List<Game>>> getUserTopThreeGames(String userId);
@@ -151,7 +151,7 @@ abstract class GameRepository {
 
   /// Rate a game (0-10 scale)
   Future<Either<Failure, void>> rateGame(
-      int gameId, String userId, double rating);
+      int gameId, String userId, double rating,);
 
   /// Toggle game in user's wishlist
   Future<Either<Failure, void>> toggleWishlist(int gameId, String userId);
@@ -172,7 +172,7 @@ abstract class GameRepository {
   /// Get wishlist items that were recently released (last month)
   /// or are releasing soon (next 2 weeks)
   Future<Either<Failure, List<Game>>> getWishlistRecentReleases(String userId,
-      {DateTime? fromDate, DateTime? toDate});
+      {DateTime? fromDate, DateTime? toDate,});
 
   // ==========================================
   // PHASE 2 - ENHANCED SEARCH & FILTERING
@@ -250,7 +250,7 @@ abstract class GameRepository {
 
   /// Search age ratings
   Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
-      String query);
+      String query,);
 
   /// Search themes
   Future<Either<Failure, List<IGDBTheme>>> searchThemes(String query);
@@ -282,8 +282,7 @@ abstract class GameRepository {
 
   /// Advanced search combining text search with filters
   Future<Either<Failure, List<Game>>> advancedGameSearch({
-    String? textQuery,
-    required SearchFilters filters,
+    required SearchFilters filters, String? textQuery,
     int limit = 20,
     int offset = 0,
   });
@@ -294,11 +293,11 @@ abstract class GameRepository {
 
   /// Get search suggestions based on partial query
   Future<Either<Failure, List<String>>> getSearchSuggestions(
-      String partialQuery);
+      String partialQuery,);
 
   /// Get recently searched games for user
   Future<Either<Failure, List<Game>>> getRecentSearches(String userId,
-      {int limit = 10});
+      {int limit = 10,});
 
   /// Save search query for user (for recent searches)
   Future<Either<Failure, void>> saveSearchQuery(String userId, String query);
@@ -339,19 +338,19 @@ abstract class GameRepository {
 
   /// Get user's gaming statistics across all collections
   Future<Either<Failure, Map<String, dynamic>>> getUserGamingStatistics(
-      String userId);
+      String userId,);
 
   /// Get user's genre preferences based on their collections
   Future<Either<Failure, Map<String, double>>> getUserGenrePreferences(
-      String userId);
+      String userId,);
 
   /// Get user's platform usage statistics
   Future<Either<Failure, Map<String, int>>> getUserPlatformStatistics(
-      String userId);
+      String userId,);
 
   /// Get user's rating patterns and analytics
   Future<Either<Failure, Map<String, dynamic>>> getUserRatingAnalytics(
-      String userId);
+      String userId,);
 
   // ==========================================
   // ENHANCED COLLECTION MANAGEMENT
@@ -450,7 +449,7 @@ abstract class GameRepository {
 
   /// Get complete game media (videos, screenshots, artwork) in one call
   Future<Either<Failure, GameMediaCollection>> getGameMediaCollection(
-      int gameId);
+      int gameId,);
 
   /// Get game details with all extended content (characters, events, media)
   Future<Either<Failure, Game>> getEnhancedGameDetails({
@@ -470,15 +469,15 @@ abstract class GameRepository {
 
   /// Get popular characters
   Future<Either<Failure, List<Character>>> getPopularCharacters(
-      {int limit = 20});
+      {int limit = 20,});
 
   /// Get characters by gender
   Future<Either<Failure, List<Character>>> getCharactersByGender(
-      CharacterGenderEnum gender);
+      CharacterGenderEnum gender,);
 
   /// Get characters by species
   Future<Either<Failure, List<Character>>> getCharactersBySpecies(
-      CharacterSpeciesEnum species);
+      CharacterSpeciesEnum species,);
 
   /// Get character details by ID
   Future<Either<Failure, Character>> getCharacterDetails(int characterId);
@@ -505,10 +504,10 @@ abstract class GameRepository {
   Future<Either<Failure, GameEngine>> getGameEngineDetails(int gameEngineId);
 
   Future<Either<Failure, Company>> getCompanyDetails(
-      int companyId, String? userId);
+      int companyId, String? userId,);
 
   Future<Either<Failure, List<Company>>> getCompanies(
-      {List<int>? ids, String? search});
+      {List<int>? ids, String? search,});
 
   /// Get games by specific gameEngine
   Future<Either<Failure, List<Game>>> getGamesByGameEngine({

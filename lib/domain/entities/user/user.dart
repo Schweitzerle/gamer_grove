@@ -6,6 +6,28 @@ import 'package:equatable/equatable.dart';
 ///
 /// Contains user profile information, privacy settings, and gaming statistics.
 class User extends Equatable {
+  const User({
+    required this.id,
+    required this.username,
+    required this.createdAt,
+    required this.updatedAt,
+    this.displayName,
+    this.bio,
+    this.avatarUrl,
+    this.country,
+    this.isProfilePublic = true,
+    this.showWishlist = true,
+    this.showRatedGames = true,
+    this.showRecommendedGames = true,
+    this.showTopThree = true,
+    this.totalGamesRated = 0,
+    this.totalGamesWishlisted = 0,
+    this.totalGamesRecommended = 0,
+    this.averageRating,
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.lastActiveAt,
+  });
   final String id;
   final String username;
   final String? displayName;
@@ -34,29 +56,6 @@ class User extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? lastActiveAt;
-
-  const User({
-    required this.id,
-    required this.username,
-    this.displayName,
-    this.bio,
-    this.avatarUrl,
-    this.country,
-    this.isProfilePublic = true,
-    this.showWishlist = true,
-    this.showRatedGames = true,
-    this.showRecommendedGames = true,
-    this.showTopThree = true,
-    this.totalGamesRated = 0,
-    this.totalGamesWishlisted = 0,
-    this.totalGamesRecommended = 0,
-    this.averageRating,
-    this.followersCount = 0,
-    this.followingCount = 0,
-    required this.createdAt,
-    required this.updatedAt,
-    this.lastActiveAt,
-  });
 
   /// Empty user instance
   static User empty() {
@@ -117,7 +116,7 @@ class User extends Equatable {
 
   /// Profile completion percentage (0.0 to 1.0)
   double get profileCompletion {
-    double score = 0.0;
+    var score = 0.0;
     if (username.isNotEmpty) score += 0.15;
     if (hasDisplayName) score += 0.15;
     if (hasBio) score += 0.20;
@@ -166,10 +165,12 @@ class User extends Equatable {
     if (difference.inDays == 0) return 'Active today';
     if (difference.inDays == 1) return 'Active yesterday';
     if (difference.inDays < 7) return 'Active ${difference.inDays} days ago';
-    if (difference.inDays < 30)
+    if (difference.inDays < 30) {
       return 'Active ${(difference.inDays / 7).floor()} weeks ago';
-    if (difference.inDays < 365)
+    }
+    if (difference.inDays < 365) {
       return 'Active ${(difference.inDays / 30).floor()} months ago';
+    }
     return 'Active ${(difference.inDays / 365).floor()} years ago';
   }
 

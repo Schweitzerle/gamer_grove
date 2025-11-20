@@ -3,7 +3,7 @@
 // ==========================================
 
 // lib/data/models/user_gaming_activity_model.dart
-import '../../domain/entities/user/user_gaming_activity.dart';
+import 'package:gamer_grove/domain/entities/user/user_gaming_activity.dart';
 
 // 2. Model anpassen:
 class UserGamingActivityModel extends UserGamingActivity {

@@ -1,12 +1,11 @@
 // lib/presentation/widgets/top_three_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/lists/top_three_game_list.dart';
-import '../../blocs/game/game_bloc.dart';
-import 'base_game_section.dart';
-import 'empty_top_three_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/empty_top_three_section.dart';
 
 class TopThreeSection extends BaseGameSection {
-  final String? username;
 
   const TopThreeSection({
     super.key,
@@ -14,6 +13,7 @@ class TopThreeSection extends BaseGameSection {
     super.gameBloc,
     this.username,
   });
+  final String? username;
 
   @override
   String get title => username != null ? "$username's Top 3" : 'My Top 3';
@@ -53,7 +53,7 @@ class TopThreeSection extends BaseGameSection {
   @override
   void onRetryAction() {
     if (currentUserId != null && gameBloc != null) {
-      gameBloc!.add(LoadGrovePageDataEvent(userId: currentUserId!));
+      gameBloc!.add(LoadGrovePageDataEvent(userId: currentUserId));
     }
   }
 }

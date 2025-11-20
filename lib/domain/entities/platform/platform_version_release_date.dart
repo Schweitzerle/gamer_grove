@@ -2,25 +2,10 @@
 // File: lib/domain/entities/platform/platform_version_release_date.dart
 
 import 'package:equatable/equatable.dart';
-import '../date/date_format.dart';
-import '../region.dart';
+import 'package:gamer_grove/domain/entities/date/date_format.dart';
+import 'package:gamer_grove/domain/entities/region.dart';
 
 class PlatformVersionReleaseDate extends Equatable {
-  final int id;
-  final String checksum;
-  final DateTime? date;
-  final int? dateFormatId;
-  final String? human;
-  final int? month;
-  final int? platformVersionId;
-  final int? releaseRegionId;
-  final int? year;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  // Legacy support
-  final DateFormatCategory? category;
-  final RegionEnum? region;
 
   const PlatformVersionReleaseDate({
     required this.id,
@@ -37,6 +22,21 @@ class PlatformVersionReleaseDate extends Equatable {
     this.category,
     this.region,
   });
+  final int id;
+  final String checksum;
+  final DateTime? date;
+  final int? dateFormatId;
+  final String? human;
+  final int? month;
+  final int? platformVersionId;
+  final int? releaseRegionId;
+  final int? year;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  // Legacy support
+  final DateFormatCategory? category;
+  final RegionEnum? region;
 
   bool get hasExactDate => dateFormatId == 0; // YYYYMMMMDD
   bool get isEstimate => dateFormatId != null && dateFormatId! > 2; // Quarter or TBD

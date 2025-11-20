@@ -11,11 +11,6 @@ enum RelationshipStatus {
 }
 
 class UserRelationship extends Equatable {
-  final String userId;
-  final String targetUserId;
-  final RelationshipStatus status;
-  final DateTime? followedAt;
-  final DateTime? followedBackAt;
 
   const UserRelationship({
     required this.userId,
@@ -24,6 +19,11 @@ class UserRelationship extends Equatable {
     this.followedAt,
     this.followedBackAt,
   });
+  final String userId;
+  final String targetUserId;
+  final RelationshipStatus status;
+  final DateTime? followedAt;
+  final DateTime? followedBackAt;
 
   bool get isFollowing => status == RelationshipStatus.following || status == RelationshipStatus.mutual;
   bool get isFollowedBy => status == RelationshipStatus.followedBy || status == RelationshipStatus.mutual;

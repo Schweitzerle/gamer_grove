@@ -1,24 +1,24 @@
 // lib/presentation/widgets/base_game_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/auth/auth_state.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../custom_shimmer.dart';
-import '../game_card.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 abstract class BaseGameSection extends StatelessWidget {
-  final String? currentUserId;
-  final GameBloc? gameBloc;
 
   const BaseGameSection({
     super.key,
     this.currentUserId,
     this.gameBloc,
   });
+  final String? currentUserId;
+  final GameBloc? gameBloc;
 
   // Abstract methods - must be implemented by subclasses
   String get title;
@@ -209,7 +209,6 @@ abstract class BaseGameSection extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    flex: 1,
                     child: Padding(
                       padding: const EdgeInsets.all(AppConstants.paddingSmall),
                       child: Column(
@@ -253,7 +252,7 @@ abstract class BaseGameSection extends StatelessWidget {
   }
 
   Widget buildEmptySection(
-      String message, IconData icon, BuildContext context) {
+      String message, IconData icon, BuildContext context,) {
     return Container(
       height: 120,
       margin: const EdgeInsets.symmetric(

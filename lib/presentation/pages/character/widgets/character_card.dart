@@ -1,25 +1,17 @@
 // lib/presentation/pages/characters/widgets/character_card.dart
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
-import '../../../../domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/character/character.dart';
 
 /// A card widget that displays character information with an image,
 /// name, and optional metadata like gender, species, and games count.
 class CharacterCard extends StatefulWidget {
-  final Character character;
-  final double? width;
-  final double? height;
-  final VoidCallback? onTap;
-  final bool showDescription;
-  final bool isSelected;
-  final bool showGamesCount;
 
   const CharacterCard({
-    super.key,
-    required this.character,
+    required this.character, super.key,
     this.width,
     this.height,
     this.onTap,
@@ -27,6 +19,13 @@ class CharacterCard extends StatefulWidget {
     this.isSelected = false,
     this.showGamesCount = true,
   });
+  final Character character;
+  final double? width;
+  final double? height;
+  final VoidCallback? onTap;
+  final bool showDescription;
+  final bool isSelected;
+  final bool showGamesCount;
 
   @override
   State<CharacterCard> createState() => _CharacterCardState();

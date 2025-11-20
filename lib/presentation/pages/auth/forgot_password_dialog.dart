@@ -1,11 +1,11 @@
 // presentation/pages/auth/forgot_password_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/input_validator.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/input_validator.dart';
-import '../../blocs/auth/auth_bloc.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
   const ForgotPasswordDialog({super.key});
@@ -108,7 +108,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
                   // Description
                   Text(
-                    'Enter your email address and we\'ll send you a link to reset your password.',
+                    "Enter your email address and we'll send you a link to reset your password.",
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

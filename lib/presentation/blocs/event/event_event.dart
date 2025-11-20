@@ -17,73 +17,73 @@ abstract class EventEvent extends Equatable {
 // ==========================================
 
 class GetEventDetailsEvent extends EventEvent {
-  final int eventId;
 
   const GetEventDetailsEvent({required this.eventId});
+  final int eventId;
 
   @override
   List<Object> get props => [eventId];
 }
 
 class GetCurrentEventsEvent extends EventEvent {
-  final int limit;
 
   const GetCurrentEventsEvent({this.limit = 10});
+  final int limit;
 
   @override
   List<Object> get props => [limit];
 }
 
 class GetUpcomingEventsEvent extends EventEvent {
-  final int limit;
 
   const GetUpcomingEventsEvent({this.limit = 10});
+  final int limit;
 
   @override
   List<Object> get props => [limit];
 }
 
 class SearchEventsEvent extends EventEvent {
-  final String query;
 
   const SearchEventsEvent({required this.query});
+  final String query;
 
   @override
   List<Object> get props => [query];
 }
 
 class GetEventsByDateRangeEvent extends EventEvent {
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final int limit;
 
   const GetEventsByDateRangeEvent({
     this.startDate,
     this.endDate,
     this.limit = 50,
   });
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int limit;
 
   @override
   List<Object?> get props => [startDate, endDate, limit];
 }
 
 class GetEventsByGamesEvent extends EventEvent {
-  final List<int> gameIds;
 
   const GetEventsByGamesEvent({required this.gameIds});
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [gameIds];
 }
 
 class GetCompleteEventDetailsEvent extends EventEvent {
-  final int eventId;
-  final bool includeGames;
 
   const GetCompleteEventDetailsEvent({
     required this.eventId,
     this.includeGames = true,
   });
+  final int eventId;
+  final bool includeGames;
 
   @override
   List<Object> get props => [eventId, includeGames];
@@ -93,28 +93,28 @@ class GetCompleteEventDetailsEvent extends EventEvent {
 class ClearEventsEvent extends EventEvent {}
 
 class GetEventDetailsWithUserDataEvent extends EventEvent {
-  final int eventId;
-  final String? userId;
 
   const GetEventDetailsWithUserDataEvent({
     required this.eventId,
     this.userId,
   });
+  final int eventId;
+  final String? userId;
 
   @override
   List<Object?> get props => [eventId, userId];
 }
 
 class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
-  final int eventId;
-  final String? userId;
-  final bool includeGames;
 
   const GetCompleteEventDetailsWithUserDataEvent({
     required this.eventId,
     this.userId,
     this.includeGames = true,
   });
+  final int eventId;
+  final String? userId;
+  final bool includeGames;
 
   @override
   List<Object?> get props => [eventId, userId, includeGames];
@@ -124,14 +124,14 @@ class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
 // ADVANCED EVENT SEARCH EVENTS
 // ==========================================
 
-class SearchEventsWithFiltersEvent extends EventEvent {
-  final String query;
-  final dynamic filters; // EventSearchFilters
+class SearchEventsWithFiltersEvent extends EventEvent { // EventSearchFilters
 
   const SearchEventsWithFiltersEvent({
     required this.query,
     required this.filters,
   });
+  final String query;
+  final dynamic filters;
 
   @override
   List<Object> get props => [query, filters];

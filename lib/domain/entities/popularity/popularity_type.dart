@@ -4,6 +4,16 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/popularity/popularity_primitive.dart';
 
 class PopularityType extends Equatable {
+
+  const PopularityType({
+    required this.id,
+    required this.checksum,
+    required this.name,
+    this.createdAt,
+    this.updatedAt,
+    this.externalPopularitySourceId,
+    this.popularitySourceEnum,
+  });
   final int id;
   final String checksum;
   final String name;
@@ -15,16 +25,6 @@ class PopularityType extends Equatable {
 
   // DEPRECATED but still useful
   final PopularitySourceEnum? popularitySourceEnum;
-
-  const PopularityType({
-    required this.id,
-    required this.checksum,
-    required this.name,
-    this.createdAt,
-    this.updatedAt,
-    this.externalPopularitySourceId,
-    this.popularitySourceEnum,
-  });
 
   // Helper getters
   bool get hasExternalSource => externalPopularitySourceId != null;

@@ -1,28 +1,27 @@
 // lib/main.dart
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gamer_grove/injection_container.dart' as di;
+import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart'
     as app_auth;
-import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
-import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'injection_container.dart' as di;
-import 'injection_container.dart';
-import 'presentation/pages/splash/splash_page.dart';
-
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
+import 'package:gamer_grove/presentation/pages/splash/splash_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: ".env");
+  await dotenv.load();
 
   // System UI
   SystemChrome.setEnabledSystemUIMode(
@@ -65,13 +64,11 @@ class GamerGroveApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: FlexThemeData.light(
                 scheme: state.flexScheme,
-                useMaterial3: true,
                 surfaceMode: FlexSurfaceMode.level,
                 blendLevel: 30,
               ),
               darkTheme: FlexThemeData.dark(
                 scheme: state.flexScheme,
-                useMaterial3: true,
                 surfaceMode: FlexSurfaceMode.level,
                 blendLevel: 30,
               ),
@@ -88,9 +85,9 @@ class GamerGroveApp extends StatelessWidget {
 /// Listener widget that loads user game data when user logs in
 /// and clears it when user logs out
 class _UserGameDataListener extends StatelessWidget {
-  final Widget child;
 
   const _UserGameDataListener({required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -100,13 +97,9 @@ class _UserGameDataListener extends StatelessWidget {
 
         if (authState is app_auth.AuthAuthenticated) {
           // User logged in - load their game data
-          debugPrint(
-            '🎮 User authenticated, loading game data for: ${authState.user.id}',
-          );
           userGameDataBloc.add(LoadUserGameDataEvent(authState.user.id));
         } else if (authState is app_auth.AuthUnauthenticated) {
           // User logged out - clear game data
-          debugPrint('🚪 User logged out, clearing game data');
           userGameDataBloc.add(const ClearUserGameDataEvent());
         }
       },
@@ -116,4 +109,4 @@ class _UserGameDataListener extends StatelessWidget {
 }
 
 // Global Supabase client access
-final supabase = Supabase.instance.client;
+final SupabaseClient supabase = Supabase.instance.client;

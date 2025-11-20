@@ -1,14 +1,14 @@
 // lib/domain/usecases/user/add_to_top_three.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
-  final UserRepository repository;
 
   AddToTopThree(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, void>> call(AddToTopThreeParams params) async {
@@ -34,15 +34,15 @@ class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
 }
 
 class AddToTopThreeParams extends Equatable {
-  final int gameId;
-  final String userId;
-  final int position;
 
   const AddToTopThreeParams({
     required this.gameId,
     required this.userId,
     required this.position,
   });
+  final int gameId;
+  final String userId;
+  final int position;
 
   @override
   List<Object?> get props => [gameId, userId, position];

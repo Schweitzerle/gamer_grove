@@ -4,15 +4,14 @@
 
 // lib/presentation/pages/game_detail/widgets/sections/statistics_section.dart
 import 'package:flutter/material.dart';
-import '../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class StatisticsSection extends StatelessWidget {
-  final Game game;
 
   const StatisticsSection({
-    super.key,
-    required this.game,
+    required this.game, super.key,
   });
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -37,18 +36,14 @@ class StatisticsSection extends StatelessWidget {
 }
 
 class StatItem extends StatelessWidget {
+
+  const StatItem({
+    required this.icon, required this.label, required this.value, required this.color, super.key,
+  });
   final IconData icon;
   final String label;
   final String value;
   final Color color;
-
-  const StatItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,15 +7,15 @@ library;
 
 /// Base class for all user-related exceptions.
 abstract class UserException implements Exception {
-  final String message;
-  final String? code;
-  final dynamic originalError;
 
   const UserException({
     required this.message,
     this.code,
     this.originalError,
   });
+  final String message;
+  final String? code;
+  final dynamic originalError;
 
   @override
   String toString() =>
@@ -25,10 +25,10 @@ abstract class UserException implements Exception {
 /// Thrown when user profile is not found.
 class UserNotFoundException extends UserException {
   const UserNotFoundException({
-    String message = 'User profile not found',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'User profile not found',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'UserNotFoundException: $message';
@@ -37,10 +37,10 @@ class UserNotFoundException extends UserException {
 /// Thrown when username is already taken.
 class UsernameAlreadyTakenException extends UserException {
   const UsernameAlreadyTakenException({
-    String message = 'This username is already taken',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'This username is already taken',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'UsernameAlreadyTakenException: $message';
@@ -49,10 +49,10 @@ class UsernameAlreadyTakenException extends UserException {
 /// Thrown when trying to follow yourself.
 class CannotFollowSelfException extends UserException {
   const CannotFollowSelfException({
-    String message = 'You cannot follow yourself',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'You cannot follow yourself',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'CannotFollowSelfException: $message';
@@ -61,10 +61,10 @@ class CannotFollowSelfException extends UserException {
 /// Thrown when trying to follow a user that's already followed.
 class AlreadyFollowingException extends UserException {
   const AlreadyFollowingException({
-    String message = 'You are already following this user',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'You are already following this user',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'AlreadyFollowingException: $message';
@@ -73,10 +73,10 @@ class AlreadyFollowingException extends UserException {
 /// Thrown when trying to unfollow a user that's not followed.
 class NotFollowingException extends UserException {
   const NotFollowingException({
-    String message = 'You are not following this user',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'You are not following this user',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'NotFollowingException: $message';
@@ -85,10 +85,10 @@ class NotFollowingException extends UserException {
 /// Thrown when avatar upload fails.
 class AvatarUploadException extends UserException {
   const AvatarUploadException({
-    String message = 'Failed to upload avatar',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Failed to upload avatar',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'AvatarUploadException: $message';
@@ -97,10 +97,10 @@ class AvatarUploadException extends UserException {
 /// Thrown when avatar file is invalid (wrong format, too large, etc.).
 class InvalidAvatarException extends UserException {
   const InvalidAvatarException({
-    String message = 'Invalid avatar file',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Invalid avatar file',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidAvatarException: $message';
@@ -109,10 +109,10 @@ class InvalidAvatarException extends UserException {
 /// Thrown when game is not found in user's collection.
 class GameNotInCollectionException extends UserException {
   const GameNotInCollectionException({
-    String message = 'Game is not in your collection',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Game is not in your collection',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'GameNotInCollectionException: $message';
@@ -121,10 +121,10 @@ class GameNotInCollectionException extends UserException {
 /// Thrown when rating value is invalid.
 class InvalidRatingException extends UserException {
   const InvalidRatingException({
-    String message = 'Rating must be between 0.0 and 10.0',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Rating must be between 0.0 and 10.0',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidRatingException: $message';
@@ -133,10 +133,10 @@ class InvalidRatingException extends UserException {
 /// Thrown when top three games list is invalid.
 class InvalidTopThreeException extends UserException {
   const InvalidTopThreeException({
-    String message = 'Top three must contain exactly 3 different games',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Top three must contain exactly 3 different games',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidTopThreeException: $message';
@@ -145,10 +145,10 @@ class InvalidTopThreeException extends UserException {
 /// Thrown when user profile data is invalid.
 class InvalidProfileDataException extends UserException {
   const InvalidProfileDataException({
-    String message = 'Invalid profile data',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'Invalid profile data',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InvalidProfileDataException: $message';
@@ -157,10 +157,10 @@ class InvalidProfileDataException extends UserException {
 /// Thrown when user lacks permission to perform an action.
 class InsufficientPermissionsException extends UserException {
   const InsufficientPermissionsException({
-    String message = 'You do not have permission to perform this action',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'You do not have permission to perform this action',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'InsufficientPermissionsException: $message';
@@ -169,10 +169,10 @@ class InsufficientPermissionsException extends UserException {
 /// Thrown when user profile is private and cannot be accessed.
 class PrivateProfileException extends UserException {
   const PrivateProfileException({
-    String message = 'This profile is private',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'This profile is private',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'PrivateProfileException: $message';
@@ -181,10 +181,10 @@ class PrivateProfileException extends UserException {
 /// Thrown when an unknown user-related error occurs.
 class UnknownUserException extends UserException {
   const UnknownUserException({
-    String message = 'An unexpected error occurred',
-    String? code,
-    dynamic originalError,
-  }) : super(message: message, code: code, originalError: originalError);
+    super.message = 'An unexpected error occurred',
+    super.code,
+    super.originalError,
+  });
 
   @override
   String toString() => 'UnknownUserException: $message';

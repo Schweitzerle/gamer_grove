@@ -1,6 +1,6 @@
 // lib/data/models/date_format_model.dart
 
-import '../../../domain/entities/date/date_format.dart';
+import 'package:gamer_grove/domain/entities/date/date_format.dart';
 
 class DateFormatModel extends DateFormat {
   const DateFormatModel({
@@ -10,6 +10,15 @@ class DateFormatModel extends DateFormat {
     super.createdAt,
     super.updatedAt,
   });
+
+  // Helper factory for creating from category enum (legacy support)
+  factory DateFormatModel.fromCategory(DateFormatCategory category) {
+    return DateFormatModel(
+      id: category.value,
+      checksum: '',
+      format: category.format,
+    );
+  }
 
   factory DateFormatModel.fromJson(Map<String, dynamic> json) {
     return DateFormatModel(
@@ -38,14 +47,5 @@ class DateFormatModel extends DateFormat {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
-  }
-
-  // Helper factory for creating from category enum (legacy support)
-  factory DateFormatModel.fromCategory(DateFormatCategory category) {
-    return DateFormatModel(
-      id: category.value,
-      checksum: '',
-      format: category.format,
-    );
   }
 }

@@ -1,6 +1,6 @@
 // lib/data/models/collection_type_model.dart
 
-import '../../../domain/entities/collection/collection_type.dart';
+import 'package:gamer_grove/domain/entities/collection/collection_type.dart';
 
 class CollectionTypeModel extends CollectionType {
   const CollectionTypeModel({

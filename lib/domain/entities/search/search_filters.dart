@@ -1,8 +1,71 @@
 // lib/domain/entities/search/search_filters.dart
 import 'package:equatable/equatable.dart';
-import '../game/game_sort_options.dart';
+import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 
 class SearchFilters extends Equatable {
+
+  const SearchFilters({
+    // Basic
+    this.genreIds = const [],
+    this.platformIds = const [],
+    this.releaseDateFrom,
+    this.releaseDateTo,
+
+    // Ratings
+    this.minTotalRating,
+    this.maxTotalRating,
+    this.minTotalRatingCount,
+    this.minUserRating,
+    this.maxUserRating,
+    this.minUserRatingCount,
+    this.minAggregatedRating,
+    this.maxAggregatedRating,
+    this.minAggregatedRatingCount,
+
+    // Game Type & Status
+    this.gameTypeIds = const [],
+    this.gameStatusIds = const [],
+
+    // Multiplayer & Modes
+    this.themesIds = const [],
+    this.gameModesIds = const [],
+    this.playerPerspectiveIds = const [],
+    this.multiplayerModeIds = const [],
+    this.hasMultiplayer,
+    this.hasSinglePlayer,
+
+    // Popularity
+    this.minFollows,
+    this.minHypes,
+
+    // Age Rating & Localization
+    this.ageRatingCategoryIds = const [],
+    this.languageSupportIds = const [],
+
+    // Dynamic Search
+    this.companyIds = const [],
+    this.isDeveloper,
+    this.isPublisher,
+    this.gameEngineIds = const [],
+    this.franchiseIds = const [],
+    this.collectionIds = const [],
+    this.keywordIds = const [],
+
+    // Name Mappings
+    this.platformNames = const {},
+    this.companyNames = const {},
+    this.gameEngineNames = const {},
+    this.franchiseNames = const {},
+    this.collectionNames = const {},
+    this.themeNames = const {},
+    this.ageRatingNames = const {},
+    this.keywordNames = const {},
+    this.languageNames = const {},
+
+    // Sorting
+    this.sortBy = GameSortBy.relevance,
+    this.sortOrder = SortOrder.descending,
+  });
   // ============================================================
   // BASIC FILTERS
   // ============================================================
@@ -86,69 +149,6 @@ class SearchFilters extends Equatable {
   // ============================================================
   final GameSortBy sortBy;
   final SortOrder sortOrder;
-
-  const SearchFilters({
-    // Basic
-    this.genreIds = const [],
-    this.platformIds = const [],
-    this.releaseDateFrom,
-    this.releaseDateTo,
-
-    // Ratings
-    this.minTotalRating,
-    this.maxTotalRating,
-    this.minTotalRatingCount,
-    this.minUserRating,
-    this.maxUserRating,
-    this.minUserRatingCount,
-    this.minAggregatedRating,
-    this.maxAggregatedRating,
-    this.minAggregatedRatingCount,
-
-    // Game Type & Status
-    this.gameTypeIds = const [],
-    this.gameStatusIds = const [],
-
-    // Multiplayer & Modes
-    this.themesIds = const [],
-    this.gameModesIds = const [],
-    this.playerPerspectiveIds = const [],
-    this.multiplayerModeIds = const [],
-    this.hasMultiplayer,
-    this.hasSinglePlayer,
-
-    // Popularity
-    this.minFollows,
-    this.minHypes,
-
-    // Age Rating & Localization
-    this.ageRatingCategoryIds = const [],
-    this.languageSupportIds = const [],
-
-    // Dynamic Search
-    this.companyIds = const [],
-    this.isDeveloper,
-    this.isPublisher,
-    this.gameEngineIds = const [],
-    this.franchiseIds = const [],
-    this.collectionIds = const [],
-    this.keywordIds = const [],
-
-    // Name Mappings
-    this.platformNames = const {},
-    this.companyNames = const {},
-    this.gameEngineNames = const {},
-    this.franchiseNames = const {},
-    this.collectionNames = const {},
-    this.themeNames = const {},
-    this.ageRatingNames = const {},
-    this.keywordNames = const {},
-    this.languageNames = const {},
-
-    // Sorting
-    this.sortBy = GameSortBy.relevance,
-    this.sortOrder = SortOrder.descending,
-  });
 
   /// Returns true if sorting is different from default (relevance/descending)
   bool get hasNonDefaultSort =>
@@ -268,8 +268,8 @@ class SearchFilters extends Equatable {
       hasSinglePlayer: hasSinglePlayer ?? this.hasSinglePlayer,
       minFollows: minFollows ?? this.minFollows,
       minHypes: minHypes ?? this.minHypes,
-      ageRatingCategoryIds: ageRatingIds ?? this.ageRatingCategoryIds,
-      languageSupportIds: languageIds ?? this.languageSupportIds,
+      ageRatingCategoryIds: ageRatingIds ?? ageRatingCategoryIds,
+      languageSupportIds: languageIds ?? languageSupportIds,
       companyIds: companyIds ?? this.companyIds,
       isDeveloper: isDeveloper ?? this.isDeveloper,
       isPublisher: isPublisher ?? this.isPublisher,

@@ -7,14 +7,12 @@ library;
 
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_auth_datasource.dart';
+import 'package:gamer_grove/data/models/user_model.dart';
+import 'package:gamer_grove/data/repositories/base/supabase_base_repository.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/repositories/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-
-import '../../core/network/network_info.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/remote/supabase/supabase_auth_datasource.dart';
-import '../models/user_model.dart';
-import 'base/supabase_base_repository.dart';
 
 /// Concrete implementation of [AuthRepository].
 ///
@@ -32,19 +30,17 @@ import 'base/supabase_base_repository.dart';
 /// // Sign in
 /// final result = await authRepo.signIn('user@example.com', 'password');
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (user) => print('Welcome ${user.username}!'),
 /// );
 /// ```
 class AuthRepositoryImpl extends SupabaseBaseRepository
     implements AuthRepository {
-  final SupabaseAuthDataSource authDataSource;
 
   AuthRepositoryImpl({
     required this.authDataSource,
-    required supabase.SupabaseClient supabase,
-    required NetworkInfo networkInfo,
-  }) : super(supabase: supabase, networkInfo: networkInfo);
+    required super.supabase,
+    required super.networkInfo,
+  });
+  final SupabaseAuthDataSource authDataSource;
 
   // ============================================================
   // AUTHENTICATION OPERATIONS
@@ -63,7 +59,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         final profileResult = await this
             .supabase
             .from('users')
-            .select('*')
+            .select()
             .eq('id', authUser.id)
             .single();
 
@@ -97,7 +93,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         final profileResult = await this
             .supabase
             .from('users')
-            .select('*')
+            .select()
             .eq('id', authUser.id)
             .single();
 
@@ -110,7 +106,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
   @override
   Future<Either<Failure, void>> signOut() async {
     return executeSupabaseVoidOperation(
-      operation: () => authDataSource.signOut(),
+      operation: authDataSource.signOut,
       errorMessage: 'Failed to sign out',
     );
   }
@@ -174,7 +170,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         final profileResult = await this
             .supabase
             .from('users')
-            .select('*')
+            .select()
             .eq('id', authUser.id)
             .maybeSingle();
 
@@ -188,14 +184,14 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
 
   Future<Either<Failure, void>> refreshSession() {
     return executeSupabaseVoidOperation(
-      operation: () => authDataSource.refreshSession(),
+      operation: authDataSource.refreshSession,
       errorMessage: 'Failed to refresh session',
     );
   }
 
   Future<Either<Failure, bool>> checkIsAuthenticated() {
     return executeSupabaseOperation(
-      operation: () => authDataSource.isSessionValid(),
+      operation: authDataSource.isSessionValid,
       errorMessage: 'Failed to check authentication status',
     );
   }
@@ -243,7 +239,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         final profileResult = await this
             .supabase
             .from('users')
-            .select('*')
+            .select()
             .eq('id', user.id)
             .maybeSingle();
 

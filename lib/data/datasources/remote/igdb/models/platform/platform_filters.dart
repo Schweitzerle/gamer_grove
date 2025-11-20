@@ -1,6 +1,6 @@
 // lib/data/datasources/remote/igdb/models/platform/platform_filters.dart
 
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Pre-configured filters for common platform queries.
 class PlatformFilters {
@@ -81,17 +81,17 @@ class PlatformFilters {
   // ============================================================
 
   /// Filter platforms that have a logo
-  static IgdbFilter hasLogo() => NullFilter('platform_logo', isNull: false);
+  static IgdbFilter hasLogo() => const NullFilter('platform_logo', isNull: false);
 
   /// Filter platforms that have a summary
-  static IgdbFilter hasSummary() => NullFilter('summary', isNull: false);
+  static IgdbFilter hasSummary() => const NullFilter('summary', isNull: false);
 }
 
 /// Builder for creating complex platform filters.
 class PlatformFilterBuilder {
-  final List<IgdbFilter> _filters = [];
 
   PlatformFilterBuilder();
+  final List<IgdbFilter> _filters = [];
 
   // Category methods
   PlatformFilterBuilder withCategory(int category) {

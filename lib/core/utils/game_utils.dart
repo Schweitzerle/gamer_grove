@@ -5,7 +5,7 @@
 // lib/core/utils/game_utils.dart
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameUtils {
   static String getGameStatusDisplayName(String? status) {

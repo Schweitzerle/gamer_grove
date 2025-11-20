@@ -14,15 +14,15 @@ abstract class CharacterEvent extends Equatable {
 }
 
 class GetCharacterDetailsEvent extends CharacterEvent {
-  final int characterId;
-  final bool includeGames;
-  final String? userId;
 
   const GetCharacterDetailsEvent({
     required this.characterId,
     this.includeGames = true,
     this.userId,
   });
+  final int characterId;
+  final bool includeGames;
+  final String? userId;
 
   @override
   List<Object> get props => [characterId, includeGames];
@@ -32,9 +32,9 @@ class ClearCharacterEvent extends CharacterEvent {}
 
 // Home Screen - Popular Characters
 class GetPopularCharactersEvent extends CharacterEvent {
-  final int limit;
 
   const GetPopularCharactersEvent({this.limit = 10});
+  final int limit;
 
   @override
   List<Object> get props => [limit];
@@ -42,9 +42,9 @@ class GetPopularCharactersEvent extends CharacterEvent {
 
 // Search Characters
 class SearchCharactersEvent extends CharacterEvent {
-  final String query;
 
   const SearchCharactersEvent({required this.query});
+  final String query;
 
   @override
   List<Object> get props => [query];
@@ -52,10 +52,6 @@ class SearchCharactersEvent extends CharacterEvent {
 
 // Advanced Search with Filters
 class SearchCharactersWithFiltersEvent extends CharacterEvent {
-  final String query;
-  final CharacterSearchFilters filters;
-  final int limit;
-  final int offset;
 
   const SearchCharactersWithFiltersEvent({
     required this.query,
@@ -63,6 +59,10 @@ class SearchCharactersWithFiltersEvent extends CharacterEvent {
     this.limit = 20,
     this.offset = 0,
   });
+  final String query;
+  final CharacterSearchFilters filters;
+  final int limit;
+  final int offset;
 
   @override
   List<Object> get props => [query, filters, limit, offset];

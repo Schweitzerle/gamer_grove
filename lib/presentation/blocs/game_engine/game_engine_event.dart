@@ -18,15 +18,15 @@ abstract class GameEngineEvent extends Equatable {
 // ==========================================
 
 class GetGameEngineDetailsEvent extends GameEngineEvent {
-  final int gameEngineId;
-  final bool includeGames;
-  final String? userId;
 
   const GetGameEngineDetailsEvent({
     required this.gameEngineId,
     this.includeGames = true,
     this.userId,
   });
+  final int gameEngineId;
+  final bool includeGames;
+  final String? userId;
 
   @override
   List<Object?> get props => [gameEngineId, includeGames, userId];
@@ -39,13 +39,7 @@ class ClearGameEngineEvent extends GameEngineEvent {}
 // ==========================================
 
 /// Load paginated games for a game engine
-class LoadGameEngineGamesEvent extends GameEngineEvent {
-  final int gameEngineId;
-  final String gameEngineName;
-  final String? userId;
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
-  final bool refresh; // If true, reset pagination
+class LoadGameEngineGamesEvent extends GameEngineEvent { // If true, reset pagination
 
   const LoadGameEngineGamesEvent({
     required this.gameEngineId,
@@ -55,6 +49,12 @@ class LoadGameEngineGamesEvent extends GameEngineEvent {
     this.sortOrder = SortOrder.descending,
     this.refresh = false,
   });
+  final int gameEngineId;
+  final String gameEngineName;
+  final String? userId;
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
+  final bool refresh;
 
   @override
   List<Object?> get props => [
@@ -74,13 +74,13 @@ class LoadMoreGameEngineGamesEvent extends GameEngineEvent {
 
 /// Change sorting for paginated games
 class ChangeGameEngineSortEvent extends GameEngineEvent {
-  final GameSortBy sortBy;
-  final SortOrder sortOrder;
 
   const ChangeGameEngineSortEvent({
     required this.sortBy,
     required this.sortOrder,
   });
+  final GameSortBy sortBy;
+  final SortOrder sortOrder;
 
   @override
   List<Object> get props => [sortBy, sortOrder];

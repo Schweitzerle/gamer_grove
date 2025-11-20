@@ -19,13 +19,13 @@ class CharacterInitial extends CharacterState {}
 class CharacterLoading extends CharacterState {}
 
 class CharacterDetailsLoaded extends CharacterState {
-  final Character character;
-  final List<Game> games;
 
   const CharacterDetailsLoaded({
     required this.character,
     required this.games,
   });
+  final Character character;
+  final List<Game> games;
 
   bool get hasGames => games.isNotEmpty;
   int get gameCount => games.length;
@@ -35,13 +35,13 @@ class CharacterDetailsLoaded extends CharacterState {
 }
 
 class CharacterError extends CharacterState {
-  final String message;
-  final List<Character> characters;
 
   const CharacterError({
     required this.message,
     this.characters = const [],
   });
+  final String message;
+  final List<Character> characters;
 
   @override
   List<Object> get props => [message, characters];
@@ -49,9 +49,9 @@ class CharacterError extends CharacterState {
 
 // Home Screen - Popular Characters
 class PopularCharactersLoaded extends CharacterState {
-  final List<Character> characters;
 
   const PopularCharactersLoaded({required this.characters});
+  final List<Character> characters;
 
   @override
   List<Object> get props => [characters];
@@ -59,23 +59,19 @@ class PopularCharactersLoaded extends CharacterState {
 
 // Search States
 class CharacterSearchLoading extends CharacterState {
-  final List<Character> characters;
-  final bool isLoadingMore;
 
   const CharacterSearchLoading({
     this.characters = const [],
     this.isLoadingMore = false,
   });
+  final List<Character> characters;
+  final bool isLoadingMore;
 
   @override
   List<Object> get props => [characters, isLoadingMore];
 }
 
 class CharacterSearchLoaded extends CharacterState {
-  final List<Character> characters;
-  final String query;
-  final bool hasReachedMax;
-  final bool isLoadingMore;
 
   const CharacterSearchLoaded({
     required this.characters,
@@ -83,6 +79,10 @@ class CharacterSearchLoaded extends CharacterState {
     this.hasReachedMax = false,
     this.isLoadingMore = false,
   });
+  final List<Character> characters;
+  final String query;
+  final bool hasReachedMax;
+  final bool isLoadingMore;
 
   CharacterSearchLoaded copyWith({
     List<Character>? characters,

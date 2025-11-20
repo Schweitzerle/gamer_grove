@@ -1,10 +1,9 @@
 // lib/data/models/character/character_model.dart - UPDATED VERSION
+import 'package:gamer_grove/domain/entities/character/character.dart';
+import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
-
-import '../../../domain/entities/character/character.dart';
-import '../../../domain/entities/character/character_gender.dart';
-import '../../../domain/entities/character/character_species.dart';
-import '../../../domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class CharacterModel extends Character {
   const CharacterModel({
@@ -27,43 +26,6 @@ class CharacterModel extends Character {
     super.mugShotImageId, // 🆕 ADD this
     super.games, // 🆕 ADD this
   });
-
-  factory CharacterModel.fromJson(Map<String, dynamic> json) {
-    return CharacterModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
-      akas: _parseStringList(json['akas']),
-      characterGenderId: json['character_gender'],
-      characterSpeciesId: json['character_species'],
-      countryName: json['country_name'],
-      description: json['description'],
-      gameIds: _parseIdList(json['games']),
-      mugShot: _parseMugShot(json['mug_shot']),
-      slug: json['slug'],
-      url: json['url'],
-      createdAt: _parseDateTime(json['created_at']),
-      updatedAt: _parseDateTime(json['updated_at']),
-      genderEnum: _parseGenderEnum(json['gender']),
-      speciesEnum: _parseSpeciesEnum(json['species']),
-      // 🆕 NEW: Extract image ID from nested mug_shot object
-      mugShotImageId: _extractMugShotImageId(json['mug_shot']),
-    );
-  }
-
-  // 🆕 NEW: Extract imageId from mug_shot data
-  static String? _extractMugShotImageId(dynamic mugShotData) {
-    if (mugShotData == null) return null;
-
-    // If mug_shot is an object with image_id
-    if (mugShotData is Map<String, dynamic>) {
-      return mugShotData['image_id']?.toString();
-    }
-
-    // If mug_shot is just an ID (int), we'll need to fetch it separately
-    // This will be handled in the repository level
-    return null;
-  }
 
   // 🆕 NEW: Factory method when we have separate mugShot data and games
   factory CharacterModel.fromJsonWithMugShot(
@@ -97,10 +59,57 @@ class CharacterModel extends Character {
     );
   }
 
+  factory CharacterModel.fromJson(Map<String, dynamic> json) {
+    // Parse the new character_gender and character_species IDs
+    final characterGenderId = json['character_gender'] as int?;
+    final characterSpeciesId = json['character_species'] as int?;
+
+    return CharacterModel(
+      id: json['id'] ?? 0,
+      checksum: json['checksum'] ?? '',
+      name: json['name'] ?? '',
+      akas: _parseStringList(json['akas']),
+      characterGenderId: characterGenderId,
+      characterSpeciesId: characterSpeciesId,
+      countryName: json['country_name'],
+      description: json['description'],
+      gameIds: _parseIdList(json['games']),
+      mugShot: _parseMugShot(json['mug_shot']),
+      slug: json['slug'],
+      url: json['url'],
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+      // Use character_gender/character_species IDs to determine enum values
+      // If they're not available, fall back to deprecated gender/species fields
+      genderEnum: characterGenderId != null
+          ? _parseGenderEnum(characterGenderId)
+          : _parseGenderEnum(json['gender']),
+      speciesEnum: characterSpeciesId != null
+          ? _parseSpeciesEnum(characterSpeciesId)
+          : _parseSpeciesEnum(json['species']),
+      // 🆕 NEW: Extract image ID from nested mug_shot object
+      mugShotImageId: _extractMugShotImageId(json['mug_shot']),
+    );
+  }
+
+  // 🆕 NEW: Extract imageId from mug_shot data
+  static String? _extractMugShotImageId(dynamic mugShotData) {
+    if (mugShotData == null) return null;
+
+    // If mug_shot is an object with image_id
+    if (mugShotData is Map<String, dynamic>) {
+      return mugShotData['image_id']?.toString();
+    }
+
+    // If mug_shot is just an ID (int), we'll need to fetch it separately
+    // This will be handled in the repository level
+    return null;
+  }
+
   // Existing helper methods (unchanged)
   static List<String> _parseStringList(dynamic data) {
     if (data is List) {
-      return data.whereType<String>().map((item) => item.toString()).toList();
+      return data.whereType<String>().map((item) => item).toList();
     }
     return [];
   }

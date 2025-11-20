@@ -4,7 +4,7 @@
 
 // lib/domain/entities/platform/platform.dart
 import 'package:equatable/equatable.dart';
-import 'platform_logo.dart'; // Import für PlatformLogo
+import 'package:gamer_grove/domain/entities/platform/platform_logo.dart'; // Import für PlatformLogo
 
 enum PlatformCategoryEnum {
   console,
@@ -15,26 +15,7 @@ enum PlatformCategoryEnum {
   computer,
 }
 
-class Platform extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final String? abbreviation;
-  final String? alternativeName;
-  final int? generation;
-  final int? platformFamilyId;
-  final int? platformLogoId;
-  final PlatformLogo? logo; // ✅ NEU: Logo-Objekt hinzugefügt
-  final int? platformTypeId;
-  final String slug;
-  final String? summary;
-  final String? url;
-  final List<int> versionIds;
-  final List<int> websiteIds;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final PlatformCategoryEnum? categoryEnum;
-  final dynamic category; // Keep for backward compatibility
+class Platform extends Equatable { // Keep for backward compatibility
 
   const Platform({
     required this.id,
@@ -57,6 +38,25 @@ class Platform extends Equatable {
     this.categoryEnum,
     this.category,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final String? abbreviation;
+  final String? alternativeName;
+  final int? generation;
+  final int? platformFamilyId;
+  final int? platformLogoId;
+  final PlatformLogo? logo; // ✅ NEU: Logo-Objekt hinzugefügt
+  final int? platformTypeId;
+  final String slug;
+  final String? summary;
+  final String? url;
+  final List<int> versionIds;
+  final List<int> websiteIds;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final PlatformCategoryEnum? categoryEnum;
+  final dynamic category;
 
   // ✅ LOGO URL GETTERS
   String? get logoUrl {

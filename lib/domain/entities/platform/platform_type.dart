@@ -2,11 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformType extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const PlatformType({
     required this.id,
@@ -15,6 +10,11 @@ class PlatformType extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   @override
   List<Object?> get props => [id, checksum, name, createdAt, updatedAt];

@@ -1,5 +1,5 @@
 // lib/data/models/multiplayer_mode_model.dart
-import '../../domain/entities/multiplayer_mode.dart';
+import 'package:gamer_grove/domain/entities/multiplayer_mode.dart';
 
 class MultiplayerModeModel extends MultiplayerMode {
   const MultiplayerModeModel({
@@ -36,10 +36,7 @@ class MultiplayerModeModel extends MultiplayerMode {
         onlineCoopMax: _parseInt(json['onlinecoopmax']) ?? 0,
         onlineMax: _parseInt(json['onlinemax']) ?? 0,
       );
-    } catch (e, stackTrace) {
-      print('❌ MultiplayerModeModel.fromJson failed: $e');
-      print('📄 JSON data: $json');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       rethrow;
     }
   }

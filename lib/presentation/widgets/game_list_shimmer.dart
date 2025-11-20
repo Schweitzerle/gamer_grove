@@ -1,6 +1,6 @@
 // presentation/widgets/game_list_shimmer.dart
 import 'package:flutter/material.dart';
-import 'game_card.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class GameListShimmer extends StatelessWidget {
   const GameListShimmer({super.key});

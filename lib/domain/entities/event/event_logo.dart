@@ -8,17 +8,6 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 
 class EventLogo extends Equatable {
-  final int id;
-  final String checksum;
-  final String imageId;
-  final int height;
-  final int width;
-  final bool alphaChannel;
-  final bool animated;
-  final int? eventId;
-  final String? url;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const EventLogo({
     required this.id,
@@ -33,6 +22,17 @@ class EventLogo extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String imageId;
+  final int height;
+  final int width;
+  final bool alphaChannel;
+  final bool animated;
+  final int? eventId;
+  final String? url;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // ==========================================
   // ENHANCED HELPER GETTERS
@@ -62,10 +62,10 @@ class EventLogo extends Equatable {
   String get bestUrl => url ?? igdbImageUrl;
 
   /// Get thumbnail URL
-  String get thumbnailUrl => getIgdbImageUrl(size: 'logo_med');
+  String get thumbnailUrl => getIgdbImageUrl();
 
   /// Get HD URL
-  String get hdUrl => getIgdbImageUrl(size: 'logo_med'); // IGDB only has one logo size
+  String get hdUrl => getIgdbImageUrl(); // IGDB only has one logo size
 
   @override
   List<Object?> get props => [

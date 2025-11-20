@@ -14,18 +14,17 @@
 library;
 
 import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../../core/network/network_info.dart';
-import '../../domain/entities/event/event.dart';
-import '../../domain/entities/search/event_search_filters.dart';
-import '../../domain/repositories/event_repository.dart';
-import '../datasources/remote/igdb/igdb_datasource.dart';
-import '../datasources/remote/igdb/models/igdb_query.dart';
-import '../datasources/remote/igdb/models/igdb_filters.dart';
-import '../datasources/remote/igdb/models/event/event_query_presets.dart';
-import '../datasources/remote/igdb/models/event/event_filters.dart';
-import '../datasources/remote/igdb/models/event/event_field_sets.dart';
-import 'base/igdb_base_repository.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_query_presets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
+import 'package:gamer_grove/data/repositories/base/igdb_base_repository.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
+import 'package:gamer_grove/domain/repositories/event_repository.dart';
 
 /// Concrete implementation of [EventRepository].
 ///
@@ -42,18 +41,16 @@ import 'base/igdb_base_repository.dart';
 /// // Get current events
 /// final result = await eventRepo.getCurrentEvents(limit: 10);
 /// result.fold(
-///   (failure) => print('Error: ${failure.message}'),
-///   (events) => print('Found ${events.length} current events'),
 /// );
 /// ```
 class EventRepositoryImpl extends IgdbBaseRepository
     implements EventRepository {
-  final IgdbDataSource igdbDataSource;
 
   EventRepositoryImpl({
     required this.igdbDataSource,
-    required NetworkInfo networkInfo,
-  }) : super(networkInfo: networkInfo);
+    required super.networkInfo,
+  });
+  final IgdbDataSource igdbDataSource;
 
   // ============================================================
   // CURRENT & UPCOMING EVENTS
@@ -67,7 +64,6 @@ class EventRepositoryImpl extends IgdbBaseRepository
       operation: () async {
         final query = EventQueryPresets.ongoing(
           limit: limit,
-          offset: 0,
         );
         return igdbDataSource.queryEvents(query);
       },
@@ -83,7 +79,6 @@ class EventRepositoryImpl extends IgdbBaseRepository
       operation: () async {
         final query = EventQueryPresets.upcoming(
           limit: limit,
-          offset: 0,
           daysAhead: 30,
         );
         return igdbDataSource.queryEvents(query);
@@ -107,7 +102,6 @@ class EventRepositoryImpl extends IgdbBaseRepository
         final searchQuery = EventQueryPresets.search(
           searchTerm: query.trim(),
           limit: 50,
-          offset: 0,
         );
         return igdbDataSource.queryEvents(searchQuery);
       },
@@ -237,7 +231,6 @@ class EventRepositoryImpl extends IgdbBaseRepository
           where: filter,
           fields: EventFieldSets.cards,
           limit: limit,
-          offset: 0,
           sort: 'start_time asc',
         );
 
@@ -263,7 +256,6 @@ class EventRepositoryImpl extends IgdbBaseRepository
           where: filter,
           fields: EventFieldSets.standard,
           limit: 100,
-          offset: 0,
           sort: 'start_time desc',
         );
 

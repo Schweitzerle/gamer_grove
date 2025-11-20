@@ -1,17 +1,11 @@
 // lib/presentation/widgets/header_section.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/navigations.dart';
-import '../../blocs/auth/auth_bloc.dart';
 
 class HeaderSection extends StatelessWidget {
-  final VoidCallback? onSearchPressed;
-  final VoidCallback? onWishlistPressed;
-  final VoidCallback? onSupabaseTestPressed;
-  final VoidCallback? onIGDBTestPressed;
 
   const HeaderSection({
     super.key,
@@ -20,6 +14,10 @@ class HeaderSection extends StatelessWidget {
     this.onSupabaseTestPressed,
     this.onIGDBTestPressed,
   });
+  final VoidCallback? onSearchPressed;
+  final VoidCallback? onWishlistPressed;
+  final VoidCallback? onSupabaseTestPressed;
+  final VoidCallback? onIGDBTestPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -51,71 +49,14 @@ class HeaderSection extends StatelessWidget {
       },
     );
   }
-
-  Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onSearchPressed ?? () => _navigateToSearch(context),
-            icon: const Icon(Icons.search),
-            label: const Text('Search Games'),
-          ),
-        ),
-        const SizedBox(width: AppConstants.paddingMedium),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.favorite_outline),
-            label: const Text('My Wishlist'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDebugActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed:
-                onSupabaseTestPressed ?? () => _navigateToSupabaseTest(context),
-            icon: const Icon(Icons.storage),
-            label: const Text('Test Supabase'),
-          ),
-        ),
-        const SizedBox(width: AppConstants.paddingMedium),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onIGDBTestPressed ?? () => _navigateToIGDBTest(context),
-            icon: const Icon(Icons.bug_report),
-            label: const Text('Test IGDB'),
-          ),
-        ),
-      ],
-    );
-  }
-
   // Default navigation methods
-  void _navigateToSearch(BuildContext context) {
-    Navigations.navigateToSearch(context);
-  }
-
-  void _navigateToSupabaseTest(BuildContext context) {
-    Navigations.navigateToSupabaseTest(context);
-  }
-
-  void _navigateToIGDBTest(BuildContext context) {
-    Navigations.navigateToIGDBTest(context);
-  }
 }
 
 // Private sub-widgets for better organization
-class _AuthenticatedWelcome extends StatelessWidget {
-  final dynamic user; // Replace with your User model
+class _AuthenticatedWelcome extends StatelessWidget { // Replace with your User model
 
   const _AuthenticatedWelcome({required this.user});
+  final dynamic user;
 
   @override
   Widget build(BuildContext context) {

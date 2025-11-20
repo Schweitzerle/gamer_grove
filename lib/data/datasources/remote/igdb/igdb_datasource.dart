@@ -1,25 +1,38 @@
 // lib/data/datasources/remote/igdb/igdb_datasource.dart
 
+import 'package:gamer_grove/core/errors/exceptions.dart'
+    show NetworkException, ServerException;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_query_presets.dart'
+    show CharacterQueryPresets;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/company/company_query_presets.dart'
+    show CompanyQueryPresets;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/event/event_query_presets.dart'
+    show EventQueryPresets;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_query_presets.dart'
+    show GameQueryPresets;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/game_engine/game_engine_query_presets.dart'
+    show GameEngineQueryPresets;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/platform/platform_query_presets.dart'
+    show PlatformQueryPresets;
 import 'package:gamer_grove/data/models/ageRating/age_rating_category_model.dart';
-import 'package:gamer_grove/data/models/game/game_mode_model.dart';
-import 'package:gamer_grove/data/models/game/game_model.dart';
 import 'package:gamer_grove/data/models/character/character_model.dart';
-import 'package:gamer_grove/data/models/game/game_status_model.dart';
-import 'package:gamer_grove/data/models/game/game_type_model.dart';
-import 'package:gamer_grove/data/models/language/lanuage_model.dart';
-import 'package:gamer_grove/data/models/platform/platform_model.dart';
+import 'package:gamer_grove/data/models/collection/collection_model.dart';
 import 'package:gamer_grove/data/models/company/company_model.dart';
 import 'package:gamer_grove/data/models/event/event_model.dart';
-import 'package:gamer_grove/data/models/game/game_engine_model.dart';
-import 'package:gamer_grove/data/models/genre_model.dart';
 import 'package:gamer_grove/data/models/franchise_model.dart';
-import 'package:gamer_grove/data/models/collection/collection_model.dart';
+import 'package:gamer_grove/data/models/game/game_engine_model.dart';
+import 'package:gamer_grove/data/models/game/game_mode_model.dart';
+import 'package:gamer_grove/data/models/game/game_model.dart';
+import 'package:gamer_grove/data/models/game/game_status_model.dart';
+import 'package:gamer_grove/data/models/game/game_type_model.dart';
+import 'package:gamer_grove/data/models/genre_model.dart';
 import 'package:gamer_grove/data/models/keyword_model.dart';
+import 'package:gamer_grove/data/models/language/lanuage_model.dart';
 import 'package:gamer_grove/data/models/multiplayer_mode_model.dart';
+import 'package:gamer_grove/data/models/platform/platform_model.dart';
 import 'package:gamer_grove/data/models/player_perspective_model.dart';
 import 'package:gamer_grove/data/models/theme_model.dart';
-
-import 'models/igdb_query.dart';
 
 /// Abstract interface for IGDB data source operations.
 ///
@@ -278,7 +291,8 @@ abstract class IgdbDataSource {
 
   /// Queries age ratings from IGDB
   Future<List<AgeRatingCategoryModel>> queryAgeRatings(
-      IgdbAgeRatingQuery query);
+    IgdbAgeRatingQuery query,
+  );
 
   // ============================================================
   // MULTIPLAYER MODE QUERIES
@@ -286,7 +300,8 @@ abstract class IgdbDataSource {
 
   /// Queries multiplayer modes from IGDB
   Future<List<MultiplayerModeModel>> queryMultiplayerModes(
-      IgdbMultiplayerModeQuery query);
+    IgdbMultiplayerModeQuery query,
+  );
 
   // ============================================================
   // LANGUAGE SUPPORT QUERIES
@@ -308,7 +323,8 @@ abstract class IgdbDataSource {
 
   /// Queries player perspectives from IGDB
   Future<List<PlayerPerspectiveModel>> queryPlayerPerspectives(
-      IgdbPlayerPerspectiveQuery query);
+    IgdbPlayerPerspectiveQuery query,
+  );
 
   // ============================================================
   // Game modes QUERIES

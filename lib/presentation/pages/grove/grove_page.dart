@@ -1,16 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
+import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/recommendations_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../injection_container.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../../blocs/game/game_bloc.dart';
-import '../../widgets/sections/recommendations_section.dart';
-import '../../widgets/sections/wishlist_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/wishlist_section.dart';
 
 class GrovePage extends StatefulWidget {
   const GrovePage({super.key});
@@ -41,17 +41,13 @@ class _GrovePageState extends State<GrovePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-      print('GrovePage: User is authenticated with ID: $_currentUserId');
     } else {
-      print('GrovePage: User is not authenticated.');
     }
 
     // Load all data at once
     if (_currentUserId != null) {
-      print('GrovePage: Loading data for user ID: $_currentUserId');
       _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
     } else {
-      print('GrovePage: No user ID, not loading data.');
     }
   }
 

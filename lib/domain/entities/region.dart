@@ -4,13 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class Region extends Equatable {
-  final int id;
-  final String checksum;
-  final String category; // 'locale' or 'continent'
-  final String identifier;
-  final String name;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const Region({
     required this.id,
@@ -21,6 +14,13 @@ class Region extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String category; // 'locale' or 'continent'
+  final String identifier;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   bool get isLocale => category == 'locale';
   bool get isContinent => category == 'continent';

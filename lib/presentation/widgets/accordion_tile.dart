@@ -4,23 +4,20 @@
 
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class AccordionTile extends StatelessWidget {
+
+  const AccordionTile({
+    required this.title, required this.icon, required this.child, super.key,
+    this.isFirst = true,
+    this.isLast = true,
+  });
   final String title;
   final IconData icon;
   final Widget child;
   final bool isFirst;
   final bool isLast;
-
-  const AccordionTile({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.child,
-    this.isFirst = true,
-    this.isLast = true,
-  });
 
   @override
   Widget build(BuildContext context) {

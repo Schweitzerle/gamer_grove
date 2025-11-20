@@ -1,8 +1,12 @@
 // lib/presentation/pages/characters/widgets/characters_filter_bar.dart
 import 'package:flutter/material.dart';
-import '../character_screen.dart';
+import 'package:gamer_grove/presentation/pages/character/character_screen.dart';
 
 class CharactersFilterBar extends StatelessWidget {
+
+  const CharactersFilterBar({
+    required this.searchController, required this.currentSort, required this.viewMode, required this.showOnlyWithImages, required this.showOnlyWithDescriptions, required this.onSearchChanged, required this.onSortChanged, required this.onViewModeChanged, required this.onShowImagesChanged, required this.onShowDescriptionsChanged, super.key,
+  });
   final TextEditingController searchController;
   final CharacterSortBy currentSort;
   final CharacterViewMode viewMode;
@@ -13,20 +17,6 @@ class CharactersFilterBar extends StatelessWidget {
   final void Function(CharacterViewMode) onViewModeChanged;
   final void Function(bool) onShowImagesChanged;
   final void Function(bool) onShowDescriptionsChanged;
-
-  const CharactersFilterBar({
-    super.key,
-    required this.searchController,
-    required this.currentSort,
-    required this.viewMode,
-    required this.showOnlyWithImages,
-    required this.showOnlyWithDescriptions,
-    required this.onSearchChanged,
-    required this.onSortChanged,
-    required this.onViewModeChanged,
-    required this.onShowImagesChanged,
-    required this.onShowDescriptionsChanged,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +201,7 @@ class CharactersFilterBar extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             const Icon(Icons.keyboard_arrow_down,
-                size: 16, color: Colors.purple),
+                size: 16, color: Colors.purple,),
           ],
         ),
       ),

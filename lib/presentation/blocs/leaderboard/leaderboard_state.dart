@@ -13,18 +13,18 @@ class LeaderboardInitial extends LeaderboardState {}
 class LeaderboardLoading extends LeaderboardState {}
 
 class LeaderboardLoaded extends LeaderboardState {
-  final List<User> users;
 
   const LeaderboardLoaded(this.users);
+  final List<User> users;
 
   @override
   List<Object> get props => [users];
 }
 
 class LeaderboardError extends LeaderboardState {
-  final String message;
 
   const LeaderboardError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

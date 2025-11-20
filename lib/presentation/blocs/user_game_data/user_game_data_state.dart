@@ -21,11 +21,6 @@ class UserGameDataLoading extends UserGameDataState {
 
 /// Loaded state with all user game data
 class UserGameDataLoaded extends UserGameDataState {
-  final String userId;
-  final Set<int> wishlistedGameIds;
-  final Set<int> recommendedGameIds;
-  final Map<int, double> ratedGames; // gameId -> rating (0-10)
-  final List<int> topThreeGameIds;
 
   const UserGameDataLoaded({
     required this.userId,
@@ -34,6 +29,11 @@ class UserGameDataLoaded extends UserGameDataState {
     required this.ratedGames,
     required this.topThreeGameIds,
   });
+  final String userId;
+  final Set<int> wishlistedGameIds;
+  final Set<int> recommendedGameIds;
+  final Map<int, double> ratedGames; // gameId -> rating (0-10)
+  final List<int> topThreeGameIds;
 
   /// Check if a game is wishlisted
   bool isWishlisted(int gameId) => wishlistedGameIds.contains(gameId);
@@ -82,9 +82,9 @@ class UserGameDataLoaded extends UserGameDataState {
 
 /// Error state
 class UserGameDataError extends UserGameDataState {
-  final String message;
 
   const UserGameDataError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];
@@ -92,8 +92,6 @@ class UserGameDataError extends UserGameDataState {
 
 /// Action success states (for showing snackbars, etc.)
 class WishlistToggled extends UserGameDataLoaded {
-  final int gameId;
-  final bool isNowWishlisted;
 
   const WishlistToggled({
     required this.gameId,
@@ -104,6 +102,8 @@ class WishlistToggled extends UserGameDataLoaded {
     required super.ratedGames,
     required super.topThreeGameIds,
   });
+  final int gameId;
+  final bool isNowWishlisted;
 
   @override
   List<Object?> get props => [
@@ -114,8 +114,6 @@ class WishlistToggled extends UserGameDataLoaded {
 }
 
 class RecommendationToggled extends UserGameDataLoaded {
-  final int gameId;
-  final bool isNowRecommended;
 
   const RecommendationToggled({
     required this.gameId,
@@ -126,6 +124,8 @@ class RecommendationToggled extends UserGameDataLoaded {
     required super.ratedGames,
     required super.topThreeGameIds,
   });
+  final int gameId;
+  final bool isNowRecommended;
 
   @override
   List<Object?> get props => [
@@ -136,8 +136,6 @@ class RecommendationToggled extends UserGameDataLoaded {
 }
 
 class GameRated extends UserGameDataLoaded {
-  final int gameId;
-  final double rating;
 
   const GameRated({
     required this.gameId,
@@ -148,6 +146,8 @@ class GameRated extends UserGameDataLoaded {
     required super.ratedGames,
     required super.topThreeGameIds,
   });
+  final int gameId;
+  final double rating;
 
   @override
   List<Object?> get props => [
@@ -158,7 +158,6 @@ class GameRated extends UserGameDataLoaded {
 }
 
 class RatingRemoved extends UserGameDataLoaded {
-  final int gameId;
 
   const RatingRemoved({
     required this.gameId,
@@ -168,6 +167,7 @@ class RatingRemoved extends UserGameDataLoaded {
     required super.ratedGames,
     required super.topThreeGameIds,
   });
+  final int gameId;
 
   @override
   List<Object?> get props => [

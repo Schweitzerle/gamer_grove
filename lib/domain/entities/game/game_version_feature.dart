@@ -4,13 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameVersionFeature extends Equatable {
-  final int id;
-  final String checksum;
-  final String title;
-  final String? description;
-  final String? category; // boolean, description
-  final int? position;
-  final List<int> valueIds;
 
   const GameVersionFeature({
     required this.id,
@@ -21,6 +14,13 @@ class GameVersionFeature extends Equatable {
     this.position,
     this.valueIds = const [],
   });
+  final int id;
+  final String checksum;
+  final String title;
+  final String? description;
+  final String? category; // boolean, description
+  final int? position;
+  final List<int> valueIds;
 
   bool get isBoolean => category == 'boolean';
   bool get isDescription => category == 'description';

@@ -1,6 +1,6 @@
 // lib/data/models/character_mug_shot_model.dart
 
-import '../../../domain/entities/character/character_mug_shot.dart';
+import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
 
 class CharacterMugShotModel extends CharacterMugShot {
   const CharacterMugShotModel({

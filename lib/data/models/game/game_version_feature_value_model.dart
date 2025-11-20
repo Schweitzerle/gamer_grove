@@ -1,7 +1,7 @@
 // ===== GAME VERSION FEATURE VALUE MODEL =====
 // File: lib/data/models/game/game_version_feature_value_model.dart
 
-import '../../../domain/entities/game/game_version_feature_value.dart';
+import 'package:gamer_grove/domain/entities/game/game_version_feature_value.dart';
 
 class GameVersionFeatureValueModel extends GameVersionFeatureValue {
   const GameVersionFeatureValueModel({

@@ -2,11 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class DateFormat extends Equatable {
-  final int id;
-  final String checksum;
-  final String format;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const DateFormat({
     required this.id,
@@ -15,6 +10,11 @@ class DateFormat extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String format;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper method to get human-readable format description
   String get description {

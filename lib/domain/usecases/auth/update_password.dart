@@ -18,24 +18,22 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ));
 ///
 /// result.fold(
-///   (failure) => print('Failed: ${failure.message}'),
-///   (_) => print('Password updated successfully'),
 /// );
 /// ```
 class UpdatePasswordUseCase implements UseCase<void, UpdatePasswordParams> {
-  final AuthRepository repository;
 
   UpdatePasswordUseCase(this.repository);
+  final AuthRepository repository;
 
   @override
   Future<Either<Failure, void>> call(UpdatePasswordParams params) async {
     if (!_isValidPassword(params.newPassword)) {
       return const Left(ValidationFailure(
         message: 'Password must be at least 6 characters',
-      ));
+      ),);
     }
 
-    return await repository.updatePassword(newPassword: params.newPassword);
+    return repository.updatePassword(newPassword: params.newPassword);
   }
 
   /// Validates password (minimum 6 characters).
@@ -45,9 +43,9 @@ class UpdatePasswordUseCase implements UseCase<void, UpdatePasswordParams> {
 }
 
 class UpdatePasswordParams extends Equatable {
-  final String newPassword;
 
   const UpdatePasswordParams({required this.newPassword});
+  final String newPassword;
 
   @override
   List<Object> get props => [newPassword];

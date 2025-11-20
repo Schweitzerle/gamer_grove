@@ -1,6 +1,6 @@
 // lib/data/models/external_game_source_model.dart
 
-import '../../../domain/entities/externalGame/external_game_source.dart';
+import 'package:gamer_grove/domain/entities/externalGame/external_game_source.dart';
 
 class ExternalGameSourceModel extends ExternalGameSource {
   const ExternalGameSourceModel({

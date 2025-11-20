@@ -1,18 +1,18 @@
 // domain/usecases/game/toggle_wishlist.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class ToggleWishlist extends UseCase<void, ToggleWishlistParams> {
-  final GameRepository repository;
 
   ToggleWishlist(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, void>> call(ToggleWishlistParams params) async {
-    return await repository.toggleWishlist(
+    return repository.toggleWishlist(
       params.gameId,
       params.userId,
     );
@@ -20,13 +20,13 @@ class ToggleWishlist extends UseCase<void, ToggleWishlistParams> {
 }
 
 class ToggleWishlistParams extends Equatable {
-  final int gameId;
-  final String userId;
 
   const ToggleWishlistParams({
     required this.gameId,
     required this.userId,
   });
+  final int gameId;
+  final String userId;
 
   @override
   List<Object> get props => [gameId, userId];

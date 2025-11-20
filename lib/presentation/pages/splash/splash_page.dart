@@ -2,12 +2,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../auth/login_page.dart';
-import '../home/home_page.dart';
+import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
+import 'package:gamer_grove/presentation/pages/home/home_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -41,20 +41,20 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
 
     _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+      curve: const Interval(0, 0.6, curve: Curves.easeOut),
+    ),);
 
     _scaleAnimation = Tween<double>(
       begin: 0.5,
-      end: 1.0,
+      end: 1,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
-    ));
+      curve: const Interval(0, 0.8, curve: Curves.elasticOut),
+    ),);
 
     // Pulse animation for icon
     _pulseController = AnimationController(
@@ -63,12 +63,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     )..repeat(reverse: true);
 
     _pulseAnimation = Tween<double>(
-      begin: 1.0,
+      begin: 1,
       end: 1.1,
     ).animate(CurvedAnimation(
       parent: _pulseController,
       curve: Curves.easeInOut,
-    ));
+    ),);
 
     // Shimmer animation for loading
     _shimmerController = AnimationController(
@@ -77,15 +77,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     )..repeat();
 
     _shimmerAnimation = Tween<double>(
-      begin: -2.0,
-      end: 2.0,
+      begin: -2,
+      end: 2,
     ).animate(CurvedAnimation(
       parent: _shimmerController,
       curve: Curves.easeInOut,
-    ));
+    ),);
   }
 
-  void _startSplashSequence() async {
+  Future<void> _startSplashSequence() async {
     // Start animations
     _animationController.forward();
 
@@ -94,18 +94,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     // Check auth status with timeout
     if (mounted) {
-      print('🚀 SplashPage: Checking auth status...');
       context.read<AuthBloc>().add(const CheckAuthStatusEvent());
 
       // Add a safety timeout
       Future<void>.delayed(const Duration(seconds: 5), () {
         if (mounted) {
           final currentState = context.read<AuthBloc>().state;
-          print(
-              '⏰ SplashPage: Timeout reached, current state: ${currentState.runtimeType}');
           if (currentState is AuthLoading) {
-            print(
-                '🔧 SplashPage: Still loading after timeout, forcing navigation to login');
             _navigateToLogin();
           }
         }
@@ -125,16 +120,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        print('🔥 SplashPage: Auth state changed to ${state.runtimeType}');
 
         if (state is AuthAuthenticated) {
-          print('✅ SplashPage: User authenticated, navigating to home');
           _navigateToHome();
         } else if (state is AuthUnauthenticated) {
-          print('❌ SplashPage: User not authenticated, navigating to login');
           _navigateToLogin();
         } else if (state is AuthError) {
-          print('💥 SplashPage: Auth error: ${state.message}');
           _navigateToLogin(); // Navigate to login on error
         }
         // Don't navigate on AuthLoading - let it complete
@@ -213,18 +204,18 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                 },
                               ),
                               const SizedBox(
-                                  height: AppConstants.paddingXLarge),
+                                  height: AppConstants.paddingXLarge,),
 
                               // App Name with Shimmer
                               ShaderMask(
                                 shaderCallback: (bounds) {
-                                  return LinearGradient(
-                                    colors: const [
+                                  return const LinearGradient(
+                                    colors: [
                                       Colors.white70,
                                       Colors.white,
                                       Colors.white70,
                                     ],
-                                    stops: const [0.0, 0.5, 1.0],
+                                    stops: [0.0, 0.5, 1.0],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ).createShader(bounds);
@@ -237,7 +228,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                       ?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
-                                        letterSpacing: 2.0,
+                                        letterSpacing: 2,
                                       ),
                                 ),
                               ),
@@ -273,7 +264,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   // Loading Indicator with Animation
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
-                      String loadingText = 'Loading...';
+                      var loadingText = 'Loading...';
 
                       if (state is AuthLoading) {
                         loadingText = 'Checking authentication...';
@@ -332,7 +323,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                               ),
                               if (kDebugMode) ...[
                                 const SizedBox(
-                                    height: AppConstants.paddingSmall),
+                                    height: AppConstants.paddingSmall,),
                                 Text(
                                   'State: ${state.runtimeType}',
                                   style: Theme.of(context)
@@ -373,7 +364,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                       'Version ${AppConstants.appVersion}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.white.withOpacity(0.7),
-                            letterSpacing: 1.0,
+                            letterSpacing: 1,
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -399,7 +390,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               child: child,
             );
           },
-          transitionDuration: AppConstants.mediumAnimation,
         ),
       );
     }
@@ -417,7 +407,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               child: child,
             );
           },
-          transitionDuration: AppConstants.mediumAnimation,
         ),
       );
     }

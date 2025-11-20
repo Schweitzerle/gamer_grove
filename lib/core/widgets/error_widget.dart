@@ -1,20 +1,19 @@
 // core/widgets/error_widget.dart
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class CustomErrorWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
-  final IconData? icon;
-  final String? buttonText;
 
   const CustomErrorWidget({
-    super.key,
-    required this.message,
+    required this.message, super.key,
     this.onRetry,
     this.icon,
     this.buttonText,
   });
+  final String message;
+  final VoidCallback? onRetry;
+  final IconData? icon;
+  final String? buttonText;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +22,6 @@ class CustomErrorWidget extends StatelessWidget {
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               icon ?? Icons.error_outline_rounded,
@@ -64,12 +62,12 @@ class CustomErrorWidget extends StatelessWidget {
 
 // Specific error widgets for common scenarios
 class NetworkErrorWidget extends StatelessWidget {
-  final VoidCallback? onRetry;
 
   const NetworkErrorWidget({
     super.key,
     this.onRetry,
   });
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -83,12 +81,12 @@ class NetworkErrorWidget extends StatelessWidget {
 }
 
 class ServerErrorWidget extends StatelessWidget {
-  final VoidCallback? onRetry;
 
   const ServerErrorWidget({
     super.key,
     this.onRetry,
   });
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -101,20 +99,17 @@ class ServerErrorWidget extends StatelessWidget {
 }
 
 class EmptyStateWidget extends StatelessWidget {
+
+  const EmptyStateWidget({
+    required this.title, required this.message, required this.icon, super.key,
+    this.onAction,
+    this.actionText,
+  });
   final String title;
   final String message;
   final IconData icon;
   final VoidCallback? onAction;
   final String? actionText;
-
-  const EmptyStateWidget({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.icon,
-    this.onAction,
-    this.actionText,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +118,6 @@ class EmptyStateWidget extends StatelessWidget {
         padding: const EdgeInsets.all(AppConstants.paddingLarge),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -163,16 +157,15 @@ class EmptyStateWidget extends StatelessWidget {
 
 
 class AppErrorWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
-  final IconData? icon;
 
   const AppErrorWidget({
-    super.key,
-    required this.message,
+    required this.message, super.key,
     this.onRetry,
     this.icon,
   });
+  final String message;
+  final VoidCallback? onRetry;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {

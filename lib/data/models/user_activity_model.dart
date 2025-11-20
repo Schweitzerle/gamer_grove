@@ -6,10 +6,8 @@ class UserActivityModel extends UserActivity {
     required super.id,
     required super.user,
     required super.activityType,
-    super.gameId,
+    required super.isPublic, required super.createdAt, super.gameId,
     super.metadata,
-    required super.isPublic,
-    required super.createdAt,
   });
 
   factory UserActivityModel.fromJson(Map<String, dynamic> json) {

@@ -1,12 +1,12 @@
 // presentation/pages/auth/register_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/input_validator.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/input_validator.dart';
-import '../../blocs/auth/auth_bloc.dart';
-import '../home/home_page.dart';
+import 'package:gamer_grove/presentation/pages/home/home_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

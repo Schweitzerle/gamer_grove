@@ -8,18 +8,18 @@ library;
 
 import 'package:dartz/dartz.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_query_presets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
+import 'package:gamer_grove/data/repositories/base/igdb_base_repository.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
 import 'package:gamer_grove/domain/entities/search/character_search_filters.dart';
 import 'package:gamer_grove/domain/repositories/character_repository.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_query_presets.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_filters.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_field_sets.dart';
-import 'base/igdb_base_repository.dart';
 
 /// Concrete implementation of [CharacterRepository].
 ///
@@ -27,12 +27,12 @@ import 'base/igdb_base_repository.dart';
 /// the unified query system.
 class CharacterRepositoryImpl extends IgdbBaseRepository
     implements CharacterRepository {
-  final IgdbDataSource igdbDataSource;
 
   CharacterRepositoryImpl({
     required this.igdbDataSource,
     required super.networkInfo,
   });
+  final IgdbDataSource igdbDataSource;
 
   // ============================================================
   // POPULAR CHARACTERS FOR HOME SCREEN
@@ -46,7 +46,6 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
       operation: () async {
         final query = CharacterQueryPresets.popular(
           limit: limit,
-          offset: 0,
         );
         return igdbDataSource.queryCharacters(query);
       },
@@ -69,7 +68,6 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
         final searchQuery = CharacterQueryPresets.search(
           searchTerm: query.trim(),
           limit: 50,
-          offset: 0,
         );
         return igdbDataSource.queryCharacters(searchQuery);
       },
@@ -100,13 +98,13 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
         }
 
         // Existence filters
-        if (filters.hasMugShot == true) {
+        if (filters.hasMugShot ?? false) {
           filterList.add(CharacterFilters.hasMugShot());
         }
-        if (filters.hasDescription == true) {
+        if (filters.hasDescription ?? false) {
           filterList.add(CharacterFilters.hasDescription());
         }
-        if (filters.hasGames == true) {
+        if (filters.hasGames ?? false) {
           filterList.add(CharacterFilters.hasGames());
         }
 
@@ -168,7 +166,7 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
     return executeIgdbOperation(
       operation: () async {
         final query = CharacterQueryPresets.fullDetails(
-            characterId: characterId);
+            characterId: characterId,);
         final characters = await igdbDataSource.queryCharacters(query);
 
         if (characters.isEmpty) {
@@ -235,8 +233,6 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
       operation: () async {
         final query = CharacterQueryPresets.fromGame(
           gameId: gameId,
-          limit: 50,
-          offset: 0,
         );
         return igdbDataSource.queryCharacters(query);
       },
@@ -257,7 +253,6 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
         final query = CharacterQueryPresets.fromGames(
           gameIds: gameIds,
           limit: 100,
-          offset: 0,
         );
         return igdbDataSource.queryCharacters(query);
       },

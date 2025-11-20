@@ -19,13 +19,13 @@ abstract class CollectionEvent extends Equatable {
 /// Event to load enriched game data for multiple games.
 /// This is the PERFORMANCE-CRITICAL event!
 class LoadGameEnrichmentEvent extends CollectionEvent {
-  final String userId;
-  final List<int> gameIds;
 
   const LoadGameEnrichmentEvent({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];
@@ -33,15 +33,15 @@ class LoadGameEnrichmentEvent extends CollectionEvent {
 
 /// Event to rate a game.
 class RateGameEvent extends CollectionEvent {
-  final String userId;
-  final int gameId;
-  final double rating;
 
   const RateGameEvent({
     required this.userId,
     required this.gameId,
     required this.rating,
   });
+  final String userId;
+  final int gameId;
+  final double rating;
 
   @override
   List<Object> get props => [userId, gameId, rating];
@@ -49,13 +49,13 @@ class RateGameEvent extends CollectionEvent {
 
 /// Event to remove a rating.
 class RemoveRatingEvent extends CollectionEvent {
-  final String userId;
-  final int gameId;
 
   const RemoveRatingEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -63,13 +63,13 @@ class RemoveRatingEvent extends CollectionEvent {
 
 /// Event to toggle wishlist.
 class ToggleWishlistEvent extends CollectionEvent {
-  final String userId;
-  final int gameId;
 
   const ToggleWishlistEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -77,13 +77,13 @@ class ToggleWishlistEvent extends CollectionEvent {
 
 /// Event to toggle recommended.
 class ToggleRecommendedEvent extends CollectionEvent {
-  final String userId;
-  final int gameId;
 
   const ToggleRecommendedEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -91,13 +91,13 @@ class ToggleRecommendedEvent extends CollectionEvent {
 
 /// Event to update top 3 games.
 class UpdateTopThreeEvent extends CollectionEvent {
-  final String userId;
-  final List<int> gameIds;
 
   const UpdateTopThreeEvent({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];
@@ -105,9 +105,9 @@ class UpdateTopThreeEvent extends CollectionEvent {
 
 /// Event to load top 3 games.
 class LoadTopThreeEvent extends CollectionEvent {
-  final String userId;
 
   const LoadTopThreeEvent({required this.userId});
+  final String userId;
 
   @override
   List<Object> get props => [userId];
@@ -115,9 +115,9 @@ class LoadTopThreeEvent extends CollectionEvent {
 
 /// Event to clear top 3 games.
 class ClearTopThreeEvent extends CollectionEvent {
-  final String userId;
 
   const ClearTopThreeEvent({required this.userId});
+  final String userId;
 
   @override
   List<Object> get props => [userId];
@@ -125,15 +125,15 @@ class ClearTopThreeEvent extends CollectionEvent {
 
 /// Event to load wishlisted games.
 class LoadWishlistedGamesEvent extends CollectionEvent {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const LoadWishlistedGamesEvent({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];
@@ -141,15 +141,15 @@ class LoadWishlistedGamesEvent extends CollectionEvent {
 
 /// Event to load rated games.
 class LoadRatedGamesEvent extends CollectionEvent {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const LoadRatedGamesEvent({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];

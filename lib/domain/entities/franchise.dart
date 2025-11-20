@@ -1,19 +1,8 @@
 // lib/domain/entities/franchise.dart
 import 'package:equatable/equatable.dart';
-import 'game/game.dart'; // 🆕 Add this import
+import 'package:gamer_grove/domain/entities/game/game.dart'; // 🆕 Add this import
 
-class Franchise extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final String? slug;
-  final String? url;
-  final List<int> gameIds;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  // 🆕 NEW: Add games property for UI display
-  final List<Game>? games; // Populated when fetched for UI
+class Franchise extends Equatable { // Populated when fetched for UI
 
   const Franchise({
     required this.id,
@@ -26,6 +15,17 @@ class Franchise extends Equatable {
     this.updatedAt,
     this.games, // 🆕 Add this parameter
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final String? slug;
+  final String? url;
+  final List<int> gameIds;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  // 🆕 NEW: Add games property for UI display
+  final List<Game>? games;
 
   // Helper getters
   bool get hasGames => gameIds.isNotEmpty;

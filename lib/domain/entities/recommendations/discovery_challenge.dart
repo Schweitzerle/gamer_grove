@@ -4,15 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class DiscoveryChallenge extends Equatable {
-  final String id;
-  final String title;
-  final String description;
-  final DiscoveryChallengeType type;
-  final Map<String, dynamic> requirements;
-  final List<int> recommendedGameIds;
-  final int rewardPoints;
-  final DateTime? expiresAt;
-  final bool isCompleted;
 
   const DiscoveryChallenge({
     required this.id,
@@ -25,11 +16,20 @@ class DiscoveryChallenge extends Equatable {
     this.expiresAt,
     this.isCompleted = false,
   });
+  final String id;
+  final String title;
+  final String description;
+  final DiscoveryChallengeType type;
+  final Map<String, dynamic> requirements;
+  final List<int> recommendedGameIds;
+  final int rewardPoints;
+  final DateTime? expiresAt;
+  final bool isCompleted;
 
   @override
   List<Object?> get props => [
     id, title, description, type, requirements,
-    recommendedGameIds, rewardPoints, expiresAt, isCompleted
+    recommendedGameIds, rewardPoints, expiresAt, isCompleted,
   ];
 }
 

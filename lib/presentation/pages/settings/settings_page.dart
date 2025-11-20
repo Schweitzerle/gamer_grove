@@ -8,9 +8,9 @@ import 'package:gamer_grove/presentation/pages/settings/about_us_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/theme_selection_dialog.dart';
 
 class SettingsPage extends StatelessWidget {
-  static const routeName = 'settings-page';
 
   const SettingsPage({super.key});
+  static const routeName = 'settings-page';
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (value) {
                   context.read<ThemeBloc>().add(
                         ThemeModeChanged(
-                            value ? ThemeMode.dark : ThemeMode.light),
+                            value ? ThemeMode.dark : ThemeMode.light,),
                       );
                 },
               ),
@@ -46,7 +46,7 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute<void>(
                     builder: (context) => const AboutUsPage(),
-                  ));
+                  ),);
                 },
               ),
             ],

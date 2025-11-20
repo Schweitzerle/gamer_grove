@@ -2,18 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class MultiplayerMode extends Equatable {
-  final int id;
-  final bool campaignCoop;
-  final bool dropin;
-  final bool lancoop;
-  final bool offlineCoop;
-  final int offlineCoopMax;
-  final int offlineMax;
-  final bool onlineCoop;
-  final int onlineCoopMax;
-  final int onlineMax;
-  final bool splitscreen;
-  final bool splitscreenOnline;
 
   const MultiplayerMode({
     required this.id,
@@ -29,10 +17,22 @@ class MultiplayerMode extends Equatable {
     this.splitscreen = false,
     this.splitscreenOnline = false,
   });
+  final int id;
+  final bool campaignCoop;
+  final bool dropin;
+  final bool lancoop;
+  final bool offlineCoop;
+  final int offlineCoopMax;
+  final int offlineMax;
+  final bool onlineCoop;
+  final int onlineCoopMax;
+  final int onlineMax;
+  final bool splitscreen;
+  final bool splitscreenOnline;
 
   @override
   List<Object> get props => [
     id, campaignCoop, dropin, lancoop, offlineCoop, offlineCoopMax,
-    offlineMax, onlineCoop, onlineCoopMax, onlineMax, splitscreen, splitscreenOnline
+    offlineMax, onlineCoop, onlineCoopMax, onlineMax, splitscreen, splitscreenOnline,
   ];
 }

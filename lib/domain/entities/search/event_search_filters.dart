@@ -14,6 +14,20 @@ enum EventSortOrder {
 }
 
 class EventSearchFilters extends Equatable {
+
+  const EventSearchFilters({
+    // Time Filters
+    this.startTimeFrom,
+    this.startTimeTo,
+
+    // Event Networks
+    this.eventNetworkIds = const [],
+    this.eventNetworkNames = const {},
+
+    // Sorting
+    this.sortBy = EventSortBy.relevance,
+    this.sortOrder = EventSortOrder.descending,
+  });
   // ============================================================
   // TIME FILTERS (based on event start_time)
   // ============================================================
@@ -31,20 +45,6 @@ class EventSearchFilters extends Equatable {
   // ============================================================
   final EventSortBy sortBy;
   final EventSortOrder sortOrder;
-
-  const EventSearchFilters({
-    // Time Filters
-    this.startTimeFrom,
-    this.startTimeTo,
-
-    // Event Networks
-    this.eventNetworkIds = const [],
-    this.eventNetworkNames = const {},
-
-    // Sorting
-    this.sortBy = EventSortBy.relevance,
-    this.sortOrder = EventSortOrder.descending,
-  });
 
   bool get hasFilters =>
       startTimeFrom != null ||

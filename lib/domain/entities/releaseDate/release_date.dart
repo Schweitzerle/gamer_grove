@@ -78,7 +78,25 @@ enum ReleaseDateRegionEnum {
   }
 }
 
-class ReleaseDate extends Equatable {
+class ReleaseDate extends Equatable { // DEPRECATED: Use releaseRegionId instead
+
+  const ReleaseDate({
+    required this.id,
+    required this.checksum,
+    this.createdAt,
+    this.updatedAt,
+    this.date,
+    this.human,
+    this.month,
+    this.year,
+    this.gameId,
+    this.platformId,
+    this.dateFormatId,
+    this.releaseRegionId,
+    this.statusId,
+    this.categoryEnum,
+    this.regionEnum,
+  });
   final int id;
   final String checksum;
   final DateTime? createdAt;
@@ -99,25 +117,7 @@ class ReleaseDate extends Equatable {
 
   // DEPRECATED fields but still useful for backwards compatibility
   final ReleaseDateCategory? categoryEnum; // DEPRECATED: Use dateFormatId instead
-  final ReleaseDateRegionEnum? regionEnum; // DEPRECATED: Use releaseRegionId instead
-
-  const ReleaseDate({
-    required this.id,
-    required this.checksum,
-    this.createdAt,
-    this.updatedAt,
-    this.date,
-    this.human,
-    this.month,
-    this.year,
-    this.gameId,
-    this.platformId,
-    this.dateFormatId,
-    this.releaseRegionId,
-    this.statusId,
-    this.categoryEnum,
-    this.regionEnum,
-  });
+  final ReleaseDateRegionEnum? regionEnum;
 
   // Helper getters
   bool get hasExactDate => date != null;

@@ -1,22 +1,18 @@
-
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class ThemeCard extends StatelessWidget {
+
+  const ThemeCard({
+    required this.scheme, required this.isSelected, required this.onSelect, super.key,
+  });
   final FlexScheme scheme;
   final bool isSelected;
   final ValueChanged<FlexScheme> onSelect;
 
-  const ThemeCard({
-    super.key,
-    required this.scheme,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = FlexThemeData.light(scheme: scheme);
+    final theme = FlexThemeData.light(scheme: scheme);
     final colorScheme = theme.colorScheme;
 
     return GestureDetector(
@@ -45,12 +41,14 @@ class ThemeCard extends StatelessWidget {
                 ),
                 child: Align(
                   alignment: Alignment.topLeft,
-                  child: Text(
-                    scheme.name.substring(0, 1).toUpperCase() +
-                        scheme.name.substring(1),
-                    style: TextStyle(
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
+                  child: FittedBox(
+                    child: Text(
+                      scheme.name.substring(0, 1).toUpperCase() +
+                          scheme.name.substring(1),
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

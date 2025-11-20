@@ -1,6 +1,6 @@
 // ===== SEARCH MODEL =====
 // lib/data/models/search/search_model.dart
-import '../../../domain/entities/search/search.dart';
+import 'package:gamer_grove/domain/entities/search/search.dart';
 
 class SearchModel extends Search {
   const SearchModel({
@@ -18,51 +18,6 @@ class SearchModel extends Search {
     super.themeId,
     super.testDummyId,
   });
-
-  factory SearchModel.fromJson(Map<String, dynamic> json) {
-    return SearchModel(
-      id: json['id'] ?? 0,
-      checksum: json['checksum'] ?? '',
-      name: json['name'] ?? '',
-      alternativeName: json['alternative_name'],
-      description: json['description'],
-      publishedAt: _parseDateTime(json['published_at']),
-      characterId: json['character'],
-      collectionId: json['collection'],
-      companyId: json['company'],
-      gameId: json['game'],
-      platformId: json['platform'],
-      themeId: json['theme'],
-      testDummyId: json['test_dummy'],
-    );
-  }
-
-  static DateTime? _parseDateTime(dynamic date) {
-    if (date is String) {
-      return DateTime.tryParse(date);
-    } else if (date is int) {
-      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
-    }
-    return null;
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'checksum': checksum,
-      'name': name,
-      'alternative_name': alternativeName,
-      'description': description,
-      'published_at': publishedAt?.millisecondsSinceEpoch,
-      'character': characterId,
-      'collection': collectionId,
-      'company': companyId,
-      'game': gameId,
-      'platform': platformId,
-      'theme': themeId,
-      'test_dummy': testDummyId,
-    };
-  }
 
   // Factory method for creating search results from different entity types
   factory SearchModel.fromGame({
@@ -183,6 +138,51 @@ class SearchModel extends Search {
       publishedAt: publishedAt,
       themeId: themeId,
     );
+  }
+
+  factory SearchModel.fromJson(Map<String, dynamic> json) {
+    return SearchModel(
+      id: json['id'] ?? 0,
+      checksum: json['checksum'] ?? '',
+      name: json['name'] ?? '',
+      alternativeName: json['alternative_name'],
+      description: json['description'],
+      publishedAt: _parseDateTime(json['published_at']),
+      characterId: json['character'],
+      collectionId: json['collection'],
+      companyId: json['company'],
+      gameId: json['game'],
+      platformId: json['platform'],
+      themeId: json['theme'],
+      testDummyId: json['test_dummy'],
+    );
+  }
+
+  static DateTime? _parseDateTime(dynamic date) {
+    if (date is String) {
+      return DateTime.tryParse(date);
+    } else if (date is int) {
+      return DateTime.fromMillisecondsSinceEpoch(date * 1000);
+    }
+    return null;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'checksum': checksum,
+      'name': name,
+      'alternative_name': alternativeName,
+      'description': description,
+      'published_at': publishedAt?.millisecondsSinceEpoch,
+      'character': characterId,
+      'collection': collectionId,
+      'company': companyId,
+      'game': gameId,
+      'platform': platformId,
+      'theme': themeId,
+      'test_dummy': testDummyId,
+    };
   }
 }
 

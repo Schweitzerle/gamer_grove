@@ -1,6 +1,6 @@
 // ===== GAME LOCALIZATION MODEL =====
 // lib/data/models/game_localization_model.dart
-import '../../../domain/entities/game/game_localization.dart';
+import 'package:gamer_grove/domain/entities/game/game_localization.dart';
 
 class GameLocalizationModel extends GameLocalization {
   const GameLocalizationModel({

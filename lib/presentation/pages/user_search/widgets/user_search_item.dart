@@ -1,27 +1,26 @@
 // lib/presentation/pages/user_search/widgets/user_search_item.dart
 
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../domain/entities/user/user.dart';
+import 'package:flutter/material.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
 
 /// A visually appealing user item widget that displays user info and stats
 class UserSearchItem extends StatelessWidget {
-  final User user;
-  final VoidCallback? onTap;
-  final bool showFollowButton;
-  final bool isFollowing;
-  final bool isLoadingFollow;
-  final VoidCallback? onFollowPressed;
 
   const UserSearchItem({
-    super.key,
-    required this.user,
+    required this.user, super.key,
     this.onTap,
     this.showFollowButton = true,
     this.isFollowing = false,
     this.isLoadingFollow = false,
     this.onFollowPressed,
   });
+  final User user;
+  final VoidCallback? onTap;
+  final bool showFollowButton;
+  final bool isFollowing;
+  final bool isLoadingFollow;
+  final VoidCallback? onFollowPressed;
 
   @override
   Widget build(BuildContext context) {

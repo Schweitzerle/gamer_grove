@@ -1,9 +1,9 @@
 // ===== PLATFORM VERSION RELEASE DATE MODEL =====
 // File: lib/data/models/platform/platform_version_release_date_model.dart
 
-import '../../../domain/entities/date/date_format.dart';
-import '../../../domain/entities/platform/platform_version_release_date.dart';
-import '../../../domain/entities/region.dart';
+import 'package:gamer_grove/domain/entities/date/date_format.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_version_release_date.dart';
+import 'package:gamer_grove/domain/entities/region.dart';
 
 class PlatformVersionReleaseDateModel extends PlatformVersionReleaseDate {
   const PlatformVersionReleaseDateModel({

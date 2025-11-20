@@ -13,29 +13,29 @@ abstract class ActivityFeedState extends Equatable {
 class ActivityFeedInitial extends ActivityFeedState {}
 
 class ActivityFeedLoading extends ActivityFeedState {
-  final ActivityFeedLoadingStep currentStep;
-  final double progress;
 
   const ActivityFeedLoading(this.currentStep, this.progress);
+  final ActivityFeedLoadingStep currentStep;
+  final double progress;
 
   @override
   List<Object> get props => [currentStep, progress];
 }
 
 class ActivityFeedLoaded extends ActivityFeedState {
-  final List<UserActivity> activities;
-  final List<Game> games;
 
   const ActivityFeedLoaded(this.activities, this.games);
+  final List<UserActivity> activities;
+  final List<Game> games;
 
   @override
   List<Object> get props => [activities, games];
 }
 
 class ActivityFeedError extends ActivityFeedState {
-  final String message;
 
   const ActivityFeedError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

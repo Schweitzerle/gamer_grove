@@ -235,10 +235,6 @@ class SocialPage extends StatelessWidget {
 }
 
 class _FeatureItem {
-  final IconData icon;
-  final String title;
-  final String description;
-  final VoidCallback? onTap;
 
   _FeatureItem({
     required this.icon,
@@ -246,4 +242,8 @@ class _FeatureItem {
     required this.description,
     this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback? onTap;
 }

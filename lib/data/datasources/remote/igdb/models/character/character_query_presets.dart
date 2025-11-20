@@ -1,12 +1,11 @@
 // lib/data/datasources/remote/igdb/models/character/character_query_presets.dart
 
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_field_sets.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/character/character_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 import 'package:gamer_grove/domain/entities/character/character_gender.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
-
-import '../igdb_query.dart';
-import '../igdb_filters.dart';
-import 'character_field_sets.dart';
-import 'character_filters.dart';
 
 /// Pre-configured query presets for common character queries.
 ///

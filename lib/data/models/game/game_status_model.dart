@@ -1,7 +1,7 @@
 // ===== GAME STATUS MODEL =====
 // File: lib/data/models/game/game_status_model.dart
 
-import '../../../domain/entities/game/game_status.dart';
+import 'package:gamer_grove/domain/entities/game/game_status.dart';
 
 class GameStatusModel extends GameStatus {
   const GameStatusModel({

@@ -1,9 +1,9 @@
 // ===== PLATFORM WEBSITE MODEL =====
 // File: lib/data/models/platform/platform_website_model.dart
 
-import '../../../domain/entities/platform/platform_website.dart';
-import '../../../domain/entities/website/website_type.dart';
-import '../website/website_type_model.dart';
+import 'package:gamer_grove/data/models/website/website_type_model.dart';
+import 'package:gamer_grove/domain/entities/platform/platform_website.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class PlatformWebsiteModel extends PlatformWebsite {
   const PlatformWebsiteModel({
@@ -16,6 +16,18 @@ class PlatformWebsiteModel extends PlatformWebsite {
     super.type,
     super.category,
   });
+
+  // Helper factory for creating platform websites
+  factory PlatformWebsiteModel.official(String url, {int? platformId}) {
+    return PlatformWebsiteModel(
+      id: 0,
+      checksum: '',
+      url: url,
+      trusted: true,
+      platformId: platformId,
+      type: WebsiteTypeModel.fromCategory(WebsiteCategory.official),
+    );
+  }
 
   factory PlatformWebsiteModel.fromJson(Map<String, dynamic> json) {
     return PlatformWebsiteModel(
@@ -54,18 +66,6 @@ class PlatformWebsiteModel extends PlatformWebsite {
       'type': typeId ?? type?.toJson(),
       'category': category?.value,
     };
-  }
-
-  // Helper factory for creating platform websites
-  factory PlatformWebsiteModel.official(String url, {int? platformId}) {
-    return PlatformWebsiteModel(
-      id: 0,
-      checksum: '',
-      url: url,
-      trusted: true,
-      platformId: platformId,
-      type: WebsiteTypeModel.fromCategory(WebsiteCategory.official),
-    );
   }
 }
 

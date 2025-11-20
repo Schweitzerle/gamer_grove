@@ -3,15 +3,15 @@
 // lib/domain/usecases/game_details/get_game_artwork.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../entities/artwork.dart';
-import '../../repositories/game_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/entities/artwork.dart';
+import 'package:gamer_grove/domain/repositories/game_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameArtwork extends UseCase<List<Artwork>, GetGameArtworkParams> {
-  final GameRepository repository;
 
   GetGameArtwork(this.repository);
+  final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Artwork>>> call(GetGameArtworkParams params) async {
@@ -19,14 +19,14 @@ class GetGameArtwork extends UseCase<List<Artwork>, GetGameArtworkParams> {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
 
-    return await repository.getGameArtwork(params.gameId);
+    return repository.getGameArtwork(params.gameId);
   }
 }
 
 class GetGameArtworkParams extends Equatable {
-  final int gameId;
 
   const GetGameArtworkParams({required this.gameId});
+  final int gameId;
 
   @override
   List<Object> get props => [gameId];

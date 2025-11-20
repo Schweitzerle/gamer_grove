@@ -17,8 +17,8 @@ class AppConstants {
   static const String screenshotSize = 't_screenshot_med';
 
   // Rating Constraints
-  static const double minRating = 0.0;
-  static const double maxRating = 10.0;
+  static const double minRating = 0;
+  static const double maxRating = 10;
   static const int maxTopGames = 3;
 
   // Cache Settings
@@ -32,21 +32,21 @@ class AppConstants {
   static const Duration longAnimation = Duration(milliseconds: 500);
 
   // UI Constraints
-  static const double borderRadius = 12.0;
-  static const double cardElevation = 4.0;
-  static const double avatarSize = 50.0;
-  static const double iconSize = 24.0;
+  static const double borderRadius = 12;
+  static const double cardElevation = 4;
+  static const double avatarSize = 50;
+  static const double iconSize = 24;
 
   // Spacing
-  static const double paddingSmall = 8.0;
-  static const double paddingMedium = 16.0;
-  static const double paddingLarge = 24.0;
-  static const double paddingXLarge = 32.0;
+  static const double paddingSmall = 8;
+  static const double paddingMedium = 16;
+  static const double paddingLarge = 24;
+  static const double paddingXLarge = 32;
 
   // Grid Layout
   static const int gridCrossAxisCount = 2;
   static const double gridChildAspectRatio = 0.65;
-  static const double gridSpacing = 16.0;
+  static const double gridSpacing = 16;
 
   // Text Limits
   static const int usernameMinLength = 3;

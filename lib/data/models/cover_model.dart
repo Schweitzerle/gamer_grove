@@ -1,5 +1,5 @@
 // lib/data/models/cover_model.dart
-import '../../domain/entities/cover.dart';
+import 'package:gamer_grove/domain/entities/cover.dart';
 
 class CoverModel extends Cover {
   const CoverModel({

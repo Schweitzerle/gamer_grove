@@ -10,9 +10,9 @@ abstract class UserGameDataEvent extends Equatable {
 
 /// Load all user game data for a user
 class LoadUserGameDataEvent extends UserGameDataEvent {
-  final String userId;
 
   const LoadUserGameDataEvent(this.userId);
+  final String userId;
 
   @override
   List<Object> get props => [userId];
@@ -20,13 +20,13 @@ class LoadUserGameDataEvent extends UserGameDataEvent {
 
 /// Toggle wishlist for a game
 class ToggleWishlistEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
 
   const ToggleWishlistEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -34,13 +34,13 @@ class ToggleWishlistEvent extends UserGameDataEvent {
 
 /// Toggle recommendation for a game
 class ToggleRecommendationEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
 
   const ToggleRecommendationEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -48,15 +48,15 @@ class ToggleRecommendationEvent extends UserGameDataEvent {
 
 /// Rate a game
 class RateGameEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
-  final double rating;
 
   const RateGameEvent({
     required this.userId,
     required this.gameId,
     required this.rating,
   });
+  final String userId;
+  final int gameId;
+  final double rating;
 
   @override
   List<Object> get props => [userId, gameId, rating];
@@ -64,13 +64,13 @@ class RateGameEvent extends UserGameDataEvent {
 
 /// Remove rating from a game
 class RemoveRatingEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
 
   const RemoveRatingEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -78,29 +78,29 @@ class RemoveRatingEvent extends UserGameDataEvent {
 
 /// Update top three games
 class UpdateTopThreeEvent extends UserGameDataEvent {
-  final String userId;
-  final List<int> gameIds;
 
   const UpdateTopThreeEvent({
     required this.userId,
     required this.gameIds,
   });
+  final String userId;
+  final List<int> gameIds;
 
   @override
   List<Object> get props => [userId, gameIds];
 }
 
 /// Set a game at a specific position in the user's top three
-class SetGameTopThreePositionEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
-  final int position; // 1, 2, or 3
+class SetGameTopThreePositionEvent extends UserGameDataEvent { // 1, 2, or 3
 
   const SetGameTopThreePositionEvent({
     required this.userId,
     required this.gameId,
     required this.position,
   });
+  final String userId;
+  final int gameId;
+  final int position;
 
   @override
   List<Object> get props => [userId, gameId, position];
@@ -108,13 +108,13 @@ class SetGameTopThreePositionEvent extends UserGameDataEvent {
 
 /// Remove a game from the user's top three
 class RemoveFromTopThreeEvent extends UserGameDataEvent {
-  final String userId;
-  final int gameId;
 
   const RemoveFromTopThreeEvent({
     required this.userId,
     required this.gameId,
   });
+  final String userId;
+  final int gameId;
 
   @override
   List<Object> get props => [userId, gameId];
@@ -127,9 +127,9 @@ class ClearUserGameDataEvent extends UserGameDataEvent {
 
 /// Refresh user game data from backend
 class RefreshUserGameDataEvent extends UserGameDataEvent {
-  final String userId;
 
   const RefreshUserGameDataEvent(this.userId);
+  final String userId;
 
   @override
   List<Object> get props => [userId];

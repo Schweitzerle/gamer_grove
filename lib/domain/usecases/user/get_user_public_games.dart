@@ -3,24 +3,24 @@
 // lib/domain/usecases/user/get_user_public_games.dart
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/errors/failures.dart';
-import '../../repositories/user_repository.dart';
-import '../base_usecase.dart';
+import 'package:gamer_grove/core/errors/failures.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUserPublicRatedGames
     extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
-  final UserRepository repository;
 
   GetUserPublicRatedGames(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetUserPublicGamesParams params) async {
+      GetUserPublicGamesParams params,) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserPublicRatedGames(
+    return repository.getUserPublicRatedGames(
       userId: params.userId,
       currentUserId: params.currentUserId,
       limit: params.limit,
@@ -31,18 +31,18 @@ class GetUserPublicRatedGames
 
 class GetUserPublicRecommendedGames
     extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
-  final UserRepository repository;
 
   GetUserPublicRecommendedGames(this.repository);
+  final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetUserPublicGamesParams params) async {
+      GetUserPublicGamesParams params,) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return await repository.getUserPublicRecommendedGames(
+    return repository.getUserPublicRecommendedGames(
       userId: params.userId,
       currentUserId: params.currentUserId,
       limit: params.limit,
@@ -52,10 +52,6 @@ class GetUserPublicRecommendedGames
 }
 
 class GetUserPublicGamesParams extends Equatable {
-  final String userId;
-  final String? currentUserId;
-  final int limit;
-  final int offset;
 
   const GetUserPublicGamesParams({
     required this.userId,
@@ -63,6 +59,10 @@ class GetUserPublicGamesParams extends Equatable {
     this.limit = 20,
     this.offset = 0,
   });
+  final String userId;
+  final String? currentUserId;
+  final int limit;
+  final int offset;
 
   @override
   List<Object?> get props => [userId, currentUserId, limit, offset];

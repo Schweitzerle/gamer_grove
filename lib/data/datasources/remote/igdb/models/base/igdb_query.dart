@@ -1,7 +1,7 @@
 // lib/data/datasources/remote/igdb/models/base/igdb_query.dart
 
 import 'package:equatable/equatable.dart';
-import '../igdb_filters.dart';
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart';
 
 /// Generic base class for all IGDB API queries.
 ///
@@ -27,6 +27,16 @@ import '../igdb_filters.dart';
 /// final queryString = query.buildQuery();
 /// ```
 class IgdbQuery<T> extends Equatable {
+
+  const IgdbQuery({
+    this.search,
+    this.where,
+    this.fields = const ['*'],
+    this.limit = 20,
+    this.offset = 0,
+    this.sort,
+    this.exclude,
+  });
   /// Search term for IGDB's search endpoint
   /// Use this instead of 'where name ~' for better search results
   final String? search;
@@ -50,16 +60,6 @@ class IgdbQuery<T> extends Equatable {
 
   /// Fields to exclude from the response
   final List<String>? exclude;
-
-  const IgdbQuery({
-    this.search,
-    this.where,
-    this.fields = const ['*'],
-    this.limit = 20,
-    this.offset = 0,
-    this.sort,
-    this.exclude,
-  });
 
   /// Builds the complete IGDB query string
   String buildQuery() {
@@ -95,7 +95,7 @@ class IgdbQuery<T> extends Equatable {
       parts.add('exclude ${exclude!.join(',')}; ');
     }
 
-    return parts.join('');
+    return parts.join();
   }
 
   /// Creates a copy of this query with modified parameters
@@ -170,13 +170,6 @@ class IgdbQuery<T> extends Equatable {
 ///   .build();
 /// ```
 class IgdbQueryBuilder<T> {
-  String? _search;
-  IgdbFilter? _where;
-  List<String> _fields = const ['*'];
-  int _limit = 20;
-  int _offset = 0;
-  String? _sort;
-  List<String>? _exclude;
 
   IgdbQueryBuilder();
 
@@ -189,6 +182,13 @@ class IgdbQueryBuilder<T> {
         _offset = query.offset,
         _sort = query.sort,
         _exclude = query.exclude;
+  String? _search;
+  IgdbFilter? _where;
+  List<String> _fields = const ['*'];
+  int _limit = 20;
+  int _offset = 0;
+  String? _sort;
+  List<String>? _exclude;
 
   IgdbQueryBuilder<T> withSearch(String? search) {
     _search = search;

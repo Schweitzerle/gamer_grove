@@ -18,13 +18,13 @@ abstract class UserProfileEvent extends Equatable {
 
 /// Event to load a user profile.
 class LoadUserProfileEvent extends UserProfileEvent {
-  final String? userId;
-  final String? username;
 
   const LoadUserProfileEvent({
     this.userId,
     this.username,
   });
+  final String? userId;
+  final String? username;
 
   @override
   List<Object?> get props => [userId, username];
@@ -32,13 +32,13 @@ class LoadUserProfileEvent extends UserProfileEvent {
 
 /// Event to update user profile.
 class UpdateUserProfileEvent extends UserProfileEvent {
-  final String userId;
-  final Map<String, dynamic> updates;
 
   const UpdateUserProfileEvent({
     required this.userId,
     required this.updates,
   });
+  final String userId;
+  final Map<String, dynamic> updates;
 
   @override
   List<Object> get props => [userId, updates];
@@ -46,13 +46,13 @@ class UpdateUserProfileEvent extends UserProfileEvent {
 
 /// Event to update user avatar.
 class UpdateUserAvatarEvent extends UserProfileEvent {
-  final String userId;
-  final String imageData;
 
   const UpdateUserAvatarEvent({
     required this.userId,
     required this.imageData,
   });
+  final String userId;
+  final String imageData;
 
   @override
   List<Object> get props => [userId, imageData];
@@ -60,13 +60,13 @@ class UpdateUserAvatarEvent extends UserProfileEvent {
 
 /// Event to follow a user.
 class FollowUserEvent extends UserProfileEvent {
-  final String currentUserId;
-  final String targetUserId;
 
   const FollowUserEvent({
     required this.currentUserId,
     required this.targetUserId,
   });
+  final String currentUserId;
+  final String targetUserId;
 
   @override
   List<Object> get props => [currentUserId, targetUserId];
@@ -74,13 +74,13 @@ class FollowUserEvent extends UserProfileEvent {
 
 /// Event to unfollow a user.
 class UnfollowUserEvent extends UserProfileEvent {
-  final String currentUserId;
-  final String targetUserId;
 
   const UnfollowUserEvent({
     required this.currentUserId,
     required this.targetUserId,
   });
+  final String currentUserId;
+  final String targetUserId;
 
   @override
   List<Object> get props => [currentUserId, targetUserId];
@@ -88,15 +88,15 @@ class UnfollowUserEvent extends UserProfileEvent {
 
 /// Event to load followers list.
 class LoadFollowersEvent extends UserProfileEvent {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const LoadFollowersEvent({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];
@@ -104,15 +104,15 @@ class LoadFollowersEvent extends UserProfileEvent {
 
 /// Event to load following list.
 class LoadFollowingEvent extends UserProfileEvent {
-  final String userId;
-  final int? limit;
-  final int? offset;
 
   const LoadFollowingEvent({
     required this.userId,
     this.limit,
     this.offset,
   });
+  final String userId;
+  final int? limit;
+  final int? offset;
 
   @override
   List<Object?> get props => [userId, limit, offset];

@@ -2,9 +2,9 @@
 // ERWEITERTE WEBSITEMODEL MIT TOJSON
 // ===========================================
 // lib/data/models/website/website_model.dart
-import '../../../domain/entities/website/website.dart';
-import '../../../domain/entities/website/website_type.dart';
-import 'website_type_model.dart';
+import 'package:gamer_grove/data/models/website/website_type_model.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class WebsiteModel extends Website {
   const WebsiteModel({
@@ -13,6 +13,15 @@ class WebsiteModel extends Website {
     required super.type,
     super.title,
   });
+
+  factory WebsiteModel.fromUrl(String url, WebsiteType type,
+      {int? id,}) {
+    return WebsiteModel(
+      id: id ?? 0,
+      url: url,
+      type: type,
+    );
+  }
 
   factory WebsiteModel.fromJson(Map<String, dynamic> json) {
     return WebsiteModel(
@@ -48,14 +57,5 @@ class WebsiteModel extends Website {
       'type': type,
       'title': title,
     };
-  }
-
-  factory WebsiteModel.fromUrl(String url, WebsiteType type,
-      {int? id, String? customTitle}) {
-    return WebsiteModel(
-      id: id ?? 0,
-      url: url,
-      type: type,
-    );
   }
 }

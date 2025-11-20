@@ -5,27 +5,25 @@
 // lib/presentation/pages/company/company_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/company/company.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/website/website.dart';
+import 'package:gamer_grove/presentation/widgets/accordion_tile.dart';
+import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/constants/app_constants.dart';
-import '../../../core/widgets/cached_image_widget.dart';
-import '../../../domain/entities/game/game.dart';
-import '../../../domain/entities/website/website.dart';
-import '../../widgets/accordion_tile.dart';
-import '../../widgets/game_card.dart';
-import '../../../core/utils/navigations.dart';
-import '../../widgets/sections/franchise_collection_section.dart';
 
 class CompanyDetailScreen extends StatefulWidget {
-  final Company company;
-  final List<Game> games;
 
   const CompanyDetailScreen({
-    super.key,
-    required this.company,
-    required this.games,
+    required this.company, required this.games, super.key,
   });
+  final Company company;
+  final List<Game> games;
 
   @override
   State<CompanyDetailScreen> createState() => _CompanyDetailScreenState();
@@ -63,35 +61,27 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   SeriesItem _createDevelopedGamesSeriesItem() {
     final developedGames = widget.company.developedGames ?? [];
     return SeriesItem(
-      type: null,
       title: 'Developed Games',
       games: developedGames.take(10).toList(),
       totalCount: developedGames.length,
       accentColor: Colors.blue,
       icon: Icons.code,
-      franchise: null,
-      collection: null,
       companyId: widget.company.id,
       companyName: widget.company.name,
       isDeveloper: true,
-      isPublisher: null,
     );
   }
 
   SeriesItem _createPublishedGamesSeriesItem() {
     final publishedGames = widget.company.publishedGames ?? [];
     return SeriesItem(
-      type: null,
       title: 'Published Games',
       games: publishedGames.take(10).toList(),
       totalCount: publishedGames.length,
       accentColor: Colors.green,
       icon: Icons.library_books,
-      franchise: null,
-      collection: null,
       companyId: widget.company.id,
       companyName: widget.company.name,
-      isDeveloper: null,
       isPublisher: true,
     );
   }
@@ -164,7 +154,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
               imageUrl: ImageUtils.getLargeImageUrl(
                 widget.company.logoUrl,
               ),
-              fit: BoxFit.cover,
               placeholder: _buildFallbackHero(),
             )
           : _buildFallbackHero(),
@@ -194,8 +183,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
               stops: const [0.0, 0.05, 0.95, 1.0],
               colors: [
                 Theme.of(context).colorScheme.surface,
@@ -261,10 +248,9 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                       child: widget.company.hasLogo &&
                               widget.company.logoUrl != null
                           ? CachedImageWidget(
-                              imageUrl: widget.company.logoUrl!,
-                              fit: BoxFit.cover,
+                              imageUrl: widget.company.logoUrl,
                             )
-                          : Container(
+                          : ColoredBox(
                               color: _getCompanyAccentColor().withOpacity(0.1),
                               child: Icon(
                                 Icons.business,
@@ -362,18 +348,18 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
 
   Widget _buildCompanyContent() {
     return SliverToBoxAdapter(
-      child: Container(
+      child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge), // Space for floating card
+                height: AppConstants.paddingLarge,), // Space for floating card
 
             // Combined Company Information Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium),
+                  horizontal: AppConstants.paddingMedium,),
               child: _buildCombinedCompanyAccordion(),
             ),
 
@@ -384,7 +370,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                 (widget.company.developedGames?.isNotEmpty ?? false))
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium),
+                    horizontal: AppConstants.paddingMedium,),
                 child:
                     _buildTabView(context, _createDevelopedGamesSeriesItem()),
               ),
@@ -398,7 +384,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                 (widget.company.publishedGames?.isNotEmpty ?? false))
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium),
+                    horizontal: AppConstants.paddingMedium,),
                 child:
                     _buildTabView(context, _createPublishedGamesSeriesItem()),
               ),
@@ -412,13 +398,13 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
 
   Widget _buildCombinedCompanyAccordion() {
     // Count total accordion items to determine isFirst/isLast
-    int accordionCount = 0;
+    var accordionCount = 0;
     if (widget.company.hasDescription) accordionCount++;
     accordionCount++; // Company Details always present
     if (widget.company.hasParent) accordionCount++;
     if (_hasAnyLinks()) accordionCount++; // Combined links section
 
-    int currentIndex = 0;
+    var currentIndex = 0;
 
     return Card(
       elevation: 2,
@@ -539,7 +525,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 8, vertical: 4,),
                         decoration: BoxDecoration(
                           color: _getCompanyAccentColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -668,7 +654,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
               title: 'External Links',
               icon: Icons.link,
               isFirst: currentIndex == 0,
-              isLast: true,
               child: _buildCombinedLinksContent(),
             ),
           ],
@@ -678,7 +663,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   bool _hasAnyLinks() {
-    return (widget.company.websites != null && widget.company.websites!.isNotEmpty) ||
+    return (widget.company.websites != null &&
+            widget.company.websites!.isNotEmpty) ||
         widget.company.url != null;
   }
 
@@ -698,7 +684,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: accentColor.withOpacity(0.2),
-          width: 1,
         ),
       ),
       child: Row(
@@ -1177,8 +1162,10 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
           children: [
             // Series Info Header
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall),
+              padding: const EdgeInsets.only(
+                  left: AppConstants.paddingSmall,
+                  right: AppConstants.paddingSmall,
+                  top: AppConstants.paddingSmall,),
               child: Row(
                 children: [
                   Container(
@@ -1223,7 +1210,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                     TextButton.icon(
                       onPressed: () => _navigateToSeries(context, item),
                       icon: Icon(Icons.arrow_forward,
-                          size: 16, color: item.accentColor),
+                          size: 16, color: item.accentColor,),
                       label: Text(
                         'View All',
                         style: TextStyle(color: item.accentColor),
@@ -1264,8 +1251,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   Widget _buildGamesList(List<Game> games) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
+      padding: const EdgeInsets.only(
+          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall,),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
@@ -1368,10 +1355,9 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                     borderRadius: BorderRadius.circular(22),
                     child: parent.hasLogo && parent.logoUrl != null
                         ? CachedImageWidget(
-                            imageUrl: parent.logoUrl!,
-                            fit: BoxFit.cover,
+                            imageUrl: parent.logoUrl,
                           )
-                        : Container(
+                        : ColoredBox(
                             color: _getCompanyAccentColor().withOpacity(0.1),
                             child: Icon(
                               Icons.business,
@@ -1426,7 +1412,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Error launching URL: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not open $url')),
@@ -1436,24 +1421,7 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   void _logCompanyData() {
-    print('\n=== 🏢 COMPANY DETAIL SCREEN LOADED ===');
-    print('🎯 Company: ${widget.company.name} (ID: ${widget.company.id})');
-    print('🎮 Games: ${widget.games.length}');
-    print('💼 Developer: ${widget.company.isDeveloper}');
-    print('📦 Publisher: ${widget.company.isPublisher}');
-    print('🏢 Has Parent: ${widget.company.hasParent}');
     if (widget.company.hasParent) {
-      print('   Parent: ${widget.company.parentCompany!.name}');
     }
-    print('🌐 Websites: ${widget.company.websites?.length ?? 0}');
-    print('🖼️ Logo: ${widget.company.hasLogo ? 'Available' : 'Fallback'}');
-    print(
-        '📄 Description: ${widget.company.hasDescription ? 'Available' : 'None'}');
-    print('🔗 URL: ${widget.company.url ?? 'None'}');
-    print('🏳️ Country: ${widget.company.country ?? 'Unknown'}');
-    print(
-        '📅 Founded: ${widget.company.hasFoundingDate ? _formatDate(widget.company.startDate!) : 'Unknown'}');
-    print('🔑 Slug: ${widget.company.slug ?? 'None'}');
-    print('=== END COMPANY DETAIL LOG ===\n');
   }
 }

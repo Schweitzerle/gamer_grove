@@ -1,6 +1,6 @@
 // lib/data/models/character_species_model.dart
 
-import '../../../domain/entities/character/character_species.dart';
+import 'package:gamer_grove/domain/entities/character/character_species.dart';
 
 class CharacterSpeciesModel extends CharacterSpecies {
   const CharacterSpeciesModel({

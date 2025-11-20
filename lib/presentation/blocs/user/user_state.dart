@@ -24,9 +24,9 @@ class UserProfileLoading extends UserProfileState {
 
 /// State when profile is loaded successfully.
 class UserProfileLoaded extends UserProfileState {
-  final User user;
 
   const UserProfileLoaded(this.user);
+  final User user;
 
   @override
   List<Object> get props => [user];
@@ -34,9 +34,9 @@ class UserProfileLoaded extends UserProfileState {
 
 /// State when profile update succeeds.
 class UserProfileUpdated extends UserProfileState {
-  final User user;
 
   const UserProfileUpdated(this.user);
+  final User user;
 
   @override
   List<Object> get props => [user];
@@ -44,9 +44,9 @@ class UserProfileUpdated extends UserProfileState {
 
 /// State when avatar upload succeeds.
 class AvatarUploadSuccess extends UserProfileState {
-  final String avatarUrl;
 
   const AvatarUploadSuccess(this.avatarUrl);
+  final String avatarUrl;
 
   @override
   List<Object> get props => [avatarUrl];
@@ -54,9 +54,9 @@ class AvatarUploadSuccess extends UserProfileState {
 
 /// State when follow action succeeds.
 class FollowSuccess extends UserProfileState {
-  final String targetUserId;
 
   const FollowSuccess(this.targetUserId);
+  final String targetUserId;
 
   @override
   List<Object> get props => [targetUserId];
@@ -64,9 +64,9 @@ class FollowSuccess extends UserProfileState {
 
 /// State when unfollow action succeeds.
 class UnfollowSuccess extends UserProfileState {
-  final String targetUserId;
 
   const UnfollowSuccess(this.targetUserId);
+  final String targetUserId;
 
   @override
   List<Object> get props => [targetUserId];
@@ -74,9 +74,9 @@ class UnfollowSuccess extends UserProfileState {
 
 /// State when followers are loaded.
 class FollowersLoaded extends UserProfileState {
-  final List<User> followers;
 
   const FollowersLoaded(this.followers);
+  final List<User> followers;
 
   @override
   List<Object> get props => [followers];
@@ -84,9 +84,9 @@ class FollowersLoaded extends UserProfileState {
 
 /// State when following list is loaded.
 class FollowingLoaded extends UserProfileState {
-  final List<User> following;
 
   const FollowingLoaded(this.following);
+  final List<User> following;
 
   @override
   List<Object> get props => [following];
@@ -94,9 +94,9 @@ class FollowingLoaded extends UserProfileState {
 
 /// State when operation fails.
 class UserProfileError extends UserProfileState {
-  final String message;
 
   const UserProfileError(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];

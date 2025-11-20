@@ -2,11 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class LanguageSupportType extends Equatable {
-  final int id;
-  final String checksum;
-  final String name;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   const LanguageSupportType({
     required this.id,
@@ -15,6 +10,11 @@ class LanguageSupportType extends Equatable {
     this.createdAt,
     this.updatedAt,
   });
+  final int id;
+  final String checksum;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   // Helper to determine support level
   bool get isAudio => name.toLowerCase().contains('audio');

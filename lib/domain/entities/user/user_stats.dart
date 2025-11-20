@@ -5,15 +5,7 @@ import 'package:equatable/equatable.dart';
 /// Domain entity representing user statistics.
 ///
 /// Contains aggregated statistics about a user's gaming activity.
-class UserStats extends Equatable {
-  final int totalGamesRated;
-  final int totalGamesWishlisted;
-  final int totalGamesRecommended;
-  final double? averageRating;
-  final int followersCount;
-  final int followingCount;
-  final int? totalPlaytime; // Optional: if tracking playtime
-  final int? totalAchievements; // Optional: if tracking achievements
+class UserStats extends Equatable { // Optional: if tracking achievements
 
   const UserStats({
     this.totalGamesRated = 0,
@@ -25,6 +17,14 @@ class UserStats extends Equatable {
     this.totalPlaytime,
     this.totalAchievements,
   });
+  final int totalGamesRated;
+  final int totalGamesWishlisted;
+  final int totalGamesRecommended;
+  final double? averageRating;
+  final int followersCount;
+  final int followingCount;
+  final int? totalPlaytime; // Optional: if tracking playtime
+  final int? totalAchievements;
 
   /// Empty stats instance (default values)
   static const empty = UserStats();

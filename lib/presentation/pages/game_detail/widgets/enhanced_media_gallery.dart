@@ -5,26 +5,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/image_utils.dart';
-import '../../../../core/widgets/cached_image_widget.dart';
-import '../../../../domain/entities/event/event.dart';
-import '../../../../domain/entities/game/game.dart';
-import '../../../../domain/entities/game/game_video.dart';
-import '../../allVideosGrid/all_videos_grid.dart';
-import '../../all_images_grid/all_images_grid.dart';
-import '../../full_screen_image_viewer/full_screen_image_viewer.dart';
-import '../../videoPlayer/video_player_screen.dart';
+import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/domain/entities/event/event.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
+import 'package:gamer_grove/domain/entities/game/game_video.dart';
+import 'package:gamer_grove/presentation/pages/allVideosGrid/all_videos_grid.dart';
+import 'package:gamer_grove/presentation/pages/all_images_grid/all_images_grid.dart';
+import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_screen_image_viewer.dart';
+import 'package:gamer_grove/presentation/pages/videoPlayer/video_player_screen.dart';
 
 class EnhancedMediaGallery extends StatefulWidget {
-  final Game? game;
-  final Event? event;
 
   const EnhancedMediaGallery({
     super.key,
     this.game,
     this.event,
   });
+  final Game? game;
+  final Event? event;
 
   @override
   State<EnhancedMediaGallery> createState() => _EnhancedMediaGalleryState();
@@ -41,7 +41,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
   }
 
   void _initializeTabs() {
-    int tabCount = 0;
+    var tabCount = 0;
     if (widget.game != null) {
       if (widget.game!.screenshots.isNotEmpty) tabCount++;
       if (widget.game!.videos.isNotEmpty) tabCount++;
@@ -65,8 +65,8 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   @override
   Widget build(BuildContext context) {
-    final List<Tab> tabs = [];
-    final List<Widget> tabViews = [];
+    final tabs = <Tab>[];
+    final tabViews = <Widget>[];
 
     if (widget.game != null) {
       if (widget.game!.screenshots.isNotEmpty) {
@@ -157,10 +157,10 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   // ✅ Staggered Tiles erstellen
   List<StaggeredGridTile> _buildStaggeredTiles(List<String> displayImages,
-      List<String> allImages, String type, bool hasMore) {
+      List<String> allImages, String type, bool hasMore,) {
     final tiles = <StaggeredGridTile>[];
 
-    for (int i = 0; i < displayImages.length; i++) {
+    for (var i = 0; i < displayImages.length; i++) {
       final isLastTile = i == displayImages.length - 1;
       final showSeeAll = isLastTile && hasMore;
 
@@ -171,23 +171,18 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
         case 0: // Hauptbild links
           crossAxisCells = 2;
           mainAxisCells = 2;
-          break;
         case 1: // Oben rechts
           crossAxisCells = 2;
           mainAxisCells = 1;
-          break;
         case 2: // Unten rechts 1 (quadratisch)
           crossAxisCells = 1;
           mainAxisCells = 1;
-          break;
         case 3: // Unten rechts 2 (quadratisch)
           crossAxisCells = 1;
           mainAxisCells = 1;
-          break;
         case 4: // See All (falls vorhanden)
           crossAxisCells = 4;
           mainAxisCells = 2;
-          break;
         default:
           crossAxisCells = 1;
           mainAxisCells = 1;
@@ -243,13 +238,12 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                 tag: 'image_${type}_$index',
                 child: CachedImageWidget(
                   imageUrl: ImageUtils.getLargeImageUrl(imageUrl),
-                  fit: BoxFit.cover,
-                  placeholder: Container(
+                  placeholder: ColoredBox(
                     color:
                         Theme.of(context).colorScheme.surfaceContainerHighest,
                     child: const Center(child: CircularProgressIndicator()),
                   ),
-                  errorWidget: Container(
+                  errorWidget: ColoredBox(
                     color: Theme.of(context).colorScheme.errorContainer,
                     child: Icon(
                       Icons.broken_image,
@@ -373,9 +367,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                           ),
                           child: CachedImageWidget(
                             imageUrl: video.thumbnailUrl,
-                            // ✅ Verwendet den getter
-                            fit: BoxFit.cover,
-                            errorWidget: Container(
+                            errorWidget: ColoredBox(
                               color: Colors.red.withOpacity(0.1),
                               child: const Icon(
                                 Icons.smart_display,
@@ -504,7 +496,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   // ✅ Navigation Methoden
   void _showFullScreenViewer(
-      List<String> images, int initialIndex, String type) {
+      List<String> images, int initialIndex, String type,) {
     Navigator.of(context).push(
       PageRouteBuilder<void>(
         pageBuilder: (context, animation, _) => FadeTransition(
@@ -516,7 +508,6 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
             gameName: widget.game?.name ?? '',
           ),
         ),
-        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }

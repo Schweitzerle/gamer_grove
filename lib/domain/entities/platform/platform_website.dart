@@ -2,19 +2,9 @@
 // File: lib/domain/entities/platform/platform_website.dart
 
 import 'package:equatable/equatable.dart';
-import '../website/website_type.dart';
+import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class PlatformWebsite extends Equatable {
-  final int id;
-  final String checksum;
-  final String url;
-  final bool trusted;
-  final int? platformId;
-  final int? typeId;
-  final WebsiteType? type;
-
-  // Legacy support
-  final WebsiteCategory? category;
 
   const PlatformWebsite({
     required this.id,
@@ -26,6 +16,16 @@ class PlatformWebsite extends Equatable {
     this.type,
     this.category,
   });
+  final int id;
+  final String checksum;
+  final String url;
+  final bool trusted;
+  final int? platformId;
+  final int? typeId;
+  final WebsiteType? type;
+
+  // Legacy support
+  final WebsiteCategory? category;
 
   // Helper getters (same as Website entity)
   String get typeName => type?.type ?? category?.typeName ?? 'Unknown';
