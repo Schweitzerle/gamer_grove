@@ -1,9 +1,10 @@
 // core/constants/app_constants.dart
 class AppConstants {
   // App Info
-  static const String appName = 'Gamer Grove';
+  static const String appName = 'GamerGrove';
   static const String appVersion = '2.0.0';
-  static const String appDescription = 'Discover, rate and recommend videogames';
+  static const String appDescription =
+      'Discover, rate and recommend videogames';
 
   // Pagination
   static const int defaultPageSize = 20;
@@ -59,21 +60,28 @@ class AppConstants {
   static const String usernamePattern = r'^[a-zA-Z0-9_]+$';
 
   // Error Messages
-  static const String networkErrorMessage = 'No internet connection. Please check your network.';
-  static const String serverErrorMessage = 'Something went wrong. Please try again later.';
-  static const String authErrorMessage = 'Authentication failed. Please check your credentials.';
-  static const String validationErrorMessage = 'Please check your input and try again.';
+  static const String networkErrorMessage =
+      'No internet connection. Please check your network.';
+  static const String serverErrorMessage =
+      'Something went wrong. Please try again later.';
+  static const String authErrorMessage =
+      'Authentication failed. Please check your credentials.';
+  static const String validationErrorMessage =
+      'Please check your input and try again.';
 
   // Success Messages
   static const String loginSuccessMessage = 'Welcome back!';
   static const String signupSuccessMessage = 'Account created successfully!';
-  static const String profileUpdateSuccessMessage = 'Profile updated successfully!';
-  static const String passwordUpdateSuccessMessage = 'Password updated successfully!';
+  static const String profileUpdateSuccessMessage =
+      'Profile updated successfully!';
+  static const String passwordUpdateSuccessMessage =
+      'Password updated successfully!';
 
   // Feature Flags
   static const bool enableDarkMode = true;
   static const bool enableAnalytics = false; // Disabled for student version
-  static const bool enableCrashReporting = false; // Disabled for student version
+  static const bool enableCrashReporting =
+      false; // Disabled for student version
   static const bool enableOfflineMode = true;
 
   // Supported Locales

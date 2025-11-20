@@ -52,3 +52,6 @@ app.*.map.json
 *.keystore
 /android/key.properties
 key.properties
+
+# Generated Envied file
+lib/core/env/env.g.dart

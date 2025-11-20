@@ -3,7 +3,6 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gamer_grove/injection_container.dart' as di;
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -19,9 +18,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load environment variables
-  await dotenv.load();
 
   // System UI
   SystemChrome.setEnabledSystemUIMode(
@@ -60,7 +56,7 @@ class GamerGroveApp extends StatelessWidget {
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
             return MaterialApp(
-              title: 'Gamer Grove',
+              title: 'GamerGrove',
               debugShowCheckedModeBanner: false,
               theme: FlexThemeData.light(
                 scheme: state.flexScheme,
@@ -85,7 +81,6 @@ class GamerGroveApp extends StatelessWidget {
 /// Listener widget that loads user game data when user logs in
 /// and clears it when user logs out
 class _UserGameDataListener extends StatelessWidget {
-
   const _UserGameDataListener({required this.child});
   final Widget child;
 

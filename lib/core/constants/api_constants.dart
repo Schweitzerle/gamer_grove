@@ -1,14 +1,14 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gamer_grove/core/env/env.dart';
 
 class ApiConstants {
   // IGDB API
   static const String igdbBaseUrl = 'https://api.igdb.com/v4';
-  static final String igdbClientId = dotenv.env['IGDB_CLIENT_ID']!;
-  static final String igdbClientSecret = dotenv.env['IGDB_CLIENT_SECRET']!;
+  static final String igdbClientId = Env.igdbClientId;
+  static final String igdbClientSecret = Env.igdbClientSecret;
 
   // Supabase
-  static final String supabaseUrl = dotenv.env['SUPABASE_URL']!;
-  static final String supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY']!;
+  static final String supabaseUrl = Env.supabaseUrl;
+  static final String supabaseAnonKey = Env.supabaseAnonKey;
 
   // API Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
@@ -22,7 +22,8 @@ class ApiConstants {
 class IGDBEndpoints {
   static const String ageRatings = 'age_ratings';
   static const String ageRatingCategories = 'age_rating_categories';
-  static const String ageRatingContentDescriptions = 'age_rating_content_descriptions';
+  static const String ageRatingContentDescriptions =
+      'age_rating_content_descriptions';
   static const String ageRatingOrganizations = 'age_rating_organizations';
   static const String alternativeNames = 'alternative_names';
   static const String artworks = 'artworks';
