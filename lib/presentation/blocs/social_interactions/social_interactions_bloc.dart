@@ -33,11 +33,15 @@ class SocialInteractionsBloc
     FollowUserRequested event,
     Emitter<SocialInteractionsState> emit,
   ) async {
+    print('🔵 [SocialInteractions] Follow request for user: ${event.targetUserId}');
+
     if (currentUserId == null) {
+      print('🔴 [SocialInteractions] Error: No current user ID');
       emit(state.setError(event.targetUserId, 'You must be logged in'));
       return;
     }
 
+    print('🔵 [SocialInteractions] Current user: $currentUserId');
     emit(state.setLoading(event.targetUserId, true));
 
     final result = await followUser(
@@ -48,8 +52,14 @@ class SocialInteractionsBloc
     );
 
     result.fold(
-      (failure) => emit(state.setError(event.targetUserId, failure.message)),
-      (_) => emit(state.updateFollowStatus(event.targetUserId, true)),
+      (failure) {
+        print('🔴 [SocialInteractions] Follow failed: ${failure.message}');
+        emit(state.setError(event.targetUserId, failure.message));
+      },
+      (_) {
+        print('🟢 [SocialInteractions] Follow successful');
+        emit(state.updateFollowStatus(event.targetUserId, true));
+      },
     );
   }
 

@@ -20,7 +20,7 @@ class UserQueries {
   /// final user = await query.build(supabase);
   /// ```
   static SupabaseQuery getProfileById(String userId) {
-    return SupabaseQuery('users').select('''
+    return SupabaseQuery('profiles').select('''
           id,
           username,
           display_name,
@@ -52,7 +52,7 @@ class UserQueries {
   /// final user = await query.maybeSingle().build(supabase);
   /// ```
   static SupabaseQuery getProfileByUsername(String username) {
-    return SupabaseQuery('users').select('''
+    return SupabaseQuery('profiles').select('''
           id,
           username,
           display_name,
@@ -89,7 +89,7 @@ class UserQueries {
     Pagination? pagination,
     SortBy? sortBy,
   }) {
-    return SupabaseQuery('users')
+    return SupabaseQuery('profiles')
         .select(
             'id, username, display_name, avatar_url, country, followers_count, total_games_rated',)
         .filter(const IsTrueFilter('is_profile_public'))
@@ -108,7 +108,7 @@ class UserQueries {
     String searchTerm, {
     Pagination? pagination,
   }) {
-    return SupabaseQuery('users')
+    return SupabaseQuery('profiles')
         .select('id, username, display_name, avatar_url, followers_count')
         .filter(ILikeFilter('username', '%$searchTerm%'))
         .filter(const IsTrueFilter('is_profile_public'))
@@ -126,7 +126,7 @@ class UserQueries {
   static SupabaseQuery getPopularUsers({
     int limit = 10,
   }) {
-    return SupabaseQuery('users')
+    return SupabaseQuery('profiles')
         .select(
             'id, username, display_name, avatar_url, followers_count, total_games_rated',)
         .filter(const IsTrueFilter('is_profile_public'))
@@ -286,7 +286,7 @@ class FollowQueries {
         .select('''
           follower_id,
           created_at,
-          users!user_follows_follower_id_fkey(
+          profiles!user_follows_follower_id_fkey(
             id,
             username,
             display_name,
@@ -329,7 +329,7 @@ class FollowQueries {
         .select('''
           following_id,
           created_at,
-          users!user_follows_following_id_fkey(
+          profiles!user_follows_following_id_fkey(
             id,
             username,
             display_name,
@@ -388,7 +388,7 @@ class FollowQueries {
         .select('''
           follower_id,
           created_at,
-          users!user_follows_follower_id_fkey(
+          profiles!user_follows_follower_id_fkey(
             id,
             username,
             display_name,
@@ -442,7 +442,7 @@ class ActivityQueries {
           game_id,
           metadata,
           created_at,
-          users(
+          profiles(
             username,
             display_name,
             avatar_url

@@ -44,7 +44,7 @@ class ActivityModel {
       metadata: json['metadata'] as Map<String, dynamic>?,
       isPublic: json['is_public'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
-      userData: json['users'] as Map<String, dynamic>?,
+      userData: json['profiles'] as Map<String, dynamic>?,
     );
   }
 
@@ -88,7 +88,7 @@ class ActivityModel {
       'metadata': metadata,
       'is_public': isPublic,
       'created_at': createdAt.toIso8601String(),
-      if (userData != null) 'users': userData,
+      if (userData != null) 'profiles': userData,
     };
   }
 

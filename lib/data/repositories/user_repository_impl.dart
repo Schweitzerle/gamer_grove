@@ -356,7 +356,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         );
         return followersData.map((data) {
           // Extract nested user data from join
-          final userData = data['users'] as Map<String, dynamic>;
+          final userData = data['profiles'] as Map<String, dynamic>;
           return UserModel.fromJson(userData).toEntity();
         }).toList();
       },
@@ -379,7 +379,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         );
         return followingData.map((data) {
           // Extract nested user data from join
-          final userData = data['users'] as Map<String, dynamic>;
+          final userData = data['profiles'] as Map<String, dynamic>;
           return UserModel.fromJson(userData).toEntity();
         }).toList();
       },
@@ -912,11 +912,11 @@ class UserRepositoryImpl extends SupabaseBaseRepository
       operation: () async {
         final response = await supabase
             .from('blocked_users')
-            .select('blocked_id, users!blocked_users_blocked_id_fkey(*)')
+            .select('blocked_id, profiles!blocked_users_blocked_id_fkey(*)')
             .eq('blocker_id', userId);
 
         return (response as List)
-            .map((data) => UserModel.fromJson(data['users']).toEntity())
+            .map((data) => UserModel.fromJson(data['profiles']).toEntity())
             .toList();
       },
       errorMessage: 'Failed to get blocked users',

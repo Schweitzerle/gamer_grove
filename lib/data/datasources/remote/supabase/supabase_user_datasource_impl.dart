@@ -66,7 +66,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       // Add updated_at timestamp
       updates['updated_at'] = DateTime.now().toIso8601String();
 
-      final result = await SupabaseUpdate('users')
+      final result = await SupabaseUpdate('profiles')
           .set(updates)
           .filter(EqualFilter('id', userId))
           .returning('*')
@@ -844,7 +844,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
       // For each followed user, check if they rated this game
       for (final followData in followingData) {
-        final userData = followData['users'] as Map<String, dynamic>?;
+        final userData = followData['profiles'] as Map<String, dynamic>?;
         if (userData == null) continue;
 
         final followedUserId = userData['id'] as String;
