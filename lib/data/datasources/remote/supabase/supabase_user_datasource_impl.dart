@@ -659,7 +659,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       final searchPattern = '%$query%';
 
       final result = await _supabase
-          .from('users')
+          .from('profiles')
           .select()
           .or('username.ilike.$searchPattern,display_name.ilike.$searchPattern')
           .eq('is_profile_public', true)
@@ -707,7 +707,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
   }) async {
     try {
       final result = await _supabase
-          .from('users')
+          .from('profiles')
           .select()
           .order('total_games_rated', ascending: false)
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 100) - 1);

@@ -112,13 +112,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       // 3. Update profile
       await supabaseClient
-          .from('users')
+          .from('profiles')
           .update(updates)
           .eq('id', widget.user.id);
 
       // 4. Fetch updated user data
       final updatedData = await supabaseClient
-          .from('users')
+          .from('profiles')
           .select()
           .eq('id', widget.user.id)
           .single();

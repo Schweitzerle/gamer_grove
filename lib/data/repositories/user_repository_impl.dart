@@ -474,7 +474,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response = await supabase
-            .from('users')
+            .from('profiles')
             .select()
             .order('created_at', ascending: false)
             .limit(limit)
@@ -970,7 +970,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response =
-            await supabase.from('users').select().inFilter('id', userIds);
+            await supabase.from('profiles').select().inFilter('id', userIds);
 
         return (response as List)
             .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
@@ -1009,7 +1009,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response = await supabase
-            .from('users')
+            .from('profiles')
             .select('id')
             .eq('username', username)
             .maybeSingle();
@@ -1096,7 +1096,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, void>> deactivateUserAccount(String userId) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await supabase.from('users').update({
+        await supabase.from('profiles').update({
           'is_active': false,
           'deactivated_at': DateTime.now().toIso8601String(),
         }).eq('id', userId);
@@ -1109,7 +1109,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, void>> reactivateUserAccount(String userId) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await supabase.from('users').update({
+        await supabase.from('profiles').update({
           'is_active': true,
           'deactivated_at': null,
         }).eq('id', userId);
@@ -1122,7 +1122,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   Future<Either<Failure, void>> deleteUserAccount(String userId) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await supabase.from('users').delete().eq('id', userId);
+        await supabase.from('profiles').delete().eq('id', userId);
       },
       errorMessage: 'Failed to delete user account',
     );

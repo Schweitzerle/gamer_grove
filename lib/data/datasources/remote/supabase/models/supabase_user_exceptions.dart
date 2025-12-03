@@ -197,7 +197,7 @@ class UserExceptionMapper {
   /// Example:
   /// ```dart
   /// try {
-  ///   await supabase.from('users').select().eq('id', userId).single();
+  ///   await supabase.from('profiles').select().eq('id', userId).single();
   /// } catch (e) {
   ///   throw UserExceptionMapper.map(e);
   /// }

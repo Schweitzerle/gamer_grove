@@ -58,7 +58,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         // Get full user profile from database
         final profileResult = await this
             .supabase
-            .from('users')
+            .from('profiles')
             .select()
             .eq('id', authUser.id)
             .single();
@@ -92,7 +92,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
 
         final profileResult = await this
             .supabase
-            .from('users')
+            .from('profiles')
             .select()
             .eq('id', authUser.id)
             .single();
@@ -121,7 +121,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         }
 
         // Delete user data from database
-        await this.supabase.from('users').delete().eq('id', userId);
+        await this.supabase.from('profiles').delete().eq('id', userId);
 
         // Delete auth user (this will cascade delete related data)
         await authDataSource.signOut();
@@ -169,7 +169,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         // Get full profile from database
         final profileResult = await this
             .supabase
-            .from('users')
+            .from('profiles')
             .select()
             .eq('id', authUser.id)
             .maybeSingle();
@@ -238,7 +238,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
         // Get full profile when auth state changes
         final profileResult = await this
             .supabase
-            .from('users')
+            .from('profiles')
             .select()
             .eq('id', user.id)
             .maybeSingle();
@@ -273,7 +273,7 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
       operation: () async {
         final result = await this
             .supabase
-            .from('users')
+            .from('profiles')
             .select('username')
             .eq('username', username)
             .maybeSingle();
