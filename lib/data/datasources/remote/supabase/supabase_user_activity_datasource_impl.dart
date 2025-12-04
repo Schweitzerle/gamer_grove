@@ -29,7 +29,7 @@ class SupabaseUserActivityDataSourceImpl
       // 2. Fetch activities from the followed users
       final activityResponse = await _supabase
           .from('user_activity')
-          .select('*, user:users(*)')
+          .select('*, user:profiles(*)')
           .inFilter('user_id', followingIds)
           .inFilter('activity_type',
               ['rated', 'updated_top_three', 'recommended', 'wishlisted'],)
