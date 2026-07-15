@@ -6,18 +6,29 @@
 
 **Last updated:** 2026-07-15 (Session 1)
 **Current branch:** `chore/phase0-baseline`
-**Current phase:** Phase 0 (Baseline & Audit) — near complete
+**Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS
 
 ---
 
 ## TL;DR State
 
-- Baseline ist **grün gemacht**: `flutter analyze` 0 errors, Debug-APK baut, Codegen läuft.
-- Zwei Baseline-Commits auf `chore/phase0-baseline`:
+- **Phase 0 abgeschlossen & verifiziert.** Baseline grün: `flutter analyze` 0 errors,
+  Debug-APK baut (exit 0), Codegen läuft, 439 Dateien formatiert.
+- **Phase 1 begonnen:** CI-Pipeline steht, erste echte Tests (AuthBloc, 11 grün),
+  4173 LOC Dead Code entfernt.
+- Vollständige Audit-Ergebnisse (Architektur, Security, TODOs, Dead Code) in **`AUDIT.md`**.
+- Commits auf `chore/phase0-baseline` (noch nicht gepusht — CI-Verifikation via GitHub steht aus):
   1. `chore: fix build baseline (codegen, gradle JDK, analyzer config)`
-  2. `style: apply dart format to entire codebase` (439 Dateien, mechanisch)
-- 4 Explore-Agenten liefen zur Kartierung (Architektur, Supabase/RLS, TODO-Inventar,
-  Dead Code). Ergebnisse werden unten eingetragen.
+  2. `style: apply dart format to entire codebase` (439 Dateien)
+  3. `test: add AuthBloc bloc_test suite + CI pipeline`
+  4. `refactor: remove dead code (deprecated datasource, social bloc, scratch)` (−4173 LOC)
+
+## ⚠️ Wichtigste Security-Findings (Details in AUDIT.md §2)
+1. **`profiles`-RLS unbekannt** — kein CREATE/RLS-Script im Repo für die migrierte
+   `profiles`-Tabelle. **Muss gegen Live-DB verifiziert werden (User-Aktion: Supabase-Zugang).**
+2. **PostgREST-Injection** in `supabase_user_datasource_impl.dart:659` (`searchUsers`) — Fix in Phase 1/2.
+3. **Follow-Graph komplett öffentlich** (`user_follows` SELECT `USING(true)`).
+4. **IGDB Client Secret im Client** — Edge-Function-Proxy in Phase 2 (auch Lizenz-Seam).
 
 ## Baseline-Zahlen (Ist-Zustand, 2026-07-15)
 
@@ -67,10 +78,21 @@
 
 ---
 
+## Phase-1-Fortschritt
+- [x] CI-Pipeline (`.github/workflows/ci.yml`): format → analyze → test+coverage → build apk.
+- [x] Erste Kern-Tests: AuthBloc (11 bloc_test-Cases, grün). mocktail + fixtures angelegt.
+- [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht (deprecated/, social/, examples, scratch).
+- [ ] Branch pushen + CI auf GitHub grün sehen, dann nach master mergen.
+- [ ] Sentry (crash) + PostHog EU (analytics) einbauen, Event-Schema.
+- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass verifizieren (AUDIT.md §4).
+- [ ] Weitere Tests: UserGameDataBloc, GameBloc, Repository-Fakes, GameCard-Widget.
+- [ ] Refactoring Monster-Dateien (filter_bottom_sheet, game_repository_impl, game_bloc).
+- [ ] 6 echte analyze-Warnings fixen (WebsiteType==WebsiteCategory-Bug etc.).
+
 ## Nächste 3 Schritte
-1. Explore-Agenten-Ergebnisse hier einpflegen (Architektur/RLS/TODO/DeadCode) + Security-Quickcheck abschließen → **Phase 0 abhaken**.
-2. Phase 1 starten: **GitHub Actions CI** (format-check → analyze → test → build apk) als erstes Gate.
-3. Sentry + PostHog EU einbauen (DSN/Key via env), Event-Schema definieren.
+1. Remote prüfen/`chore/phase0-baseline` pushen → CI-Run auf GitHub verifizieren → nach master mergen.
+2. Sentry + PostHog EU integrieren (DSN/Key via env + GitHub Secrets), Funnel-Events definieren.
+3. Unused-files-Pass + nächste Bloc-Tests (UserGameDataBloc, GameBloc).
 
 ## Offene Entscheidungen für den User (gebündelt — siehe MASTERPLAN §"Offene Entscheidungen")
 1. **Pricing** Pro: Default-Vorschlag 3,99 €/Monat · 24,99 €/Jahr.
