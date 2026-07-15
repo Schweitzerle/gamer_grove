@@ -2,11 +2,13 @@
 import 'dart:async';
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/core/env/env.dart';
 import 'package:gamer_grove/injection_container.dart' as di;
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -18,24 +20,48 @@ import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/splash/splash_page.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // System UI
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge,
-    overlays: [SystemUiOverlay.top],
+  unawaited(
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+      overlays: [SystemUiOverlay.top],
+    ),
   );
 
   // Setup Dependency Injection (includes Supabase initialization)
   await di.initDependencies();
 
-  // Funnel start (no-op unless Umami is configured).
-  unawaited(sl<AnalyticsService>().track(AnalyticsEvents.appOpen));
+  // Runs the app and records the funnel-start event (no-op unless Umami
+  // is configured).
+  Future<void> startApp() async {
+    unawaited(sl<AnalyticsService>().track(AnalyticsEvents.appOpen));
+    runApp(const GamerGroveApp());
+  }
 
-  runApp(const GamerGroveApp());
+  // Crash reporting via Sentry — only when a DSN is configured, so local/CI
+  // builds without the DSN run unchanged. Sentry must wrap runApp to capture
+  // Flutter framework errors.
+  if (Env.sentryDsn.isEmpty) {
+    await startApp();
+  } else {
+    await SentryFlutter.init(
+      (options) {
+        options
+          ..dsn = Env.sentryDsn
+          ..environment = kReleaseMode ? 'production' : 'debug'
+          ..tracesSampleRate = kReleaseMode ? 0.2 : 1.0
+          // Don't send user IP / PII by default (GDPR-friendly).
+          ..sendDefaultPii = false;
+      },
+      appRunner: startApp,
+    );
+  }
 }
 
 class GamerGroveApp extends StatelessWidget {
