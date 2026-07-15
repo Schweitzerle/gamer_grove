@@ -5,8 +5,15 @@
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
 **Last updated:** 2026-07-15 (Session 1)
-**Current branch:** `chore/phase0-baseline`
+**Current branch:** `master` (Phase-0/CI-Arbeit via PR #85 gemergt, CI grün)
 **Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS
+
+### ✅ Merged to master (PR #85, squash f3e683f, CI green: analyze+test AND build APK)
+Alle Session-1-Commits sind auf master. Feature-Branch gelöscht. Nächste Arbeit
+wieder auf frischem Feature-Branch.
+> Gotcha für Folgesessions: `flutter analyze` ist default `--fatal-infos`; CI nutzt
+> `--no-fatal-infos` (Gate nur auf 0 errors + 0 warnings). `gh pr merge --squash`
+> hat lokal master nicht ge-fast-forwarded → ggf. `git fetch && git reset --hard origin/master`.
 
 ---
 
@@ -79,27 +86,33 @@
 ---
 
 ## Phase-1-Fortschritt
-- [x] CI-Pipeline (`.github/workflows/ci.yml`): format → analyze → test+coverage → build apk.
-- [x] Erste Kern-Tests: AuthBloc (11 bloc_test-Cases, grün). mocktail + fixtures angelegt.
-- [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht (deprecated/, social/, examples, scratch).
-- [ ] Branch pushen + CI auf GitHub grün sehen, dann nach master mergen.
-- [ ] Sentry (crash) + PostHog EU (analytics) einbauen, Event-Schema.
-- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass verifizieren (AUDIT.md §4).
+- [x] CI-Pipeline (`.github/workflows/ci.yml`): format → analyze(--no-fatal-infos) → test+coverage → build apk. **Grün, gemergt (PR #85).**
+- [x] AuthBloc-Tests (11), Game-Entity-Tests (3). mocktail + fixtures.
+- [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht.
+- [x] Alle 6 echten analyze-Warnings gefixt (WebsiteType==WebsiteCategory-Bug etc.) + Regression-Tests.
+- [x] **Analytics-Abstraktion + Umami-Backend (key-gated, 5 Tests)** — `AnalyticsService`/Noop/Umami, Event-Schema, `app_open` in main verdrahtet. Branch `feat/analytics-observability`.
+- [ ] **Sentry native init** (Dependency `sentry_flutter` + guarded init in main) — nächste Session, mit Emulator-Verifikation (native Dep, CI-Build-Risiko).
+- [ ] Analytics-Events an Funnel-Punkten verdrahten (signup, rate_game, wishlist_add, follow_user, activation).
+- [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren.
+- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass (AUDIT.md §4).
 - [ ] Weitere Tests: UserGameDataBloc, GameBloc, Repository-Fakes, GameCard-Widget.
-- [ ] Refactoring Monster-Dateien (filter_bottom_sheet, game_repository_impl, game_bloc).
-- [ ] 6 echte analyze-Warnings fixen (WebsiteType==WebsiteCategory-Bug etc.).
+- [ ] Refactoring Monster-Dateien (filter_bottom_sheet 3251, game_repository_impl 2516, game_bloc 2014).
+- [ ] Security-Fix: PostgREST-Injection in `searchUsers` (AUDIT.md §2.2).
 
 ## Nächste 3 Schritte
 1. Remote prüfen/`chore/phase0-baseline` pushen → CI-Run auf GitHub verifizieren → nach master mergen.
 2. Sentry + PostHog EU integrieren (DSN/Key via env + GitHub Secrets), Funnel-Events definieren.
 3. Unused-files-Pass + nächste Bloc-Tests (UserGameDataBloc, GameBloc).
 
-## Offene Entscheidungen für den User (gebündelt — siehe MASTERPLAN §"Offene Entscheidungen")
-1. **Pricing** Pro: Default-Vorschlag 3,99 €/Monat · 24,99 €/Jahr.
-2. **IGDB kommerziell vs. Alternative** (Recherche folgt in Phase 2).
-3. **Accounts/Geld**: RevenueCat, Sentry, PostHog (Free Tiers), Play Console / App Store.
-4. **Launch-Reihenfolge**: Default Android zuerst, iOS 2–4 Wochen später.
-5. Store-Publishing bleibt bestätigungspflichtig.
+## User-Entscheidungen (2026-07-15 beantwortet)
+1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
+2. **Analytics:** **Umami** (statt PostHog — User konsolidiert mit eigenen Web-Projekten).
+   Kein Mobile-SDK → via HTTP-Event-API (`/api/send`). Hinter `AnalyticsService`-Interface
+   bauen (Swap = Refactor). **Crashes:** **Sentry** (User hat Account).
+3. **IGDB:** **Erst Recherche** (kommerziell vs. RAWG/MobyGames), dann Entscheidung. Noch nichts umbauen.
+4. **Launch:** **Nur Android** vorerst (kein iOS/Apple-Account). Store-Publishing bleibt bestätigungspflichtig.
+5. **Noch offen/benötigt vom User:** Sentry-DSN + Umami-Instanz-URL + Website-ID (für Live-Events);
+   RevenueCat-Account + Play-Console-Produkte (Phase 2). Code wird key-gated gebaut (no-op ohne Keys).
 
 ## Branch-/Merge-Status
 - `chore/phase0-baseline` — 2 Commits, noch nicht gepusht/gemerged (CI existiert noch

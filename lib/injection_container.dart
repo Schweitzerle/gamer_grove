@@ -7,7 +7,10 @@ library;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/core/analytics/umami_analytics_service.dart';
 import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/env/env.dart';
 // Core
 import 'package:gamer_grove/core/network/network_info.dart';
 import 'package:gamer_grove/core/services/game_enrichment_service.dart';
@@ -114,6 +117,7 @@ import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Service locator instance.
@@ -159,6 +163,19 @@ Future<void> initDependencies() async {
         supabase: sl(),
         enableLogging: true, // Enable logging to debug enrichment
       ),
+    )
+
+    // Analytics: Umami when configured (env), otherwise a no-op so the app
+    // runs fine without keys. Depends on the AnalyticsService interface only.
+    ..registerLazySingleton<http.Client>(http.Client.new)
+    ..registerLazySingleton<AnalyticsService>(
+      () => Env.umamiUrl.isEmpty
+          ? const NoopAnalyticsService()
+          : UmamiAnalyticsService(
+              baseUrl: Env.umamiUrl,
+              websiteId: Env.umamiWebsiteId,
+              client: sl<http.Client>(),
+            ),
     )
 
     // ============================================================
