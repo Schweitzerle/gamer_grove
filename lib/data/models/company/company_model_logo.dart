@@ -33,7 +33,8 @@ class CompanyLogoModel extends CompanyLogo {
       width: width,
       alphaChannel: alphaChannel,
       animated: animated,
-      url: customUrl ?? 'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
+      url: customUrl ??
+          'https://images.igdb.com/igdb/image/upload/t_logo_med/$imageId.jpg',
     );
   }
 
@@ -63,4 +64,3 @@ class CompanyLogoModel extends CompanyLogo {
     };
   }
 }
-

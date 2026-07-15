@@ -41,7 +41,8 @@ class PlatformVersionModel extends PlatformVersion {
       os: json['os'],
       output: json['output'],
       platformLogoId: json['platform_logo'],
-      platformVersionReleaseDateIds: _parseIdList(json['platform_version_release_dates']),
+      platformVersionReleaseDateIds:
+          _parseIdList(json['platform_version_release_dates']),
       resolutions: json['resolutions'],
       slug: json['slug'],
       sound: json['sound'],
@@ -87,4 +88,3 @@ class PlatformVersionModel extends PlatformVersion {
     };
   }
 }
-

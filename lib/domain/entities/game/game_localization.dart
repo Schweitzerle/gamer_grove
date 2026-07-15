@@ -17,7 +17,6 @@ enum LocalizationRegion {
 }
 
 class GameLocalization extends Equatable {
-
   const GameLocalization({
     required this.id,
     required this.name,

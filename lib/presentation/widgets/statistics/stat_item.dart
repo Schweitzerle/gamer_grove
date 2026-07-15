@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// A single statistics item displaying a label, value, and optional percentage
 class StatItem extends StatelessWidget {
-
   /// Creates a StatItem
   const StatItem({
     required this.label,
@@ -12,6 +11,7 @@ class StatItem extends StatelessWidget {
     this.valueColor,
     this.showProgress = false,
   });
+
   /// Label for the stat
   final String label;
 
@@ -75,8 +75,8 @@ class StatItem extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: percentage! / 100,
                 minHeight: 6,
-                backgroundColor:
-                    theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                backgroundColor: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.5),
                 valueColor: AlwaysStoppedAnimation<Color>(effectiveValueColor),
               ),
             ),

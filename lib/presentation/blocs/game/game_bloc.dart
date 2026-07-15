@@ -1457,7 +1457,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
 
       var enrichedVersionParent =
-          game.versionParent != null ? [game.versionParent!] : [];
+          game.versionParent != null ? [game.versionParent!] : <Game>[];
       if (game.versionParent != null) {
         enrichedVersionParent = await enrichGamesWithUserData(
           game.versionParent != null ? [game.versionParent!] : [],
@@ -1471,7 +1471,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       }
 
       var enrichedParentGames =
-          game.parentGame != null ? [game.parentGame!] : [];
+          game.parentGame != null ? [game.parentGame!] : <Game>[];
       if (game.versionParent != null) {
         enrichedParentGames = await enrichGamesWithUserData(
           game.parentGame != null ? [game.parentGame!] : [],

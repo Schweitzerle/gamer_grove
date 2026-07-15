@@ -41,26 +41,26 @@ class LanguageSupportTypeModel extends LanguageSupportType {
 
   // Factory methods for common types
   static LanguageSupportTypeModel audio() => const LanguageSupportTypeModel(
-    id: LanguageSupportTypes.audio,
-    checksum: '',
-    name: 'Audio',
-  );
+        id: LanguageSupportTypes.audio,
+        checksum: '',
+        name: 'Audio',
+      );
 
   static LanguageSupportTypeModel subtitles() => const LanguageSupportTypeModel(
-    id: LanguageSupportTypes.subtitles,
-    checksum: '',
-    name: 'Subtitles',
-  );
+        id: LanguageSupportTypes.subtitles,
+        checksum: '',
+        name: 'Subtitles',
+      );
 
   static LanguageSupportTypeModel interface() => const LanguageSupportTypeModel(
-    id: LanguageSupportTypes.interface,
-    checksum: '',
-    name: 'Interface',
-  );
+        id: LanguageSupportTypes.interface,
+        checksum: '',
+        name: 'Interface',
+      );
 
   static LanguageSupportTypeModel fullAudio() => const LanguageSupportTypeModel(
-    id: LanguageSupportTypes.fullAudio,
-    checksum: '',
-    name: 'Full Audio',
-  );
+        id: LanguageSupportTypes.fullAudio,
+        checksum: '',
+        name: 'Full Audio',
+      );
 }

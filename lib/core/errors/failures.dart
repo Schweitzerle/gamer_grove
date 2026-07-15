@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable {
-
   const Failure({
     required this.message,
     this.code,
@@ -48,7 +47,6 @@ class ValidationFailure extends Failure {
     super.code,
   });
 }
-
 
 class NotFoundFailure extends Failure {
   const NotFoundFailure({

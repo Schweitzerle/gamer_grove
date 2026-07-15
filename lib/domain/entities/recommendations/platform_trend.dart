@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformTrend extends Equatable {
-
   const PlatformTrend({
     required this.platformId,
     required this.platformName,
@@ -27,8 +26,12 @@ class PlatformTrend extends Equatable {
 
   @override
   List<Object?> get props => [
-    platformId, platformName, trendScore, adoptionRate,
-    gameCount, averageRating, calculatedAt,
-  ];
+        platformId,
+        platformName,
+        trendScore,
+        adoptionRate,
+        gameCount,
+        averageRating,
+        calculatedAt,
+      ];
 }
-

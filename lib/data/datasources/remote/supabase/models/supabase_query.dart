@@ -20,7 +20,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide SortBy;
 /// final result = await query;
 /// ```
 class SupabaseQuery {
-
   SupabaseQuery(this.table);
   final String table;
   String? _selectColumns;
@@ -217,7 +216,6 @@ class SupabaseQuery {
 ///   .build(supabase);
 /// ```
 class SupabaseRpcQuery {
-
   SupabaseRpcQuery(this.functionName);
   final String functionName;
   final Map<String, dynamic> _params = {};
@@ -281,7 +279,6 @@ class SupabaseRpcQuery {
 ///   .build(supabase);
 /// ```
 class SupabaseInsert {
-
   SupabaseInsert(this.table);
   final String table;
   Map<String, dynamic>? _values;
@@ -376,7 +373,6 @@ class SupabaseInsert {
 ///   .build(supabase);
 /// ```
 class SupabaseUpdate {
-
   SupabaseUpdate(this.table);
   final String table;
   Map<String, dynamic>? _values;
@@ -460,7 +456,6 @@ class SupabaseUpdate {
 ///   .build(supabase);
 /// ```
 class SupabaseDelete {
-
   SupabaseDelete(this.table);
   final String table;
   final List<SupabaseFilter> _filters = [];
@@ -492,7 +487,8 @@ class SupabaseDelete {
   Future<dynamic> build(SupabaseClient supabase) async {
     if (_filters.isEmpty) {
       throw ArgumentError(
-          'No filters provided for delete - this would delete all rows!',);
+        'No filters provided for delete - this would delete all rows!',
+      );
     }
 
     var query = supabase.from(table).delete();

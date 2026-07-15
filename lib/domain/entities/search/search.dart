@@ -12,7 +12,8 @@ enum SearchResultType {
   unknown,
 }
 
-class Search extends Equatable { // Usually not relevant for production
+class Search extends Equatable {
+  // Usually not relevant for production
 
   const Search({
     required this.id,
@@ -58,31 +59,46 @@ class Search extends Equatable { // Usually not relevant for production
 
   int? get entityId {
     switch (resultType) {
-      case SearchResultType.game: return gameId;
-      case SearchResultType.character: return characterId;
-      case SearchResultType.collection: return collectionId;
-      case SearchResultType.company: return companyId;
-      case SearchResultType.platform: return platformId;
-      case SearchResultType.theme: return themeId;
-      default: return null;
+      case SearchResultType.game:
+        return gameId;
+      case SearchResultType.character:
+        return characterId;
+      case SearchResultType.collection:
+        return collectionId;
+      case SearchResultType.company:
+        return companyId;
+      case SearchResultType.platform:
+        return platformId;
+      case SearchResultType.theme:
+        return themeId;
+      default:
+        return null;
     }
   }
 
   String get entityType {
     switch (resultType) {
-      case SearchResultType.game: return 'Game';
-      case SearchResultType.character: return 'Character';
-      case SearchResultType.collection: return 'Collection';
-      case SearchResultType.company: return 'Company';
-      case SearchResultType.platform: return 'Platform';
-      case SearchResultType.theme: return 'Theme';
-      default: return 'Unknown';
+      case SearchResultType.game:
+        return 'Game';
+      case SearchResultType.character:
+        return 'Character';
+      case SearchResultType.collection:
+        return 'Collection';
+      case SearchResultType.company:
+        return 'Company';
+      case SearchResultType.platform:
+        return 'Platform';
+      case SearchResultType.theme:
+        return 'Theme';
+      default:
+        return 'Unknown';
     }
   }
 
   // Helper getters
   bool get hasDescription => description != null && description!.isNotEmpty;
-  bool get hasAlternativeName => alternativeName != null && alternativeName!.isNotEmpty;
+  bool get hasAlternativeName =>
+      alternativeName != null && alternativeName!.isNotEmpty;
   bool get hasPublishedDate => publishedAt != null;
   bool get isGameResult => resultType == SearchResultType.game;
   bool get isCharacterResult => resultType == SearchResultType.character;
@@ -97,19 +113,18 @@ class Search extends Equatable { // Usually not relevant for production
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    alternativeName,
-    name,
-    description,
-    publishedAt,
-    characterId,
-    collectionId,
-    companyId,
-    gameId,
-    platformId,
-    themeId,
-    testDummyId,
-  ];
+        id,
+        checksum,
+        alternativeName,
+        name,
+        description,
+        publishedAt,
+        characterId,
+        collectionId,
+        companyId,
+        gameId,
+        platformId,
+        themeId,
+        testDummyId,
+      ];
 }
-

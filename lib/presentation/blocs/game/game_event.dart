@@ -9,7 +9,6 @@ abstract class GameEvent extends Equatable {
 }
 
 class SearchGamesEvent extends GameEvent {
-
   const SearchGamesEvent(this.query, {this.userId});
   final String query;
   final String? userId;
@@ -21,7 +20,6 @@ class SearchGamesEvent extends GameEvent {
 class LoadMoreGamesEvent extends GameEvent {}
 
 class GetGameDetailsEvent extends GameEvent {
-
   const GetGameDetailsEvent(this.gameId);
   final int gameId;
 
@@ -30,7 +28,6 @@ class GetGameDetailsEvent extends GameEvent {
 }
 
 class RateGameEvent extends GameEvent {
-
   const RateGameEvent({
     required this.gameId,
     required this.userId,
@@ -45,7 +42,6 @@ class RateGameEvent extends GameEvent {
 }
 
 class RemoveRatingEvent extends GameEvent {
-
   const RemoveRatingEvent({
     required this.gameId,
     required this.userId,
@@ -58,7 +54,6 @@ class RemoveRatingEvent extends GameEvent {
 }
 
 class ToggleWishlistEvent extends GameEvent {
-
   const ToggleWishlistEvent({
     required this.gameId,
     required this.userId,
@@ -72,7 +67,6 @@ class ToggleWishlistEvent extends GameEvent {
 
 // Toggle Recommendation Event
 class ToggleRecommendEvent extends GameEvent {
-
   const ToggleRecommendEvent({
     required this.gameId,
     required this.userId,
@@ -85,7 +79,6 @@ class ToggleRecommendEvent extends GameEvent {
 }
 
 class AddToTopThreeEvent extends GameEvent {
-
   const AddToTopThreeEvent({
     required this.gameId,
     required this.userId,
@@ -100,7 +93,6 @@ class AddToTopThreeEvent extends GameEvent {
 }
 
 class UpdateTopThreeEvent extends GameEvent {
-
   const UpdateTopThreeEvent({
     required this.userId,
   });
@@ -111,7 +103,6 @@ class UpdateTopThreeEvent extends GameEvent {
 }
 
 class RemoveFromTopThreeEvent extends GameEvent {
-
   const RemoveFromTopThreeEvent({
     required this.userId,
     required this.gameId,
@@ -127,7 +118,6 @@ class ClearSearchEvent extends GameEvent {}
 
 // NEW EVENTS FOR HOME PAGE
 class LoadPopularGamesEvent extends GameEvent {
-
   const LoadPopularGamesEvent({
     this.limit = 20,
     this.offset = 0,
@@ -140,7 +130,6 @@ class LoadPopularGamesEvent extends GameEvent {
 }
 
 class LoadUpcomingGamesEvent extends GameEvent {
-
   const LoadUpcomingGamesEvent({
     this.limit = 20,
     this.offset = 0,
@@ -153,7 +142,6 @@ class LoadUpcomingGamesEvent extends GameEvent {
 }
 
 class LoadLatestGamesEvent extends GameEvent {
-
   const LoadLatestGamesEvent({
     this.limit = 20,
     this.offset = 0,
@@ -166,7 +154,6 @@ class LoadLatestGamesEvent extends GameEvent {
 }
 
 class LoadTopRatedGamesEvent extends GameEvent {
-
   const LoadTopRatedGamesEvent({
     this.limit = 20,
     this.offset = 0,
@@ -179,7 +166,6 @@ class LoadTopRatedGamesEvent extends GameEvent {
 }
 
 class LoadUserRatedEvent extends GameEvent {
-
   const LoadUserRatedEvent(this.userId);
   final String userId;
 
@@ -188,7 +174,6 @@ class LoadUserRatedEvent extends GameEvent {
 }
 
 class LoadUserTopThreeEvent extends GameEvent {
-
   const LoadUserTopThreeEvent(this.userId);
   final String userId;
 
@@ -197,7 +182,6 @@ class LoadUserTopThreeEvent extends GameEvent {
 }
 
 class LoadUserWishlistEvent extends GameEvent {
-
   const LoadUserWishlistEvent(this.userId);
   final String userId;
 
@@ -206,7 +190,6 @@ class LoadUserWishlistEvent extends GameEvent {
 }
 
 class LoadUserRecommendationsEvent extends GameEvent {
-
   const LoadUserRecommendationsEvent(this.userId);
   final String userId;
 
@@ -214,7 +197,8 @@ class LoadUserRecommendationsEvent extends GameEvent {
   List<Object> get props => [userId];
 }
 
-class GetGameDetailsWithUserDataEvent extends GameEvent { // Optional for logged-in users
+class GetGameDetailsWithUserDataEvent extends GameEvent {
+  // Optional for logged-in users
 
   const GetGameDetailsWithUserDataEvent({
     required this.gameId,
@@ -228,7 +212,6 @@ class GetGameDetailsWithUserDataEvent extends GameEvent { // Optional for logged
 }
 
 class LoadHomePageDataEvent extends GameEvent {
-
   const LoadHomePageDataEvent({this.userId});
   final String? userId;
 
@@ -237,7 +220,6 @@ class LoadHomePageDataEvent extends GameEvent {
 }
 
 class LoadGrovePageDataEvent extends GameEvent {
-
   const LoadGrovePageDataEvent({this.userId});
   final String? userId;
 
@@ -246,7 +228,6 @@ class LoadGrovePageDataEvent extends GameEvent {
 }
 
 class GetSimilarGamesEvent extends GameEvent {
-
   const GetSimilarGamesEvent({required this.gameId});
   final int gameId;
 
@@ -255,7 +236,6 @@ class GetSimilarGamesEvent extends GameEvent {
 }
 
 class GetGameDLCsEvent extends GameEvent {
-
   const GetGameDLCsEvent({required this.gameId});
   final int gameId;
 
@@ -264,7 +244,6 @@ class GetGameDLCsEvent extends GameEvent {
 }
 
 class GetGameExpansionsEvent extends GameEvent {
-
   const GetGameExpansionsEvent({required this.gameId});
   final int gameId;
 
@@ -273,7 +252,6 @@ class GetGameExpansionsEvent extends GameEvent {
 }
 
 class GetCompleteGameDetailsEvent extends GameEvent {
-
   const GetCompleteGameDetailsEvent({
     required this.gameId,
     this.userId,
@@ -286,7 +264,6 @@ class GetCompleteGameDetailsEvent extends GameEvent {
 }
 
 class LoadGameWithUserDataEvent extends GameEvent {
-
   const LoadGameWithUserDataEvent({
     required this.gameId,
     this.userId,
@@ -306,7 +283,6 @@ class LoadGameWithUserDataEvent extends GameEvent {
 
 /// Load complete franchise games (for "View All" screens)
 class LoadCompleteFranchiseGamesEvent extends GameEvent {
-
   const LoadCompleteFranchiseGamesEvent({
     required this.franchiseId,
     required this.franchiseName,
@@ -324,7 +300,6 @@ class LoadCompleteFranchiseGamesEvent extends GameEvent {
 
 /// Load complete collection games (for "View All" screens)
 class LoadCompleteCollectionGamesEvent extends GameEvent {
-
   const LoadCompleteCollectionGamesEvent({
     required this.collectionId,
     required this.collectionName,
@@ -342,7 +317,6 @@ class LoadCompleteCollectionGamesEvent extends GameEvent {
 
 /// Load complete similar games (for "View All" screens)
 class LoadCompleteSimilarGamesEvent extends GameEvent {
-
   const LoadCompleteSimilarGamesEvent({
     required this.gameId,
     required this.gameName,
@@ -358,7 +332,6 @@ class LoadCompleteSimilarGamesEvent extends GameEvent {
 
 /// Load complete game series (DLCs + Expansions + Remakes, etc.)
 class LoadCompleteGameSeriesEvent extends GameEvent {
-
   const LoadCompleteGameSeriesEvent({
     required this.gameId,
     required this.gameName,
@@ -374,7 +347,6 @@ class LoadCompleteGameSeriesEvent extends GameEvent {
 
 // ⚡ NEUE EVENTS
 class LoadFranchiseGamesPreviewEvent extends GameEvent {
-
   const LoadFranchiseGamesPreviewEvent({
     required this.franchiseId,
     required this.franchiseName,
@@ -387,7 +359,6 @@ class LoadFranchiseGamesPreviewEvent extends GameEvent {
 }
 
 class LoadCollectionGamesPreviewEvent extends GameEvent {
-
   const LoadCollectionGamesPreviewEvent({
     required this.collectionId,
     required this.collectionName,
@@ -400,7 +371,6 @@ class LoadCollectionGamesPreviewEvent extends GameEvent {
 }
 
 class LoadAllFranchiseGamesEvent extends GameEvent {
-
   const LoadAllFranchiseGamesEvent({
     required this.franchiseId,
     required this.franchiseName,
@@ -420,7 +390,6 @@ class LoadAllFranchiseGamesEvent extends GameEvent {
 class RefreshCacheEvent extends GameEvent {}
 
 class LoadAllCollectionGamesEvent extends GameEvent {
-
   const LoadAllCollectionGamesEvent({
     required this.collectionId,
     required this.collectionName,
@@ -435,7 +404,6 @@ class LoadAllCollectionGamesEvent extends GameEvent {
 }
 
 class LoadAllUserRatedEvent extends GameEvent {
-
   const LoadAllUserRatedEvent(this.userId);
   final String userId;
 
@@ -444,7 +412,6 @@ class LoadAllUserRatedEvent extends GameEvent {
 }
 
 class LoadAllUserRatedGameIdsEvent extends GameEvent {
-
   const LoadAllUserRatedGameIdsEvent(this.userId);
   final String userId;
 
@@ -453,7 +420,6 @@ class LoadAllUserRatedGameIdsEvent extends GameEvent {
 }
 
 class LoadUserRatedGamesPageEvent extends GameEvent {
-
   const LoadUserRatedGamesPageEvent(this.gameIds, this.page);
   final List<int> gameIds;
   final int page;
@@ -463,7 +429,6 @@ class LoadUserRatedGamesPageEvent extends GameEvent {
 }
 
 class LoadAllUserWishlistGameIdsEvent extends GameEvent {
-
   const LoadAllUserWishlistGameIdsEvent(this.userId);
   final String userId;
 
@@ -472,7 +437,6 @@ class LoadAllUserWishlistGameIdsEvent extends GameEvent {
 }
 
 class LoadUserWishlistGamesPageEvent extends GameEvent {
-
   const LoadUserWishlistGamesPageEvent(this.gameIds, this.page);
   final List<int> gameIds;
   final int page;
@@ -482,7 +446,6 @@ class LoadUserWishlistGamesPageEvent extends GameEvent {
 }
 
 class LoadAllUserRecommendedGameIdsEvent extends GameEvent {
-
   const LoadAllUserRecommendedGameIdsEvent(this.userId);
   final String userId;
 
@@ -491,7 +454,6 @@ class LoadAllUserRecommendedGameIdsEvent extends GameEvent {
 }
 
 class LoadUserRecommendedGamesPageEvent extends GameEvent {
-
   const LoadUserRecommendedGamesPageEvent(this.gameIds, this.page);
   final List<int> gameIds;
   final int page;
@@ -501,7 +463,6 @@ class LoadUserRecommendedGamesPageEvent extends GameEvent {
 }
 
 class LoadAllUserWishlistEvent extends GameEvent {
-
   const LoadAllUserWishlistEvent(this.userId);
   final String userId;
 
@@ -510,7 +471,6 @@ class LoadAllUserWishlistEvent extends GameEvent {
 }
 
 class LoadAllUserRecommendationsEvent extends GameEvent {
-
   const LoadAllUserRecommendationsEvent(this.userId);
   final String userId;
 
@@ -519,7 +479,6 @@ class LoadAllUserRecommendationsEvent extends GameEvent {
 }
 
 class LoadAllUserRatedPaginated extends GameEvent {
-
   const LoadAllUserRatedPaginated(this.userId);
   final String userId;
 
@@ -528,7 +487,6 @@ class LoadAllUserRatedPaginated extends GameEvent {
 }
 
 class LoadMoreUserRatedPaginated extends GameEvent {
-
   const LoadMoreUserRatedPaginated(this.userId);
   final String userId;
 

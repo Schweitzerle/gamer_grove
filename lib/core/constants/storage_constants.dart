@@ -30,7 +30,8 @@ class StorageConstants {
   static const String similarGamesKey = 'similar_games';
   static const String gameDLCsKey = 'game_dlcs';
   static const String gameExpansionsKey = 'game_expansions';
-  static const String gameStandaloneExpansionsKey = 'game_standalone_expansions';
+  static const String gameStandaloneExpansionsKey =
+      'game_standalone_expansions';
   static const String gameBundlesKey = 'game_bundles';
   static const String gameExpandedGamesKey = 'game_expanded_games';
   static const String gameForksKey = 'game_forks';

@@ -5,8 +5,8 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
-class GetUserTopThree extends UseCase<List<Game>, GetUserTopThreeParams> {
 
+class GetUserTopThree extends UseCase<List<Game>, GetUserTopThreeParams> {
   GetUserTopThree(this.repository);
   final GameRepository repository;
 
@@ -21,11 +21,9 @@ class GetUserTopThree extends UseCase<List<Game>, GetUserTopThreeParams> {
 }
 
 class GetUserTopThreeParams extends Equatable {
-
   const GetUserTopThreeParams({required this.userId});
   final String userId;
 
   @override
   List<Object> get props => [userId];
 }
-

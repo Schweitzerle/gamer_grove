@@ -2,9 +2,11 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class ThemeCard extends StatelessWidget {
-
   const ThemeCard({
-    required this.scheme, required this.isSelected, required this.onSelect, super.key,
+    required this.scheme,
+    required this.isSelected,
+    required this.onSelect,
+    super.key,
   });
   final FlexScheme scheme;
   final bool isSelected;

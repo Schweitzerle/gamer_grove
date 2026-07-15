@@ -7,7 +7,6 @@ library;
 
 /// Base class for all authentication exceptions.
 abstract class AuthException implements Exception {
-
   const AuthException({
     required this.message,
     this.code,

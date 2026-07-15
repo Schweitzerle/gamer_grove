@@ -6,14 +6,14 @@ import 'package:toasty_box/toasty_box.dart';
 
 /// Service for showing context-aware toasts throughout the app
 class GamerGroveToastService {
-
   /// Show rating toast with circular progress indicator like on game card
   static void showRatingToast(
     BuildContext context, {
     required String gameName,
     required double rating,
   }) {
-    final displayRating = (rating * 100).toInt(); // Convert 0-1 to 0-100 for display
+    final displayRating =
+        (rating * 100).toInt(); // Convert 0-1 to 0-100 for display
     final color = ColorScales.getRatingColor(displayRating.toDouble());
     final ratingProgress = rating; // 0-1 range for progress indicator
 

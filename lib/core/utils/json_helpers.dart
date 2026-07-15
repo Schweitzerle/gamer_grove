@@ -161,7 +161,9 @@ class JsonHelpers {
   /// - extractMultipleNested(json, ["user.name", "user.email", "user.id"])
   ///   -> {"user.name": "John", "user.email": "john@example.com", "user.id": 123}
   static Map<String, dynamic> extractMultipleNested(
-      dynamic value, List<String> paths,) {
+    dynamic value,
+    List<String> paths,
+  ) {
     final result = <String, dynamic>{};
     for (final path in paths) {
       result[path] = extractNested<dynamic>(value, path);
@@ -272,26 +274,24 @@ class JsonHelpers {
 
     json.forEach((key, value) {
       if (value is Map<String, dynamic>) {
-        if (value.containsKey('id')) {
-        }
+        if (value.containsKey('id')) {}
 
         // Recurse into nested objects
         if (currentDepth < maxDepth - 1) {
-          analyzeJsonStructure(value,
-              prefix: '$prefix  ',
-              maxDepth: maxDepth,
-              currentDepth: currentDepth + 1,);
+          analyzeJsonStructure(
+            value,
+            prefix: '$prefix  ',
+            maxDepth: maxDepth,
+            currentDepth: currentDepth + 1,
+          );
         }
       } else if (value is List) {
         if (value.isNotEmpty) {
           final first = value.first;
           if (first is Map<String, dynamic>) {
-          } else {
-          }
-        } else {
-        }
-      } else {
-      }
+          } else {}
+        } else {}
+      } else {}
     });
   }
 
@@ -300,10 +300,8 @@ class JsonHelpers {
     json.forEach((key, value) {
       if (isExpandedObject(value)) {
       } else if (isSimpleReference(value)) {
-      } else if (value is List && hasExpandedObjects(value)) {
-      }
+      } else if (value is List && hasExpandedObjects(value)) {}
     });
-
   }
 
   // ==========================================

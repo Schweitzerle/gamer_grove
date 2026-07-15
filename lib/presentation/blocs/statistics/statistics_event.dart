@@ -10,9 +10,9 @@ abstract class StatisticsEvent extends Equatable {
 
 /// Event to load statistics for a user
 class LoadStatisticsEvent extends StatisticsEvent {
-
   /// Creates a LoadStatisticsEvent
   const LoadStatisticsEvent({required this.userId});
+
   /// User ID to load statistics for
   final String userId;
 
@@ -22,9 +22,9 @@ class LoadStatisticsEvent extends StatisticsEvent {
 
 /// Event to refresh statistics for a user
 class RefreshStatisticsEvent extends StatisticsEvent {
-
   /// Creates a RefreshStatisticsEvent
   const RefreshStatisticsEvent({required this.userId});
+
   /// User ID to refresh statistics for
   final String userId;
 

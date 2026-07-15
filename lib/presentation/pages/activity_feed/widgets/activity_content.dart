@@ -7,9 +7,11 @@ import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class ActivityContent extends StatelessWidget {
-
-  const ActivityContent(
-      {required this.activity, required this.games, super.key,});
+  const ActivityContent({
+    required this.activity,
+    required this.games,
+    super.key,
+  });
   final UserActivity activity;
   final List<Game> games;
 
@@ -141,7 +143,10 @@ class ActivityContent extends StatelessWidget {
   }
 
   Widget _buildTopThreeGameColumn(
-      BuildContext context, Game game, int position,) {
+    BuildContext context,
+    Game game,
+    int position,
+  ) {
     return Column(
       children: [
         _buildTopThreeCircle(context, position),

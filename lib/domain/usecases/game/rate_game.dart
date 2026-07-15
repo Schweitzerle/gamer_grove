@@ -6,14 +6,14 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class RateGame extends UseCase<void, RateGameParams> {
-
   RateGame(this.repository);
   final GameRepository repository;
 
   @override
   Future<Either<Failure, void>> call(RateGameParams params) async {
     if (params.rating < 0 || params.rating > 10) {
-      return const Left(ValidationFailure(message: 'Rating must be between 0 and 10'));
+      return const Left(
+          ValidationFailure(message: 'Rating must be between 0 and 10'));
     }
 
     return repository.rateGame(
@@ -25,7 +25,6 @@ class RateGame extends UseCase<void, RateGameParams> {
 }
 
 class RateGameParams extends Equatable {
-
   const RateGameParams({
     required this.gameId,
     required this.userId,
@@ -38,4 +37,3 @@ class RateGameParams extends Equatable {
   @override
   List<Object> get props => [gameId, userId, rating];
 }
-

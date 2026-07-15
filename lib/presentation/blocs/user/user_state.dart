@@ -24,7 +24,6 @@ class UserProfileLoading extends UserProfileState {
 
 /// State when profile is loaded successfully.
 class UserProfileLoaded extends UserProfileState {
-
   const UserProfileLoaded(this.user);
   final User user;
 
@@ -34,7 +33,6 @@ class UserProfileLoaded extends UserProfileState {
 
 /// State when profile update succeeds.
 class UserProfileUpdated extends UserProfileState {
-
   const UserProfileUpdated(this.user);
   final User user;
 
@@ -44,7 +42,6 @@ class UserProfileUpdated extends UserProfileState {
 
 /// State when avatar upload succeeds.
 class AvatarUploadSuccess extends UserProfileState {
-
   const AvatarUploadSuccess(this.avatarUrl);
   final String avatarUrl;
 
@@ -54,7 +51,6 @@ class AvatarUploadSuccess extends UserProfileState {
 
 /// State when follow action succeeds.
 class FollowSuccess extends UserProfileState {
-
   const FollowSuccess(this.targetUserId);
   final String targetUserId;
 
@@ -64,7 +60,6 @@ class FollowSuccess extends UserProfileState {
 
 /// State when unfollow action succeeds.
 class UnfollowSuccess extends UserProfileState {
-
   const UnfollowSuccess(this.targetUserId);
   final String targetUserId;
 
@@ -74,7 +69,6 @@ class UnfollowSuccess extends UserProfileState {
 
 /// State when followers are loaded.
 class FollowersLoaded extends UserProfileState {
-
   const FollowersLoaded(this.followers);
   final List<User> followers;
 
@@ -84,7 +78,6 @@ class FollowersLoaded extends UserProfileState {
 
 /// State when following list is loaded.
 class FollowingLoaded extends UserProfileState {
-
   const FollowingLoaded(this.following);
   final List<User> following;
 
@@ -94,7 +87,6 @@ class FollowingLoaded extends UserProfileState {
 
 /// State when operation fails.
 class UserProfileError extends UserProfileState {
-
   const UserProfileError(this.message);
   final String message;
 

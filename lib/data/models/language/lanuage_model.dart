@@ -47,42 +47,42 @@ class LanguageModel extends Language {
 
   // Factory for creating common languages
   static LanguageModel english() => const LanguageModel(
-    id: 1,
-    checksum: '',
-    locale: 'en-US',
-    name: 'English',
-    nativeName: 'English',
-  );
+        id: 1,
+        checksum: '',
+        locale: 'en-US',
+        name: 'English',
+        nativeName: 'English',
+      );
 
   static LanguageModel german() => const LanguageModel(
-    id: 2,
-    checksum: '',
-    locale: 'de-DE',
-    name: 'German',
-    nativeName: 'Deutsch',
-  );
+        id: 2,
+        checksum: '',
+        locale: 'de-DE',
+        name: 'German',
+        nativeName: 'Deutsch',
+      );
 
   static LanguageModel spanish() => const LanguageModel(
-    id: 3,
-    checksum: '',
-    locale: 'es-ES',
-    name: 'Spanish',
-    nativeName: 'Español',
-  );
+        id: 3,
+        checksum: '',
+        locale: 'es-ES',
+        name: 'Spanish',
+        nativeName: 'Español',
+      );
 
   static LanguageModel french() => const LanguageModel(
-    id: 4,
-    checksum: '',
-    locale: 'fr-FR',
-    name: 'French',
-    nativeName: 'Français',
-  );
+        id: 4,
+        checksum: '',
+        locale: 'fr-FR',
+        name: 'French',
+        nativeName: 'Français',
+      );
 
   static LanguageModel japanese() => const LanguageModel(
-    id: 5,
-    checksum: '',
-    locale: 'ja-JP',
-    name: 'Japanese',
-    nativeName: '日本語',
-  );
+        id: 5,
+        checksum: '',
+        locale: 'ja-JP',
+        name: 'Japanese',
+        nativeName: '日本語',
+      );
 }

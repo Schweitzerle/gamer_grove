@@ -14,9 +14,10 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dar
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class GameEnginePaginatedGamesScreen extends StatefulWidget {
-
   const GameEnginePaginatedGamesScreen({
-    required this.gameEngineId, required this.gameEngineName, super.key,
+    required this.gameEngineId,
+    required this.gameEngineName,
+    super.key,
     this.userId,
   });
   final int gameEngineId;
@@ -52,11 +53,13 @@ class _GameEnginePaginatedGamesScreenState
     _scrollController.addListener(_onScroll);
 
     // Load initial data
-    context.read<GameEngineBloc>().add(LoadGameEngineGamesEvent(
-          gameEngineId: widget.gameEngineId,
-          gameEngineName: widget.gameEngineName,
-          userId: widget.userId,
-        ),);
+    context.read<GameEngineBloc>().add(
+          LoadGameEngineGamesEvent(
+            gameEngineId: widget.gameEngineId,
+            gameEngineName: widget.gameEngineName,
+            userId: widget.userId,
+          ),
+        );
   }
 
   @override
@@ -192,12 +195,14 @@ class _GameEnginePaginatedGamesScreenState
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<GameEngineBloc>().add(LoadGameEngineGamesEvent(
-                      gameEngineId: widget.gameEngineId,
-                      gameEngineName: widget.gameEngineName,
-                      userId: widget.userId,
-                      refresh: true,
-                    ),);
+                context.read<GameEngineBloc>().add(
+                      LoadGameEngineGamesEvent(
+                        gameEngineId: widget.gameEngineId,
+                        gameEngineName: widget.gameEngineName,
+                        userId: widget.userId,
+                        refresh: true,
+                      ),
+                    );
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
@@ -466,10 +471,9 @@ class _GameEnginePaginatedGamesScreenState
     if (currentState is! GameEngineGamesLoaded) return;
 
     // Ensure current sortBy is in available options, otherwise use ratingCount
-    final initialSortBy =
-        _availableSortOptions.contains(currentState.sortBy)
-            ? currentState.sortBy
-            : GameSortBy.ratingCount;
+    final initialSortBy = _availableSortOptions.contains(currentState.sortBy)
+        ? currentState.sortBy
+        : GameSortBy.ratingCount;
     final initialOrder = currentState.sortOrder;
 
     showDialog<void>(
@@ -492,7 +496,6 @@ class _GameEnginePaginatedGamesScreenState
 
 // Separate StatefulWidget for the dialog
 class _SortDialog extends StatefulWidget {
-
   const _SortDialog({
     required this.initialSortBy,
     required this.initialOrder,

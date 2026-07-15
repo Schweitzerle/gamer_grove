@@ -5,8 +5,8 @@ import 'package:gamer_grove/data/repositories/base/supabase_base_repository.dart
 import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
 
-class UserActivityRepositoryImpl extends SupabaseBaseRepository implements UserActivityRepository {
-
+class UserActivityRepositoryImpl extends SupabaseBaseRepository
+    implements UserActivityRepository {
   UserActivityRepositoryImpl({
     required this.dataSource,
     required super.supabase,

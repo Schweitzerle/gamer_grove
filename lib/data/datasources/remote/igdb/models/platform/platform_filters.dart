@@ -81,7 +81,8 @@ class PlatformFilters {
   // ============================================================
 
   /// Filter platforms that have a logo
-  static IgdbFilter hasLogo() => const NullFilter('platform_logo', isNull: false);
+  static IgdbFilter hasLogo() =>
+      const NullFilter('platform_logo', isNull: false);
 
   /// Filter platforms that have a summary
   static IgdbFilter hasSummary() => const NullFilter('summary', isNull: false);
@@ -89,7 +90,6 @@ class PlatformFilters {
 
 /// Builder for creating complex platform filters.
 class PlatformFilterBuilder {
-
   PlatformFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

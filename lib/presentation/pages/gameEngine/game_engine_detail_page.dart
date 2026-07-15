@@ -15,10 +15,12 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dar
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_details_screen.dart';
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
-class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded gameEngine
+class GameEngineDetailPage extends StatelessWidget {
+  // Optional pre-loaded gameEngine
 
   const GameEngineDetailPage({
-    required this.gameEngineId, super.key,
+    required this.gameEngineId,
+    super.key,
     this.gameEngine,
   });
   final int gameEngineId;
@@ -26,7 +28,6 @@ class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded game
 
   @override
   Widget build(BuildContext context) {
-
     return BlocProvider<GameEngineBloc>(
       create: (context) {
         final bloc = sl<GameEngineBloc>();
@@ -34,14 +35,16 @@ class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded game
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        bloc.add(GetGameEngineDetailsEvent(
+        bloc.add(
+          GetGameEngineDetailsEvent(
             gameEngineId: gameEngineId,
-            userId: userId,),);
+            userId: userId,
+          ),
+        );
         return bloc;
       },
       child: BlocBuilder<GameEngineBloc, GameEngineState>(
         builder: (context, state) {
-
           if (state is GameEngineLoading) {
             return _buildLiveLoadingState(context);
           } else if (state is GameEngineDetailsLoaded) {
@@ -66,8 +69,10 @@ class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded game
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -113,8 +118,10 @@ class GameEngineDetailPage extends StatelessWidget { // Optional pre-loaded game
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),

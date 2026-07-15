@@ -6,7 +6,6 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 
 class HeaderSection extends StatelessWidget {
-
   const HeaderSection({
     super.key,
     this.onSearchPressed,
@@ -53,7 +52,8 @@ class HeaderSection extends StatelessWidget {
 }
 
 // Private sub-widgets for better organization
-class _AuthenticatedWelcome extends StatelessWidget { // Replace with your User model
+class _AuthenticatedWelcome extends StatelessWidget {
+  // Replace with your User model
 
   const _AuthenticatedWelcome({required this.user});
   final dynamic user;

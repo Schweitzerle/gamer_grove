@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class RatingDialog extends StatefulWidget {
-
   const RatingDialog({
-    required this.gameName, required this.onRatingChanged, super.key,
+    required this.gameName,
+    required this.onRatingChanged,
+    super.key,
     this.onRatingDeleted,
     this.currentRating,
   });
@@ -37,10 +38,12 @@ class _RatingDialogState extends State<RatingDialog>
     _scaleAnimation = Tween<double>(
       begin: 0.8,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
 
     _animationController.forward();
   }

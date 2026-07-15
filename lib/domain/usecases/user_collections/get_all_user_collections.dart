@@ -9,13 +9,14 @@ import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.da
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetAllUserCollections extends UseCase<Map<UserCollectionType, List<Game>>, GetAllUserCollectionsParams> {
-
+class GetAllUserCollections extends UseCase<Map<UserCollectionType, List<Game>>,
+    GetAllUserCollectionsParams> {
   GetAllUserCollections(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, Map<UserCollectionType, List<Game>>>> call(GetAllUserCollectionsParams params) async {
+  Future<Either<Failure, Map<UserCollectionType, List<Game>>>> call(
+      GetAllUserCollectionsParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -28,7 +29,6 @@ class GetAllUserCollections extends UseCase<Map<UserCollectionType, List<Game>>,
 }
 
 class GetAllUserCollectionsParams extends Equatable {
-
   const GetAllUserCollectionsParams({
     required this.userId,
     this.limitPerCollection = 10,
@@ -39,4 +39,3 @@ class GetAllUserCollectionsParams extends Equatable {
   @override
   List<Object> get props => [userId, limitPerCollection];
 }
-

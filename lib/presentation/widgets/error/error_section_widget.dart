@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class ErrorSectionWidget extends StatelessWidget {
-
   const ErrorSectionWidget({
-    required this.message, super.key,
+    required this.message,
+    super.key,
     this.onRetry,
   });
   final String message;
@@ -32,8 +32,8 @@ class ErrorSectionWidget extends StatelessWidget {
               Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                 textAlign: TextAlign.center,
               ),
               if (onRetry != null) ...[

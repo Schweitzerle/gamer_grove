@@ -13,7 +13,6 @@ import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class EditProfilePage extends StatefulWidget {
-
   const EditProfilePage({required this.user, super.key});
   static const String routeName = 'edit_profile';
   final User user;
@@ -87,7 +86,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               filePath,
               file,
               fileOptions: const supabase.FileOptions(
-                  upsert: true,),
+                upsert: true,
+              ),
             );
 
         avatarUrl =
@@ -166,7 +166,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 label: const Text('Save'),
                 onPressed: _saveProfile,
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
               ),
             ),

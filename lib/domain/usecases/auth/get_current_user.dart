@@ -24,7 +24,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class GetCurrentUserUseCase implements UseCase<User?, NoParams> {
-
   GetCurrentUserUseCase(this.repository);
   final AuthRepository repository;
 

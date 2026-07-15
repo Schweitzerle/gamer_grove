@@ -9,7 +9,6 @@ import 'package:gamer_grove/domain/entities/game/game_engine_logo.dart';
 import 'package:gamer_grove/domain/entities/platform/platform.dart';
 
 class GameEngine extends Equatable {
-
   const GameEngine({
     required this.id,
     required this.checksum,
@@ -67,21 +66,19 @@ class GameEngine extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    description,
-    logoId,
-    logo,
-    slug,
-    url,
-    companyIds,
-    platformIds,
-    companies,
-    platforms,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        description,
+        logoId,
+        logo,
+        slug,
+        url,
+        companyIds,
+        platformIds,
+        companies,
+        platforms,
+        createdAt,
+        updatedAt,
+      ];
 }
-
-

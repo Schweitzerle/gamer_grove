@@ -8,13 +8,14 @@ import 'package:gamer_grove/domain/entities/game/game_media_collection.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetGameMediaCollection extends UseCase<GameMediaCollection, GetGameMediaCollectionParams> {
-
+class GetGameMediaCollection
+    extends UseCase<GameMediaCollection, GetGameMediaCollectionParams> {
   GetGameMediaCollection(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, GameMediaCollection>> call(GetGameMediaCollectionParams params) async {
+  Future<Either<Failure, GameMediaCollection>> call(
+      GetGameMediaCollectionParams params) async {
     if (params.gameId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
@@ -24,11 +25,9 @@ class GetGameMediaCollection extends UseCase<GameMediaCollection, GetGameMediaCo
 }
 
 class GetGameMediaCollectionParams extends Equatable {
-
   const GetGameMediaCollectionParams({required this.gameId});
   final int gameId;
 
   @override
   List<Object> get props => [gameId];
 }
-

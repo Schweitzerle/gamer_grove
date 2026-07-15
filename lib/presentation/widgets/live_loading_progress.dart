@@ -8,9 +8,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class LiveLoadingProgress extends StatefulWidget {
-
   const LiveLoadingProgress({
-    required this.title, required this.steps, super.key,
+    required this.title,
+    required this.steps,
+    super.key,
     this.stepDuration = const Duration(milliseconds: 800),
   });
   final String title;
@@ -47,18 +48,22 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
     _pulseAnimation = Tween<double>(
       begin: 0.4,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _typewriterAnimation = Tween<double>(
       begin: 0,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _typewriterController,
-      curve: Curves.easeOut,
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _typewriterController,
+        curve: Curves.easeOut,
+      ),
+    );
 
     _startLoading();
   }
@@ -216,8 +221,11 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
             height: 20,
             margin: const EdgeInsets.only(right: 12),
             child: isCompleted
-                ? Icon(Icons.check_circle,
-                    color: Theme.of(context).colorScheme.primary, size: 16,)
+                ? Icon(
+                    Icons.check_circle,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 16,
+                  )
                 : isActive
                     ? AnimatedBuilder(
                         animation: _pulseAnimation,
@@ -254,82 +262,84 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Step Text with Typewriter Effect
-                if (isActive) AnimatedBuilder(
-                        animation: _typewriterAnimation,
-                        builder: (context, child) {
-                          final visibleLength =
-                              (step.text.length * _typewriterAnimation.value)
-                                  .round();
-                          final visibleText =
-                              step.text.substring(0, visibleLength);
+                if (isActive)
+                  AnimatedBuilder(
+                    animation: _typewriterAnimation,
+                    builder: (context, child) {
+                      final visibleLength =
+                          (step.text.length * _typewriterAnimation.value)
+                              .round();
+                      final visibleText = step.text.substring(0, visibleLength);
 
-                          return RichText(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '> ',
-                                  style: TextStyle(
-                                    color: stepColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: visibleText,
-                                  style: TextStyle(
-                                    color: stepColor,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                                if (visibleLength < step.text.length &&
-                                    _typewriterAnimation.value < 1.0)
-                                  TextSpan(
-                                    text: '▌',
-                                    style: TextStyle(
-                                      color: stepColor,
-                                      fontFamily: 'monospace',
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ) else RichText(
+                      return RichText(
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: isCompleted ? '✓ ' : '  ',
+                              text: '> ',
                               style: TextStyle(
-                                color: isCompleted
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                color: stepColor,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'monospace',
                               ),
                             ),
                             TextSpan(
-                              text: step.text,
+                              text: visibleText,
                               style: TextStyle(
-                                color: isCompleted
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.8)
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                color: stepColor,
                                 fontFamily: 'monospace',
                               ),
                             ),
+                            if (visibleLength < step.text.length &&
+                                _typewriterAnimation.value < 1.0)
+                              TextSpan(
+                                text: '▌',
+                                style: TextStyle(
+                                  color: stepColor,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
                           ],
                         ),
-                      ),
+                      );
+                    },
+                  )
+                else
+                  RichText(
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: isCompleted ? '✓ ' : '  ',
+                          style: TextStyle(
+                            color: isCompleted
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        TextSpan(
+                          text: step.text,
+                          style: TextStyle(
+                            color: isCompleted
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.8)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 // Substep (if any)
                 if (step.substep != null && isActive)
@@ -358,7 +368,6 @@ class _LiveLoadingProgressState extends State<LiveLoadingProgress>
 // ==================================================
 
 class LoadingStep {
-
   const LoadingStep({
     required this.text,
     this.substep,

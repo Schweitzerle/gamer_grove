@@ -45,7 +45,6 @@ import 'package:gamer_grove/domain/repositories/event_repository.dart';
 /// ```
 class EventRepositoryImpl extends IgdbBaseRepository
     implements EventRepository {
-
   EventRepositoryImpl({
     required this.igdbDataSource,
     required super.networkInfo,
@@ -161,9 +160,8 @@ class EventRepositoryImpl extends IgdbBaseRepository
             sortField = 'start_time';
         }
 
-        final sortOrder = filters.sortOrder == EventSortOrder.ascending
-            ? 'asc'
-            : 'desc';
+        final sortOrder =
+            filters.sortOrder == EventSortOrder.ascending ? 'asc' : 'desc';
 
         final query = IgdbEventQuery(
           where: combinedFilter,

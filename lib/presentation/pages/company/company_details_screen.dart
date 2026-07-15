@@ -18,9 +18,10 @@ import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_s
 import 'package:url_launcher/url_launcher.dart';
 
 class CompanyDetailScreen extends StatefulWidget {
-
   const CompanyDetailScreen({
-    required this.company, required this.games, super.key,
+    required this.company,
+    required this.games,
+    super.key,
   });
   final Company company;
   final List<Game> games;
@@ -354,12 +355,14 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge,), // Space for floating card
+              height: AppConstants.paddingLarge,
+            ), // Space for floating card
 
             // Combined Company Information Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,),
+                horizontal: AppConstants.paddingMedium,
+              ),
               child: _buildCombinedCompanyAccordion(),
             ),
 
@@ -370,7 +373,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                 (widget.company.developedGames?.isNotEmpty ?? false))
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium,),
+                  horizontal: AppConstants.paddingMedium,
+                ),
                 child:
                     _buildTabView(context, _createDevelopedGamesSeriesItem()),
               ),
@@ -384,7 +388,8 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                 (widget.company.publishedGames?.isNotEmpty ?? false))
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium,),
+                  horizontal: AppConstants.paddingMedium,
+                ),
                 child:
                     _buildTabView(context, _createPublishedGamesSeriesItem()),
               ),
@@ -525,7 +530,9 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _getCompanyAccentColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -1163,9 +1170,10 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
             // Series Info Header
             Padding(
               padding: const EdgeInsets.only(
-                  left: AppConstants.paddingSmall,
-                  right: AppConstants.paddingSmall,
-                  top: AppConstants.paddingSmall,),
+                left: AppConstants.paddingSmall,
+                right: AppConstants.paddingSmall,
+                top: AppConstants.paddingSmall,
+              ),
               child: Row(
                 children: [
                   Container(
@@ -1209,8 +1217,11 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
                   if (item.totalCount >= 10)
                     TextButton.icon(
                       onPressed: () => _navigateToSeries(context, item),
-                      icon: Icon(Icons.arrow_forward,
-                          size: 16, color: item.accentColor,),
+                      icon: Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: item.accentColor,
+                      ),
                       label: Text(
                         'View All',
                         style: TextStyle(color: item.accentColor),
@@ -1252,7 +1263,9 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(
-          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall,),
+        left: AppConstants.paddingSmall,
+        bottom: AppConstants.paddingSmall,
+      ),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
@@ -1421,7 +1434,6 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
   }
 
   void _logCompanyData() {
-    if (widget.company.hasParent) {
-    }
+    if (widget.company.hasParent) {}
   }
 }

@@ -43,5 +43,3 @@ class CollectionTypeModel extends CollectionType {
     };
   }
 }
-
-

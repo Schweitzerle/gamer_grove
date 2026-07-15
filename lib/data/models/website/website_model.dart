@@ -14,8 +14,11 @@ class WebsiteModel extends Website {
     super.title,
   });
 
-  factory WebsiteModel.fromUrl(String url, WebsiteType type,
-      {int? id,}) {
+  factory WebsiteModel.fromUrl(
+    String url,
+    WebsiteType type, {
+    int? id,
+  }) {
     return WebsiteModel(
       id: id ?? 0,
       url: url,

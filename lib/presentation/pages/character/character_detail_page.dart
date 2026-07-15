@@ -15,12 +15,15 @@ import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
 import 'package:gamer_grove/presentation/pages/character/character_detail_screen.dart';
 import 'package:gamer_grove/presentation/widgets/character_laoding_steps.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart' hide CharacterLoadingSteps;
+import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'
+    hide CharacterLoadingSteps;
 
-class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded character
+class CharacterDetailPage extends StatelessWidget {
+  // Optional pre-loaded character
 
   const CharacterDetailPage({
-    required this.characterId, super.key,
+    required this.characterId,
+    super.key,
     this.character,
   });
   final int characterId;
@@ -28,7 +31,6 @@ class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded chara
 
   @override
   Widget build(BuildContext context) {
-
     return BlocProvider<CharacterBloc>(
       create: (context) {
         final bloc = sl<CharacterBloc>();
@@ -36,14 +38,16 @@ class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded chara
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        bloc.add(GetCharacterDetailsEvent(
+        bloc.add(
+          GetCharacterDetailsEvent(
             characterId: characterId,
-            userId: userId,),);
+            userId: userId,
+          ),
+        );
         return bloc;
       },
       child: BlocBuilder<CharacterBloc, CharacterState>(
         builder: (context, state) {
-
           if (state is CharacterLoading) {
             return _buildLiveLoadingState(context);
           } else if (state is CharacterDetailsLoaded) {
@@ -68,8 +72,10 @@ class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded chara
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -115,8 +121,10 @@ class CharacterDetailPage extends StatelessWidget { // Optional pre-loaded chara
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),

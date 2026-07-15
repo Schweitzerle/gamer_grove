@@ -45,14 +45,13 @@ class GameVersionModel extends GameVersion {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'game': gameId,
-    'features': featureIds,
-    'games': gameIds,
-    'url': url,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
+        'id': id,
+        'checksum': checksum,
+        'game': gameId,
+        'features': featureIds,
+        'games': gameIds,
+        'url': url,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
 }
-

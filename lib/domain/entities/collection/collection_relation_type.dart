@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CollectionRelationType extends Equatable {
-
   const CollectionRelationType({
     required this.id,
     required this.checksum,
@@ -24,13 +23,13 @@ class CollectionRelationType extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    description,
-    allowedChildTypeId,
-    allowedParentTypeId,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        description,
+        allowedChildTypeId,
+        allowedParentTypeId,
+        createdAt,
+        updatedAt,
+      ];
 }

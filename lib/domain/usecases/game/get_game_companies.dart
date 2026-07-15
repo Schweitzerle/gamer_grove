@@ -5,13 +5,14 @@ import 'package:gamer_grove/domain/entities/company/company.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetGameCompanies implements UseCase<List<Company>, GetGameCompaniesParams> {
-
+class GetGameCompanies
+    implements UseCase<List<Company>, GetGameCompaniesParams> {
   GetGameCompanies(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Company>>> call(GetGameCompaniesParams params) async {
+  Future<Either<Failure, List<Company>>> call(
+      GetGameCompaniesParams params) async {
     return repository.getCompanies(
       ids: params.ids,
       search: params.search,
@@ -20,7 +21,6 @@ class GetGameCompanies implements UseCase<List<Company>, GetGameCompaniesParams>
 }
 
 class GetGameCompaniesParams {
-
   GetGameCompaniesParams({
     this.ids,
     this.search,

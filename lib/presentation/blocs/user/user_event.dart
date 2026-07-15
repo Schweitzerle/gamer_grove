@@ -18,7 +18,6 @@ abstract class UserProfileEvent extends Equatable {
 
 /// Event to load a user profile.
 class LoadUserProfileEvent extends UserProfileEvent {
-
   const LoadUserProfileEvent({
     this.userId,
     this.username,
@@ -32,7 +31,6 @@ class LoadUserProfileEvent extends UserProfileEvent {
 
 /// Event to update user profile.
 class UpdateUserProfileEvent extends UserProfileEvent {
-
   const UpdateUserProfileEvent({
     required this.userId,
     required this.updates,
@@ -46,7 +44,6 @@ class UpdateUserProfileEvent extends UserProfileEvent {
 
 /// Event to update user avatar.
 class UpdateUserAvatarEvent extends UserProfileEvent {
-
   const UpdateUserAvatarEvent({
     required this.userId,
     required this.imageData,
@@ -60,7 +57,6 @@ class UpdateUserAvatarEvent extends UserProfileEvent {
 
 /// Event to follow a user.
 class FollowUserEvent extends UserProfileEvent {
-
   const FollowUserEvent({
     required this.currentUserId,
     required this.targetUserId,
@@ -74,7 +70,6 @@ class FollowUserEvent extends UserProfileEvent {
 
 /// Event to unfollow a user.
 class UnfollowUserEvent extends UserProfileEvent {
-
   const UnfollowUserEvent({
     required this.currentUserId,
     required this.targetUserId,
@@ -88,7 +83,6 @@ class UnfollowUserEvent extends UserProfileEvent {
 
 /// Event to load followers list.
 class LoadFollowersEvent extends UserProfileEvent {
-
   const LoadFollowersEvent({
     required this.userId,
     this.limit,
@@ -104,7 +98,6 @@ class LoadFollowersEvent extends UserProfileEvent {
 
 /// Event to load following list.
 class LoadFollowingEvent extends UserProfileEvent {
-
   const LoadFollowingEvent({
     required this.userId,
     this.limit,

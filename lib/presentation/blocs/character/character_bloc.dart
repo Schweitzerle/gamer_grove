@@ -12,7 +12,6 @@ import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
 
 class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
-
   CharacterBloc({
     required this.getCharacterWithGames,
     required this.enrichmentService,
@@ -62,21 +61,27 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
               event.userId!,
             );
 
-            emit(CharacterDetailsLoaded(
-              character: characterWithGames.character,
-              games: enrichedGames,
-            ),);
+            emit(
+              CharacterDetailsLoaded(
+                character: characterWithGames.character,
+                games: enrichedGames,
+              ),
+            );
           } catch (e) {
-            emit(CharacterDetailsLoaded(
-              character: characterWithGames.character,
-              games: characterWithGames.games,
-            ),);
+            emit(
+              CharacterDetailsLoaded(
+                character: characterWithGames.character,
+                games: characterWithGames.games,
+              ),
+            );
           }
         } else {
-          emit(CharacterDetailsLoaded(
-            character: characterWithGames.character,
-            games: characterWithGames.games,
-          ),);
+          emit(
+            CharacterDetailsLoaded(
+              character: characterWithGames.character,
+              games: characterWithGames.games,
+            ),
+          );
         }
       },
     );
@@ -120,10 +125,12 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
 
     result.fold(
       (failure) => emit(CharacterError(message: failure.message)),
-      (characters) => emit(CharacterSearchLoaded(
-        characters: characters,
-        query: event.query,
-      ),),
+      (characters) => emit(
+        CharacterSearchLoaded(
+          characters: characters,
+          query: event.query,
+        ),
+      ),
     );
   }
 
@@ -149,11 +156,13 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
       (failure) => emit(CharacterError(message: failure.message)),
       (characters) {
         _currentOffset = characters.length;
-        emit(CharacterSearchLoaded(
-          characters: characters,
-          query: event.query,
-          hasReachedMax: characters.length < event.limit,
-        ),);
+        emit(
+          CharacterSearchLoaded(
+            characters: characters,
+            query: event.query,
+            hasReachedMax: characters.length < event.limit,
+          ),
+        );
       },
     );
   }
@@ -175,17 +184,21 @@ class CharacterBloc extends Bloc<CharacterEvent, CharacterState> {
     );
 
     result.fold(
-      (failure) => emit(CharacterError(
-        message: failure.message,
-        characters: currentState.characters,
-      ),),
+      (failure) => emit(
+        CharacterError(
+          message: failure.message,
+          characters: currentState.characters,
+        ),
+      ),
       (newCharacters) {
         _currentOffset += newCharacters.length;
-        emit(currentState.copyWith(
-          characters: [...currentState.characters, ...newCharacters],
-          hasReachedMax: newCharacters.length < _pageSize,
-          isLoadingMore: false,
-        ),);
+        emit(
+          currentState.copyWith(
+            characters: [...currentState.characters, ...newCharacters],
+            hasReachedMax: newCharacters.length < _pageSize,
+            isLoadingMore: false,
+          ),
+        );
       },
     );
   }

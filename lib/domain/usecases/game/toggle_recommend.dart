@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class ToggleRecommend extends UseCase<void, ToggleRecommendParams> {
-
   ToggleRecommend(this.repository);
   final GameRepository repository;
 
@@ -20,7 +19,6 @@ class ToggleRecommend extends UseCase<void, ToggleRecommendParams> {
 }
 
 class ToggleRecommendParams extends Equatable {
-
   const ToggleRecommendParams({
     required this.gameId,
     required this.userId,
@@ -31,4 +29,3 @@ class ToggleRecommendParams extends Equatable {
   @override
   List<Object> get props => [gameId, userId];
 }
-

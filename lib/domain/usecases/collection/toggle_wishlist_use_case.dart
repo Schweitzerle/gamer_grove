@@ -24,7 +24,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class ToggleWishlistUseCase implements UseCase<void, ToggleWishlistParams> {
-
   ToggleWishlistUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -35,7 +34,6 @@ class ToggleWishlistUseCase implements UseCase<void, ToggleWishlistParams> {
 }
 
 class ToggleWishlistParams extends Equatable {
-
   const ToggleWishlistParams({
     required this.userId,
     required this.gameId,

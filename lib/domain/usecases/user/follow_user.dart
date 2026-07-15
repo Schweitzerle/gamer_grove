@@ -22,7 +22,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class FollowUserUseCase implements UseCase<void, FollowUserParams> {
-
   FollowUserUseCase(this.repository);
   final UserRepository repository;
 
@@ -30,9 +29,11 @@ class FollowUserUseCase implements UseCase<void, FollowUserParams> {
   Future<Either<Failure, void>> call(FollowUserParams params) async {
     // Validate not trying to follow self
     if (params.currentUserId == params.targetUserId) {
-      return const Left(ValidationFailure(
-        message: 'You cannot follow yourself',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'You cannot follow yourself',
+        ),
+      );
     }
 
     // Check if already following (optional - repository handles this)
@@ -47,9 +48,11 @@ class FollowUserUseCase implements UseCase<void, FollowUserParams> {
     );
 
     if (alreadyFollowing) {
-      return const Left(ValidationFailure(
-        message: 'You are already following this user',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'You are already following this user',
+        ),
+      );
     }
 
     return repository.followUser(
@@ -60,7 +63,6 @@ class FollowUserUseCase implements UseCase<void, FollowUserParams> {
 }
 
 class FollowUserParams extends Equatable {
-
   const FollowUserParams({
     required this.currentUserId,
     required this.targetUserId,

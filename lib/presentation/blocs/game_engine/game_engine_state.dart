@@ -24,7 +24,6 @@ class GameEngineInitial extends GameEngineState {}
 class GameEngineLoading extends GameEngineState {}
 
 class GameEngineDetailsLoaded extends GameEngineState {
-
   const GameEngineDetailsLoaded({
     required this.gameEngine,
     required this.games,
@@ -40,7 +39,6 @@ class GameEngineDetailsLoaded extends GameEngineState {
 }
 
 class GameEngineError extends GameEngineState {
-
   const GameEngineError({required this.message});
   final String message;
 
@@ -54,7 +52,6 @@ class GameEngineError extends GameEngineState {
 
 /// Loading paginated games (initial load)
 class GameEngineGamesLoading extends GameEngineState {
-
   const GameEngineGamesLoading({
     required this.gameEngineId,
     required this.gameEngineName,
@@ -67,7 +64,8 @@ class GameEngineGamesLoading extends GameEngineState {
 }
 
 /// Paginated games loaded
-class GameEngineGamesLoaded extends GameEngineState { // 🆕 Store userId for enrichment
+class GameEngineGamesLoaded extends GameEngineState {
+  // 🆕 Store userId for enrichment
 
   const GameEngineGamesLoaded({
     required this.gameEngineId,
@@ -129,7 +127,6 @@ class GameEngineGamesLoaded extends GameEngineState { // 🆕 Store userId for e
 
 /// Error loading paginated games
 class GameEngineGamesError extends GameEngineState {
-
   const GameEngineGamesError({
     required this.gameEngineId,
     required this.gameEngineName,

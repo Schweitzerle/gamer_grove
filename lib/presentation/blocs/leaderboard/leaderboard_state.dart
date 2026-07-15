@@ -13,7 +13,6 @@ class LeaderboardInitial extends LeaderboardState {}
 class LeaderboardLoading extends LeaderboardState {}
 
 class LeaderboardLoaded extends LeaderboardState {
-
   const LeaderboardLoaded(this.users);
   final List<User> users;
 
@@ -22,7 +21,6 @@ class LeaderboardLoaded extends LeaderboardState {
 }
 
 class LeaderboardError extends LeaderboardState {
-
   const LeaderboardError(this.message);
   final String message;
 

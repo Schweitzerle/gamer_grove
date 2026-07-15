@@ -7,13 +7,14 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetSearchSuggestions extends UseCase<List<String>, GetSearchSuggestionsParams> {
-
+class GetSearchSuggestions
+    extends UseCase<List<String>, GetSearchSuggestionsParams> {
   GetSearchSuggestions(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<String>>> call(GetSearchSuggestionsParams params) async {
+  Future<Either<Failure, List<String>>> call(
+      GetSearchSuggestionsParams params) async {
     if (params.partialQuery.length < 2) {
       return const Right([]);
     }
@@ -23,11 +24,9 @@ class GetSearchSuggestions extends UseCase<List<String>, GetSearchSuggestionsPar
 }
 
 class GetSearchSuggestionsParams extends Equatable {
-
   const GetSearchSuggestionsParams({required this.partialQuery});
   final String partialQuery;
 
   @override
   List<Object> get props => [partialQuery];
 }
-

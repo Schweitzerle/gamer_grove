@@ -10,13 +10,13 @@ import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetEnhancedGameDetails
     extends UseCase<Game, GetEnhancedGameDetailsParams> {
-
   GetEnhancedGameDetails(this.repository);
   final GameRepository repository;
 
   @override
   Future<Either<Failure, Game>> call(
-      GetEnhancedGameDetailsParams params,) async {
+    GetEnhancedGameDetailsParams params,
+  ) async {
     if (params.gameId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
@@ -32,7 +32,6 @@ class GetEnhancedGameDetails
 }
 
 class GetEnhancedGameDetailsParams extends Equatable {
-
   const GetEnhancedGameDetailsParams({
     required this.gameId,
     this.userId,

@@ -10,9 +10,10 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class DLCExpansionSection extends StatelessWidget {
-
   const DLCExpansionSection({
-    required this.dlcs, required this.expansions, super.key,
+    required this.dlcs,
+    required this.expansions,
+    super.key,
   });
   final List<Game> dlcs;
   final List<Game> expansions;
@@ -72,9 +73,9 @@ class DLCExpansionSection extends StatelessWidget {
             width: 160,
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
-                game: game,
-                onTap: () =>
-                    Navigations.navigateToGameDetail(game.id, context),),
+              game: game,
+              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+            ),
           );
         },
       ),

@@ -9,9 +9,12 @@ import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_screen_image_viewer.dart';
 
 class AllImagesGrid extends StatelessWidget {
-
   const AllImagesGrid({
-    required this.images, required this.title, required this.type, required this.gameName, super.key,
+    required this.images,
+    required this.title,
+    required this.type,
+    required this.gameName,
+    super.key,
   });
   final List<String> images;
   final String title;

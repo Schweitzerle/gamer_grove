@@ -25,19 +25,18 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class GetTopThreeUseCase
     implements UseCase<List<Map<String, dynamic>>, GetTopThreeParams> {
-
   GetTopThreeUseCase(this.repository);
   final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetTopThreeParams params,) async {
+    GetTopThreeParams params,
+  ) async {
     return repository.getUserTopThreeGames(userId: params.userId);
   }
 }
 
 class GetTopThreeParams extends Equatable {
-
   const GetTopThreeParams({required this.userId});
   final String userId;
 

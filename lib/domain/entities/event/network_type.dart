@@ -7,7 +7,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 class NetworkType extends Equatable {
-
   const NetworkType({
     required this.id,
     required this.checksum,
@@ -31,16 +30,19 @@ class NetworkType extends Equatable {
   int get eventNetworkCount => eventNetworkIds.length;
 
   // Enhanced network type detection
-  bool get isSocialMedia => name.toLowerCase().contains('social') ||
+  bool get isSocialMedia =>
+      name.toLowerCase().contains('social') ||
       name.toLowerCase().contains('twitter') ||
       name.toLowerCase().contains('facebook') ||
       name.toLowerCase().contains('instagram');
 
-  bool get isStreaming => name.toLowerCase().contains('stream') ||
+  bool get isStreaming =>
+      name.toLowerCase().contains('stream') ||
       name.toLowerCase().contains('twitch') ||
       name.toLowerCase().contains('youtube');
 
-  bool get isOfficial => name.toLowerCase().contains('official') ||
+  bool get isOfficial =>
+      name.toLowerCase().contains('official') ||
       name.toLowerCase().contains('website');
 
   // Enhanced icon detection
@@ -61,11 +63,11 @@ class NetworkType extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    eventNetworkIds,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        eventNetworkIds,
+        createdAt,
+        updatedAt,
+      ];
 }

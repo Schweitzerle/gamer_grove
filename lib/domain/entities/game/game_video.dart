@@ -15,7 +15,8 @@ class GameVideo extends Equatable {
   final String? title;
 
   String get youtubeUrl => 'https://www.youtube.com/watch?v=$videoId';
-  String get thumbnailUrl => 'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
+  String get thumbnailUrl =>
+      'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
 
   @override
   List<Object?> get props => [id, videoId, title];

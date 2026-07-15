@@ -8,9 +8,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class FranchiseCollectionsSection extends StatefulWidget {
-
   const FranchiseCollectionsSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -31,44 +31,50 @@ class _FranchiseCollectionsSectionState
     // Add Main Franchise first (if exists)
     if (widget.game.mainFranchise != null &&
         widget.game.mainFranchise!.hasGames) {
-      seriesItems.add(SeriesItem(
-        type: SeriesType.mainFranchise,
-        title: widget.game.mainFranchise!.name,
-        games: _getFranchiseGames(widget.game.mainFranchise!),
-        totalCount: widget.game.mainFranchise!.gameCount,
-        franchise: widget.game.mainFranchise,
-        accentColor: Colors.orange,
-        icon: Icons.stars,
-      ),);
+      seriesItems.add(
+        SeriesItem(
+          type: SeriesType.mainFranchise,
+          title: widget.game.mainFranchise!.name,
+          games: _getFranchiseGames(widget.game.mainFranchise!),
+          totalCount: widget.game.mainFranchise!.gameCount,
+          franchise: widget.game.mainFranchise,
+          accentColor: Colors.orange,
+          icon: Icons.stars,
+        ),
+      );
     }
 
     // Add Other Franchises
     for (final franchise in widget.game.franchises) {
       if (franchise.hasGames) {
-        seriesItems.add(SeriesItem(
-          type: SeriesType.franchise,
-          title: franchise.name,
-          games: _getFranchiseGames(franchise),
-          totalCount: franchise.gameCount,
-          franchise: franchise,
-          accentColor: Colors.orange,
-          icon: Icons.account_tree,
-        ),);
+        seriesItems.add(
+          SeriesItem(
+            type: SeriesType.franchise,
+            title: franchise.name,
+            games: _getFranchiseGames(franchise),
+            totalCount: franchise.gameCount,
+            franchise: franchise,
+            accentColor: Colors.orange,
+            icon: Icons.account_tree,
+          ),
+        );
       }
     }
 
     // Add Collections
     for (final collection in widget.game.collections) {
       if (collection.hasGames) {
-        seriesItems.add(SeriesItem(
-          type: SeriesType.collection,
-          title: collection.name,
-          games: _getCollectionGames(collection),
-          totalCount: collection.gameCount,
-          collection: collection,
-          accentColor: Colors.blue,
-          icon: Icons.collections,
-        ),);
+        seriesItems.add(
+          SeriesItem(
+            type: SeriesType.collection,
+            title: collection.name,
+            games: _getCollectionGames(collection),
+            totalCount: collection.gameCount,
+            collection: collection,
+            accentColor: Colors.blue,
+            icon: Icons.collections,
+          ),
+        );
       }
     }
 
@@ -283,7 +289,10 @@ class _FranchiseCollectionsSectionState
 
   // Preview widget for collapsed state
   Widget _buildPreview(
-      BuildContext context, List<SeriesItem> seriesItems, int totalGames,) {
+    BuildContext context,
+    List<SeriesItem> seriesItems,
+    int totalGames,
+  ) {
     // Show tab names as preview
     final tabNames = seriesItems.map((item) {
       final icon = item.type == SeriesType.collection ? '📁' : '🎮';
@@ -361,9 +370,10 @@ class _FranchiseCollectionsSectionState
         // Series Info Header
         Padding(
           padding: const EdgeInsets.only(
-              left: AppConstants.paddingMedium,
-              right: AppConstants.paddingMedium,
-              top: AppConstants.paddingSmall,),
+            left: AppConstants.paddingMedium,
+            right: AppConstants.paddingMedium,
+            top: AppConstants.paddingSmall,
+          ),
           child: Row(
             children: [
               Container(
@@ -409,8 +419,11 @@ class _FranchiseCollectionsSectionState
               if (item.totalCount > 5)
                 TextButton.icon(
                   onPressed: () => _navigateToSeries(context, item),
-                  icon: Icon(Icons.arrow_forward,
-                      size: 16, color: item.accentColor,),
+                  icon: Icon(
+                    Icons.arrow_forward,
+                    size: 16,
+                    color: item.accentColor,
+                  ),
                   label: Text(
                     'View All',
                     style: TextStyle(color: item.accentColor),
@@ -502,12 +515,17 @@ class _FranchiseCollectionsSectionState
   // Navigation methods
   void _navigateToSeries(BuildContext context, SeriesItem item) {
     if (item.franchise != null) {
-      Navigations.navigateToFranchiseGames(context,
-          franchiseId: item.franchise!.id, franchiseName: item.franchise!.name,);
+      Navigations.navigateToFranchiseGames(
+        context,
+        franchiseId: item.franchise!.id,
+        franchiseName: item.franchise!.name,
+      );
     } else if (item.collection != null) {
-      Navigations.navigateToCollectionGames(context,
-          collectionId: item.collection!.id,
-          collectionName: item.collection!.name,);
+      Navigations.navigateToCollectionGames(
+        context,
+        collectionId: item.collection!.id,
+        collectionName: item.collection!.name,
+      );
     } else if (item.companyId != null && item.companyName != null) {
       Navigations.navigateToCompanyGames(
         context,
@@ -542,9 +560,13 @@ enum SeriesType {
 }
 
 class SeriesItem {
-
   SeriesItem({
-    required this.title, required this.games, required this.totalCount, required this.accentColor, required this.icon, this.type,
+    required this.title,
+    required this.games,
+    required this.totalCount,
+    required this.accentColor,
+    required this.icon,
+    this.type,
     this.franchise,
     this.collection,
     this.companyId,

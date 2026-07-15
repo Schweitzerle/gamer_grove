@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformVersionCompany extends Equatable {
-
   const PlatformVersionCompany({
     required this.id,
     required this.checksum,
@@ -32,11 +31,11 @@ class PlatformVersionCompany extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    comment,
-    companyId,
-    developer,
-    manufacturer,
-  ];
+        id,
+        checksum,
+        comment,
+        companyId,
+        developer,
+        manufacturer,
+      ];
 }

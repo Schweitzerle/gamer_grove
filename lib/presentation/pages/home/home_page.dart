@@ -27,19 +27,31 @@ class _HomePageState extends State<HomePage> {
         index: _selectedIndex,
         children: [
           // Index 0 - Grove
-          if (_visitedPages.contains(0)) const GrovePage() else _buildPlaceholder('Grove', Icons.gamepad_rounded),
+          if (_visitedPages.contains(0))
+            const GrovePage()
+          else
+            _buildPlaceholder('Grove', Icons.gamepad_rounded),
 
           // Index 1 - Social
-          if (_visitedPages.contains(1)) const SocialPage() else _buildPlaceholder('Social', Icons.people),
+          if (_visitedPages.contains(1))
+            const SocialPage()
+          else
+            _buildPlaceholder('Social', Icons.people),
 
           // Index 2 - Home (Landing Page)
           const HomeContent(), // Immer geladen da Landing Page
 
           // Index 3 - Search
-          if (_visitedPages.contains(3)) const SearchPage() else _buildPlaceholder('Search', Icons.search),
+          if (_visitedPages.contains(3))
+            const SearchPage()
+          else
+            _buildPlaceholder('Search', Icons.search),
 
           // Index 4 - Profile
-          if (_visitedPages.contains(4)) const ProfilePage() else _buildPlaceholder('Profile', Icons.person),
+          if (_visitedPages.contains(4))
+            const ProfilePage()
+          else
+            _buildPlaceholder('Profile', Icons.person),
         ],
       ),
       bottomNavigationBar: NavigationBar(

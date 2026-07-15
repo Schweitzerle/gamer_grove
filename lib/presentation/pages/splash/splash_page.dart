@@ -43,18 +43,22 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0, 0.6, curve: Curves.easeOut),
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     _scaleAnimation = Tween<double>(
       begin: 0.5,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0, 0.8, curve: Curves.elasticOut),
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0, 0.8, curve: Curves.elasticOut),
+      ),
+    );
 
     // Pulse animation for icon
     _pulseController = AnimationController(
@@ -65,10 +69,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _pulseAnimation = Tween<double>(
       begin: 1,
       end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     // Shimmer animation for loading
     _shimmerController = AnimationController(
@@ -79,10 +85,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _shimmerAnimation = Tween<double>(
       begin: -2,
       end: 2,
-    ).animate(CurvedAnimation(
-      parent: _shimmerController,
-      curve: Curves.easeInOut,
-    ),);
+    ).animate(
+      CurvedAnimation(
+        parent: _shimmerController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   Future<void> _startSplashSequence() async {
@@ -120,7 +128,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-
         if (state is AuthAuthenticated) {
           _navigateToHome();
         } else if (state is AuthUnauthenticated) {
@@ -204,7 +211,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                 },
                               ),
                               const SizedBox(
-                                  height: AppConstants.paddingXLarge,),
+                                height: AppConstants.paddingXLarge,
+                              ),
 
                               // App Name with Shimmer
                               ShaderMask(
@@ -323,7 +331,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                               ),
                               if (kDebugMode) ...[
                                 const SizedBox(
-                                    height: AppConstants.paddingSmall,),
+                                  height: AppConstants.paddingSmall,
+                                ),
                                 Text(
                                   'State: ${state.runtimeType}',
                                   style: Theme.of(context)

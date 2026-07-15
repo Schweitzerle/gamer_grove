@@ -25,7 +25,6 @@ part 'statistics_state.dart';
 /// );
 /// ```
 class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
-
   /// Creates a StatisticsBloc
   StatisticsBloc({
     required this.gameRepository,
@@ -33,6 +32,7 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
     on<LoadStatisticsEvent>(_onLoadStatistics);
     on<RefreshStatisticsEvent>(_onRefreshStatistics);
   }
+
   /// Game repository for fetching user's rated games
   final GameRepository gameRepository;
 
@@ -96,10 +96,12 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       // Calculate statistics from the games
       final statistics = _calculateStatistics(allGames);
 
-      emit(StatisticsLoaded(
-        statistics: statistics,
-        userId: userId,
-      ),);
+      emit(
+        StatisticsLoaded(
+          statistics: statistics,
+          userId: userId,
+        ),
+      );
     } catch (e) {
       emit(StatisticsError('Failed to load statistics: $e'));
     }
@@ -126,16 +128,18 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       for (final genre in game.genres) {
         distribution[genre.name] = (distribution[genre.name] ?? 0) + 1;
       }
-        }
+    }
 
     // Calculate percentages and sort
     final totalGames = games.length;
     final topGenres = distribution.entries
-        .map((e) => GenreData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-            ),)
+        .map(
+          (e) => GenreData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
@@ -152,21 +156,22 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
 
     for (final game in games) {
       for (final platform in game.platforms) {
-        distribution[platform.name] =
-            (distribution[platform.name] ?? 0) + 1;
+        distribution[platform.name] = (distribution[platform.name] ?? 0) + 1;
         abbreviations[platform.name] = platform.abbreviation;
       }
-        }
+    }
 
     // Calculate percentages and sort
     final totalGames = games.length;
     final topPlatforms = distribution.entries
-        .map((e) => PlatformData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-              abbreviation: abbreviations[e.key],
-            ),)
+        .map(
+          (e) => PlatformData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+            abbreviation: abbreviations[e.key],
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
@@ -184,16 +189,18 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       for (final theme in game.themes) {
         distribution[theme.name] = (distribution[theme.name] ?? 0) + 1;
       }
-        }
+    }
 
     // Calculate percentages and sort
     final totalGames = games.length;
     final topThemes = distribution.entries
-        .map((e) => ThemeData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-            ),)
+        .map(
+          (e) => ThemeData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
@@ -211,16 +218,18 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       for (final mode in game.gameModes) {
         distribution[mode.name] = (distribution[mode.name] ?? 0) + 1;
       }
-        }
+    }
 
     // Calculate percentages and sort
     final totalGames = games.length;
     final topModes = distribution.entries
-        .map((e) => GameModeData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-            ),)
+        .map(
+          (e) => GameModeData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
@@ -265,8 +274,7 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       }
     }
 
-    final averageRating =
-        ratings.reduce((a, b) => a + b) / ratings.length;
+    final averageRating = ratings.reduce((a, b) => a + b) / ratings.length;
 
     return RatingStats(
       averageRating: averageRating,
@@ -303,21 +311,25 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
 
     // Calculate top developers
     final topDevelopers = developers.entries
-        .map((e) => DeveloperData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-            ),)
+        .map(
+          (e) => DeveloperData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 
     // Calculate top publishers
     final topPublishers = publishers.entries
-        .map((e) => DeveloperData(
-              name: e.key,
-              count: e.value,
-              percentage: (e.value / totalGames) * 100,
-            ),)
+        .map(
+          (e) => DeveloperData(
+            name: e.key,
+            count: e.value,
+            percentage: (e.value / totalGames) * 100,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 

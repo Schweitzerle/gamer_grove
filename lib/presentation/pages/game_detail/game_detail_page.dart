@@ -21,7 +21,6 @@ import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_s
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
 
 class GameDetailPage extends StatefulWidget {
-
   const GameDetailPage({required this.gameId, super.key});
   final int gameId;
 
@@ -61,19 +60,18 @@ class _GameDetailPageState extends State<GameDetailPage>
     _gameBloc = sl<GameBloc>();
     final authState = context.read<AuthBloc>().state;
 
-
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-    } else {
-    }
+    } else {}
   }
 
   void _loadGameDetails() {
-
-    _gameBloc.add(GetCompleteGameDetailsEvent(
-      gameId: widget.gameId,
-      userId: _currentUserId,
-    ),);
+    _gameBloc.add(
+      GetCompleteGameDetailsEvent(
+        gameId: widget.gameId,
+        userId: _currentUserId,
+      ),
+    );
   }
 
   void _initializeMediaTabs(Game game) {
@@ -151,8 +149,10 @@ class _GameDetailPageState extends State<GameDetailPage>
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -163,7 +163,8 @@ class _GameDetailPageState extends State<GameDetailPage>
             title: 'Loading Game Details',
             steps: EventLoadingSteps.gameDetails(context),
             stepDuration: const Duration(
-                milliseconds: 1000,), // ✅ Slightly faster for games
+              milliseconds: 1000,
+            ), // ✅ Slightly faster for games
           ),
         ),
       ),
@@ -188,8 +189,10 @@ class _GameDetailPageState extends State<GameDetailPage>
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -204,29 +207,21 @@ class _GameDetailPageState extends State<GameDetailPage>
 
   // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
   void _logGameDetailsData(Game game) {
-
     // 🆕 UPDATED: Characters data with detailed image info
     if (game.characters.isNotEmpty) {
-
       for (var i = 0; i < game.characters.length && i < 5; i++) {
         final char = game.characters[i];
 
         // 🆕 NEW: Log image information
         if (char.hasImage) {
         } else if (char.hasMugShot) {
-        } else {
-        }
+        } else {}
 
-        if (char.description != null) {
-        }
+        if (char.description != null) {}
       }
 
-      if (game.characters.length > 5) {
-      }
-
-    } else {
-    }
-
+      if (game.characters.length > 5) {}
+    } else {}
   }
 
   Widget _buildSliverAppBar(Game game) {

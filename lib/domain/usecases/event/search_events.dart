@@ -9,14 +9,14 @@ import 'package:gamer_grove/domain/repositories/event_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchEvents extends UseCase<List<Event>, SearchEventsParams> {
-
   SearchEvents(this.repository);
   final EventRepository repository;
 
   @override
   Future<Either<Failure, List<Event>>> call(SearchEventsParams params) async {
     if (params.query.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Search query cannot be empty'));
+      return const Left(
+          ValidationFailure(message: 'Search query cannot be empty'));
     }
 
     return repository.searchEvents(params.query.trim());
@@ -24,7 +24,6 @@ class SearchEvents extends UseCase<List<Event>, SearchEventsParams> {
 }
 
 class SearchEventsParams extends Equatable {
-
   const SearchEventsParams({required this.query});
   final String query;
 

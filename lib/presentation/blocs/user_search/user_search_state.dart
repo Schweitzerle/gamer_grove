@@ -5,7 +5,6 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 
 /// Represents the state of user search
 class UserSearchState extends Equatable {
-
   const UserSearchState({
     this.users = const [],
     this.isLoading = false,

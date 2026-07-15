@@ -7,9 +7,9 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 
 class GameEnginesSection extends StatelessWidget {
-
   const GameEnginesSection({
-    required this.gameEngines, super.key,
+    required this.gameEngines,
+    super.key,
   });
   final List<GameEngine> gameEngines;
 
@@ -34,9 +34,10 @@ class GameEnginesSection extends StatelessWidget {
   Widget _buildSectionHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-          top: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall,
-          left: AppConstants.paddingSmall,),
+        top: AppConstants.paddingSmall,
+        right: AppConstants.paddingSmall,
+        left: AppConstants.paddingSmall,
+      ),
       child: Row(
         children: [
           Icon(
@@ -61,9 +62,10 @@ class GameEnginesSection extends StatelessWidget {
     if (gameEngines.length == 1) {
       return Padding(
         padding: const EdgeInsets.only(
-            bottom: AppConstants.paddingSmall,
-            left: AppConstants.paddingSmall,
-            right: AppConstants.paddingSmall,),
+          bottom: AppConstants.paddingSmall,
+          left: AppConstants.paddingSmall,
+          right: AppConstants.paddingSmall,
+        ),
         child: _buildSingleEngineCard(context, gameEngines.first),
       );
     }
@@ -243,8 +245,11 @@ class GameEnginesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEngineLogo(BuildContext context, GameEngine engine,
-      {required double size,}) {
+  Widget _buildEngineLogo(
+    BuildContext context,
+    GameEngine engine, {
+    required double size,
+  }) {
     if (engine.hasLogo) {
       final logoUrl = ImageUtils.getMediumImageUrl(
         engine.logo?.url.toString(),
@@ -275,7 +280,10 @@ class GameEnginesSection extends StatelessWidget {
   }
 
   Widget _buildDefaultEngineLogo(
-      BuildContext context, GameEngine engine, double size,) {
+    BuildContext context,
+    GameEngine engine,
+    double size,
+  ) {
     final iconData = _getEngineIconData(engine);
     final color = _getEngineColor(engine);
 

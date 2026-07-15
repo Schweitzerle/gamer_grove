@@ -9,9 +9,11 @@ import 'package:gamer_grove/domain/entities/game/game_video.dart';
 import 'package:gamer_grove/presentation/pages/videoPlayer/video_player_screen.dart';
 
 class AllVideosGrid extends StatelessWidget {
-
   const AllVideosGrid({
-    required this.videos, required this.title, required this.gameName, super.key,
+    required this.videos,
+    required this.title,
+    required this.gameName,
+    super.key,
   });
   final List<GameVideo> videos;
   final String title;

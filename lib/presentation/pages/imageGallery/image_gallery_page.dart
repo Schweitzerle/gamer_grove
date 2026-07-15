@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 
 class ImageGalleryPage extends StatefulWidget {
-
   const ImageGalleryPage({
-    required this.images, required this.initialIndex, super.key,
+    required this.images,
+    required this.initialIndex,
+    super.key,
   });
   final List<String> images;
   final int initialIndex;
@@ -59,7 +60,8 @@ class _ImageGalleryPageState extends State<ImageGalleryPage> {
               child: CachedNetworkImage(
                 imageUrl: ImageUtils.getLargeImageUrl(widget.images[index]),
                 fit: BoxFit.contain,
-                placeholder: (context, url) => const CircularProgressIndicator(),
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator(),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),

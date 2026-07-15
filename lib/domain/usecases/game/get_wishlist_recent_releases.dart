@@ -6,13 +6,14 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetWishlistRecentReleases extends UseCase<List<Game>, GetWishlistRecentReleasesParams> {
-
+class GetWishlistRecentReleases
+    extends UseCase<List<Game>, GetWishlistRecentReleasesParams> {
   GetWishlistRecentReleases(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetWishlistRecentReleasesParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetWishlistRecentReleasesParams params) async {
     return repository.getWishlistRecentReleases(
       params.userId,
       fromDate: params.fromDate,
@@ -22,17 +23,16 @@ class GetWishlistRecentReleases extends UseCase<List<Game>, GetWishlistRecentRel
 }
 
 class GetWishlistRecentReleasesParams extends Equatable {
-
   const GetWishlistRecentReleasesParams({
     required this.userId,
     this.fromDate, // defaults to 1 month ago
-    this.toDate,   // defaults to 2 weeks from now
+    this.toDate, // defaults to 2 weeks from now
   });
 
   // Helper constructor for default date range (1 month ago to 2 weeks from now)
   GetWishlistRecentReleasesParams.defaultRange({
     required this.userId,
-  }) : fromDate = DateTime.now().subtract(const Duration(days: 30)),
+  })  : fromDate = DateTime.now().subtract(const Duration(days: 30)),
         toDate = DateTime.now().add(const Duration(days: 14));
   final String userId;
   final DateTime? fromDate;
@@ -41,5 +41,3 @@ class GetWishlistRecentReleasesParams extends Equatable {
   @override
   List<Object?> get props => [userId, fromDate, toDate];
 }
-
-

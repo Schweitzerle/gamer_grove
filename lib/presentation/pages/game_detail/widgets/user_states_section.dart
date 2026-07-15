@@ -18,9 +18,9 @@ import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
 class UserStatesContent extends StatelessWidget {
-
   const UserStatesContent({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -44,9 +44,7 @@ class UserStatesContent extends StatelessWidget {
           userRating = userDataState.getRating(game.id);
           isInTopThree = userDataState.isInTopThree(game.id);
           topThreePosition = userDataState.getTopThreePosition(game.id);
-
-        } else {
-        }
+        } else {}
 
         return Column(
           children: [
@@ -221,7 +219,9 @@ class UserStatesContent extends StatelessWidget {
   }
 
   void _showTopThreeDialog(
-      BuildContext context, user_data.UserGameDataState userDataState,) {
+    BuildContext context,
+    user_data.UserGameDataState userDataState,
+  ) {
     final userId = _getCurrentUserId(context);
     if (userId == null) {
       _showLoginRequiredSnackBar(context);
@@ -244,7 +244,8 @@ class UserStatesContent extends StatelessWidget {
         game: game,
         gameBloc: gameBloc, // ✅ Pass GameBloc for dialog compatibility
         onPositionSelected: (position) {
-          _updateTopThree(context, userDataBloc, userId, position, currentTopThreeIds);
+          _updateTopThree(
+              context, userDataBloc, userId, position, currentTopThreeIds);
         },
       ),
     );
@@ -276,15 +277,18 @@ class UserStatesContent extends StatelessWidget {
   }
 
   void _rateGame(
-      BuildContext context,
-      user_data.UserGameDataBloc userDataBloc,
-      String userId,
-      double rating,) {
-    userDataBloc.add(user_data.RateGameEvent(
-      gameId: game.id,
-      userId: userId,
-      rating: rating,
-    ),);
+    BuildContext context,
+    user_data.UserGameDataBloc userDataBloc,
+    String userId,
+    double rating,
+  ) {
+    userDataBloc.add(
+      user_data.RateGameEvent(
+        gameId: game.id,
+        userId: userId,
+        rating: rating,
+      ),
+    );
 
     HapticFeedback.lightImpact();
 
@@ -297,13 +301,16 @@ class UserStatesContent extends StatelessWidget {
   }
 
   void _deleteRating(
-      BuildContext context,
-      user_data.UserGameDataBloc userDataBloc,
-      String userId,) {
-    userDataBloc.add(user_data.RemoveRatingEvent(
-      gameId: game.id,
-      userId: userId,
-    ),);
+    BuildContext context,
+    user_data.UserGameDataBloc userDataBloc,
+    String userId,
+  ) {
+    userDataBloc.add(
+      user_data.RemoveRatingEvent(
+        gameId: game.id,
+        userId: userId,
+      ),
+    );
 
     HapticFeedback.lightImpact();
 
@@ -325,11 +332,13 @@ class UserStatesContent extends StatelessWidget {
     // ✅ Use SetGameTopThreePositionEvent instead of UpdateTopThreeEvent
     // This properly handles the backend logic (removing from old position, etc.)
 
-    userDataBloc.add(user_data.SetGameTopThreePositionEvent(
-      userId: userId,
-      gameId: game.id,
-      position: position,
-    ),);
+    userDataBloc.add(
+      user_data.SetGameTopThreePositionEvent(
+        userId: userId,
+        gameId: game.id,
+        position: position,
+      ),
+    );
 
     HapticFeedback.lightImpact();
 

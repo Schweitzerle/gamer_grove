@@ -5,7 +5,6 @@ import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
 
 class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
-
   CompanyBloc({
     required this.getCompanyWithGames,
     required this.enrichmentService,
@@ -42,21 +41,27 @@ class CompanyBloc extends Bloc<CompanyEvent, CompanyState> {
               event.userId!,
             );
 
-            emit(CompanyDetailsLoaded(
-              company: companyWithGames.company,
-              games: enrichedGames,
-            ),);
+            emit(
+              CompanyDetailsLoaded(
+                company: companyWithGames.company,
+                games: enrichedGames,
+              ),
+            );
           } catch (e) {
-            emit(CompanyDetailsLoaded(
-              company: companyWithGames.company,
-              games: companyWithGames.games,
-            ),);
+            emit(
+              CompanyDetailsLoaded(
+                company: companyWithGames.company,
+                games: companyWithGames.games,
+              ),
+            );
           }
         } else {
-          emit(CompanyDetailsLoaded(
-            company: companyWithGames.company,
-            games: companyWithGames.games,
-          ),);
+          emit(
+            CompanyDetailsLoaded(
+              company: companyWithGames.company,
+              games: companyWithGames.games,
+            ),
+          );
         }
       },
     );

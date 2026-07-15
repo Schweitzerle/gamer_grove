@@ -58,6 +58,3 @@ class RegionModel extends Region {
     };
   }
 }
-
-
-

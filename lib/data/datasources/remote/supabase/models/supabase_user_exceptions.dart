@@ -7,7 +7,6 @@ library;
 
 /// Base class for all user-related exceptions.
 abstract class UserException implements Exception {
-
   const UserException({
     required this.message,
     this.code,

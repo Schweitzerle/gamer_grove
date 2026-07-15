@@ -7,9 +7,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class CharacterGamesSection extends StatefulWidget {
-
   const CharacterGamesSection({
-    required this.character, super.key,
+    required this.character,
+    super.key,
     this.games,
   });
   final Character character;
@@ -359,7 +359,8 @@ class _CharacterGamesSectionState extends State<CharacterGamesSection>
       builder: (context) => AlertDialog(
         title: Text('${widget.character.name} Games'),
         content: Text(
-            'Show all ${_displayGames.length} games featuring this character.',),
+          'Show all ${_displayGames.length} games featuring this character.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

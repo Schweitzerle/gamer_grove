@@ -8,13 +8,14 @@ import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetCharacterDetails extends UseCase<Character, GetCharacterDetailsParams> {
-
+class GetCharacterDetails
+    extends UseCase<Character, GetCharacterDetailsParams> {
   GetCharacterDetails(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, Character>> call(GetCharacterDetailsParams params) async {
+  Future<Either<Failure, Character>> call(
+      GetCharacterDetailsParams params) async {
     if (params.characterId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid character ID'));
     }
@@ -24,11 +25,9 @@ class GetCharacterDetails extends UseCase<Character, GetCharacterDetailsParams> 
 }
 
 class GetCharacterDetailsParams extends Equatable {
-
   const GetCharacterDetailsParams({required this.characterId});
   final int characterId;
 
   @override
   List<Object> get props => [characterId];
 }
-

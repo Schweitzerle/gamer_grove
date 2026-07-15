@@ -8,9 +8,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GameInfoSection extends StatelessWidget {
-
   const GameInfoSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -85,24 +85,28 @@ class GameInfoSection extends StatelessWidget {
 
     // Game Type Card
     if (game.gameType != null) {
-      cards.add(_buildDetailCard(
-        context,
-        title: 'Type',
-        value: _formatLabel(game.gameType!.type),
-        icon: _getTypeIcon(game.gameType!.type),
-        color: _getTypeColor(game.gameType!.type),
-      ),);
+      cards.add(
+        _buildDetailCard(
+          context,
+          title: 'Type',
+          value: _formatLabel(game.gameType!.type),
+          icon: _getTypeIcon(game.gameType!.type),
+          color: _getTypeColor(game.gameType!.type),
+        ),
+      );
     }
 
     // Game Status Card
     if (game.gameStatus != null) {
-      cards.add(_buildDetailCard(
-        context,
-        title: 'Status',
-        value: _formatLabel(game.gameStatus!.status),
-        icon: _getStatusIcon(game.gameStatus!.status),
-        color: _getStatusColor(game.gameStatus!.status),
-      ),);
+      cards.add(
+        _buildDetailCard(
+          context,
+          title: 'Status',
+          value: _formatLabel(game.gameStatus!.status),
+          icon: _getStatusIcon(game.gameStatus!.status),
+          color: _getStatusColor(game.gameStatus!.status),
+        ),
+      );
     }
 
     if (cards.isEmpty) return const SizedBox.shrink();
@@ -294,35 +298,39 @@ class GameInfoSection extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: game.alternativeNames
-                .map((name) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6,),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withOpacity(0.2),
+                .map(
+                  (name) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withOpacity(0.2),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              Theme.of(context).shadowColor.withOpacity(0.05),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                Theme.of(context).shadowColor.withOpacity(0.05),
-                            blurRadius: 2,
-                            offset: const Offset(0, 1),
+                      ],
+                    ),
+                    child: Text(
+                      name,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        name,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                      ),
-                    ),)
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -474,7 +482,9 @@ class GameInfoSection extends StatelessWidget {
     return label
         .replaceAll('_', ' ')
         .replaceAllMapped(
-            RegExp('([a-z])([A-Z])'), (match) => '${match[1]} ${match[2]}',)
+          RegExp('([a-z])([A-Z])'),
+          (match) => '${match[1]} ${match[2]}',
+        )
         .split(' ')
         .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');

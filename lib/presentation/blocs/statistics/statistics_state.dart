@@ -22,12 +22,12 @@ class StatisticsLoading extends StatisticsState {
 
 /// Loaded state with statistics data
 class StatisticsLoaded extends StatisticsState {
-
   /// Creates a StatisticsLoaded state
   const StatisticsLoaded({
     required this.statistics,
     required this.userId,
   });
+
   /// The statistics data
   final GameStatistics statistics;
 
@@ -40,9 +40,9 @@ class StatisticsLoaded extends StatisticsState {
 
 /// Error state
 class StatisticsError extends StatisticsState {
-
   /// Creates a StatisticsError state
   const StatisticsError(this.message);
+
   /// Error message
   final String message;
 
@@ -52,9 +52,9 @@ class StatisticsError extends StatisticsState {
 
 /// Empty state when user has no rated games
 class StatisticsEmpty extends StatisticsState {
-
   /// Creates a StatisticsEmpty state
   const StatisticsEmpty({required this.userId});
+
   /// User ID
   final String userId;
 

@@ -11,12 +11,13 @@ import 'package:gamer_grove/domain/entities/user/activity.dart';
 ///
 /// Represents user activity from Supabase database with JSON conversion.
 class ActivityModel {
-
   const ActivityModel({
     required this.id,
     required this.userId,
     required this.activityType,
-    required this.isPublic, required this.createdAt, this.gameId,
+    required this.isPublic,
+    required this.createdAt,
+    this.gameId,
     this.metadata,
     this.userData,
   });

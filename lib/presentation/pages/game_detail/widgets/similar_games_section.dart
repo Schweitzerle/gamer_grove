@@ -10,9 +10,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 class SimilarGamesSection extends StatelessWidget {
-
   const SimilarGamesSection({
-    required this.games, super.key,
+    required this.games,
+    super.key,
   });
   final List<Game> games;
 
@@ -51,9 +51,9 @@ class SimilarGamesSection extends StatelessWidget {
             width: 160,
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
-                game: game,
-                onTap: () =>
-                    Navigations.navigateToGameDetail(game.id, context),),
+              game: game,
+              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+            ),
           );
         },
       ),

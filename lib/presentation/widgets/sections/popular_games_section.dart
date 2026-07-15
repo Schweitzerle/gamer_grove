@@ -31,12 +31,14 @@ class PopularGamesSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is PopularGamesLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('No popular games found', Icons.trending_up, context);
+        return buildEmptySection(
+            'No popular games found', Icons.trending_up, context);
       }
       return buildHorizontalGameList(state.games);
     } else if (state is HomePageLoaded) {
       if (state.popularGames.isEmpty) {
-        return buildEmptySection('No popular games found', Icons.trending_up, context);
+        return buildEmptySection(
+            'No popular games found', Icons.trending_up, context);
       }
       return buildHorizontalGameList(state.popularGames);
     } else if (state is GameError) {

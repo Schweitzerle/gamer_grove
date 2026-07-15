@@ -14,7 +14,6 @@ class CompanyInitial extends CompanyState {}
 class CompanyLoading extends CompanyState {}
 
 class CompanyDetailsLoaded extends CompanyState {
-
   const CompanyDetailsLoaded({
     required this.company,
     required this.games,
@@ -30,7 +29,6 @@ class CompanyDetailsLoaded extends CompanyState {
 }
 
 class CompanyError extends CompanyState {
-
   const CompanyError({required this.message});
   final String message;
 

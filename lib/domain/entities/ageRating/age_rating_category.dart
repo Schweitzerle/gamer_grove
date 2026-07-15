@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_organization.dart';
 
 class AgeRatingCategory extends Equatable {
-
   const AgeRatingCategory({
     required this.id,
     required this.checksum,

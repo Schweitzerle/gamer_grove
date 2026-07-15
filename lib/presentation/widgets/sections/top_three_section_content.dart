@@ -7,9 +7,9 @@ import 'package:gamer_grove/presentation/widgets/sections/empty_top_three_sectio
 import 'package:gamer_grove/presentation/widgets/skeletons/horizontal_game_list_skeleton.dart';
 
 class TopThreeSectionContent extends StatelessWidget {
-
   const TopThreeSectionContent({
-    required this.state, super.key,
+    required this.state,
+    super.key,
     this.currentUserId,
     this.gameBloc,
   });

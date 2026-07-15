@@ -18,7 +18,6 @@ class GameInitial extends GameState {}
 class GameSearchLoading extends GameState {}
 
 class GameSearchLoaded extends GameState {
-
   const GameSearchLoaded({
     required this.games,
     required this.hasReachedMax,
@@ -64,7 +63,6 @@ class GameSearchLoaded extends GameState {
 class PopularGamesLoading extends GameState {}
 
 class PopularGamesLoaded extends GameState {
-
   const PopularGamesLoaded({
     required this.games,
     this.hasReachedMax = false,
@@ -96,7 +94,6 @@ class PopularGamesLoaded extends GameState {
 class UpcomingGamesLoading extends GameState {}
 
 class UpcomingGamesLoaded extends GameState {
-
   const UpcomingGamesLoaded({
     required this.games,
     this.hasReachedMax = false,
@@ -128,7 +125,6 @@ class UpcomingGamesLoaded extends GameState {
 class LatestGamesLoading extends GameState {}
 
 class LatestGamesLoaded extends GameState {
-
   const LatestGamesLoaded({
     required this.games,
     this.hasReachedMax = false,
@@ -160,7 +156,6 @@ class LatestGamesLoaded extends GameState {
 class TopRatedGamesLoading extends GameState {}
 
 class TopRatedGamesLoaded extends GameState {
-
   const TopRatedGamesLoaded({
     required this.games,
     this.hasReachedMax = false,
@@ -192,7 +187,6 @@ class TopRatedGamesLoaded extends GameState {
 class UserWishlistLoading extends GameState {}
 
 class UserWishlistLoaded extends GameState {
-
   const UserWishlistLoaded({
     required this.games,
     required this.userId,
@@ -219,7 +213,6 @@ class UserWishlistLoaded extends GameState {
 class UserRecommendationsLoading extends GameState {}
 
 class UserRecommendationsLoaded extends GameState {
-
   const UserRecommendationsLoaded({
     required this.games,
     required this.userId,
@@ -246,7 +239,6 @@ class UserRecommendationsLoaded extends GameState {
 class UserRatedLoading extends GameState {}
 
 class UserRatedLoaded extends GameState {
-
   const UserRatedLoaded({
     required this.games,
     required this.userId,
@@ -273,7 +265,6 @@ class UserRatedLoaded extends GameState {
 class UserTopThreeLoading extends GameState {}
 
 class UserTopThreeLoaded extends GameState {
-
   const UserTopThreeLoaded({
     required this.games,
     required this.userId,
@@ -290,7 +281,6 @@ class UserTopThreeLoaded extends GameState {
 class GameDetailsLoading extends GameState {}
 
 class GameDetailsLoaded extends GameState {
-
   const GameDetailsLoaded(this.game);
   final Game game;
 
@@ -299,7 +289,8 @@ class GameDetailsLoaded extends GameState {
 }
 
 // Error State
-class GameError extends GameState { // Keep existing games on error
+class GameError extends GameState {
+  // Keep existing games on error
 
   const GameError(this.message, {this.games = const []});
   final String message;
@@ -312,7 +303,6 @@ class GameError extends GameState { // Keep existing games on error
 
 // Multi-state for home page (combining multiple data sources)
 class HomePageDataLoaded extends GameState {
-
   const HomePageDataLoaded({
     this.popularGames = const [],
     this.upcomingGames = const [],
@@ -353,7 +343,6 @@ class HomePageDataLoaded extends GameState {
 }
 
 class GameDetailsWithUserDataLoaded extends GameState {
-
   const GameDetailsWithUserDataLoaded({
     required this.game,
     this.isWishlisted = false,
@@ -402,7 +391,6 @@ class GameDetailsWithUserDataLoaded extends GameState {
 class HomePageLoading extends GameState {}
 
 class HomePageLoaded extends GameState {
-
   const HomePageLoaded({
     required this.popularGames,
     required this.upcomingGames,
@@ -456,7 +444,6 @@ class HomePageLoaded extends GameState {
 class GrovePageLoading extends GameState {}
 
 class GrovePageLoaded extends GameState {
-
   const GrovePageLoaded({
     required this.userRated,
     required this.userWishlist,
@@ -493,7 +480,6 @@ class GrovePageLoaded extends GameState {
 }
 
 class SimilarGamesLoaded extends GameState {
-
   const SimilarGamesLoaded(this.games);
   @override
   final List<Game> games;
@@ -509,7 +495,6 @@ class SimilarGamesLoaded extends GameState {
 }
 
 class GameDLCsLoaded extends GameState {
-
   const GameDLCsLoaded(this.dlcs);
   final List<Game> dlcs;
 
@@ -518,7 +503,6 @@ class GameDLCsLoaded extends GameState {
 }
 
 class GameExpansionsLoaded extends GameState {
-
   const GameExpansionsLoaded(this.expansions);
   final List<Game> expansions;
 
@@ -534,7 +518,6 @@ class GameExpansionsLoaded extends GameState {
 
 /// Complete franchise games loaded (for "View All" screens)
 class CompleteFranchiseGamesLoaded extends GameState {
-
   const CompleteFranchiseGamesLoaded({
     required this.franchiseId,
     required this.franchiseName,
@@ -572,7 +555,6 @@ class CompleteFranchiseGamesLoaded extends GameState {
 
 /// Complete collection games loaded (for "View All" screens)
 class CompleteCollectionGamesLoaded extends GameState {
-
   const CompleteCollectionGamesLoaded({
     required this.collectionId,
     required this.collectionName,
@@ -610,7 +592,6 @@ class CompleteCollectionGamesLoaded extends GameState {
 
 /// Complete similar games loaded (for "View All" screens)
 class CompleteSimilarGamesLoaded extends GameState {
-
   const CompleteSimilarGamesLoaded({
     required this.gameId,
     required this.gameName,
@@ -626,7 +607,8 @@ class CompleteSimilarGamesLoaded extends GameState {
 }
 
 /// Complete game series loaded (for "View All" screens)
-class CompleteGameSeriesLoaded extends GameState { // "dlcs", "expansions", etc.
+class CompleteGameSeriesLoaded extends GameState {
+  // "dlcs", "expansions", etc.
 
   const CompleteGameSeriesLoaded({
     required this.gameId,
@@ -643,7 +625,6 @@ class CompleteGameSeriesLoaded extends GameState { // "dlcs", "expansions", etc.
 
 // ⚡ NEUE STATES
 class FranchiseGamesPreviewLoaded extends GameState {
-
   const FranchiseGamesPreviewLoaded({
     required this.franchiseId,
     required this.franchiseName,
@@ -659,7 +640,6 @@ class FranchiseGamesPreviewLoaded extends GameState {
 }
 
 class CollectionGamesPreviewLoaded extends GameState {
-
   const CollectionGamesPreviewLoaded({
     required this.collectionId,
     required this.collectionName,
@@ -675,7 +655,6 @@ class CollectionGamesPreviewLoaded extends GameState {
 }
 
 class AllUserRatedLoaded extends GameState {
-
   const AllUserRatedLoaded(this.games);
   @override
   final List<Game> games;
@@ -685,7 +664,6 @@ class AllUserRatedLoaded extends GameState {
 }
 
 class AllUserWishlistedLoaded extends GameState {
-
   const AllUserWishlistedLoaded(this.games);
   @override
   final List<Game> games;
@@ -695,7 +673,6 @@ class AllUserWishlistedLoaded extends GameState {
 }
 
 class AllUserRecommendationsLoaded extends GameState {
-
   const AllUserRecommendationsLoaded(this.games);
   @override
   final List<Game> games;
@@ -707,7 +684,6 @@ class AllUserRecommendationsLoaded extends GameState {
 class AllUserRatedPaginatedLoading extends GameState {}
 
 class AllUserRatedPaginatedLoaded extends GameState {
-
   const AllUserRatedPaginatedLoaded({
     required this.games,
     required this.hasReachedMax,
@@ -731,7 +707,6 @@ class AllUserRatedPaginatedLoaded extends GameState {
 }
 
 class AllUserRatedPaginatedError extends GameState {
-
   const AllUserRatedPaginatedError(this.message);
   final String message;
 
@@ -743,7 +718,6 @@ class AllUserRatedPaginatedError extends GameState {
 class AllUserWishlistPaginatedLoading extends GameState {}
 
 class AllUserWishlistPaginatedLoaded extends GameState {
-
   const AllUserWishlistPaginatedLoaded({
     required this.games,
     required this.hasReachedMax,
@@ -767,7 +741,6 @@ class AllUserWishlistPaginatedLoaded extends GameState {
 }
 
 class AllUserWishlistPaginatedError extends GameState {
-
   const AllUserWishlistPaginatedError(this.message);
   final String message;
 
@@ -779,7 +752,6 @@ class AllUserWishlistPaginatedError extends GameState {
 class AllUserRecommendedPaginatedLoading extends GameState {}
 
 class AllUserRecommendedPaginatedLoaded extends GameState {
-
   const AllUserRecommendedPaginatedLoaded({
     required this.games,
     required this.hasReachedMax,
@@ -803,7 +775,6 @@ class AllUserRecommendedPaginatedLoaded extends GameState {
 }
 
 class AllUserRecommendedPaginatedError extends GameState {
-
   const AllUserRecommendedPaginatedError(this.message);
   final String message;
 

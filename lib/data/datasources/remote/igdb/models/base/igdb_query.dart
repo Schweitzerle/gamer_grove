@@ -27,7 +27,6 @@ import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dar
 /// final queryString = query.buildQuery();
 /// ```
 class IgdbQuery<T> extends Equatable {
-
   const IgdbQuery({
     this.search,
     this.where,
@@ -37,6 +36,7 @@ class IgdbQuery<T> extends Equatable {
     this.sort,
     this.exclude,
   });
+
   /// Search term for IGDB's search endpoint
   /// Use this instead of 'where name ~' for better search results
   final String? search;
@@ -136,7 +136,8 @@ class IgdbQuery<T> extends Equatable {
   }
 
   @override
-  List<Object?> get props => [search, where, fields, limit, offset, sort, exclude];
+  List<Object?> get props =>
+      [search, where, fields, limit, offset, sort, exclude];
 
   @override
   String toString() => 'IgdbQuery<$T>(limit: $limit, offset: $offset)';
@@ -170,7 +171,6 @@ class IgdbQuery<T> extends Equatable {
 ///   .build();
 /// ```
 class IgdbQueryBuilder<T> {
-
   IgdbQueryBuilder();
 
   /// Start from an existing query

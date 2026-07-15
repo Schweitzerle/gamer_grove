@@ -32,12 +32,14 @@ class LatestGamesSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is LatestGamesLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('No Latest games found', Icons.schedule, context);
+        return buildEmptySection(
+            'No Latest games found', Icons.schedule, context);
       }
       return buildHorizontalGameList(state.games);
     } else if (state is HomePageLoaded) {
       if (state.latestGames.isEmpty) {
-        return buildEmptySection('No Latest games found', Icons.schedule, context);
+        return buildEmptySection(
+            'No Latest games found', Icons.schedule, context);
       }
       return buildHorizontalGameList(state.latestGames);
     } else if (state is GameError) {

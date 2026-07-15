@@ -16,7 +16,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// final result = await useCase(ClearTopThreeParams(userId: 'uuid'));
 /// ```
 class ClearTopThreeUseCase implements UseCase<void, ClearTopThreeParams> {
-
   ClearTopThreeUseCase(this.repository);
   final UserRepository repository;
 
@@ -31,7 +30,6 @@ class ClearTopThreeUseCase implements UseCase<void, ClearTopThreeParams> {
 }
 
 class ClearTopThreeParams extends Equatable {
-
   const ClearTopThreeParams({required this.userId});
   final String userId;
 

@@ -5,7 +5,6 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
 class RecommendationsSection extends BaseGameSection {
-
   const RecommendationsSection({
     super.key,
     super.currentUserId,
@@ -50,16 +49,23 @@ class RecommendationsSection extends BaseGameSection {
     } else if (state is UserRecommendationsLoaded) {
       if (state.games.isEmpty) {
         return buildEmptySection(
-            'No recommendations yet', Icons.lightbulb_outline, context,);
+          'No recommendations yet',
+          Icons.lightbulb_outline,
+          context,
+        );
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRecommendations.isEmpty) {
         return buildEmptySection(
-            'No recommendations yet', Icons.lightbulb_outline, context,);
+          'No recommendations yet',
+          Icons.lightbulb_outline,
+          context,
+        );
       }
       return buildHorizontalGameList(
-          state.userRecommendations.take(10).toList(),);
+        state.userRecommendations.take(10).toList(),
+      );
     } else if (state is GameError) {
       return buildErrorSection('Failed to load recommendations', context);
     }

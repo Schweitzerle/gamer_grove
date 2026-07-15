@@ -4,8 +4,8 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class RemoveFromTopThreeUseCase extends UseCase<void, RemoveFromTopThreeParams> {
-
+class RemoveFromTopThreeUseCase
+    extends UseCase<void, RemoveFromTopThreeParams> {
   RemoveFromTopThreeUseCase(this.repository);
   final UserRepository repository;
 
@@ -23,7 +23,6 @@ class RemoveFromTopThreeUseCase extends UseCase<void, RemoveFromTopThreeParams> 
 }
 
 class RemoveFromTopThreeParams extends Equatable {
-
   const RemoveFromTopThreeParams({
     required this.userId,
     required this.gameId,

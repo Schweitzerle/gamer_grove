@@ -91,7 +91,8 @@ class UserQueries {
   }) {
     return SupabaseQuery('profiles')
         .select(
-            'id, username, display_name, avatar_url, country, followers_count, total_games_rated',)
+          'id, username, display_name, avatar_url, country, followers_count, total_games_rated',
+        )
         .filter(const IsTrueFilter('is_profile_public'))
         .sort(sortBy ?? const SortBy('followers_count', SortOrder.desc))
         .paginate(pagination ?? const Pagination(limit: 20));
@@ -128,7 +129,8 @@ class UserQueries {
   }) {
     return SupabaseQuery('profiles')
         .select(
-            'id, username, display_name, avatar_url, followers_count, total_games_rated',)
+          'id, username, display_name, avatar_url, followers_count, total_games_rated',
+        )
         .filter(const IsTrueFilter('is_profile_public'))
         .filter(const GreaterThanFilter('followers_count', 0))
         .sort(const SortBy('followers_count', SortOrder.desc))
@@ -158,8 +160,10 @@ class UserGameQueries {
   /// final query = UserGameQueries.getWishlistedGames(userId);
   /// final games = await query.build(supabase);
   /// ```
-  static SupabaseQuery getWishlistedGames(String userId,
-      {Pagination? pagination,}) {
+  static SupabaseQuery getWishlistedGames(
+    String userId, {
+    Pagination? pagination,
+  }) {
     return SupabaseQuery('user_games')
         .select('game_id, wishlisted_at')
         .filter(EqualFilter('user_id', userId))
@@ -191,8 +195,10 @@ class UserGameQueries {
   /// final query = UserGameQueries.getRecommendedGames(userId);
   /// final games = await query.build(supabase);
   /// ```
-  static SupabaseQuery getRecommendedGames(String userId,
-      {Pagination? pagination,}) {
+  static SupabaseQuery getRecommendedGames(
+    String userId, {
+    Pagination? pagination,
+  }) {
     return SupabaseQuery('user_games')
         .select('game_id, recommended_at')
         .filter(EqualFilter('user_id', userId))

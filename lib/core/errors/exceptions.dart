@@ -1,8 +1,6 @@
 // exceptions.dart
 class ServerException implements Exception {
-
-  ServerException(
-    {
+  ServerException({
     required this.message,
     this.statusCode,
   });
@@ -11,7 +9,6 @@ class ServerException implements Exception {
 }
 
 class NetworkException implements Exception {
-
   NetworkException({
     this.message = 'No internet connection',
   });
@@ -19,7 +16,6 @@ class NetworkException implements Exception {
 }
 
 class CacheException implements Exception {
-
   CacheException({
     this.message = 'Cache error',
   });
@@ -27,7 +23,6 @@ class CacheException implements Exception {
 }
 
 class AuthException implements Exception {
-
   AuthException({
     required this.message,
     this.code,
@@ -37,7 +32,6 @@ class AuthException implements Exception {
 }
 
 class ValidationException implements Exception {
-
   ValidationException({
     required this.message,
     this.errors,
@@ -47,7 +41,6 @@ class ValidationException implements Exception {
 }
 
 class UnauthorizedException implements Exception {
-
   UnauthorizedException({
     required this.message,
     this.code,
@@ -57,7 +50,6 @@ class UnauthorizedException implements Exception {
 }
 
 class NotFoundException implements Exception {
-
   NotFoundException({
     required this.message,
     this.code,

@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/keyword.dart';
 
 class KeywordsSection extends StatelessWidget {
-
   const KeywordsSection({
-    required this.keywords, super.key,
+    required this.keywords,
+    super.key,
   });
   final List<Keyword> keywords;
 

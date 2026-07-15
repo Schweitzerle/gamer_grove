@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class RatingWidget extends StatefulWidget {
-
   const RatingWidget({
-    required this.onRatingChanged, super.key,
+    required this.onRatingChanged,
+    super.key,
     this.initialRating,
     this.isReadOnly = false,
     this.size = 32.0,
@@ -64,7 +64,6 @@ class _RatingWidgetState extends State<RatingWidget> {
 }
 
 class GameRatingCard extends StatelessWidget {
-
   const GameRatingCard({
     super.key,
     this.igdbRating,
@@ -127,7 +126,8 @@ class GameRatingCard extends StatelessWidget {
     BuildContext context, {
     required double rating,
     required String title,
-    required Color color, String? subtitle,
+    required Color color,
+    String? subtitle,
   }) {
     return Column(
       children: [
@@ -192,9 +192,10 @@ class GameRatingCard extends StatelessWidget {
 }
 
 class RatingDialog extends StatefulWidget {
-
   const RatingDialog({
-    required this.gameTitle, required this.onRatingSubmitted, super.key,
+    required this.gameTitle,
+    required this.onRatingSubmitted,
+    super.key,
     this.initialRating,
   });
   final String gameTitle;
@@ -296,9 +297,9 @@ class _RatingDialogState extends State<RatingDialog> {
 
 // Compact rating display for cards
 class CompactRatingWidget extends StatelessWidget {
-
   const CompactRatingWidget({
-    required this.rating, super.key,
+    required this.rating,
+    super.key,
     this.showLabel = true,
     this.size = 16,
   });

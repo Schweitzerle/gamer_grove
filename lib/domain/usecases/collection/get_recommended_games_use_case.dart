@@ -20,7 +20,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class GetRecommendedGamesUseCase
     implements UseCase<List<int>, GetRecommendedGamesParams> {
-
   GetRecommendedGamesUseCase(this.repository);
   final UserRepository repository;
 
@@ -37,7 +36,6 @@ class GetRecommendedGamesUseCase
 }
 
 class GetRecommendedGamesParams extends Equatable {
-
   const GetRecommendedGamesParams({
     required this.userId,
     this.limit,

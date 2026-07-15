@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CharacterSpecies extends Equatable {
-
   const CharacterSpecies({
     required this.id,
     required this.checksum,
@@ -33,18 +32,23 @@ enum CharacterSpeciesEnum {
 
   static CharacterSpeciesEnum fromValue(int value) {
     return values.firstWhere(
-          (species) => species.value == value,
+      (species) => species.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case human: return 'Human';
-      case alien: return 'Alien';
-      case animal: return 'Animal';
-      case android: return 'Android';
-      case unknown: return 'Unknown';
+      case human:
+        return 'Human';
+      case alien:
+        return 'Alien';
+      case animal:
+        return 'Animal';
+      case android:
+        return 'Android';
+      case unknown:
+        return 'Unknown';
     }
   }
 }

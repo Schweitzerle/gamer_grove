@@ -41,5 +41,6 @@ abstract class CharacterRepository {
   Future<Either<Failure, List<Character>>> getCharactersByGame(int gameId);
 
   Future<Either<Failure, List<Character>>> getCharactersByGames(
-      List<int> gameIds,);
+    List<int> gameIds,
+  );
 }

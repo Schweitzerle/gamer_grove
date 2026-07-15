@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 
 class EventLogo extends Equatable {
-
   const EventLogo({
     required this.id,
     required this.checksum,
@@ -69,17 +68,16 @@ class EventLogo extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    imageId,
-    height,
-    width,
-    alphaChannel,
-    animated,
-    eventId,
-    url,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        imageId,
+        height,
+        width,
+        alphaChannel,
+        animated,
+        eventId,
+        url,
+        createdAt,
+        updatedAt,
+      ];
 }
-

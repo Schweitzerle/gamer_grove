@@ -18,9 +18,10 @@ enum CharacterViewMode {
 }
 
 class CharactersScreen extends StatefulWidget {
-
   const CharactersScreen({
-    required this.characters, required this.gameTitle, super.key,
+    required this.characters,
+    required this.gameTitle,
+    super.key,
     this.initialCharacter,
   });
   final List<Character> characters;

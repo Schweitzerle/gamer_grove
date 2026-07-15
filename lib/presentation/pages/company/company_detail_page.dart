@@ -14,9 +14,9 @@ import 'package:gamer_grove/presentation/pages/company/company_details_screen.da
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
 class CompanyDetailPage extends StatefulWidget {
-
   const CompanyDetailPage({
-    required this.companyId, super.key,
+    required this.companyId,
+    super.key,
   });
   final int companyId;
 
@@ -38,7 +38,6 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
       userId = authState.user.id;
     }
 
-
     context.read<CompanyBloc>().add(
           GetCompanyDetailsEvent(
             companyId: widget.companyId,
@@ -52,7 +51,6 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
     return Scaffold(
       body: BlocBuilder<CompanyBloc, CompanyState>(
         builder: (context, state) {
-
           if (state is CompanyLoading) {
             return _buildLoadingState();
           } else if (state is CompanyDetailsLoaded) {
@@ -105,8 +103,10 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),

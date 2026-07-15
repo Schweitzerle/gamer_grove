@@ -9,9 +9,9 @@ import 'package:gamer_grove/domain/entities/character/character.dart';
 /// A card widget that displays character information with an image,
 /// name, and optional metadata like gender, species, and games count.
 class CharacterCard extends StatefulWidget {
-
   const CharacterCard({
-    required this.character, super.key,
+    required this.character,
+    super.key,
     this.width,
     this.height,
     this.onTap,
@@ -288,18 +288,18 @@ class _CharacterCardState extends State<CharacterCard>
           Text(
             widget.character.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 13,
-                  letterSpacing: 0.2,
-                  shadows: [
-                    Shadow(
-                      offset: const Offset(0, 1),
-                      blurRadius: 3,
-                      color: Colors.black.withOpacity(0.6),
-                    ),
-                  ],
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 13,
+              letterSpacing: 0.2,
+              shadows: [
+                Shadow(
+                  offset: const Offset(0, 1),
+                  blurRadius: 3,
+                  color: Colors.black.withOpacity(0.6),
                 ),
+              ],
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

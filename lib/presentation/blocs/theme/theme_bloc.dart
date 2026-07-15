@@ -1,4 +1,3 @@
-
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,7 +11,8 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       final prefs = await SharedPreferences.getInstance();
       final themeModeIndex = prefs.getInt('themeMode') ?? ThemeMode.dark.index;
       final themeMode = ThemeMode.values[themeModeIndex];
-      final flexSchemeIndex = prefs.getInt('flexScheme') ?? FlexScheme.material.index;
+      final flexSchemeIndex =
+          prefs.getInt('flexScheme') ?? FlexScheme.material.index;
       final flexScheme = FlexScheme.values[flexSchemeIndex];
       emit(state.copyWith(themeMode: themeMode, flexScheme: flexScheme));
     });

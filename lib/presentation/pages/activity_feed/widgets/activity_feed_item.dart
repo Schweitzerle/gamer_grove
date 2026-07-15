@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/user_activity.dart';
 
 class ActivityFeedItem extends StatelessWidget {
-
   const ActivityFeedItem({required this.activity, super.key});
   final UserActivity activity;
 

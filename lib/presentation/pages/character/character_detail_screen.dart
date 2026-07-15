@@ -15,9 +15,10 @@ import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 
 class CharacterDetailScreen extends StatefulWidget {
-
   const CharacterDetailScreen({
-    required this.character, required this.games, super.key,
+    required this.character,
+    required this.games,
+    super.key,
   });
   final Character character;
   final List<Game> games;
@@ -129,7 +130,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
       child: widget.character.hasImage
           ? CachedImageWidget(
               imageUrl: ImageUtils.getLargeImageUrl(
-                  widget.character.largeUrl ?? widget.character.imageUrl,),
+                widget.character.largeUrl ?? widget.character.imageUrl,
+              ),
               placeholder: _buildFallbackHero(),
             )
           : _buildFallbackHero(),
@@ -362,12 +364,14 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge,), // Space for floating card
+              height: AppConstants.paddingLarge,
+            ), // Space for floating card
 
             // Combined Character Information and Details Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,),
+                horizontal: AppConstants.paddingMedium,
+              ),
               child: _buildCombinedCharacterAccordion(),
             ),
 
@@ -377,7 +381,8 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
             if (widget.games.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium,),
+                  horizontal: AppConstants.paddingMedium,
+                ),
                 child:
                     _buildTabView(context, _createCharacterGamesSeriesItem()),
               ),
@@ -506,7 +511,9 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.purple.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -602,9 +609,10 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
           // Series Info Header
           Padding(
             padding: const EdgeInsets.only(
-                left: AppConstants.paddingSmall,
-                right: AppConstants.paddingSmall,
-                top: AppConstants.paddingSmall,),
+              left: AppConstants.paddingSmall,
+              right: AppConstants.paddingSmall,
+              top: AppConstants.paddingSmall,
+            ),
             child: Row(
               children: [
                 Container(
@@ -651,8 +659,11 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
                 if (item.totalCount > 10)
                   TextButton.icon(
                     onPressed: () => _navigateToSeries(context, item),
-                    icon: Icon(Icons.arrow_forward,
-                        size: 16, color: item.accentColor,),
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: item.accentColor,
+                    ),
                     label: Text(
                       'View All',
                       style: TextStyle(color: item.accentColor),
@@ -687,7 +698,9 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(
-          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall,),
+        left: AppConstants.paddingSmall,
+        bottom: AppConstants.paddingSmall,
+      ),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];
@@ -800,6 +813,5 @@ class _CharacterDetailScreenState extends State<CharacterDetailScreen> {
     );
   }
 
-  void _logCharacterData() {
-  }
+  void _logCharacterData() {}
 }

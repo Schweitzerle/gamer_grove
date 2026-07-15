@@ -12,9 +12,9 @@ import 'package:gamer_grove/presentation/pages/event/widgets/event_card.dart';
 import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class EventsSection extends StatelessWidget {
-
   const EventsSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
     this.currentUserId,
     this.showViewAll = true,
     this.maxDisplayedEvents = 6,
@@ -57,14 +57,16 @@ class EventsSection extends StatelessWidget {
                       Text(
                         'Gaming Events',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Text(
                         _buildSubtitle(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -125,8 +127,6 @@ class EventsSection extends StatelessWidget {
     }
   }
 
-
-
   void _navigateToAllEvents(BuildContext context) {
     Navigations.navigateToAllEvents(
       context,
@@ -170,7 +170,8 @@ class EventsLoadingSection extends StatelessWidget {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -185,7 +186,9 @@ class EventsLoadingSection extends StatelessWidget {
                           height: 20,
                           width: 120,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -196,7 +199,9 @@ class EventsLoadingSection extends StatelessWidget {
                           height: 14,
                           width: 160,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -228,7 +233,9 @@ class EventsLoadingSection extends StatelessWidget {
                     child: CustomShimmer(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),

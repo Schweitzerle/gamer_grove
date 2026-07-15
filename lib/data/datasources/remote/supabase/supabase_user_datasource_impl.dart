@@ -16,7 +16,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Concrete implementation of [SupabaseUserDataSource].
 class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
-
   SupabaseUserDataSourceImpl({required SupabaseClient supabase})
       : _supabase = supabase;
   final SupabaseClient _supabase;
@@ -43,7 +42,8 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
 
   @override
   Future<Map<String, dynamic>?> getUserProfileByUsername(
-      String username,) async {
+    String username,
+  ) async {
     try {
       final result =
           await UserQueries.getProfileByUsername(username).build(_supabase);
@@ -406,7 +406,8 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       final game3Id = gameIds[2] == 0 ? null : gameIds[2];
 
       // Check for duplicates (excluding nulls)
-      final nonNullGames = [game1Id, game2Id, game3Id].whereType<int>().toList();
+      final nonNullGames =
+          [game1Id, game2Id, game3Id].whereType<int>().toList();
       if (nonNullGames.toSet().length != nonNullGames.length) {
         throw const InvalidTopThreeException(
           message: 'All games must be different',
@@ -429,7 +430,6 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       throw UserExceptionMapper.map(e);
     }
   }
-
 
   @override
   Future<List<int>?> getTopThree(String userId) async {

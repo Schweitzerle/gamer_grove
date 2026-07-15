@@ -41,7 +41,6 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 /// )
 /// ```
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-
   AuthBloc({
     required this.signInUseCase,
     required this.signUpUseCase,
@@ -116,8 +115,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (failure.message.contains('Invalid login credentials')) {
           emit(const AuthError('Invalid email or password.'));
         } else {
-          emit(const AuthError(
-              'An unexpected error occurred. Please try again.',),);
+          emit(
+            const AuthError(
+              'An unexpected error occurred. Please try again.',
+            ),
+          );
         }
       },
       (user) => emit(AuthAuthenticated(user)),
@@ -144,8 +146,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (failure.message.contains('User already exists')) {
           emit(const AuthError('Email already in use.'));
         } else {
-          emit(AuthError(
-              'An unexpected error occurred. Please try again. Error: ${failure.message}',),);
+          emit(
+            AuthError(
+              'An unexpected error occurred. Please try again. Error: ${failure.message}',
+            ),
+          );
         }
       },
       (user) {
@@ -165,7 +170,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(
-          const AuthError('An unexpected error occurred. Please try again.'),),
+        const AuthError('An unexpected error occurred. Please try again.'),
+      ),
       (_) => emit(const AuthUnauthenticated()),
     );
   }
@@ -183,7 +189,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(
-          const AuthError('An unexpected error occurred. Please try again.'),),
+        const AuthError('An unexpected error occurred. Please try again.'),
+      ),
       (_) => emit(const PasswordResetSent()),
     );
   }
@@ -204,7 +211,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(
-          const AuthError('An unexpected error occurred. Please try again.'),),
+        const AuthError('An unexpected error occurred. Please try again.'),
+      ),
       (_) {
         // Restore authenticated state after password update
         if (currentState is AuthAuthenticated) {

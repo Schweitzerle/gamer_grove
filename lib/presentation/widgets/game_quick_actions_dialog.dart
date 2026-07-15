@@ -7,14 +7,16 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
-import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart' as user_data;
+import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart'
+    as user_data;
 import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
 class GameQuickActionsDialog extends StatefulWidget {
-
   const GameQuickActionsDialog({
-    required this.game, required this.gameBloc, super.key,
+    required this.game,
+    required this.gameBloc,
+    super.key,
   });
   final Game game;
   final GameBloc gameBloc;
@@ -155,44 +157,45 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildActionButton(
-                        icon: userRating != null
-                            ? Icons.star
-                            : Icons.star_outline,
-                        label: userRating != null ? 'Rated' : 'Rate',
-                        color: Colors.amber,
-                        isActive: userRating != null,
-                        onTap: _rateGame,
-                      ),
-                      _buildActionButton(
-                        icon: isWishlisted
-                            ? Icons.favorite
-                            : Icons.favorite_outline,
-                        label: 'Wishlist',
-                        color: Colors.red,
-                        isActive: isWishlisted,
-                        onTap: _toggleWishlist,
-                      ),
-                      _buildActionButton(
-                        icon: isRecommended
-                            ? Icons.thumb_up
-                            : Icons.thumb_up_outlined,
-                        label: 'Recommend',
-                        color: Colors.green,
-                        isActive: isRecommended,
-                        onTap: _toggleRecommend,
-                      ),
-                      _buildActionButton(
-                          icon: Icons.emoji_events,
-                          label: 'Top 3',
-                          color: Colors.orange,
-                          isActive: isInTopThree,
-                          onTap: () {
-                            _showTopThreeDialog(widget.game);
-                          },),
-                    ],),
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      icon:
+                          userRating != null ? Icons.star : Icons.star_outline,
+                      label: userRating != null ? 'Rated' : 'Rate',
+                      color: Colors.amber,
+                      isActive: userRating != null,
+                      onTap: _rateGame,
+                    ),
+                    _buildActionButton(
+                      icon: isWishlisted
+                          ? Icons.favorite
+                          : Icons.favorite_outline,
+                      label: 'Wishlist',
+                      color: Colors.red,
+                      isActive: isWishlisted,
+                      onTap: _toggleWishlist,
+                    ),
+                    _buildActionButton(
+                      icon: isRecommended
+                          ? Icons.thumb_up
+                          : Icons.thumb_up_outlined,
+                      label: 'Recommend',
+                      color: Colors.green,
+                      isActive: isRecommended,
+                      onTap: _toggleRecommend,
+                    ),
+                    _buildActionButton(
+                      icon: Icons.emoji_events,
+                      label: 'Top 3',
+                      color: Colors.orange,
+                      isActive: isInTopThree,
+                      onTap: () {
+                        _showTopThreeDialog(widget.game);
+                      },
+                    ),
+                  ],
+                ),
               ),
 
               // Bottom padding for gesture area
@@ -342,16 +345,13 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
       return;
     }
 
-
     // Get current top three games from the bloc state
     List<Game>? currentTopThree;
     final currentState = widget.gameBloc.state;
 
-
     if (currentState is GrovePageLoaded) {
       currentTopThree = currentState.userTopThree;
-    } else {
-    }
+    } else {}
 
     showDialog<void>(
       context: context,
@@ -368,7 +368,6 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
 
   void _addToTopThree(int gameId, int position) {
     if (_currentUserId == null) return;
-
 
     // ✅ Get current top three from UserGameDataBloc
     final userDataBloc = context.read<user_data.UserGameDataBloc>();
@@ -399,10 +398,12 @@ class _GameQuickActionsDialogState extends State<GameQuickActionsDialog> {
     }
 
     // ✅ Use UserGameDataBloc to update top three
-    userDataBloc.add(user_data.UpdateTopThreeEvent(
-      userId: _currentUserId!,
-      gameIds: updatedList,
-    ),);
+    userDataBloc.add(
+      user_data.UpdateTopThreeEvent(
+        userId: _currentUserId!,
+        gameIds: updatedList,
+      ),
+    );
 
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(

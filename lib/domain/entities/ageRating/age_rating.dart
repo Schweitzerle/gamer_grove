@@ -144,7 +144,6 @@ enum AgeRatingRatingEnum {
 }
 
 class AgeRating extends Equatable {
-
   const AgeRating({
     required this.id,
     required this.checksum,

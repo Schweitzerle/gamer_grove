@@ -11,13 +11,14 @@ import 'package:gamer_grove/domain/entities/user/user_collection_filters.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetUserWishlistWithFilters extends UseCase<List<Game>, GetUserWishlistWithFiltersParams> {
-
+class GetUserWishlistWithFilters
+    extends UseCase<List<Game>, GetUserWishlistWithFiltersParams> {
   GetUserWishlistWithFilters(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetUserWishlistWithFiltersParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetUserWishlistWithFiltersParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -32,7 +33,6 @@ class GetUserWishlistWithFilters extends UseCase<List<Game>, GetUserWishlistWith
 }
 
 class GetUserWishlistWithFiltersParams extends Equatable {
-
   const GetUserWishlistWithFiltersParams({
     required this.userId,
     required this.filters,
@@ -47,4 +47,3 @@ class GetUserWishlistWithFiltersParams extends Equatable {
   @override
   List<Object> get props => [userId, filters, limit, offset];
 }
-

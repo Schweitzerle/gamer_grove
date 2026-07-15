@@ -14,7 +14,6 @@ abstract class CharacterEvent extends Equatable {
 }
 
 class GetCharacterDetailsEvent extends CharacterEvent {
-
   const GetCharacterDetailsEvent({
     required this.characterId,
     this.includeGames = true,
@@ -32,7 +31,6 @@ class ClearCharacterEvent extends CharacterEvent {}
 
 // Home Screen - Popular Characters
 class GetPopularCharactersEvent extends CharacterEvent {
-
   const GetPopularCharactersEvent({this.limit = 10});
   final int limit;
 
@@ -42,7 +40,6 @@ class GetPopularCharactersEvent extends CharacterEvent {
 
 // Search Characters
 class SearchCharactersEvent extends CharacterEvent {
-
   const SearchCharactersEvent({required this.query});
   final String query;
 
@@ -52,7 +49,6 @@ class SearchCharactersEvent extends CharacterEvent {
 
 // Advanced Search with Filters
 class SearchCharactersWithFiltersEvent extends CharacterEvent {
-
   const SearchCharactersWithFiltersEvent({
     required this.query,
     required this.filters,

@@ -18,7 +18,6 @@ abstract class GameEngineEvent extends Equatable {
 // ==========================================
 
 class GetGameEngineDetailsEvent extends GameEngineEvent {
-
   const GetGameEngineDetailsEvent({
     required this.gameEngineId,
     this.includeGames = true,
@@ -39,7 +38,8 @@ class ClearGameEngineEvent extends GameEngineEvent {}
 // ==========================================
 
 /// Load paginated games for a game engine
-class LoadGameEngineGamesEvent extends GameEngineEvent { // If true, reset pagination
+class LoadGameEngineGamesEvent extends GameEngineEvent {
+  // If true, reset pagination
 
   const LoadGameEngineGamesEvent({
     required this.gameEngineId,
@@ -74,7 +74,6 @@ class LoadMoreGameEngineGamesEvent extends GameEngineEvent {
 
 /// Change sorting for paginated games
 class ChangeGameEngineSortEvent extends GameEngineEvent {
-
   const ChangeGameEngineSortEvent({
     required this.sortBy,
     required this.sortOrder,

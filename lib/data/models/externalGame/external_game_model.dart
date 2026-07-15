@@ -47,7 +47,9 @@ class ExternalGameModel extends ExternalGame {
       updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
       // Try category field first (deprecated), fallback to external_game_source ID
       categoryEnum: _parseCategoryEnum(json['category']) ??
-                    (sourceId != null ? ExternalGameCategoryEnum.fromValue(sourceId) : null),
+          (sourceId != null
+              ? ExternalGameCategoryEnum.fromValue(sourceId)
+              : null),
       mediaEnum: _parseMediaEnum(json['media']),
     );
   }
@@ -119,7 +121,6 @@ class ExternalGameModel extends ExternalGame {
 
 /// Extended version that can store expanded reference data
 class ExternalGameModelExpanded extends ExternalGameModel {
-
   const ExternalGameModelExpanded({
     required super.id,
     required super.checksum,
@@ -160,7 +161,9 @@ class ExternalGameModelExpanded extends ExternalGameModel {
       updatedAt: JsonHelpers.parseDateTime(json['updated_at']),
       // Try category field first (deprecated), fallback to external_game_source ID
       categoryEnum: ExternalGameModel._parseCategoryEnum(json['category']) ??
-                    (sourceId != null ? ExternalGameCategoryEnum.fromValue(sourceId) : null),
+          (sourceId != null
+              ? ExternalGameCategoryEnum.fromValue(sourceId)
+              : null),
       mediaEnum: ExternalGameModel._parseMediaEnum(json['media']),
       // Extract expanded data
       platformName: JsonHelpers.extractNested<String>(json, 'platform.name'),

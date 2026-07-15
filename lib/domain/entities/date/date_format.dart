@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class DateFormat extends Equatable {
-
   const DateFormat({
     required this.id,
     required this.checksum,
@@ -49,12 +48,12 @@ class DateFormat extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    format,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        format,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 // Date Format Category Enum (für Legacy Support)
@@ -73,21 +72,29 @@ enum DateFormatCategory {
 
   static DateFormatCategory fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => tbd,
     );
   }
 
   String get format {
     switch (this) {
-      case yyyyMMMMdd: return 'YYYYMMMMDD';
-      case yyyyMMMM: return 'YYYYMMMM';
-      case yyyy: return 'YYYY';
-      case yyyyQ1: return 'YYYYQ1';
-      case yyyyQ2: return 'YYYYQ2';
-      case yyyyQ3: return 'YYYYQ3';
-      case yyyyQ4: return 'YYYYQ4';
-      case tbd: return 'TBD';
+      case yyyyMMMMdd:
+        return 'YYYYMMMMDD';
+      case yyyyMMMM:
+        return 'YYYYMMMM';
+      case yyyy:
+        return 'YYYY';
+      case yyyyQ1:
+        return 'YYYYQ1';
+      case yyyyQ2:
+        return 'YYYYQ2';
+      case yyyyQ3:
+        return 'YYYYQ3';
+      case yyyyQ4:
+        return 'YYYYQ4';
+      case tbd:
+        return 'TBD';
     }
   }
 }

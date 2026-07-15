@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 
 /// Represents the state of social interactions
 class SocialInteractionsState extends Equatable {
-
   const SocialInteractionsState({
     this.followingStatus = const {},
     this.loadingStatus = const {},
@@ -13,6 +12,7 @@ class SocialInteractionsState extends Equatable {
 
   /// Initial state
   factory SocialInteractionsState.initial() => const SocialInteractionsState();
+
   /// Map of userId -> follow status
   final Map<String, bool> followingStatus;
 

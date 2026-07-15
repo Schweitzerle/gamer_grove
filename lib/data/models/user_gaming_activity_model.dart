@@ -13,7 +13,7 @@ class UserGamingActivityModel extends UserGamingActivity {
     super.gamesRecommendedThisMonth,
     super.genreBreakdown,
     super.platformBreakdown,
-    super.lastRatedGameId,      // ✅ Geändert
+    super.lastRatedGameId, // ✅ Geändert
     super.lastAddedToWishlistId, // ✅ Geändert
     super.lastRecommendedGameId, // ✅ Geändert
   });
@@ -21,13 +21,16 @@ class UserGamingActivityModel extends UserGamingActivity {
   factory UserGamingActivityModel.fromJson(Map<String, dynamic> json) {
     return UserGamingActivityModel(
       gamesRatedThisMonth: json['games_rated_this_month'] as int? ?? 0,
-      gamesAddedToWishlistThisMonth: json['games_added_to_wishlist_this_month'] as int? ?? 0,
-      gamesRecommendedThisMonth: json['games_recommended_this_month'] as int? ?? 0,
+      gamesAddedToWishlistThisMonth:
+          json['games_added_to_wishlist_this_month'] as int? ?? 0,
+      gamesRecommendedThisMonth:
+          json['games_recommended_this_month'] as int? ?? 0,
       genreBreakdown: Map<String, int>.from(json['genre_breakdown'] ?? {}),
-      platformBreakdown: Map<String, int>.from(json['platform_breakdown'] ?? {}),
-      lastRatedGameId: json['last_rated_game'] as int?,          // ✅ FIX
+      platformBreakdown:
+          Map<String, int>.from(json['platform_breakdown'] ?? {}),
+      lastRatedGameId: json['last_rated_game'] as int?, // ✅ FIX
       lastAddedToWishlistId: json['last_added_to_wishlist'] as int?, // ✅ FIX
-      lastRecommendedGameId: json['last_recommended_game'] as int?,   // ✅ FIX
+      lastRecommendedGameId: json['last_recommended_game'] as int?, // ✅ FIX
     );
   }
 

@@ -19,7 +19,6 @@ class CharacterInitial extends CharacterState {}
 class CharacterLoading extends CharacterState {}
 
 class CharacterDetailsLoaded extends CharacterState {
-
   const CharacterDetailsLoaded({
     required this.character,
     required this.games,
@@ -35,7 +34,6 @@ class CharacterDetailsLoaded extends CharacterState {
 }
 
 class CharacterError extends CharacterState {
-
   const CharacterError({
     required this.message,
     this.characters = const [],
@@ -49,7 +47,6 @@ class CharacterError extends CharacterState {
 
 // Home Screen - Popular Characters
 class PopularCharactersLoaded extends CharacterState {
-
   const PopularCharactersLoaded({required this.characters});
   final List<Character> characters;
 
@@ -59,7 +56,6 @@ class PopularCharactersLoaded extends CharacterState {
 
 // Search States
 class CharacterSearchLoading extends CharacterState {
-
   const CharacterSearchLoading({
     this.characters = const [],
     this.isLoadingMore = false,
@@ -72,7 +68,6 @@ class CharacterSearchLoading extends CharacterState {
 }
 
 class CharacterSearchLoaded extends CharacterState {
-
   const CharacterSearchLoaded({
     required this.characters,
     required this.query,

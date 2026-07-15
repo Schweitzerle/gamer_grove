@@ -9,12 +9,12 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameVideos extends UseCase<List<GameVideo>, GetGameVideosParams> {
-
   GetGameVideos(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<GameVideo>>> call(GetGameVideosParams params) async {
+  Future<Either<Failure, List<GameVideo>>> call(
+      GetGameVideosParams params) async {
     if (params.gameId <= 0) {
       return const Left(ValidationFailure(message: 'Invalid game ID'));
     }
@@ -24,11 +24,9 @@ class GetGameVideos extends UseCase<List<GameVideo>, GetGameVideosParams> {
 }
 
 class GetGameVideosParams extends Equatable {
-
   const GetGameVideosParams({required this.gameId});
   final int gameId;
 
   @override
   List<Object> get props => [gameId];
 }
-

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class CustomLoadingWidget extends StatelessWidget {
-
   const CustomLoadingWidget({
     super.key,
     this.message,
@@ -33,8 +32,8 @@ class CustomLoadingWidget extends StatelessWidget {
             Text(
               message!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -80,7 +79,6 @@ class ProfileLoadingWidget extends StatelessWidget {
 
 // Inline loading widget for buttons
 class InlineLoadingWidget extends StatelessWidget {
-
   const InlineLoadingWidget({
     super.key,
     this.size = 16,
@@ -104,9 +102,10 @@ class InlineLoadingWidget extends StatelessWidget {
 
 // Overlay loading widget
 class OverlayLoadingWidget extends StatelessWidget {
-
   const OverlayLoadingWidget({
-    required this.child, required this.isLoading, super.key,
+    required this.child,
+    required this.isLoading,
+    super.key,
     this.loadingMessage,
   });
   final Widget child;
@@ -133,7 +132,6 @@ class OverlayLoadingWidget extends StatelessWidget {
 
 // Skeleton loading widget for lists
 class SkeletonLoadingWidget extends StatelessWidget {
-
   const SkeletonLoadingWidget({
     super.key,
     this.width = double.infinity,
@@ -151,7 +149,8 @@ class SkeletonLoadingWidget extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: borderRadius ?? BorderRadius.circular(AppConstants.borderRadius / 2),
+        borderRadius: borderRadius ??
+            BorderRadius.circular(AppConstants.borderRadius / 2),
       ),
     );
   }
@@ -165,10 +164,7 @@ class SkeletonGameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme
-            .of(context)
-            .colorScheme
-            .surfaceContainerHighest,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
       ),
       child: Column(
@@ -179,10 +175,7 @@ class SkeletonGameCard extends StatelessWidget {
             flex: 3,
             child: Container(
               decoration: BoxDecoration(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(AppConstants.borderRadius),
                 ),
@@ -201,10 +194,7 @@ class SkeletonGameCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   SkeletonLoadingWidget(
                     height: 12,
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.3,
+                    width: MediaQuery.of(context).size.width * 0.3,
                   ),
                 ],
               ),

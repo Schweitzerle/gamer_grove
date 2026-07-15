@@ -24,7 +24,6 @@ enum CharacterSortOption {
 }
 
 class AllCharactersScreen extends StatefulWidget {
-
   const AllCharactersScreen({
     super.key,
     this.title = 'All Characters',
@@ -328,14 +327,16 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
                           ),
                           ...CharacterGenderEnum.values
                               .where((g) => g != CharacterGenderEnum.unknown)
-                              .map((gender) => _buildFilterChip(
-                                    label: gender.displayName,
-                                    isSelected: _genderFilter == gender,
-                                    onSelected: () {
-                                      setState(() => _genderFilter = gender);
-                                      _performSearch();
-                                    },
-                                  ),),
+                              .map(
+                                (gender) => _buildFilterChip(
+                                  label: gender.displayName,
+                                  isSelected: _genderFilter == gender,
+                                  onSelected: () {
+                                    setState(() => _genderFilter = gender);
+                                    _performSearch();
+                                  },
+                                ),
+                              ),
                         ],
                       ),
                     ),
@@ -363,14 +364,16 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
                           ),
                           ...CharacterSpeciesEnum.values
                               .where((s) => s != CharacterSpeciesEnum.unknown)
-                              .map((species) => _buildFilterChip(
-                                    label: species.displayName,
-                                    isSelected: _speciesFilter == species,
-                                    onSelected: () {
-                                      setState(() => _speciesFilter = species);
-                                      _performSearch();
-                                    },
-                                  ),),
+                              .map(
+                                (species) => _buildFilterChip(
+                                  label: species.displayName,
+                                  isSelected: _speciesFilter == species,
+                                  onSelected: () {
+                                    setState(() => _speciesFilter = species);
+                                    _performSearch();
+                                  },
+                                ),
+                              ),
                         ],
                       ),
                     ),
@@ -489,7 +492,9 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
   }
 
   Widget _buildCharactersContent(
-      List<Character> characters, bool isLoadingMore,) {
+    List<Character> characters,
+    bool isLoadingMore,
+  ) {
     return _buildCharactersGrid(characters, isLoadingMore);
   }
 

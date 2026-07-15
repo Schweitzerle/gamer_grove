@@ -229,7 +229,6 @@ class GameFilters {
 ///   .build();
 /// ```
 class GameFilterBuilder {
-
   GameFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

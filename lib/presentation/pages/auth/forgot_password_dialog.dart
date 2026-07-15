@@ -179,9 +179,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
                   // Cancel Button
                   TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () => Navigator.of(context).pop(),
+                    onPressed:
+                        _isLoading ? null : () => Navigator.of(context).pop(),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         vertical: AppConstants.paddingMedium,

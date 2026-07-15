@@ -22,7 +22,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class ToggleRecommendedUseCase
     implements UseCase<void, ToggleRecommendedParams> {
-
   ToggleRecommendedUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -33,7 +32,6 @@ class ToggleRecommendedUseCase
 }
 
 class ToggleRecommendedParams extends Equatable {
-
   const ToggleRecommendedParams({
     required this.userId,
     required this.gameId,

@@ -16,12 +16,12 @@ enum ActivityType {
 ///
 /// Represents actions performed by users that can be displayed in activity feeds.
 class Activity extends Equatable {
-
   const Activity({
     required this.id,
     required this.userId,
     required this.activityType,
-    required this.createdAt, this.gameId,
+    required this.createdAt,
+    this.gameId,
     this.metadata,
     this.isPublic = true,
     this.username,

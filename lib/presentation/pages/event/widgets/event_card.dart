@@ -12,9 +12,9 @@ import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
-
   const EventCard({
-    required this.event, super.key,
+    required this.event,
+    super.key,
     this.onTap,
     this.showStatus = true,
     this.showGamesCount = false,
@@ -77,7 +77,9 @@ class EventCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 4,),
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       child: _buildEventContent(context),
                     ),
                   ),

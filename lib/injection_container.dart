@@ -391,7 +391,8 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetGameExpansions(sl()))
     ..registerLazySingleton(() => GetEnhancedGameDetails(sl()))
     ..registerLazySingleton(
-        () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()),)
+      () => GetCompleteGameDetailPageData(getEnhancedGameDetails: sl()),
+    )
 
     //Character Use Cases
     ..registerLazySingleton(() => GetCharacterWithGames(sl()))
@@ -403,8 +404,10 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => SearchEvents(sl()))
     ..registerLazySingleton(() => GetEventsByDateRange(sl()))
     ..registerLazySingleton(() => GetEventsByGames(sl()))
-    ..registerLazySingleton(() =>
-        GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()),)
+    ..registerLazySingleton(
+      () =>
+          GetCompleteEventDetails(eventRepository: sl(), gameRepository: sl()),
+    )
     ..registerLazySingleton(() => AdvancedEventSearch(sl()))
 
     // Platform Use Cases

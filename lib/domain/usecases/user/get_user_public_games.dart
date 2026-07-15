@@ -9,13 +9,13 @@ import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUserPublicRatedGames
     extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
-
   GetUserPublicRatedGames(this.repository);
   final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetUserPublicGamesParams params,) async {
+    GetUserPublicGamesParams params,
+  ) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -31,13 +31,13 @@ class GetUserPublicRatedGames
 
 class GetUserPublicRecommendedGames
     extends UseCase<List<Map<String, dynamic>>, GetUserPublicGamesParams> {
-
   GetUserPublicRecommendedGames(this.repository);
   final UserRepository repository;
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> call(
-      GetUserPublicGamesParams params,) async {
+    GetUserPublicGamesParams params,
+  ) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -52,7 +52,6 @@ class GetUserPublicRecommendedGames
 }
 
 class GetUserPublicGamesParams extends Equatable {
-
   const GetUserPublicGamesParams({
     required this.userId,
     this.currentUserId,

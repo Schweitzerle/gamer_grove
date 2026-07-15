@@ -57,7 +57,8 @@ class Navigations {
   static void navigateToLocalAllGames(
     BuildContext context, {
     required String title,
-    required List<Game> games, String? subtitle,
+    required List<Game> games,
+    String? subtitle,
     bool showFilters = true,
     bool showSearch = true,
     bool blurRated = false,
@@ -148,7 +149,10 @@ class Navigations {
   }
 
   static void navigateToEventGames(
-      BuildContext context, SeriesItem item, Event event,) {
+    BuildContext context,
+    SeriesItem item,
+    Event event,
+  ) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
@@ -158,7 +162,10 @@ class Navigations {
   }
 
   static void navigateToCharacterGames(
-      BuildContext context, SeriesItem item, Character character,) {
+    BuildContext context,
+    SeriesItem item,
+    Character character,
+  ) {
     Navigations.navigateToLocalAllGames(
       context,
       title: item.title,
@@ -359,7 +366,9 @@ class Navigations {
   }
 
   static void navigateToCollectionDetail(
-      BuildContext context, int collectionId,) {
+    BuildContext context,
+    int collectionId,
+  ) {
     // TODO: Implement collection detail screen
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Collection detail screen coming soon!')),
@@ -389,7 +398,8 @@ class Navigations {
   static void navigateToAllEventsGeneric(
     BuildContext context, {
     required String title,
-    required List<Event> events, String? subtitle,
+    required List<Event> events,
+    String? subtitle,
     Game? game,
     bool showFilters = true,
     bool showSearch = true,
@@ -427,10 +437,12 @@ class Navigations {
           providers: [
             BlocProvider(
               create: (context) => sl<EventBloc>()
-                ..add(GetCompleteEventDetailsWithUserDataEvent(
-                  eventId: eventId,
-                  userId: userId, // 🎯 User ID mitgeben!
-                ),),
+                ..add(
+                  GetCompleteEventDetailsWithUserDataEvent(
+                    eventId: eventId,
+                    userId: userId, // 🎯 User ID mitgeben!
+                  ),
+                ),
             ),
             BlocProvider.value(
               value: context.read<AuthBloc>(),
@@ -445,9 +457,11 @@ class Navigations {
     );
   }
 
-  static void navigateToCharacterDetail(BuildContext context, int characterId,
-      {Character? character,}) {
-
+  static void navigateToCharacterDetail(
+    BuildContext context,
+    int characterId, {
+    Character? character,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
@@ -689,7 +703,8 @@ class Navigations {
     if (!event.hasLiveStream) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('No live stream available for this event'),),
+          content: Text('No live stream available for this event'),
+        ),
       );
       return;
     }
@@ -736,7 +751,8 @@ class Navigations {
     // TODO: Implement event notifications settings
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-          content: Text('Event notifications settings coming soon!'),),
+        content: Text('Event notifications settings coming soon!'),
+      ),
     );
   }
 

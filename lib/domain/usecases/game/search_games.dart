@@ -7,14 +7,14 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
-
   SearchGames(this.repository);
   final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Game>>> call(SearchGamesParams params) async {
     if (params.query.isEmpty) {
-      return const Left(ValidationFailure(message: 'Search query cannot be empty'));
+      return const Left(
+          ValidationFailure(message: 'Search query cannot be empty'));
     }
 
     return repository.searchGames(
@@ -26,7 +26,6 @@ class SearchGames extends UseCase<List<Game>, SearchGamesParams> {
 }
 
 class SearchGamesParams extends Equatable {
-
   const SearchGamesParams({
     required this.query,
     this.limit = 20,

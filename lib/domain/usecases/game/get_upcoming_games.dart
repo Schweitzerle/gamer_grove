@@ -7,12 +7,12 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUpcomingGames extends UseCase<List<Game>, GetUpcomingGamesParams> {
-
   GetUpcomingGames(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetUpcomingGamesParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetUpcomingGamesParams params) async {
     return repository.getUpcomingGames(
       params.limit,
       params.offset,
@@ -21,7 +21,6 @@ class GetUpcomingGames extends UseCase<List<Game>, GetUpcomingGamesParams> {
 }
 
 class GetUpcomingGamesParams extends Equatable {
-
   const GetUpcomingGamesParams({
     this.limit = 20,
     this.offset = 0,
@@ -32,4 +31,3 @@ class GetUpcomingGamesParams extends Equatable {
   @override
   List<Object> get props => [limit, offset];
 }
-

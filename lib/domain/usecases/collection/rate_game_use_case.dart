@@ -25,7 +25,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class RateGameUseCase implements UseCase<void, RateGameParams> {
-
   RateGameUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -33,9 +32,11 @@ class RateGameUseCase implements UseCase<void, RateGameParams> {
   Future<Either<Failure, void>> call(RateGameParams params) async {
     // Validate rating range
     if (params.rating < 0.0 || params.rating > 10.0) {
-      return const Left(ValidationFailure(
-        message: 'Rating must be between 0.0 and 10.0',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'Rating must be between 0.0 and 10.0',
+        ),
+      );
     }
 
     return repository.rateGame(
@@ -47,7 +48,6 @@ class RateGameUseCase implements UseCase<void, RateGameParams> {
 }
 
 class RateGameParams extends Equatable {
-
   const RateGameParams({
     required this.userId,
     required this.gameId,

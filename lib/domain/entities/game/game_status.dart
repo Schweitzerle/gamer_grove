@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameStatus extends Equatable {
-
   const GameStatus({
     required this.id,
     required this.checksum,

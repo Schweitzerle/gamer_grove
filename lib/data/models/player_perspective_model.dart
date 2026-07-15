@@ -12,7 +12,9 @@ class PlayerPerspectiveModel extends PlayerPerspective {
     return PlayerPerspectiveModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? 'Unknown Perspective',
-      slug: json['slug'] ?? json['name']?.toString().toLowerCase().replaceAll(' ', '-') ?? 'unknown',
+      slug: json['slug'] ??
+          json['name']?.toString().toLowerCase().replaceAll(' ', '-') ??
+          'unknown',
     );
   }
 }

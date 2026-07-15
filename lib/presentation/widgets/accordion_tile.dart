@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class AccordionTile extends StatelessWidget {
-
   const AccordionTile({
-    required this.title, required this.icon, required this.child, super.key,
+    required this.title,
+    required this.icon,
+    required this.child,
+    super.key,
     this.isFirst = true,
     this.isLast = true,
   });

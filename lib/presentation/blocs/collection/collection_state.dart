@@ -24,7 +24,6 @@ class CollectionLoading extends CollectionState {
 /// State when game enrichment data is loaded.
 /// This is the PERFORMANCE-CRITICAL state!
 class GameEnrichmentLoaded extends CollectionState {
-
   const GameEnrichmentLoaded(this.enrichmentData);
   final Map<int, Map<String, dynamic>> enrichmentData;
 
@@ -34,7 +33,6 @@ class GameEnrichmentLoaded extends CollectionState {
 
 /// State when rating succeeds.
 class RatingSuccess extends CollectionState {
-
   const RatingSuccess({
     required this.gameId,
     required this.rating,
@@ -48,7 +46,6 @@ class RatingSuccess extends CollectionState {
 
 /// State when rating is removed.
 class RatingRemoved extends CollectionState {
-
   const RatingRemoved(this.gameId);
   final int gameId;
 
@@ -58,7 +55,6 @@ class RatingRemoved extends CollectionState {
 
 /// State when wishlist toggle succeeds.
 class WishlistToggled extends CollectionState {
-
   const WishlistToggled(this.gameId);
   final int gameId;
 
@@ -68,7 +64,6 @@ class WishlistToggled extends CollectionState {
 
 /// State when recommended toggle succeeds.
 class RecommendedToggled extends CollectionState {
-
   const RecommendedToggled(this.gameId);
   final int gameId;
 
@@ -78,7 +73,6 @@ class RecommendedToggled extends CollectionState {
 
 /// State when top 3 is updated.
 class TopThreeUpdated extends CollectionState {
-
   const TopThreeUpdated(this.gameIds);
   final List<int> gameIds;
 
@@ -88,7 +82,6 @@ class TopThreeUpdated extends CollectionState {
 
 /// State when top 3 is loaded.
 class TopThreeLoaded extends CollectionState {
-
   const TopThreeLoaded(this.gameIds);
   final List<int>? gameIds;
 
@@ -103,7 +96,6 @@ class TopThreeCleared extends CollectionState {
 
 /// State when wishlisted games are loaded.
 class WishlistedGamesLoaded extends CollectionState {
-
   const WishlistedGamesLoaded(this.gameIds);
   final List<int> gameIds;
 
@@ -113,7 +105,6 @@ class WishlistedGamesLoaded extends CollectionState {
 
 /// State when rated games are loaded.
 class RatedGamesLoaded extends CollectionState {
-
   const RatedGamesLoaded(this.games);
   final List<Map<String, dynamic>> games;
 
@@ -123,7 +114,6 @@ class RatedGamesLoaded extends CollectionState {
 
 /// State when operation fails.
 class CollectionError extends CollectionState {
-
   const CollectionError(this.message);
   final String message;
 

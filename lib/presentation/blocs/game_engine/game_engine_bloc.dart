@@ -11,7 +11,6 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_event.dar
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dart';
 
 class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
-
   GameEngineBloc({
     required this.getGameEngineWithGames,
     required this.gameRepository,
@@ -61,21 +60,27 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               event.userId!,
             );
 
-            emit(GameEngineDetailsLoaded(
-              gameEngine: gameEngineWithGames.gameEngine,
-              games: enrichedGames,
-            ),);
+            emit(
+              GameEngineDetailsLoaded(
+                gameEngine: gameEngineWithGames.gameEngine,
+                games: enrichedGames,
+              ),
+            );
           } catch (e) {
-            emit(GameEngineDetailsLoaded(
-              gameEngine: gameEngineWithGames.gameEngine,
-              games: gameEngineWithGames.games,
-            ),);
+            emit(
+              GameEngineDetailsLoaded(
+                gameEngine: gameEngineWithGames.gameEngine,
+                games: gameEngineWithGames.games,
+              ),
+            );
           }
         } else {
-          emit(GameEngineDetailsLoaded(
-            gameEngine: gameEngineWithGames.gameEngine,
-            games: gameEngineWithGames.games,
-          ),);
+          emit(
+            GameEngineDetailsLoaded(
+              gameEngine: gameEngineWithGames.gameEngine,
+              games: gameEngineWithGames.games,
+            ),
+          );
         }
       },
     );
@@ -96,12 +101,13 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     LoadGameEngineGamesEvent event,
     Emitter<GameEngineState> emit,
   ) async {
-
     // Show loading state
-    emit(GameEngineGamesLoading(
-      gameEngineId: event.gameEngineId,
-      gameEngineName: event.gameEngineName,
-    ),);
+    emit(
+      GameEngineGamesLoading(
+        gameEngineId: event.gameEngineId,
+        gameEngineName: event.gameEngineName,
+      ),
+    );
 
     // Fetch first page
     final result = await gameRepository.getGamesByGameEngine(
@@ -112,14 +118,15 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     await result.fold(
       (failure) async {
-        emit(GameEngineGamesError(
-          gameEngineId: event.gameEngineId,
-          gameEngineName: event.gameEngineName,
-          message: failure.message,
-        ),);
+        emit(
+          GameEngineGamesError(
+            gameEngineId: event.gameEngineId,
+            gameEngineName: event.gameEngineName,
+            message: failure.message,
+          ),
+        );
       },
       (games) async {
-
         // Enrich games if userId is provided
         var enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
@@ -128,22 +135,23 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               games,
               event.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // hasMore = true if we got a full page
         final hasMore = games.length == _pageSize;
 
-        emit(GameEngineGamesLoaded(
-          gameEngineId: event.gameEngineId,
-          gameEngineName: event.gameEngineName,
-          games: enrichedGames,
-          hasMore: hasMore,
-          sortBy: event.sortBy,
-          sortOrder: event.sortOrder,
-          userId: event.userId, // 🆕 Store userId in state
-        ),);
+        emit(
+          GameEngineGamesLoaded(
+            gameEngineId: event.gameEngineId,
+            gameEngineName: event.gameEngineName,
+            games: enrichedGames,
+            hasMore: hasMore,
+            sortBy: event.sortBy,
+            sortOrder: event.sortOrder,
+            userId: event.userId, // 🆕 Store userId in state
+          ),
+        );
       },
     );
   }
@@ -161,7 +169,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
     if (currentState.isLoadingMore || !currentState.hasMore) {
       return;
     }
-
 
     // Set loading more flag
     emit(currentState.copyWith(isLoadingMore: true));
@@ -183,7 +190,6 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
         emit(currentState.copyWith(isLoadingMore: false));
       },
       (newGames) async {
-
         // Enrich new games if userId is available
         var enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
@@ -192,24 +198,25 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               newGames,
               currentState.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // Combine existing games with new games
         final allGames = [...currentState.games, ...enrichedNewGames];
         final hasMore = newGames.length == _pageSize;
 
-        emit(GameEngineGamesLoaded(
-          gameEngineId: currentState.gameEngineId,
-          gameEngineName: currentState.gameEngineName,
-          games: allGames,
-          hasMore: hasMore,
-          currentPage: nextPage,
-          sortBy: currentState.sortBy,
-          sortOrder: currentState.sortOrder,
-          userId: currentState.userId, // 🆕 Keep userId
-        ),);
+        emit(
+          GameEngineGamesLoaded(
+            gameEngineId: currentState.gameEngineId,
+            gameEngineName: currentState.gameEngineName,
+            games: allGames,
+            hasMore: hasMore,
+            currentPage: nextPage,
+            sortBy: currentState.sortBy,
+            sortOrder: currentState.sortOrder,
+            userId: currentState.userId, // 🆕 Keep userId
+          ),
+        );
       },
     );
   }
@@ -223,12 +230,13 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     final currentState = state as GameEngineGamesLoaded;
 
-
     // Show loading state
-    emit(GameEngineGamesLoading(
-      gameEngineId: currentState.gameEngineId,
-      gameEngineName: currentState.gameEngineName,
-    ),);
+    emit(
+      GameEngineGamesLoading(
+        gameEngineId: currentState.gameEngineId,
+        gameEngineName: currentState.gameEngineName,
+      ),
+    );
 
     // Fetch first page with new sort
     final result = await gameRepository.getGamesByGameEngine(
@@ -239,14 +247,15 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
 
     await result.fold(
       (failure) async {
-        emit(GameEngineGamesError(
-          gameEngineId: currentState.gameEngineId,
-          gameEngineName: currentState.gameEngineName,
-          message: failure.message,
-        ),);
+        emit(
+          GameEngineGamesError(
+            gameEngineId: currentState.gameEngineId,
+            gameEngineName: currentState.gameEngineName,
+            message: failure.message,
+          ),
+        );
       },
       (games) async {
-
         // 🆕 Enrich games if userId is available
         var enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
@@ -255,22 +264,23 @@ class GameEngineBloc extends Bloc<GameEngineEvent, GameEngineState> {
               games,
               currentState.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // hasMore = true if we got a full page
         final hasMore = games.length == _pageSize;
 
-        emit(GameEngineGamesLoaded(
-          gameEngineId: currentState.gameEngineId,
-          gameEngineName: currentState.gameEngineName,
-          games: enrichedGames, // 🆕 Use enriched games
-          hasMore: hasMore,
-          sortBy: event.sortBy,
-          sortOrder: event.sortOrder,
-          userId: currentState.userId, // 🆕 Keep userId
-        ),);
+        emit(
+          GameEngineGamesLoaded(
+            gameEngineId: currentState.gameEngineId,
+            gameEngineName: currentState.gameEngineName,
+            games: enrichedGames, // 🆕 Use enriched games
+            hasMore: hasMore,
+            sortBy: event.sortBy,
+            sortOrder: event.sortOrder,
+            userId: currentState.userId, // 🆕 Keep userId
+          ),
+        );
       },
     );
   }

@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ abstract class ThemeEvent extends Equatable {
 }
 
 class ThemeModeChanged extends ThemeEvent {
-
   const ThemeModeChanged(this.themeMode);
   final ThemeMode themeMode;
 
@@ -20,7 +18,6 @@ class ThemeModeChanged extends ThemeEvent {
 }
 
 class ThemeSchemeChanged extends ThemeEvent {
-
   const ThemeSchemeChanged(this.flexScheme);
   final FlexScheme flexScheme;
 

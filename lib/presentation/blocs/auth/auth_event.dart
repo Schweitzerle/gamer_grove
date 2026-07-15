@@ -24,7 +24,6 @@ class CheckAuthStatusEvent extends AuthEvent {
 
 /// Event to sign in with email and password.
 class SignInEvent extends AuthEvent {
-
   const SignInEvent({
     required this.email,
     required this.password,
@@ -38,7 +37,6 @@ class SignInEvent extends AuthEvent {
 
 /// Event to sign up a new user.
 class SignUpEvent extends AuthEvent {
-
   const SignUpEvent({
     required this.email,
     required this.password,
@@ -59,7 +57,6 @@ class SignOutEvent extends AuthEvent {
 
 /// Event to send password reset email.
 class ResetPasswordEvent extends AuthEvent {
-
   const ResetPasswordEvent({required this.email});
   final String email;
 
@@ -69,7 +66,6 @@ class ResetPasswordEvent extends AuthEvent {
 
 /// Event to update password.
 class UpdatePasswordEvent extends AuthEvent {
-
   const UpdatePasswordEvent({required this.newPassword});
   final String newPassword;
 
@@ -79,7 +75,6 @@ class UpdatePasswordEvent extends AuthEvent {
 
 /// Event triggered when auth state changes (from stream).
 class AuthStateChangedEvent extends AuthEvent {
-
   const AuthStateChangedEvent(this.user);
   final User? user;
 
@@ -89,7 +84,6 @@ class AuthStateChangedEvent extends AuthEvent {
 
 /// Event to update user data in the auth state.
 class UserDataUpdated extends AuthEvent {
-
   const UserDataUpdated(this.user);
   final User user;
 

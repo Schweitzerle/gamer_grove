@@ -395,7 +395,9 @@ class DateFormatter {
 
   /// Format live event indicator
   static String formatLiveEventIndicator(
-      DateTime startTime, DateTime? endTime,) {
+    DateTime startTime,
+    DateTime? endTime,
+  ) {
     final now = DateTime.now();
 
     if (endTime != null && endTime.isAfter(now) && startTime.isBefore(now)) {

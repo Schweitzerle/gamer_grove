@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/entities/date/date_format.dart';
 import 'package:gamer_grove/domain/entities/region.dart';
 
 class PlatformVersionReleaseDate extends Equatable {
-
   const PlatformVersionReleaseDate({
     required this.id,
     required this.checksum,
@@ -39,23 +38,23 @@ class PlatformVersionReleaseDate extends Equatable {
   final RegionEnum? region;
 
   bool get hasExactDate => dateFormatId == 0; // YYYYMMMMDD
-  bool get isEstimate => dateFormatId != null && dateFormatId! > 2; // Quarter or TBD
+  bool get isEstimate =>
+      dateFormatId != null && dateFormatId! > 2; // Quarter or TBD
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    date,
-    dateFormatId,
-    human,
-    month,
-    platformVersionId,
-    releaseRegionId,
-    year,
-    createdAt,
-    updatedAt,
-    category,
-    region,
-  ];
+        id,
+        checksum,
+        date,
+        dateFormatId,
+        human,
+        month,
+        platformVersionId,
+        releaseRegionId,
+        year,
+        createdAt,
+        updatedAt,
+        category,
+        region,
+      ];
 }
-

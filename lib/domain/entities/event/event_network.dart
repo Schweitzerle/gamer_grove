@@ -7,7 +7,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/event/network_type.dart';
 
-class EventNetwork extends Equatable { // 🆕 Full NetworkType object instead of ID
+class EventNetwork extends Equatable {
+  // 🆕 Full NetworkType object instead of ID
 
   const EventNetwork({
     required this.id,
@@ -41,20 +42,29 @@ class EventNetwork extends Equatable { // 🆕 Full NetworkType object instead o
 
   // Enhanced URL type detection
   bool get isTwitchUrl => url.toLowerCase().contains('twitch.tv');
-  bool get isYouTubeUrl => url.toLowerCase().contains('youtube.com') ||
+  bool get isYouTubeUrl =>
+      url.toLowerCase().contains('youtube.com') ||
       url.toLowerCase().contains('youtu.be');
-  bool get isTwitterUrl => url.toLowerCase().contains('twitter.com') ||
+  bool get isTwitterUrl =>
+      url.toLowerCase().contains('twitter.com') ||
       url.toLowerCase().contains('x.com');
   bool get isFacebookUrl => url.toLowerCase().contains('facebook.com');
   bool get isInstagramUrl => url.toLowerCase().contains('instagram.com');
-  bool get isDiscordUrl => url.toLowerCase().contains('discord.gg') ||
+  bool get isDiscordUrl =>
+      url.toLowerCase().contains('discord.gg') ||
       url.toLowerCase().contains('discord.com');
   bool get isTikTokUrl => url.toLowerCase().contains('tiktok.com');
   bool get isLinkedInUrl => url.toLowerCase().contains('linkedin.com');
   bool get isRedditUrl => url.toLowerCase().contains('reddit.com');
 
-  bool get isSocialMediaUrl => isTwitterUrl || isFacebookUrl ||
-      isInstagramUrl || isDiscordUrl || isTikTokUrl || isLinkedInUrl || isRedditUrl;
+  bool get isSocialMediaUrl =>
+      isTwitterUrl ||
+      isFacebookUrl ||
+      isInstagramUrl ||
+      isDiscordUrl ||
+      isTikTokUrl ||
+      isLinkedInUrl ||
+      isRedditUrl;
   bool get isStreamingUrl => isTwitchUrl || isYouTubeUrl;
 
   // Enhanced platform name detection
@@ -109,14 +119,13 @@ class EventNetwork extends Equatable { // 🆕 Full NetworkType object instead o
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    url,
-    eventId,
-    networkTypeId,
-    createdAt,
-    updatedAt,
-    networkType,
-  ];
+        id,
+        checksum,
+        url,
+        eventId,
+        networkTypeId,
+        createdAt,
+        updatedAt,
+        networkType,
+      ];
 }
-

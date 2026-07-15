@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseUserActivityDataSourceImpl
     implements SupabaseUserActivityDataSource {
-
   SupabaseUserActivityDataSourceImpl({required SupabaseClient supabase})
       : _supabase = supabase;
   final SupabaseClient _supabase;
@@ -31,14 +30,14 @@ class SupabaseUserActivityDataSourceImpl
           .from('user_activity')
           .select('*, user:profiles(*)')
           .inFilter('user_id', followingIds)
-          .inFilter('activity_type',
-              ['rated', 'updated_top_three', 'recommended', 'wishlisted'],)
+          .inFilter(
+            'activity_type',
+            ['rated', 'updated_top_three', 'recommended', 'wishlisted'],
+          )
           .order('created_at', ascending: false)
           .limit(50);
 
-      return activityResponse
-          .map(UserActivityModel.fromJson)
-          .toList();
+      return activityResponse.map(UserActivityModel.fromJson).toList();
     } catch (e) {
       throw UserExceptionMapper.map(e);
     }

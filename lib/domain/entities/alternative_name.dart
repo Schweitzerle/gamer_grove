@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class AlternativeName extends Equatable {
-
   const AlternativeName({
     required this.id,
     required this.checksum,
@@ -22,12 +21,12 @@ class AlternativeName extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    comment,
-    gameId,
-    name,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        comment,
+        gameId,
+        name,
+        createdAt,
+        updatedAt,
+      ];
 }

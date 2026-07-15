@@ -3,7 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class ReleaseDateStatus extends Equatable {
-
   const ReleaseDateStatus({
     required this.id,
     required this.checksum,
@@ -23,16 +22,21 @@ class ReleaseDateStatus extends Equatable {
   bool get hasDescription => description != null && description!.isNotEmpty;
 
   // Status type detection
-  bool get isReleased => name.toLowerCase().contains('released') ||
+  bool get isReleased =>
+      name.toLowerCase().contains('released') ||
       name.toLowerCase().contains('available');
-  bool get isCancelled => name.toLowerCase().contains('cancelled') ||
+  bool get isCancelled =>
+      name.toLowerCase().contains('cancelled') ||
       name.toLowerCase().contains('canceled');
-  bool get isDelayed => name.toLowerCase().contains('delayed') ||
+  bool get isDelayed =>
+      name.toLowerCase().contains('delayed') ||
       name.toLowerCase().contains('postponed');
   bool get isAnnounced => name.toLowerCase().contains('announced');
-  bool get isEarlyAccess => name.toLowerCase().contains('early access') ||
+  bool get isEarlyAccess =>
+      name.toLowerCase().contains('early access') ||
       name.toLowerCase().contains('beta');
-  bool get isTbd => name.toLowerCase().contains('tbd') ||
+  bool get isTbd =>
+      name.toLowerCase().contains('tbd') ||
       name.toLowerCase().contains('to be determined');
 
   String get displayName => name;
@@ -40,11 +44,11 @@ class ReleaseDateStatus extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    description,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        description,
+        createdAt,
+        updatedAt,
+      ];
 }

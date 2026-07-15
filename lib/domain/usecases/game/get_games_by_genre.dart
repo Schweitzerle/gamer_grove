@@ -10,14 +10,14 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGamesByGenre extends UseCase<List<Game>, GetGamesByGenreParams> {
-
   GetGamesByGenre(this.repository);
   final GameRepository repository;
 
   @override
   Future<Either<Failure, List<Game>>> call(GetGamesByGenreParams params) async {
     if (params.genreIds.isEmpty) {
-      return const Left(ValidationFailure(message: 'At least one genre ID required'));
+      return const Left(
+          ValidationFailure(message: 'At least one genre ID required'));
     }
 
     return repository.getGamesByGenre(
@@ -31,7 +31,6 @@ class GetGamesByGenre extends UseCase<List<Game>, GetGamesByGenreParams> {
 }
 
 class GetGamesByGenreParams extends Equatable {
-
   const GetGamesByGenreParams({
     required this.genreIds,
     this.limit = 20,
@@ -48,4 +47,3 @@ class GetGamesByGenreParams extends Equatable {
   @override
   List<Object> get props => [genreIds, limit, offset, sortBy, sortOrder];
 }
-

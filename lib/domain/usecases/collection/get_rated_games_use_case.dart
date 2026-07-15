@@ -29,7 +29,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class GetRatedGamesUseCase
     implements UseCase<List<Map<String, dynamic>>, GetRatedGamesParams> {
-
   GetRatedGamesUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -46,7 +45,6 @@ class GetRatedGamesUseCase
 }
 
 class GetRatedGamesParams extends Equatable {
-
   const GetRatedGamesParams({
     required this.userId,
     this.limit,

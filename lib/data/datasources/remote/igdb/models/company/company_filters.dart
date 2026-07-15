@@ -36,7 +36,8 @@ class CompanyFilters {
   static IgdbFilter independentOnly() => const NullFilter('parent');
 
   /// Filter subsidiary companies (has parent)
-  static IgdbFilter subsidiariesOnly() => const NullFilter('parent', isNull: false);
+  static IgdbFilter subsidiariesOnly() =>
+      const NullFilter('parent', isNull: false);
 
   // ============================================================
   // LOCATION FILTERS
@@ -87,7 +88,6 @@ class CompanyFilters {
 
 /// Builder for creating complex company filters.
 class CompanyFilterBuilder {
-
   CompanyFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

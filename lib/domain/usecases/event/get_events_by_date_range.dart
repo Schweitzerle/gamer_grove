@@ -8,17 +8,19 @@ import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/domain/repositories/event_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetEventsByDateRange extends UseCase<List<Event>, GetEventsByDateRangeParams> {
-
+class GetEventsByDateRange
+    extends UseCase<List<Event>, GetEventsByDateRangeParams> {
   GetEventsByDateRange(this.repository);
   final EventRepository repository;
 
   @override
-  Future<Either<Failure, List<Event>>> call(GetEventsByDateRangeParams params) async {
+  Future<Either<Failure, List<Event>>> call(
+      GetEventsByDateRangeParams params) async {
     if (params.startDate != null &&
         params.endDate != null &&
         params.startDate!.isAfter(params.endDate!)) {
-      return const Left(ValidationFailure(message: 'Start date cannot be after end date'));
+      return const Left(
+          ValidationFailure(message: 'Start date cannot be after end date'));
     }
 
     return repository.getEventsByDateRange(
@@ -30,7 +32,6 @@ class GetEventsByDateRange extends UseCase<List<Event>, GetEventsByDateRangePara
 }
 
 class GetEventsByDateRangeParams extends Equatable {
-
   const GetEventsByDateRangeParams({
     this.startDate,
     this.endDate,
@@ -43,4 +44,3 @@ class GetEventsByDateRangeParams extends Equatable {
   @override
   List<Object?> get props => [startDate, endDate, limit];
 }
-

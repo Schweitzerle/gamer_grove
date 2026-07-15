@@ -18,22 +18,31 @@ enum ReleaseDateCategory {
 
   static ReleaseDateCategory fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case yyyymmdd: return 'YYYY-MM-DD';
-      case yyyymm: return 'YYYY-MM';
-      case yyyy: return 'YYYY';
-      case yyyyq1: return 'YYYY Q1';
-      case yyyyq2: return 'YYYY Q2';
-      case yyyyq3: return 'YYYY Q3';
-      case yyyyq4: return 'YYYY Q4';
-      case tbd: return 'TBD';
-      default: return 'Unknown';
+      case yyyymmdd:
+        return 'YYYY-MM-DD';
+      case yyyymm:
+        return 'YYYY-MM';
+      case yyyy:
+        return 'YYYY';
+      case yyyyq1:
+        return 'YYYY Q1';
+      case yyyyq2:
+        return 'YYYY Q2';
+      case yyyyq3:
+        return 'YYYY Q3';
+      case yyyyq4:
+        return 'YYYY Q4';
+      case tbd:
+        return 'TBD';
+      default:
+        return 'Unknown';
     }
   }
 }
@@ -56,29 +65,41 @@ enum ReleaseDateRegionEnum {
 
   static ReleaseDateRegionEnum fromValue(int value) {
     return values.firstWhere(
-          (region) => region.value == value,
+      (region) => region.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case europe: return 'Europe';
-      case northAmerica: return 'North America';
-      case australia: return 'Australia';
-      case newZealand: return 'New Zealand';
-      case japan: return 'Japan';
-      case china: return 'China';
-      case asia: return 'Asia';
-      case worldwide: return 'Worldwide';
-      case korea: return 'Korea';
-      case brazil: return 'Brazil';
-      default: return 'Unknown';
+      case europe:
+        return 'Europe';
+      case northAmerica:
+        return 'North America';
+      case australia:
+        return 'Australia';
+      case newZealand:
+        return 'New Zealand';
+      case japan:
+        return 'Japan';
+      case china:
+        return 'China';
+      case asia:
+        return 'Asia';
+      case worldwide:
+        return 'Worldwide';
+      case korea:
+        return 'Korea';
+      case brazil:
+        return 'Brazil';
+      default:
+        return 'Unknown';
     }
   }
 }
 
-class ReleaseDate extends Equatable { // DEPRECATED: Use releaseRegionId instead
+class ReleaseDate extends Equatable {
+  // DEPRECATED: Use releaseRegionId instead
 
   const ReleaseDate({
     required this.id,
@@ -116,7 +137,8 @@ class ReleaseDate extends Equatable { // DEPRECATED: Use releaseRegionId instead
   final int? statusId;
 
   // DEPRECATED fields but still useful for backwards compatibility
-  final ReleaseDateCategory? categoryEnum; // DEPRECATED: Use dateFormatId instead
+  final ReleaseDateCategory?
+      categoryEnum; // DEPRECATED: Use dateFormatId instead
   final ReleaseDateRegionEnum? regionEnum;
 
   // Helper getters
@@ -165,20 +187,25 @@ class ReleaseDate extends Equatable { // DEPRECATED: Use releaseRegionId instead
   bool get hasYearAndMonth => categoryEnum == ReleaseDateCategory.yyyymm;
   bool get hasYearOnly => categoryEnum == ReleaseDateCategory.yyyy;
   bool get isQuarterlyRelease => [
-    ReleaseDateCategory.yyyyq1,
-    ReleaseDateCategory.yyyyq2,
-    ReleaseDateCategory.yyyyq3,
-    ReleaseDateCategory.yyyyq4,
-  ].contains(categoryEnum);
+        ReleaseDateCategory.yyyyq1,
+        ReleaseDateCategory.yyyyq2,
+        ReleaseDateCategory.yyyyq3,
+        ReleaseDateCategory.yyyyq4,
+      ].contains(categoryEnum);
   bool get isTbd => categoryEnum == ReleaseDateCategory.tbd;
 
   String get quarterDisplayName {
     switch (categoryEnum) {
-      case ReleaseDateCategory.yyyyq1: return 'Q1 $year';
-      case ReleaseDateCategory.yyyyq2: return 'Q2 $year';
-      case ReleaseDateCategory.yyyyq3: return 'Q3 $year';
-      case ReleaseDateCategory.yyyyq4: return 'Q4 $year';
-      default: return '';
+      case ReleaseDateCategory.yyyyq1:
+        return 'Q1 $year';
+      case ReleaseDateCategory.yyyyq2:
+        return 'Q2 $year';
+      case ReleaseDateCategory.yyyyq3:
+        return 'Q3 $year';
+      case ReleaseDateCategory.yyyyq4:
+        return 'Q4 $year';
+      default:
+        return '';
     }
   }
 
@@ -221,21 +248,20 @@ class ReleaseDate extends Equatable { // DEPRECATED: Use releaseRegionId instead
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    createdAt,
-    updatedAt,
-    date,
-    human,
-    month,
-    year,
-    gameId,
-    platformId,
-    dateFormatId,
-    releaseRegionId,
-    statusId,
-    categoryEnum,
-    regionEnum,
-  ];
+        id,
+        checksum,
+        createdAt,
+        updatedAt,
+        date,
+        human,
+        month,
+        year,
+        gameId,
+        platformId,
+        dateFormatId,
+        releaseRegionId,
+        statusId,
+        categoryEnum,
+        regionEnum,
+      ];
 }
-

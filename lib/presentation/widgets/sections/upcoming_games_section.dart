@@ -31,12 +31,14 @@ class UpcomingGamesSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is UpcomingGamesLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('No upcoming games found', Icons.schedule, context);
+        return buildEmptySection(
+            'No upcoming games found', Icons.schedule, context);
       }
       return buildHorizontalGameList(state.games);
     } else if (state is HomePageLoaded) {
       if (state.upcomingGames.isEmpty) {
-        return buildEmptySection('No upcoming games found', Icons.schedule, context);
+        return buildEmptySection(
+            'No upcoming games found', Icons.schedule, context);
       }
       return buildHorizontalGameList(state.upcomingGames);
     } else if (state is GameError) {

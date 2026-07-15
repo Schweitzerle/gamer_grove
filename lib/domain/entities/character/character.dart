@@ -5,7 +5,8 @@ import 'package:gamer_grove/domain/entities/character/character_mug_shot.dart';
 import 'package:gamer_grove/domain/entities/character/character_species.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
-class Character extends Equatable { // The actual Game objects this character appears in
+class Character extends Equatable {
+  // The actual Game objects this character appears in
 
   const Character({
     required this.id,
@@ -139,23 +140,23 @@ class Character extends Equatable { // The actual Game objects this character ap
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    akas,
-    characterGenderId,
-    characterSpeciesId,
-    countryName,
-    description,
-    gameIds,
-    mugShot,
-    slug,
-    url,
-    createdAt,
-    updatedAt,
-    genderEnum,
-    speciesEnum,
-    mugShotImageId, // 🆕 ADD this to props
-    games, // 🆕 ADD this to props
-  ];
+        id,
+        checksum,
+        name,
+        akas,
+        characterGenderId,
+        characterSpeciesId,
+        countryName,
+        description,
+        gameIds,
+        mugShot,
+        slug,
+        url,
+        createdAt,
+        updatedAt,
+        genderEnum,
+        speciesEnum,
+        mugShotImageId, // 🆕 ADD this to props
+        games, // 🆕 ADD this to props
+      ];
 }

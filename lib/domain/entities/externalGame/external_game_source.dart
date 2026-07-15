@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class ExternalGameSource extends Equatable {
-
   const ExternalGameSource({
     required this.id,
     required this.checksum,

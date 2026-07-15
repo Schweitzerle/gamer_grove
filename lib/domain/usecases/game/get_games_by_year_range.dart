@@ -9,15 +9,17 @@ import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetGamesByYearRange extends UseCase<List<Game>, GetGamesByYearRangeParams> {
-
+class GetGamesByYearRange
+    extends UseCase<List<Game>, GetGamesByYearRangeParams> {
   GetGamesByYearRange(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetGamesByYearRangeParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetGamesByYearRangeParams params) async {
     if (params.fromYear > params.toYear) {
-      return const Left(ValidationFailure(message: 'From year cannot be greater than to year'));
+      return const Left(ValidationFailure(
+          message: 'From year cannot be greater than to year'));
     }
 
     return repository.getGamesByReleaseYear(
@@ -32,7 +34,6 @@ class GetGamesByYearRange extends UseCase<List<Game>, GetGamesByYearRangeParams>
 }
 
 class GetGamesByYearRangeParams extends Equatable {
-
   const GetGamesByYearRangeParams({
     required this.fromYear,
     required this.toYear,
@@ -49,6 +50,6 @@ class GetGamesByYearRangeParams extends Equatable {
   final SortOrder sortOrder;
 
   @override
-  List<Object> get props => [fromYear, toYear, limit, offset, sortBy, sortOrder];
+  List<Object> get props =>
+      [fromYear, toYear, limit, offset, sortBy, sortOrder];
 }
-

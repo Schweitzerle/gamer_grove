@@ -9,18 +9,19 @@ import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class SearchUsers extends UseCase<List<User>, SearchUsersParams> {
-
   SearchUsers(this.repository);
   final UserRepository repository;
 
   @override
   Future<Either<Failure, List<User>>> call(SearchUsersParams params) async {
     if (params.query.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Search query cannot be empty'));
+      return const Left(
+          ValidationFailure(message: 'Search query cannot be empty'));
     }
 
     if (params.query.trim().length < 2) {
-      return const Left(ValidationFailure(message: 'Search query must be at least 2 characters'));
+      return const Left(ValidationFailure(
+          message: 'Search query must be at least 2 characters'));
     }
 
     return repository.searchUsers(
@@ -33,7 +34,6 @@ class SearchUsers extends UseCase<List<User>, SearchUsersParams> {
 }
 
 class SearchUsersParams extends Equatable {
-
   const SearchUsersParams({
     required this.query,
     this.currentUserId,
@@ -48,4 +48,3 @@ class SearchUsersParams extends Equatable {
   @override
   List<Object?> get props => [query, currentUserId, limit, offset];
 }
-

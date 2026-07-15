@@ -25,11 +25,11 @@ class GameVersionFeatureValueModel extends GameVersionFeatureValue {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'game': gameId,
-    'game_feature': gameFeatureId,
-    'included_feature': includedFeature,
-    'note': note,
-  };
+        'id': id,
+        'checksum': checksum,
+        'game': gameId,
+        'game_feature': gameFeatureId,
+        'included_feature': includedFeature,
+        'note': note,
+      };
 }

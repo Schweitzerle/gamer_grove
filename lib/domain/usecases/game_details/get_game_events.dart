@@ -9,7 +9,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameEvents extends UseCase<List<Event>, GetGameEventsParams> {
-
   GetGameEvents(this.repository);
   final GameRepository repository;
 
@@ -24,11 +23,9 @@ class GetGameEvents extends UseCase<List<Event>, GetGameEventsParams> {
 }
 
 class GetGameEventsParams extends Equatable {
-
   const GetGameEventsParams({required this.gameId});
   final int gameId;
 
   @override
   List<Object> get props => [gameId];
 }
-

@@ -14,7 +14,6 @@ import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
 
 class GenericPlatformSection extends StatelessWidget {
-
   const GenericPlatformSection({
     super.key,
     this.game,
@@ -22,8 +21,10 @@ class GenericPlatformSection extends StatelessWidget {
     this.title = 'Available Platforms',
     this.showReleaseTimeline = true,
     this.showFirstReleaseInfo = true,
-  }) : assert(game != null || platforms != null,
-            'Either game or platforms must be provided',);
+  }) : assert(
+          game != null || platforms != null,
+          'Either game or platforms must be provided',
+        );
   // ✅ FLEXIBLE CONSTRUCTOR - Entweder Game oder Platform List
   final Game? game;
   final List<Platform>? platforms;
@@ -90,17 +91,19 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ PLATFORM CARDS SECTION
   Widget _buildPlatformCardsSection(
-      BuildContext context, Map<int, List<ReleaseDate>> platformReleases,) {
-
+    BuildContext context,
+    Map<int, List<ReleaseDate>> platformReleases,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
         Padding(
           padding: const EdgeInsets.only(
-              left: AppConstants.paddingSmall,
-              right: AppConstants.paddingSmall,
-              top: AppConstants.paddingSmall,),
+            left: AppConstants.paddingSmall,
+            right: AppConstants.paddingSmall,
+            top: AppConstants.paddingSmall,
+          ),
           child: Row(
             children: [
               Icon(
@@ -141,8 +144,9 @@ class GenericPlatformSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(
-                left: AppConstants.paddingSmall,
-                bottom: AppConstants.paddingSmall,),
+              left: AppConstants.paddingSmall,
+              bottom: AppConstants.paddingSmall,
+            ),
             itemCount: _platforms.length,
             itemBuilder: (context, index) {
               final platform = _platforms[index];
@@ -161,13 +165,17 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ PLATFORM CARD WIDGET - SIMPLIFIED & ROBUST
   Widget _buildPlatformCard(
-      BuildContext context, Platform platform, List<ReleaseDate> releases,) {
-
+    BuildContext context,
+    Platform platform,
+    List<ReleaseDate> releases,
+  ) {
     final earliestRelease = releases.isNotEmpty
-        ? releases.reduce((a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
-                (b.date?.millisecondsSinceEpoch ?? 0)
-            ? a
-            : b,)
+        ? releases.reduce(
+            (a, b) => (a.date?.millisecondsSinceEpoch ?? 0) <
+                    (b.date?.millisecondsSinceEpoch ?? 0)
+                ? a
+                : b,
+          )
         : null;
 
     final platformColor = _getPlatformColor(platform.name);
@@ -410,7 +418,10 @@ class GenericPlatformSection extends StatelessWidget {
 
   // ✅ TIMELINE ITEM (nur für Game Context)
   Widget _buildTimelineItem(
-      BuildContext context, List<ReleaseDate> releases, bool isLast,) {
+    BuildContext context,
+    List<ReleaseDate> releases,
+    bool isLast,
+  ) {
     final firstRelease = releases.first;
 
     return Padding(
@@ -469,7 +480,9 @@ class GenericPlatformSection extends StatelessWidget {
 
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color:
                               Theme.of(context).colorScheme.secondaryContainer,
@@ -528,9 +541,10 @@ class GenericPlatformSection extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(
-          bottom: AppConstants.paddingSmall,
-          left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall,),
+        bottom: AppConstants.paddingSmall,
+        left: AppConstants.paddingSmall,
+        right: AppConstants.paddingSmall,
+      ),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -603,14 +617,22 @@ class GenericPlatformSection extends StatelessWidget {
   Platform _findPlatformById(int? platformId) {
     if (platformId == null) {
       return const Platform(
-          id: 0, name: 'Unknown', slug: '', checksum: '',);
+        id: 0,
+        name: 'Unknown',
+        slug: '',
+        checksum: '',
+      );
     }
 
     try {
       return _platforms.firstWhere((p) => p.id == platformId);
     } catch (e) {
       return const Platform(
-          id: 0, name: 'Unknown', slug: '', checksum: '',);
+        id: 0,
+        name: 'Unknown',
+        slug: '',
+        checksum: '',
+      );
     }
   }
 

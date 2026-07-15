@@ -25,7 +25,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class GetUserProfileUseCase implements UseCase<User, GetUserProfileParams> {
-
   GetUserProfileUseCase(this.repository);
   final UserRepository repository;
 
@@ -34,15 +33,16 @@ class GetUserProfileUseCase implements UseCase<User, GetUserProfileParams> {
     if (params.userId != null) {
       return repository.getUserProfile(userId: params.userId!);
     } else {
-      return const Left(ValidationFailure(
-        message: 'userId must be provided',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'userId must be provided',
+        ),
+      );
     }
   }
 }
 
 class GetUserProfileParams extends Equatable {
-
   const GetUserProfileParams({
     this.userId,
     this.username,

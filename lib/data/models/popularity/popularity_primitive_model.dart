@@ -85,7 +85,8 @@ class PopularityPrimitiveModel extends PopularityPrimitive {
       calculatedAt: _parseDateTime(json['calculated_at']),
       popularityTypeId: json['popularity_type'],
       externalPopularitySourceId: json['external_popularity_source'],
-      popularitySourceEnum: _parsePopularitySourceEnum(json['popularity_source']),
+      popularitySourceEnum:
+          _parsePopularitySourceEnum(json['popularity_source']),
     );
   }
 
@@ -127,4 +128,3 @@ class PopularityPrimitiveModel extends PopularityPrimitive {
     };
   }
 }
-

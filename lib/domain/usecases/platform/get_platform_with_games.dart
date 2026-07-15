@@ -11,48 +11,47 @@ import 'package:gamer_grove/domain/entities/platform/platform.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGamesParams> {
-
+class GetPlatformWithGames
+    extends UseCase<PlatformWithGames, GetPlatformWithGamesParams> {
   GetPlatformWithGames(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, PlatformWithGames>> call(GetPlatformWithGamesParams params) async {
+  Future<Either<Failure, PlatformWithGames>> call(
+      GetPlatformWithGamesParams params) async {
     try {
-
       // Get platform details first
-      final platformResult = await repository.getPlatformDetails(params.platformId);
+      final platformResult =
+          await repository.getPlatformDetails(params.platformId);
 
       if (platformResult.isLeft()) {
         return platformResult.fold(
-              (failure) {
+          (failure) {
             return Left(failure);
           },
-              (platform) => throw Exception('Unexpected success'),
+          (platform) => throw Exception('Unexpected success'),
         );
       }
 
       final platform = platformResult.fold(
-            (l) => throw Exception('Unexpected failure'),
-            (r) => r,
+        (l) => throw Exception('Unexpected failure'),
+        (r) => r,
       );
-
 
       var games = <Game>[];
 
       // Load games for this platform if requested
       if (params.includeGames) {
-
         final gamesResult = await repository.getGamesByPlatform(
           platformIds: [platform.id],
           limit: params.limit,
         );
 
         games = gamesResult.fold(
-              (failure) {
+          (failure) {
             return <Game>[];
           },
-              (gamesList) {
+          (gamesList) {
             return gamesList;
           },
         );
@@ -64,15 +63,14 @@ class GetPlatformWithGames extends UseCase<PlatformWithGames, GetPlatformWithGam
       );
 
       return Right(result);
-
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load platform with games: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to load platform with games: $e'));
     }
   }
 }
 
 class GetPlatformWithGamesParams extends Equatable {
-
   const GetPlatformWithGamesParams({
     required this.platformId,
     this.includeGames = true,
@@ -87,7 +85,6 @@ class GetPlatformWithGamesParams extends Equatable {
 }
 
 class PlatformWithGames extends Equatable {
-
   const PlatformWithGames({
     required this.platform,
     required this.games,
