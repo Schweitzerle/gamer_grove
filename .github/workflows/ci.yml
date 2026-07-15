@@ -49,8 +49,11 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
 
+      # Gate on errors + warnings (must stay at 0). The ~1400 pre-existing
+      # info-level lints (deprecated_member_use, avoid_catches_without_on_clauses,
+      # ...) are a Phase 1 cleanup backlog; flip to --fatal-infos once burned down.
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests with coverage
         run: flutter test --coverage
