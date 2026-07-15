@@ -13,7 +13,6 @@ abstract class ActivityFeedState extends Equatable {
 class ActivityFeedInitial extends ActivityFeedState {}
 
 class ActivityFeedLoading extends ActivityFeedState {
-
   const ActivityFeedLoading(this.currentStep, this.progress);
   final ActivityFeedLoadingStep currentStep;
   final double progress;
@@ -23,7 +22,6 @@ class ActivityFeedLoading extends ActivityFeedState {
 }
 
 class ActivityFeedLoaded extends ActivityFeedState {
-
   const ActivityFeedLoaded(this.activities, this.games);
   final List<UserActivity> activities;
   final List<Game> games;
@@ -33,7 +31,6 @@ class ActivityFeedLoaded extends ActivityFeedState {
 }
 
 class ActivityFeedError extends ActivityFeedState {
-
   const ActivityFeedError(this.message);
   final String message;
 

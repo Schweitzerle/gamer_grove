@@ -17,7 +17,10 @@ import 'package:shimmer/shimmer.dart';
 
 class TopThreeDialog extends StatefulWidget {
   const TopThreeDialog({
-    required this.game, required this.onPositionSelected, required this.gameBloc, super.key,
+    required this.game,
+    required this.onPositionSelected,
+    required this.gameBloc,
+    super.key,
     this.currentTopThree,
   });
 
@@ -41,9 +44,7 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   }
 
   Future<void> _loadTopThreeGames() async {
-
     if (widget.currentTopThree != null) {
-
       // Sort by position and fill the array
       final sortedGames = List<Game?>.filled(3, null);
       for (final game in widget.currentTopThree!) {
@@ -54,15 +55,13 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
         }
       }
 
-      for (var i = 0; i < sortedGames.length; i++) {
-      }
+      for (var i = 0; i < sortedGames.length; i++) {}
 
       setState(() {
         _topThreeGames = sortedGames;
         _isLoading = false;
       });
     } else {
-
       // Load top three directly from backend
       final userId = _getCurrentUserId();
       if (userId != null) {
@@ -116,7 +115,6 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
   void _removeFromTopThree(Game game) {
     final userId = _getCurrentUserId();
     if (userId == null) return;
-
 
     // ✅ UPDATE BOTH BLOCS!
     // 1. Update GameBloc (for game detail pages)

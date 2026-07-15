@@ -23,7 +23,6 @@ class EventLoading extends EventState {}
 // ==========================================
 
 class EventDetailsLoaded extends EventState {
-
   const EventDetailsLoaded({required this.event});
   final Event event;
 
@@ -32,7 +31,6 @@ class EventDetailsLoaded extends EventState {
 }
 
 class CompleteEventDetailsLoaded extends EventState {
-
   const CompleteEventDetailsLoaded({required this.eventDetails});
   final CompleteEventDetails eventDetails;
 
@@ -41,7 +39,6 @@ class CompleteEventDetailsLoaded extends EventState {
 }
 
 class CurrentEventsLoaded extends EventState {
-
   const CurrentEventsLoaded({required this.events});
   final List<Event> events;
 
@@ -50,7 +47,6 @@ class CurrentEventsLoaded extends EventState {
 }
 
 class UpcomingEventsLoaded extends EventState {
-
   const UpcomingEventsLoaded({required this.events});
   final List<Event> events;
 
@@ -59,7 +55,6 @@ class UpcomingEventsLoaded extends EventState {
 }
 
 class EventsSearchLoaded extends EventState {
-
   const EventsSearchLoaded({
     required this.events,
     required this.query,
@@ -72,7 +67,6 @@ class EventsSearchLoaded extends EventState {
 }
 
 class EventsByDateRangeLoaded extends EventState {
-
   const EventsByDateRangeLoaded({
     required this.events,
     this.startDate,
@@ -87,7 +81,6 @@ class EventsByDateRangeLoaded extends EventState {
 }
 
 class EventsByGamesLoaded extends EventState {
-
   const EventsByGamesLoaded({
     required this.events,
     required this.gameIds,
@@ -104,7 +97,6 @@ class EventsByGamesLoaded extends EventState {
 // ==========================================
 
 class EventSearchLoading extends EventState {
-
   const EventSearchLoading({
     this.events = const [],
     this.isLoadingMore = false,
@@ -117,7 +109,6 @@ class EventSearchLoading extends EventState {
 }
 
 class EventSearchLoaded extends EventState {
-
   const EventSearchLoaded({
     required this.events,
     required this.query,
@@ -148,7 +139,6 @@ class EventSearchLoaded extends EventState {
 }
 
 class EventError extends EventState {
-
   const EventError({
     required this.message,
     this.events = const [],

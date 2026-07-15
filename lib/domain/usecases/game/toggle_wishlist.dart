@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class ToggleWishlist extends UseCase<void, ToggleWishlistParams> {
-
   ToggleWishlist(this.repository);
   final GameRepository repository;
 
@@ -20,7 +19,6 @@ class ToggleWishlist extends UseCase<void, ToggleWishlistParams> {
 }
 
 class ToggleWishlistParams extends Equatable {
-
   const ToggleWishlistParams({
     required this.gameId,
     required this.userId,
@@ -31,4 +29,3 @@ class ToggleWishlistParams extends Equatable {
   @override
   List<Object> get props => [gameId, userId];
 }
-

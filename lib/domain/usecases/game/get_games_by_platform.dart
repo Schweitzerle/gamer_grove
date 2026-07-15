@@ -10,14 +10,15 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGamesByPlatform extends UseCase<List<Game>, GetGamesByPlatformParams> {
-
   GetGamesByPlatform(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetGamesByPlatformParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetGamesByPlatformParams params) async {
     if (params.platformIds.isEmpty) {
-      return const Left(ValidationFailure(message: 'At least one platform ID required'));
+      return const Left(
+          ValidationFailure(message: 'At least one platform ID required'));
     }
 
     return repository.getGamesByPlatform(
@@ -31,7 +32,6 @@ class GetGamesByPlatform extends UseCase<List<Game>, GetGamesByPlatformParams> {
 }
 
 class GetGamesByPlatformParams extends Equatable {
-
   const GetGamesByPlatformParams({
     required this.platformIds,
     this.limit = 20,
@@ -48,4 +48,3 @@ class GetGamesByPlatformParams extends Equatable {
   @override
   List<Object> get props => [platformIds, limit, offset, sortBy, sortOrder];
 }
-

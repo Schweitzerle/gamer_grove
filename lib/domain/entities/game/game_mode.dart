@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameMode extends Equatable {
-
   const GameMode({
     required this.id,
     required this.checksum,
@@ -22,12 +21,12 @@ class GameMode extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    slug,
-    url,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        slug,
+        url,
+        createdAt,
+        updatedAt,
+      ];
 }

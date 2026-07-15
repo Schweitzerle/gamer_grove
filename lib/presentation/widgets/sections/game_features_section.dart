@@ -8,9 +8,9 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameFeaturesSection extends StatelessWidget {
-
   const GameFeaturesSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -122,8 +122,11 @@ class GameFeaturesSection extends StatelessWidget {
                   color: Colors.blue.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(Icons.sports_esports,
-                    size: 16, color: Colors.blue,),
+                child: const Icon(
+                  Icons.sports_esports,
+                  size: 16,
+                  color: Colors.blue,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -144,29 +147,33 @@ class GameFeaturesSection extends StatelessWidget {
             spacing: 4,
             runSpacing: 4,
             children: game.gameModes
-                .map((mode) => InkWell(
-                      onTap: () => Navigations.navigateToGameModeGames(
-                        context,
-                        gameModeId: mode.id,
-                        gameModeName: mode.name,
+                .map(
+                  (mode) => InkWell(
+                    onTap: () => Navigations.navigateToGameModeGames(
+                      context,
+                      gameModeId: mode.id,
+                      gameModeName: mode.name,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.blue.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Text(
-                          mode.name,
-                          style: const TextStyle(fontSize: 11),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.blue.withOpacity(0.2),
                         ),
                       ),
-                    ),)
+                      child: Text(
+                        mode.name,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -219,29 +226,33 @@ class GameFeaturesSection extends StatelessWidget {
             spacing: 4,
             runSpacing: 4,
             children: game.playerPerspectives
-                .map((perspective) => InkWell(
-                      onTap: () => Navigations.navigateToPlayerPerspectiveGames(
-                        context,
-                        perspectiveId: perspective.id,
-                        perspectiveName: perspective.name,
+                .map(
+                  (perspective) => InkWell(
+                    onTap: () => Navigations.navigateToPlayerPerspectiveGames(
+                      context,
+                      perspectiveId: perspective.id,
+                      perspectiveName: perspective.name,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.green.withOpacity(0.2),
-                          ),
-                        ),
-                        child: Text(
-                          perspective.name,
-                          style: const TextStyle(fontSize: 11),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.green.withOpacity(0.2),
                         ),
                       ),
-                    ),)
+                      child: Text(
+                        perspective.name,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -278,69 +289,86 @@ class GameFeaturesSection extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: game.multiplayerModes
-              .map((mode) => Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.purple.withOpacity(0.3),
+              .map(
+                (mode) => Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.purple.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Mode Type
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(
+                              Icons.people,
+                              size: 16,
+                              color: Colors.purple,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Multiplayer Mode',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.purple,
+                                ),
+                          ),
+                        ],
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Mode Type
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.purple.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Icon(
-                                Icons.people,
-                                size: 16,
-                                color: Colors.purple,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Multiplayer Mode',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.purple,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                        // Mode Details
-                        if (mode.onlineMax > 1)
-                          _buildModeDetail(context, Icons.wifi,
-                              'Online: Up to ${mode.onlineMax} players',),
-                        if (mode.offlineMax > 1)
-                          _buildModeDetail(context, Icons.home,
-                              'Local: Up to ${mode.offlineMax} players',),
-                        if (mode.onlineCoop)
-                          _buildModeDetail(
-                              context, Icons.handshake, 'Online Co-op',),
-                        if (mode.offlineCoop)
-                          _buildModeDetail(
-                              context, Icons.people_alt, 'Local Co-op',),
-                        if (mode.splitscreen)
-                          _buildModeDetail(
-                              context, Icons.splitscreen, 'Split-screen',),
-                      ],
-                    ),
-                  ),)
+                      // Mode Details
+                      if (mode.onlineMax > 1)
+                        _buildModeDetail(
+                          context,
+                          Icons.wifi,
+                          'Online: Up to ${mode.onlineMax} players',
+                        ),
+                      if (mode.offlineMax > 1)
+                        _buildModeDetail(
+                          context,
+                          Icons.home,
+                          'Local: Up to ${mode.offlineMax} players',
+                        ),
+                      if (mode.onlineCoop)
+                        _buildModeDetail(
+                          context,
+                          Icons.handshake,
+                          'Online Co-op',
+                        ),
+                      if (mode.offlineCoop)
+                        _buildModeDetail(
+                          context,
+                          Icons.people_alt,
+                          'Local Co-op',
+                        ),
+                      if (mode.splitscreen)
+                        _buildModeDetail(
+                          context,
+                          Icons.splitscreen,
+                          'Split-screen',
+                        ),
+                    ],
+                  ),
+                ),
+              )
               .toList(),
         ),
       ],
@@ -476,25 +504,25 @@ class GameFeaturesSection extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: game.gameLocalizations
-              .map((localization) => Chip(
-                    avatar: Icon(
-                      Icons.location_on,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    label: Text(
-                      localization.name,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
-                    side: BorderSide(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.2),
-                    ),
-                  ),)
+              .map(
+                (localization) => Chip(
+                  avatar: Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  label: Text(
+                    localization.name,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  side: BorderSide(
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
+              )
               .toList(),
         ),
       ],
@@ -563,21 +591,25 @@ class GameFeaturesSection extends StatelessWidget {
             runSpacing: 4,
             children: languages
                 .take(maxDisplayed)
-                .map((lang) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2,),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: color.withOpacity(0.2),
-                        ),
+                .map(
+                  (lang) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: color.withOpacity(0.2),
                       ),
-                      child: Text(
-                        lang,
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),)
+                    ),
+                    child: Text(
+                      lang,
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
 
@@ -587,7 +619,12 @@ class GameFeaturesSection extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: InkWell(
                 onTap: () => _showLanguageBottomSheet(
-                    context, title, languages, color, icon,),
+                  context,
+                  title,
+                  languages,
+                  color,
+                  icon,
+                ),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding:

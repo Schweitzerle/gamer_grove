@@ -11,15 +11,17 @@ import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class SearchGamesWithFilters extends UseCase<List<Game>, SearchGamesWithFiltersParams> {
-
+class SearchGamesWithFilters
+    extends UseCase<List<Game>, SearchGamesWithFiltersParams> {
   SearchGamesWithFilters(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(SearchGamesWithFiltersParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      SearchGamesWithFiltersParams params) async {
     if (params.query.isEmpty && !params.filters.hasFilters) {
-      return const Left(ValidationFailure(message: 'Search query or filters required'));
+      return const Left(
+          ValidationFailure(message: 'Search query or filters required'));
     }
 
     return repository.searchGamesWithFilters(
@@ -32,7 +34,6 @@ class SearchGamesWithFilters extends UseCase<List<Game>, SearchGamesWithFiltersP
 }
 
 class SearchGamesWithFiltersParams extends Equatable {
-
   const SearchGamesWithFiltersParams({
     required this.query,
     required this.filters,
@@ -47,4 +48,3 @@ class SearchGamesWithFiltersParams extends Equatable {
   @override
   List<Object> get props => [query, filters, limit, offset];
 }
-

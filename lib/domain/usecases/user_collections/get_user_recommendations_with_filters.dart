@@ -9,13 +9,14 @@ import 'package:gamer_grove/domain/entities/user/user_collection_filters.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetUserRecommendedGamesWithFilters extends UseCase<List<Game>, GetUserRecommendedGamesWithFiltersParams> {
-
+class GetUserRecommendedGamesWithFilters
+    extends UseCase<List<Game>, GetUserRecommendedGamesWithFiltersParams> {
   GetUserRecommendedGamesWithFilters(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, List<Game>>> call(GetUserRecommendedGamesWithFiltersParams params) async {
+  Future<Either<Failure, List<Game>>> call(
+      GetUserRecommendedGamesWithFiltersParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -30,7 +31,6 @@ class GetUserRecommendedGamesWithFilters extends UseCase<List<Game>, GetUserReco
 }
 
 class GetUserRecommendedGamesWithFiltersParams extends Equatable {
-
   const GetUserRecommendedGamesWithFiltersParams({
     required this.userId,
     required this.filters,
@@ -45,4 +45,3 @@ class GetUserRecommendedGamesWithFiltersParams extends Equatable {
   @override
   List<Object> get props => [userId, filters, limit, offset];
 }
-

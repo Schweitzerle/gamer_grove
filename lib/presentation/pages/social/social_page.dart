@@ -7,9 +7,6 @@ import 'package:gamer_grove/presentation/pages/followers_following/followers_fol
 import 'package:gamer_grove/presentation/pages/leaderboard/leaderboard_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/user_search_page.dart';
 
-
-
-
 class SocialPage extends StatelessWidget {
   const SocialPage({super.key});
 
@@ -80,7 +77,8 @@ class SocialPage extends StatelessWidget {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('You need to be logged in to see your following list.'),
+                        content: Text(
+                            'You need to be logged in to see your following list.'),
                       ),
                     );
                   }
@@ -235,7 +233,6 @@ class SocialPage extends StatelessWidget {
 }
 
 class _FeatureItem {
-
   _FeatureItem({
     required this.icon,
     required this.title,

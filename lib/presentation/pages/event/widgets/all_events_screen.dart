@@ -27,9 +27,10 @@ enum EventStatusFilter {
 }
 
 class AllEventsScreen extends StatefulWidget {
-
   const AllEventsScreen({
-    required this.title, required this.events, super.key,
+    required this.title,
+    required this.events,
+    super.key,
     this.subtitle,
     this.game,
     this.showFilters = true,

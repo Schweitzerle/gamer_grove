@@ -8,7 +8,6 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 
 class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
-
   ActivityFeedBloc({
     required this.getActivityFeed,
     required this.gameRepository,
@@ -26,14 +25,22 @@ class ActivityFeedBloc extends Bloc<ActivityFeedEvent, ActivityFeedState> {
   ) async {
     final authState = authBloc.state;
     if (authState is AuthAuthenticated) {
-      emit(const ActivityFeedLoading(
-          ActivityFeedLoadingStep.loadingActivities, 0,),);
+      emit(
+        const ActivityFeedLoading(
+          ActivityFeedLoadingStep.loadingActivities,
+          0,
+        ),
+      );
       final activityResult = await getActivityFeed(authState.user.id);
       await activityResult.fold(
         (failure) async => emit(ActivityFeedError(failure.message)),
         (activities) async {
-          emit(const ActivityFeedLoading(
-              ActivityFeedLoadingStep.loadingGames, 0.5,),);
+          emit(
+            const ActivityFeedLoading(
+              ActivityFeedLoadingStep.loadingGames,
+              0.5,
+            ),
+          );
           final gameIds = activities
               .map((activity) {
                 if (activity.gameId != null) {

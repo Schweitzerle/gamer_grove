@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class RemoveFromTopThree extends UseCase<void, RemoveFromTopThreeParams> {
-
   RemoveFromTopThree(this.repository);
   final UserRepository repository;
 
@@ -23,13 +22,13 @@ class RemoveFromTopThree extends UseCase<void, RemoveFromTopThreeParams> {
         gameId: params.gameId,
       );
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to remove game from top three: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to remove game from top three: $e'));
     }
   }
 }
 
 class RemoveFromTopThreeParams extends Equatable {
-
   const RemoveFromTopThreeParams({
     required this.userId,
     required this.gameId,

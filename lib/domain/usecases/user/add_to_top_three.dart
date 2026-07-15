@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
-
   AddToTopThree(this.repository);
   final UserRepository repository;
 
@@ -18,7 +17,8 @@ class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
     }
 
     if (params.position < 1 || params.position > 3) {
-      return const Left(ValidationFailure(message: 'Position must be 1, 2, or 3'));
+      return const Left(
+          ValidationFailure(message: 'Position must be 1, 2, or 3'));
     }
 
     try {
@@ -28,13 +28,13 @@ class AddToTopThree extends UseCase<void, AddToTopThreeParams> {
         gameId: params.gameId,
       );
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to add game to top three: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to add game to top three: $e'));
     }
   }
 }
 
 class AddToTopThreeParams extends Equatable {
-
   const AddToTopThreeParams({
     required this.gameId,
     required this.userId,

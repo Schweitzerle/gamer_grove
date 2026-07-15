@@ -11,9 +11,11 @@ import 'package:gamer_grove/domain/entities/game/game_video.dart';
 import 'package:gamer_grove/presentation/pages/imageGallery/image_gallery_page.dart';
 
 class MediaGallery extends StatelessWidget {
-
   const MediaGallery({
-    required this.screenshots, required this.videos, required this.artworks, super.key,
+    required this.screenshots,
+    required this.videos,
+    required this.artworks,
+    super.key,
   });
   final List<String> screenshots;
   final List<GameVideo> videos;
@@ -72,7 +74,10 @@ class MediaGallery extends StatelessWidget {
                 itemCount: screenshots.length,
                 itemBuilder: (context, index) {
                   return _buildScreenshotThumbnail(
-                      context, screenshots[index], index,);
+                    context,
+                    screenshots[index],
+                    index,
+                  );
                 },
               ),
             ),
@@ -95,7 +100,10 @@ class MediaGallery extends StatelessWidget {
                 itemCount: artworks.length,
                 itemBuilder: (context, index) {
                   return _buildArtworkThumbnail(
-                      context, artworks[index], index,);
+                    context,
+                    artworks[index],
+                    index,
+                  );
                 },
               ),
             ),
@@ -162,7 +170,10 @@ class MediaGallery extends StatelessWidget {
   }
 
   Widget _buildScreenshotThumbnail(
-      BuildContext context, String imageUrl, int index,) {
+    BuildContext context,
+    String imageUrl,
+    int index,
+  ) {
     return Container(
       width: 300,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -181,7 +192,10 @@ class MediaGallery extends StatelessWidget {
   }
 
   Widget _buildArtworkThumbnail(
-      BuildContext context, String imageUrl, int index,) {
+    BuildContext context,
+    String imageUrl,
+    int index,
+  ) {
     return Container(
       width: 200,
       margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
@@ -217,7 +231,10 @@ class MediaGallery extends StatelessWidget {
   }
 
   void _openImageGallery(
-      BuildContext context, List<String> images, int initialIndex,) {
+    BuildContext context,
+    List<String> images,
+    int initialIndex,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => ImageGalleryPage(

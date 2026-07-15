@@ -24,7 +24,6 @@ class PlatformInitial extends PlatformState {}
 class PlatformLoading extends PlatformState {}
 
 class PlatformDetailsLoaded extends PlatformState {
-
   const PlatformDetailsLoaded({
     required this.platform,
     required this.games,
@@ -40,7 +39,6 @@ class PlatformDetailsLoaded extends PlatformState {
 }
 
 class PlatformError extends PlatformState {
-
   const PlatformError({required this.message});
   final String message;
 
@@ -54,7 +52,6 @@ class PlatformError extends PlatformState {
 
 /// Loading paginated games (initial load)
 class PlatformGamesLoading extends PlatformState {
-
   const PlatformGamesLoading({
     required this.platformId,
     required this.platformName,
@@ -68,7 +65,6 @@ class PlatformGamesLoading extends PlatformState {
 
 /// Paginated games loaded
 class PlatformGamesLoaded extends PlatformState {
-
   const PlatformGamesLoaded({
     required this.platformId,
     required this.platformName,
@@ -129,7 +125,6 @@ class PlatformGamesLoaded extends PlatformState {
 
 /// Error loading paginated games
 class PlatformGamesError extends PlatformState {
-
   const PlatformGamesError({
     required this.platformId,
     required this.platformName,

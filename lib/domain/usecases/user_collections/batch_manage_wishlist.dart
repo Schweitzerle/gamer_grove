@@ -8,7 +8,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class BatchAddToWishlist extends UseCase<void, BatchAddToWishlistParams> {
-
   BatchAddToWishlist(this.repository);
   final GameRepository repository;
 
@@ -29,7 +28,6 @@ class BatchAddToWishlist extends UseCase<void, BatchAddToWishlistParams> {
 }
 
 class BatchAddToWishlistParams extends Equatable {
-
   const BatchAddToWishlistParams({
     required this.userId,
     required this.gameIds,
@@ -40,4 +38,3 @@ class BatchAddToWishlistParams extends Equatable {
   @override
   List<Object> get props => [userId, gameIds];
 }
-

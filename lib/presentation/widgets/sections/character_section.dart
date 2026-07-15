@@ -8,9 +8,9 @@ import 'package:gamer_grove/presentation/pages/character/character_screen.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
 
 class CharactersSection extends StatelessWidget {
-
   const CharactersSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -103,7 +103,9 @@ class CharactersSection extends StatelessWidget {
   }
 
   Widget _buildCharactersPreview(
-      BuildContext context, List<Character> characters,) {
+    BuildContext context,
+    List<Character> characters,
+  ) {
     // Show first 4 characters in a horizontal scroll
     final previewCharacters = characters.take(4).toList();
 

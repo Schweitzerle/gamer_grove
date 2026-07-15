@@ -11,7 +11,6 @@ import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 
 abstract class BaseGameSection extends StatelessWidget {
-
   const BaseGameSection({
     super.key,
     this.currentUserId,
@@ -252,7 +251,10 @@ abstract class BaseGameSection extends StatelessWidget {
   }
 
   Widget buildEmptySection(
-      String message, IconData icon, BuildContext context,) {
+    String message,
+    IconData icon,
+    BuildContext context,
+  ) {
     return Container(
       height: 120,
       margin: const EdgeInsets.symmetric(

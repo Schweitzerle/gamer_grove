@@ -14,7 +14,6 @@ enum EventSortOrder {
 }
 
 class EventSearchFilters extends Equatable {
-
   const EventSearchFilters({
     // Time Filters
     this.startTimeFrom,

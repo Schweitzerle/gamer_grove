@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameReleaseFormat extends Equatable {
-
   const GameReleaseFormat({
     required this.id,
     required this.checksum,

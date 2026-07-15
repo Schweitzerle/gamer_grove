@@ -17,7 +17,6 @@ abstract class EventEvent extends Equatable {
 // ==========================================
 
 class GetEventDetailsEvent extends EventEvent {
-
   const GetEventDetailsEvent({required this.eventId});
   final int eventId;
 
@@ -26,7 +25,6 @@ class GetEventDetailsEvent extends EventEvent {
 }
 
 class GetCurrentEventsEvent extends EventEvent {
-
   const GetCurrentEventsEvent({this.limit = 10});
   final int limit;
 
@@ -35,7 +33,6 @@ class GetCurrentEventsEvent extends EventEvent {
 }
 
 class GetUpcomingEventsEvent extends EventEvent {
-
   const GetUpcomingEventsEvent({this.limit = 10});
   final int limit;
 
@@ -44,7 +41,6 @@ class GetUpcomingEventsEvent extends EventEvent {
 }
 
 class SearchEventsEvent extends EventEvent {
-
   const SearchEventsEvent({required this.query});
   final String query;
 
@@ -53,7 +49,6 @@ class SearchEventsEvent extends EventEvent {
 }
 
 class GetEventsByDateRangeEvent extends EventEvent {
-
   const GetEventsByDateRangeEvent({
     this.startDate,
     this.endDate,
@@ -68,7 +63,6 @@ class GetEventsByDateRangeEvent extends EventEvent {
 }
 
 class GetEventsByGamesEvent extends EventEvent {
-
   const GetEventsByGamesEvent({required this.gameIds});
   final List<int> gameIds;
 
@@ -77,7 +71,6 @@ class GetEventsByGamesEvent extends EventEvent {
 }
 
 class GetCompleteEventDetailsEvent extends EventEvent {
-
   const GetCompleteEventDetailsEvent({
     required this.eventId,
     this.includeGames = true,
@@ -93,7 +86,6 @@ class GetCompleteEventDetailsEvent extends EventEvent {
 class ClearEventsEvent extends EventEvent {}
 
 class GetEventDetailsWithUserDataEvent extends EventEvent {
-
   const GetEventDetailsWithUserDataEvent({
     required this.eventId,
     this.userId,
@@ -106,7 +98,6 @@ class GetEventDetailsWithUserDataEvent extends EventEvent {
 }
 
 class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
-
   const GetCompleteEventDetailsWithUserDataEvent({
     required this.eventId,
     this.userId,
@@ -124,7 +115,8 @@ class GetCompleteEventDetailsWithUserDataEvent extends EventEvent {
 // ADVANCED EVENT SEARCH EVENTS
 // ==========================================
 
-class SearchEventsWithFiltersEvent extends EventEvent { // EventSearchFilters
+class SearchEventsWithFiltersEvent extends EventEvent {
+  // EventSearchFilters
 
   const SearchEventsWithFiltersEvent({
     required this.query,

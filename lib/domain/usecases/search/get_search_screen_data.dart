@@ -14,7 +14,6 @@ import 'package:gamer_grove/domain/usecases/game/get_search_suggestions.dart';
 
 class GetSearchScreenData
     extends UseCase<SearchScreenData, GetSearchScreenDataParams> {
-
   GetSearchScreenData({
     required this.getAllGenres,
     required this.getAllPlatforms,
@@ -26,7 +25,8 @@ class GetSearchScreenData
 
   @override
   Future<Either<Failure, SearchScreenData>> call(
-      GetSearchScreenDataParams params,) async {
+    GetSearchScreenDataParams params,
+  ) async {
     try {
       // Get all genres
       final genresResult = await getAllGenres();
@@ -40,24 +40,27 @@ class GetSearchScreenData
       var suggestions = <String>[];
       if (params.partialQuery?.isNotEmpty ?? false) {
         final suggestionsResult = await getSearchSuggestions(
-            GetSearchSuggestionsParams(partialQuery: params.partialQuery!),);
+          GetSearchSuggestionsParams(partialQuery: params.partialQuery!),
+        );
         suggestions = suggestionsResult.fold((l) => <String>[], (r) => r);
       }
 
-      return Right(SearchScreenData(
-        genres: genres,
-        platforms: platforms,
-        suggestions: suggestions,
-      ),);
+      return Right(
+        SearchScreenData(
+          genres: genres,
+          platforms: platforms,
+          suggestions: suggestions,
+        ),
+      );
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to load search screen data: $e'),);
+        ServerFailure(message: 'Failed to load search screen data: $e'),
+      );
     }
   }
 }
 
 class GetSearchScreenDataParams extends Equatable {
-
   const GetSearchScreenDataParams({this.partialQuery});
   final String? partialQuery;
 
@@ -66,7 +69,6 @@ class GetSearchScreenDataParams extends Equatable {
 }
 
 class SearchScreenData extends Equatable {
-
   const SearchScreenData({
     required this.genres,
     required this.platforms,

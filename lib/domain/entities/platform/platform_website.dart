@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class PlatformWebsite extends Equatable {
-
   const PlatformWebsite({
     required this.id,
     required this.checksum,
@@ -45,13 +44,13 @@ class PlatformWebsite extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    url,
-    trusted,
-    platformId,
-    typeId,
-    type,
-    category,
-  ];
+        id,
+        checksum,
+        url,
+        trusted,
+        platformId,
+        typeId,
+        type,
+        category,
+      ];
 }

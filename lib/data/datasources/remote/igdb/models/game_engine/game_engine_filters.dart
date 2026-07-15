@@ -53,15 +53,16 @@ class GameEngineFilters {
   static IgdbFilter hasUrl() => const NullFilter('url', isNull: false);
 
   /// Filter game engines that support platforms
-  static IgdbFilter hasPlatforms() => const NullFilter('platforms', isNull: false);
+  static IgdbFilter hasPlatforms() =>
+      const NullFilter('platforms', isNull: false);
 
   /// Filter game engines that have associated companies
-  static IgdbFilter hasCompanies() => const NullFilter('companies', isNull: false);
+  static IgdbFilter hasCompanies() =>
+      const NullFilter('companies', isNull: false);
 }
 
 /// Builder for creating complex game engine filters.
 class GameEngineFilterBuilder {
-
   GameEngineFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

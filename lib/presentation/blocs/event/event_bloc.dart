@@ -19,7 +19,6 @@ import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
 
 class EventBloc extends Bloc<EventEvent, EventState> {
-
   EventBloc({
     required this.getEventDetails,
     required this.getCurrentEvents,
@@ -41,7 +40,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<ClearEventsEvent>(_onClearEvents);
     on<GetEventDetailsWithUserDataEvent>(_onGetEventDetailsWithUserData);
     on<GetCompleteEventDetailsWithUserDataEvent>(
-        _onGetCompleteEventDetailsWithUserData,);
+      _onGetCompleteEventDetailsWithUserData,
+    );
     on<SearchEventsWithFiltersEvent>(_onSearchEventsWithFilters);
     on<LoadMoreEventsEvent>(_onLoadMoreEvents);
     on<ClearEventSearchEvent>(_onClearEventSearch);
@@ -116,10 +116,12 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventsSearchLoaded(
-        events: events,
-        query: event.query,
-      ),),
+      (events) => emit(
+        EventsSearchLoaded(
+          events: events,
+          query: event.query,
+        ),
+      ),
     );
   }
 
@@ -139,11 +141,13 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventsByDateRangeLoaded(
-        events: events,
-        startDate: event.startDate,
-        endDate: event.endDate,
-      ),),
+      (events) => emit(
+        EventsByDateRangeLoaded(
+          events: events,
+          startDate: event.startDate,
+          endDate: event.endDate,
+        ),
+      ),
     );
   }
 
@@ -159,10 +163,12 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventsByGamesLoaded(
-        events: events,
-        gameIds: event.gameIds,
-      ),),
+      (events) => emit(
+        EventsByGamesLoaded(
+          events: events,
+          gameIds: event.gameIds,
+        ),
+      ),
     );
   }
 
@@ -248,14 +254,20 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         if (event.userId != null && eventDetails.event.games.isNotEmpty) {
           try {
             final enrichedEvent = await _enrichEventWithUserData(
-                eventDetails.event, event.userId!,);
+              eventDetails.event,
+              event.userId!,
+            );
             final enrichedEventDetails =
                 eventDetails.copyWith(event: enrichedEvent);
             emit(
-                CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails),);
+              CompleteEventDetailsLoaded(eventDetails: enrichedEventDetails),
+            );
           } catch (e) {
-            emit(CompleteEventDetailsLoaded(
-                eventDetails: eventDetails,),); // Fallback
+            emit(
+              CompleteEventDetailsLoaded(
+                eventDetails: eventDetails,
+              ),
+            ); // Fallback
           }
         } else {
           emit(CompleteEventDetailsLoaded(eventDetails: eventDetails));
@@ -283,11 +295,13 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
     result.fold(
       (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventSearchLoaded(
-        events: events,
-        query: event.query,
-        hasReachedMax: events.length < 20,
-      ),),
+      (events) => emit(
+        EventSearchLoaded(
+          events: events,
+          query: event.query,
+          hasReachedMax: events.length < 20,
+        ),
+      ),
     );
   }
 
@@ -312,17 +326,21 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     );
 
     result.fold(
-      (failure) => emit(EventError(
-        message: failure.message,
-        events: currentState.events,
-      ),),
+      (failure) => emit(
+        EventError(
+          message: failure.message,
+          events: currentState.events,
+        ),
+      ),
       (newEvents) {
         final hasReachedMax = newEvents.length < 20;
-        emit(EventSearchLoaded(
-          events: List.of(currentState.events)..addAll(newEvents),
-          query: currentState.query,
-          hasReachedMax: hasReachedMax,
-        ),);
+        emit(
+          EventSearchLoaded(
+            events: List.of(currentState.events)..addAll(newEvents),
+            query: currentState.query,
+            hasReachedMax: hasReachedMax,
+          ),
+        );
       },
     );
   }

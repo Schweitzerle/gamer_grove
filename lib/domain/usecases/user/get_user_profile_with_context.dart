@@ -8,13 +8,14 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetUserProfileWithContext extends UseCase<User, GetUserProfileWithContextParams> {
-
+class GetUserProfileWithContext
+    extends UseCase<User, GetUserProfileWithContextParams> {
   GetUserProfileWithContext(this.repository);
   final UserRepository repository;
 
   @override
-  Future<Either<Failure, User>> call(GetUserProfileWithContextParams params) async {
+  Future<Either<Failure, User>> call(
+      GetUserProfileWithContextParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -27,7 +28,6 @@ class GetUserProfileWithContext extends UseCase<User, GetUserProfileWithContextP
 }
 
 class GetUserProfileWithContextParams extends Equatable {
-
   const GetUserProfileWithContextParams({
     required this.userId,
     this.currentUserId,
@@ -38,5 +38,3 @@ class GetUserProfileWithContextParams extends Equatable {
   @override
   List<Object?> get props => [userId, currentUserId];
 }
-
-

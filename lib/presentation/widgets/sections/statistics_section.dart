@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class StatisticsSection extends StatelessWidget {
-
   const StatisticsSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -36,9 +36,12 @@ class StatisticsSection extends StatelessWidget {
 }
 
 class StatItem extends StatelessWidget {
-
   const StatItem({
-    required this.icon, required this.label, required this.value, required this.color, super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+    super.key,
   });
   final IconData icon;
   final String label;
@@ -54,14 +57,14 @@ class StatItem extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );

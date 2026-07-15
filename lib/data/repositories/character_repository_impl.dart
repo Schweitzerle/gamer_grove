@@ -27,7 +27,6 @@ import 'package:gamer_grove/domain/repositories/character_repository.dart';
 /// the unified query system.
 class CharacterRepositoryImpl extends IgdbBaseRepository
     implements CharacterRepository {
-
   CharacterRepositoryImpl({
     required this.igdbDataSource,
     required super.networkInfo,
@@ -166,7 +165,8 @@ class CharacterRepositoryImpl extends IgdbBaseRepository
     return executeIgdbOperation(
       operation: () async {
         final query = CharacterQueryPresets.fullDetails(
-            characterId: characterId,);
+          characterId: characterId,
+        );
         final characters = await igdbDataSource.queryCharacters(query);
 
         if (characters.isEmpty) {

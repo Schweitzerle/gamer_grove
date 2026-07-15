@@ -2,13 +2,13 @@
 import 'package:equatable/equatable.dart';
 
 class Rating extends Equatable {
-
   const Rating({
     required this.id,
     required this.userId,
     required this.gameId,
     required this.value,
-    required this.createdAt, this.review,
+    required this.createdAt,
+    this.review,
     this.updatedAt,
   });
   final String id;
@@ -21,14 +21,14 @@ class Rating extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    userId,
-    gameId,
-    value,
-    review,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        userId,
+        gameId,
+        value,
+        review,
+        createdAt,
+        updatedAt,
+      ];
 
   Rating copyWith({
     String? id,

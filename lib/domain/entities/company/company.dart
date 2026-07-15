@@ -21,14 +21,13 @@ enum CompanyChangeDateCategory {
 
   static CompanyChangeDateCategory fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => unknown,
     );
   }
 }
 
 class Company extends Equatable {
-
   const Company({
     required this.id,
     required this.checksum,
@@ -94,7 +93,9 @@ class Company extends Equatable {
   bool get hasFoundingDate => startDate != null;
   bool get hasDescription => description != null && description!.isNotEmpty;
 
-  int get totalGamesCount => developedGames!= null && publishedGames != null ? developedGames!.length + publishedGames!.length : 0;
+  int get totalGamesCount => developedGames != null && publishedGames != null
+      ? developedGames!.length + publishedGames!.length
+      : 0;
   bool get isDeveloper => developedGames != null && developedGames!.isNotEmpty;
   bool get isPublisher => publishedGames != null && publishedGames!.isNotEmpty;
   bool get isDeveloperAndPublisher => isDeveloper && isPublisher;
@@ -108,28 +109,28 @@ class Company extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    description,
-    slug,
-    url,
-    country,
-    createdAt,
-    updatedAt,
-    changeDate,
-    changeDateCategory,
-    changeDateFormatId,
-    changedCompanyId,
-    parentCompany,
-    logoId,
-    logo, // NEU
-    statusId,
-    startDate,
-    startDateCategory,
-    startDateFormatId,
-    developedGames,
-    publishedGames,
-    websites,
-  ];
+        id,
+        checksum,
+        name,
+        description,
+        slug,
+        url,
+        country,
+        createdAt,
+        updatedAt,
+        changeDate,
+        changeDateCategory,
+        changeDateFormatId,
+        changedCompanyId,
+        parentCompany,
+        logoId,
+        logo, // NEU
+        statusId,
+        startDate,
+        startDateCategory,
+        startDateFormatId,
+        developedGames,
+        publishedGames,
+        websites,
+      ];
 }

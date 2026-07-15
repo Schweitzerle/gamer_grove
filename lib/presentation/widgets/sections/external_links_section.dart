@@ -12,9 +12,9 @@ import 'package:gamer_grove/domain/entities/website/website.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ExternalLinksSection extends StatelessWidget {
-
   const ExternalLinksSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -666,7 +666,9 @@ class ExternalLinksSection extends StatelessWidget {
   }
 
   Color _getStoreColor(
-      BuildContext context, ExternalGameCategoryEnum? category,) {
+    BuildContext context,
+    ExternalGameCategoryEnum? category,
+  ) {
     if (category == null) return Theme.of(context).colorScheme.primary;
 
     // Use enum's name property for string-based mapping
@@ -720,8 +722,7 @@ class ExternalLinksSection extends StatelessWidget {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> _launchStoreUrl(ExternalGame store) async {
@@ -731,7 +732,6 @@ class ExternalLinksSection extends StatelessWidget {
       if (url != null) {
         await _launchUrl(url);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }

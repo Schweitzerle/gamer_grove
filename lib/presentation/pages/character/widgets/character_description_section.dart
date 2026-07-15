@@ -4,9 +4,9 @@ import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 
 class CharacterDescriptionSection extends StatefulWidget {
-
   const CharacterDescriptionSection({
-    required this.character, super.key,
+    required this.character,
+    super.key,
   });
   final Character character;
 

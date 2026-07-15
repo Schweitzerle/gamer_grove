@@ -21,7 +21,6 @@ class UserGameDataLoading extends UserGameDataState {
 
 /// Loaded state with all user game data
 class UserGameDataLoaded extends UserGameDataState {
-
   const UserGameDataLoaded({
     required this.userId,
     required this.wishlistedGameIds,
@@ -82,7 +81,6 @@ class UserGameDataLoaded extends UserGameDataState {
 
 /// Error state
 class UserGameDataError extends UserGameDataState {
-
   const UserGameDataError(this.message);
   final String message;
 
@@ -92,7 +90,6 @@ class UserGameDataError extends UserGameDataState {
 
 /// Action success states (for showing snackbars, etc.)
 class WishlistToggled extends UserGameDataLoaded {
-
   const WishlistToggled({
     required this.gameId,
     required this.isNowWishlisted,
@@ -114,7 +111,6 @@ class WishlistToggled extends UserGameDataLoaded {
 }
 
 class RecommendationToggled extends UserGameDataLoaded {
-
   const RecommendationToggled({
     required this.gameId,
     required this.isNowRecommended,
@@ -136,7 +132,6 @@ class RecommendationToggled extends UserGameDataLoaded {
 }
 
 class GameRated extends UserGameDataLoaded {
-
   const GameRated({
     required this.gameId,
     required this.rating,
@@ -158,7 +153,6 @@ class GameRated extends UserGameDataLoaded {
 }
 
 class RatingRemoved extends UserGameDataLoaded {
-
   const RatingRemoved({
     required this.gameId,
     required super.userId,

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 
 class CachedImageWidget extends StatelessWidget {
-
   const CachedImageWidget({
-    required this.imageUrl, super.key,
+    required this.imageUrl,
+    super.key,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -37,7 +37,7 @@ class CachedImageWidget extends StatelessWidget {
       height: height,
       fit: fit,
       placeholder: (context, url) =>
-      placeholder ??
+          placeholder ??
           CustomShimmer(
             child: Container(
               width: width,

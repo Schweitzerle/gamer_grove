@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameType extends Equatable {
-
   const GameType({
     required this.id,
     required this.checksum,

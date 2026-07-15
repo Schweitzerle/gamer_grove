@@ -43,7 +43,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// }
 /// ```
 abstract class SupabaseBaseRepository {
-
   SupabaseBaseRepository({
     required this.supabase,
     required this.networkInfo,
@@ -82,9 +81,11 @@ abstract class SupabaseBaseRepository {
     try {
       // Check network connectivity first
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       // Execute the operation
@@ -98,29 +99,39 @@ abstract class SupabaseBaseRepository {
       return Left(_mapUserException(e));
     } on PostgrestException catch (e) {
       // Handle Supabase database exceptions
-      return Left(ServerFailure(
-        message: _extractPostgrestError(e),
-      ),);
+      return Left(
+        ServerFailure(
+          message: _extractPostgrestError(e),
+        ),
+      );
     } on StorageException catch (e) {
       // Handle Supabase storage exceptions
-      return Left(ServerFailure(
-        message: 'Storage error: ${e.message}',
-      ),);
+      return Left(
+        ServerFailure(
+          message: 'Storage error: ${e.message}',
+        ),
+      );
     } on SocketException {
       // Handle network socket errors
-      return const Left(NetworkFailure(
-        message: 'Connection failed. Please check your network.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Connection failed. Please check your network.',
+        ),
+      );
     } on TimeoutException {
       // Handle timeout errors
-      return const Left(NetworkFailure(
-        message: 'Request timed out. Please try again.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Request timed out. Please try again.',
+        ),
+      );
     } catch (e) {
       // Handle any other unexpected errors
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 
@@ -141,9 +152,11 @@ abstract class SupabaseBaseRepository {
   }) async {
     try {
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       await operation();
@@ -153,25 +166,35 @@ abstract class SupabaseBaseRepository {
     } on user_ex.UserException catch (e) {
       return Left(_mapUserException(e));
     } on PostgrestException catch (e) {
-      return Left(ServerFailure(
-        message: _extractPostgrestError(e),
-      ),);
+      return Left(
+        ServerFailure(
+          message: _extractPostgrestError(e),
+        ),
+      );
     } on StorageException catch (e) {
-      return Left(ServerFailure(
-        message: 'Storage error: ${e.message}',
-      ),);
+      return Left(
+        ServerFailure(
+          message: 'Storage error: ${e.message}',
+        ),
+      );
     } on SocketException {
-      return const Left(NetworkFailure(
-        message: 'Connection failed. Please check your network.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Connection failed. Please check your network.',
+        ),
+      );
     } on TimeoutException {
-      return const Left(NetworkFailure(
-        message: 'Request timed out. Please try again.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Request timed out. Please try again.',
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 
@@ -289,9 +312,11 @@ abstract class SupabaseBaseRepository {
   }) async {
     try {
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       final results = <T>[];
@@ -306,13 +331,17 @@ abstract class SupabaseBaseRepository {
     } on user_ex.UserException catch (e) {
       return Left(_mapUserException(e));
     } on PostgrestException catch (e) {
-      return Left(ServerFailure(
-        message: _extractPostgrestError(e),
-      ),);
+      return Left(
+        ServerFailure(
+          message: _extractPostgrestError(e),
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 

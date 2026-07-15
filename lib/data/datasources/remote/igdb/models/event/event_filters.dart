@@ -97,7 +97,6 @@ class EventFilters {
 
 /// Builder for creating complex event filters.
 class EventFilterBuilder {
-
   EventFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

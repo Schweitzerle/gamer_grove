@@ -54,7 +54,6 @@ import 'package:gamer_grove/presentation/blocs/collection/collection_state.dart'
 /// );
 /// ```
 class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
-
   CollectionBloc({
     required this.getUserGameDataUseCase,
     required this.rateGameUseCase,

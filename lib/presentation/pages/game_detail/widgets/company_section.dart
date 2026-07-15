@@ -11,15 +11,16 @@ import 'package:gamer_grove/domain/entities/company/company.dart';
 import 'package:gamer_grove/domain/entities/involved_company.dart';
 
 class GenericCompanySection extends StatelessWidget {
-
   const GenericCompanySection({
     super.key,
     this.involvedCompanies,
     this.companies,
     this.title = 'Related Companies',
     this.showRoles = true,
-  }) : assert(involvedCompanies != null || companies != null,
-            'Either involvedCompanies or companies must be provided',);
+  }) : assert(
+          involvedCompanies != null || companies != null,
+          'Either involvedCompanies or companies must be provided',
+        );
   // ✅ FLEXIBLE CONSTRUCTOR - Entweder InvolvedCompanies oder direkte Companies
   final List<InvolvedCompany>? involvedCompanies;
   final List<Company>? companies;
@@ -53,7 +54,10 @@ class GenericCompanySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: AppConstants.paddingSmall),
             child: _buildInvolvedCompanySubsection(
-                context, 'Developer', developers,),
+              context,
+              'Developer',
+              developers,
+            ),
           ),
           if (publishers.isNotEmpty || others.isNotEmpty)
             const SizedBox(height: 20),
@@ -66,7 +70,10 @@ class GenericCompanySection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: AppConstants.paddingSmall),
             child: _buildInvolvedCompanySubsection(
-                context, 'Other Companies', others,),
+              context,
+              'Other Companies',
+              others,
+            ),
           ),
         ],
       ],
@@ -83,9 +90,10 @@ class GenericCompanySection extends StatelessWidget {
           // Section Header
           Padding(
             padding: const EdgeInsets.only(
-                left: AppConstants.paddingSmall,
-                right: AppConstants.paddingSmall,
-                top: AppConstants.paddingSmall,),
+              left: AppConstants.paddingSmall,
+              right: AppConstants.paddingSmall,
+              top: AppConstants.paddingSmall,
+            ),
             child: Row(
               children: [
                 Icon(
@@ -211,7 +219,9 @@ class GenericCompanySection extends StatelessWidget {
 
   // ✅ INVOLVED COMPANY CARD (mit Rollen)
   Widget _buildInvolvedCompanyCard(
-      BuildContext context, InvolvedCompany involvedCompany,) {
+    BuildContext context,
+    InvolvedCompany involvedCompany,
+  ) {
     final company = involvedCompany.company;
     final roles = _getRoles(involvedCompany);
 

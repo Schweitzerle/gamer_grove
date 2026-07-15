@@ -8,7 +8,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetAllGenres extends NoParamsUseCase<List<Genre>> {
-
   GetAllGenres(this.repository);
   final GameRepository repository;
 
@@ -17,4 +16,3 @@ class GetAllGenres extends NoParamsUseCase<List<Genre>> {
     return repository.getAllGenres();
   }
 }
-

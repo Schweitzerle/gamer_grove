@@ -28,7 +28,6 @@ import 'package:gamer_grove/domain/entities/website/website.dart';
 import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class Game extends Equatable {
-
   Game({
     required this.id,
     required this.name,
@@ -268,16 +267,24 @@ class Game extends Equatable {
   bool get hasMultiplayer => multiplayerModes.isNotEmpty;
 
   /// Prüft ob das Spiel Online-Multiplayer unterstützt
-  bool get hasOnlineMultiplayer => multiplayerModes.any((mode) =>
-      mode.onlineCoop || mode.onlineMax > 1 || mode.splitscreenOnline,);
+  bool get hasOnlineMultiplayer => multiplayerModes.any(
+        (mode) =>
+            mode.onlineCoop || mode.onlineMax > 1 || mode.splitscreenOnline,
+      );
 
   /// Prüft ob das Spiel lokalen Multiplayer unterstützt
   bool get hasLocalMultiplayer => multiplayerModes.any(
-      (mode) => mode.offlineCoop || mode.offlineMax > 1 || mode.splitscreen,);
+        (mode) => mode.offlineCoop || mode.offlineMax > 1 || mode.splitscreen,
+      );
 
   /// Prüft ob das Spiel Co-op unterstützt
-  bool get hasCooperative => multiplayerModes.any((mode) =>
-      mode.campaignCoop || mode.onlineCoop || mode.offlineCoop || mode.lancoop,);
+  bool get hasCooperative => multiplayerModes.any(
+        (mode) =>
+            mode.campaignCoop ||
+            mode.onlineCoop ||
+            mode.offlineCoop ||
+            mode.lancoop,
+      );
 
   /// Prüft ob das Spiel Split-Screen unterstützt
   bool get hasSplitScreen => multiplayerModes
@@ -312,14 +319,18 @@ class Game extends Equatable {
       .toList();
 
   /// Prüft ob das Spiel auf PC verfügbar ist
-  bool get isAvailableOnPC => platforms.any((platform) =>
-      platform.name.toLowerCase().contains('pc') ||
-      platform.name.toLowerCase().contains('windows'),);
+  bool get isAvailableOnPC => platforms.any(
+        (platform) =>
+            platform.name.toLowerCase().contains('pc') ||
+            platform.name.toLowerCase().contains('windows'),
+      );
 
   /// Prüft ob das Spiel auf Konsolen verfügbar ist
-  bool get isAvailableOnConsoles => platforms.any((platform) =>
-      !platform.name.toLowerCase().contains('pc') &&
-      !platform.name.toLowerCase().contains('windows'),);
+  bool get isAvailableOnConsoles => platforms.any(
+        (platform) =>
+            !platform.name.toLowerCase().contains('pc') &&
+            !platform.name.toLowerCase().contains('windows'),
+      );
 
   // ===== CONTENT PROPERTIES =====
 
@@ -374,7 +385,8 @@ class Game extends Equatable {
       developers.isNotEmpty &&
       publishers.isNotEmpty &&
       !developers.any(
-          (dev) => publishers.any((pub) => dev.company.id == pub.company.id),);
+        (dev) => publishers.any((pub) => dev.company.id == pub.company.id),
+      );
 
   // ===== GAME MODE PROPERTIES =====
 
@@ -401,9 +413,11 @@ class Game extends Equatable {
       playerPerspectives.any((pp) => pp.name.toLowerCase().contains('third'));
 
   /// Top-Down/Isometric Perspektive verfügbar
-  bool get hasTopDownPerspective => playerPerspectives.any((pp) =>
-      pp.name.toLowerCase().contains('bird') ||
-      pp.name.toLowerCase().contains('isometric'),);
+  bool get hasTopDownPerspective => playerPerspectives.any(
+        (pp) =>
+            pp.name.toLowerCase().contains('bird') ||
+            pp.name.toLowerCase().contains('isometric'),
+      );
 
   bool get hasEvents => events.isNotEmpty;
   int get eventsCount => events.length;

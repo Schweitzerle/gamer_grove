@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class LanguageSupportType extends Equatable {
-
   const LanguageSupportType({
     required this.id,
     required this.checksum,
@@ -32,12 +31,12 @@ class LanguageSupportType extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 // Common language support types

@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class DiscoveryChallenge extends Equatable {
-
   const DiscoveryChallenge({
     required this.id,
     required this.title,
@@ -28,9 +27,16 @@ class DiscoveryChallenge extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, title, description, type, requirements,
-    recommendedGameIds, rewardPoints, expiresAt, isCompleted,
-  ];
+        id,
+        title,
+        description,
+        type,
+        requirements,
+        recommendedGameIds,
+        rewardPoints,
+        expiresAt,
+        isCompleted,
+      ];
 }
 
 enum DiscoveryChallengeType {

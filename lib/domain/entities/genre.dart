@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class Genre extends Equatable {
-
   const Genre({
     required this.id,
     required this.checksum,
@@ -22,12 +21,12 @@ class Genre extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    slug,
-    url,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        slug,
+        url,
+        createdAt,
+        updatedAt,
+      ];
 }

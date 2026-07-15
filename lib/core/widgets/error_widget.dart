@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class CustomErrorWidget extends StatelessWidget {
-
   const CustomErrorWidget({
-    required this.message, super.key,
+    required this.message,
+    super.key,
     this.onRetry,
     this.icon,
     this.buttonText,
@@ -32,17 +32,17 @@ class CustomErrorWidget extends StatelessWidget {
             Text(
               'Oops! Something went wrong',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
@@ -62,7 +62,6 @@ class CustomErrorWidget extends StatelessWidget {
 
 // Specific error widgets for common scenarios
 class NetworkErrorWidget extends StatelessWidget {
-
   const NetworkErrorWidget({
     super.key,
     this.onRetry,
@@ -81,7 +80,6 @@ class NetworkErrorWidget extends StatelessWidget {
 }
 
 class ServerErrorWidget extends StatelessWidget {
-
   const ServerErrorWidget({
     super.key,
     this.onRetry,
@@ -99,9 +97,11 @@ class ServerErrorWidget extends StatelessWidget {
 }
 
 class EmptyStateWidget extends StatelessWidget {
-
   const EmptyStateWidget({
-    required this.title, required this.message, required this.icon, super.key,
+    required this.title,
+    required this.message,
+    required this.icon,
+    super.key,
     this.onAction,
     this.actionText,
   });
@@ -128,17 +128,17 @@ class EmptyStateWidget extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppConstants.paddingSmall),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (onAction != null && actionText != null) ...[
@@ -155,11 +155,10 @@ class EmptyStateWidget extends StatelessWidget {
   }
 }
 
-
 class AppErrorWidget extends StatelessWidget {
-
   const AppErrorWidget({
-    required this.message, super.key,
+    required this.message,
+    super.key,
     this.onRetry,
     this.icon,
   });
@@ -190,8 +189,8 @@ class AppErrorWidget extends StatelessWidget {
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[

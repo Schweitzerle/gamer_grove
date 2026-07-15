@@ -28,41 +28,69 @@ enum CompanyWebsiteCategory {
 
   static CompanyWebsiteCategory fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case official: return 'Official Website';
-      case wikia: return 'Wikia';
-      case wikipedia: return 'Wikipedia';
-      case facebook: return 'Facebook';
-      case twitter: return 'Twitter';
-      case twitch: return 'Twitch';
-      case instagram: return 'Instagram';
-      case youtube: return 'YouTube';
-      case iphone: return 'iPhone App';
-      case ipad: return 'iPad App';
-      case android: return 'Android App';
-      case steam: return 'Steam';
-      case reddit: return 'Reddit';
-      case itch: return 'Itch.io';
-      case epicGames: return 'Epic Games';
-      case gog: return 'GOG';
-      case discord: return 'Discord';
-      case bluesky: return 'Bluesky';
-      default: return 'Unknown';
+      case official:
+        return 'Official Website';
+      case wikia:
+        return 'Wikia';
+      case wikipedia:
+        return 'Wikipedia';
+      case facebook:
+        return 'Facebook';
+      case twitter:
+        return 'Twitter';
+      case twitch:
+        return 'Twitch';
+      case instagram:
+        return 'Instagram';
+      case youtube:
+        return 'YouTube';
+      case iphone:
+        return 'iPhone App';
+      case ipad:
+        return 'iPad App';
+      case android:
+        return 'Android App';
+      case steam:
+        return 'Steam';
+      case reddit:
+        return 'Reddit';
+      case itch:
+        return 'Itch.io';
+      case epicGames:
+        return 'Epic Games';
+      case gog:
+        return 'GOG';
+      case discord:
+        return 'Discord';
+      case bluesky:
+        return 'Bluesky';
+      default:
+        return 'Unknown';
     }
   }
 
-  bool get isSocialMedia => [facebook, twitter, instagram, youtube, twitch, discord, bluesky].contains(this);
+  bool get isSocialMedia => [
+        facebook,
+        twitter,
+        instagram,
+        youtube,
+        twitch,
+        discord,
+        bluesky
+      ].contains(this);
   bool get isStore => [steam, epicGames, gog, itch].contains(this);
   bool get isApp => [iphone, ipad, android].contains(this);
 }
 
-class CompanyWebsite extends Equatable { // New reference to Website Type
+class CompanyWebsite extends Equatable {
+  // New reference to Website Type
 
   const CompanyWebsite({
     required this.id,
@@ -88,11 +116,11 @@ class CompanyWebsite extends Equatable { // New reference to Website Type
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    url,
-    trusted,
-    category,
-    typeId,
-  ];
+        id,
+        checksum,
+        url,
+        trusted,
+        category,
+        typeId,
+      ];
 }

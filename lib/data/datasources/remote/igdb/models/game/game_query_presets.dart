@@ -2,7 +2,8 @@
 
 import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_field_sets.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_filters.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart' hide GameFilters;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart'
+    hide GameFilters;
 import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 
 /// Pre-configured query presets for common game queries.
@@ -98,10 +99,16 @@ class GameQueryPresets {
 
     final filters = <IgdbFilter>[
       const FieldFilter('hypes', '>=', 5),
-      FieldFilter('first_release_date', '>=',
-          sixMonthsAgo.millisecondsSinceEpoch ~/ 1000,),
-      FieldFilter('first_release_date', '<=',
-          sixMonthsFromNow.millisecondsSinceEpoch ~/ 1000,),
+      FieldFilter(
+        'first_release_date',
+        '>=',
+        sixMonthsAgo.millisecondsSinceEpoch ~/ 1000,
+      ),
+      FieldFilter(
+        'first_release_date',
+        '<=',
+        sixMonthsFromNow.millisecondsSinceEpoch ~/ 1000,
+      ),
     ];
 
     if (releasedAfter != null) {

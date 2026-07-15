@@ -25,7 +25,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class GetWishlistedGamesUseCase
     implements UseCase<List<int>, GetWishlistedGamesParams> {
-
   GetWishlistedGamesUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -42,7 +41,6 @@ class GetWishlistedGamesUseCase
 }
 
 class GetWishlistedGamesParams extends Equatable {
-
   const GetWishlistedGamesParams({
     required this.userId,
     this.limit,

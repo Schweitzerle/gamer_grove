@@ -9,19 +9,19 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetCompleteGameDetails implements UseCase<Game, GetCompleteGameDetailsParams> {
-
+class GetCompleteGameDetails
+    implements UseCase<Game, GetCompleteGameDetailsParams> {
   GetCompleteGameDetails(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, Game>> call(GetCompleteGameDetailsParams params) async {
+  Future<Either<Failure, Game>> call(
+      GetCompleteGameDetailsParams params) async {
     return repository.getCompleteGameDetails(params.gameId, params.userId);
   }
 }
 
 class GetCompleteGameDetailsParams {
-
   GetCompleteGameDetailsParams({
     required this.gameId,
     this.userId,
@@ -29,8 +29,3 @@ class GetCompleteGameDetailsParams {
   final int gameId;
   final String? userId;
 }
-
-
-
-
-

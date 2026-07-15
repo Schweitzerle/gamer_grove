@@ -26,7 +26,6 @@ abstract class IgdbFilter extends Equatable {
 /// // Output: "total_rating > 80"
 /// ```
 class FieldFilter extends IgdbFilter {
-
   const FieldFilter(this.field, this.operator, this.value);
   final String field;
   final String operator;
@@ -59,7 +58,6 @@ class FieldFilter extends IgdbFilter {
 /// // Output: "platforms = (6,48,49)"
 /// ```
 class ContainsFilter extends IgdbFilter {
-
   const ContainsFilter(this.field, this.values);
   final String field;
   final List<dynamic> values;
@@ -85,7 +83,6 @@ class ContainsFilter extends IgdbFilter {
 /// // Output: "platforms = [6,48,49]"
 /// ```
 class AnyFilter extends IgdbFilter {
-
   const AnyFilter(this.field, this.values);
   final String field;
   final List<dynamic> values;
@@ -111,7 +108,6 @@ class AnyFilter extends IgdbFilter {
 /// // Output: "genres = {12,31}"
 /// ```
 class AllFilter extends IgdbFilter {
-
   const AllFilter(this.field, this.values);
   final String field;
   final List<dynamic> values;
@@ -140,7 +136,6 @@ class AllFilter extends IgdbFilter {
 /// // Output: "parent_game != null"
 /// ```
 class NullFilter extends IgdbFilter {
-
   const NullFilter(this.field, {this.isNull = true});
   final String field;
   final bool isNull;
@@ -164,7 +159,8 @@ class NullFilter extends IgdbFilter {
 /// ], operator: '&')
 /// // Output: "total_rating > 80 & platforms = (6)"
 /// ```
-class CombinedFilter extends IgdbFilter { // '&' for AND, '|' for OR
+class CombinedFilter extends IgdbFilter {
+  // '&' for AND, '|' for OR
 
   const CombinedFilter(this.filters, {this.operator = '&'});
   final List<IgdbFilter> filters;
@@ -193,7 +189,6 @@ class CombinedFilter extends IgdbFilter { // '&' for AND, '|' for OR
 /// // Output: "!(genres = (12))"
 /// ```
 class NotFilter extends IgdbFilter {
-
   const NotFilter(this.filter);
   final IgdbFilter filter;
 
@@ -425,7 +420,6 @@ class GameFilters {
 ///   .build();
 /// ```
 class GameFilterBuilder {
-
   GameFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

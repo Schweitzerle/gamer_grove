@@ -3,7 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class ReleaseDateRegion extends Equatable {
-
   const ReleaseDateRegion({
     required this.id,
     required this.checksum,
@@ -19,23 +18,24 @@ class ReleaseDateRegion extends Equatable {
 
   // Helper getters
   bool get isEurope => region.toLowerCase().contains('europe');
-  bool get isNorthAmerica => region.toLowerCase().contains('north america') ||
+  bool get isNorthAmerica =>
+      region.toLowerCase().contains('north america') ||
       region.toLowerCase().contains('usa') ||
       region.toLowerCase().contains('us');
   bool get isAsia => region.toLowerCase().contains('asia');
   bool get isJapan => region.toLowerCase().contains('japan');
-  bool get isWorldwide => region.toLowerCase().contains('worldwide') ||
+  bool get isWorldwide =>
+      region.toLowerCase().contains('worldwide') ||
       region.toLowerCase().contains('global');
 
   String get displayName => region;
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    region,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        region,
+        createdAt,
+        updatedAt,
+      ];
 }
-

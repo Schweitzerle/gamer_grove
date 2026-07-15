@@ -6,7 +6,6 @@ abstract class NetworkInfo {
 }
 
 class NetworkInfoImpl implements NetworkInfo {
-
   NetworkInfoImpl(this.connectivity);
   final Connectivity connectivity;
 

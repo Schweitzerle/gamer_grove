@@ -22,7 +22,6 @@ abstract class SupabaseFilter {
 /// // Generates: WHERE username = 'john_doe'
 /// ```
 class EqualFilter implements SupabaseFilter {
-
   const EqualFilter(this.column, this.value);
   final String column;
   final dynamic value;
@@ -42,7 +41,6 @@ class EqualFilter implements SupabaseFilter {
 /// // Generates: WHERE game_id IN (1942, 1905, 113)
 /// ```
 class InFilter implements SupabaseFilter {
-
   const InFilter(this.column, this.values);
   final String column;
   final List<dynamic> values;
@@ -62,7 +60,6 @@ class InFilter implements SupabaseFilter {
 /// // Generates: WHERE rating > 8.0
 /// ```
 class GreaterThanFilter implements SupabaseFilter {
-
   const GreaterThanFilter(this.column, this.value);
   final String column;
   final dynamic value;
@@ -82,7 +79,6 @@ class GreaterThanFilter implements SupabaseFilter {
 /// // Generates: WHERE rating >= 8.0
 /// ```
 class GreaterThanOrEqualFilter implements SupabaseFilter {
-
   const GreaterThanOrEqualFilter(this.column, this.value);
   final String column;
   final dynamic value;
@@ -102,7 +98,6 @@ class GreaterThanOrEqualFilter implements SupabaseFilter {
 /// // Generates: WHERE followers_count < 1000
 /// ```
 class LessThanFilter implements SupabaseFilter {
-
   const LessThanFilter(this.column, this.value);
   final String column;
   final dynamic value;
@@ -122,7 +117,6 @@ class LessThanFilter implements SupabaseFilter {
 /// // Generates: WHERE followers_count <= 1000
 /// ```
 class LessThanOrEqualFilter implements SupabaseFilter {
-
   const LessThanOrEqualFilter(this.column, this.value);
   final String column;
   final dynamic value;
@@ -142,7 +136,6 @@ class LessThanOrEqualFilter implements SupabaseFilter {
 /// // Generates: WHERE username LIKE '%john%'
 /// ```
 class LikeFilter implements SupabaseFilter {
-
   const LikeFilter(this.column, this.pattern);
   final String column;
   final String pattern;
@@ -162,7 +155,6 @@ class LikeFilter implements SupabaseFilter {
 /// // Generates: WHERE username ILIKE '%JOHN%'
 /// ```
 class ILikeFilter implements SupabaseFilter {
-
   const ILikeFilter(this.column, this.pattern);
   final String column;
   final String pattern;
@@ -182,7 +174,6 @@ class ILikeFilter implements SupabaseFilter {
 /// // Generates: WHERE bio IS NULL
 /// ```
 class IsNullFilter implements SupabaseFilter {
-
   const IsNullFilter(this.column);
   final String column;
 
@@ -201,7 +192,6 @@ class IsNullFilter implements SupabaseFilter {
 /// // Generates: WHERE avatar_url IS NOT NULL
 /// ```
 class NotNullFilter implements SupabaseFilter {
-
   const NotNullFilter(this.column);
   final String column;
 
@@ -220,7 +210,6 @@ class NotNullFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = true
 /// ```
 class IsTrueFilter implements SupabaseFilter {
-
   const IsTrueFilter(this.column);
   final String column;
 
@@ -239,7 +228,6 @@ class IsTrueFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = false
 /// ```
 class IsFalseFilter implements SupabaseFilter {
-
   const IsFalseFilter(this.column);
   final String column;
 
@@ -261,7 +249,6 @@ class IsFalseFilter implements SupabaseFilter {
 /// // Generates: WHERE is_profile_public = true AND followers_count > 100
 /// ```
 class AndFilter implements SupabaseFilter {
-
   const AndFilter(this.filters);
   final List<SupabaseFilter> filters;
 
@@ -296,7 +283,6 @@ enum SortOrder {
 /// final sort = SortBy('created_at', SortOrder.descending);
 /// ```
 class SortBy {
-
   const SortBy(this.column, this.order);
   final String column;
   final SortOrder order;
@@ -318,7 +304,6 @@ class SortBy {
 /// final pagination = Pagination(limit: 20, offset: 40);
 /// ```
 class Pagination {
-
   const Pagination({
     required this.limit,
     this.offset = 0,

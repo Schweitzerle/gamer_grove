@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/company/company.dart';
 
 class InvolvedCompany extends Equatable {
-
   const InvolvedCompany({
     required this.id,
     required this.company,
@@ -20,5 +19,6 @@ class InvolvedCompany extends Equatable {
   final bool isSupporting;
 
   @override
-  List<Object> get props => [id, company, isDeveloper, isPublisher, isPorting, isSupporting];
+  List<Object> get props =>
+      [id, company, isDeveloper, isPublisher, isPorting, isSupporting];
 }

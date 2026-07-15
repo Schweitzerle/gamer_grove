@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 
 /// Statistics entity containing user's gaming statistics
 class GameStatistics extends Equatable {
-
   /// Creates a GameStatistics instance
   const GameStatistics({
     required this.genreStats,
@@ -13,6 +12,7 @@ class GameStatistics extends Equatable {
     required this.developerStats,
     required this.totalGames,
   });
+
   /// Genre statistics
   final GenreStats genreStats;
 
@@ -48,12 +48,12 @@ class GameStatistics extends Equatable {
 
 /// Genre statistics
 class GenreStats extends Equatable {
-
   /// Creates a GenreStats instance
   const GenreStats({
     required this.distribution,
     required this.topGenres,
   });
+
   /// Distribution of genres (genre name -> count)
   final Map<String, int> distribution;
 
@@ -66,13 +66,13 @@ class GenreStats extends Equatable {
 
 /// Genre data entry
 class GenreData extends Equatable {
-
   /// Creates a GenreData instance
   const GenreData({
     required this.name,
     required this.count,
     required this.percentage,
   });
+
   /// Genre name
   final String name;
 
@@ -88,12 +88,12 @@ class GenreData extends Equatable {
 
 /// Platform statistics
 class PlatformStats extends Equatable {
-
   /// Creates a PlatformStats instance
   const PlatformStats({
     required this.distribution,
     required this.topPlatforms,
   });
+
   /// Distribution of platforms (platform name -> count)
   final Map<String, int> distribution;
 
@@ -106,7 +106,6 @@ class PlatformStats extends Equatable {
 
 /// Platform data entry
 class PlatformData extends Equatable {
-
   /// Creates a PlatformData instance
   const PlatformData({
     required this.name,
@@ -114,6 +113,7 @@ class PlatformData extends Equatable {
     required this.percentage,
     this.abbreviation,
   });
+
   /// Platform name
   final String name;
 
@@ -132,12 +132,12 @@ class PlatformData extends Equatable {
 
 /// Theme statistics
 class ThemeStats extends Equatable {
-
   /// Creates a ThemeStats instance
   const ThemeStats({
     required this.distribution,
     required this.topThemes,
   });
+
   /// Distribution of themes (theme name -> count)
   final Map<String, int> distribution;
 
@@ -150,13 +150,13 @@ class ThemeStats extends Equatable {
 
 /// Theme data entry
 class ThemeData extends Equatable {
-
   /// Creates a ThemeData instance
   const ThemeData({
     required this.name,
     required this.count,
     required this.percentage,
   });
+
   /// Theme name
   final String name;
 
@@ -172,12 +172,12 @@ class ThemeData extends Equatable {
 
 /// Game mode statistics
 class GameModeStats extends Equatable {
-
   /// Creates a GameModeStats instance
   const GameModeStats({
     required this.distribution,
     required this.topModes,
   });
+
   /// Distribution of game modes (mode name -> count)
   final Map<String, int> distribution;
 
@@ -190,13 +190,13 @@ class GameModeStats extends Equatable {
 
 /// Game mode data entry
 class GameModeData extends Equatable {
-
   /// Creates a GameModeData instance
   const GameModeData({
     required this.name,
     required this.count,
     required this.percentage,
   });
+
   /// Game mode name
   final String name;
 
@@ -212,7 +212,6 @@ class GameModeData extends Equatable {
 
 /// Rating statistics
 class RatingStats extends Equatable {
-
   /// Creates a RatingStats instance
   const RatingStats({
     required this.averageRating,
@@ -223,6 +222,7 @@ class RatingStats extends Equatable {
     required this.gamesRated5OrMore,
     required this.gamesRatedBelow5,
   });
+
   /// Average rating across all rated games
   final double averageRating;
 
@@ -258,13 +258,13 @@ class RatingStats extends Equatable {
 
 /// Developer/Publisher statistics
 class DeveloperStats extends Equatable {
-
   /// Creates a DeveloperStats instance
   const DeveloperStats({
     required this.distribution,
     required this.topDevelopers,
     required this.topPublishers,
   });
+
   /// Distribution of companies (company name -> count)
   final Map<String, int> distribution;
 
@@ -280,13 +280,13 @@ class DeveloperStats extends Equatable {
 
 /// Developer/Publisher data entry
 class DeveloperData extends Equatable {
-
   /// Creates a DeveloperData instance
   const DeveloperData({
     required this.name,
     required this.count,
     required this.percentage,
   });
+
   /// Company name
   final String name;
 

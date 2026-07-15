@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 
 class SearchFilters extends Equatable {
-
   const SearchFilters({
     // Basic
     this.genreIds = const [],

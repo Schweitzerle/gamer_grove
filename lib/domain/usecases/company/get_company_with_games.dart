@@ -9,15 +9,14 @@ import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetCompanyWithGames
     extends UseCase<CompanyWithGames, GetCompanyWithGamesParams> {
-
   GetCompanyWithGames(this.repository);
   final GameRepository repository;
 
   @override
   Future<Either<Failure, CompanyWithGames>> call(
-      GetCompanyWithGamesParams params,) async {
+    GetCompanyWithGamesParams params,
+  ) async {
     try {
-
       final companyResult =
           await repository.getCompanyDetails(params.companyId, params.userId);
 
@@ -35,11 +34,9 @@ class GetCompanyWithGames
         (r) => r,
       );
 
-
       var games = <Game>[];
 
       if (params.includeGames) {
-
         final gamesResult = await repository.getGamesByCompany(
           companyIds: [company.id],
           limit: params.limit,
@@ -63,13 +60,13 @@ class GetCompanyWithGames
       return Right(result);
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to load company with games: $e'),);
+        ServerFailure(message: 'Failed to load company with games: $e'),
+      );
     }
   }
 }
 
 class GetCompanyWithGamesParams extends Equatable {
-
   const GetCompanyWithGamesParams({
     required this.companyId,
     this.includeGames = true,
@@ -86,7 +83,6 @@ class GetCompanyWithGamesParams extends Equatable {
 }
 
 class CompanyWithGames extends Equatable {
-
   const CompanyWithGames({
     required this.company,
     required this.games,

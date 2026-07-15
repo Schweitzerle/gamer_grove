@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GenreTrend extends Equatable {
-
   const GenreTrend({
     required this.genreId,
     required this.genreName,
@@ -28,8 +27,12 @@ class GenreTrend extends Equatable {
 
   @override
   List<Object?> get props => [
-    genreId, genreName, trendScore, growthRate,
-    gameCount, averageRating, calculatedAt,
-  ];
+        genreId,
+        genreName,
+        trendScore,
+        growthRate,
+        gameCount,
+        averageRating,
+        calculatedAt,
+      ];
 }
-

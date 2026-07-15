@@ -11,7 +11,6 @@ import 'package:gamer_grove/presentation/blocs/social_interactions/social_intera
 /// BLoC for handling social interactions (follow/unfollow)
 class SocialInteractionsBloc
     extends Bloc<SocialInteractionsEvent, SocialInteractionsState> {
-
   SocialInteractionsBloc({
     required this.followUser,
     required this.unfollowUser,
@@ -33,7 +32,8 @@ class SocialInteractionsBloc
     FollowUserRequested event,
     Emitter<SocialInteractionsState> emit,
   ) async {
-    print('🔵 [SocialInteractions] Follow request for user: ${event.targetUserId}');
+    print(
+        '🔵 [SocialInteractions] Follow request for user: ${event.targetUserId}');
 
     if (currentUserId == null) {
       print('🔴 [SocialInteractions] Error: No current user ID');

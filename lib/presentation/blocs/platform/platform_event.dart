@@ -18,7 +18,6 @@ abstract class PlatformEvent extends Equatable {
 // ==========================================
 
 class GetPlatformDetailsEvent extends PlatformEvent {
-
   const GetPlatformDetailsEvent({
     required this.platformId,
     this.includeGames = true,
@@ -39,7 +38,8 @@ class ClearPlatformEvent extends PlatformEvent {}
 // ==========================================
 
 /// Load paginated games for a platform
-class LoadPlatformGamesEvent extends PlatformEvent { // If true, reset pagination
+class LoadPlatformGamesEvent extends PlatformEvent {
+  // If true, reset pagination
 
   const LoadPlatformGamesEvent({
     required this.platformId,
@@ -74,7 +74,6 @@ class LoadMorePlatformGamesEvent extends PlatformEvent {
 
 /// Change sorting for paginated games
 class ChangePlatformSortEvent extends PlatformEvent {
-
   const ChangePlatformSortEvent({
     required this.sortBy,
     required this.sortOrder,

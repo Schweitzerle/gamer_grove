@@ -16,9 +16,10 @@ import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_s
 import 'package:url_launcher/url_launcher.dart';
 
 class PlatformDetailScreen extends StatefulWidget {
-
   const PlatformDetailScreen({
-    required this.platform, required this.games, super.key,
+    required this.platform,
+    required this.games,
+    super.key,
   });
   final Platform platform;
   final List<Game> games;
@@ -336,12 +337,14 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
-                height: AppConstants.paddingLarge,), // Space for floating card
+              height: AppConstants.paddingLarge,
+            ), // Space for floating card
 
             // Platform Information Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,),
+                horizontal: AppConstants.paddingMedium,
+              ),
               child: _buildPlatformInformationAccordion(),
             ),
 
@@ -490,7 +493,9 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _getPlatformAccentColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -774,7 +779,8 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
             // Series Info Header
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall,),
+                horizontal: AppConstants.paddingSmall,
+              ),
               child: Row(
                 children: [
                   Container(
@@ -821,8 +827,11 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
                   if (item.totalCount >= 10)
                     TextButton.icon(
                       onPressed: () => _navigateToSeries(context, item),
-                      icon: Icon(Icons.arrow_forward,
-                          size: 16, color: item.accentColor,),
+                      icon: Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: item.accentColor,
+                      ),
                       label: Text(
                         'View All',
                         style: TextStyle(color: item.accentColor),
@@ -941,9 +950,7 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
 
   void _logPlatformData() {
     if (widget.games.isNotEmpty) {
-      for (var i = 0; i < widget.games.length && i < 3; i++) {
-      }
-    } else {
-    }
+      for (var i = 0; i < widget.games.length && i < 3; i++) {}
+    } else {}
   }
 }

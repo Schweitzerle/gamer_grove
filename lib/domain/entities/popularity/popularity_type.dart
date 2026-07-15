@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/popularity/popularity_primitive.dart';
 
 class PopularityType extends Equatable {
-
   const PopularityType({
     required this.id,
     required this.checksum,
@@ -41,28 +40,34 @@ class PopularityType extends Equatable {
   }
 
   // Common popularity type detection
-  bool get isUserRating => name.toLowerCase().contains('rating') ||
+  bool get isUserRating =>
+      name.toLowerCase().contains('rating') ||
       name.toLowerCase().contains('user');
-  bool get isWishlist => name.toLowerCase().contains('wishlist') ||
+  bool get isWishlist =>
+      name.toLowerCase().contains('wishlist') ||
       name.toLowerCase().contains('want');
-  bool get isFollowing => name.toLowerCase().contains('follow') ||
+  bool get isFollowing =>
+      name.toLowerCase().contains('follow') ||
       name.toLowerCase().contains('track');
-  bool get isViews => name.toLowerCase().contains('view') ||
+  bool get isViews =>
+      name.toLowerCase().contains('view') ||
       name.toLowerCase().contains('visit');
-  bool get isDownloads => name.toLowerCase().contains('download') ||
+  bool get isDownloads =>
+      name.toLowerCase().contains('download') ||
       name.toLowerCase().contains('install');
-  bool get isPurchases => name.toLowerCase().contains('purchase') ||
+  bool get isPurchases =>
+      name.toLowerCase().contains('purchase') ||
       name.toLowerCase().contains('sale') ||
       name.toLowerCase().contains('buy');
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    createdAt,
-    updatedAt,
-    externalPopularitySourceId,
-    popularitySourceEnum,
-  ];
+        id,
+        checksum,
+        name,
+        createdAt,
+        updatedAt,
+        externalPopularitySourceId,
+        popularitySourceEnum,
+      ];
 }

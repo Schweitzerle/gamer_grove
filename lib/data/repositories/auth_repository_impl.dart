@@ -34,7 +34,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 /// ```
 class AuthRepositoryImpl extends SupabaseBaseRepository
     implements AuthRepository {
-
   AuthRepositoryImpl({
     required this.authDataSource,
     required super.supabase,

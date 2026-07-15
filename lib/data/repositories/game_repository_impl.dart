@@ -25,7 +25,8 @@ import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_field_
 import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_filters.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/game/game_query_presets.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/game_engine/game_engine_query_presets.dart';
-import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart' hide GameFilters;
+import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_filters.dart'
+    hide GameFilters;
 import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/platform/platform_query_presets.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_datasource.dart';
@@ -81,7 +82,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 /// );
 /// ```
 class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
-
   GameRepositoryImpl({
     required this.igdbDataSource,
     required super.networkInfo,
@@ -541,13 +541,13 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<Game>>> advancedGameSearch({
-    required SearchFilters filters, String? textQuery,
+    required SearchFilters filters,
+    String? textQuery,
     int limit = 20,
     int offset = 0,
   }) {
     return executeIgdbOperation(
       operation: () async {
-
         // Build combined filters from SearchFilters
         final igdbFilters = <IgdbFilter>[
           //GameFilters.mainGamesOnly(),
@@ -588,17 +588,26 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         // Total Rating (user + critic combined)
         if (filters.minTotalRating != null) {
           final filter = FieldFilter(
-              'total_rating', '>=', filters.minTotalRating!.toInt() * 10,);
+            'total_rating',
+            '>=',
+            filters.minTotalRating!.toInt() * 10,
+          );
           igdbFilters.add(filter);
         }
         if (filters.maxTotalRating != null) {
           final filter = FieldFilter(
-              'total_rating', '<=', filters.maxTotalRating!.toInt() * 10,);
+            'total_rating',
+            '<=',
+            filters.maxTotalRating!.toInt() * 10,
+          );
           igdbFilters.add(filter);
         }
         if (filters.minTotalRatingCount != null) {
           final filter = FieldFilter(
-              'total_rating_count', '>=', filters.minTotalRatingCount,);
+            'total_rating_count',
+            '>=',
+            filters.minTotalRatingCount,
+          );
           igdbFilters.add(filter);
         }
 
@@ -621,18 +630,27 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
         // Aggregated Critic Rating
         if (filters.minAggregatedRating != null) {
-          final filter = FieldFilter('aggregated_rating', '>=',
-              filters.minAggregatedRating!.toInt() * 10,);
+          final filter = FieldFilter(
+            'aggregated_rating',
+            '>=',
+            filters.minAggregatedRating!.toInt() * 10,
+          );
           igdbFilters.add(filter);
         }
         if (filters.maxAggregatedRating != null) {
-          final filter = FieldFilter('aggregated_rating', '<=',
-              filters.maxAggregatedRating!.toInt() * 10,);
+          final filter = FieldFilter(
+            'aggregated_rating',
+            '<=',
+            filters.maxAggregatedRating!.toInt() * 10,
+          );
           igdbFilters.add(filter);
         }
         if (filters.minAggregatedRatingCount != null) {
-          final filter = FieldFilter('aggregated_rating_count', '>=',
-              filters.minAggregatedRatingCount,);
+          final filter = FieldFilter(
+            'aggregated_rating_count',
+            '>=',
+            filters.minAggregatedRatingCount,
+          );
           igdbFilters.add(filter);
         }
 
@@ -657,7 +675,9 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         }
         if (filters.playerPerspectiveIds.isNotEmpty) {
           final filter = ContainsFilter(
-              'player_perspectives', filters.playerPerspectiveIds,);
+            'player_perspectives',
+            filters.playerPerspectiveIds,
+          );
           igdbFilters.add(filter);
         }
         if (filters.multiplayerModeIds.isNotEmpty) {
@@ -690,7 +710,9 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         // ========== AGE RATING & LOCALIZATION ==========
         if (filters.ageRatingCategoryIds.isNotEmpty) {
           final filter = ContainsFilter(
-              'age_ratings.rating_category', filters.ageRatingCategoryIds,);
+            'age_ratings.rating_category',
+            filters.ageRatingCategoryIds,
+          );
           igdbFilters.add(filter);
         }
         if (filters.languageSupportIds.isNotEmpty) {
@@ -743,12 +765,10 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           igdbFilters.add(filter);
         }
 
-
         final whereClause =
             igdbFilters.isNotEmpty ? CombinedFilter(igdbFilters) : null;
 
-        if (whereClause != null) {
-        }
+        if (whereClause != null) {}
 
         // Build sort string from filters
         // Note: 'relevance' sort only works with text search
@@ -768,7 +788,6 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
           offset: offset,
           sort: sortString,
         );
-
 
         return igdbDataSource.queryGames(query);
       },
@@ -997,10 +1016,13 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
   ) {
     return executeIgdbOperation(
       operation: () async {
-        final multiFieldFilter = CombinedFilter([
-          FieldFilter('name', '~', query),
-          FieldFilter('native_name', '~', query),
-        ], operator: '|',); // Use OR operator to match ANY field
+        final multiFieldFilter = CombinedFilter(
+          [
+            FieldFilter('name', '~', query),
+            FieldFilter('native_name', '~', query),
+          ],
+          operator: '|',
+        ); // Use OR operator to match ANY field
 
         final igdbQuery = IgdbLanguageQuery(
           where: multiFieldFilter,
@@ -2085,7 +2107,8 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<int>>> getUserWishlistGameIds(
-      String userId,) async {
+    String userId,
+  ) async {
     if (supabaseUserDataSource == null) {
       return const Left(
         ServerFailure(message: 'User datasource not available'),
@@ -2098,13 +2121,15 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
       return Right(gameIds);
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to get wishlisted game ids: $e'),);
+        ServerFailure(message: 'Failed to get wishlisted game ids: $e'),
+      );
     }
   }
 
   @override
   Future<Either<Failure, List<int>>> getUserRecommendedGameIds(
-      String userId,) async {
+    String userId,
+  ) async {
     if (supabaseUserDataSource == null) {
       return const Left(
         ServerFailure(message: 'User datasource not available'),
@@ -2117,7 +2142,8 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
       return Right(gameIds);
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to get recommended game ids: $e'),);
+        ServerFailure(message: 'Failed to get recommended game ids: $e'),
+      );
     }
   }
 
@@ -2473,15 +2499,19 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
 
   @override
   Future<Either<Failure, List<AgeRatingCategory>>> searchAgeRatings(
-      String query,) {
+    String query,
+  ) {
     return executeIgdbOperation(
       operation: () async {
         // Create multiple filters for different fields (OR logic)
         // Search in: organization name, rating category, and content descriptions
-        final multiFieldFilter = CombinedFilter([
-          FieldFilter('organization.name', '~', query),
-          FieldFilter('rating', '~', query),
-        ], operator: '|',); // Use OR operator to match ANY field
+        final multiFieldFilter = CombinedFilter(
+          [
+            FieldFilter('organization.name', '~', query),
+            FieldFilter('rating', '~', query),
+          ],
+          operator: '|',
+        ); // Use OR operator to match ANY field
 
         final igdbQuery = IgdbAgeRatingQuery(
           where: multiFieldFilter,

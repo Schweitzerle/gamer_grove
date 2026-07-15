@@ -154,7 +154,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
-                      'All your games are loaded. Filtering and sorting is done locally.',),
+                    'All your games are loaded. Filtering and sorting is done locally.',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -404,9 +405,11 @@ class _UserGameListPageState extends State<UserGameListPage> {
     // Apply sorting
     switch (_sortCategory) {
       case SortCategory.name:
-        result.sort((a, b) => _sortDirection == SortDirection.ascending
-            ? a.name.compareTo(b.name)
-            : b.name.compareTo(a.name),);
+        result.sort(
+          (a, b) => _sortDirection == SortDirection.ascending
+              ? a.name.compareTo(b.name)
+              : b.name.compareTo(a.name),
+        );
       case SortCategory.totalRating:
         result.sort((a, b) {
           final aRating = a.totalRating ?? 0;

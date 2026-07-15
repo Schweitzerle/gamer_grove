@@ -103,7 +103,6 @@ class CharacterFilters {
 ///   .build();
 /// ```
 class CharacterFilterBuilder {
-
   CharacterFilterBuilder();
   final List<IgdbFilter> _filters = [];
 

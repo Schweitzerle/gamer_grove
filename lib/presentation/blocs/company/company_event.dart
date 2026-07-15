@@ -13,7 +13,6 @@ abstract class CompanyEvent extends Equatable {
 }
 
 class GetCompanyDetailsEvent extends CompanyEvent {
-
   const GetCompanyDetailsEvent({
     required this.companyId,
     this.includeGames = true,

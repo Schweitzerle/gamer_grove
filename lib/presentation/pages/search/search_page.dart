@@ -34,7 +34,6 @@ import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 
 class SearchPage extends StatefulWidget {
-
   const SearchPage({
     super.key,
     this.initialFilters,
@@ -219,10 +218,12 @@ class _SearchPageState extends State<SearchPage> {
 
     // Use SearchGamesWithFiltersEvent if filters are active
     if (_currentFilters.hasFilters || query.trim().isNotEmpty) {
-      _gameBloc.add(SearchGamesWithFiltersEvent(
-        query: query.trim(),
-        filters: _currentFilters,
-      ),);
+      _gameBloc.add(
+        SearchGamesWithFiltersEvent(
+          query: query.trim(),
+          filters: _currentFilters,
+        ),
+      );
     } else {
       _gameBloc.add(SearchGamesEvent(query.trim(), userId: _currentUserId));
     }
@@ -704,9 +705,7 @@ class _SearchPageState extends State<SearchPage> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _recentSearches
-                  .map(_buildSearchChip)
-                  .toList(),
+              children: _recentSearches.map(_buildSearchChip).toList(),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
           ],
@@ -803,7 +802,8 @@ class _SearchPageState extends State<SearchPage> {
       onRefresh: () async {
         if (_searchController.text.isNotEmpty) {
           _gameBloc.add(
-              SearchGamesEvent(_searchController.text, userId: _currentUserId),);
+            SearchGamesEvent(_searchController.text, userId: _currentUserId),
+          );
         }
       },
       child: GridView.builder(

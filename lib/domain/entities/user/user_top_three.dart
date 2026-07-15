@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class UserTopThree extends Equatable {
-
   const UserTopThree({
     this.firstGameId,
     this.secondGameId,

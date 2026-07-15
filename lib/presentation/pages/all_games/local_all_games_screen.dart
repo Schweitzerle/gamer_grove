@@ -34,9 +34,10 @@ enum RatingFilter {
 }
 
 class EnrichedAllGamesScreen extends StatefulWidget {
-
   const EnrichedAllGamesScreen({
-    required this.title, required this.games, super.key,
+    required this.title,
+    required this.games,
+    super.key,
     this.subtitle,
     this.userId,
     this.showFilters = true,
@@ -136,71 +137,44 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     _applyFiltersAndSort();
   }
 
-      void _onScroll() {
+  void _onScroll() {
+    if (_hasReachedMax || _isLoadingMore || widget.loadMore == null) return;
 
-        if (_hasReachedMax || _isLoadingMore || widget.loadMore == null) return;
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      _loadMoreGames();
+    }
+  }
 
-    
+  Future<void> _loadMoreGames() async {
+    if (_isLoadingMore) return;
 
-        if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+    setState(() {
+      _isLoadingMore = true;
+    });
 
-          _loadMoreGames();
+    try {
+      final newGames = await widget.loadMore!(_allGames.length);
 
-        }
+      if (newGames.isEmpty) {
+        _hasReachedMax = true;
+      } else {
+        _allGames.addAll(newGames);
 
+        _totalGames = _allGames.length; // Update total games count
+
+        // Re-apply filters and sort to include new games
+
+        _applyFiltersAndSort();
       }
-
-    
-
-      Future<void> _loadMoreGames() async {
-
-        if (_isLoadingMore) return;
-
-    
-
-        setState(() {
-
-          _isLoadingMore = true;
-
-        });
-
-    
-
-        try {
-
-          final newGames = await widget.loadMore!(_allGames.length);
-
-          if (newGames.isEmpty) {
-
-            _hasReachedMax = true;
-
-          } else {
-
-            _allGames.addAll(newGames);
-
-            _totalGames = _allGames.length; // Update total games count
-
-            // Re-apply filters and sort to include new games
-
-            _applyFiltersAndSort();
-
-          }
-
-        } catch (e) {
-
-          // Optionally show a snackbar or error message
-
-        } finally {
-
-          setState(() {
-
-            _isLoadingMore = false;
-
-          });
-
-        }
-
-      }
+    } catch (e) {
+      // Optionally show a snackbar or error message
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
 
   //TODO: maybe implement filtering with dynamic data from api like in search screen and then use it for local filtering of the games
   void _applyFiltersAndSort() {
@@ -209,24 +183,28 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
-          .where((game) =>
-              game.name.toLowerCase().contains(_searchQuery.toLowerCase()),)
+          .where(
+            (game) =>
+                game.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+          )
           .toList();
     }
 
     // Apply genre filter
     if (_selectedGenres.isNotEmpty) {
       filtered = filtered
-          .where((game) =>
-              game.genres.any(_selectedGenres.contains),)
+          .where(
+            (game) => game.genres.any(_selectedGenres.contains),
+          )
           .toList();
     }
 
     // Apply platform filter
     if (_selectedPlatforms.isNotEmpty) {
       filtered = filtered
-          .where((game) => game.platforms
-              .any(_selectedPlatforms.contains),)
+          .where(
+            (game) => game.platforms.any(_selectedPlatforms.contains),
+          )
           .toList();
     }
 
@@ -257,9 +235,11 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
     // Apply sorting - Logik angepasst an _sortCategory und _sortDirection
     switch (_sortCategory) {
       case SortCategory.name:
-        filtered.sort((a, b) => _sortDirection == SortDirection.ascending
-            ? a.name.compareTo(b.name)
-            : b.name.compareTo(a.name),);
+        filtered.sort(
+          (a, b) => _sortDirection == SortDirection.ascending
+              ? a.name.compareTo(b.name)
+              : b.name.compareTo(a.name),
+        );
       case SortCategory.totalRating:
         filtered.sort((a, b) {
           final aRating = a.totalRating ?? 0;
@@ -418,8 +398,7 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
   }
 
   Widget _buildEnrichmentProgress() {
-    final progress =
-        _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
+    final progress = _totalGames > 0 ? _enrichmentProgress / _totalGames : 0.0;
 
     return Padding(
       padding: const EdgeInsets.all(AppConstants.paddingLarge),

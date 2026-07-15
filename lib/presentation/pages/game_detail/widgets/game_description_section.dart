@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameDescriptionContent extends StatelessWidget {
-
   const GameDescriptionContent({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -60,21 +60,23 @@ class GameDescriptionContent extends StatelessWidget {
                           Icon(
                             Icons.format_quote,
                             size: 24,
-                            color: _getGameAccentColor(context).withOpacity(0.3),
+                            color:
+                                _getGameAccentColor(context).withOpacity(0.3),
                           ),
                           const SizedBox(height: 8),
                           // Summary text
                           Text(
                             game.summary!,
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      height: 1.6,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface,
-                                      fontStyle: FontStyle.italic,
-                                      letterSpacing: 0.2,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  height: 1.6,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                  fontStyle: FontStyle.italic,
+                                  letterSpacing: 0.2,
+                                ),
                           ),
                           const SizedBox(height: 8),
                           // Closing quote
@@ -282,7 +284,8 @@ class GameDescriptionContent extends StatelessWidget {
                                         .textTheme
                                         .labelSmall
                                         ?.copyWith(
-                                          color: storylineColor.withOpacity(0.6),
+                                          color:
+                                              storylineColor.withOpacity(0.6),
                                           fontWeight: FontWeight.w600,
                                           letterSpacing: 1.2,
                                         ),
@@ -343,7 +346,9 @@ class GameDescriptionContent extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4,),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: storylineColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),

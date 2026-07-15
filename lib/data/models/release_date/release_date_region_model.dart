@@ -41,4 +41,3 @@ class ReleaseDateRegionModel extends ReleaseDateRegion {
     };
   }
 }
-

@@ -11,11 +11,22 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 ///
 /// Represents user data from Supabase database with JSON conversion.
 class UserModel {
-
   const UserModel({
     required this.id,
     required this.username,
-    required this.isProfilePublic, required this.showWishlist, required this.showRatedGames, required this.showRecommendedGames, required this.showTopThree, required this.totalGamesRated, required this.totalGamesWishlisted, required this.totalGamesRecommended, required this.followersCount, required this.followingCount, required this.createdAt, required this.updatedAt, this.displayName,
+    required this.isProfilePublic,
+    required this.showWishlist,
+    required this.showRatedGames,
+    required this.showRecommendedGames,
+    required this.showTopThree,
+    required this.totalGamesRated,
+    required this.totalGamesWishlisted,
+    required this.totalGamesRecommended,
+    required this.followersCount,
+    required this.followingCount,
+    required this.createdAt,
+    required this.updatedAt,
+    this.displayName,
     this.bio,
     this.avatarUrl,
     this.country,

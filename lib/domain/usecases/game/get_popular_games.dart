@@ -7,7 +7,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetPopularGames extends UseCase<List<Game>, GetPopularGamesParams> {
-
   GetPopularGames(this.repository);
   final GameRepository repository;
 
@@ -21,7 +20,6 @@ class GetPopularGames extends UseCase<List<Game>, GetPopularGamesParams> {
 }
 
 class GetPopularGamesParams extends Equatable {
-
   const GetPopularGamesParams({
     this.limit = 20,
     this.offset = 0,
@@ -32,4 +30,3 @@ class GetPopularGamesParams extends Equatable {
   @override
   List<Object> get props => [limit, offset];
 }
-

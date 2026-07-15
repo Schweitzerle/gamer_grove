@@ -420,7 +420,8 @@ class GameModel extends Game {
   }
 
   static List<PlayerPerspective> _extractPlayerPerspectives(
-      dynamic perspectives,) {
+    dynamic perspectives,
+  ) {
     if (perspectives is List) {
       return perspectives
           .whereType<Map<String, dynamic>>()
@@ -508,7 +509,8 @@ class GameModel extends Game {
   }
 
   static List<GameLocalization> _extractGameLocalizations(
-      dynamic localizations,) {
+    dynamic localizations,
+  ) {
     if (localizations is List) {
       return localizations
           .whereType<Map<String, dynamic>>()
@@ -634,18 +636,22 @@ class GameModel extends Game {
       'screenshots': screenshots.map((url) => {'url': url}).toList(),
       'artworks': artworks.map((url) => {'url': url}).toList(),
       'genres': genres
-          .map((genre) => {
-                'id': genre.id,
-                'name': genre.name,
-                'slug': genre.slug,
-              },)
+          .map(
+            (genre) => {
+              'id': genre.id,
+              'name': genre.name,
+              'slug': genre.slug,
+            },
+          )
           .toList(),
       'platforms': platforms
-          .map((platform) => {
-                'id': platform.id,
-                'name': platform.name,
-                'abbreviation': platform.abbreviation,
-              },)
+          .map(
+            (platform) => {
+              'id': platform.id,
+              'name': platform.name,
+              'abbreviation': platform.abbreviation,
+            },
+          )
           .toList(),
       'themes': themes.map((theme) => {'name': theme}).toList(),
       'hypes': hypes,

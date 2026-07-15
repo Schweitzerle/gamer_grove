@@ -4,7 +4,6 @@ import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
 
 class GetActivityFeedUseCase {
-
   GetActivityFeedUseCase(this.repository);
   final UserActivityRepository repository;
 

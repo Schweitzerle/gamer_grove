@@ -15,10 +15,12 @@ import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_details_screen.dart';
 import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
-class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platform
+class PlatformDetailPage extends StatelessWidget {
+  // Optional pre-loaded platform
 
   const PlatformDetailPage({
-    required this.platformId, super.key,
+    required this.platformId,
+    super.key,
     this.platform,
   });
   final int platformId;
@@ -26,7 +28,6 @@ class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platfo
 
   @override
   Widget build(BuildContext context) {
-
     return BlocProvider<PlatformBloc>(
       create: (context) {
         final bloc = sl<PlatformBloc>();
@@ -34,14 +35,16 @@ class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platfo
         final authState = context.read<AuthBloc>().state;
         final userId =
             authState is AuthAuthenticated ? authState.user.id : null;
-        bloc.add(GetPlatformDetailsEvent(
+        bloc.add(
+          GetPlatformDetailsEvent(
             platformId: platformId,
-            userId: userId,),);
+            userId: userId,
+          ),
+        );
         return bloc;
       },
       child: BlocBuilder<PlatformBloc, PlatformState>(
         builder: (context, state) {
-
           if (state is PlatformLoading) {
             return _buildLiveLoadingState(context);
           } else if (state is PlatformDetailsLoaded) {
@@ -66,8 +69,10 @@ class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platfo
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -113,8 +118,10 @@ class PlatformDetailPage extends StatelessWidget { // Optional pre-loaded platfo
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),

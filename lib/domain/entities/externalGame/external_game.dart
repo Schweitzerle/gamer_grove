@@ -32,51 +32,84 @@ enum ExternalGameCategoryEnum {
 
   static ExternalGameCategoryEnum fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case steam: return 'Steam';
-      case giantBomb: return 'Giant Bomb';
-      case gog: return 'GOG';
-      case youtube: return 'YouTube';
-      case microsoft: return 'Microsoft Store';
-      case apple: return 'App Store';
-      case twitch: return 'Twitch';
-      case android: return 'Google Play';
-      case amazonAsin: return 'Amazon';
-      case amazonLuna: return 'Amazon Luna';
-      case amazonAdg: return 'Amazon ADG';
-      case epicGameStore: return 'Epic Games Store';
-      case oculus: return 'Oculus Store';
-      case utomik: return 'Utomik';
-      case itchIo: return 'itch.io';
-      case xboxMarketplace: return 'Xbox Marketplace';
-      case kartridge: return 'Kartridge';
-      case playstationStoreUs: return 'PlayStation Store';
-      case focusEntertainment: return 'Focus Entertainment';
-      case xboxGamePassUltimateCloud: return 'Xbox Game Pass Ultimate Cloud';
-      case gamejolt: return 'Game Jolt';
-      case igdb: return 'IGDB';
-      case unknown: return 'Unknown';
+      case steam:
+        return 'Steam';
+      case giantBomb:
+        return 'Giant Bomb';
+      case gog:
+        return 'GOG';
+      case youtube:
+        return 'YouTube';
+      case microsoft:
+        return 'Microsoft Store';
+      case apple:
+        return 'App Store';
+      case twitch:
+        return 'Twitch';
+      case android:
+        return 'Google Play';
+      case amazonAsin:
+        return 'Amazon';
+      case amazonLuna:
+        return 'Amazon Luna';
+      case amazonAdg:
+        return 'Amazon ADG';
+      case epicGameStore:
+        return 'Epic Games Store';
+      case oculus:
+        return 'Oculus Store';
+      case utomik:
+        return 'Utomik';
+      case itchIo:
+        return 'itch.io';
+      case xboxMarketplace:
+        return 'Xbox Marketplace';
+      case kartridge:
+        return 'Kartridge';
+      case playstationStoreUs:
+        return 'PlayStation Store';
+      case focusEntertainment:
+        return 'Focus Entertainment';
+      case xboxGamePassUltimateCloud:
+        return 'Xbox Game Pass Ultimate Cloud';
+      case gamejolt:
+        return 'Game Jolt';
+      case igdb:
+        return 'IGDB';
+      case unknown:
+        return 'Unknown';
     }
   }
 
   String get iconName {
     switch (this) {
-      case steam: return 'steam';
-      case gog: return 'gog';
-      case epicGameStore: return 'epic';
-      case microsoft: return 'microsoft';
-      case apple: return 'apple';
-      case android: return 'google_play';
-      case playstationStoreUs: return 'playstation';
-      case xboxMarketplace: return 'xbox';
-      case itchIo: return 'itch';
-      default: return 'external_link';
+      case steam:
+        return 'steam';
+      case gog:
+        return 'gog';
+      case epicGameStore:
+        return 'epic';
+      case microsoft:
+        return 'microsoft';
+      case apple:
+        return 'apple';
+      case android:
+        return 'google_play';
+      case playstationStoreUs:
+        return 'playstation';
+      case xboxMarketplace:
+        return 'xbox';
+      case itchIo:
+        return 'itch';
+      default:
+        return 'external_link';
     }
   }
 
@@ -105,22 +138,24 @@ enum ExternalGameMediaEnum {
 
   static ExternalGameMediaEnum fromValue(int value) {
     return values.firstWhere(
-          (media) => media.value == value,
+      (media) => media.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case digital: return 'Digital';
-      case physical: return 'Physical';
-      case unknown: return 'Unknown';
+      case digital:
+        return 'Digital';
+      case physical:
+        return 'Physical';
+      case unknown:
+        return 'Unknown';
     }
   }
 }
 
 class ExternalGame extends Equatable {
-
   const ExternalGame({
     required this.id,
     required this.checksum,
@@ -206,20 +241,20 @@ class ExternalGame extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    countries,
-    externalGameSourceId,
-    gameId,
-    gameReleaseFormatId,
-    name,
-    platformId,
-    uid,
-    url,
-    year,
-    createdAt,
-    updatedAt,
-    categoryEnum,
-    mediaEnum,
-  ];
+        id,
+        checksum,
+        countries,
+        externalGameSourceId,
+        gameId,
+        gameReleaseFormatId,
+        name,
+        platformId,
+        uid,
+        url,
+        year,
+        createdAt,
+        updatedAt,
+        categoryEnum,
+        mediaEnum,
+      ];
 }

@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetSimilarGames implements UseCase<List<Game>, int> {
-
   GetSimilarGames(this.repository);
   final GameRepository repository;
 

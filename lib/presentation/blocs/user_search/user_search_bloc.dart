@@ -12,7 +12,6 @@ import 'package:gamer_grove/presentation/blocs/user_search/user_search_state.dar
 
 /// BLoC for handling user search with pagination
 class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
-
   UserSearchBloc({
     required this.searchUsers,
     this.getFollowers,
@@ -76,7 +75,9 @@ class UserSearchBloc extends Bloc<UserSearchEvent, UserSearchState> {
     LoadMoreUsersRequested event,
     Emitter<UserSearchState> emit,
   ) async {
-    if (state.hasReachedMax || state.isLoadingMore || state.currentQuery.isEmpty) {
+    if (state.hasReachedMax ||
+        state.isLoadingMore ||
+        state.currentQuery.isEmpty) {
       return;
     }
 

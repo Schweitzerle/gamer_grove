@@ -19,7 +19,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// final enrichedGames = await service.enrichGames(games, userId);
 /// ```
 class GameEnrichmentService {
-
   GameEnrichmentService({
     required this.supabase,
     this.enableLogging = false,
@@ -270,7 +269,6 @@ class GameEnrichmentService {
 
   /// Logs a message if logging is enabled.
   void _log(String message) {
-    if (enableLogging) {
-    }
+    if (enableLogging) {}
   }
 }

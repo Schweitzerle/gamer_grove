@@ -27,7 +27,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class UpdateUserProfileUseCase
     implements UseCase<User, UpdateUserProfileParams> {
-
   UpdateUserProfileUseCase(this.repository);
   final UserRepository repository;
 
@@ -38,9 +37,11 @@ class UpdateUserProfileUseCase
       final displayName = params.updates['display_name'] as String?;
       if (displayName != null &&
           (displayName.isEmpty || displayName.length > 50)) {
-        return const Left(ValidationFailure(
-          message: 'Display name must be 1-50 characters',
-        ),);
+        return const Left(
+          ValidationFailure(
+            message: 'Display name must be 1-50 characters',
+          ),
+        );
       }
     }
 
@@ -48,9 +49,11 @@ class UpdateUserProfileUseCase
     if (params.updates.containsKey('bio')) {
       final bio = params.updates['bio'] as String?;
       if (bio != null && bio.length > 500) {
-        return const Left(ValidationFailure(
-          message: 'Bio must be 500 characters or less',
-        ),);
+        return const Left(
+          ValidationFailure(
+            message: 'Bio must be 500 characters or less',
+          ),
+        );
       }
     }
 
@@ -59,10 +62,12 @@ class UpdateUserProfileUseCase
       final username = params.updates['username'] as String;
       final usernameRegex = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
       if (!usernameRegex.hasMatch(username)) {
-        return const Left(ValidationFailure(
-          message:
-              'Username must be 3-20 characters, alphanumeric and underscores only',
-        ),);
+        return const Left(
+          ValidationFailure(
+            message:
+                'Username must be 3-20 characters, alphanumeric and underscores only',
+          ),
+        );
       }
     }
 
@@ -81,7 +86,6 @@ class UpdateUserProfileUseCase
 }
 
 class UpdateUserProfileParams extends Equatable {
-
   const UpdateUserProfileParams({
     required this.userId,
     required this.updates,

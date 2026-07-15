@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CollectionRelation extends Equatable {
-
   const CollectionRelation({
     required this.id,
     required this.checksum,
@@ -20,16 +19,17 @@ class CollectionRelation extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  bool get hasParentChild => childCollectionId != null && parentCollectionId != null;
+  bool get hasParentChild =>
+      childCollectionId != null && parentCollectionId != null;
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    childCollectionId,
-    parentCollectionId,
-    typeId,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        childCollectionId,
+        parentCollectionId,
+        typeId,
+        createdAt,
+        updatedAt,
+      ];
 }

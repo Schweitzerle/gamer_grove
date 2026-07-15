@@ -20,7 +20,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class IsAuthenticatedUseCase implements UseCase<bool, NoParams> {
-
   IsAuthenticatedUseCase(this.repository);
   final AuthRepository repository;
 

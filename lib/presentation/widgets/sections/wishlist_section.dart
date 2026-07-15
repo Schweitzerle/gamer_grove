@@ -5,9 +5,12 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
 class WishlistSection extends BaseGameSection {
-
-  const WishlistSection(
-      {super.key, super.currentUserId, super.gameBloc, this.username,});
+  const WishlistSection({
+    super.key,
+    super.currentUserId,
+    super.gameBloc,
+    this.username,
+  });
   final String? username;
 
   @override
@@ -47,13 +50,19 @@ class WishlistSection extends BaseGameSection {
     } else if (state is UserWishlistLoaded) {
       if (state.games.isEmpty) {
         return buildEmptySection(
-            'Your wishlist is empty', Icons.favorite_border, context,);
+          'Your wishlist is empty',
+          Icons.favorite_border,
+          context,
+        );
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userWishlist.isEmpty) {
         return buildEmptySection(
-            'Your wishlist is empty', Icons.favorite_border, context,);
+          'Your wishlist is empty',
+          Icons.favorite_border,
+          context,
+        );
       }
       return buildHorizontalGameList(state.userWishlist.take(10).toList());
     } else if (state is GameError) {

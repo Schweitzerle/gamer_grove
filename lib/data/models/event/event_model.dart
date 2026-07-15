@@ -82,7 +82,9 @@ class EventModel extends Event {
   factory EventModel.live({
     required int id,
     required String name,
-    required DateTime startTime, required String liveStreamUrl, String? description,
+    required DateTime startTime,
+    required String liveStreamUrl,
+    String? description,
     DateTime? endTime,
     EventLogo? eventLogo,
     List<Game> games = const [],
@@ -103,7 +105,8 @@ class EventModel extends Event {
   factory EventModel.upcoming({
     required int id,
     required String name,
-    required DateTime startTime, String? description,
+    required DateTime startTime,
+    String? description,
     DateTime? endTime,
     EventLogo? eventLogo,
     List<Game> games = const [],
@@ -285,33 +288,39 @@ class EventModel extends Event {
           : null,
 
       'event_networks': eventNetworks
-          .map((network) => {
-                'id': network.id,
-                'url': network.url,
-                'network_type': network.networkType != null
-                    ? {
-                        'id': network.networkType!.id,
-                        'name': network.networkType!.name,
-                      }
-                    : null,
-              },)
+          .map(
+            (network) => {
+              'id': network.id,
+              'url': network.url,
+              'network_type': network.networkType != null
+                  ? {
+                      'id': network.networkType!.id,
+                      'name': network.networkType!.name,
+                    }
+                  : null,
+            },
+          )
           .toList(),
 
       'games': games
-          .map((game) => {
-                'id': game.id,
-                'name': game.name,
-                'slug': game.slug,
-                'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
-              },)
+          .map(
+            (game) => {
+              'id': game.id,
+              'name': game.name,
+              'slug': game.slug,
+              'cover': game.coverUrl != null ? {'url': game.coverUrl} : null,
+            },
+          )
           .toList(),
 
       'videos': videos
-          .map((video) => {
-                'id': video.id,
-                'name': video.title,
-                'video_id': video.videoId,
-              },)
+          .map(
+            (video) => {
+              'id': video.id,
+              'name': video.title,
+              'video_id': video.videoId,
+            },
+          )
           .toList(),
 
       // Legacy ID fields for backward compatibility

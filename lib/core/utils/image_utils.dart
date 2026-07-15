@@ -3,8 +3,10 @@ import 'package:gamer_grove/core/constants/app_constants.dart';
 
 class ImageUtils {
   // Build IGDB image URL with proper size
-  static String buildIgdbImageUrl(String? baseUrl,
-      {String size = AppConstants.mediumImageSize,}) {
+  static String buildIgdbImageUrl(
+    String? baseUrl, {
+    String size = AppConstants.mediumImageSize,
+  }) {
     if (baseUrl == null || baseUrl.isEmpty) return '';
 
     // IGDB URLs come without https: prefix
@@ -84,8 +86,11 @@ class ImageUtils {
   }
 
   // Resize image URL for better performance
-  static String getOptimizedImageUrl(String? originalUrl,
-      {int? width, int? height,}) {
+  static String getOptimizedImageUrl(
+    String? originalUrl, {
+    int? width,
+    int? height,
+  }) {
     if (originalUrl == null || originalUrl.isEmpty) return '';
 
     // For IGDB images, use appropriate size
@@ -121,5 +126,3 @@ class ImageUtils {
     return null;
   }
 }
-
-

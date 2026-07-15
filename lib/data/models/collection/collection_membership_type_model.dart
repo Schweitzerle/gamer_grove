@@ -1,4 +1,3 @@
-
 // lib/data/models/collection_membership_type_model.dart
 
 import 'package:gamer_grove/domain/entities/collection/collection_membership_type.dart';

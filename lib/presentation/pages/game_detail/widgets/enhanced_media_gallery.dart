@@ -17,7 +17,6 @@ import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_scr
 import 'package:gamer_grove/presentation/pages/videoPlayer/video_player_screen.dart';
 
 class EnhancedMediaGallery extends StatefulWidget {
-
   const EnhancedMediaGallery({
     super.key,
     this.game,
@@ -156,8 +155,12 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
   }
 
   // ✅ Staggered Tiles erstellen
-  List<StaggeredGridTile> _buildStaggeredTiles(List<String> displayImages,
-      List<String> allImages, String type, bool hasMore,) {
+  List<StaggeredGridTile> _buildStaggeredTiles(
+    List<String> displayImages,
+    List<String> allImages,
+    String type,
+    bool hasMore,
+  ) {
     final tiles = <StaggeredGridTile>[];
 
     for (var i = 0; i < displayImages.length; i++) {
@@ -496,7 +499,10 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
 
   // ✅ Navigation Methoden
   void _showFullScreenViewer(
-      List<String> images, int initialIndex, String type,) {
+    List<String> images,
+    int initialIndex,
+    String type,
+  ) {
     Navigator.of(context).push(
       PageRouteBuilder<void>(
         pageBuilder: (context, animation, _) => FadeTransition(

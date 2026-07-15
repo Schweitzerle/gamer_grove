@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformType extends Equatable {
-
   const PlatformType({
     required this.id,
     required this.checksum,

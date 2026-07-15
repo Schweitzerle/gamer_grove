@@ -10,7 +10,6 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/game/game_video.dart';
 
 class Event extends Equatable {
-
   const Event({
     required this.id,
     required this.checksum,
@@ -50,7 +49,8 @@ class Event extends Equatable {
   // Event content - ENHANCED with actual objects
   final EventLogo? eventLogo; // 🆕 Full EventLogo object instead of ID
   final String? liveStreamUrl;
-  final List<EventNetwork> eventNetworks; // 🆕 Full EventNetwork objects instead of IDs
+  final List<EventNetwork>
+      eventNetworks; // 🆕 Full EventNetwork objects instead of IDs
   final List<Game> games; // 🆕 Full Game objects instead of IDs
   final List<GameVideo> videos; // 🆕 Full GameVideo objects instead of IDs
 
@@ -67,7 +67,8 @@ class Event extends Equatable {
   bool get hasLogo => eventLogo != null && eventLogo!.bestUrl.isNotEmpty;
   bool get hasLogoObject => eventLogo != null;
   bool get hasLiveStream => liveStreamUrl != null && liveStreamUrl!.isNotEmpty;
-  bool get hasNetworks => eventNetworks.isNotEmpty || eventNetworkIds.isNotEmpty;
+  bool get hasNetworks =>
+      eventNetworks.isNotEmpty || eventNetworkIds.isNotEmpty;
   bool get hasNetworkObjects => eventNetworks.isNotEmpty;
   bool get hasGames => games.isNotEmpty || gameIds.isNotEmpty;
   bool get hasGameObjects => games.isNotEmpty;
@@ -119,7 +120,8 @@ class Event extends Equatable {
   bool get hasTrailers => videos.isNotEmpty || videoIds.isNotEmpty;
 
   // Enhanced counters
-  int get networkCount => eventNetworks.isNotEmpty ? eventNetworks.length : eventNetworkIds.length;
+  int get networkCount =>
+      eventNetworks.isNotEmpty ? eventNetworks.length : eventNetworkIds.length;
   int get gameCount => games.isNotEmpty ? games.length : gameIds.length;
   int get videoCount => videos.isNotEmpty ? videos.length : videoIds.length;
 
@@ -166,14 +168,24 @@ class Event extends Equatable {
 
   /// Get upcoming games from featured games
   List<Game> get upcomingGames {
-    return games.where((game) => game.firstReleaseDate != null &&
-        game.firstReleaseDate!.isAfter(DateTime.now()),).toList();
+    return games
+        .where(
+          (game) =>
+              game.firstReleaseDate != null &&
+              game.firstReleaseDate!.isAfter(DateTime.now()),
+        )
+        .toList();
   }
 
   /// Get released games from featured games
   List<Game> get releasedGames {
-    return games.where((game) => game.firstReleaseDate != null &&
-        game.firstReleaseDate!.isBefore(DateTime.now()),).toList();
+    return games
+        .where(
+          (game) =>
+              game.firstReleaseDate != null &&
+              game.firstReleaseDate!.isBefore(DateTime.now()),
+        )
+        .toList();
   }
 
   // ==========================================
@@ -226,25 +238,24 @@ class Event extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    description,
-    slug,
-    createdAt,
-    updatedAt,
-    startTime,
-    endTime,
-    timeZone,
-    eventLogo,
-    liveStreamUrl,
-    eventNetworks,
-    games,
-    videos,
-    eventLogoId,
-    eventNetworkIds,
-    gameIds,
-    videoIds,
-  ];
+        id,
+        checksum,
+        name,
+        description,
+        slug,
+        createdAt,
+        updatedAt,
+        startTime,
+        endTime,
+        timeZone,
+        eventLogo,
+        liveStreamUrl,
+        eventNetworks,
+        games,
+        videos,
+        eventLogoId,
+        eventNetworkIds,
+        gameIds,
+        videoIds,
+      ];
 }
-

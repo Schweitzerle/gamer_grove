@@ -18,9 +18,9 @@ import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_s
 import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailScreen extends StatefulWidget {
-
   const EventDetailScreen({
-    required this.event, super.key,
+    required this.event,
+    super.key,
     this.featuredGames,
     this.showGames = true,
   });
@@ -146,7 +146,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         child: widget.event.hasLogo
             ? CachedImageWidget(
                 imageUrl: ImageUtils.getLargeImageUrl(
-                    widget.event.eventLogo!.bestUrl,),
+                  widget.event.eventLogo!.bestUrl,
+                ),
                 placeholder: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -281,7 +282,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         // Status Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4,),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: _getEventStatusColor().withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
@@ -303,7 +306,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   if (widget.event.hasLiveStream)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8,),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(8),
@@ -311,8 +316,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.live_tv,
-                              color: Colors.white, size: 16,),
+                          const Icon(
+                            Icons.live_tv,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             widget.event.isLive ? 'LIVE' : 'STREAM',
@@ -419,7 +427,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             // Combined Event Information and Details Accordion
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,),
+                horizontal: AppConstants.paddingMedium,
+              ),
               child: _buildCombinedEventAccordion(),
             ),
 
@@ -429,7 +438,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             if (widget.event.hasGameObjects)
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingMedium,),
+                  horizontal: AppConstants.paddingMedium,
+                ),
                 child: _buildTabView(context, _createEventGamesSeriesItem()),
               ),
 
@@ -581,7 +591,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4,),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _getEventStatusColor().withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -611,10 +623,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ),
               ),
             ),
-            Builder(builder: (context) {
-              currentIndex++;
-              return const SizedBox.shrink();
-            },),
+            Builder(
+              builder: (context) {
+                currentIndex++;
+                return const SizedBox.shrink();
+              },
+            ),
           ],
 
           // Event Information Accordion
@@ -641,7 +655,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     _buildEnhancedInfoCard(
                       'Start Time',
                       DateFormatter.formatEventDateTime(
-                          widget.event.startTime!,),
+                        widget.event.startTime!,
+                      ),
                       Icons.schedule,
                       Colors.green,
                     ),
@@ -699,7 +714,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         onPressed: _openLiveStream,
                         icon: const Icon(Icons.live_tv),
                         label: Text(
-                            widget.event.isLive ? 'Watch Live' : 'View Stream',),
+                          widget.event.isLive ? 'Watch Live' : 'View Stream',
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
@@ -713,10 +729,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               ),
             ),
           ),
-          Builder(builder: (context) {
-            currentIndex++;
-            return const SizedBox.shrink();
-          },),
+          Builder(
+            builder: (context) {
+              currentIndex++;
+              return const SizedBox.shrink();
+            },
+          ),
 
           // Links & Networks Accordion
           if (widget.event.hasNetworkObjects)
@@ -922,9 +940,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           // Series Info Header
           Padding(
             padding: const EdgeInsets.only(
-                left: AppConstants.paddingSmall,
-                right: AppConstants.paddingSmall,
-                top: AppConstants.paddingSmall,),
+              left: AppConstants.paddingSmall,
+              right: AppConstants.paddingSmall,
+              top: AppConstants.paddingSmall,
+            ),
             child: Row(
               children: [
                 Container(
@@ -971,8 +990,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 if (item.totalCount > 10)
                   TextButton.icon(
                     onPressed: () => _navigateToSeries(context, item),
-                    icon: Icon(Icons.arrow_forward,
-                        size: 16, color: item.accentColor,),
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: item.accentColor,
+                    ),
                     label: Text(
                       'View All',
                       style: TextStyle(color: item.accentColor),
@@ -1007,7 +1029,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(
-          left: AppConstants.paddingSmall, bottom: AppConstants.paddingSmall,),
+        left: AppConstants.paddingSmall,
+        bottom: AppConstants.paddingSmall,
+      ),
       itemCount: games.length,
       itemBuilder: (context, index) {
         final game = games[index];

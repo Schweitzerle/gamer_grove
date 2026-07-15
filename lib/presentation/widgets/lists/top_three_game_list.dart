@@ -4,9 +4,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/gameItems/top_three_game_item.dart';
 
 class TopThreeGameList extends StatelessWidget {
-
   const TopThreeGameList({
-    required this.games, super.key,
+    required this.games,
+    super.key,
   });
   final List<Game> games;
 
@@ -30,5 +30,3 @@ class TopThreeGameList extends StatelessWidget {
     );
   }
 }
-
-

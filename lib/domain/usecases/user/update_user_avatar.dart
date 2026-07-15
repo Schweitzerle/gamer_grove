@@ -23,7 +23,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ```
 class UpdateUserAvatarUseCase
     implements UseCase<String, UpdateUserAvatarParams> {
-
   UpdateUserAvatarUseCase(this.repository);
   final UserRepository repository;
 
@@ -31,9 +30,11 @@ class UpdateUserAvatarUseCase
   Future<Either<Failure, String>> call(UpdateUserAvatarParams params) async {
     // Validate image data is not empty
     if (params.imageData.isEmpty) {
-      return const Left(ValidationFailure(
-        message: 'Image data cannot be empty',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'Image data cannot be empty',
+        ),
+      );
     }
 
     return repository.updateUserAvatar(
@@ -44,7 +45,6 @@ class UpdateUserAvatarUseCase
 }
 
 class UpdateUserAvatarParams extends Equatable {
-
   const UpdateUserAvatarParams({
     required this.userId,
     required this.imageData,

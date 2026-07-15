@@ -11,7 +11,6 @@ enum RelationshipStatus {
 }
 
 class UserRelationship extends Equatable {
-
   const UserRelationship({
     required this.userId,
     required this.targetUserId,
@@ -25,10 +24,15 @@ class UserRelationship extends Equatable {
   final DateTime? followedAt;
   final DateTime? followedBackAt;
 
-  bool get isFollowing => status == RelationshipStatus.following || status == RelationshipStatus.mutual;
-  bool get isFollowedBy => status == RelationshipStatus.followedBy || status == RelationshipStatus.mutual;
+  bool get isFollowing =>
+      status == RelationshipStatus.following ||
+      status == RelationshipStatus.mutual;
+  bool get isFollowedBy =>
+      status == RelationshipStatus.followedBy ||
+      status == RelationshipStatus.mutual;
   bool get isMutual => status == RelationshipStatus.mutual;
 
   @override
-  List<Object?> get props => [userId, targetUserId, status, followedAt, followedBackAt];
+  List<Object?> get props =>
+      [userId, targetUserId, status, followedAt, followedBackAt];
 }

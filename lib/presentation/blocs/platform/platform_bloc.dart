@@ -11,7 +11,6 @@ import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 
 class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
-
   PlatformBloc({
     required this.getPlatformWithGames,
     required this.gameRepository,
@@ -60,21 +59,27 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               platformWithGames.games,
               event.userId!,
             );
-            emit(PlatformDetailsLoaded(
-              platform: platformWithGames.platform,
-              games: enrichedGames,
-            ),);
+            emit(
+              PlatformDetailsLoaded(
+                platform: platformWithGames.platform,
+                games: enrichedGames,
+              ),
+            );
           } catch (e) {
-            emit(PlatformDetailsLoaded(
-              platform: platformWithGames.platform,
-              games: platformWithGames.games,
-            ),);
+            emit(
+              PlatformDetailsLoaded(
+                platform: platformWithGames.platform,
+                games: platformWithGames.games,
+              ),
+            );
           }
         } else {
-          emit(PlatformDetailsLoaded(
-            platform: platformWithGames.platform,
-            games: platformWithGames.games,
-          ),);
+          emit(
+            PlatformDetailsLoaded(
+              platform: platformWithGames.platform,
+              games: platformWithGames.games,
+            ),
+          );
         }
       },
     );
@@ -95,12 +100,13 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     LoadPlatformGamesEvent event,
     Emitter<PlatformState> emit,
   ) async {
-
     // Show loading state
-    emit(PlatformGamesLoading(
-      platformId: event.platformId,
-      platformName: event.platformName,
-    ),);
+    emit(
+      PlatformGamesLoading(
+        platformId: event.platformId,
+        platformName: event.platformName,
+      ),
+    );
 
     // Fetch first page
     final result = await gameRepository.getGamesByPlatform(
@@ -111,14 +117,15 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     await result.fold(
       (failure) async {
-        emit(PlatformGamesError(
-          platformId: event.platformId,
-          platformName: event.platformName,
-          message: failure.message,
-        ),);
+        emit(
+          PlatformGamesError(
+            platformId: event.platformId,
+            platformName: event.platformName,
+            message: failure.message,
+          ),
+        );
       },
       (games) async {
-
         // Enrich games if userId is provided
         var enrichedGames = games;
         if (event.userId != null && games.isNotEmpty) {
@@ -127,22 +134,23 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               games,
               event.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // hasMore = true if we got a full page
         final hasMore = games.length == _pageSize;
 
-        emit(PlatformGamesLoaded(
-          platformId: event.platformId,
-          platformName: event.platformName,
-          games: enrichedGames,
-          hasMore: hasMore,
-          sortBy: event.sortBy,
-          sortOrder: event.sortOrder,
-          userId: event.userId,
-        ),);
+        emit(
+          PlatformGamesLoaded(
+            platformId: event.platformId,
+            platformName: event.platformName,
+            games: enrichedGames,
+            hasMore: hasMore,
+            sortBy: event.sortBy,
+            sortOrder: event.sortOrder,
+            userId: event.userId,
+          ),
+        );
       },
     );
   }
@@ -160,7 +168,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
     if (currentState.isLoadingMore || !currentState.hasMore) {
       return;
     }
-
 
     // Set loading more flag
     emit(currentState.copyWith(isLoadingMore: true));
@@ -182,7 +189,6 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
         emit(currentState.copyWith(isLoadingMore: false));
       },
       (newGames) async {
-
         // Enrich new games if userId is available
         var enrichedNewGames = newGames;
         if (currentState.userId != null && newGames.isNotEmpty) {
@@ -191,24 +197,25 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               newGames,
               currentState.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // Combine existing games with new games
         final allGames = [...currentState.games, ...enrichedNewGames];
         final hasMore = newGames.length == _pageSize;
 
-        emit(PlatformGamesLoaded(
-          platformId: currentState.platformId,
-          platformName: currentState.platformName,
-          games: allGames,
-          hasMore: hasMore,
-          currentPage: nextPage,
-          sortBy: currentState.sortBy,
-          sortOrder: currentState.sortOrder,
-          userId: currentState.userId,
-        ),);
+        emit(
+          PlatformGamesLoaded(
+            platformId: currentState.platformId,
+            platformName: currentState.platformName,
+            games: allGames,
+            hasMore: hasMore,
+            currentPage: nextPage,
+            sortBy: currentState.sortBy,
+            sortOrder: currentState.sortOrder,
+            userId: currentState.userId,
+          ),
+        );
       },
     );
   }
@@ -222,12 +229,13 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     final currentState = state as PlatformGamesLoaded;
 
-
     // Show loading state
-    emit(PlatformGamesLoading(
-      platformId: currentState.platformId,
-      platformName: currentState.platformName,
-    ),);
+    emit(
+      PlatformGamesLoading(
+        platformId: currentState.platformId,
+        platformName: currentState.platformName,
+      ),
+    );
 
     // Fetch first page with new sort
     final result = await gameRepository.getGamesByPlatform(
@@ -238,14 +246,15 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
 
     await result.fold(
       (failure) async {
-        emit(PlatformGamesError(
-          platformId: currentState.platformId,
-          platformName: currentState.platformName,
-          message: failure.message,
-        ),);
+        emit(
+          PlatformGamesError(
+            platformId: currentState.platformId,
+            platformName: currentState.platformName,
+            message: failure.message,
+          ),
+        );
       },
       (games) async {
-
         // Enrich games if userId is available
         var enrichedGames = games;
         if (currentState.userId != null && games.isNotEmpty) {
@@ -254,22 +263,23 @@ class PlatformBloc extends Bloc<PlatformEvent, PlatformState> {
               games,
               currentState.userId!,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         // hasMore = true if we got a full page
         final hasMore = games.length == _pageSize;
 
-        emit(PlatformGamesLoaded(
-          platformId: currentState.platformId,
-          platformName: currentState.platformName,
-          games: enrichedGames,
-          hasMore: hasMore,
-          sortBy: event.sortBy,
-          sortOrder: event.sortOrder,
-          userId: currentState.userId,
-        ),);
+        emit(
+          PlatformGamesLoaded(
+            platformId: currentState.platformId,
+            platformName: currentState.platformName,
+            games: enrichedGames,
+            hasMore: hasMore,
+            sortBy: event.sortBy,
+            sortOrder: event.sortOrder,
+            userId: currentState.userId,
+          ),
+        );
       },
     );
   }

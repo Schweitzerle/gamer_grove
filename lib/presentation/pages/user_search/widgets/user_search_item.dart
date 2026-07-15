@@ -6,9 +6,9 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 
 /// A visually appealing user item widget that displays user info and stats
 class UserSearchItem extends StatelessWidget {
-
   const UserSearchItem({
-    required this.user, super.key,
+    required this.user,
+    super.key,
     this.onTap,
     this.showFollowButton = true,
     this.isFollowing = false,
@@ -242,9 +242,8 @@ class UserSearchItem extends StatelessWidget {
           backgroundColor: isFollowing
               ? colorScheme.surfaceContainerHighest
               : colorScheme.primary,
-          foregroundColor: isFollowing
-              ? colorScheme.onSurface
-              : colorScheme.onPrimary,
+          foregroundColor:
+              isFollowing ? colorScheme.onSurface : colorScheme.onPrimary,
           elevation: isFollowing ? 0 : 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -266,9 +265,7 @@ class UserSearchItem extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isFollowing
-                        ? colorScheme.onSurface
-                        : colorScheme.onPrimary,
+                    isFollowing ? colorScheme.onSurface : colorScheme.onPrimary,
                   ),
                 ),
               )

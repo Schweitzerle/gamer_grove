@@ -13,9 +13,9 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CommunityInfoContent extends StatelessWidget {
-
   const CommunityInfoContent({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -46,9 +46,10 @@ class CommunityInfoContent extends StatelessWidget {
   Widget _buildRatingsSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-          top: AppConstants.paddingSmall,
-          left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall,),
+        top: AppConstants.paddingSmall,
+        left: AppConstants.paddingSmall,
+        right: AppConstants.paddingSmall,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -132,9 +133,10 @@ class CommunityInfoContent extends StatelessWidget {
   Widget _buildCommunitySection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
-          bottom: AppConstants.paddingSmall,
-          left: AppConstants.paddingSmall,
-          right: AppConstants.paddingSmall,),
+        bottom: AppConstants.paddingSmall,
+        left: AppConstants.paddingSmall,
+        right: AppConstants.paddingSmall,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -201,7 +203,10 @@ class CommunityInfoContent extends StatelessWidget {
     BuildContext context, {
     required String title,
     required double rating,
-    required IconData icon, required Color color, required String subtitle, int? count,
+    required IconData icon,
+    required Color color,
+    required String subtitle,
+    int? count,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -430,7 +435,8 @@ class _FollowedUsersRatingsSectionState
             // Section Header
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall,),
+                horizontal: AppConstants.paddingSmall,
+              ),
               child: Row(
                 children: [
                   Icon(

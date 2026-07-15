@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class Region extends Equatable {
-
   const Region({
     required this.id,
     required this.checksum,
@@ -30,32 +29,45 @@ class Region extends Equatable {
     if (!isLocale) return null;
 
     switch (identifier.toUpperCase()) {
-      case 'US': return '🇺🇸';
-      case 'GB': return '🇬🇧';
-      case 'DE': return '🇩🇪';
-      case 'FR': return '🇫🇷';
-      case 'ES': return '🇪🇸';
-      case 'IT': return '🇮🇹';
-      case 'JP': return '🇯🇵';
-      case 'CN': return '🇨🇳';
-      case 'KR': return '🇰🇷';
-      case 'BR': return '🇧🇷';
-      case 'AU': return '🇦🇺';
-      case 'NZ': return '🇳🇿';
-      default: return null;
+      case 'US':
+        return '🇺🇸';
+      case 'GB':
+        return '🇬🇧';
+      case 'DE':
+        return '🇩🇪';
+      case 'FR':
+        return '🇫🇷';
+      case 'ES':
+        return '🇪🇸';
+      case 'IT':
+        return '🇮🇹';
+      case 'JP':
+        return '🇯🇵';
+      case 'CN':
+        return '🇨🇳';
+      case 'KR':
+        return '🇰🇷';
+      case 'BR':
+        return '🇧🇷';
+      case 'AU':
+        return '🇦🇺';
+      case 'NZ':
+        return '🇳🇿';
+      default:
+        return null;
     }
   }
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    category,
-    identifier,
-    name,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        category,
+        identifier,
+        name,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 // Legacy Region Enum for backward compatibility
@@ -76,24 +88,33 @@ enum RegionEnum {
 
   static RegionEnum fromValue(int value) {
     return values.firstWhere(
-          (region) => region.value == value,
+      (region) => region.value == value,
       orElse: () => worldwide,
     );
   }
 
   String get displayName {
     switch (this) {
-      case europe: return 'Europe';
-      case northAmerica: return 'North America';
-      case australia: return 'Australia';
-      case newZealand: return 'New Zealand';
-      case japan: return 'Japan';
-      case china: return 'China';
-      case asia: return 'Asia';
-      case worldwide: return 'Worldwide';
-      case korea: return 'Korea';
-      case brazil: return 'Brazil';
+      case europe:
+        return 'Europe';
+      case northAmerica:
+        return 'North America';
+      case australia:
+        return 'Australia';
+      case newZealand:
+        return 'New Zealand';
+      case japan:
+        return 'Japan';
+      case china:
+        return 'China';
+      case asia:
+        return 'Asia';
+      case worldwide:
+        return 'Worldwide';
+      case korea:
+        return 'Korea';
+      case brazil:
+        return 'Brazil';
     }
   }
 }
-

@@ -20,17 +20,28 @@ class GameLocalizationModel extends GameLocalization {
   static LocalizationRegion _parseRegion(dynamic region) {
     if (region is int) {
       switch (region) {
-        case 1: return LocalizationRegion.europe;
-        case 2: return LocalizationRegion.northAmerica;
-        case 3: return LocalizationRegion.australia;
-        case 4: return LocalizationRegion.newZealand;
-        case 5: return LocalizationRegion.japan;
-        case 6: return LocalizationRegion.china;
-        case 7: return LocalizationRegion.asia;
-        case 8: return LocalizationRegion.worldwide;
-        case 9: return LocalizationRegion.korea;
-        case 10: return LocalizationRegion.brazil;
-        default: return LocalizationRegion.unknown;
+        case 1:
+          return LocalizationRegion.europe;
+        case 2:
+          return LocalizationRegion.northAmerica;
+        case 3:
+          return LocalizationRegion.australia;
+        case 4:
+          return LocalizationRegion.newZealand;
+        case 5:
+          return LocalizationRegion.japan;
+        case 6:
+          return LocalizationRegion.china;
+        case 7:
+          return LocalizationRegion.asia;
+        case 8:
+          return LocalizationRegion.worldwide;
+        case 9:
+          return LocalizationRegion.korea;
+        case 10:
+          return LocalizationRegion.brazil;
+        default:
+          return LocalizationRegion.unknown;
       }
     }
     return LocalizationRegion.unknown;

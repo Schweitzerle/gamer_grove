@@ -3,7 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class CompanyStatus extends Equatable {
-
   const CompanyStatus({
     required this.id,
     required this.checksum,
@@ -19,15 +18,16 @@ class CompanyStatus extends Equatable {
 
   // Helper getters
   bool get isActive => name.toLowerCase().contains('active');
-  bool get isDefunct => name.toLowerCase().contains('defunct') ||
+  bool get isDefunct =>
+      name.toLowerCase().contains('defunct') ||
       name.toLowerCase().contains('closed');
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        name,
+        createdAt,
+        updatedAt,
+      ];
 }

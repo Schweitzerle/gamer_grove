@@ -9,9 +9,9 @@ import 'package:gamer_grove/core/utils/date_formatter.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 class GameInfoCard extends StatelessWidget {
-
   const GameInfoCard({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -41,9 +41,9 @@ class GameInfoCard extends StatelessWidget {
               Text(
                 game.name,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
                 maxLines: 3, // ✅ Kann jetzt mehr Zeilen haben bei Bedarf
                 overflow: TextOverflow.ellipsis,
               ),
@@ -69,13 +69,14 @@ class GameInfoCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           'Released ${DateFormatter.formatYearOnly(game.firstReleaseDate!)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer
-                                .withOpacity(0.8),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withOpacity(0.8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ],
                     ),
@@ -98,13 +99,14 @@ class GameInfoCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'by ${game.developers.first.company.name}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withOpacity(0.8),
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                          .withOpacity(0.8),
+                                      fontWeight: FontWeight.w500,
+                                    ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -123,25 +125,29 @@ class GameInfoCard extends StatelessWidget {
                   child: Row(
                     children: game.genres
                         .take(6) // ✅ Kann jetzt mehr Genres zeigen
-                        .map((genre) => Container(
-                      margin: const EdgeInsets.only(right: 6),
-                      child: Chip(
-                        label: Text(
-                          genre.name,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+                        .map(
+                          (genre) => Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            child: Chip(
+                              label: Text(
+                                genre.name,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surface
+                                  .withOpacity(0.8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
                           ),
-                        ),
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .surface
-                            .withOpacity(0.8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),)
+                        )
                         .toList(),
                   ),
                 ),

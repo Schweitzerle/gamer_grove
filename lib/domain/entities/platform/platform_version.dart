@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlatformVersion extends Equatable {
-
   const PlatformVersion({
     required this.id,
     required this.checksum,
@@ -49,34 +48,33 @@ class PlatformVersion extends Equatable {
   final List<int> companyIds;
 
   // Helper to check if it's a revision/slim model
-  bool get isRevision => name.toLowerCase().contains('slim') ||
+  bool get isRevision =>
+      name.toLowerCase().contains('slim') ||
       name.toLowerCase().contains('pro') ||
       name.toLowerCase().contains('lite') ||
       name.toLowerCase().contains('revision');
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    connectivity,
-    cpu,
-    graphics,
-    mainManufacturerId,
-    media,
-    memory,
-    name,
-    os,
-    output,
-    platformLogoId,
-    platformVersionReleaseDateIds,
-    resolutions,
-    slug,
-    sound,
-    storage,
-    summary,
-    url,
-    companyIds,
-  ];
+        id,
+        checksum,
+        connectivity,
+        cpu,
+        graphics,
+        mainManufacturerId,
+        media,
+        memory,
+        name,
+        os,
+        output,
+        platformLogoId,
+        platformVersionReleaseDateIds,
+        resolutions,
+        slug,
+        sound,
+        storage,
+        summary,
+        url,
+        companyIds,
+      ];
 }
-
-

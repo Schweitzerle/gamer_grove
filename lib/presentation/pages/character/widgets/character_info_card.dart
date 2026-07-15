@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 
-class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
+class CharacterInfoCard extends StatelessWidget {
+  // 🆕 ADD this parameter
 
   const CharacterInfoCard({
-    required this.character, super.key,
+    required this.character,
+    super.key,
     this.loadedGamesCount, // 🆕 ADD this
   });
   final Character character;
@@ -77,8 +79,8 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
               Text(
                 character.name,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -86,9 +88,9 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
               Text(
                 'Character Profile',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.purple,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: Colors.purple,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
@@ -145,8 +147,8 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
                 value: loadedGamesCount != null
                     ? '$loadedGamesCount'
                     : character.hasLoadedGames
-                    ? '${character.loadedGameCount}'
-                    : '${character.gameIds.length}',
+                        ? '${character.loadedGameCount}'
+                        : '${character.gameIds.length}',
                 color: Colors.purple,
               ),
             ),
@@ -157,12 +159,12 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
   }
 
   Widget _buildStatItem(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -182,9 +184,9 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
@@ -192,8 +194,8 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
           Text(
             value,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -217,9 +219,9 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
             Text(
               'Also known as:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
@@ -240,8 +242,8 @@ class CharacterInfoCard extends StatelessWidget { // 🆕 ADD this parameter
               child: Text(
                 name,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             );
           }).toList(),

@@ -21,7 +21,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// ));
 /// ```
 class RemoveRatingUseCase implements UseCase<void, RemoveRatingParams> {
-
   RemoveRatingUseCase(this.repository);
   final UserRepositoryImpl repository;
 
@@ -32,7 +31,6 @@ class RemoveRatingUseCase implements UseCase<void, RemoveRatingParams> {
 }
 
 class RemoveRatingParams extends Equatable {
-
   const RemoveRatingParams({
     required this.userId,
     required this.gameId,

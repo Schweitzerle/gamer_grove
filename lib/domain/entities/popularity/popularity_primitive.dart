@@ -12,22 +12,24 @@ enum PopularitySourceEnum {
 
   static PopularitySourceEnum fromValue(int value) {
     return values.firstWhere(
-          (source) => source.value == value,
+      (source) => source.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case steam: return 'Steam';
-      case igdb: return 'IGDB';
-      default: return 'Unknown';
+      case steam:
+        return 'Steam';
+      case igdb:
+        return 'IGDB';
+      default:
+        return 'Unknown';
     }
   }
 }
 
 class PopularityPrimitive extends Equatable {
-
   const PopularityPrimitive({
     required this.id,
     required this.checksum,
@@ -104,16 +106,15 @@ class PopularityPrimitive extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    createdAt,
-    updatedAt,
-    calculatedAt,
-    gameId,
-    value,
-    popularityTypeId,
-    externalPopularitySourceId,
-    popularitySourceEnum,
-  ];
+        id,
+        checksum,
+        createdAt,
+        updatedAt,
+        calculatedAt,
+        gameId,
+        value,
+        popularityTypeId,
+        externalPopularitySourceId,
+        popularitySourceEnum,
+      ];
 }
-

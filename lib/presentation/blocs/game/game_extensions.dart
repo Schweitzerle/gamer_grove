@@ -9,7 +9,6 @@ import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 
 class SearchGamesWithFiltersEvent extends GameEvent {
-
   const SearchGamesWithFiltersEvent({
     required this.query,
     required this.filters,
@@ -22,7 +21,6 @@ class SearchGamesWithFiltersEvent extends GameEvent {
 }
 
 class LoadRecentSearchesEvent extends GameEvent {
-
   const LoadRecentSearchesEvent({required this.userId});
   final String userId;
 
@@ -31,7 +29,6 @@ class LoadRecentSearchesEvent extends GameEvent {
 }
 
 class SaveSearchQueryEvent extends GameEvent {
-
   const SaveSearchQueryEvent({
     required this.userId,
     required this.query,
@@ -48,7 +45,6 @@ class SaveSearchQueryEvent extends GameEvent {
 // ==========================================
 
 class RecentSearchesLoaded extends GameState {
-
   const RecentSearchesLoaded({required this.queries});
   final List<String> queries;
 
@@ -60,7 +56,6 @@ class SearchQuerySaved extends GameState {}
 
 // GameSearchError gibt es bereits als GameError, aber für Konsistenz:
 class GameSearchError extends GameState {
-
   const GameSearchError({required this.message});
   final String message;
 

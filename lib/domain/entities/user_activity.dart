@@ -2,12 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
 
 class UserActivity extends Equatable {
-
   const UserActivity({
     required this.id,
     required this.user,
     required this.activityType,
-    required this.isPublic, required this.createdAt, this.gameId,
+    required this.isPublic,
+    required this.createdAt,
+    this.gameId,
     this.metadata,
   });
   final String id;
@@ -19,5 +20,6 @@ class UserActivity extends Equatable {
   final DateTime createdAt;
 
   @override
-  List<Object?> get props => [id, user, activityType, gameId, metadata, isPublic, createdAt];
+  List<Object?> get props =>
+      [id, user, activityType, gameId, metadata, isPublic, createdAt];
 }

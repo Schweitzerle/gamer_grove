@@ -23,7 +23,6 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EventSearchPage extends StatefulWidget {
-
   const EventSearchPage({
     super.key,
     this.initialFilters,
@@ -174,10 +173,12 @@ class _EventSearchPageState extends State<EventSearchPage> {
 
     // Use SearchEventsWithFiltersEvent if filters are active
     if (_currentFilters.hasFilters || query.trim().isNotEmpty) {
-      _eventBloc.add(SearchEventsWithFiltersEvent(
-        query: query.trim(),
-        filters: _currentFilters,
-      ),);
+      _eventBloc.add(
+        SearchEventsWithFiltersEvent(
+          query: query.trim(),
+          filters: _currentFilters,
+        ),
+      );
     } else {
       _eventBloc.add(SearchEventsEvent(query: query.trim()));
     }
@@ -492,9 +493,7 @@ class _EventSearchPageState extends State<EventSearchPage> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _recentSearches
-                  .map(_buildSearchChip)
-                  .toList(),
+              children: _recentSearches.map(_buildSearchChip).toList(),
             ),
             const SizedBox(height: AppConstants.paddingLarge),
           ],

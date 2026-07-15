@@ -4,7 +4,6 @@ import 'package:gamer_grove/domain/entities/game/game_sort_options.dart';
 import 'package:gamer_grove/domain/entities/user/user_collection_sort_options.dart';
 
 class UserCollectionFilters extends Equatable {
-
   const UserCollectionFilters({
     this.genreIds = const [],
     this.platformIds = const [],
@@ -37,22 +36,24 @@ class UserCollectionFilters extends Equatable {
   // Helper methods
   bool get hasFilters =>
       genreIds.isNotEmpty ||
-          platformIds.isNotEmpty ||
-          minRating != null ||
-          maxRating != null ||
-          minUserRating != null ||
-          maxUserRating != null ||
-          releaseDateFrom != null ||
-          releaseDateTo != null ||
-          addedDateFrom != null ||
-          addedDateTo != null ||
-          releaseYears.isNotEmpty;
+      platformIds.isNotEmpty ||
+      minRating != null ||
+      maxRating != null ||
+      minUserRating != null ||
+      maxUserRating != null ||
+      releaseDateFrom != null ||
+      releaseDateTo != null ||
+      addedDateFrom != null ||
+      addedDateTo != null ||
+      releaseYears.isNotEmpty;
 
   bool get hasGenreFilter => genreIds.isNotEmpty;
   bool get hasPlatformFilter => platformIds.isNotEmpty;
   bool get hasGameRatingFilter => minRating != null || maxRating != null;
-  bool get hasUserRatingFilter => minUserRating != null || maxUserRating != null;
-  bool get hasReleaseDateFilter => releaseDateFrom != null || releaseDateTo != null;
+  bool get hasUserRatingFilter =>
+      minUserRating != null || maxUserRating != null;
+  bool get hasReleaseDateFilter =>
+      releaseDateFrom != null || releaseDateTo != null;
   bool get hasAddedDateFilter => addedDateFrom != null || addedDateTo != null;
 
   UserCollectionFilters copyWith({
@@ -96,9 +97,7 @@ class UserCollectionFilters extends Equatable {
 
   // Get appropriate filters for collection type
   static UserCollectionFilters forWishlist() {
-    return const UserCollectionFilters(
-      
-    );
+    return const UserCollectionFilters();
   }
 
   static UserCollectionFilters forRated() {
@@ -108,26 +107,23 @@ class UserCollectionFilters extends Equatable {
   }
 
   static UserCollectionFilters forRecommended() {
-    return const UserCollectionFilters(
-      
-    );
+    return const UserCollectionFilters();
   }
 
   @override
   List<Object?> get props => [
-    genreIds,
-    platformIds,
-    minRating,
-    maxRating,
-    minUserRating,
-    maxUserRating,
-    releaseDateFrom,
-    releaseDateTo,
-    addedDateFrom,
-    addedDateTo,
-    releaseYears,
-    sortBy,
-    sortOrder,
-  ];
+        genreIds,
+        platformIds,
+        minRating,
+        maxRating,
+        minUserRating,
+        maxUserRating,
+        releaseDateFrom,
+        releaseDateTo,
+        addedDateFrom,
+        addedDateTo,
+        releaseYears,
+        sortBy,
+        sortOrder,
+      ];
 }
-

@@ -5,8 +5,8 @@ import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
-class GetUserWishlist extends UseCase<List<Game>, GetUserWishlistParams> {
 
+class GetUserWishlist extends UseCase<List<Game>, GetUserWishlistParams> {
   GetUserWishlist(this.repository);
   final GameRepository repository;
 
@@ -16,13 +16,14 @@ class GetUserWishlist extends UseCase<List<Game>, GetUserWishlistParams> {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
 
-    return repository.getUserWishlist(params.userId, params.limit, params.offset);
+    return repository.getUserWishlist(
+        params.userId, params.limit, params.offset);
   }
 }
 
 class GetUserWishlistParams extends Equatable {
-
-  const GetUserWishlistParams({required this.userId, required this.limit, required this.offset});
+  const GetUserWishlistParams(
+      {required this.userId, required this.limit, required this.offset});
   final String userId;
   final int limit;
   final int offset;
@@ -30,4 +31,3 @@ class GetUserWishlistParams extends Equatable {
   @override
   List<Object> get props => [userId];
 }
-

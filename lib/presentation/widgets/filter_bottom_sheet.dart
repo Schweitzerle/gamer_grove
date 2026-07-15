@@ -28,7 +28,13 @@ import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
 
 class FilterBottomSheet extends StatefulWidget {
   const FilterBottomSheet({
-    required this.currentFilters, required this.availableGenres, required this.availableGameTypes, required this.availableGameStatuses, required this.availableGameModes, required this.availablePlayerPerspectives, super.key,
+    required this.currentFilters,
+    required this.availableGenres,
+    required this.availableGameTypes,
+    required this.availableGameStatuses,
+    required this.availableGameModes,
+    required this.availablePlayerPerspectives,
+    super.key,
     this.onSearchCompanies,
     this.onSearchGameEngines,
     this.onSearchFranchises,
@@ -363,7 +369,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     // Player Perspectives
     if (_selectedPlayerPerspectives.isNotEmpty) count++;
     // Release Year
-    if (_releaseDateFrom != null || _releaseDateTo != null || _singleReleaseDate != null) count++;
+    if (_releaseDateFrom != null ||
+        _releaseDateTo != null ||
+        _singleReleaseDate != null) count++;
 
     return count;
   }
@@ -372,11 +380,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     var count = 0;
 
     // Total Rating
-    if (_minTotalRating > 0.0 || _maxTotalRating < 10.0 || _minTotalRatingCount != null) count++;
+    if (_minTotalRating > 0.0 ||
+        _maxTotalRating < 10.0 ||
+        _minTotalRatingCount != null) count++;
     // User Rating
-    if (_minUserRating > 0.0 || _maxUserRating < 10.0 || _minUserRatingCount != null) count++;
+    if (_minUserRating > 0.0 ||
+        _maxUserRating < 10.0 ||
+        _minUserRatingCount != null) count++;
     // Aggregated Rating (Critic)
-    if (_minAggregatedRating > 0.0 || _maxAggregatedRating < 100.0 || _minAggregatedRatingCount != null) count++;
+    if (_minAggregatedRating > 0.0 ||
+        _maxAggregatedRating < 100.0 ||
+        _minAggregatedRatingCount != null) count++;
     // Hypes
     if (_minHypes != null || _maxHypes != null) count++;
     // Follows
@@ -1117,8 +1131,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               children: [
                 Row(
                   children: [
-                    Icon(icon,
-                        size: 20, color: Theme.of(context).colorScheme.primary,),
+                    Icon(
+                      icon,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       title,
@@ -2098,8 +2115,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     }
   }
 
-  Widget _buildDateChip(
-      {required String label, required VoidCallback onRemove,}) {
+  Widget _buildDateChip({
+    required String label,
+    required VoidCallback onRemove,
+  }) {
     final theme = Theme.of(context);
     return Chip(
       label: Text(label),
@@ -2336,10 +2355,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                       leading: leadingWidget,
                       title: itemBuilder(item),
                       trailing: isSelected
-                          ? Icon(Icons.check_circle,
-                              color: theme.colorScheme.primary,)
-                          : Icon(Icons.add_circle_outline,
-                              color: theme.colorScheme.primary,),
+                          ? Icon(
+                              Icons.check_circle,
+                              color: theme.colorScheme.primary,
+                            )
+                          : Icon(
+                              Icons.add_circle_outline,
+                              color: theme.colorScheme.primary,
+                            ),
                       onTap: () {
                         if (isSelected) {
                           onRemove(itemId);
@@ -2792,8 +2815,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       releaseDateTo: _singleReleaseDate != null && _dateOperator == 'before'
           ? _singleReleaseDate
           : _singleReleaseDate != null && _dateOperator == 'on'
-              ? DateTime(_singleReleaseDate!.year, _singleReleaseDate!.month,
-                  _singleReleaseDate!.day, 23, 59, 59,)
+              ? DateTime(
+                  _singleReleaseDate!.year,
+                  _singleReleaseDate!.month,
+                  _singleReleaseDate!.day,
+                  23,
+                  59,
+                  59,
+                )
               : _releaseDateTo,
       sortBy: _sortBy,
       sortOrder: _sortOrder,
@@ -2898,9 +2927,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 // ==========================================
 
 class DateFilterDialog extends StatefulWidget {
-
   const DateFilterDialog({
-    required this.onApply, super.key,
+    required this.onApply,
+    super.key,
     this.initialDateFrom,
     this.initialDateTo,
     this.initialSingleDate,
@@ -3221,8 +3250,10 @@ class _DateFilterDialogState extends State<DateFilterDialog>
                         constraints: const BoxConstraints(),
                       ),
                     const SizedBox(width: 8),
-                    Icon(Icons.calendar_today,
-                        color: theme.colorScheme.primary,),
+                    Icon(
+                      Icons.calendar_today,
+                      color: theme.colorScheme.primary,
+                    ),
                   ],
                 ),
               ],

@@ -15,7 +15,8 @@ enum PlatformCategoryEnum {
   computer,
 }
 
-class Platform extends Equatable { // Keep for backward compatibility
+class Platform extends Equatable {
+  // Keep for backward compatibility
 
   const Platform({
     required this.id,
@@ -111,31 +112,31 @@ class Platform extends Equatable { // Keep for backward compatibility
   // ✅ CONVENIENCE GETTERS
   bool get hasLogo => logo != null;
   bool get isConsole => categoryEnum == PlatformCategoryEnum.console;
-  bool get isPC => categoryEnum == PlatformCategoryEnum.operatingSystem ||
+  bool get isPC =>
+      categoryEnum == PlatformCategoryEnum.operatingSystem ||
       categoryEnum == PlatformCategoryEnum.computer;
   bool get isHandheld => categoryEnum == PlatformCategoryEnum.portableConsole;
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    abbreviation,
-    alternativeName,
-    generation,
-    platformFamilyId,
-    platformLogoId,
-    logo, // ✅ NEU
-    platformTypeId,
-    slug,
-    summary,
-    url,
-    versionIds,
-    websiteIds,
-    createdAt,
-    updatedAt,
-    categoryEnum,
-    category,
-  ];
+        id,
+        checksum,
+        name,
+        abbreviation,
+        alternativeName,
+        generation,
+        platformFamilyId,
+        platformLogoId,
+        logo, // ✅ NEU
+        platformTypeId,
+        slug,
+        summary,
+        url,
+        versionIds,
+        websiteIds,
+        createdAt,
+        updatedAt,
+        categoryEnum,
+        category,
+      ];
 }
-

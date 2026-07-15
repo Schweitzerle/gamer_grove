@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AboutUsPage extends StatelessWidget {
@@ -27,7 +26,8 @@ class AboutUsPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Text('This app uses the IGDB API but is not endorsed or certified by IGDB.'),
+            Text(
+                'This app uses the IGDB API but is not endorsed or certified by IGDB.'),
           ],
         ),
       ),

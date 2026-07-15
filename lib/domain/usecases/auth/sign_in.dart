@@ -28,7 +28,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class SignInUseCase implements UseCase<User, SignInParams> {
-
   SignInUseCase(this.repository);
   final AuthRepository repository;
 
@@ -36,15 +35,19 @@ class SignInUseCase implements UseCase<User, SignInParams> {
   Future<Either<Failure, User>> call(SignInParams params) async {
     // Validate inputs
     if (!_isValidEmail(params.email)) {
-      return const Left(ValidationFailure(
-        message: 'Invalid email format',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'Invalid email format',
+        ),
+      );
     }
 
     if (!_isValidPassword(params.password)) {
-      return const Left(ValidationFailure(
-        message: 'Password must be at least 6 characters',
-      ),);
+      return const Left(
+        ValidationFailure(
+          message: 'Password must be at least 6 characters',
+        ),
+      );
     }
 
     return repository.signIn(
@@ -68,7 +71,6 @@ class SignInUseCase implements UseCase<User, SignInParams> {
 }
 
 class SignInParams extends Equatable {
-
   const SignInParams({
     required this.email,
     required this.password,

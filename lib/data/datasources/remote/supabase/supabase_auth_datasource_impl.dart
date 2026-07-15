@@ -12,7 +12,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 /// Uses Supabase client for all authentication operations and
 /// maps errors to custom exceptions.
 class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
-
   SupabaseAuthDataSourceImpl({required SupabaseClient supabase})
       : _supabase = supabase;
   final SupabaseClient _supabase;

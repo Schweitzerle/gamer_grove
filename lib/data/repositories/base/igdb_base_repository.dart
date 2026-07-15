@@ -38,7 +38,6 @@ import 'package:http/http.dart' as http;
 /// }
 /// ```
 abstract class IgdbBaseRepository {
-
   IgdbBaseRepository({
     required this.networkInfo,
   });
@@ -75,9 +74,11 @@ abstract class IgdbBaseRepository {
     try {
       // Check network connectivity first
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       // Execute the operation
@@ -85,49 +86,67 @@ abstract class IgdbBaseRepository {
       return Right(result);
     } on SocketException {
       // Handle network socket errors
-      return const Left(NetworkFailure(
-        message: 'Connection failed. Please check your network.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Connection failed. Please check your network.',
+        ),
+      );
     } on TimeoutException {
       // Handle timeout errors
-      return const Left(NetworkFailure(
-        message: 'Request timed out. Please try again.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Request timed out. Please try again.',
+        ),
+      );
     } on http.ClientException catch (e) {
       // Handle HTTP client errors
-      return Left(NetworkFailure(
-        message: 'Network error: ${e.message}',
-      ),);
+      return Left(
+        NetworkFailure(
+          message: 'Network error: ${e.message}',
+        ),
+      );
     } on FormatException {
       // Handle JSON parsing errors
-      return const Left(ServerFailure(
-        message: 'Invalid data received from server',
-      ),);
+      return const Left(
+        ServerFailure(
+          message: 'Invalid data received from server',
+        ),
+      );
     } on IgdbRateLimitException catch (e) {
       // Handle IGDB rate limiting
-      return Left(ServerFailure(
-        message: e.message,
-      ),);
+      return Left(
+        ServerFailure(
+          message: e.message,
+        ),
+      );
     } on IgdbAuthenticationException catch (e) {
       // Handle IGDB authentication errors
-      return Left(AuthenticationFailure(
-        message: e.message,
-      ),);
+      return Left(
+        AuthenticationFailure(
+          message: e.message,
+        ),
+      );
     } on IgdbNotFoundException {
       // Handle 404 errors
-      return const Left(ServerFailure(
-        message: 'Resource not found',
-      ),);
+      return const Left(
+        ServerFailure(
+          message: 'Resource not found',
+        ),
+      );
     } on IgdbApiException catch (e) {
       // Handle general IGDB API errors
-      return Left(ServerFailure(
-        message: e.message,
-      ),);
+      return Left(
+        ServerFailure(
+          message: e.message,
+        ),
+      );
     } catch (e) {
       // Handle any other unexpected errors
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 
@@ -148,21 +167,27 @@ abstract class IgdbBaseRepository {
   }) async {
     try {
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       await operation();
       return const Right(null);
     } on SocketException {
-      return const Left(NetworkFailure(
-        message: 'Connection failed. Please check your network.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Connection failed. Please check your network.',
+        ),
+      );
     } on TimeoutException {
-      return const Left(NetworkFailure(
-        message: 'Request timed out. Please try again.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Request timed out. Please try again.',
+        ),
+      );
     } on IgdbRateLimitException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on IgdbAuthenticationException catch (e) {
@@ -170,9 +195,11 @@ abstract class IgdbBaseRepository {
     } on IgdbApiException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 
@@ -197,9 +224,11 @@ abstract class IgdbBaseRepository {
   }) async {
     try {
       if (!await networkInfo.isConnected) {
-        return const Left(NetworkFailure(
-          message: 'No internet connection. Please check your network.',
-        ),);
+        return const Left(
+          NetworkFailure(
+            message: 'No internet connection. Please check your network.',
+          ),
+        );
       }
 
       // Execute all operations in parallel
@@ -208,13 +237,17 @@ abstract class IgdbBaseRepository {
 
       return Right(results);
     } on SocketException {
-      return const Left(NetworkFailure(
-        message: 'Connection failed. Please check your network.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Connection failed. Please check your network.',
+        ),
+      );
     } on TimeoutException {
-      return const Left(NetworkFailure(
-        message: 'Request timed out. Please try again.',
-      ),);
+      return const Left(
+        NetworkFailure(
+          message: 'Request timed out. Please try again.',
+        ),
+      );
     } on IgdbRateLimitException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on IgdbAuthenticationException catch (e) {
@@ -222,9 +255,11 @@ abstract class IgdbBaseRepository {
     } on IgdbApiException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(
-        message: '$errorMessage: $e',
-      ),);
+      return Left(
+        ServerFailure(
+          message: '$errorMessage: $e',
+        ),
+      );
     }
   }
 
@@ -291,7 +326,6 @@ abstract class IgdbBaseRepository {
 
 /// Base exception for all IGDB API errors.
 abstract class IgdbApiException implements Exception {
-
   const IgdbApiException(this.message, {this.statusCode});
   final String message;
   final int? statusCode;

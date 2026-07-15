@@ -8,13 +8,14 @@ import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetFollowSuggestions extends UseCase<List<User>, GetFollowSuggestionsParams> {
-
+class GetFollowSuggestions
+    extends UseCase<List<User>, GetFollowSuggestionsParams> {
   GetFollowSuggestions(this.repository);
   final UserRepository repository;
 
   @override
-  Future<Either<Failure, List<User>>> call(GetFollowSuggestionsParams params) async {
+  Future<Either<Failure, List<User>>> call(
+      GetFollowSuggestionsParams params) async {
     if (params.userId.isEmpty) {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
@@ -27,7 +28,6 @@ class GetFollowSuggestions extends UseCase<List<User>, GetFollowSuggestionsParam
 }
 
 class GetFollowSuggestionsParams extends Equatable {
-
   const GetFollowSuggestionsParams({
     required this.userId,
     this.limit = 20,

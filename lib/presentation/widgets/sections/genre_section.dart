@@ -8,9 +8,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 // lib/presentation/pages/game_detail/widgets/sections/genre_section.dart
 
 class GenreSection extends StatelessWidget {
-
   const GenreSection({
-    required this.game, super.key,
+    required this.game,
+    super.key,
   });
   final Game game;
 
@@ -128,33 +128,35 @@ class GenreSection extends StatelessWidget {
           runSpacing: 6,
           children: [
             // Display first tags - CLICKABLE
-            ...genres.take(maxDisplayed).map((genre) => InkWell(
-                  onTap: () => Navigations.navigateToGenreGames(
-                    context,
-                    genreId: genre.id,
-                    genreName: genre.name,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: color.withOpacity(0.3),
+            ...genres.take(maxDisplayed).map(
+                  (genre) => InkWell(
+                    onTap: () => Navigations.navigateToGenreGames(
+                      context,
+                      genreId: genre.id,
+                      genreName: genre.name,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        genre.name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      genre.name,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: color,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ),
-                ),),
+                ),
 
             // ✅ SHOW ALL BUTTON
             if (hasMore)
@@ -232,32 +234,35 @@ class GenreSection extends StatelessWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
-            ...themes.take(maxDisplayed).map((theme) => InkWell(
-                onTap: () => Navigations.navigateToThemeGames(
+            ...themes.take(maxDisplayed).map(
+                  (theme) => InkWell(
+                    onTap: () => Navigations.navigateToThemeGames(
                       context,
                       themeId: theme.id,
                       themeName: theme.name,
                     ),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: color.withOpacity(0.3),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        theme.name.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    theme.name.toString(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: color,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),),),
+                ),
             if (hasMore)
               InkWell(
                 onTap: () =>
@@ -329,37 +334,44 @@ class GenreSection extends StatelessWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
-            ...keywords.take(maxDisplayed).map((keyword) => InkWell(
-                  onTap: () => Navigations.navigateToKeywordGames(
-                    context,
-                    keywordId: keyword.id,
-                    keywordName: keyword.name,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: color.withOpacity(0.3),
+            ...keywords.take(maxDisplayed).map(
+                  (keyword) => InkWell(
+                    onTap: () => Navigations.navigateToKeywordGames(
+                      context,
+                      keywordId: keyword.id,
+                      keywordName: keyword.name,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        keyword.name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      keyword.name,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: color,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ),
-                ),),
+                ),
             if (hasMore)
               InkWell(
                 onTap: () => _showKeywordsBottomSheet(
-                    context, title, keywords, color, icon,),
+                  context,
+                  title,
+                  keywords,
+                  color,
+                  icon,
+                ),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding:
@@ -476,36 +488,40 @@ class GenreSection extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: genres
-                        .map((genre) => InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigations.navigateToGenreGames(
-                                  context,
-                                  genreId: genre.id,
-                                  genreName: genre.name,
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8,),
-                                decoration: BoxDecoration(
-                                  color: color.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: color.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Text(
-                                  genre.name,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: color,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        .map(
+                          (genre) => InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigations.navigateToGenreGames(
+                                context,
+                                genreId: genre.id,
+                                genreName: genre.name,
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: color.withOpacity(0.3),
                                 ),
                               ),
-                            ),)
+                              child: Text(
+                                genre.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: color,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -598,7 +614,8 @@ class GenreSection extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: themes
-                        .map((theme) => InkWell(
+                        .map(
+                          (theme) => InkWell(
                             onTap: () {
                               Navigator.pop(context);
                               Navigations.navigateToThemeGames(
@@ -610,7 +627,9 @@ class GenreSection extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8,),
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: color.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
@@ -626,7 +645,9 @@ class GenreSection extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ),),)
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),
@@ -719,36 +740,40 @@ class GenreSection extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: keywords
-                        .map((keyword) => InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                                Navigations.navigateToKeywordGames(
-                                  context,
-                                  keywordId: keyword.id,
-                                  keywordName: keyword.name,
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8,),
-                                decoration: BoxDecoration(
-                                  color: color.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: color.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Text(
-                                  keyword.name,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: color,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        .map(
+                          (keyword) => InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigations.navigateToKeywordGames(
+                                context,
+                                keywordId: keyword.id,
+                                keywordName: keyword.name,
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: color.withOpacity(0.3),
                                 ),
                               ),
-                            ),)
+                              child: Text(
+                                keyword.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: color,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                         .toList(),
                   ),
                 ),

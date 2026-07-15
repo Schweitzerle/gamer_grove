@@ -4,7 +4,6 @@ import 'package:gamer_grove/domain/entities/language/language.dart';
 import 'package:gamer_grove/domain/entities/language/language_support_type.dart';
 
 class LanguageSupport extends Equatable {
-
   const LanguageSupport({
     required this.id,
     required this.checksum,
@@ -38,14 +37,14 @@ class LanguageSupport extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    gameId,
-    languageId,
-    languageSupportTypeId,
-    language,
-    supportType,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        gameId,
+        languageId,
+        languageSupportTypeId,
+        language,
+        supportType,
+        createdAt,
+        updatedAt,
+      ];
 }

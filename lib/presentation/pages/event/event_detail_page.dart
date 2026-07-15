@@ -18,9 +18,9 @@ import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
 
 // Updated event_detail_page.dart snippet:
 class EventDetailPage extends StatefulWidget {
-
   const EventDetailPage({
-    required this.eventId, super.key,
+    required this.eventId,
+    super.key,
     this.game,
   });
   final int eventId;
@@ -69,8 +69,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -111,8 +113,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: Theme.of(context).colorScheme.onSurface,),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),

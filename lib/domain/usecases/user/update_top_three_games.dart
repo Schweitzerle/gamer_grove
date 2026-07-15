@@ -8,7 +8,6 @@ import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
-
   UpdateTopThreeGames(this.repository);
   final UserRepository repository;
 
@@ -19,12 +18,14 @@ class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
     }
 
     if (params.gameIds.length != 3) {
-      return const Left(ValidationFailure(message: 'Must provide exactly 3 games'));
+      return const Left(
+          ValidationFailure(message: 'Must provide exactly 3 games'));
     }
 
     // Check for duplicates
     if (params.gameIds.toSet().length != 3) {
-      return const Left(ValidationFailure(message: 'All three games must be different'));
+      return const Left(
+          ValidationFailure(message: 'All three games must be different'));
     }
 
     return repository.updateTopThreeGames(
@@ -35,7 +36,6 @@ class UpdateTopThreeGames extends UseCase<void, UpdateTopThreeGamesParams> {
 }
 
 class UpdateTopThreeGamesParams extends Equatable {
-
   const UpdateTopThreeGamesParams({
     required this.userId,
     required this.gameIds,

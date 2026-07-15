@@ -185,4 +185,3 @@ class SearchModel extends Search {
     };
   }
 }
-

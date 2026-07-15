@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class WebsiteType extends Equatable {
-
   const WebsiteType({
     required this.id,
     required this.checksum,
@@ -57,30 +56,40 @@ class WebsiteType extends Equatable {
 
   // Helper to check if it's a social media type
   bool get isSocialMedia => [
-    'facebook', 'twitter', 'instagram',
-    'youtube', 'twitch', 'reddit',
-    'discord', 'bluesky',
-  ].contains(type.toLowerCase());
+        'facebook',
+        'twitter',
+        'instagram',
+        'youtube',
+        'twitch',
+        'reddit',
+        'discord',
+        'bluesky',
+      ].contains(type.toLowerCase());
 
   // Helper to check if it's a store/marketplace
   bool get isStore => [
-    'steam', 'epicgames', 'gog',
-    'iphone', 'ipad', 'android',
-  ].contains(type.toLowerCase());
+        'steam',
+        'epicgames',
+        'gog',
+        'iphone',
+        'ipad',
+        'android',
+      ].contains(type.toLowerCase());
 
   // Helper to check if it's a wiki/info site
   bool get isWiki => [
-    'wikia', 'wikipedia',
-  ].contains(type.toLowerCase());
+        'wikia',
+        'wikipedia',
+      ].contains(type.toLowerCase());
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    type,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        type,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 // Website Category Enum (für Legacy Support)
@@ -113,7 +122,7 @@ enum WebsiteCategory {
 
   static WebsiteCategory fromValue(int value) {
     return values.firstWhere(
-          (category) => category.value == value,
+      (category) => category.value == value,
       orElse: () => official,
     );
   }

@@ -8,7 +8,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class BatchRateGames extends UseCase<void, BatchRateGamesParams> {
-
   BatchRateGames(this.repository);
   final GameRepository repository;
 
@@ -18,13 +17,15 @@ class BatchRateGames extends UseCase<void, BatchRateGamesParams> {
       return const Left(ValidationFailure(message: 'User ID cannot be empty'));
     }
     if (params.gameRatings.isEmpty) {
-      return const Left(ValidationFailure(message: 'Game ratings cannot be empty'));
+      return const Left(
+          ValidationFailure(message: 'Game ratings cannot be empty'));
     }
 
     // Validate ratings are in valid range (0-10)
     for (final rating in params.gameRatings.values) {
       if (rating < 0 || rating > 10) {
-        return const Left(ValidationFailure(message: 'Ratings must be between 0 and 10'));
+        return const Left(
+            ValidationFailure(message: 'Ratings must be between 0 and 10'));
       }
     }
 
@@ -35,7 +36,8 @@ class BatchRateGames extends UseCase<void, BatchRateGamesParams> {
   }
 }
 
-class BatchRateGamesParams extends Equatable { // gameId -> rating
+class BatchRateGamesParams extends Equatable {
+  // gameId -> rating
 
   const BatchRateGamesParams({
     required this.userId,
@@ -47,4 +49,3 @@ class BatchRateGamesParams extends Equatable { // gameId -> rating
   @override
   List<Object> get props => [userId, gameRatings];
 }
-

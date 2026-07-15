@@ -2,7 +2,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart'; // 🆕 Add this import
 
-class Franchise extends Equatable { // Populated when fetched for UI
+class Franchise extends Equatable {
+  // Populated when fetched for UI
 
   const Franchise({
     required this.id,
@@ -37,14 +38,14 @@ class Franchise extends Equatable { // Populated when fetched for UI
 
   @override
   List<Object?> get props => [
-    id,
-    checksum,
-    name,
-    slug,
-    url,
-    gameIds,
-    createdAt,
-    updatedAt,
-    games, // 🆕 Add this to props
-  ];
+        id,
+        checksum,
+        name,
+        slug,
+        url,
+        gameIds,
+        createdAt,
+        updatedAt,
+        games, // 🆕 Add this to props
+      ];
 }

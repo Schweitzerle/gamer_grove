@@ -46,4 +46,3 @@ class CollectionRelationModel extends CollectionRelation {
     };
   }
 }
-

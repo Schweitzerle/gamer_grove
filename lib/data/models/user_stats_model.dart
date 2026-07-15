@@ -10,13 +10,16 @@ import 'package:gamer_grove/domain/entities/user/user_stats.dart';
 /// User statistics model for data layer.
 ///
 /// Represents aggregated user statistics from Supabase database.
-class UserStatsModel { // Optional: if tracking achievements
+class UserStatsModel {
+  // Optional: if tracking achievements
 
   const UserStatsModel({
     required this.totalGamesRated,
     required this.totalGamesWishlisted,
     required this.totalGamesRecommended,
-    required this.followersCount, required this.followingCount, this.averageRating,
+    required this.followersCount,
+    required this.followingCount,
+    this.averageRating,
     this.totalPlaytime,
     this.totalAchievements,
   });

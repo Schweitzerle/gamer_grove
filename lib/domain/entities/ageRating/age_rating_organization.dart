@@ -3,7 +3,6 @@
 import 'package:equatable/equatable.dart';
 
 class AgeRatingOrganization extends Equatable {
-
   const AgeRatingOrganization({
     required this.id,
     required this.checksum,
@@ -38,14 +37,22 @@ class AgeRatingOrganization extends Equatable {
   // Helper für Display
   String get displayName {
     switch (id) {
-      case 1: return 'ESRB';
-      case 2: return 'PEGI';
-      case 3: return 'CERO';
-      case 4: return 'USK';
-      case 5: return 'GRAC';
-      case 6: return 'ClassInd';
-      case 7: return 'ACB';
-      default: return name;
+      case 1:
+        return 'ESRB';
+      case 2:
+        return 'PEGI';
+      case 3:
+        return 'CERO';
+      case 4:
+        return 'USK';
+      case 5:
+        return 'GRAC';
+      case 6:
+        return 'ClassInd';
+      case 7:
+        return 'ACB';
+      default:
+        return name;
     }
   }
 

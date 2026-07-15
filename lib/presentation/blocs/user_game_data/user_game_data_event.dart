@@ -10,7 +10,6 @@ abstract class UserGameDataEvent extends Equatable {
 
 /// Load all user game data for a user
 class LoadUserGameDataEvent extends UserGameDataEvent {
-
   const LoadUserGameDataEvent(this.userId);
   final String userId;
 
@@ -20,7 +19,6 @@ class LoadUserGameDataEvent extends UserGameDataEvent {
 
 /// Toggle wishlist for a game
 class ToggleWishlistEvent extends UserGameDataEvent {
-
   const ToggleWishlistEvent({
     required this.userId,
     required this.gameId,
@@ -34,7 +32,6 @@ class ToggleWishlistEvent extends UserGameDataEvent {
 
 /// Toggle recommendation for a game
 class ToggleRecommendationEvent extends UserGameDataEvent {
-
   const ToggleRecommendationEvent({
     required this.userId,
     required this.gameId,
@@ -48,7 +45,6 @@ class ToggleRecommendationEvent extends UserGameDataEvent {
 
 /// Rate a game
 class RateGameEvent extends UserGameDataEvent {
-
   const RateGameEvent({
     required this.userId,
     required this.gameId,
@@ -64,7 +60,6 @@ class RateGameEvent extends UserGameDataEvent {
 
 /// Remove rating from a game
 class RemoveRatingEvent extends UserGameDataEvent {
-
   const RemoveRatingEvent({
     required this.userId,
     required this.gameId,
@@ -78,7 +73,6 @@ class RemoveRatingEvent extends UserGameDataEvent {
 
 /// Update top three games
 class UpdateTopThreeEvent extends UserGameDataEvent {
-
   const UpdateTopThreeEvent({
     required this.userId,
     required this.gameIds,
@@ -91,7 +85,8 @@ class UpdateTopThreeEvent extends UserGameDataEvent {
 }
 
 /// Set a game at a specific position in the user's top three
-class SetGameTopThreePositionEvent extends UserGameDataEvent { // 1, 2, or 3
+class SetGameTopThreePositionEvent extends UserGameDataEvent {
+  // 1, 2, or 3
 
   const SetGameTopThreePositionEvent({
     required this.userId,
@@ -108,7 +103,6 @@ class SetGameTopThreePositionEvent extends UserGameDataEvent { // 1, 2, or 3
 
 /// Remove a game from the user's top three
 class RemoveFromTopThreeEvent extends UserGameDataEvent {
-
   const RemoveFromTopThreeEvent({
     required this.userId,
     required this.gameId,
@@ -127,7 +121,6 @@ class ClearUserGameDataEvent extends UserGameDataEvent {
 
 /// Refresh user game data from backend
 class RefreshUserGameDataEvent extends UserGameDataEvent {
-
   const RefreshUserGameDataEvent(this.userId);
   final String userId;
 

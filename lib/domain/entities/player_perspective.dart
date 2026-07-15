@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class PlayerPerspective extends Equatable {
-
   const PlayerPerspective({
     required this.id,
     required this.name,

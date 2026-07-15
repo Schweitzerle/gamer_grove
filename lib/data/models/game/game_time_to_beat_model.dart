@@ -35,13 +35,13 @@ class GameTimeToBeatModel extends GameTimeToBeat {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'checksum': checksum,
-    'game': gameId,
-    'hastily': hastily,
-    'normally': normally,
-    'completely': completely,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
+        'id': id,
+        'checksum': checksum,
+        'game': gameId,
+        'hastily': hastily,
+        'normally': normally,
+        'completely': completely,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
 }

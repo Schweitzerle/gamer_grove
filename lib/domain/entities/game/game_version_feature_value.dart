@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameVersionFeatureValue extends Equatable {
-
   const GameVersionFeatureValue({
     required this.id,
     required this.checksum,
@@ -25,7 +24,8 @@ class GameVersionFeatureValue extends Equatable {
   bool get isUnknown => includedFeature == 'UNKNOWN' || includedFeature == null;
 
   @override
-  List<Object?> get props => [id, checksum, gameId, gameFeatureId, includedFeature, note];
+  List<Object?> get props =>
+      [id, checksum, gameId, gameFeatureId, includedFeature, note];
 }
 
 // Included Feature Enum
@@ -39,6 +39,7 @@ enum IncludedFeature {
 
   static IncludedFeature fromValue(String? value) {
     if (value == null) return unknown;
-    return values.firstWhere((feature) => feature.value == value, orElse: () => unknown);
+    return values.firstWhere((feature) => feature.value == value,
+        orElse: () => unknown);
   }
 }

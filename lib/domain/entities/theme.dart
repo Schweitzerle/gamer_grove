@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class IGDBTheme extends Equatable {
-
   const IGDBTheme({
     required this.id,
     required this.checksum,

@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameVersion extends Equatable {
-
   const GameVersion({
     required this.id,
     required this.checksum,
@@ -25,5 +24,6 @@ class GameVersion extends Equatable {
   final DateTime? updatedAt;
 
   @override
-  List<Object?> get props => [id, checksum, gameId, featureIds, gameIds, url, createdAt, updatedAt];
+  List<Object?> get props =>
+      [id, checksum, gameId, featureIds, gameIds, url, createdAt, updatedAt];
 }

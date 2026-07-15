@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetUserRated extends UseCase<List<Game>, GetUserRatedParams> {
-
   GetUserRated(this.repository);
   final GameRepository repository;
 
@@ -17,14 +16,19 @@ class GetUserRated extends UseCase<List<Game>, GetUserRatedParams> {
     }
 
     return repository.getUserRated(
-        params.userId, params.limit, params.offset,);
+      params.userId,
+      params.limit,
+      params.offset,
+    );
   }
 }
 
 class GetUserRatedParams extends Equatable {
-
-  const GetUserRatedParams(
-      {required this.userId, required this.limit, required this.offset,});
+  const GetUserRatedParams({
+    required this.userId,
+    required this.limit,
+    required this.offset,
+  });
   final String userId;
   final int limit;
   final int offset;

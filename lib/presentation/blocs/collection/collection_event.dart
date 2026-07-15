@@ -19,7 +19,6 @@ abstract class CollectionEvent extends Equatable {
 /// Event to load enriched game data for multiple games.
 /// This is the PERFORMANCE-CRITICAL event!
 class LoadGameEnrichmentEvent extends CollectionEvent {
-
   const LoadGameEnrichmentEvent({
     required this.userId,
     required this.gameIds,
@@ -33,7 +32,6 @@ class LoadGameEnrichmentEvent extends CollectionEvent {
 
 /// Event to rate a game.
 class RateGameEvent extends CollectionEvent {
-
   const RateGameEvent({
     required this.userId,
     required this.gameId,
@@ -49,7 +47,6 @@ class RateGameEvent extends CollectionEvent {
 
 /// Event to remove a rating.
 class RemoveRatingEvent extends CollectionEvent {
-
   const RemoveRatingEvent({
     required this.userId,
     required this.gameId,
@@ -63,7 +60,6 @@ class RemoveRatingEvent extends CollectionEvent {
 
 /// Event to toggle wishlist.
 class ToggleWishlistEvent extends CollectionEvent {
-
   const ToggleWishlistEvent({
     required this.userId,
     required this.gameId,
@@ -77,7 +73,6 @@ class ToggleWishlistEvent extends CollectionEvent {
 
 /// Event to toggle recommended.
 class ToggleRecommendedEvent extends CollectionEvent {
-
   const ToggleRecommendedEvent({
     required this.userId,
     required this.gameId,
@@ -91,7 +86,6 @@ class ToggleRecommendedEvent extends CollectionEvent {
 
 /// Event to update top 3 games.
 class UpdateTopThreeEvent extends CollectionEvent {
-
   const UpdateTopThreeEvent({
     required this.userId,
     required this.gameIds,
@@ -105,7 +99,6 @@ class UpdateTopThreeEvent extends CollectionEvent {
 
 /// Event to load top 3 games.
 class LoadTopThreeEvent extends CollectionEvent {
-
   const LoadTopThreeEvent({required this.userId});
   final String userId;
 
@@ -115,7 +108,6 @@ class LoadTopThreeEvent extends CollectionEvent {
 
 /// Event to clear top 3 games.
 class ClearTopThreeEvent extends CollectionEvent {
-
   const ClearTopThreeEvent({required this.userId});
   final String userId;
 
@@ -125,7 +117,6 @@ class ClearTopThreeEvent extends CollectionEvent {
 
 /// Event to load wishlisted games.
 class LoadWishlistedGamesEvent extends CollectionEvent {
-
   const LoadWishlistedGamesEvent({
     required this.userId,
     this.limit,
@@ -141,7 +132,6 @@ class LoadWishlistedGamesEvent extends CollectionEvent {
 
 /// Event to load rated games.
 class LoadRatedGamesEvent extends CollectionEvent {
-
   const LoadRatedGamesEvent({
     required this.userId,
     this.limit,

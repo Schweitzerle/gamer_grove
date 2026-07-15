@@ -33,7 +33,8 @@ class InputValidator {
     return null;
   }
 
-  static String? validatePasswordConfirmation(String? password, String? confirmation) {
+  static String? validatePasswordConfirmation(
+      String? password, String? confirmation) {
     if (confirmation == null || confirmation.isEmpty) {
       return 'Password confirmation is required';
     }
@@ -114,18 +115,19 @@ class InputValidator {
     return null;
   }
 
-  static String? validateMaxLength(String? value, int maxLength, String fieldName) {
+  static String? validateMaxLength(
+      String? value, int maxLength, String fieldName) {
     if (value != null && value.length > maxLength) {
       return '$fieldName cannot exceed $maxLength characters';
     }
     return null;
   }
 
-  static String? validateMinLength(String? value, int minLength, String fieldName) {
+  static String? validateMinLength(
+      String? value, int minLength, String fieldName) {
     if (value != null && value.isNotEmpty && value.length < minLength) {
       return '$fieldName must be at least $minLength characters';
     }
     return null;
   }
 }
-

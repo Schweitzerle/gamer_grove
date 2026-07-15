@@ -7,7 +7,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameDetails extends UseCase<Game, GameDetailsParams> {
-
   GetGameDetails(this.repository);
   final GameRepository repository;
 
@@ -18,11 +17,9 @@ class GetGameDetails extends UseCase<Game, GameDetailsParams> {
 }
 
 class GameDetailsParams extends Equatable {
-
   const GameDetailsParams({required this.gameId});
   final int gameId;
 
   @override
   List<Object> get props => [gameId];
 }
-

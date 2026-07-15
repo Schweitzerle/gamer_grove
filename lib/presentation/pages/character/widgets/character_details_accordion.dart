@@ -6,9 +6,9 @@ import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion
 import 'package:intl/intl.dart';
 
 class CharacterDetailsAccordion extends StatelessWidget {
-
   const CharacterDetailsAccordion({
-    required this.character, super.key,
+    required this.character,
+    super.key,
   });
   final Character character;
 
@@ -107,10 +107,12 @@ class CharacterDetailsAccordion extends StatelessWidget {
 
     return Column(
       children: accordionItems
-          .map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: item,
-              ),)
+          .map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: item,
+            ),
+          )
           .toList(),
     );
   }
@@ -269,8 +271,11 @@ class CharacterDetailsAccordion extends StatelessWidget {
               color: Colors.amber.withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Icon(Icons.alternate_email,
-                size: 16, color: Colors.amber,),
+            child: const Icon(
+              Icons.alternate_email,
+              size: 16,
+              color: Colors.amber,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -291,7 +296,9 @@ class CharacterDetailsAccordion extends StatelessWidget {
                   children: character.akas.map((name) {
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2,),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.amber.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),

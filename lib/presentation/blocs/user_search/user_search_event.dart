@@ -12,7 +12,6 @@ abstract class UserSearchEvent extends Equatable {
 
 /// Event to search for users with a query
 class SearchUsersRequested extends UserSearchEvent {
-
   const SearchUsersRequested(this.query);
   final String query;
 
@@ -42,7 +41,6 @@ class RetrySearchRequested extends UserSearchEvent {
 
 /// Event to load followers for a user
 class LoadFollowersRequested extends UserSearchEvent {
-
   const LoadFollowersRequested(this.userId);
   final String userId;
 
@@ -52,7 +50,6 @@ class LoadFollowersRequested extends UserSearchEvent {
 
 /// Event to load following for a user
 class LoadFollowingRequested extends UserSearchEvent {
-
   const LoadFollowingRequested(this.userId);
   final String userId;
 

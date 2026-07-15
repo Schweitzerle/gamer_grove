@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class CharacterGender extends Equatable {
-
   const CharacterGender({
     required this.id,
     required this.checksum,
@@ -20,7 +19,6 @@ class CharacterGender extends Equatable {
   List<Object?> get props => [id, checksum, name, createdAt, updatedAt];
 }
 
-
 // Character Gender Enum (DEPRECATED but still useful)
 enum CharacterGenderEnum {
   male(0),
@@ -33,17 +31,21 @@ enum CharacterGenderEnum {
 
   static CharacterGenderEnum fromValue(int value) {
     return values.firstWhere(
-          (gender) => gender.value == value,
+      (gender) => gender.value == value,
       orElse: () => unknown,
     );
   }
 
   String get displayName {
     switch (this) {
-      case male: return 'Male';
-      case female: return 'Female';
-      case other: return 'Other';
-      case unknown: return 'Unknown';
+      case male:
+        return 'Male';
+      case female:
+        return 'Female';
+      case other:
+        return 'Other';
+      case unknown:
+        return 'Unknown';
     }
   }
 }

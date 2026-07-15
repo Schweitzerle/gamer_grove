@@ -80,11 +80,16 @@ class ReleaseDateModel extends ReleaseDate {
   }) {
     ReleaseDateCategory category;
     switch (quarter) {
-      case 1: category = ReleaseDateCategory.yyyyq1;
-      case 2: category = ReleaseDateCategory.yyyyq2;
-      case 3: category = ReleaseDateCategory.yyyyq3;
-      case 4: category = ReleaseDateCategory.yyyyq4;
-      default: category = ReleaseDateCategory.yyyy;
+      case 1:
+        category = ReleaseDateCategory.yyyyq1;
+      case 2:
+        category = ReleaseDateCategory.yyyyq2;
+      case 3:
+        category = ReleaseDateCategory.yyyyq3;
+      case 4:
+        category = ReleaseDateCategory.yyyyq4;
+      default:
+        category = ReleaseDateCategory.yyyy;
     }
 
     return ReleaseDateModel(

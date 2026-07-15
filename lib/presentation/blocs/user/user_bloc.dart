@@ -39,7 +39,6 @@ import 'package:gamer_grove/presentation/blocs/user/user_state.dart';
 /// );
 /// ```
 class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
-
   UserProfileBloc({
     required this.getUserProfileUseCase,
     required this.updateUserProfileUseCase,

@@ -4,7 +4,6 @@
 import 'package:equatable/equatable.dart';
 
 class GameVersionFeature extends Equatable {
-
   const GameVersionFeature({
     required this.id,
     required this.checksum,
@@ -26,7 +25,8 @@ class GameVersionFeature extends Equatable {
   bool get isDescription => category == 'description';
 
   @override
-  List<Object?> get props => [id, checksum, title, description, category, position, valueIds];
+  List<Object?> get props =>
+      [id, checksum, title, description, category, position, valueIds];
 }
 
 // Category Enum
@@ -38,6 +38,7 @@ enum GameVersionFeatureCategory {
   final String value;
 
   static GameVersionFeatureCategory fromValue(String value) {
-    return values.firstWhere((cat) => cat.value == value, orElse: () => description);
+    return values.firstWhere((cat) => cat.value == value,
+        orElse: () => description);
   }
 }

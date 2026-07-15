@@ -11,8 +11,8 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWithGamesParams> {
-
+class GetCharacterWithGames
+    extends UseCase<CharacterWithGames, GetCharacterWithGamesParams> {
   GetCharacterWithGames(this.repository);
   final GameRepository repository;
 
@@ -22,44 +22,44 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
 // Verbessere deine GetCharacterWithGames UseCase:
 
   @override
-  Future<Either<Failure, CharacterWithGames>> call(GetCharacterWithGamesParams params) async {
+  Future<Either<Failure, CharacterWithGames>> call(
+      GetCharacterWithGamesParams params) async {
     try {
-
       // Get character details (this should include enriched games from repository)
-      final characterResult = await repository.getCharacterDetails(params.characterId);
+      final characterResult =
+          await repository.getCharacterDetails(params.characterId);
 
       if (characterResult.isLeft()) {
         return characterResult.fold(
-              (failure) {
+          (failure) {
             return Left(failure);
           },
-              (character) => throw Exception('Unexpected success'),
+          (character) => throw Exception('Unexpected success'),
         );
       }
 
       final character = characterResult.fold(
-            (l) => throw Exception('Unexpected failure'),
-            (r) => r,
+        (l) => throw Exception('Unexpected failure'),
+        (r) => r,
       );
-
 
       // The character should already have games loaded from repository
       var games = character.games ?? [];
 
-      if (games.isEmpty && character.gameIds.isNotEmpty && params.includeGames) {
-
+      if (games.isEmpty &&
+          character.gameIds.isNotEmpty &&
+          params.includeGames) {
         final gamesResult = await repository.getGamesByIds(character.gameIds);
         if (gamesResult.isRight()) {
           games = gamesResult.fold(
-                (failure) {
+            (failure) {
               return <Game>[];
             },
-                (gamesList) {
+            (gamesList) {
               return gamesList;
             },
           );
-        } else {
-        }
+        } else {}
       }
 
       final result = CharacterWithGames(
@@ -68,15 +68,14 @@ class GetCharacterWithGames extends UseCase<CharacterWithGames, GetCharacterWith
       );
 
       return Right(result);
-
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load character with games: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to load character with games: $e'));
     }
   }
 }
 
 class GetCharacterWithGamesParams extends Equatable {
-
   const GetCharacterWithGamesParams({
     required this.characterId,
     this.includeGames = true,
@@ -89,7 +88,6 @@ class GetCharacterWithGamesParams extends Equatable {
 }
 
 class CharacterWithGames extends Equatable {
-
   const CharacterWithGames({
     required this.character,
     required this.games,

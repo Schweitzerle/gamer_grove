@@ -20,43 +20,53 @@ enum UserCollectionSortBy {
 
   String get displayName {
     switch (this) {
-      case name: return 'Name';
-      case rating: return 'My Rating';
-      case releaseDate: return 'Release Date';
-      case dateAdded: return 'Date Added';
-      case lastPlayed: return 'Last Played';
-      case gameRating: return 'Game Rating';
-      case dateRated: return 'Date Rated';
-      case alphabetical: return 'Alphabetical';
-      case popularity: return 'Popularity';
-      case recentlyAdded: return 'Recently Added';
+      case name:
+        return 'Name';
+      case rating:
+        return 'My Rating';
+      case releaseDate:
+        return 'Release Date';
+      case dateAdded:
+        return 'Date Added';
+      case lastPlayed:
+        return 'Last Played';
+      case gameRating:
+        return 'Game Rating';
+      case dateRated:
+        return 'Date Rated';
+      case alphabetical:
+        return 'Alphabetical';
+      case popularity:
+        return 'Popularity';
+      case recentlyAdded:
+        return 'Recently Added';
     }
   }
 
   // Different sort options available for different collection types
   static List<UserCollectionSortBy> get wishlistSortOptions => [
-    name,
-    dateAdded,
-    releaseDate,
-    gameRating,
-    popularity,
-  ];
+        name,
+        dateAdded,
+        releaseDate,
+        gameRating,
+        popularity,
+      ];
 
   static List<UserCollectionSortBy> get ratedSortOptions => [
-    name,
-    rating,
-    dateRated,
-    releaseDate,
-    gameRating,
-  ];
+        name,
+        rating,
+        dateRated,
+        releaseDate,
+        gameRating,
+      ];
 
   static List<UserCollectionSortBy> get recommendedSortOptions => [
-    name,
-    dateAdded,
-    releaseDate,
-    gameRating,
-    popularity,
-  ];
+        name,
+        dateAdded,
+        releaseDate,
+        gameRating,
+        popularity,
+      ];
 }
 
 // lib/domain/entities/user/user_collection_type.dart
@@ -71,20 +81,27 @@ enum UserCollectionType {
 
   String get displayName {
     switch (this) {
-      case wishlist: return 'Wishlist';
-      case rated: return 'Rated Games';
-      case recommended: return 'Recommended';
-      case topThree: return 'Top Three';
+      case wishlist:
+        return 'Wishlist';
+      case rated:
+        return 'Rated Games';
+      case recommended:
+        return 'Recommended';
+      case topThree:
+        return 'Top Three';
     }
   }
 
   String get icon {
     switch (this) {
-      case wishlist: return '❤️';
-      case rated: return '⭐';
-      case recommended: return '👍';
-      case topThree: return '🏆';
+      case wishlist:
+        return '❤️';
+      case rated:
+        return '⭐';
+      case recommended:
+        return '👍';
+      case topThree:
+        return '🏆';
     }
   }
 }
-

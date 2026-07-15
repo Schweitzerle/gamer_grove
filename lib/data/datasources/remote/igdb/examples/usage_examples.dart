@@ -15,7 +15,6 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 // ============================================================
 
 class BasicQueryExamples {
-
   BasicQueryExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -51,7 +50,6 @@ class BasicQueryExamples {
 // ============================================================
 
 class PlatformQueryExamples {
-
   PlatformQueryExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -100,7 +98,6 @@ class PlatformQueryExamples {
 // ============================================================
 
 class CompanyQueryExamples {
-
   CompanyQueryExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -149,7 +146,6 @@ class CompanyQueryExamples {
 // ============================================================
 
 class GenreQueryExamples {
-
   GenreQueryExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -189,7 +185,8 @@ class GenreQueryExamples {
     final filter = CombinedFilter([
       GameFilters.byTheme(horrorThemeId),
       GameFilters.releasedAfter(
-          DateTime.now().subtract(const Duration(days: 365 * 5)),),
+        DateTime.now().subtract(const Duration(days: 365 * 5)),
+      ),
       GameFilters.mainGamesOnly(),
       GameFilters.minRatingCount(10),
     ]);
@@ -210,7 +207,6 @@ class GenreQueryExamples {
 // ============================================================
 
 class ComplexQueryExamples {
-
   ComplexQueryExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -287,7 +283,6 @@ class ComplexQueryExamples {
 // ============================================================
 
 class PaginationExamples {
-
   PaginationExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -327,7 +322,6 @@ class PaginationExamples {
 // ============================================================
 
 class PerformanceOptimizedExamples {
-
   PerformanceOptimizedExamples(this.dataSource);
   final IgdbDataSource dataSource;
 
@@ -368,7 +362,6 @@ class PerformanceOptimizedExamples {
 
 /// Example of how to integrate this in your repository
 class GameRepositoryExample {
-
   GameRepositoryExample(this.igdbDataSource);
   final IgdbDataSource igdbDataSource;
 
@@ -417,7 +410,6 @@ class GameRepositoryExample {
 
 /// Shows how to migrate from old code to new query system
 class MigrationExample {
-
   MigrationExample(this.dataSource);
   final IgdbDataSource dataSource;
 

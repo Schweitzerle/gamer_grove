@@ -6,7 +6,6 @@ import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart
 import 'package:gamer_grove/presentation/widgets/sections/empty_top_three_section.dart';
 
 class TopThreeSection extends BaseGameSection {
-
   const TopThreeSection({
     super.key,
     super.currentUserId,

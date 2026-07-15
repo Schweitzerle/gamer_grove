@@ -93,7 +93,8 @@ class PopularityTypeModel extends PopularityType {
       createdAt: _parseDateTime(json['created_at']),
       updatedAt: _parseDateTime(json['updated_at']),
       externalPopularitySourceId: json['external_popularity_source'],
-      popularitySourceEnum: _parsePopularitySourceEnum(json['popularity_source']),
+      popularitySourceEnum:
+          _parsePopularitySourceEnum(json['popularity_source']),
     );
   }
 

@@ -23,7 +23,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class GetFollowersUseCase implements UseCase<List<User>, GetFollowersParams> {
-
   GetFollowersUseCase(this.repository);
   final UserRepository repository;
 
@@ -38,7 +37,6 @@ class GetFollowersUseCase implements UseCase<List<User>, GetFollowersParams> {
 }
 
 class GetFollowersParams extends Equatable {
-
   const GetFollowersParams({
     required this.userId,
     this.limit,

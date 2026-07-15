@@ -5,7 +5,6 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
 class RatedSection extends BaseGameSection {
-
   const RatedSection({
     super.key,
     super.currentUserId,
@@ -49,13 +48,19 @@ class RatedSection extends BaseGameSection {
     } else if (state is UserRatedLoaded) {
       if (state.games.isEmpty) {
         return buildEmptySection(
-            'Your ratings are empty', Icons.star_border, context,);
+          'Your ratings are empty',
+          Icons.star_border,
+          context,
+        );
       }
       return buildHorizontalGameList(state.games.take(10).toList());
     } else if (state is GrovePageLoaded) {
       if (state.userRated.isEmpty) {
         return buildEmptySection(
-            'Your ratings are empty', Icons.star_border, context,);
+          'Your ratings are empty',
+          Icons.star_border,
+          context,
+        );
       }
       return buildHorizontalGameList(state.userRated.take(10).toList());
     } else if (state is GameError) {

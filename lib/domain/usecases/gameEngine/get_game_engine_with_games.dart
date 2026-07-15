@@ -11,48 +11,48 @@ import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
-class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineWithGamesParams> {
-
+class GetGameEngineWithGames
+    extends UseCase<GameEngineWithGames, GetGameEngineWithGamesParams> {
   GetGameEngineWithGames(this.repository);
   final GameRepository repository;
 
   @override
-  Future<Either<Failure, GameEngineWithGames>> call(GetGameEngineWithGamesParams params) async {
+  Future<Either<Failure, GameEngineWithGames>> call(
+      GetGameEngineWithGamesParams params) async {
     try {
-
       // Get gameEngine details first
-      final gameEngineResult = await repository.getGameEngineDetails(params.gameEngineId);
+      final gameEngineResult =
+          await repository.getGameEngineDetails(params.gameEngineId);
 
       if (gameEngineResult.isLeft()) {
         return gameEngineResult.fold(
-              (failure) {
+          (failure) {
             return Left(failure);
           },
-              (gameEngine) => throw Exception('Unexpected success'),
+          (gameEngine) => throw Exception('Unexpected success'),
         );
       }
 
       final gameEngine = gameEngineResult.fold(
-            (l) => throw Exception('Unexpected failure'),
-            (r) => r,
+        (l) => throw Exception('Unexpected failure'),
+        (r) => r,
       );
-
 
       var games = <Game>[];
 
       // Load games for this gameEngine if requested
       if (params.includeGames) {
-
-        final gamesResult = await repository.getGamesByGameEngine( //TODO: ändfern in gmaeengine
+        final gamesResult = await repository.getGamesByGameEngine(
+          //TODO: ändfern in gmaeengine
           gameEngineIds: [gameEngine.id],
           limit: params.limit,
         );
 
         games = gamesResult.fold(
-              (failure) {
+          (failure) {
             return <Game>[];
           },
-              (gamesList) {
+          (gamesList) {
             return gamesList;
           },
         );
@@ -64,15 +64,14 @@ class GetGameEngineWithGames extends UseCase<GameEngineWithGames, GetGameEngineW
       );
 
       return Right(result);
-
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to load gameEngine with games: $e'));
+      return Left(
+          ServerFailure(message: 'Failed to load gameEngine with games: $e'));
     }
   }
 }
 
 class GetGameEngineWithGamesParams extends Equatable {
-
   const GetGameEngineWithGamesParams({
     required this.gameEngineId,
     this.includeGames = true,
@@ -87,7 +86,6 @@ class GetGameEngineWithGamesParams extends Equatable {
 }
 
 class GameEngineWithGames extends Equatable {
-
   const GameEngineWithGames({
     required this.gameEngine,
     required this.games,

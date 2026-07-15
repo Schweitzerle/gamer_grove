@@ -6,7 +6,6 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class GetGameExpansions implements UseCase<List<Game>, int> {
-
   GetGameExpansions(this.repository);
   final GameRepository repository;
 

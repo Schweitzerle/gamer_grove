@@ -18,7 +18,6 @@ import 'package:gamer_grove/domain/usecases/usecase.dart';
 /// );
 /// ```
 class SignOutUseCase implements UseCase<void, NoParams> {
-
   SignOutUseCase(this.repository);
   final AuthRepository repository;
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// A card widget for displaying statistics
 class StatisticsCard extends StatefulWidget {
-
   /// Creates a StatisticsCard
   const StatisticsCard({
     required this.title,
@@ -13,6 +12,7 @@ class StatisticsCard extends StatefulWidget {
     this.collapsible = false,
     this.initiallyCollapsed = false,
   });
+
   /// Title of the statistics card
   final String title;
 
@@ -50,7 +50,8 @@ class _StatisticsCardState extends State<StatisticsCard> {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: widget.backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
+      color:
+          widget.backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

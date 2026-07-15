@@ -33,12 +33,14 @@ class TopRatedGamesSection extends BaseGameSection {
       return buildHorizontalGameListSkeleton();
     } else if (state is TopRatedGamesLoaded) {
       if (state.games.isEmpty) {
-        return buildEmptySection('No top rated games found', Icons.trending_up, context);
+        return buildEmptySection(
+            'No top rated games found', Icons.trending_up, context);
       }
       return buildHorizontalGameList(state.games);
     } else if (state is HomePageLoaded) {
       if (state.topRatedGames.isEmpty) {
-        return buildEmptySection('No top rated games found', Icons.trending_up, context);
+        return buildEmptySection(
+            'No top rated games found', Icons.trending_up, context);
       }
       return buildHorizontalGameList(state.topRatedGames);
     } else if (state is GameError) {

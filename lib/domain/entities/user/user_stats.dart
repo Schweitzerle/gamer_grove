@@ -5,7 +5,8 @@ import 'package:equatable/equatable.dart';
 /// Domain entity representing user statistics.
 ///
 /// Contains aggregated statistics about a user's gaming activity.
-class UserStats extends Equatable { // Optional: if tracking achievements
+class UserStats extends Equatable {
+  // Optional: if tracking achievements
 
   const UserStats({
     this.totalGamesRated = 0,

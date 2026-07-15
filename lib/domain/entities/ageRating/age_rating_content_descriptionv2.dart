@@ -2,7 +2,6 @@
 import 'package:equatable/equatable.dart';
 
 class AgeRatingContentDescriptionV2 extends Equatable {
-
   const AgeRatingContentDescriptionV2({
     required this.id,
     required this.checksum,
@@ -16,18 +15,19 @@ class AgeRatingContentDescriptionV2 extends Equatable {
   final String checksum;
   final DateTime createdAt;
   final String description;
-  final int descriptionType; // Reference ID for Age Rating Content Description Type
+  final int
+      descriptionType; // Reference ID for Age Rating Content Description Type
   final int organization; // Reference ID for Age Rating Organization
   final DateTime updatedAt;
 
   @override
   List<Object> get props => [
-    id,
-    checksum,
-    createdAt,
-    description,
-    descriptionType,
-    organization,
-    updatedAt,
-  ];
+        id,
+        checksum,
+        createdAt,
+        description,
+        descriptionType,
+        organization,
+        updatedAt,
+      ];
 }

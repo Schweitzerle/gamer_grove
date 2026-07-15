@@ -14,7 +14,6 @@ import 'package:gamer_grove/domain/usecases/game_details/get_enhanced_game_detai
 
 class GetCompleteGameDetailPageData
     extends UseCase<GameDetailPageData, GetCompleteGameDetailPageDataParams> {
-
   GetCompleteGameDetailPageData({
     required this.getEnhancedGameDetails,
   });
@@ -22,14 +21,16 @@ class GetCompleteGameDetailPageData
 
   @override
   Future<Either<Failure, GameDetailPageData>> call(
-      GetCompleteGameDetailPageDataParams params,) async {
+    GetCompleteGameDetailPageDataParams params,
+  ) async {
     try {
       // Get enhanced game details with all content
-      final gameResult =
-          await getEnhancedGameDetails(GetEnhancedGameDetailsParams.fullDetails(
-        gameId: params.gameId,
-        userId: params.userId,
-      ),);
+      final gameResult = await getEnhancedGameDetails(
+        GetEnhancedGameDetailsParams.fullDetails(
+          gameId: params.gameId,
+          userId: params.userId,
+        ),
+      );
 
       if (gameResult.isLeft()) {
         return gameResult.fold(
@@ -39,28 +40,32 @@ class GetCompleteGameDetailPageData
       }
 
       final game = gameResult.fold(
-          (l) => throw Exception('Unexpected failure'), (r) => r,);
+        (l) => throw Exception('Unexpected failure'),
+        (r) => r,
+      );
 
-      return Right(GameDetailPageData(
-        game: game,
-        characters: game.characters,
-        events: game.events,
-        mediaCollection: GameMediaCollection(
-          gameId: game.id,
-          videos: game.videos,
-          screenshots: game.screenshots,
-          artworks: game.artworks,
+      return Right(
+        GameDetailPageData(
+          game: game,
+          characters: game.characters,
+          events: game.events,
+          mediaCollection: GameMediaCollection(
+            gameId: game.id,
+            videos: game.videos,
+            screenshots: game.screenshots,
+            artworks: game.artworks,
+          ),
         ),
-      ),);
+      );
     } catch (e) {
       return Left(
-          ServerFailure(message: 'Failed to load game detail page data: $e'),);
+        ServerFailure(message: 'Failed to load game detail page data: $e'),
+      );
     }
   }
 }
 
 class GetCompleteGameDetailPageDataParams extends Equatable {
-
   const GetCompleteGameDetailPageDataParams({
     required this.gameId,
     this.userId,
@@ -73,7 +78,6 @@ class GetCompleteGameDetailPageDataParams extends Equatable {
 }
 
 class GameDetailPageData extends Equatable {
-
   const GameDetailPageData({
     required this.game,
     required this.characters,

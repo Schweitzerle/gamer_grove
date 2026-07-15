@@ -4,8 +4,8 @@ import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_event.dar
 import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_state.dart';
 
 class LeaderboardBloc extends Bloc<LeaderboardEvent, LeaderboardState> {
-
-  LeaderboardBloc({required this.getLeaderboardUsers}) : super(LeaderboardInitial()) {
+  LeaderboardBloc({required this.getLeaderboardUsers})
+      : super(LeaderboardInitial()) {
     on<LoadLeaderboard>(_onLoadLeaderboard);
   }
   final GetLeaderboardUsersUseCase getLeaderboardUsers;

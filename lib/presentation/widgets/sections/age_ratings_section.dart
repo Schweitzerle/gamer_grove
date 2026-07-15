@@ -5,9 +5,9 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
 
 class AgeRatingsSection extends StatelessWidget {
-
   const AgeRatingsSection({
-    required this.ageRatings, super.key,
+    required this.ageRatings,
+    super.key,
   });
   final List<AgeRating> ageRatings;
 
@@ -22,9 +22,10 @@ class AgeRatingsSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(
-              top: AppConstants.paddingSmall,
-              right: AppConstants.paddingSmall,
-              left: AppConstants.paddingSmall,),
+            top: AppConstants.paddingSmall,
+            right: AppConstants.paddingSmall,
+            left: AppConstants.paddingSmall,
+          ),
           child: Text(
             'Age Ratings',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -57,9 +58,9 @@ class AgeRatingsSection extends StatelessWidget {
 }
 
 class AgeRatingChip extends StatelessWidget {
-
   const AgeRatingChip({
-    required this.rating, super.key,
+    required this.rating,
+    super.key,
   });
   final AgeRating rating;
 
@@ -190,7 +191,6 @@ class AgeRatingChip extends StatelessWidget {
 
 /// Style-Klasse für Age Rating Darstellung
 class _RatingStyle {
-
   const _RatingStyle({
     required this.color,
     required this.icon,
@@ -201,9 +201,9 @@ class _RatingStyle {
 
 /// Dialog für detaillierte Age Rating Informationen
 class AgeRatingDetailsDialog extends StatelessWidget {
-
   const AgeRatingDetailsDialog({
-    required this.rating, super.key,
+    required this.rating,
+    super.key,
   });
   final AgeRating rating;
 
@@ -280,7 +280,9 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                     .map(
                       (desc) => Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6,),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: ratingStyle.color.withOpacity(0.1),
                           border: Border.all(
@@ -412,9 +414,9 @@ class AgeRatingDetailsDialog extends StatelessWidget {
 
 /// Erweiterte Age Ratings Section mit Filter-Funktionalität
 class EnhancedAgeRatingsSection extends StatefulWidget {
-
   const EnhancedAgeRatingsSection({
-    required this.ageRatings, super.key,
+    required this.ageRatings,
+    super.key,
     this.showAllRatings = false,
   });
   final List<AgeRating> ageRatings;
@@ -436,9 +438,11 @@ class _EnhancedAgeRatingsSectionState extends State<EnhancedAgeRatingsSection> {
 
     final filteredRatings = selectedOrganization != null
         ? widget.ageRatings
-            .where((r) =>
-                r.organizationName.toLowerCase() ==
-                selectedOrganization!.toLowerCase(),)
+            .where(
+              (r) =>
+                  r.organizationName.toLowerCase() ==
+                  selectedOrganization!.toLowerCase(),
+            )
             .toList()
         : widget.ageRatings;
 

@@ -5,9 +5,9 @@ import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
 
 class EventFilterBottomSheet extends StatefulWidget {
-
   const EventFilterBottomSheet({
-    required this.currentFilters, super.key,
+    required this.currentFilters,
+    super.key,
   });
   final EventSearchFilters currentFilters;
 
@@ -116,7 +116,9 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
 
   int _getActiveFilterCount() {
     var count = 0;
-    if (_eventTimeFrom != null || _eventTimeTo != null || _singleEventTime != null) {
+    if (_eventTimeFrom != null ||
+        _eventTimeTo != null ||
+        _singleEventTime != null) {
       count++;
     }
     return count;
@@ -287,7 +289,9 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: hasDateFilter
                                 ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                           ),
                     ),
                   ),
@@ -505,9 +509,9 @@ class _EventFilterBottomSheetState extends State<EventFilterBottomSheet>
 // ==========================================
 
 class EventTimeFilterDialog extends StatefulWidget {
-
   const EventTimeFilterDialog({
-    required this.onApply, super.key,
+    required this.onApply,
+    super.key,
     this.initialDateFrom,
     this.initialDateTo,
     this.initialSingleDate,

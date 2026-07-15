@@ -36,13 +36,13 @@ import 'package:gamer_grove/domain/repositories/user_repository.dart';
 /// ```
 class UserRepositoryImpl extends SupabaseBaseRepository
     implements UserRepository {
-
   /// Creates an instance of [UserRepositoryImpl].
   UserRepositoryImpl({
     required this.userDataSource,
     required super.supabase,
     required super.networkInfo,
   });
+
   /// The data source for user-related operations.
   final SupabaseUserDataSource userDataSource;
 
@@ -480,7 +480,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
             .limit(limit)
             .range(offset, offset + limit - 1);
         return (response as List)
-            .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
+            .map((data) =>
+                UserModel.fromJson(data as Map<String, dynamic>).toEntity())
             .toList();
       },
       errorMessage: 'Failed to get new users',
@@ -743,8 +744,6 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
-
-
   @override
   Future<Either<Failure, void>> removeFromTopThree({
     required String userId,
@@ -752,21 +751,18 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-
         // Get current top three (already normalized to 3 elements with 0s)
-        final currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
+        final currentTopThree =
+            await userDataSource.getTopThree(userId) ?? [0, 0, 0];
 
         // Find and remove the game (set to 0, which will be converted to null)
         final index = currentTopThree.indexOf(gameId);
         if (index != -1) {
           currentTopThree[index] = 0;
-        } else {
-        }
-
+        } else {}
 
         // Use unified update method
         await userDataSource.updateTopThree(userId, currentTopThree);
-
       },
       errorMessage: 'Failed to remove from top three',
     );
@@ -808,8 +804,11 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         if (profile['show_rated_games'] == false) {
           return <Map<String, dynamic>>[];
         }
-        return userDataSource.getRatedGames(userId,
-            limit: limit, offset: offset,);
+        return userDataSource.getRatedGames(
+          userId,
+          limit: limit,
+          offset: offset,
+        );
       },
       errorMessage: 'Failed to get public rated games',
     );
@@ -829,8 +828,11 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         if (profile['show_recommended_games'] == false) {
           return <Map<String, dynamic>>[];
         }
-        final games = await userDataSource.getRecommendedGames(userId,
-            limit: limit, offset: offset,);
+        final games = await userDataSource.getRecommendedGames(
+          userId,
+          limit: limit,
+          offset: offset,
+        );
         return games.cast<Map<String, dynamic>>();
       },
       errorMessage: 'Failed to get public recommended games',
@@ -973,7 +975,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
             await supabase.from('profiles').select().inFilter('id', userIds);
 
         return (response as List)
-            .map((data) => UserModel.fromJson(data as Map<String, dynamic>).toEntity())
+            .map((data) =>
+                UserModel.fromJson(data as Map<String, dynamic>).toEntity())
             .toList();
       },
       errorMessage: 'Failed to get multiple user profiles',
@@ -1042,6 +1045,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
       errorMessage: 'Failed to suggest usernames',
     );
   }
+
   @override
   Future<Either<Failure, List<User>>> getFollowSuggestions({
     required String userId,
@@ -1070,8 +1074,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-
-        final currentTopThree = await userDataSource.getTopThree(userId) ?? [0, 0, 0];
+        final currentTopThree =
+            await userDataSource.getTopThree(userId) ?? [0, 0, 0];
 
         // Check if the game is already in the top three at a different position
         final existingIndex = currentTopThree.indexOf(gameId);
@@ -1083,8 +1087,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         // Set the game at the new position
         if (position >= 1 && position <= 3) {
           currentTopThree[position - 1] = gameId;
-        } else {
-        }
+        } else {}
 
         await userDataSource.updateTopThree(userId, currentTopThree);
       },

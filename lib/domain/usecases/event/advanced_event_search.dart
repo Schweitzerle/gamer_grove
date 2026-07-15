@@ -9,13 +9,13 @@ import 'package:gamer_grove/domain/usecases/base_usecase.dart';
 
 class AdvancedEventSearch
     extends UseCase<List<Event>, AdvancedEventSearchParams> {
-
   AdvancedEventSearch(this.repository);
   final EventRepository repository;
 
   @override
   Future<Either<Failure, List<Event>>> call(
-      AdvancedEventSearchParams params,) async {
+    AdvancedEventSearchParams params,
+  ) async {
     // No Validation needed for now
     /* if ((params.textQuery?.isEmpty ?? true) && !params.filters.hasFilters) {
       return const Left(ValidationFailure(message: 'Text query or filters required'));
@@ -31,9 +31,9 @@ class AdvancedEventSearch
 }
 
 class AdvancedEventSearchParams extends Equatable {
-
   const AdvancedEventSearchParams({
-    required this.filters, this.textQuery,
+    required this.filters,
+    this.textQuery,
     this.limit = 20,
     this.offset = 0,
   });

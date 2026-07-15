@@ -6,7 +6,9 @@ class UserActivityModel extends UserActivity {
     required super.id,
     required super.user,
     required super.activityType,
-    required super.isPublic, required super.createdAt, super.gameId,
+    required super.isPublic,
+    required super.createdAt,
+    super.gameId,
     super.metadata,
   });
 
