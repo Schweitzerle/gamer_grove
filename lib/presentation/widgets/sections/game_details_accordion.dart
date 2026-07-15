@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/date_formatter.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
-import 'package:gamer_grove/domain/entities/website/website_type.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/community_info_section.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
@@ -319,7 +318,7 @@ class GameDetailsAccordion extends StatelessWidget {
       }
 
       // If there's only one website, check if it's NOT just an official site
-      return game.websites.first.type != WebsiteCategory.official;
+      return game.websites.first.type.type.toLowerCase() != 'official';
     }
 
     return false;

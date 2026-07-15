@@ -140,18 +140,12 @@ class GameRepositoryImpl extends IgdbBaseRepository implements GameRepository {
         final eventResult = await getGameEvents(gameId);
         final game = games.first;
 
-        // Handle the Either result from getGameCharacters
-        charactersResult.fold(
-          (failure) => game.characters = [],
-          (characters) => game.characters = characters,
+        // Enrich the immutable game with its characters/events (empty on
+        // failure) via copyWith instead of mutating the shared entity.
+        return game.copyWith(
+          characters: charactersResult.getOrElse(() => const []),
+          events: eventResult.getOrElse(() => const []),
         );
-
-        eventResult.fold(
-          (failure) => game.events = [],
-          (events) => game.events = events,
-        );
-
-        return game;
       },
       errorMessage: 'Failed to fetch game details',
     );

@@ -25,10 +25,9 @@ import 'package:gamer_grove/domain/entities/releaseDate/release_date.dart';
 import 'package:gamer_grove/domain/entities/screenshot.dart';
 import 'package:gamer_grove/domain/entities/theme.dart';
 import 'package:gamer_grove/domain/entities/website/website.dart';
-import 'package:gamer_grove/domain/entities/website/website_type.dart';
 
 class Game extends Equatable {
-  Game({
+  const Game({
     required this.id,
     required this.name,
     this.summary,
@@ -205,8 +204,8 @@ class Game extends Equatable {
   final bool isInTopThree;
   final int? topThreePosition;
 
-  List<Character> characters;
-  List<Event> events;
+  final List<Character> characters;
+  final List<Event> events;
 
   // ===== COMPUTED PROPERTIES =====
 
@@ -305,18 +304,8 @@ class Game extends Equatable {
           .reduce((a, b) => a > b ? a : b);
 
   /// Gibt alle Social Media Links zurück
-  List<Website> get socialMediaLinks => websites
-      .where(
-        (website) => [
-          WebsiteCategory.facebook,
-          WebsiteCategory.twitter,
-          WebsiteCategory.instagram,
-          WebsiteCategory.youtube,
-          WebsiteCategory.twitch,
-          WebsiteCategory.discord,
-        ].contains(website.type),
-      )
-      .toList();
+  List<Website> get socialMediaLinks =>
+      websites.where((website) => website.type.isSocialMedia).toList();
 
   /// Prüft ob das Spiel auf PC verfügbar ist
   bool get isAvailableOnPC => platforms.any(
