@@ -5,8 +5,15 @@
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
 **Last updated:** 2026-07-15 (Session 1)
-**Current branch:** `chore/phase0-baseline`
+**Current branch:** `master` (Phase-0/CI-Arbeit via PR #85 gemergt, CI grün)
 **Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS
+
+### ✅ Merged to master (PR #85, squash f3e683f, CI green: analyze+test AND build APK)
+Alle Session-1-Commits sind auf master. Feature-Branch gelöscht. Nächste Arbeit
+wieder auf frischem Feature-Branch.
+> Gotcha für Folgesessions: `flutter analyze` ist default `--fatal-infos`; CI nutzt
+> `--no-fatal-infos` (Gate nur auf 0 errors + 0 warnings). `gh pr merge --squash`
+> hat lokal master nicht ge-fast-forwarded → ggf. `git fetch && git reset --hard origin/master`.
 
 ---
 
@@ -94,12 +101,15 @@
 2. Sentry + PostHog EU integrieren (DSN/Key via env + GitHub Secrets), Funnel-Events definieren.
 3. Unused-files-Pass + nächste Bloc-Tests (UserGameDataBloc, GameBloc).
 
-## Offene Entscheidungen für den User (gebündelt — siehe MASTERPLAN §"Offene Entscheidungen")
-1. **Pricing** Pro: Default-Vorschlag 3,99 €/Monat · 24,99 €/Jahr.
-2. **IGDB kommerziell vs. Alternative** (Recherche folgt in Phase 2).
-3. **Accounts/Geld**: RevenueCat, Sentry, PostHog (Free Tiers), Play Console / App Store.
-4. **Launch-Reihenfolge**: Default Android zuerst, iOS 2–4 Wochen später.
-5. Store-Publishing bleibt bestätigungspflichtig.
+## User-Entscheidungen (2026-07-15 beantwortet)
+1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
+2. **Analytics:** **Umami** (statt PostHog — User konsolidiert mit eigenen Web-Projekten).
+   Kein Mobile-SDK → via HTTP-Event-API (`/api/send`). Hinter `AnalyticsService`-Interface
+   bauen (Swap = Refactor). **Crashes:** **Sentry** (User hat Account).
+3. **IGDB:** **Erst Recherche** (kommerziell vs. RAWG/MobyGames), dann Entscheidung. Noch nichts umbauen.
+4. **Launch:** **Nur Android** vorerst (kein iOS/Apple-Account). Store-Publishing bleibt bestätigungspflichtig.
+5. **Noch offen/benötigt vom User:** Sentry-DSN + Umami-Instanz-URL + Website-ID (für Live-Events);
+   RevenueCat-Account + Play-Console-Produkte (Phase 2). Code wird key-gated gebaut (no-op ohne Keys).
 
 ## Branch-/Merge-Status
 - `chore/phase0-baseline` — 2 Commits, noch nicht gepusht/gemerged (CI existiert noch
