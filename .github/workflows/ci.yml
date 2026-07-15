@@ -38,6 +38,9 @@ jobs:
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           IGDB_CLIENT_ID=${{ secrets.IGDB_CLIENT_ID || 'placeholder-client-id' }}
           IGDB_CLIENT_SECRET=${{ secrets.IGDB_CLIENT_SECRET || 'placeholder-secret' }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          UMAMI_URL=${{ secrets.UMAMI_URL }}
+          UMAMI_WEBSITE_ID=${{ secrets.UMAMI_WEBSITE_ID }}
           EOF
 
       - name: Install dependencies
@@ -92,6 +95,9 @@ jobs:
           SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           IGDB_CLIENT_ID=${{ secrets.IGDB_CLIENT_ID || 'placeholder-client-id' }}
           IGDB_CLIENT_SECRET=${{ secrets.IGDB_CLIENT_SECRET || 'placeholder-secret' }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          UMAMI_URL=${{ secrets.UMAMI_URL }}
+          UMAMI_WEBSITE_ID=${{ secrets.UMAMI_WEBSITE_ID }}
           EOF
 
       - name: Install dependencies

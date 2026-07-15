@@ -15,7 +15,7 @@ class UmamiAnalyticsService implements AnalyticsService {
     required String baseUrl,
     required String websiteId,
     required http.Client client,
-    String hostname = 'app.gamergrove',
+    String hostname = 'gamergrove.app',
   })  : _baseUrl = _trimTrailingSlash(baseUrl),
         _websiteId = websiteId,
         _client = client,
