@@ -1,8 +1,12 @@
 // lib/main.dart
+import 'dart:async';
+
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/analytics_events.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/injection_container.dart' as di;
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -27,6 +31,9 @@ void main() async {
 
   // Setup Dependency Injection (includes Supabase initialization)
   await di.initDependencies();
+
+  // Funnel start (no-op unless Umami is configured).
+  unawaited(sl<AnalyticsService>().track(AnalyticsEvents.appOpen));
 
   runApp(const GamerGroveApp());
 }
