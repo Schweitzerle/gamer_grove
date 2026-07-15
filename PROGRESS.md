@@ -86,15 +86,18 @@ wieder auf frischem Feature-Branch.
 ---
 
 ## Phase-1-Fortschritt
-- [x] CI-Pipeline (`.github/workflows/ci.yml`): format → analyze → test+coverage → build apk.
-- [x] Erste Kern-Tests: AuthBloc (11 bloc_test-Cases, grün). mocktail + fixtures angelegt.
-- [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht (deprecated/, social/, examples, scratch).
-- [ ] Branch pushen + CI auf GitHub grün sehen, dann nach master mergen.
-- [ ] Sentry (crash) + PostHog EU (analytics) einbauen, Event-Schema.
-- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass verifizieren (AUDIT.md §4).
+- [x] CI-Pipeline (`.github/workflows/ci.yml`): format → analyze(--no-fatal-infos) → test+coverage → build apk. **Grün, gemergt (PR #85).**
+- [x] AuthBloc-Tests (11), Game-Entity-Tests (3). mocktail + fixtures.
+- [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht.
+- [x] Alle 6 echten analyze-Warnings gefixt (WebsiteType==WebsiteCategory-Bug etc.) + Regression-Tests.
+- [x] **Analytics-Abstraktion + Umami-Backend (key-gated, 5 Tests)** — `AnalyticsService`/Noop/Umami, Event-Schema, `app_open` in main verdrahtet. Branch `feat/analytics-observability`.
+- [ ] **Sentry native init** (Dependency `sentry_flutter` + guarded init in main) — nächste Session, mit Emulator-Verifikation (native Dep, CI-Build-Risiko).
+- [ ] Analytics-Events an Funnel-Punkten verdrahten (signup, rate_game, wishlist_add, follow_user, activation).
+- [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren.
+- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass (AUDIT.md §4).
 - [ ] Weitere Tests: UserGameDataBloc, GameBloc, Repository-Fakes, GameCard-Widget.
-- [ ] Refactoring Monster-Dateien (filter_bottom_sheet, game_repository_impl, game_bloc).
-- [ ] 6 echte analyze-Warnings fixen (WebsiteType==WebsiteCategory-Bug etc.).
+- [ ] Refactoring Monster-Dateien (filter_bottom_sheet 3251, game_repository_impl 2516, game_bloc 2014).
+- [ ] Security-Fix: PostgREST-Injection in `searchUsers` (AUDIT.md §2.2).
 
 ## Nächste 3 Schritte
 1. Remote prüfen/`chore/phase0-baseline` pushen → CI-Run auf GitHub verifizieren → nach master mergen.
