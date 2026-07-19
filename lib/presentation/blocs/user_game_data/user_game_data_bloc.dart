@@ -1,7 +1,12 @@
 // presentation/blocs/user_game_data/user_game_data_bloc.dart
 
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/activation_tracker.dart';
+import 'package:gamer_grove/core/analytics/analytics_events.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_rated_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_recommended_games_use_case.dart';
 import 'package:gamer_grove/domain/usecases/collection/get_top_three_use_case.dart';
@@ -56,7 +61,11 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
     required this.updateTopThreeUseCase,
     required this.setTopThreeGameAtPositionUseCase,
     required this.removeFromTopThreeUseCase,
-  }) : super(const UserGameDataInitial()) {
+    AnalyticsService analytics = const NoopAnalyticsService(),
+    ActivationTracker? activationTracker,
+  })  : _analytics = analytics,
+        _activationTracker = activationTracker,
+        super(const UserGameDataInitial()) {
     on<LoadUserGameDataEvent>(_onLoadUserGameData);
     on<ToggleWishlistEvent>(_onToggleWishlist);
     on<ToggleRecommendationEvent>(_onToggleRecommendation);
@@ -79,6 +88,8 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
   final UpdateTopThreeUseCase updateTopThreeUseCase;
   final SetTopThreeGameAtPositionUseCase setTopThreeGameAtPositionUseCase;
   final RemoveFromTopThreeUseCase removeFromTopThreeUseCase;
+  final AnalyticsService _analytics;
+  final ActivationTracker? _activationTracker;
 
   /// Load all user game data from backend
   Future<void> _onLoadUserGameData(
@@ -265,7 +276,17 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         emit(UserGameDataError(failure.message));
       },
       (_) {
-        // Success - state already updated
+        // Track only additions (not removals) as a funnel signal.
+        if (isNowWishlisted) {
+          unawaited(
+            _analytics.track(
+              AnalyticsEvents.wishlistAdd,
+              properties: {AnalyticsProps.gameId: event.gameId},
+            ),
+          );
+          final tracker = _activationTracker;
+          if (tracker != null) unawaited(tracker.onWishlistAdded());
+        }
       },
     );
   }
@@ -363,7 +384,17 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         emit(UserGameDataError(failure.message));
       },
       (_) {
-        // Success - state already updated
+        unawaited(
+          _analytics.track(
+            AnalyticsEvents.rateGame,
+            properties: {
+              AnalyticsProps.gameId: event.gameId,
+              AnalyticsProps.rating: event.rating,
+            },
+          ),
+        );
+        final tracker = _activationTracker;
+        if (tracker != null) unawaited(tracker.onGameRated());
       },
     );
   }
