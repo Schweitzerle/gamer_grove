@@ -4,9 +4,25 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-15 (Session 1)
-**Current branch:** `master` (Phase-0/CI-Arbeit via PR #85 gemergt, CI grün)
-**Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS
+**Last updated:** 2026-07-19 (Session 2)
+**Current branch:** `master`
+**Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS (nahezu fertig)
+
+### Session 2 (2026-07-19) — merged to master
+- PR #88 Sentry crash reporting (DSN-gated) — gemergt.
+- PR #89 chore: desktop plugin registrants regeneriert (sentry_flutter/jni).
+- PR #90 **fix(security): PostgREST-Injection in searchUsers** — `escapePostgrestFilterValue`
+  (double-quote/escape), 8 Unit-Tests. AUDIT.md §2.2 erledigt.
+- PR #91 **refactor: 147 Orphan-Dateien entfernt (−13.6k LOC)** — Reachability-Analyse
+  (BFS von main.dart/injection_container.dart), 0 Import-Refs verifiziert, analyze 0/0,
+  Tests grün. AUDIT.md §4 erledigt. (Detektor-Script: scratchpad/find_orphans.dart.)
+- PR #92 **feat(analytics): Funnel-Events + ActivationTracker** — signup/rate_game/
+  wishlist_add/follow_user verdrahtet; `ActivationTracker` (SharedPreferences, once-per-user:
+  erstes Rating ODER ≥3 Wishlist + ≥1 Follow). 6 Tests. **PENDING CI/Merge** bei Session-Ende.
+> Gotcha: alle Analytics-Deps sind **optional** an den Blocs (default Noop/null) → bestehende
+> Tests unberührt. `SocialInteractionsBloc` wird NICHT in DI registriert, sondern in 4 Pages
+> direkt konstruiert (user_search/user_detail/leaderboard/followers_following) — dort Analytics
+> durchgereicht. `UserBloc` (mit `FollowUserEvent`) ist ungenutzt (keine DI/UI-Refs).
 
 ### ✅ Merged to master (PR #85, squash f3e683f, CI green: analyze+test AND build APK)
 Alle Session-1-Commits sind auf master. Feature-Branch gelöscht. Nächste Arbeit
@@ -90,19 +106,21 @@ wieder auf frischem Feature-Branch.
 - [x] AuthBloc-Tests (11), Game-Entity-Tests (3). mocktail + fixtures.
 - [x] Entrümpeln Teil 1: 4173 LOC Dead Code gelöscht.
 - [x] Alle 6 echten analyze-Warnings gefixt (WebsiteType==WebsiteCategory-Bug etc.) + Regression-Tests.
-- [x] **Analytics-Abstraktion + Umami-Backend (key-gated, 5 Tests)** — `AnalyticsService`/Noop/Umami, Event-Schema, `app_open` in main verdrahtet. Branch `feat/analytics-observability`.
-- [ ] **Sentry native init** (Dependency `sentry_flutter` + guarded init in main) — nächste Session, mit Emulator-Verifikation (native Dep, CI-Build-Risiko).
-- [ ] Analytics-Events an Funnel-Punkten verdrahten (signup, rate_game, wishlist_add, follow_user, activation).
-- [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren.
-- [ ] Weitere Entrümpelung: ~95 Orphan-Kandidaten via unused-files-Pass (AUDIT.md §4).
-- [ ] Weitere Tests: UserGameDataBloc, GameBloc, Repository-Fakes, GameCard-Widget.
-- [ ] Refactoring Monster-Dateien (filter_bottom_sheet 3251, game_repository_impl 2516, game_bloc 2014).
-- [ ] Security-Fix: PostgREST-Injection in `searchUsers` (AUDIT.md §2.2).
+- [x] **Analytics-Abstraktion + Umami-Backend (key-gated, 5 Tests)** — `AnalyticsService`/Noop/Umami, Event-Schema, `app_open` in main verdrahtet.
+- [x] **Sentry native init** (DSN-gated in main) — PR #88 gemergt.
+- [x] **Analytics-Events an Funnel-Punkten verdrahtet** (signup, rate_game, wishlist_add, follow_user, activation) — PR #92 (pending merge).
+- [x] **Entrümpelung Teil 2: 147 Orphan-Dateien (−13.6k LOC)** — PR #91 gemergt.
+- [x] **Security-Fix: PostgREST-Injection in `searchUsers`** — PR #90 gemergt.
+- [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren (USER-AKTION).
+- [ ] Weitere Tests: UserGameDataBloc-bloc_test, GameBloc, Repository-Fakes, GameCard-Widget.
+- [ ] **Refactoring Monster-Dateien** (filter_bottom_sheet 3251, game_repository_impl 2516,
+      game_bloc 2014) — parallele Subagenten, behavior-preserving, dann Review+Merge. **NÄCHSTER GROSSER BLOCK.**
 
 ## Nächste 3 Schritte
-1. Remote prüfen/`chore/phase0-baseline` pushen → CI-Run auf GitHub verifizieren → nach master mergen.
-2. Sentry + PostHog EU integrieren (DSN/Key via env + GitHub Secrets), Funnel-Events definieren.
-3. Unused-files-Pass + nächste Bloc-Tests (UserGameDataBloc, GameBloc).
+1. PR #92 (Analytics) nach grünem CI mergen.
+2. **Refactoring Monster-Dateien** via parallele Worktree-Subagenten (je eine Datei),
+   behavior-preserving, Verifikation analyze+test+build, Review+Merge einzeln.
+3. Bloc-/Widget-Tests (UserGameDataBloc, GameCard) als Safety-Net.
 
 ## User-Entscheidungen (2026-07-15 beantwortet)
 1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
