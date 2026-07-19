@@ -18,11 +18,33 @@
   Tests grün. AUDIT.md §4 erledigt. (Detektor-Script: scratchpad/find_orphans.dart.)
 - PR #92 **feat(analytics): Funnel-Events + ActivationTracker** — signup/rate_game/
   wishlist_add/follow_user verdrahtet; `ActivationTracker` (SharedPreferences, once-per-user:
-  erstes Rating ODER ≥3 Wishlist + ≥1 Follow). 6 Tests. **PENDING CI/Merge** bei Session-Ende.
+  erstes Rating ODER ≥3 Wishlist + ≥1 Follow). 10 Tests (Tracker 6 + UserGameDataBloc 4). GEMERGT.
+- PR #93 **refactor: filter_bottom_sheet.dart 3282→8 Dateien (<800 je)** — behavior-preserving
+  via **part-file/extension-Strategie**; `DateFilterDialog` in eigene Datei. Lokal + CI verifiziert
+  (analyze 0/0, 27 Tests, APK-Build grün). GEMERGT. **Refactoring 1 von 3 fertig.**
 > Gotcha: alle Analytics-Deps sind **optional** an den Blocs (default Noop/null) → bestehende
 > Tests unberührt. `SocialInteractionsBloc` wird NICHT in DI registriert, sondern in 4 Pages
 > direkt konstruiert (user_search/user_detail/leaderboard/followers_following) — dort Analytics
 > durchgereicht. `UserBloc` (mit `FollowUserEvent`) ist ungenutzt (keine DI/UI-Refs).
+
+### 🔧 Monster-Refactoring — Strategie & Stand (WICHTIG für Folgesession)
+Erprobtes Muster (PR #93): Riesen-Datei als **Library-Root** behalten, Methoden in
+`extension _X on <StateOrClass>` in **`part`-Dateien** auslagern (gleiche Library = voller
+Zugriff auf private Felder/`setState`, byte-identischer Move). Bei `State`-Klassen: `setState`
+in Extensions triggert `invalid_use_of_protected_member` (Analyzer-False-Positive, läuft zur
+Laufzeit) → `// ignore_for_file: invalid_use_of_protected_member` je part-Datei.
+- **`filter_bottom_sheet.dart`** ✅ fertig (PR #93).
+- **`game_bloc.dart`** (2014 Z., nutzt schon `part game_event/game_state/game_extensions`):
+  Handler sind private, via `on<>()` registriert — **KEINE** `@override`-Interface-Methoden →
+  part/extension-Muster funktioniert **direkt** (wie filter_bottom_sheet). Nächster einfacher Kandidat.
+- **`game_repository_impl.dart`** (2540 Z., 96 `@override` `implements GameRepository`): part/extension
+  **funktioniert NICHT** (Extension-Methoden erfüllen kein Interface → "Missing concrete implementation";
+  auch keine privaten Helfer zum Auslagern). **Lösung: Mixin-Chain** — `class GameRepositoryImpl
+  extends IgdbBaseRepository with _RepoSearch, _RepoDetails, … implements GameRepository`, Mixins in
+  part-Dateien (`mixin _RepoSearch on IgdbBaseRepository { … }`). Mixin-Member erfüllen das Interface.
+  ⚠️ Prüfen: greifen Methoden auf Felder von `GameRepositoryImpl` (Datasources) zu, die NICHT auf
+  `IgdbBaseRepository` liegen? Dann Mixin-`on`-Constraint anpassen oder Felder hochziehen. Subagent-Versuch
+  brach durch Account-Session-Limit ab (kein Code-Ergebnis).
 
 ### ✅ Merged to master (PR #85, squash f3e683f, CI green: analyze+test AND build APK)
 Alle Session-1-Commits sind auf master. Feature-Branch gelöscht. Nächste Arbeit
@@ -108,19 +130,28 @@ wieder auf frischem Feature-Branch.
 - [x] Alle 6 echten analyze-Warnings gefixt (WebsiteType==WebsiteCategory-Bug etc.) + Regression-Tests.
 - [x] **Analytics-Abstraktion + Umami-Backend (key-gated, 5 Tests)** — `AnalyticsService`/Noop/Umami, Event-Schema, `app_open` in main verdrahtet.
 - [x] **Sentry native init** (DSN-gated in main) — PR #88 gemergt.
-- [x] **Analytics-Events an Funnel-Punkten verdrahtet** (signup, rate_game, wishlist_add, follow_user, activation) — PR #92 (pending merge).
+- [x] **Analytics-Events an Funnel-Punkten verdrahtet** (signup, rate_game, wishlist_add, follow_user, activation) — PR #92 gemergt.
 - [x] **Entrümpelung Teil 2: 147 Orphan-Dateien (−13.6k LOC)** — PR #91 gemergt.
 - [x] **Security-Fix: PostgREST-Injection in `searchUsers`** — PR #90 gemergt.
+- [x] **UserGameDataBloc-bloc_test** (4) — rate/wishlist Verhalten + Analytics-Wiring. In PR #92.
+- [x] **Refactoring 1/3: filter_bottom_sheet** (3282→8 Dateien) — PR #93 gemergt.
 - [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren (USER-AKTION).
-- [ ] Weitere Tests: UserGameDataBloc-bloc_test, GameBloc, Repository-Fakes, GameCard-Widget.
-- [ ] **Refactoring Monster-Dateien** (filter_bottom_sheet 3251, game_repository_impl 2516,
-      game_bloc 2014) — parallele Subagenten, behavior-preserving, dann Review+Merge. **NÄCHSTER GROSSER BLOCK.**
+- [ ] **Refactoring 2/3: game_bloc.dart** (2014) — part/extension-Muster (funktioniert direkt, s.o.).
+- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain** nötig (s.o.), NICHT part/extension.
+- [ ] Weitere Tests: GameBloc, Repository-Fakes, GameCard-Widget.
 
-## Nächste 3 Schritte
-1. PR #92 (Analytics) nach grünem CI mergen.
-2. **Refactoring Monster-Dateien** via parallele Worktree-Subagenten (je eine Datei),
-   behavior-preserving, Verifikation analyze+test+build, Review+Merge einzeln.
-3. Bloc-/Widget-Tests (UserGameDataBloc, GameCard) als Safety-Net.
+## Nächste 3 Schritte (Session 3)
+1. **Refactoring 2/3: `game_bloc.dart`** — part/extension-Muster (wie PR #93, funktioniert direkt,
+   da Handler keine `@override`-Interface-Methoden sind). Worktree-Subagent, verify analyze 0/0 +
+   `flutter test`, Review+Merge. RAM-Limit: **nur 1 Flutter-Prozess gleichzeitig** (Subagenten sequenziell).
+2. **Refactoring 3/3: `game_repository_impl.dart`** — **Mixin-Chain** (part/extension scheitert am
+   Interface, s. Abschnitt oben). Danach part/extension NICHT nutzen.
+3. Rest-Tests: GameCard-Widget-Test, Repository-Fakes. Dann Phase 1 = DONE → Phase 2 (Monetarisierung)
+   starten mit IGDB-Lizenz-Recherche (Blocker) + RevenueCat.
+
+> **Session-2-Ende-Notiz:** 6 PRs gemergt (#88–#93). Phase 1 ~85% fertig. Es fehlen nur noch
+> 2 Refactorings + ein paar Tests. Ein Subagent-Versuch für game_repository_impl brach durch ein
+> Account-Session-Limit ab (kein Code verloren, Erkenntnis dokumentiert: Mixin-Chain nötig).
 
 ## User-Entscheidungen (2026-07-15 beantwortet)
 1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
