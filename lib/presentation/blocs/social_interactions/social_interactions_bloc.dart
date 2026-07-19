@@ -2,6 +2,9 @@
 
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/activation_tracker.dart';
+import 'package:gamer_grove/core/analytics/analytics_events.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/user/follow_user.dart';
 import 'package:gamer_grove/domain/usecases/user/unfollow_user.dart';
@@ -16,7 +19,11 @@ class SocialInteractionsBloc
     required this.unfollowUser,
     required this.userRepository,
     this.currentUserId,
-  }) : super(SocialInteractionsState.initial()) {
+    AnalyticsService analytics = const NoopAnalyticsService(),
+    ActivationTracker? activationTracker,
+  })  : _analytics = analytics,
+        _activationTracker = activationTracker,
+        super(SocialInteractionsState.initial()) {
     on<FollowUserRequested>(_onFollowUserRequested);
     on<UnfollowUserRequested>(_onUnfollowUserRequested);
     on<ToggleFollowRequested>(_onToggleFollowRequested);
@@ -26,22 +33,19 @@ class SocialInteractionsBloc
   final UnfollowUserUseCase unfollowUser;
   final UserRepository userRepository;
   final String? currentUserId;
+  final AnalyticsService _analytics;
+  final ActivationTracker? _activationTracker;
 
   /// Handle follow user request
   Future<void> _onFollowUserRequested(
     FollowUserRequested event,
     Emitter<SocialInteractionsState> emit,
   ) async {
-    print(
-        '🔵 [SocialInteractions] Follow request for user: ${event.targetUserId}');
-
     if (currentUserId == null) {
-      print('🔴 [SocialInteractions] Error: No current user ID');
       emit(state.setError(event.targetUserId, 'You must be logged in'));
       return;
     }
 
-    print('🔵 [SocialInteractions] Current user: $currentUserId');
     emit(state.setLoading(event.targetUserId, true));
 
     final result = await followUser(
@@ -53,12 +57,18 @@ class SocialInteractionsBloc
 
     result.fold(
       (failure) {
-        print('🔴 [SocialInteractions] Follow failed: ${failure.message}');
         emit(state.setError(event.targetUserId, failure.message));
       },
       (_) {
-        print('🟢 [SocialInteractions] Follow successful');
         emit(state.updateFollowStatus(event.targetUserId, true));
+        unawaited(
+          _analytics.track(
+            AnalyticsEvents.followUser,
+            properties: {AnalyticsProps.source: 'social_interactions'},
+          ),
+        );
+        final tracker = _activationTracker;
+        if (tracker != null) unawaited(tracker.onUserFollowed());
       },
     );
   }

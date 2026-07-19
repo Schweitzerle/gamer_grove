@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/activation_tracker.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
@@ -37,6 +38,8 @@ class UserSearchPage extends StatelessWidget {
             unfollowUser: sl(),
             userRepository: sl(),
             currentUserId: currentUserId,
+            analytics: sl(),
+            activationTracker: sl<ActivationTracker>(),
           ),
         ),
       ],

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/core/analytics/activation_tracker.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
@@ -64,6 +65,8 @@ class _FollowersFollowingPageState extends State<FollowersFollowingPage> {
       unfollowUser: sl(),
       userRepository: sl(),
       currentUserId: _currentUserId,
+      analytics: sl(),
+      activationTracker: sl<ActivationTracker>(),
     );
 
     // Load followers or following based on type

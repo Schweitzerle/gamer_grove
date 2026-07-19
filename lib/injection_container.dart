@@ -7,6 +7,7 @@ library;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/core/analytics/activation_tracker.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/analytics/umami_analytics_service.dart';
 import 'package:gamer_grove/core/constants/api_constants.dart';
@@ -118,6 +119,7 @@ import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_blo
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Service locator instance.
@@ -146,8 +148,12 @@ Future<void> initDependencies() async {
     anonKey: ApiConstants.supabaseAnonKey,
   );
 
+  // Resolve SharedPreferences up-front so consumers can use it synchronously.
+  final prefs = await SharedPreferences.getInstance();
+
   sl
     ..registerLazySingleton<SupabaseClient>(() => supabase.client)
+    ..registerLazySingleton<SharedPreferences>(() => prefs)
 
     // ============================================================
     // CORE
@@ -177,6 +183,12 @@ Future<void> initDependencies() async {
               client: sl<http.Client>(),
             ),
     )
+    ..registerLazySingleton<ActivationTracker>(
+      () => ActivationTracker(
+        analytics: sl<AnalyticsService>(),
+        prefs: sl<SharedPreferences>(),
+      ),
+    )
 
     // ============================================================
     // PRESENTATION LAYER - BLOCS
@@ -192,6 +204,7 @@ Future<void> initDependencies() async {
         resetPasswordUseCase: sl(),
         updatePasswordUseCase: sl(),
         isAuthenticatedUseCase: sl(),
+        analytics: sl<AnalyticsService>(),
       ),
     )
 
@@ -238,6 +251,8 @@ Future<void> initDependencies() async {
         updateTopThreeUseCase: sl(),
         setTopThreeGameAtPositionUseCase: sl(),
         removeFromTopThreeUseCase: sl(),
+        analytics: sl<AnalyticsService>(),
+        activationTracker: sl<ActivationTracker>(),
       ),
     )
 

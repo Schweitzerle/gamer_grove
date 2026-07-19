@@ -2,7 +2,11 @@
 // BLOC
 // ============================================================
 
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/analytics_events.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
 import 'package:gamer_grove/domain/usecases/auth/reset_password.dart';
@@ -49,7 +53,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resetPasswordUseCase,
     required this.updatePasswordUseCase,
     required this.isAuthenticatedUseCase,
-  }) : super(const AuthInitial()) {
+    AnalyticsService analytics = const NoopAnalyticsService(),
+  })  : _analytics = analytics,
+        super(const AuthInitial()) {
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<SignInEvent>(_onSignIn);
     on<SignUpEvent>(_onSignUp);
@@ -66,6 +72,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResetPasswordUseCase resetPasswordUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
   final IsAuthenticatedUseCase isAuthenticatedUseCase;
+  final AnalyticsService _analytics;
 
   /// Handles user data updates.
   Future<void> _onUserDataUpdated(
@@ -155,6 +162,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (user) {
         emit(AuthAuthenticated(user));
+        unawaited(_analytics.track(AnalyticsEvents.signup));
       },
     );
   }
