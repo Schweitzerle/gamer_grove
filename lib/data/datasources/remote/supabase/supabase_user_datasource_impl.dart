@@ -7,6 +7,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:gamer_grove/data/datasources/remote/supabase/models/postgrest_filter.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_filters.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_presets.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_query.dart';
@@ -655,8 +656,11 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     int? offset,
   }) async {
     try {
-      // Use ilike for case-insensitive search on username and display_name
-      final searchPattern = '%$query%';
+      // Use ilike for case-insensitive search on username and display_name.
+      // The pattern is double-quoted/escaped so PostgREST treats reserved
+      // filter characters (`,` `(` `)` `.`) in user input as literal data and
+      // cannot inject additional filter logic. See escapePostgrestFilterValue.
+      final searchPattern = escapePostgrestFilterValue('%$query%');
 
       final result = await _supabase
           .from('profiles')
