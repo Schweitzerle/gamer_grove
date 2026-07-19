@@ -34,17 +34,39 @@ Zugriff auf private Felder/`setState`, byte-identischer Move). Bei `State`-Klass
 in Extensions triggert `invalid_use_of_protected_member` (Analyzer-False-Positive, läuft zur
 Laufzeit) → `// ignore_for_file: invalid_use_of_protected_member` je part-Datei.
 - **`filter_bottom_sheet.dart`** ✅ fertig (PR #93).
-- **`game_bloc.dart`** (2014 Z., nutzt schon `part game_event/game_state/game_extensions`):
-  Handler sind private, via `on<>()` registriert — **KEINE** `@override`-Interface-Methoden →
-  part/extension-Muster funktioniert **direkt** (wie filter_bottom_sheet). Nächster einfacher Kandidat.
+- **`game_bloc.dart`** ✅ fertig — **PR #94** (2014→5 Dateien, root 505 + 4 part-Extensions, alle <800;
+  analyze 0/0, 37 Tests grün; KEIN ignore_for_file nötig, da Bloc-Handler keine @override-Interface-
+  Methoden sind). Pending CI/Merge bei Session-2-Ende.
 - **`game_repository_impl.dart`** (2540 Z., 96 `@override` `implements GameRepository`): part/extension
   **funktioniert NICHT** (Extension-Methoden erfüllen kein Interface → "Missing concrete implementation";
-  auch keine privaten Helfer zum Auslagern). **Lösung: Mixin-Chain** — `class GameRepositoryImpl
-  extends IgdbBaseRepository with _RepoSearch, _RepoDetails, … implements GameRepository`, Mixins in
-  part-Dateien (`mixin _RepoSearch on IgdbBaseRepository { … }`). Mixin-Member erfüllen das Interface.
-  ⚠️ Prüfen: greifen Methoden auf Felder von `GameRepositoryImpl` (Datasources) zu, die NICHT auf
-  `IgdbBaseRepository` liegen? Dann Mixin-`on`-Constraint anpassen oder Felder hochziehen. Subagent-Versuch
-  brach durch Account-Session-Limit ab (kein Code-Ergebnis).
+  auch keine privaten Helfer zum Auslagern). **Lösung: Mixin-Chain mit Getter-Seams.** Konkret geprüft
+  (Session 2): die genutzten Felder `igdbDataSource` / `supabaseUserDataSource?` / `enrichmentService?`
+  liegen auf `GameRepositoryImpl` selbst; die Basis `IgdbBaseRepository` hat nur `networkInfo` +
+  Helfer (`executeIgdbOperation` etc.). Daher `mixin … on IgdbBaseRepository` NICHT ausreichend.
+  **Erprobter Bauplan für Session 3:**
+  ```dart
+  abstract class GameRepositoryBase extends IgdbBaseRepository {
+    GameRepositoryBase({required super.networkInfo});
+    IgdbDataSource get igdbDataSource;               // Seams
+    SupabaseUserDataSource? get supabaseUserDataSource;
+    GameEnrichmentService? get enrichmentService;
+  }
+  mixin _RepoSearch on GameRepositoryBase { /* Methoden ohne @override, nutzen die Getter */ }
+  // … weitere mixins je Concern in part-Dateien: part of '../game_repository_impl.dart';
+  class GameRepositoryImpl extends GameRepositoryBase
+      with _RepoSearch, _RepoDetails, _RepoLists, _RepoByFacet, _RepoBatchUserData, _RepoTaxonomy
+      implements GameRepository {
+    GameRepositoryImpl({required this.igdbDataSource, required super.networkInfo,
+        this.supabaseUserDataSource, this.enrichmentService});
+    @override final IgdbDataSource igdbDataSource;   // erfüllt die Getter-Seams
+    @override final SupabaseUserDataSource? supabaseUserDataSource;
+    @override final GameEnrichmentService? enrichmentService;
+  }
+  ```
+  Mixin-Member erfüllen das `implements GameRepository`. Beim Verschieben in Mixins die `@override`
+  an den Methoden BEHALTEN (Mixin implementiert das Interface — `@override` korrekt). Verify: analyze 0/0
+  + `flutter test`. Subagent-Versuch brach durch Account-Session-Limit ab (kein Code-Ergebnis, aber
+  Interface-Wall bestätigt).
 
 ### ✅ Merged to master (PR #85, squash f3e683f, CI green: analyze+test AND build APK)
 Alle Session-1-Commits sind auf master. Feature-Branch gelöscht. Nächste Arbeit
@@ -136,8 +158,8 @@ wieder auf frischem Feature-Branch.
 - [x] **UserGameDataBloc-bloc_test** (4) — rate/wishlist Verhalten + Analytics-Wiring. In PR #92.
 - [x] **Refactoring 1/3: filter_bottom_sheet** (3282→8 Dateien) — PR #93 gemergt.
 - [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren (USER-AKTION).
-- [ ] **Refactoring 2/3: game_bloc.dart** (2014) — part/extension-Muster (funktioniert direkt, s.o.).
-- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain** nötig (s.o.), NICHT part/extension.
+- [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 (pending merge). part/extension.
+- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan), NICHT part/extension.
 - [ ] Weitere Tests: GameBloc, Repository-Fakes, GameCard-Widget.
 
 ## Nächste 3 Schritte (Session 3)
