@@ -4,9 +4,49 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-19 (Session 2)
+**Last updated:** 2026-07-20 (Session 3)
 **Current branch:** `master`
-**Current phase:** ✅ Phase 0 COMPLETE · Phase 1 IN PROGRESS (nahezu fertig)
+**Current phase:** ✅ Phase 0 COMPLETE · ✅ **Phase 1 COMPLETE** · ⏭ Phase 2 als Nächstes
+
+### Session 3 (2026-07-20) — merged to master (PRs #95–#97) → **Phase 1 DONE**
+- **PR #95 refactor: game_repository_impl → Mixin-Chain (Refactoring 3/3).** 2540 Z. →
+  root 133 Z. + 6 concern-Mixins in `game_repository_impl/` (je <800). `GameRepositoryBase`
+  mit Getter-Seams (igdbDataSource/supabaseUserDataSource/enrichmentService); Mixins
+  `on GameRepositoryBase implements GameRepository`. 96 @override byte-identisch verschoben.
+  analyze 0/0, 37 Tests grün, CI grün (analyze+test+APK). **Alle 3 Monster-Dateien fertig.**
+- **PR #96 test: GameCard-Widget-Tests (10) + GameRepositoryImpl-Fakes (7) + Card-a11y.**
+  GameCard in `MergeSemantics`+`Semantics(button)` gewrappt (nur Semantik, kein Visual-Change) →
+  labeledTapTarget-Guideline grün. Fakes über IgdbDataSource/NetworkInfo prüfen die Mixin-Seams
+  (searchGames delegate/empty/offline, Exception→Failure-Mapping, getPopularGames, id-Validation).
+  54 Tests grün gesamt.
+- **PR #97 feat(analytics): Umami-Send-Status im Debug-Build loggen.** `[analytics:umami] sent
+  "<event>" -> <status>` nur in kDebugMode → Funnel im logcat beobachtbar.
+- **✅ FUNNEL END-TO-END LIVE VERIFIZIERT (Emulator, echte Keys):** Debug-APK auf Emulator
+  `Medium_Phone_API_36` (headless, -memory 2048) installiert, echter Signup durchgeführt
+  (User `ggverify07201649@example.com` in prod-Supabase angelegt), Spiel „Grand Theft Auto VI"
+  mit 5.0 bewertet (Rating in Supabase persistiert, UI zeigt es). logcat-Evidenz gegen die
+  **live** Umami-Instanz:
+  ```
+  [analytics:umami] sent "app_open"   -> 200
+  [analytics:umami] sent "signup"     -> 200
+  [analytics:umami] sent "rate_game"  -> 200
+  [analytics:umami] sent "activation" -> 200   # ActivationTracker feuert beim 1. Rating
+  ```
+  Sentry-native-Backend startet beim Launch (Crash-Reporting live). Screenshots in scratchpad.
+> **Gotchas Session 3:**
+> - **Emulator-RAM:** Vor Builds `./android/gradlew --stop` + `pkill -f GradleDaemon` → gab hier
+>   1,8→5,5 GB frei. Emulator **headless** starten (`emulator @… -no-window -gpu swiftshader_indirect
+>   -memory 2048`); **1536 MB Guest OOMt** (lowmemorykiller cascade killt den Emulator). `screencap`
+>   liefert unter RAM-Druck sporadisch 0 Bytes → 2–3× retry.
+> - **Physisches Gerät (Motorola, wireless) NICHT nutzbar:** hat die release-signierte App bereits
+>   installiert → `INSTALL_FAILED_UPDATE_INCOMPATIBLE`; Debug drüber = destruktiver Uninstall der
+>   User-App → NICHT gemacht. Emulator ist der saubere Zielort.
+> - **UI via adb:** `input tap x y` (Emu-Koord = physische Pixel, hier 1080×2400). Beim Ausfüllen von
+>   Passwortfeldern verdeckt die Tastatur das Confirm-Feld → zwischen Feldern `keyevent 4` (IME zu),
+>   sonst landet Text im falschen Feld.
+> - **🐛 Gefundener Bug (Phase-3-Polish):** Rating-Tile zeigt „50.0/10" statt „5.0/10" (Skalierung ×10
+>   im Label). Kosmetisch, nicht funktional — Rating-Wert korrekt gespeichert.
+> - **Cleanup-Notiz:** Test-Signup `ggverify07201649@example.com` liegt in prod-Supabase (bei Bedarf löschen).
 
 ### Session 2 (2026-07-19) — merged to master
 - PR #88 Sentry crash reporting (DSN-gated) — gemergt.
@@ -171,27 +211,27 @@ wieder auf frischem Feature-Branch.
   (Table-GRANT-Ebene) — das Worst-Case aus dem Audit trifft NICHT zu. Offen: volle RLS-Prüfung für
   Rolle `authenticated` (nächste Session, mit Login-JWT).
 - [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 GEMERGT. part/extension.
-- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan,
-      vollständig ausgearbeitet), NICHT part/extension. 2 Subagent-Versuche brachen am Account-Session-Limit
-      ab (kein Code); Bauplan validiert & ready. **Erster Task in Session 3.**
-- [ ] Weitere Tests: GameBloc, Repository-Fakes, GameCard-Widget.
+- [x] **Refactoring 3/3: game_repository_impl.dart** (2540→root 133 + 6 Mixins) — **PR #95 GEMERGT.**
+      Mixin-Chain mit Getter-Seams (part/extension scheitert am Interface). Alle 3 Monster-Dateien fertig.
+- [x] **Weitere Tests: Repository-Fakes (7) + GameCard-Widget (10)** — PR #96 GEMERGT. 54 Tests grün.
+- [x] **Funnel end-to-end live verifiziert** (Signup→rate_game→activation, je HTTP 200 an live Umami) — s.o.
 
-## Nächste 3 Schritte (Session 3)
-1. **Refactoring 2/3: `game_bloc.dart`** — part/extension-Muster (wie PR #93, funktioniert direkt,
-   da Handler keine `@override`-Interface-Methoden sind). Worktree-Subagent, verify analyze 0/0 +
-   `flutter test`, Review+Merge. RAM-Limit: **nur 1 Flutter-Prozess gleichzeitig** (Subagenten sequenziell).
-2. **Refactoring 3/3: `game_repository_impl.dart`** — **Mixin-Chain** (part/extension scheitert am
-   Interface, s. Abschnitt oben). Danach part/extension NICHT nutzen.
-3. Rest-Tests: GameCard-Widget-Test, Repository-Fakes. Dann Phase 1 = DONE → Phase 2 (Monetarisierung)
-   starten mit IGDB-Lizenz-Recherche (Blocker) + RevenueCat.
+## ✅ Phase 1 = DONE. Nächste 3 Schritte (Session 4 → Phase 2 Monetarisierung)
+1. **⚠️ IGDB-Lizenz-Recherche (BLOCKER für kommerziellen Launch):** IGDB/Twitch gratis nur nicht-
+   kommerziell. Optionen recherchieren (kommerzielle IGDB-Vereinbarung vs. RAWG/MobyGames-Hybrid),
+   dem User mit Empfehlung vorlegen. Datasource ist bereits abstrahiert (Adapter-Seam sauber halten).
+2. **IAP-Infrastruktur:** RevenueCat (`purchases_flutter`) — Abo „GamerGrove Pro" (2,99 €/M · 19,99 €/J,
+   User-Entscheid steht). Key-gated bauen (no-op ohne Keys). RevenueCat-Account + Play-Console-Produkte =
+   User-Aktion (bündeln).
+3. **`EntitlementService`-Interface + Free/Pro-Schnitt** (Vorschlag in MASTERPLAN Phase 2) + Paywall-Screen.
+   Danach Security-Review über den Payment-/Entitlement-Pfad.
 
-> **Session-2-Ende-Notiz:** **7 PRs gemergt (#88–#94).** Phase 1 ~90% fertig. Es fehlt nur noch
-> 1 Refactoring (game_repository_impl, Bauplan oben komplett) + ein paar Tests (GameCard-Widget,
-> Repository-Fakes). 2 Subagent-Versuche für game_repository_impl brachen am Account-Session-Limit ab
-> (Reset 8:50pm Berlin) — kein Code verloren, Design validiert & dokumentiert. Master ist grün.
-> **Session 3 Start:** `git reset --hard origin/master` (Desktop-Plugin-Dateien werden lokal durch
-> `flutter pub get` „modifiziert" angezeigt — ignorieren/`git checkout -- linux macos windows`), dann
-> game_repository_impl-Refactoring nach obigem Mixin-Bauplan, danach Rest-Tests → Phase 1 DONE → Phase 2.
+> **Session-3-Ende-Notiz:** **3 PRs gemergt (#95–#97) → Phase 1 KOMPLETT.** Alle 3 Monster-Dateien
+> refaktoriert (je <800 Z.), erste Widget-/Repo-Tests da (54 grün), Funnel end-to-end auf dem Emulator
+> gegen live Umami/Sentry verifiziert (app_open/signup/rate_game/activation je 200; Screenshots in
+> scratchpad). Master grün. **Offene User-Items für Phase 2:** IGDB-Lizenz-Entscheid (nach Recherche),
+> RevenueCat-Account + Store-Produkte. **Session 4 Start:** `git reset --hard origin/master`, dann
+> Phase-2-IGDB-Lizenz-Recherche.
 
 ## User-Entscheidungen (2026-07-15 beantwortet)
 1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
