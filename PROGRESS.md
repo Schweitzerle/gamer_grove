@@ -161,8 +161,15 @@ wieder auf frischem Feature-Branch.
       (`https://umami.playrackd.com`), `UMAMI_WEBSITE_ID` in lokaler `.env` + als GitHub-Secrets gesetzt.
       Test-Events per curl an beide Endpunkte gesendet → je HTTP 200 akzeptiert (Umami Session/Visit
       vergeben; Sentry Event-ID retour). Werte NICHT hier ablegen (nur GitHub Secrets + gitignored .env).
-      ⚠️ Lokale `.env` hat für SUPABASE_*/IGDB_* noch **Platzhalter** → echter App-Emulator-Lauf braucht
-      die realen Supabase/IGDB-Keys (für Login-Flow-Verifikation der Funnel-Events end-to-end).
+- [x] **ALLE Keys real gesetzt (2026-07-20):** `SUPABASE_URL` (jmvhqefqjuljrbxlhanf), `SUPABASE_ANON_KEY`,
+      `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` in lokaler `.env` + als GitHub-Secrets. `env.g.dart` per
+      `dart run build_runner build` neu generiert → App nutzt lokal jetzt echte Backends. Live verifiziert:
+      IGDB/Twitch OAuth-Token OK (200), Supabase GoTrue `/auth/v1/health` mit anon-Key OK (200).
+      → **Emulator-Lauf & Funnel-End-to-End-Verifikation jetzt möglich.**
+- **Security-Fund (2026-07-20, entschärft AUDIT §2.1):** `GET /rest/v1/profiles` als **anon** →
+  `42501 permission denied for table profiles`. Unauthentifizierter PII-Zugriff ist blockiert
+  (Table-GRANT-Ebene) — das Worst-Case aus dem Audit trifft NICHT zu. Offen: volle RLS-Prüfung für
+  Rolle `authenticated` (nächste Session, mit Login-JWT).
 - [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 GEMERGT. part/extension.
 - [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan,
       vollständig ausgearbeitet), NICHT part/extension. 2 Subagent-Versuche brachen am Account-Session-Limit
