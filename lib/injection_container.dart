@@ -12,6 +12,7 @@ import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/analytics/umami_analytics_service.dart';
 import 'package:gamer_grove/core/constants/api_constants.dart';
 import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
+import 'package:gamer_grove/core/entitlements/revenuecat_entitlement_service.dart';
 import 'package:gamer_grove/core/env/env.dart';
 // Core
 import 'package:gamer_grove/core/network/network_info.dart';
@@ -533,6 +534,22 @@ Future<void> initDependencies() async {
       dio.options.receiveTimeout = const Duration(seconds: 30);
       return dio;
     });
+}
+
+/// Swaps the default [FreeEntitlementService] for the RevenueCat-backed one
+/// when `REVENUECAT_API_KEY` is configured. Call once after [initDependencies].
+///
+/// No-op (free tier) when no key is set, so local/CI builds run unchanged and
+/// the RevenueCat SDK is never configured without a key.
+Future<void> initBilling() async {
+  if (Env.revenueCatApiKey.isEmpty) return;
+  final service = await RevenueCatEntitlementService.configure(
+    apiKey: Env.revenueCatApiKey,
+  );
+  if (sl.isRegistered<EntitlementService>()) {
+    await sl.unregister<EntitlementService>();
+  }
+  sl.registerSingleton<EntitlementService>(service);
 }
 
 /// Resets all dependencies.

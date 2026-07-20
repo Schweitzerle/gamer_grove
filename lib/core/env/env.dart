@@ -28,4 +28,11 @@ abstract class Env {
 
   @EnviedField(varName: 'UMAMI_WEBSITE_ID', defaultValue: '')
   static const String umamiWebsiteId = _Env.umamiWebsiteId;
+
+  // ===== Billing (optional; empty => billing disabled / free tier) =====
+  // RevenueCat's public SDK key is a client-embeddable key (not a secret),
+  // like the Sentry DSN above. Empty default => no billing backend is
+  // configured and the app runs on the free tier.
+  @EnviedField(varName: 'REVENUECAT_API_KEY', defaultValue: '')
+  static const String revenueCatApiKey = _Env.revenueCatApiKey;
 }

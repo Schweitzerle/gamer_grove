@@ -37,6 +37,9 @@ void main() async {
   // Setup Dependency Injection (includes Supabase initialization)
   await di.initDependencies();
 
+  // Configure billing (RevenueCat) when a key is present; no-op otherwise.
+  await di.initBilling();
+
   // Runs the app and records the funnel-start event (no-op unless Umami
   // is configured).
   Future<void> startApp() async {

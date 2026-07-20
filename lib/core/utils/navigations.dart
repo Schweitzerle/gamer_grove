@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
+import 'package:gamer_grove/core/entitlements/revenuecat_entitlement_service.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
@@ -918,11 +920,17 @@ class Navigations {
     BuildContext context, {
     required String source,
   }) async {
+    // Wire a real purchase handler only when RevenueCat is configured;
+    // otherwise the paywall CTA tracks intent and shows a "coming soon" notice.
+    final service = sl<EntitlementService>();
+    final onPurchase =
+        service is RevenueCatEntitlementService ? service.purchase : null;
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => PaywallPage(
           analytics: sl<AnalyticsService>(),
           source: source,
+          onPurchase: onPurchase,
         ),
       ),
     );
