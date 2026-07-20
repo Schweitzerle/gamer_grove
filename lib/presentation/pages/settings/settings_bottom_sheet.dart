@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
@@ -24,6 +25,8 @@ class SettingsBottomSheet extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+              const _UpgradeProTile(),
+              const SizedBox(height: 8),
               ListTile(
                 title: const Text('Mode'),
                 trailing: SegmentedButton<ThemeMode>(
@@ -92,6 +95,61 @@ class SettingsBottomSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Prominent entry point into the GamerGrove Pro paywall.
+class _UpgradeProTile extends StatelessWidget {
+  const _UpgradeProTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Semantics(
+      button: true,
+      label: 'Upgrade to GamerGrove Pro',
+      child: InkWell(
+        onTap: () => Navigations.navigateToPaywall(context, source: 'settings'),
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [scheme.primary, scheme.tertiary],
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(Icons.workspace_premium, color: scheme.onPrimary),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'GamerGrove Pro',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: scheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Unlock stats, collections & more',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onPrimary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: scheme.onPrimary),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
