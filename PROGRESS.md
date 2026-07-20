@@ -35,11 +35,20 @@
 - [x] IGDB-Lizenz-Recherche + Entscheidung (IGDB behalten) — `docs/PHASE2_IGDB_LICENSE.md`, PR #99.
 - [x] `EntitlementService`-Interface + Free-Default + DI — PR #100.
 - [x] Paywall-Screen (designed, funnel-verdrahtet, key-gated) — commit d060346.
-- [ ] **RevenueCat-Backend** (`purchases_flutter`, key-gated via env wie Umami): `RevenueCatEntitlementService`
-      + `PurchaseHandler`, Offerings → echte Preise, restore. RevenueCat-Account + Play-Console-Produkte = **User-Action**.
+- [x] **Paywall in Navigation** (`Navigations.navigateToPaywall`) + Settings-„Upgrade to Pro"-Kachel — PR #102.
+- [x] **RevenueCat-Backend key-gated** (`purchases_flutter ^10.4.2`) — PR #103. `RevenueCatEntitlementService`
+      (configure/listener→Entitlements[`pro`]/refresh/restore/`purchase(ProPlan)` via Offering `default`),
+      `Env.revenueCatApiKey` (leerer Default → Free), DI `initBilling()` (swap in main), Paywall-`onPurchase`
+      verdrahtet. analyze 0/0, 67 Tests, **APK baut mit nativem Plugin** (lokal + CI). Static-SDK-API → wird
+      per echtem Sandbox-Kauf verifiziert (nicht Unit-Test).
+      **⏳ Wartet nur noch auf User:** `REVENUECAT_API_KEY` (`goog_…`) als `.env`+GitHub-Secret; Play-Produkte
+      `gg_pro_monthly`/`gg_pro_yearly`; RC-Entitlement `pro`, Offering `default`. Setup-Steps siehe Chat/Session.
+      **Sobald Key da:** in `.env`+Secret eintragen → `dart run build_runner build` → App nutzt echtes Billing;
+      dann internes Test-AAB + License-Tester für Sandbox-Kauf-Verifikation (Screenshots/Logs).
 - [ ] **ProGate + Trigger-Punkte:** Free/Pro-Gates an echten Upgrade-Momenten (extended stats, unlimited
-      collections, advanced filters, profile customization) → Paywall öffnen mit `source`.
-- [ ] Paywall in Navigation einhängen (`Navigations.navigateToPaywall`) + golden + `/design-review`-Pass.
+      collections, advanced filters, profile customization) → Paywall öffnen mit `source`. (Pro-Features
+      existieren noch nicht als solche → erst bauen/markieren, dann gaten.)
+- [ ] golden + `/design-review`-Pass für Paywall.
 - [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS).
 - [ ] IGDB-Edge-Function-Proxy (Client-Secret raus; Security + saubere kommerzielle Posture).
 - [ ] Security-Review über den gesamten Payment-/Entitlement-Pfad.
