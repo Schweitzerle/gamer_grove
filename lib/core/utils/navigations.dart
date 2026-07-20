@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
@@ -25,6 +26,7 @@ import 'package:gamer_grove/presentation/pages/event/widgets/all_events_screen.d
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_detail_page.dart';
+import 'package:gamer_grove/presentation/pages/paywall/paywall_page.dart';
 import 'package:gamer_grove/presentation/pages/search/search_page.dart';
 import 'package:gamer_grove/presentation/pages/user_game_list_page.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
@@ -904,5 +906,26 @@ class Navigations {
         ),
       ),
     );
+  }
+
+  /// Opens the GamerGrove Pro paywall.
+  ///
+  /// [source] identifies where the upgrade was triggered (tracked with the
+  /// `paywall_view` event). Billing is not wired yet, so [PaywallPage.onPurchase]
+  /// stays null (the CTA tracks intent and shows a "coming soon" notice) until a
+  /// RevenueCat-backed handler is provided.
+  static Future<bool> navigateToPaywall(
+    BuildContext context, {
+    required String source,
+  }) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => PaywallPage(
+          analytics: sl<AnalyticsService>(),
+          source: source,
+        ),
+      ),
+    );
+    return result ?? false;
   }
 }
