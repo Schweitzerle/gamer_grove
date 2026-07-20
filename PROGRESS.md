@@ -34,9 +34,9 @@ Zugriff auf private Felder/`setState`, byte-identischer Move). Bei `State`-Klass
 in Extensions triggert `invalid_use_of_protected_member` (Analyzer-False-Positive, läuft zur
 Laufzeit) → `// ignore_for_file: invalid_use_of_protected_member` je part-Datei.
 - **`filter_bottom_sheet.dart`** ✅ fertig (PR #93).
-- **`game_bloc.dart`** ✅ fertig — **PR #94** (2014→5 Dateien, root 505 + 4 part-Extensions, alle <800;
-  analyze 0/0, 37 Tests grün; KEIN ignore_for_file nötig, da Bloc-Handler keine @override-Interface-
-  Methoden sind). Pending CI/Merge bei Session-2-Ende.
+- **`game_bloc.dart`** ✅ fertig & GEMERGT — **PR #94** (2014→5 Dateien, root 505 + 4 part-Extensions,
+  alle <800; analyze 0/0, 37 Tests grün, APK-Build grün; KEIN ignore_for_file nötig, da Bloc-Handler
+  keine @override-Interface-Methoden sind).
 - **`game_repository_impl.dart`** (2540 Z., 96 `@override` `implements GameRepository`): part/extension
   **funktioniert NICHT** (Extension-Methoden erfüllen kein Interface → "Missing concrete implementation";
   auch keine privaten Helfer zum Auslagern). **Lösung: Mixin-Chain mit Getter-Seams.** Konkret geprüft
@@ -158,8 +158,10 @@ wieder auf frischem Feature-Branch.
 - [x] **UserGameDataBloc-bloc_test** (4) — rate/wishlist Verhalten + Analytics-Wiring. In PR #92.
 - [x] **Refactoring 1/3: filter_bottom_sheet** (3282→8 Dateien) — PR #93 gemergt.
 - [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren (USER-AKTION).
-- [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 (pending merge). part/extension.
-- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan), NICHT part/extension.
+- [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 GEMERGT. part/extension.
+- [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan,
+      vollständig ausgearbeitet), NICHT part/extension. 2 Subagent-Versuche brachen am Account-Session-Limit
+      ab (kein Code); Bauplan validiert & ready. **Erster Task in Session 3.**
 - [ ] Weitere Tests: GameBloc, Repository-Fakes, GameCard-Widget.
 
 ## Nächste 3 Schritte (Session 3)
@@ -171,9 +173,13 @@ wieder auf frischem Feature-Branch.
 3. Rest-Tests: GameCard-Widget-Test, Repository-Fakes. Dann Phase 1 = DONE → Phase 2 (Monetarisierung)
    starten mit IGDB-Lizenz-Recherche (Blocker) + RevenueCat.
 
-> **Session-2-Ende-Notiz:** 6 PRs gemergt (#88–#93). Phase 1 ~85% fertig. Es fehlen nur noch
-> 2 Refactorings + ein paar Tests. Ein Subagent-Versuch für game_repository_impl brach durch ein
-> Account-Session-Limit ab (kein Code verloren, Erkenntnis dokumentiert: Mixin-Chain nötig).
+> **Session-2-Ende-Notiz:** **7 PRs gemergt (#88–#94).** Phase 1 ~90% fertig. Es fehlt nur noch
+> 1 Refactoring (game_repository_impl, Bauplan oben komplett) + ein paar Tests (GameCard-Widget,
+> Repository-Fakes). 2 Subagent-Versuche für game_repository_impl brachen am Account-Session-Limit ab
+> (Reset 8:50pm Berlin) — kein Code verloren, Design validiert & dokumentiert. Master ist grün.
+> **Session 3 Start:** `git reset --hard origin/master` (Desktop-Plugin-Dateien werden lokal durch
+> `flutter pub get` „modifiziert" angezeigt — ignorieren/`git checkout -- linux macos windows`), dann
+> game_repository_impl-Refactoring nach obigem Mixin-Bauplan, danach Rest-Tests → Phase 1 DONE → Phase 2.
 
 ## User-Entscheidungen (2026-07-15 beantwortet)
 1. **Pricing Pro:** **2,99 €/Monat · 19,99 €/Jahr**.
