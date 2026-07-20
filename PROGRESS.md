@@ -4,9 +4,45 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-20 (Session 3)
+**Last updated:** 2026-07-20 (Session 4)
 **Current branch:** `master`
-**Current phase:** ✅ Phase 0 COMPLETE · ✅ **Phase 1 COMPLETE** · ⏭ Phase 2 als Nächstes
+**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🚧 **Phase 2 IN PROGRESS (Monetarisierung)**
+
+### Session 4 (2026-07-20) — Phase 2 gestartet (Monetarisierung)
+- **Entscheidung (User): Game-Data-Source = IGDB behalten** (Recherche in
+  `docs/PHASE2_IGDB_LICENSE.md`, PR #99). Kernbefund: Supabase speichert **nur `game_id`-Refs**,
+  keine IGDB-Metadaten → **TDSA-24h-Caching-Regel schon eingehalten**, IGDB bleiben = low-risk.
+  RAWG bleibt als Fallback-Adapter-Seam (aber Attribution-Pflicht pro Screen + 100k-MAU-Deckel).
+  **User-Action offen:** 1 Mail an `partner@igdb.com` (kommerzielle Bestätigung) vor Paid-Launch.
+- **PR #100 feat(entitlements): EntitlementService-Scaffold + Free/Pro-Modell.** `ProFeature`-Enum
+  (extendedStats/unlimitedCollections/advancedFilters/profileCustomization/adFree), `Entitlements`
+  (Equatable, isPro/has()), Interface + `FreeEntitlementService` (Default, alles frei) — Muster wie
+  `AnalyticsService`. In DI registriert (RevenueCat-Impl wird später key-gated eingehängt). 6 Tests.
+- **feat(paywall): designed Paywall-Screen** (commit `d060346`) — Gradient-Pro-Hero, Feature-Value-Prop,
+  2 wählbare Plan-Cards (yearly „Best value/Save 44%", monthly), Sticky-CTA + Kleingedrucktes; alle
+  Tokens aus `Theme.of(context)` (beide Themes). Funnel verdrahtet: `paywall_view`(source)/`purchase_start`
+  (plan)/`purchase_done`. `onPurchase` nullable → ohne RevenueCat trackt CTA Intent + „coming soon".
+  `ProPlan`-Modell + statische Preise (2,99 €/M · 19,99 €/J, ersetzt später RevenueCat-Offerings).
+  8 Widget-Tests inkl. a11y-Guidelines. analyze 0/0, Suite **67 grün**.
+> **⚠️ Prozess-Slip (ehrlich dokumentiert):** Paywall-Commit `d060346` ging **direkt auf master**
+> (Branch vergessen) statt via PR — kein Code-Review-Gate. Code ist aber lokal + **master-CI grün**
+> (analyze+test+APK) verifiziert. KEIN Force-Push zur Korrektur (History-Rewrite auf shared main =
+> bestätigungspflichtig). Lehre: vor jedem Feature-Block explizit `git checkout -b` prüfen.
+> **CI-Wartungsnotiz:** GitHub warnt, `actions/checkout@v4`/`upload-artifact@v4`/`setup-java@v4` laufen
+> auf Node20 (deprecated, forced Node24) — bei Gelegenheit Action-Versionen bumpen (nicht dringend).
+
+### Phase-2-Fortschritt (MASTERPLAN §80–99)
+- [x] IGDB-Lizenz-Recherche + Entscheidung (IGDB behalten) — `docs/PHASE2_IGDB_LICENSE.md`, PR #99.
+- [x] `EntitlementService`-Interface + Free-Default + DI — PR #100.
+- [x] Paywall-Screen (designed, funnel-verdrahtet, key-gated) — commit d060346.
+- [ ] **RevenueCat-Backend** (`purchases_flutter`, key-gated via env wie Umami): `RevenueCatEntitlementService`
+      + `PurchaseHandler`, Offerings → echte Preise, restore. RevenueCat-Account + Play-Console-Produkte = **User-Action**.
+- [ ] **ProGate + Trigger-Punkte:** Free/Pro-Gates an echten Upgrade-Momenten (extended stats, unlimited
+      collections, advanced filters, profile customization) → Paywall öffnen mit `source`.
+- [ ] Paywall in Navigation einhängen (`Navigations.navigateToPaywall`) + golden + `/design-review`-Pass.
+- [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS).
+- [ ] IGDB-Edge-Function-Proxy (Client-Secret raus; Security + saubere kommerzielle Posture).
+- [ ] Security-Review über den gesamten Payment-/Entitlement-Pfad.
 
 ### Session 3 (2026-07-20) — merged to master (PRs #95–#97) → **Phase 1 DONE**
 - **PR #95 refactor: game_repository_impl → Mixin-Chain (Refactoring 3/3).** 2540 Z. →
