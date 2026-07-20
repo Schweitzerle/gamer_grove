@@ -157,7 +157,12 @@ wieder auf frischem Feature-Branch.
 - [x] **Security-Fix: PostgREST-Injection in `searchUsers`** — PR #90 gemergt.
 - [x] **UserGameDataBloc-bloc_test** (4) — rate/wishlist Verhalten + Analytics-Wiring. In PR #92.
 - [x] **Refactoring 1/3: filter_bottom_sheet** (3282→8 Dateien) — PR #93 gemergt.
-- [ ] Umami/Sentry-Keys vom User → GitHub Secrets + lokale .env → Live-Events verifizieren (USER-AKTION).
+- [x] **Umami/Sentry-Keys konfiguriert & LIVE verifiziert** (2026-07-20): `SENTRY_DSN`, `UMAMI_URL`
+      (`https://umami.playrackd.com`), `UMAMI_WEBSITE_ID` in lokaler `.env` + als GitHub-Secrets gesetzt.
+      Test-Events per curl an beide Endpunkte gesendet → je HTTP 200 akzeptiert (Umami Session/Visit
+      vergeben; Sentry Event-ID retour). Werte NICHT hier ablegen (nur GitHub Secrets + gitignored .env).
+      ⚠️ Lokale `.env` hat für SUPABASE_*/IGDB_* noch **Platzhalter** → echter App-Emulator-Lauf braucht
+      die realen Supabase/IGDB-Keys (für Login-Flow-Verifikation der Funnel-Events end-to-end).
 - [x] **Refactoring 2/3: game_bloc.dart** (2014→5 Dateien) — PR #94 GEMERGT. part/extension.
 - [ ] **Refactoring 3/3: game_repository_impl.dart** (2540) — **Mixin-Chain mit Getter-Seams** (s.o. Bauplan,
       vollständig ausgearbeitet), NICHT part/extension. 2 Subagent-Versuche brachen am Account-Session-Limit
