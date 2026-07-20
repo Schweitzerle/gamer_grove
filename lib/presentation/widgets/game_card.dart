@@ -44,6 +44,18 @@ class GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Expose the whole card as a single tappable button node so screen
+    // readers announce the game (title, rating, genres) once instead of
+    // walking every decorative overlay.
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        child: _buildCard(context),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         await HapticFeedback.lightImpact();
