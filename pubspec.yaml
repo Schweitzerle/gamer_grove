@@ -60,6 +60,7 @@ dependencies:
   # Animations (minimal)
   flutter_animate: ^4.5.0
   flutter_dotenv: ^5.1.0
+  purchases_flutter: ^10.4.2
 
 dev_dependencies:
   flutter_test:

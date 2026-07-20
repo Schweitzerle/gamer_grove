@@ -41,6 +41,7 @@ jobs:
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           UMAMI_URL=${{ secrets.UMAMI_URL }}
           UMAMI_WEBSITE_ID=${{ secrets.UMAMI_WEBSITE_ID }}
+          REVENUECAT_API_KEY=${{ secrets.REVENUECAT_API_KEY }}
           EOF
 
       - name: Install dependencies
@@ -98,6 +99,7 @@ jobs:
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           UMAMI_URL=${{ secrets.UMAMI_URL }}
           UMAMI_WEBSITE_ID=${{ secrets.UMAMI_WEBSITE_ID }}
+          REVENUECAT_API_KEY=${{ secrets.REVENUECAT_API_KEY }}
           EOF
 
       - name: Install dependencies
