@@ -55,7 +55,7 @@ class UmamiAnalyticsService implements AnalyticsService {
     };
 
     try {
-      await _client.post(
+      final response = await _client.post(
         Uri.parse('$_baseUrl/api/send'),
         headers: const {
           'Content-Type': 'application/json',
@@ -63,6 +63,11 @@ class UmamiAnalyticsService implements AnalyticsService {
         },
         body: jsonEncode({'type': 'event', 'payload': payload}),
       );
+      // Debug-only visibility so the funnel is observable in logs during
+      // manual/end-to-end verification. Never logged in release builds.
+      if (kDebugMode) {
+        debugPrint('[analytics:umami] sent "$name" -> ${response.statusCode}');
+      }
     } on Exception catch (error) {
       // Never propagate analytics failures into product code.
       if (kDebugMode) {
