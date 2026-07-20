@@ -11,6 +11,7 @@ import 'package:gamer_grove/core/analytics/activation_tracker.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/analytics/umami_analytics_service.dart';
 import 'package:gamer_grove/core/constants/api_constants.dart';
+import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
 import 'package:gamer_grove/core/env/env.dart';
 // Core
 import 'package:gamer_grove/core/network/network_info.dart';
@@ -189,6 +190,11 @@ Future<void> initDependencies() async {
         prefs: sl<SharedPreferences>(),
       ),
     )
+
+    // Entitlements: free tier by default. A RevenueCat-backed implementation
+    // will be swapped in here (key-gated) once billing is configured; feature
+    // gates depend only on the EntitlementService interface.
+    ..registerLazySingleton<EntitlementService>(FreeEntitlementService.new)
 
     // ============================================================
     // PRESENTATION LAYER - BLOCS
