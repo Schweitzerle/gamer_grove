@@ -7,6 +7,7 @@ library;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gamer_grove/core/analytics/activation_tracker.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/analytics/umami_analytics_service.dart';
@@ -542,7 +543,12 @@ Future<void> initDependencies() async {
 /// No-op (free tier) when no key is set, so local/CI builds run unchanged and
 /// the RevenueCat SDK is never configured without a key.
 Future<void> initBilling() async {
-  if (Env.revenueCatApiKey.isEmpty) return;
+  if (Env.revenueCatApiKey.isEmpty) {
+    if (kDebugMode) {
+      debugPrint('[billing] no REVENUECAT_API_KEY set → free tier');
+    }
+    return;
+  }
   final service = await RevenueCatEntitlementService.configure(
     apiKey: Env.revenueCatApiKey,
   );
@@ -550,6 +556,12 @@ Future<void> initBilling() async {
     await sl.unregister<EntitlementService>();
   }
   sl.registerSingleton<EntitlementService>(service);
+  if (kDebugMode) {
+    debugPrint(
+      '[billing] RevenueCat configured '
+      '(current: ${service.entitlements.isPro ? "pro" : "free"})',
+    );
+  }
 }
 
 /// Resets all dependencies.

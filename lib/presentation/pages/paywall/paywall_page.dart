@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/entitlements/pro_plan.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/presentation/pages/paywall/widgets/pro_plan_card.dart';
 
 /// Result of a purchase attempt triggered from the paywall.
 typedef PurchaseHandler = Future<bool> Function(ProPlan plan);
+
+/// Restores previous purchases; returns whether Pro is active afterwards.
+typedef RestoreHandler = Future<bool> Function();
 
 /// The GamerGrove Pro upgrade screen.
 ///
@@ -21,6 +25,7 @@ class PaywallPage extends StatefulWidget {
     required this.analytics,
     this.source = 'unknown',
     this.onPurchase,
+    this.onRestore,
     super.key,
   });
 
@@ -31,6 +36,9 @@ class PaywallPage extends StatefulWidget {
 
   /// Billing callback; null until RevenueCat is wired in.
   final PurchaseHandler? onPurchase;
+
+  /// Restore-purchases callback; null until RevenueCat is wired in.
+  final RestoreHandler? onRestore;
 
   @override
   State<PaywallPage> createState() => _PaywallPageState();
@@ -76,8 +84,10 @@ class _PaywallPageState extends State<PaywallPage> {
     final handler = widget.onPurchase;
     if (handler == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Subscriptions are coming soon.')),
+      GamerGroveToastService.showInfo(
+        context,
+        title: 'Coming soon',
+        message: "Subscriptions aren't available just yet.",
       );
       return;
     }
@@ -91,7 +101,34 @@ class _PaywallPageState extends State<PaywallPage> {
         AnalyticsEvents.purchaseDone,
         properties: {AnalyticsProps.plan: _selected.id},
       );
-      if (mounted) Navigator.of(context).pop(true);
+      if (!mounted) return;
+      GamerGroveToastService.showSuccess(
+        context,
+        title: 'Welcome to GamerGrove Pro!',
+        message: 'Your Pro features are now unlocked.',
+      );
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _onRestorePressed() async {
+    final handler = widget.onRestore;
+    if (handler == null) return;
+    final restored = await handler();
+    if (!mounted) return;
+    if (restored) {
+      GamerGroveToastService.showSuccess(
+        context,
+        title: 'Purchases restored',
+        message: 'Your GamerGrove Pro is active again.',
+      );
+      Navigator.of(context).pop(true);
+    } else {
+      GamerGroveToastService.showInfo(
+        context,
+        title: 'Nothing to restore',
+        message: 'We found no previous Pro purchase for this account.',
+      );
     }
   }
 
@@ -139,6 +176,7 @@ class _PaywallPageState extends State<PaywallPage> {
             _PaywallFooter(
               purchasing: _purchasing,
               onPurchase: _onPurchasePressed,
+              onRestore: widget.onRestore != null ? _onRestorePressed : null,
             ),
           ],
         ),
@@ -244,10 +282,15 @@ class _FeatureRow extends StatelessWidget {
 }
 
 class _PaywallFooter extends StatelessWidget {
-  const _PaywallFooter({required this.purchasing, required this.onPurchase});
+  const _PaywallFooter({
+    required this.purchasing,
+    required this.onPurchase,
+    this.onRestore,
+  });
 
   final bool purchasing;
   final VoidCallback onPurchase;
+  final VoidCallback? onRestore;
 
   @override
   Widget build(BuildContext context) {
@@ -288,6 +331,11 @@ class _PaywallFooter extends StatelessWidget {
                   color: scheme.onSurfaceVariant,
                 ),
           ),
+          if (onRestore != null)
+            TextButton(
+              onPressed: purchasing ? null : onRestore,
+              child: const Text('Restore purchases'),
+            ),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/entitlements/pro_access.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
@@ -60,6 +61,12 @@ class SettingsBottomSheet extends StatelessWidget {
                   ),
                 ),
                 onTap: () async {
+                  // Theme customization is a Pro feature; free users get the
+                  // paywall, Pro users get the theme picker.
+                  if (!await requirePro(context, source: 'settings_theme')) {
+                    return;
+                  }
+                  if (!context.mounted) return;
                   await showDialog<void>(
                     context: context,
                     builder: (context) => const ThemeSelectionDialog(),
