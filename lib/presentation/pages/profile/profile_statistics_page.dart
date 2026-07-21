@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/entitlements/pro_feature.dart';
 import 'package:gamer_grove/domain/entities/statistics/game_statistics.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/statistics/statistics_bloc.dart';
+import 'package:gamer_grove/presentation/widgets/pro/pro_gate.dart';
+import 'package:gamer_grove/presentation/widgets/pro/pro_locked_view.dart';
 import 'package:gamer_grove/presentation/widgets/statistics/stat_item.dart';
 import 'package:gamer_grove/presentation/widgets/statistics/statistics_card.dart';
 
@@ -19,99 +22,109 @@ class ProfileStatisticsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          sl<StatisticsBloc>()..add(LoadStatisticsEvent(userId: userId)),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Gaming Statistics'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Gaming Statistics'),
+      ),
+      body: ProGate(
+        feature: ProFeature.extendedStats,
+        lockedBuilder: (context) => const ProLockedView(
+          title: 'Gaming statistics',
+          description: 'Unlock deep insights into your ratings, genres and '
+              'platforms with GamerGrove Pro.',
+          source: 'statistics',
+          icon: Icons.insights,
         ),
-        body: BlocBuilder<StatisticsBloc, StatisticsState>(
-          builder: (context, state) {
-            if (state is StatisticsLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+        builder: (context) => BlocProvider(
+          create: (context) =>
+              sl<StatisticsBloc>()..add(LoadStatisticsEvent(userId: userId)),
+          child: BlocBuilder<StatisticsBloc, StatisticsState>(
+            builder: (context, state) {
+              if (state is StatisticsLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-            if (state is StatisticsError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Failed to load statistics',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium,
+              if (state is StatisticsError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context
-                            .read<StatisticsBloc>()
-                            .add(LoadStatisticsEvent(userId: userId));
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
+                      const SizedBox(height: 16),
+                      Text(
+                        'Failed to load statistics',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context
+                              .read<StatisticsBloc>()
+                              .add(LoadStatisticsEvent(userId: userId));
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-            if (state is StatisticsEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.bar_chart_outlined,
-                      size: 64,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No statistics yet',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Rate some games to see your statistics',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                    ),
-                  ],
-                ),
-              );
-            }
+              if (state is StatisticsEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bar_chart_outlined,
+                        size: 64,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No statistics yet',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Rate some games to see your statistics',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.6),
+                            ),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-            if (state is StatisticsLoaded) {
-              return _buildStatistics(context, state.statistics);
-            }
+              if (state is StatisticsLoaded) {
+                return _buildStatistics(context, state.statistics);
+              }
 
-            return const SizedBox.shrink();
-          },
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );

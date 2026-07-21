@@ -923,14 +923,14 @@ class Navigations {
     // Wire a real purchase handler only when RevenueCat is configured;
     // otherwise the paywall CTA tracks intent and shows a "coming soon" notice.
     final service = sl<EntitlementService>();
-    final onPurchase =
-        service is RevenueCatEntitlementService ? service.purchase : null;
+    final rcService = service is RevenueCatEntitlementService ? service : null;
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => PaywallPage(
           analytics: sl<AnalyticsService>(),
           source: source,
-          onPurchase: onPurchase,
+          onPurchase: rcService?.purchase,
+          onRestore: rcService?.restore,
         ),
       ),
     );

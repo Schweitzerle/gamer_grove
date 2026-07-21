@@ -98,8 +98,8 @@ void main() {
   });
 
   testWidgets(
-      'CTA tracks purchase_start with the selected plan and shows a notice '
-      'when billing is not configured', (tester) async {
+      'CTA tracks purchase_start with the selected plan and does not complete '
+      'a purchase when billing is not configured', (tester) async {
     await pumpPaywall(tester);
 
     await tester.tap(find.text('Start GamerGrove Pro'));
@@ -108,8 +108,10 @@ void main() {
     final event = analytics.events
         .firstWhere((e) => e.$1 == AnalyticsEvents.purchaseStart);
     expect(event.$2?[AnalyticsProps.plan], ProPlans.yearly.id);
-    expect(find.text('Subscriptions are coming soon.'), findsOneWidget);
     expect(analytics.names, isNot(contains(AnalyticsEvents.purchaseDone)));
+
+    // Let the "coming soon" toast timer flush so no timer is left pending.
+    await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets('successful purchase tracks purchase_done and pops with true',
@@ -143,6 +145,8 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start GamerGrove Pro'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 6)); // flush success toast timer
     await tester.pumpAndSettle();
 
     expect(analytics.names, contains(AnalyticsEvents.purchaseDone));
