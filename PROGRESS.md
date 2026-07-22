@@ -4,9 +4,44 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-22 (Session 5)
+**Last updated:** 2026-07-22 (Session 6)
 **Current branch:** `master`
-**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~90% (Kauf live verifiziert)**
+**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~95% (Custom Collections gebaut)**
+
+### Session 6 (2026-07-22) — CUSTOM COLLECTIONS (letztes großes Pre-Launch-Feature, 4 PRs)
+Neues Kern-Feature: benannte User-Sammlungen (z.B. „Cozy games", „Backlog 2026"), getrennt von
+den festen Listen (Wishlist/Rated/Recommended/Top 3). Free-Limit **3**, Pro unbegrenzt.
+- **PR #110 (GEMERGT): domain + data + migration.** `UserCollection`-Entity,
+  `UserCollectionsRepository`(+Impl über `SupabaseBaseRepository`), `SupabaseCollectionsDataSource`
+  (getUserCollections embeddet `user_collection_games(count)` → kein N+1; addGame idempotent + Position),
+  `UserCollectionModel`, 7 Usecases (get/create/update/delete + add/remove/list-ids, Name-Validierung).
+  DI verdrahtet. **18 Tests** (Repo-Fakes inkl. offline/Fehler-Mapping + Usecase-Validierung).
+- **PR #112: `UserCollectionsBloc`** (load/create/update/delete/add/remove). `Loaded`-State hält Liste
+  sichtbar bei Mutationen (`isMutating`) + one-shot `actionError` (Toast). Reload nach Erfolg → korrekte
+  Counts. 7 bloc_test.
+- **PR #113: UI.** `CollectionsPage` (Liste, FAB-Create, Rename/Delete-Menü, Empty/Error), `CollectionDetailPage`
+  (GameCard-Grid aus ids→getGamesByIds, Empty/Error, Long-Press-Remove optimistisch), `CollectionFormSheet`,
+  `AddToCollectionSheet` (von Game-Detail UserStatesContent). Profil-Section „My Collections". Neuer
+  `GetGamesByIdsUseCase`. Widget-Tests (Collections empty/list/create/a11y + Detail empty/error).
+- **PR #117: Gating + Paywall + Analytics.** `kFreeCollectionLimit=3`, `ensureCanCreateCollection`
+  (Pro/unter-Limit frei; am Limit → Paywall `source:'collections_limit'`), reine Predicate
+  `isAtFreeCollectionLimit` (unit-getestet). Paywall-Bullet „Unlimited collections" WIEDER drin (ehrlich),
+  Settings-Upsell-Subtitle angepasst, `AnalyticsEvents.collectionCreate`('collection_create') gefeuert.
+- **PR #116 fix:** FK zeigte auf `public.users` — **die Live-DB hat aber `public.profiles`**
+  (`public.users` = 404, per anon-REST-Probe verifiziert). Migration korrigiert, sonst wäre sie beim
+  Einspielen gescheitert. **Merke: die User-Tabelle heißt live `profiles`, nicht `users`** (die
+  SupabaseScripts 001/003 sind insofern veraltet).
+- **✅ ALLE 5 PRs GEMERGT** (#110 → #112 → #115 → #116 → #117). analyze 0/0, full suite **104 grün**.
+- **✅ MIGRATION LIVE EINGESPIELT (User) + RLS END-TO-END VERIFIZIERT (2026-07-22):** echter Test gegen
+  die Prod-DB mit Wegwerf-User: Signup 200 → private Collection anlegen **201** (FK auf profiles + INSERT-
+  Policy ok) → Owner sieht sie (`[{"name":"Secret backlog","is_public":false}]`) → **anon sieht `[]`**
+  (private Collection NICHT sichtbar ✅) → Owner-DELETE 204. Tabellen, GRANTs und alle RLS-Policies
+  bestätigt. (Wegwerf-User `ggcol…@example.com` liegt noch in prod-Supabase — bei Bedarf löschen.)
+> **Follow-ups:** serverseitige Limit-Enforcement (RLS/Trigger — heute nur clientseitig);
+> Share-UI (is_public-Toggle ist vorbereitet); golden/design-review-Pass für die Collections-Screens.
+> **Gotcha:** Force-Push ist vom Harness geblockt → Stacked-PRs nach Merge nicht rebasen, sondern frische
+> Branches von master + cherry-pick (siehe Memory). Ebenso: PRs, die gegen einen gelöschten Base-Branch
+> stehen, triggern nach `gh pr edit --base master` KEINE CI → neu aufsetzen.
 
 ### Session 5 (2026-07-21/22) — RevenueCat LIVE, Kauf end-to-end verifiziert (PRs #105–#108)
 - **RevenueCat komplett eingerichtet & scharf** (User + ich): Google-Play-Abos `gg_pro_monthly:monthly`
@@ -77,8 +112,10 @@
 - [x] **ProGate + 3 Gates:** Statistics/Theme (#106) + erweiterte Meta-Filter (#108). Reaktiv, `requirePro`,
       `ProLockedView`. Settings-Kachel Pro-Status + Play-Abo-Verwaltung.
 - [x] **Paywall ehrlich** (#108): nur real existierende Features beworben (Stats/Filters/Themes).
-- [ ] **Custom Collections** als echtes Feature (User-Listen, Free-Limit, Pro unbegrenzt) — optional, falls
-      der Pro-Tier voller sein soll (User-Entscheid; aktuell bewusst NICHT beworben).
+- [x] **Custom Collections** als echtes Feature (User-Listen, Free-Limit 3, Pro unbegrenzt) — PRs #110/#112/
+      #115/#116/#117, Migration live + RLS verifiziert. Wird jetzt auf der Paywall beworben (ehrlich).
+- [ ] Serverseitige Enforcement des Collection-Limits (RLS/Trigger) — heute nur clientseitig.
+- [ ] Share-UI für öffentliche Collections (`is_public` + RLS sind schon da).
 - [ ] golden + `/design-review`-Pass für Paywall.
 - [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS) —
       für serverseitigen Pro-Status (Anti-Tampering, Pro-only Social-Features). Für ersten Launch nicht zwingend.
