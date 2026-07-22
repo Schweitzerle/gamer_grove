@@ -22,7 +22,7 @@
 
 CREATE TABLE IF NOT EXISTS public.user_collections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
   cover_game_id INTEGER,
