@@ -25,6 +25,9 @@ abstract final class AnalyticsEvents {
   /// User followed another user.
   static const String followUser = 'follow_user';
 
+  /// User created a custom collection.
+  static const String collectionCreate = 'collection_create';
+
   /// The paywall / upgrade screen was shown.
   static const String paywallView = 'paywall_view';
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/core/entitlements/free_limits.dart';
 import 'package:gamer_grove/core/entitlements/pro_plan.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/presentation/pages/paywall/widgets/pro_plan_card.dart';
@@ -55,6 +56,11 @@ class _PaywallPageState extends State<PaywallPage> {
       Icons.tune,
       'Advanced filters',
       'Filter by themes, companies, engines & more',
+    ),
+    (
+      Icons.collections_bookmark,
+      'Unlimited collections',
+      'Free stops at $kFreeCollectionLimit — go unlimited',
     ),
     (Icons.palette, 'Profile customization', 'App themes that are yours'),
   ];
