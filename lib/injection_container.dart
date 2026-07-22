@@ -78,6 +78,7 @@ import 'package:gamer_grove/domain/usecases/event/search_events.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_details.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_dlcs.dart';
 import 'package:gamer_grove/domain/usecases/game/get_game_expansions.dart';
+import 'package:gamer_grove/domain/usecases/game/get_games_by_ids.dart';
 import 'package:gamer_grove/domain/usecases/game/get_latest_games.dart';
 import 'package:gamer_grove/domain/usecases/game/get_popular_games.dart';
 import 'package:gamer_grove/domain/usecases/game/get_similar_games.dart';
@@ -444,6 +445,7 @@ Future<void> initDependencies() async {
     // Game Use Cases
     ..registerLazySingleton(() => GetUserRatedGameIds(sl()))
     ..registerLazySingleton(() => SearchGames(sl()))
+    ..registerLazySingleton(() => GetGamesByIdsUseCase(sl()))
     ..registerLazySingleton(() => GetGameDetails(sl()))
     ..registerLazySingleton(() => RateGame(sl()))
     ..registerLazySingleton(() => ToggleWishlist(sl()))
