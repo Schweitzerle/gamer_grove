@@ -2,6 +2,8 @@
 // ENHANCED USER STATES CONTENT - With UserGameDataBloc Integration
 // ==================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +16,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart'
     as user_data;
+import 'package:gamer_grove/presentation/pages/collections/widgets/add_to_collection_sheet.dart';
 import 'package:gamer_grove/presentation/widgets/rating_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/top_three_dialog.dart';
 
@@ -128,6 +131,18 @@ class UserStatesContent extends StatelessWidget {
                 ),
               ],
             ),
+
+            const SizedBox(height: 8),
+
+            // Add to a custom collection
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _addToCollection(context),
+                icon: const Icon(Icons.collections_bookmark_outlined, size: 18),
+                label: const Text('Add to collection'),
+              ),
+            ),
           ],
         );
       },
@@ -149,6 +164,22 @@ class UserStatesContent extends StatelessWidget {
       context,
       title: 'Login Required',
       message: 'Please log in to use this feature',
+    );
+  }
+
+  void _addToCollection(BuildContext context) {
+    final userId = _getCurrentUserId(context);
+    if (userId == null) {
+      _showLoginRequiredSnackBar(context);
+      return;
+    }
+    unawaited(
+      showAddToCollectionSheet(
+        context,
+        userId: userId,
+        gameId: game.id,
+        gameName: game.name,
+      ),
     );
   }
 

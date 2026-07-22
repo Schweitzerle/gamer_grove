@@ -1,7 +1,7 @@
 part of 'user_collections_bloc.dart';
 
 /// Base state for the custom-collections bloc.
-abstract class UserCollectionsState extends Equatable {
+sealed class UserCollectionsState extends Equatable {
   const UserCollectionsState();
 
   @override

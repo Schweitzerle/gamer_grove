@@ -6,6 +6,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/pages/auth/login_page.dart';
+import 'package:gamer_grove/presentation/pages/collections/collections_page.dart';
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_statistics_page.dart';
@@ -65,6 +66,7 @@ class ProfilePage extends StatelessWidget {
                 ),
                 _buildProfileHeader(context, user),
                 _buildStats(context, user),
+                _buildCollectionsButton(context, user),
                 _buildStatisticsButton(context, user),
               ],
             );
@@ -293,6 +295,28 @@ class ProfilePage extends StatelessWidget {
     }
 
     return child;
+  }
+
+  Widget _buildCollectionsButton(BuildContext context, User user) {
+    final theme = Theme.of(context);
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(CollectionsPage.route(user.id));
+          },
+          icon: const Icon(Icons.collections_bookmark_rounded),
+          label: const Text('My Collections'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            foregroundColor: theme.colorScheme.onSecondaryContainer,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildStatisticsButton(BuildContext context, User user) {
