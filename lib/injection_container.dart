@@ -129,6 +129,7 @@ import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_bloc.dart
 import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/statistics/statistics_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user/user_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -253,6 +254,18 @@ Future<void> initDependencies() async {
         clearTopThreeUseCase: sl(),
         getWishlistedGamesUseCase: sl(),
         getRatedGamesUseCase: sl(),
+      ),
+    )
+
+    // Custom Collections BLoC
+    ..registerFactory(
+      () => UserCollectionsBloc(
+        getUserCollections: sl(),
+        createCollection: sl(),
+        updateCollection: sl(),
+        deleteCollection: sl(),
+        addGameToCollection: sl(),
+        removeGameFromCollection: sl(),
       ),
     )
 
