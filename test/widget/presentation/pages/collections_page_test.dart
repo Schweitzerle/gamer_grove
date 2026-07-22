@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/collection/user_collection.dart';
 import 'package:gamer_grove/domain/repositories/user_collections_repository.dart';
@@ -11,6 +12,7 @@ import 'package:gamer_grove/domain/usecases/user_collection/delete_collection_us
 import 'package:gamer_grove/domain/usecases/user_collection/get_user_collections_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/remove_game_from_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/update_collection_use_case.dart';
+import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/pages/collections/collections_page.dart';
 
@@ -91,6 +93,21 @@ Widget _wrap(UserCollectionsBloc bloc) {
 }
 
 void main() {
+  // The create flow gates on entitlements via the service locator; a free
+  // service keeps the (under-limit) create path open in these tests.
+  setUp(() {
+    if (sl.isRegistered<EntitlementService>()) {
+      sl.unregister<EntitlementService>();
+    }
+    sl.registerSingleton<EntitlementService>(FreeEntitlementService());
+  });
+
+  tearDown(() {
+    if (sl.isRegistered<EntitlementService>()) {
+      sl.unregister<EntitlementService>();
+    }
+  });
+
   UserCollection col(String id, String name, {int count = 0}) =>
       UserCollection(id: id, userId: 'u1', name: name, gameCount: count);
 

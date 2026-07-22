@@ -4,6 +4,7 @@ import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/domain/entities/collection/user_collection.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
+import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/collections/widgets/collection_form_sheet.dart';
 
@@ -63,8 +64,16 @@ class CollectionsPage extends StatelessWidget {
 
   Future<void> _create(BuildContext context) async {
     final bloc = context.read<UserCollectionsBloc>();
+    final state = bloc.state;
+    final currentCount = state is UserCollectionsLoaded ? state.count : 0;
+
+    if (!await ensureCanCreateCollection(context, currentCount)) return;
+    if (!context.mounted) return;
+
     final result = await showCollectionFormSheet(context);
     if (result == null) return;
+
+    trackCollectionCreate();
     bloc.add(
       CreateCollection(
         userId: userId,
