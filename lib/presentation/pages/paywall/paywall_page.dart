@@ -52,12 +52,11 @@ class _PaywallPageState extends State<PaywallPage> {
       'Genre, platform & rating trends'
     ),
     (
-      Icons.collections_bookmark,
-      'Unlimited collections',
-      'Organize your library without limits'
+      Icons.tune,
+      'Advanced filters',
+      'Filter by themes, companies, engines & more',
     ),
-    (Icons.tune, 'Advanced filters & sorting', 'Find exactly what you want'),
-    (Icons.palette, 'Profile customization', 'Themes & badges that are yours'),
+    (Icons.palette, 'Profile customization', 'App themes that are yours'),
   ];
 
   ProPlan _selected = ProPlans.yearly;

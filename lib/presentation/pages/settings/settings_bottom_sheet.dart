@@ -144,7 +144,7 @@ class _ProUpsellTile extends StatelessWidget {
       semanticsLabel: 'Upgrade to GamerGrove Pro',
       leading: Icons.workspace_premium,
       title: 'GamerGrove Pro',
-      subtitle: 'Unlock stats, collections & more',
+      subtitle: 'Unlock stats, advanced filters & themes',
       trailing: Icons.chevron_right,
       onTap: () => Navigations.navigateToPaywall(context, source: 'settings'),
     );

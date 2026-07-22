@@ -83,6 +83,20 @@ extension _FilterBottomSheetTabs on _FilterBottomSheetState {
   // ==========================================
 
   Widget _buildMetaTab() {
+    return ProGate(
+      feature: ProFeature.advancedFilters,
+      lockedBuilder: (context) => const ProLockedView(
+        title: 'Advanced filters',
+        description: 'Filter by themes, keywords, companies, franchises, '
+            'engines, age ratings & languages with GamerGrove Pro.',
+        source: 'filters_meta',
+        icon: Icons.tune,
+      ),
+      builder: (context) => _buildMetaTabContent(),
+    );
+  }
+
+  Widget _buildMetaTabContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
