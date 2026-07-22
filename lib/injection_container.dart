@@ -23,6 +23,8 @@ import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource_impl.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_auth_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_auth_datasource_impl.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_collections_datasource.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/supabase_collections_datasource_impl.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_activity_datasource_impl.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_user_datasource.dart';
@@ -33,6 +35,7 @@ import 'package:gamer_grove/data/repositories/character_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/event_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/game_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/user_activity_repository_impl.dart';
+import 'package:gamer_grove/data/repositories/user_collections_repository_impl.dart';
 import 'package:gamer_grove/data/repositories/user_repository_impl.dart';
 // Domain Layer - Repositories (Interfaces)
 import 'package:gamer_grove/domain/repositories/auth_repository.dart';
@@ -40,6 +43,7 @@ import 'package:gamer_grove/domain/repositories/character_repository.dart';
 import 'package:gamer_grove/domain/repositories/event_repository.dart';
 import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
+import 'package:gamer_grove/domain/repositories/user_collections_repository.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
@@ -105,6 +109,13 @@ import 'package:gamer_grove/domain/usecases/user/search_users.dart';
 import 'package:gamer_grove/domain/usecases/user/unfollow_user.dart';
 import 'package:gamer_grove/domain/usecases/user/update_user_avatar.dart';
 import 'package:gamer_grove/domain/usecases/user/update_user_profile.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/add_game_to_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/create_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/delete_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/get_collection_game_ids_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/get_user_collections_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/remove_game_from_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/update_collection_use_case.dart';
 import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_bloc.dart';
 // Presentation Layer - BLoCs
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -408,6 +419,15 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetRatedGamesUseCase(sl()))
     ..registerLazySingleton(() => GetRecommendedGamesUseCase(sl()))
 
+    // Custom Collections Use Cases
+    ..registerLazySingleton(() => GetUserCollectionsUseCase(sl()))
+    ..registerLazySingleton(() => CreateCollectionUseCase(sl()))
+    ..registerLazySingleton(() => UpdateCollectionUseCase(sl()))
+    ..registerLazySingleton(() => DeleteCollectionUseCase(sl()))
+    ..registerLazySingleton(() => GetCollectionGameIdsUseCase(sl()))
+    ..registerLazySingleton(() => AddGameToCollectionUseCase(sl()))
+    ..registerLazySingleton(() => RemoveGameFromCollectionUseCase(sl()))
+
     // Game Use Cases
     ..registerLazySingleton(() => GetUserRatedGameIds(sl()))
     ..registerLazySingleton(() => SearchGames(sl()))
@@ -508,6 +528,13 @@ Future<void> initDependencies() async {
         networkInfo: sl(),
       ),
     )
+    ..registerLazySingleton<UserCollectionsRepository>(
+      () => UserCollectionsRepositoryImpl(
+        dataSource: sl(),
+        supabase: sl(),
+        networkInfo: sl(),
+      ),
+    )
 
     // ============================================================
     // DATA LAYER - DATA SOURCES
@@ -521,6 +548,9 @@ Future<void> initDependencies() async {
     )
     ..registerLazySingleton<SupabaseUserActivityDataSource>(
       () => SupabaseUserActivityDataSourceImpl(supabase: sl()),
+    )
+    ..registerLazySingleton<SupabaseCollectionsDataSource>(
+      () => SupabaseCollectionsDataSourceImpl(supabase: sl()),
     )
 
     // IGDB Data Source
