@@ -4,9 +4,37 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-20 (Session 4)
+**Last updated:** 2026-07-22 (Session 5)
 **Current branch:** `master`
-**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🚧 **Phase 2 IN PROGRESS (Monetarisierung)**
+**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~90% (Kauf live verifiziert)**
+
+### Session 5 (2026-07-21/22) — RevenueCat LIVE, Kauf end-to-end verifiziert (PRs #105–#108)
+- **RevenueCat komplett eingerichtet & scharf** (User + ich): Google-Play-Abos `gg_pro_monthly:monthly`
+  (2,99 €) + `gg_pro_yearly:yearly` (19,99 €) live (per Play-API verifiziert, ACTIVE). RC-Projekt (Flutter),
+  App-Config mit Service-Account-JSON, Entitlement `pro`, Offering `default` (Monthly/Annual). Public Key
+  `goog_…` in lokaler `.env` + GitHub-Secret `REVENUECAT_API_KEY`.
+- **✅ Echter Sandbox-Kauf verifiziert** (User-Gerät, internes Test-AAB): Kauf → Google-Dialog → Success →
+  Entitlement `pro` aktiv → Statistics + Theme entsperrt. Restore + „Manage subscription" (Play-Abo-Seite) drin.
+- **3 Pro-Gates live** (PR #106, #108): Statistics (`extendedStats`), Theme (`profileCustomization`),
+  erweiterte Meta-Filter im Filter-Sheet (`advancedFilters`). `ProGate` (reaktiv via entitlement-Stream),
+  `ProLockedView`, `requirePro()`-Helper. Paywall-Toasts auf `GamerGroveToastService` umgestellt + Restore.
+- **Paywall ehrlich gemacht** (#108): „Unbegrenzte Sammlungen"/„Badges" raus (existieren nicht) → nur noch
+  Deep Stats · Advanced Filters · App Themes. Settings-Kachel zeigt Pro-Status + Abo-Verwaltung.
+- **Play-Setup:** App in Play Console, internes Test-AAB, Upload-Key gefunden (`StoreStuff/GamerGrove/
+  gamergrove-release-key.jks`, Alias `gamergrove`, SHA1 `C9:75:98:…`) → `android/key.properties` zeigt lokal
+  darauf. Aktueller versionCode: **11** (2.0.2+11).
+> **Gotchas Session 5:**
+> - **envied inkrementell liest `.env` nicht neu** → env.g.dart behielt leeren Key → v8 zeigte „coming soon".
+>   Fix: nach `.env`-Änderung **`dart run build_runner clean` + `rm env.g.dart` + build**. **Immer prüfen:**
+>   `grep goog_ lib/core/env/env.g.dart` UND im AAB: `unzip -p …/app-release.aab base/lib/arm64-v8a/libapp.so | strings | grep goog_`.
+> - **`test_…`-Key = RevenueCat Test Store** (Fake-Store), NICHT für echtes Play-Billing. Wir brauchen den `goog_…`.
+> - RevenueCat-Credentials-Check braucht 3 Dinge am Service-Account: (1) Play-Console **Kontoberechtigungen**
+>   „Finanzdaten ansehen" + „Bestellungen/Abos verwalten" (NICHT App-Ebene!), (2) **Cloud Pub/Sub API** aktiv +
+>   SA-Rolle **Pub/Sub-Admin** (GCP-IAM), (3) Play Android Developer API. Propagation teils ~3 Min.
+> - Service-Account-JSON liegt **außerhalb Repo**: `~/gg-play-sa.json` (nicht committen!).
+> - Play-Upload: versionCode muss stets hochzählen; AAB muss mit dem `gamergrove`-Key signiert sein.
+
+### Phase-2-Fortschritt (MASTERPLAN §80–99)
 
 ### Session 4 (2026-07-20) — Phase 2 gestartet (Monetarisierung)
 - **Entscheidung (User): Game-Data-Source = IGDB behalten** (Recherche in
@@ -45,12 +73,18 @@
       `gg_pro_monthly`/`gg_pro_yearly`; RC-Entitlement `pro`, Offering `default`. Setup-Steps siehe Chat/Session.
       **Sobald Key da:** in `.env`+Secret eintragen → `dart run build_runner build` → App nutzt echtes Billing;
       dann internes Test-AAB + License-Tester für Sandbox-Kauf-Verifikation (Screenshots/Logs).
-- [ ] **ProGate + Trigger-Punkte:** Free/Pro-Gates an echten Upgrade-Momenten (extended stats, unlimited
-      collections, advanced filters, profile customization) → Paywall öffnen mit `source`. (Pro-Features
-      existieren noch nicht als solche → erst bauen/markieren, dann gaten.)
+- [x] **RevenueCat live + echter Sandbox-Kauf verifiziert** — s. Session-5-Block (PRs #105–#107).
+- [x] **ProGate + 3 Gates:** Statistics/Theme (#106) + erweiterte Meta-Filter (#108). Reaktiv, `requirePro`,
+      `ProLockedView`. Settings-Kachel Pro-Status + Play-Abo-Verwaltung.
+- [x] **Paywall ehrlich** (#108): nur real existierende Features beworben (Stats/Filters/Themes).
+- [ ] **Custom Collections** als echtes Feature (User-Listen, Free-Limit, Pro unbegrenzt) — optional, falls
+      der Pro-Tier voller sein soll (User-Entscheid; aktuell bewusst NICHT beworben).
 - [ ] golden + `/design-review`-Pass für Paywall.
-- [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS).
+- [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS) —
+      für serverseitigen Pro-Status (Anti-Tampering, Pro-only Social-Features). Für ersten Launch nicht zwingend.
 - [ ] IGDB-Edge-Function-Proxy (Client-Secret raus; Security + saubere kommerzielle Posture).
+- [ ] **Legal (BLOCKER vor Public-Launch):** Datenschutzerklärung muss RevenueCat + Google-Play-Billing +
+      Abo-Bedingungen nennen; Play verlangt das. Gehört zu Phase 4, aber vor Produktion nötig.
 - [ ] Security-Review über den gesamten Payment-/Entitlement-Pfad.
 
 ### Session 3 (2026-07-20) — merged to master (PRs #95–#97) → **Phase 1 DONE**
