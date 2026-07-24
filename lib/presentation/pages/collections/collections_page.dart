@@ -25,6 +25,20 @@ class CollectionsPage extends StatelessWidget {
     );
   }
 
+  /// Route for callers that already own a bloc (e.g. the Grove section), so
+  /// changes made here stay reflected in the caller's list.
+  static Route<void> routeWith({
+    required String userId,
+    required UserCollectionsBloc collectionsBloc,
+  }) {
+    return MaterialPageRoute<void>(
+      builder: (_) => BlocProvider.value(
+        value: collectionsBloc,
+        child: CollectionsPage(userId: userId),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

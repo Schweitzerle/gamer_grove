@@ -9,6 +9,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/sections/section_frame.dart';
 
 abstract class BaseGameSection extends StatelessWidget {
   const BaseGameSection({
@@ -61,75 +62,12 @@ abstract class BaseGameSection extends StatelessWidget {
     bool showViewAll = false,
     VoidCallback? onViewAll,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
-      child: Card(
-        margin: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingSmall,
-        ),
-        color: Theme.of(context).colorScheme.surface,
-        child: Padding(
-          padding:
-              const EdgeInsets.symmetric(vertical: AppConstants.paddingSmall),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Section Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingSmall,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      icon,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          Text(
-                            subtitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (showViewAll && onViewAll != null)
-                      TextButton(
-                        onPressed: onViewAll,
-                        child: const Text('View All'),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppConstants.paddingSmall),
-
-              // Section Content
-              child,
-            ],
-          ),
-        ),
-      ),
+    return SectionFrame(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      onViewAll: showViewAll ? onViewAll : null,
+      child: child,
     );
   }
 
