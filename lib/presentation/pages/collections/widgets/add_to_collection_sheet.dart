@@ -1,23 +1,40 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gamer_grove/core/services/toast_service.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/add_game_to_collection_use_case.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
 import 'package:gamer_grove/presentation/pages/collections/widgets/collection_form_sheet.dart';
 
+/// Result of the add-to-collection sheet.
+///
+/// The sheet closes as soon as the write finishes, so its own context is gone
+/// by then; the caller (which still has a live context) shows the feedback.
+class AddToCollectionOutcome {
+  const AddToCollectionOutcome.added(this.collectionName) : error = null;
+  const AddToCollectionOutcome.failed(this.collectionName, this.error);
+
+  final String collectionName;
+  final String? error;
+
+  bool get isAdded => error == null;
+}
+
 /// Opens the "Add to collection" sheet for [gameId].
 ///
-/// Tapping a collection adds the game (idempotent) and closes the sheet. A
-/// "New collection" action creates one inline; the user can then tap it.
-Future<void> showAddToCollectionSheet(
+/// Tapping a collection performs the (idempotent) add, then closes the sheet
+/// and returns the outcome. A "New collection" action creates one inline; the
+/// user can then tap it.
+Future<AddToCollectionOutcome?> showAddToCollectionSheet(
   BuildContext context, {
   required String userId,
   required int gameId,
   required String gameName,
 }) {
-  return showModalBottomSheet<void>(
+  return showModalBottomSheet<AddToCollectionOutcome>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
@@ -32,7 +49,7 @@ Future<void> showAddToCollectionSheet(
   );
 }
 
-class _AddToCollectionSheet extends StatelessWidget {
+class _AddToCollectionSheet extends StatefulWidget {
   const _AddToCollectionSheet({
     required this.userId,
     required this.gameId,
@@ -42,6 +59,14 @@ class _AddToCollectionSheet extends StatelessWidget {
   final String userId;
   final int gameId;
   final String gameName;
+
+  @override
+  State<_AddToCollectionSheet> createState() => _AddToCollectionSheetState();
+}
+
+class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
+  /// Collection currently being written to; blocks further taps meanwhile.
+  String? _addingToId;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +85,7 @@ class _AddToCollectionSheet extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              gameName,
+              widget.gameName,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -78,7 +103,8 @@ class _AddToCollectionSheet extends StatelessWidget {
                 ),
               ),
               title: const Text('New collection'),
-              onTap: () => _createCollection(context),
+              onTap:
+                  _addingToId != null ? null : () => _createCollection(context),
             ),
             const Divider(height: 8),
             Flexible(
@@ -107,7 +133,17 @@ class _AddToCollectionSheet extends StatelessWidget {
                                         ? '1 game'
                                         : '${c.gameCount} games',
                                   ),
-                                  onTap: () => _addTo(context, c.id, c.name),
+                                  trailing: _addingToId == c.id
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : null,
+                                  enabled: _addingToId == null,
+                                  onTap: () => _addTo(c.id, c.name),
                                 ),
                             ],
                           ),
@@ -138,17 +174,28 @@ class _AddToCollectionSheet extends StatelessWidget {
         ),
       );
 
-  void _addTo(BuildContext context, String collectionId, String name) {
-    context.read<UserCollectionsBloc>().add(
-          AddGameToCollection(collectionId: collectionId, gameId: gameId),
-        );
-    HapticFeedback.lightImpact();
-    Navigator.of(context).pop();
-    GamerGroveToastService.showSuccess(
-      context,
-      title: 'Added to $name',
-      message: gameName,
+  /// Writes the game into [collectionId], then closes the sheet with the
+  /// outcome. The write runs through the use case rather than the sheet's bloc
+  /// so it cannot outlive the bloc this sheet owns, and so the feedback the
+  /// caller shows reflects what actually happened.
+  Future<void> _addTo(String collectionId, String name) async {
+    if (_addingToId != null) return;
+    setState(() => _addingToId = collectionId);
+    unawaited(HapticFeedback.lightImpact());
+
+    final result = await sl<AddGameToCollectionUseCase>()(
+      AddGameToCollectionParams(
+        collectionId: collectionId,
+        gameId: widget.gameId,
+      ),
     );
+    if (!mounted) return;
+
+    final outcome = result.fold(
+      (failure) => AddToCollectionOutcome.failed(name, failure.message),
+      (_) => AddToCollectionOutcome.added(name),
+    );
+    Navigator.of(context).pop(outcome);
   }
 
   Future<void> _createCollection(BuildContext context) async {
@@ -165,7 +212,7 @@ class _AddToCollectionSheet extends StatelessWidget {
     trackCollectionCreate();
     bloc.add(
       CreateCollection(
-        userId: userId,
+        userId: widget.userId,
         name: result.name,
         description: result.description,
       ),
