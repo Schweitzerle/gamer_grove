@@ -4,9 +4,34 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-22 (Session 6)
+**Last updated:** 2026-07-24 (Session 7)
 **Current branch:** `master`
 **Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~95% (Custom Collections gebaut)**
+
+### Session 7 (2026-07-24) — Add-to-Collection-Lifecycle-Fix + versionCode 13 im Internal Track
+- **PR #119 (GEMERGT): `AddToCollectionSheet` Lifecycle-Bug.** `_addTo` schickte `AddGameToCollection`
+  an den sheet-eigenen Bloc und poppte die Route im selben Frame — der Pop disposed den `BlocProvider`,
+  dem der Bloc gehört, also emittierte der laufende Write in einen geschlossenen Bloc (`StateError`).
+  Dazu feuerte der Success-Toast optimistisch, log also bei Fehlschlag (offline/RLS/Server).
+  Jetzt: Write awaited über `sl<AddGameToCollectionUseCase>()`, Sheet poppt mit `AddToCollectionOutcome`
+  (`.added` / `.failed(msg)`), der Aufrufer (lebender Context) zeigt den echten Toast; Spinner auf der
+  Kachel + Tap-Sperre während des Writes. **5 neue Widget-Tests** (Liste, Success-Outcome + genau 1
+  Repo-Call, Failure-Outcome mit Message, Dismiss → `null`, a11y). analyze 0/0, full suite **109 grün**.
+- **✅ Internal Testing serviert jetzt versionCode 13** (`2.0.2 (13) — Custom Collections`, status
+  completed, per API verifiziert). Signatur SHA1 `C9:75:98:52:2B:2C:3C:58…` (gamergrove-Key),
+  RevenueCat-Key `goog_RwZLrr…` in `libapp.so`, Collections-Code drin.
+  AAB liegt unter `~/Documents/Stuff/StudioProjects/aab_out/app-release-13.aab`.
+> **Gotcha (Play-API):** `edits().tracks().list()` liefert das Feld **`tracks`** (Plural) — ein
+> `resp.get("track")` gibt still `[]` zurück und täuscht „nichts hochgeladen" vor. Ebenso listet
+> `edits().bundles().list()` nur Bundles **im offenen Edit**, nicht die Upload-Historie → taugt NICHT
+> zur Prüfung, ob ein versionCode frei ist. Track-Stand stattdessen über `tracks` lesen.
+> Ist-Stand Tracks: production=5 (2.0.2), beta=3, alpha=3, internal=13.
+> **Gotcha (Disk):** `/` lief während des Builds auf 100% voll (Git-Commit scheiterte mit
+> `No space left on device`). Freigeräumt durch Löschen von `build/app/intermediates` (3,1 G,
+> regenerierbar). **Offen für den User:** `~/.cache` 63 G, `~/.local/share/Trash` 36 G,
+> `~/.gradle` 28 G — nicht angefasst, weil User-Daten/-State.
+> **Noch zu testen (User, auf Gerät mit 13):** CRUD, 4. Collection → Paywall, Add-to-Collection inkl.
+> **Flugmodus → Fehler-Toast statt falschem „Added"**, Long-Press-Remove, zweiter Account sieht nichts.
 
 ### Session 6 (2026-07-22) — CUSTOM COLLECTIONS (letztes großes Pre-Launch-Feature, 4 PRs)
 Neues Kern-Feature: benannte User-Sammlungen (z.B. „Cozy games", „Backlog 2026"), getrennt von
