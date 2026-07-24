@@ -68,6 +68,15 @@ abstract class SupabaseAuthDataSource {
   /// ```
   Future<void> signOut();
 
+  /// Permanently deletes the signed-in user's account and all their data.
+  ///
+  /// Calls the `delete_own_account` RPC, which removes the profile, every
+  /// user-owned row and the auth identity itself. The account is derived from
+  /// the session server-side, so this can only ever delete the caller.
+  ///
+  /// Throws [AuthException] on failure.
+  Future<void> deleteAccount();
+
   /// Sends a password reset email to the user.
   ///
   /// User will receive an email with a link to reset their password.

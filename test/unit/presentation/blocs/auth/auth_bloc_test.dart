@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/usecases/auth/delete_account.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
 import 'package:gamer_grove/domain/usecases/auth/reset_password.dart';
@@ -24,6 +25,8 @@ class _MockSignUpUseCase extends Mock implements SignUpUseCase {}
 
 class _MockSignOutUseCase extends Mock implements SignOutUseCase {}
 
+class _MockDeleteAccountUseCase extends Mock implements DeleteAccountUseCase {}
+
 class _MockGetCurrentUserUseCase extends Mock
     implements GetCurrentUserUseCase {}
 
@@ -39,6 +42,7 @@ void main() {
   late _MockSignInUseCase signIn;
   late _MockSignUpUseCase signUp;
   late _MockSignOutUseCase signOut;
+  late _MockDeleteAccountUseCase deleteAccount;
   late _MockGetCurrentUserUseCase getCurrentUser;
   late _MockResetPasswordUseCase resetPassword;
   late _MockUpdatePasswordUseCase updatePassword;
@@ -66,6 +70,7 @@ void main() {
     signIn = _MockSignInUseCase();
     signUp = _MockSignUpUseCase();
     signOut = _MockSignOutUseCase();
+    deleteAccount = _MockDeleteAccountUseCase();
     getCurrentUser = _MockGetCurrentUserUseCase();
     resetPassword = _MockResetPasswordUseCase();
     updatePassword = _MockUpdatePasswordUseCase();
@@ -76,6 +81,7 @@ void main() {
         signInUseCase: signIn,
         signUpUseCase: signUp,
         signOutUseCase: signOut,
+        deleteAccountUseCase: deleteAccount,
         getCurrentUserUseCase: getCurrentUser,
         resetPasswordUseCase: resetPassword,
         updatePasswordUseCase: updatePassword,
@@ -207,6 +213,30 @@ void main() {
       build: buildBloc,
       act: (bloc) => bloc.add(const SignOutEvent()),
       expect: () => [const AuthUnauthenticated()],
+    );
+  });
+
+  group('DeleteAccountEvent', () {
+    blocTest<AuthBloc, AuthState>(
+      'emits [Unauthenticated] once the account is gone',
+      setUp: () => when(() => deleteAccount(any()))
+          .thenAnswer((_) async => const Right<Failure, void>(null)),
+      build: buildBloc,
+      act: (bloc) => bloc.add(const DeleteAccountEvent()),
+      expect: () => [const AuthUnauthenticated()],
+      verify: (_) => verify(() => deleteAccount(const NoParams())).called(1),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'keeps the user signed in and surfaces why deletion failed',
+      setUp: () => when(() => deleteAccount(any())).thenAnswer(
+        (_) async => const Left<Failure, void>(
+          ServerFailure(message: 'Failed to delete account'),
+        ),
+      ),
+      build: buildBloc,
+      act: (bloc) => bloc.add(const DeleteAccountEvent()),
+      expect: () => [const AuthError('Failed to delete account')],
     );
   });
 

@@ -45,6 +45,7 @@ import 'package:gamer_grove/domain/repositories/game_repository.dart';
 import 'package:gamer_grove/domain/repositories/user_activity_repository.dart';
 import 'package:gamer_grove/domain/repositories/user_collections_repository.dart';
 import 'package:gamer_grove/domain/repositories/user_repository.dart';
+import 'package:gamer_grove/domain/usecases/auth/delete_account.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
 import 'package:gamer_grove/domain/usecases/auth/reset_password.dart';
@@ -222,6 +223,7 @@ Future<void> initDependencies() async {
         signInUseCase: sl(),
         signUpUseCase: sl(),
         signOutUseCase: sl(),
+        deleteAccountUseCase: sl(),
         getCurrentUserUseCase: sl(),
         resetPasswordUseCase: sl(),
         updatePasswordUseCase: sl(),
@@ -402,6 +404,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => SignInUseCase(sl()))
     ..registerLazySingleton(() => SignUpUseCase(sl()))
     ..registerLazySingleton(() => SignOutUseCase(sl()))
+    ..registerLazySingleton(() => DeleteAccountUseCase(sl()))
     ..registerLazySingleton(() => GetCurrentUserUseCase(sl()))
     ..registerLazySingleton(() => ResetPasswordUseCase(sl()))
     ..registerLazySingleton(() => UpdatePasswordUseCase(sl()))

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +12,7 @@ import 'package:gamer_grove/presentation/pages/collections/collections_page.dart
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/edit_profile_page.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_statistics_page.dart';
+import 'package:gamer_grove/presentation/pages/profile/widgets/delete_account_dialog.dart';
 import 'package:gamer_grove/presentation/pages/settings/settings_bottom_sheet.dart';
 
 /// Profile page showing the current user's profile
@@ -68,6 +71,7 @@ class ProfilePage extends StatelessWidget {
                 _buildStats(context, user),
                 _buildCollectionsButton(context, user),
                 _buildStatisticsButton(context, user),
+                _buildDeleteAccount(context, user),
               ],
             );
           },
@@ -317,6 +321,38 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Self-service account deletion (GDPR Art. 17 and a Play requirement for
+  /// apps with accounts). Deliberately understated and last on the page.
+  Widget _buildDeleteAccount(BuildContext context, User user) {
+    final theme = Theme.of(context);
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+        child: Center(
+          child: TextButton.icon(
+            onPressed: () => unawaited(_deleteAccount(context, user)),
+            icon: Icon(
+              Icons.delete_forever_outlined,
+              size: 18,
+              color: theme.colorScheme.error,
+            ),
+            label: Text(
+              'Delete account',
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount(BuildContext context, User user) async {
+    final bloc = context.read<AuthBloc>();
+    if (!await confirmAccountDeletion(context, username: user.username)) return;
+    bloc.add(const DeleteAccountEvent());
   }
 
   Widget _buildStatisticsButton(BuildContext context, User user) {

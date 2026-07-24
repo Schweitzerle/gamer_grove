@@ -112,19 +112,11 @@ class AuthRepositoryImpl extends SupabaseBaseRepository
 
   @override
   Future<Either<Failure, void>> deleteAccount() async {
+    // Deleting the profile row client-side would leave the auth identity
+    // behind: the email would stay registered and the user would end up with a
+    // login but no profile. The RPC removes data AND identity in one step.
     return executeSupabaseVoidOperation(
-      operation: () async {
-        final userId = await super.getCurrentUserId();
-        if (userId == null || userId.isEmpty) {
-          throw Exception('No user logged in');
-        }
-
-        // Delete user data from database
-        await this.supabase.from('profiles').delete().eq('id', userId);
-
-        // Delete auth user (this will cascade delete related data)
-        await authDataSource.signOut();
-      },
+      operation: authDataSource.deleteAccount,
       errorMessage: 'Failed to delete account',
     );
   }
