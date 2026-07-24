@@ -153,6 +153,24 @@ class InvalidProfileDataException extends UserException {
   String toString() => 'InvalidProfileDataException: $message';
 }
 
+/// SQLSTATE raised by the database triggers that enforce free-tier limits.
+///
+/// Defined in SupabaseScripts/014; a dedicated code keeps this apart from
+/// generic failures so the UI can offer the upgrade instead of an error.
+const String freeLimitSqlState = 'P0100';
+
+/// Thrown when a free-tier limit is hit server-side.
+class FreeLimitReachedException extends UserException {
+  const FreeLimitReachedException({
+    super.message = 'This is a Pro feature',
+    super.code,
+    super.originalError,
+  });
+
+  @override
+  String toString() => 'FreeLimitReachedException: $message';
+}
+
 /// Thrown when user lacks permission to perform an action.
 class InsufficientPermissionsException extends UserException {
   const InsufficientPermissionsException({

@@ -13,8 +13,9 @@ import 'package:gamer_grove/injection_container.dart';
 /// this opens the paywall (source `collections_limit`) and returns whether the
 /// user may proceed (true when already Pro, under the limit, or just upgraded).
 ///
-/// Server-side enforcement of the limit is a tracked follow-up; today the cap
-/// lives here.
+/// This is the fast path only — the database enforces the same cap
+/// (SupabaseScripts/014), so a bypassed client is still rejected. Use
+/// [showCollectionLimitPaywall] to handle that server-side rejection.
 Future<bool> ensureCanCreateCollection(
   BuildContext context,
   int currentCount,
@@ -25,6 +26,12 @@ Future<bool> ensureCanCreateCollection(
   );
   if (!blocked) return true;
   return requirePro(context, source: 'collections_limit');
+}
+
+/// Opens the paywall after the database rejected a create for exceeding the
+/// free limit — reached when the local count was stale or the gate was bypassed.
+Future<void> showCollectionLimitPaywall(BuildContext context) async {
+  await requirePro(context, source: 'collections_limit_server');
 }
 
 /// Fires the `collection_create` funnel event (fire-and-forget).

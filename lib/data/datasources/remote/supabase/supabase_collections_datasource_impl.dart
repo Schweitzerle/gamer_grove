@@ -55,6 +55,13 @@ class SupabaseCollectionsDataSourceImpl
           .returning(_collectionColumns)
           .build(_supabase);
       return (rows as List).first as Map<String, dynamic>;
+    } on PostgrestException catch (e) {
+      // The limit trigger raises this; the UI turns it into the paywall
+      // instead of an error message.
+      if (e.code == freeLimitSqlState) {
+        throw FreeLimitReachedException(message: e.message);
+      }
+      throw UserExceptionMapper.map(e);
     } catch (e) {
       throw UserExceptionMapper.map(e);
     }

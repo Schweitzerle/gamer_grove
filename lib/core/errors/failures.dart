@@ -61,3 +61,14 @@ class AuthorizationFailure extends Failure {
     super.code,
   });
 }
+
+/// A free-tier limit was hit. The UI should offer the upgrade, not an error.
+///
+/// Raised by the database, so it also covers clients that bypassed the local
+/// check (see SupabaseScripts/014).
+class FreeLimitReachedFailure extends Failure {
+  const FreeLimitReachedFailure({
+    super.message = 'This is a Pro feature',
+    super.code,
+  });
+}

@@ -41,12 +41,17 @@ class UserCollectionsLoaded extends UserCollectionsState {
     required this.collections,
     this.isMutating = false,
     this.actionError,
+    this.actionNeedsPro = false,
   });
 
   final String userId;
   final List<UserCollection> collections;
   final bool isMutating;
   final String? actionError;
+
+  /// The last action was rejected by a free-tier limit. Consumers should offer
+  /// the upgrade rather than an error; cleared on the next event.
+  final bool actionNeedsPro;
 
   int get count => collections.length;
 
@@ -55,15 +60,18 @@ class UserCollectionsLoaded extends UserCollectionsState {
     List<UserCollection>? collections,
     bool? isMutating,
     String? actionError,
+    bool actionNeedsPro = false,
   }) {
     return UserCollectionsLoaded(
       userId: userId ?? this.userId,
       collections: collections ?? this.collections,
       isMutating: isMutating ?? this.isMutating,
       actionError: actionError,
+      actionNeedsPro: actionNeedsPro,
     );
   }
 
   @override
-  List<Object?> get props => [userId, collections, isMutating, actionError];
+  List<Object?> get props =>
+      [userId, collections, isMutating, actionError, actionNeedsPro];
 }

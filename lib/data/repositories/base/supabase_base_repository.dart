@@ -229,7 +229,9 @@ abstract class SupabaseBaseRepository {
 
   /// Maps user exceptions to appropriate failures.
   Failure _mapUserException(user_ex.UserException exception) {
-    if (exception is user_ex.UserNotFoundException) {
+    if (exception is user_ex.FreeLimitReachedException) {
+      return FreeLimitReachedFailure(message: exception.message);
+    } else if (exception is user_ex.UserNotFoundException) {
       return const ServerFailure(message: 'User not found');
     } else if (exception is user_ex.UsernameAlreadyTakenException) {
       return ValidationFailure(message: exception.message);
