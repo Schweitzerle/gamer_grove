@@ -141,6 +141,23 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    try {
+      // The RPC scopes the deletion to auth.uid(); nothing is passed in.
+      await _supabase.rpc<void>('delete_own_account');
+      // The identity is gone — drop the now-dangling local session too.
+      await _supabase.auth.signOut();
+    } on AuthException catch (e) {
+      throw AuthExceptionMapper.map(e);
+    } catch (e) {
+      throw UnknownAuthException(
+        message: 'Failed to delete account: $e',
+        originalError: e,
+      );
+    }
+  }
+
+  @override
   Future<void> resetPassword(String email) async {
     try {
       if (!isValidEmail(email)) {

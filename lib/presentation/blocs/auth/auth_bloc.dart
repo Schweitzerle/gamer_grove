@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/domain/usecases/auth/delete_account.dart';
 import 'package:gamer_grove/domain/usecases/auth/get_current_user.dart';
 import 'package:gamer_grove/domain/usecases/auth/is_authenticated.dart';
 import 'package:gamer_grove/domain/usecases/auth/reset_password.dart';
@@ -49,6 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signInUseCase,
     required this.signUpUseCase,
     required this.signOutUseCase,
+    required this.deleteAccountUseCase,
     required this.getCurrentUserUseCase,
     required this.resetPasswordUseCase,
     required this.updatePasswordUseCase,
@@ -60,6 +62,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignInEvent>(_onSignIn);
     on<SignUpEvent>(_onSignUp);
     on<SignOutEvent>(_onSignOut);
+    on<DeleteAccountEvent>(_onDeleteAccount);
     on<ResetPasswordEvent>(_onResetPassword);
     on<UpdatePasswordEvent>(_onUpdatePassword);
     on<AuthStateChangedEvent>(_onAuthStateChanged);
@@ -68,6 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInUseCase signInUseCase;
   final SignUpUseCase signUpUseCase;
   final SignOutUseCase signOutUseCase;
+  final DeleteAccountUseCase deleteAccountUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
   final UpdatePasswordUseCase updatePasswordUseCase;
@@ -180,6 +184,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(
         const AuthError('An unexpected error occurred. Please try again.'),
       ),
+      (_) => emit(const AuthUnauthenticated()),
+    );
+  }
+
+  /// Handles account deletion. On success the user is already signed out by
+  /// the data layer, so the session simply ends as unauthenticated.
+  Future<void> _onDeleteAccount(
+    DeleteAccountEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await deleteAccountUseCase(const NoParams());
+
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
       (_) => emit(const AuthUnauthenticated()),
     );
   }

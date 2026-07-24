@@ -55,6 +55,11 @@ class SignOutEvent extends AuthEvent {
   const SignOutEvent();
 }
 
+/// Event to permanently delete the current user's account and all their data.
+class DeleteAccountEvent extends AuthEvent {
+  const DeleteAccountEvent();
+}
+
 /// Event to send password reset email.
 class ResetPasswordEvent extends AuthEvent {
   const ResetPasswordEvent({required this.email});
