@@ -63,6 +63,13 @@ class _FakeRepo implements UserCollectionsRepository {
   }
 
   @override
+  Future<Either<Failure, List<String>>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  }) async =>
+      const Right([]);
+
+  @override
   Future<Either<Failure, List<int>>> getCollectionGameIds(
     String collectionId,
   ) async =>

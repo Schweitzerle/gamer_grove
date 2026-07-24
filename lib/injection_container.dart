@@ -114,6 +114,7 @@ import 'package:gamer_grove/domain/usecases/user_collection/add_game_to_collecti
 import 'package:gamer_grove/domain/usecases/user_collection/create_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/delete_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/get_collection_game_ids_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/get_collection_ids_containing_game_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/get_user_collections_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/remove_game_from_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/update_collection_use_case.dart';
@@ -439,6 +440,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => UpdateCollectionUseCase(sl()))
     ..registerLazySingleton(() => DeleteCollectionUseCase(sl()))
     ..registerLazySingleton(() => GetCollectionGameIdsUseCase(sl()))
+    ..registerLazySingleton(() => GetCollectionIdsContainingGameUseCase(sl()))
     ..registerLazySingleton(() => AddGameToCollectionUseCase(sl()))
     ..registerLazySingleton(() => RemoveGameFromCollectionUseCase(sl()))
 

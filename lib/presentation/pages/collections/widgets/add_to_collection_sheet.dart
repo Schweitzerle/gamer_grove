@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/add_game_to_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/get_collection_ids_containing_game_use_case.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
@@ -68,6 +69,31 @@ class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
   /// Collection currently being written to; blocks further taps meanwhile.
   String? _addingToId;
 
+  /// Collections that already hold this game — shown as added, not tappable.
+  Set<String> _alreadyIn = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadMembership());
+  }
+
+  /// Membership is advisory: if the lookup fails the sheet stays fully usable,
+  /// and adding again is a no-op server-side anyway.
+  Future<void> _loadMembership() async {
+    final result = await sl<GetCollectionIdsContainingGameUseCase>()(
+      GetCollectionIdsContainingGameParams(
+        userId: widget.userId,
+        gameId: widget.gameId,
+      ),
+    );
+    if (!mounted) return;
+    result.fold(
+      (_) {},
+      (ids) => setState(() => _alreadyIn = ids.toSet()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -118,32 +144,16 @@ class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
                             shrinkWrap: true,
                             children: [
                               for (final c in collections)
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: const Icon(
-                                    Icons.collections_bookmark_rounded,
-                                  ),
-                                  title: Text(
-                                    c.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  subtitle: Text(
-                                    c.gameCount == 1
-                                        ? '1 game'
-                                        : '${c.gameCount} games',
-                                  ),
-                                  trailing: _addingToId == c.id
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : null,
-                                  enabled: _addingToId == null,
-                                  onTap: () => _addTo(c.id, c.name),
+                                _CollectionTile(
+                                  name: c.name,
+                                  gameCount: c.gameCount,
+                                  contains: _alreadyIn.contains(c.id),
+                                  adding: _addingToId == c.id,
+                                  // Any add in flight locks the whole list so
+                                  // a second tap cannot race the first.
+                                  onTap: _addingToId != null
+                                      ? null
+                                      : () => _addTo(c.id, c.name),
                                 ),
                             ],
                           ),
@@ -179,7 +189,7 @@ class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
   /// so it cannot outlive the bloc this sheet owns, and so the feedback the
   /// caller shows reflects what actually happened.
   Future<void> _addTo(String collectionId, String name) async {
-    if (_addingToId != null) return;
+    if (_addingToId != null || _alreadyIn.contains(collectionId)) return;
     setState(() => _addingToId = collectionId);
     unawaited(HapticFeedback.lightImpact());
 
@@ -218,4 +228,56 @@ class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
       ),
     );
   }
+}
+
+/// One collection row in the sheet.
+///
+/// A collection that already holds the game is shown as added and is not
+/// tappable — re-adding is a server-side no-op, so offering it only produced a
+/// success toast for something that did not happen.
+class _CollectionTile extends StatelessWidget {
+  const _CollectionTile({
+    required this.name,
+    required this.gameCount,
+    required this.contains,
+    required this.adding,
+    required this.onTap,
+  });
+
+  final String name;
+  final int gameCount;
+  final bool contains;
+  final bool adding;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final subtitle =
+        contains ? 'Already in this collection' : _gameCountLabel(gameCount);
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      enabled: !contains && onTap != null,
+      leading: Icon(
+        contains
+            ? Icons.check_circle_rounded
+            : Icons.collections_bookmark_rounded,
+        color: contains ? scheme.primary : null,
+      ),
+      title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(subtitle),
+      trailing: adding
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : null,
+      onTap: contains ? null : onTap,
+    );
+  }
+
+  static String _gameCountLabel(int count) =>
+      count == 1 ? '1 game' : '$count games';
 }

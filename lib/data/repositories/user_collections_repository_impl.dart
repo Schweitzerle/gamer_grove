@@ -91,6 +91,20 @@ class UserCollectionsRepositoryImpl extends SupabaseBaseRepository
   }
 
   @override
+  Future<Either<Failure, List<String>>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  }) {
+    return executeSupabaseOperation(
+      operation: () => dataSource.getCollectionIdsContainingGame(
+        userId: userId,
+        gameId: gameId,
+      ),
+      errorMessage: 'Failed to check collection membership',
+    );
+  }
+
+  @override
   Future<Either<Failure, void>> addGameToCollection({
     required String collectionId,
     required int gameId,

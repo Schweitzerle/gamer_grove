@@ -36,6 +36,12 @@ abstract class UserCollectionsRepository {
   /// Returns the game ids in a collection, ordered by stored position.
   Future<Either<Failure, List<int>>> getCollectionGameIds(String collectionId);
 
+  /// Returns the ids of the user's collections that already contain [gameId].
+  Future<Either<Failure, List<String>>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  });
+
   /// Adds a game to a collection (idempotent — re-adding is a no-op).
   Future<Either<Failure, void>> addGameToCollection({
     required String collectionId,

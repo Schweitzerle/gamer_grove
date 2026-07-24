@@ -7,6 +7,7 @@ import 'package:gamer_grove/domain/repositories/user_collections_repository.dart
 import 'package:gamer_grove/domain/usecases/user_collection/add_game_to_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/create_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/delete_collection_use_case.dart';
+import 'package:gamer_grove/domain/usecases/user_collection/get_collection_ids_containing_game_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/get_user_collections_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/remove_game_from_collection_use_case.dart';
 import 'package:gamer_grove/domain/usecases/user_collection/update_collection_use_case.dart';
@@ -17,11 +18,31 @@ import 'package:gamer_grove/presentation/pages/collections/widgets/add_to_collec
 /// Repository serving a fixed list and a configurable add result, so the sheet
 /// can be driven through both the success and the failure path.
 class _FakeRepo implements UserCollectionsRepository {
-  _FakeRepo(this._collections, {this.addFailure});
+  _FakeRepo(
+    this._collections, {
+    this.addFailure,
+    this.containing = const [],
+    this.containingFailure,
+  });
 
   final List<UserCollection> _collections;
   final Failure? addFailure;
+
+  /// Collection ids reported as already holding the game.
+  final List<String> containing;
+
+  /// Makes the membership lookup fail instead of returning [containing].
+  final Failure? containingFailure;
   int addCalls = 0;
+
+  @override
+  Future<Either<Failure, List<String>>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  }) async {
+    final failure = containingFailure;
+    return failure != null ? Left(failure) : Right(containing);
+  }
 
   @override
   Future<Either<Failure, List<UserCollection>>> getUserCollections(
@@ -93,6 +114,9 @@ void main() {
       )
       ..registerFactory<AddGameToCollectionUseCase>(
         () => AddGameToCollectionUseCase(r),
+      )
+      ..registerFactory<GetCollectionIdsContainingGameUseCase>(
+        () => GetCollectionIdsContainingGameUseCase(r),
       );
   }
 
@@ -102,6 +126,9 @@ void main() {
     }
     if (sl.isRegistered<AddGameToCollectionUseCase>()) {
       await sl.unregister<AddGameToCollectionUseCase>();
+    }
+    if (sl.isRegistered<GetCollectionIdsContainingGameUseCase>()) {
+      await sl.unregister<GetCollectionIdsContainingGameUseCase>();
     }
   });
 
@@ -190,6 +217,47 @@ void main() {
 
     expect(repo.addCalls, 0);
     expect(outcomes, [null]);
+  });
+
+  testWidgets('marks a collection that already holds the game', (tester) async {
+    register(_FakeRepo(collections, containing: ['c1']));
+
+    await pumpSheet(tester);
+
+    expect(find.text('Already in this collection'), findsOneWidget);
+    expect(find.text('0 games'), findsNothing);
+  });
+
+  testWidgets('tapping an already-added collection does nothing',
+      (tester) async {
+    register(_FakeRepo(collections, containing: ['c1']));
+
+    final outcomes = await pumpSheet(tester);
+    await tester.tap(find.text('Cozy games'));
+    await tester.pumpAndSettle();
+
+    expect(repo.addCalls, 0, reason: 'no pointless write');
+    expect(find.text('Add to collection'), findsOneWidget); // sheet stays open
+    expect(outcomes, isEmpty, reason: 'no toast-triggering outcome');
+  });
+
+  testWidgets('stays usable when the membership lookup fails', (tester) async {
+    // Membership is advisory — a failed lookup must not lock the sheet.
+    register(
+      _FakeRepo(
+        collections,
+        containingFailure: const ServerFailure(message: 'lookup down'),
+      ),
+    );
+
+    final outcomes = await pumpSheet(tester);
+    expect(find.text('Already in this collection'), findsNothing);
+
+    await tester.tap(find.text('Cozy games'));
+    await tester.pumpAndSettle();
+
+    expect(repo.addCalls, 1);
+    expect(outcomes.single!.isAdded, isTrue);
   });
 
   testWidgets('meets accessibility guidelines', (tester) async {

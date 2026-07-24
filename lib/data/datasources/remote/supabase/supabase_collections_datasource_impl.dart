@@ -114,6 +114,27 @@ class SupabaseCollectionsDataSourceImpl
   }
 
   @override
+  Future<List<String>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  }) async {
+    try {
+      // The !inner embed turns the owner filter into a join condition, so only
+      // membership rows of this user's collections come back.
+      final result = await SupabaseQuery(_gamesTable)
+          .select('collection_id, $_collectionsTable!inner(user_id)')
+          .filter(EqualFilter('game_id', gameId))
+          .filter(EqualFilter('$_collectionsTable.user_id', userId))
+          .build(_supabase);
+      return (result as List)
+          .map((e) => (e as Map<String, dynamic>)['collection_id'] as String)
+          .toList();
+    } catch (e) {
+      throw UserExceptionMapper.map(e);
+    }
+  }
+
+  @override
   Future<void> addGameToCollection({
     required String collectionId,
     required int gameId,

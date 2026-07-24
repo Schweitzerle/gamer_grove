@@ -30,6 +30,14 @@ abstract class SupabaseCollectionsDataSource {
   /// Game ids in a collection, ordered by stored position.
   Future<List<int>> getCollectionGameIds(String collectionId);
 
+  /// Ids of the user's own collections that already contain [gameId].
+  ///
+  /// Scoped to [userId] so public collections of other users never leak in.
+  Future<List<String>> getCollectionIdsContainingGame({
+    required String userId,
+    required int gameId,
+  });
+
   /// Adds a game at the end of the collection; idempotent.
   Future<void> addGameToCollection({
     required String collectionId,
