@@ -167,20 +167,34 @@ class UserStatesContent extends StatelessWidget {
     );
   }
 
-  void _addToCollection(BuildContext context) {
+  Future<void> _addToCollection(BuildContext context) async {
     final userId = _getCurrentUserId(context);
     if (userId == null) {
       _showLoginRequiredSnackBar(context);
       return;
     }
-    unawaited(
-      showAddToCollectionSheet(
-        context,
-        userId: userId,
-        gameId: game.id,
-        gameName: game.name,
-      ),
+    final outcome = await showAddToCollectionSheet(
+      context,
+      userId: userId,
+      gameId: game.id,
+      gameName: game.name,
     );
+    // Null means the user dismissed the sheet without picking a collection.
+    if (outcome == null || !context.mounted) return;
+
+    if (outcome.isAdded) {
+      GamerGroveToastService.showSuccess(
+        context,
+        title: 'Added to ${outcome.collectionName}',
+        message: game.name,
+      );
+    } else {
+      GamerGroveToastService.showError(
+        context,
+        title: "Couldn't add to ${outcome.collectionName}",
+        message: outcome.error ?? 'Please try again.',
+      );
+    }
   }
 
   void _toggleWishlist(BuildContext context) {
