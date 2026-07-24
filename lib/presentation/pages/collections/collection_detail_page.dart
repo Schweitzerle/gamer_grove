@@ -14,7 +14,8 @@ import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
 
 /// Shows the games inside a single custom collection as a grid, with an empty
-/// state and long-press-to-remove.
+/// state and two ways to remove a game: an explicit edit mode with a remove
+/// badge per card, and long-press as a shortcut for users who know it.
 class CollectionDetailPage extends StatefulWidget {
   const CollectionDetailPage({
     required this.collection,
@@ -55,6 +56,10 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
   List<Game> _games = [];
   bool _loading = true;
   String? _error;
+
+  /// Edit mode shows a remove badge on every card. Without it, removing was
+  /// long-press only — which testers did not discover.
+  bool _editing = false;
 
   @override
   void initState() {
@@ -134,7 +139,11 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     if (confirmed != true || !mounted) return;
 
     // Optimistic local removal; the bloc keeps the parent list's counts fresh.
-    setState(() => _games = _games.where((g) => g.id != game.id).toList());
+    setState(() {
+      _games = _games.where((g) => g.id != game.id).toList();
+      // Nothing left to edit once the last game is gone.
+      if (_games.isEmpty) _editing = false;
+    });
     context.read<UserCollectionsBloc>().add(
           RemoveGameFromCollection(
             collectionId: widget.collection.id,
@@ -151,9 +160,23 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final canEdit = !_loading && _error == null && _games.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.collection.name),
+        title: Text(_editing ? 'Remove games' : widget.collection.name),
+        actions: [
+          if (canEdit)
+            _editing
+                ? TextButton(
+                    onPressed: () => setState(() => _editing = false),
+                    child: const Text('Done'),
+                  )
+                : IconButton(
+                    tooltip: 'Remove games',
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => setState(() => _editing = true),
+                  ),
+        ],
       ),
       body: _buildBody(),
     );
@@ -167,6 +190,16 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     if (_games.isEmpty) {
       return const _CollectionDetailEmpty();
     }
+    if (!_editing) return _buildGrid();
+    return Column(
+      children: [
+        const _EditModeHint(),
+        Expanded(child: _buildGrid()),
+      ],
+    );
+  }
+
+  Widget _buildGrid() {
     return GridView.builder(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -180,12 +213,95 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
         final game = _games[index];
         return GestureDetector(
           onLongPress: () => _removeGame(game),
-          child: GameCard(
-            game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          child: Stack(
+            children: [
+              GameCard(
+                game: game,
+                onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              ),
+              if (_editing)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: _RemoveBadge(
+                    gameName: game.name,
+                    onPressed: () => _removeGame(game),
+                  ),
+                ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+/// Explains what the badges do while edit mode is active.
+class _EditModeHint extends StatelessWidget {
+  const _EditModeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      color: scheme.surfaceContainerHighest,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, size: 18, color: scheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Tap the − on a game to remove it from this collection.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Remove control overlaid on a card while the page is in edit mode.
+class _RemoveBadge extends StatelessWidget {
+  const _RemoveBadge({required this.gameName, required this.onPressed});
+
+  final String gameName;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: 'Remove $gameName from collection',
+      child: SizedBox(
+        // Keeps the touch target at the 48dp platform minimum.
+        width: 48,
+        height: 48,
+        child: Center(
+          child: Material(
+            color: scheme.errorContainer,
+            shape: const CircleBorder(),
+            elevation: 2,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onPressed,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Icon(
+                  Icons.remove_rounded,
+                  size: 20,
+                  color: scheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

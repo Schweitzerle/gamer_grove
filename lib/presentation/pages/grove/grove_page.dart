@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +9,8 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
+import 'package:gamer_grove/presentation/pages/grove/widgets/collections_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/recommendations_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
@@ -21,18 +25,21 @@ class GrovePage extends StatefulWidget {
 
 class _GrovePageState extends State<GrovePage> {
   late GameBloc _gameBloc;
+  late UserCollectionsBloc _collectionsBloc;
   String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
     _gameBloc = sl<GameBloc>();
+    _collectionsBloc = sl<UserCollectionsBloc>();
     _loadInitialData();
   }
 
   @override
   void dispose() {
-    _gameBloc.close();
+    unawaited(_gameBloc.close());
+    unawaited(_collectionsBloc.close());
     super.dispose();
   }
 
@@ -44,15 +51,20 @@ class _GrovePageState extends State<GrovePage> {
     } else {}
 
     // Load all data at once
-    if (_currentUserId != null) {
-      _gameBloc.add(LoadGrovePageDataEvent(userId: _currentUserId));
+    final userId = _currentUserId;
+    if (userId != null) {
+      _gameBloc.add(LoadGrovePageDataEvent(userId: userId));
+      _collectionsBloc.add(LoadCollections(userId));
     } else {}
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _gameBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<GameBloc>.value(value: _gameBloc),
+        BlocProvider<UserCollectionsBloc>.value(value: _collectionsBloc),
+      ],
       child: Scaffold(
         body: RefreshIndicator(
           onRefresh: () async {
@@ -92,6 +104,12 @@ class _GrovePageState extends State<GrovePage> {
                     currentUserId: _currentUserId,
                     gameBloc: _gameBloc,
                   ),
+                ),
+
+              // Custom collections, right below the showcase.
+              if (_currentUserId != null)
+                SliverToBoxAdapter(
+                  child: CollectionsSection(userId: _currentUserId!),
                 ),
 
               // Rated Game Section
