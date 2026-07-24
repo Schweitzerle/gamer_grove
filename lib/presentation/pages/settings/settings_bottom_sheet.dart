@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
@@ -8,6 +10,7 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
+import 'package:gamer_grove/presentation/pages/legal/legal_document_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/theme_selection_dialog.dart';
 import 'package:gamer_grove/presentation/pages/settings/widgets/theme_card.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -77,6 +80,7 @@ class SettingsBottomSheet extends StatelessWidget {
                   );
                 },
               ),
+              const _LegalLinks(),
               const Spacer(),
               const Divider(),
               const SizedBox(height: 8),
@@ -107,6 +111,64 @@ class SettingsBottomSheet extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Privacy policy and imprint. Both must be reachable from inside the app:
+/// the imprint is required for a German business (§ 5 DDG) and Play expects the
+/// privacy policy to be available to users, not only in the store listing.
+class _LegalLinks extends StatelessWidget {
+  const _LegalLinks();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.privacy_tip_outlined),
+          title: const Text('Privacy Policy'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => unawaited(
+            Navigator.of(context).push(
+              LegalDocumentPage.route(LegalDocument.privacyPolicy),
+            ),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.gavel_outlined),
+          title: const Text('Datenschutz & Impressum'),
+          subtitle: const Text('Deutsche Fassung'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => unawaited(_showGermanLegal(context)),
+        ),
+      ],
+    );
+  }
+
+  /// The German privacy policy is the binding version, so it is offered
+  /// together with the imprint it belongs to.
+  Future<void> _showGermanLegal(BuildContext context) async {
+    final choice = await showModalBottomSheet<LegalDocument>(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Datenschutzerklärung'),
+              onTap: () => Navigator.of(context).pop(LegalDocument.datenschutz),
+            ),
+            ListTile(
+              title: const Text('Impressum'),
+              onTap: () => Navigator.of(context).pop(LegalDocument.impressum),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+    await Navigator.of(context).push(LegalDocumentPage.route(choice));
   }
 }
 
