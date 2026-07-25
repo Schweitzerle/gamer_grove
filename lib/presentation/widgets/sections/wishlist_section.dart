@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
@@ -22,6 +23,12 @@ class WishlistSection extends BaseGameSection {
   String get subtitle => username != null
       ? 'Games $username wants to play'
       : 'Games you want to play';
+
+  @override
+  List<Game> gamesOf(GameState state) => switch (state) {
+        GrovePageLoaded(:final userWishlist) => userWishlist,
+        _ => const [],
+      };
 
   @override
   ChamberLightMode get lightMode => ChamberLightMode.cold;

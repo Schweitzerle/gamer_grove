@@ -487,7 +487,7 @@ packages:
     source: hosted
     version: "8.1.6"
   flutter_cache_manager:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_cache_manager
       sha256: "400b6592f16a4409a7f2bb929a9a7e38c72cceb8ffb99ee57bbf2cb2cecf8386"
@@ -1056,14 +1056,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
-  palette_generator_master:
-    dependency: "direct main"
-    description:
-      name: palette_generator_master
-      sha256: "2b27a3d9f773c5bc407ed828589488777f73fa23cd24abe6a9b90249a41a7df0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   path:
     dependency: "direct main"
     description:
