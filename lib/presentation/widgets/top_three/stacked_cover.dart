@@ -49,13 +49,11 @@ class StackedCover extends StatelessWidget {
     // instead, so nobody taps expecting to open and gets a shuffle.
     final label = switch ((game, isFront, onTap)) {
       // Nowhere to send anyone yet, so it promises nothing.
-      (null, _, null) => 'Platz $rank ist noch frei',
-      (null, _, _) =>
-        'Platz $rank ist noch frei. Antippen, um ein Spiel zu wählen.',
-      (final g?, true, _) =>
-        'Platz $rank: ${g.name}. Antippen, um das Spiel zu öffnen.',
+      (null, _, null) => 'Place $rank is still empty',
+      (null, _, _) => 'Place $rank is still empty. Tap to choose a game.',
+      (final g?, true, _) => 'Place $rank: ${g.name}. Tap to open the game.',
       (final g?, false, _) =>
-        'Platz $rank: ${g.name}. Antippen, um es nach vorn zu holen.',
+        'Place $rank: ${g.name}. Tap to bring it to the front.',
     };
 
     return Semantics(

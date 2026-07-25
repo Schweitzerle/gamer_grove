@@ -52,7 +52,7 @@ class TopThreeSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _isOwn ? 'DEINE TOP 3' : 'TOP 3 VON ${username!.toUpperCase()}',
+                _isOwn ? 'YOUR TOP 3' : "${username!.toUpperCase()}'S TOP 3",
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.primary,
                   letterSpacing: 1.6,
@@ -61,8 +61,8 @@ class TopThreeSection extends StatelessWidget {
               SizedBox(height: tokens.spaceXs),
               Text(
                 _isOwn
-                    ? 'Das Beste, was du gespielt hast'
-                    : 'Was $username am meisten mag',
+                    ? 'The best you have played'
+                    : 'What $username likes most',
                 style: theme.textTheme.headlineMedium,
               ),
               SizedBox(height: tokens.spaceMd),
@@ -81,7 +81,7 @@ class TopThreeSection extends StatelessWidget {
                     // There is no picker to send people to yet: the Top 3 is
                     // set from a game's page. Say where, rather than offering a
                     // tap that goes nowhere.
-                    'Freie Plätze besetzt du über den Stern auf einer Spielseite.',
+                    'Fill the empty places with the star on a game page.',
                     style: theme.textTheme.bodySmall,
                   ),
                 ),

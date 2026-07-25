@@ -47,8 +47,8 @@ void main() {
   Finder slot(int rank, {required bool front}) => find.bySemanticsLabel(
         RegExp(
           front
-              ? 'Platz $rank:.*das Spiel zu öffnen'
-              : 'Platz $rank:.*nach vorn zu holen',
+              ? 'Place $rank:.*Tap to open'
+              : 'Place $rank:.*bring it to the front',
         ),
       );
 
@@ -104,11 +104,11 @@ void main() {
       (tester) async {
     await pump(tester, entries: [games.first]);
 
-    expect(find.bySemanticsLabel('Platz 2 ist noch frei'), findsOneWidget);
-    expect(find.bySemanticsLabel('Platz 3 ist noch frei'), findsOneWidget);
+    expect(find.bySemanticsLabel('Place 2 is still empty'), findsOneWidget);
+    expect(find.bySemanticsLabel('Place 3 is still empty'), findsOneWidget);
     // Inert, so it must not announce itself as a button.
     final node = tester.getSemantics(
-      find.bySemanticsLabel('Platz 2 ist noch frei'),
+      find.bySemanticsLabel('Place 2 is still empty'),
     );
     expect(node.flagsCollection.isButton, isFalse);
   });
@@ -119,7 +119,7 @@ void main() {
     await pump(tester, entries: [games.first], onFillSlot: () => taps++);
 
     await tester.tap(
-      find.bySemanticsLabel(RegExp('Platz 2 ist noch frei. Antippen')),
+      find.bySemanticsLabel(RegExp('Place 2 is still empty. Tap')),
     );
     expect(taps, 1);
   });
