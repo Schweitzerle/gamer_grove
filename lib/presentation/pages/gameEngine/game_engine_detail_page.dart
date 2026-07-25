@@ -13,7 +13,8 @@ import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_bloc.dart
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_event.dart';
 import 'package:gamer_grove/presentation/blocs/game_engine/game_engine_state.dart';
 import 'package:gamer_grove/presentation/pages/gameEngine/game_engine_details_screen.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
 
 class GameEngineDetailPage extends StatelessWidget {
   // Optional pre-loaded gameEngine

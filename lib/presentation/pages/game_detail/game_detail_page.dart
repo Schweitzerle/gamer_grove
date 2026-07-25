@@ -13,7 +13,8 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'; // ✅ Import Live Loading
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/content_dlc_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/events_section.dart';

@@ -13,7 +13,8 @@ import 'package:gamer_grove/presentation/blocs/platform/platform_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_event.dart';
 import 'package:gamer_grove/presentation/blocs/platform/platform_state.dart';
 import 'package:gamer_grove/presentation/pages/platform/platform_details_screen.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
 
 class PlatformDetailPage extends StatelessWidget {
   // Optional pre-loaded platform

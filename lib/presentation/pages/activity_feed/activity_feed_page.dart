@@ -7,7 +7,8 @@ import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_loadi
 import 'package:gamer_grove/presentation/blocs/activity_feed/activity_feed_state.dart';
 import 'package:gamer_grove/presentation/pages/activity_feed/widgets/activity_card.dart';
 import 'package:gamer_grove/presentation/pages/activity_feed/widgets/activity_content.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_step.dart';
 
 /// A page that displays the activity feed of the users that the current user follows.
 class ActivityFeedPage extends StatefulWidget {
