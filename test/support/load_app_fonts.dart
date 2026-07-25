@@ -37,4 +37,29 @@ Future<void> loadAppFonts() async {
     }
     await loader.load();
   }
+
+  await _loadMaterialIcons();
+}
+
+/// Icons render as empty boxes in widget tests unless the icon font is loaded
+/// explicitly — the asset bundle is not served to the test binding. Located via
+/// the SDK rather than hardcoded, and skipped silently when it cannot be found,
+/// so a golden run never fails over a missing developer-machine path.
+Future<void> _loadMaterialIcons() async {
+  // The test runs on the Dart VM inside the SDK, so walk up from it until the
+  // Flutter cache turns up rather than guessing a fixed depth.
+  for (var dir = File(Platform.resolvedExecutable).parent;
+      dir.path != dir.parent.path;
+      dir = dir.parent) {
+    final file = File(
+      '${dir.path}/artifacts/material_fonts/MaterialIcons-Regular.otf',
+    );
+    if (!file.existsSync()) continue;
+    final loader = FontLoader('MaterialIcons')
+      ..addFont(
+        file.readAsBytes().then((bytes) => ByteData.view(bytes.buffer)),
+      );
+    await loader.load();
+    return;
+  }
 }
