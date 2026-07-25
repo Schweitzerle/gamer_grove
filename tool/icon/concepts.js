@@ -1,6 +1,11 @@
 // Renders the competing GamerGrove icon directions for review.
 // Each concept is a self-contained hand-authored vector; the winner gets
 // promoted into render.js as the single source of truth for all layers.
+//
+// Brand platform (decided): "Dein Ort" — a grove is a place, not a tree.
+// Every mark here shows a bounded place with your games inside it.
+// Palette: deep jade-black ground (under the canopy) + warm gold (the light
+// that falls into the clearing) + parchment covers.
 const { Resvg } = require('@resvg/resvg-js');
 const fs = require('fs');
 const path = require('path');
@@ -8,132 +13,103 @@ const path = require('path');
 const OUT = process.argv[2] || path.join(__dirname, 'concepts');
 fs.mkdirSync(OUT, { recursive: true });
 
-// ---------------------------------------------------------------- A: Canopy
-// A tree whose crown is built from game tiles. Silhouette carries the small
-// sizes, the card grid only reveals itself when the icon is big.
-const canopyDefs = `
-  <linearGradient id="aBg" x1="0" y1="0" x2="0.6" y2="1">
-    <stop offset="0" stop-color="#0F3A2B"/><stop offset="1" stop-color="#06201A"/></linearGradient>
-  <radialGradient id="aGlow" cx="50%" cy="38%" r="60%">
-    <stop offset="0" stop-color="#6EE7A8" stop-opacity=".22"/>
-    <stop offset="100%" stop-color="#6EE7A8" stop-opacity="0"/></radialGradient>
-  <linearGradient id="aLeaf" x1="0" y1="0" x2="0.4" y2="1">
-    <stop offset="0" stop-color="#5BE49B"/><stop offset="1" stop-color="#9BE04F"/></linearGradient>
-  <linearGradient id="aLeaf2" x1="0" y1="0" x2="0.4" y2="1">
-    <stop offset="0" stop-color="#34C77F"/><stop offset="1" stop-color="#6FCB52"/></linearGradient>
-  <linearGradient id="aTrunk" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#C98A4E"/><stop offset="1" stop-color="#9A6234"/></linearGradient>`;
+const palette = `
+  <linearGradient id="ground" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#12241F"/><stop offset="1" stop-color="#070F0D"/></linearGradient>
+  <radialGradient id="light" cx="50%" cy="34%" r="60%">
+    <stop offset="0" stop-color="#FFC46B" stop-opacity=".26"/>
+    <stop offset="100%" stop-color="#FFC46B" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient>`;
 
-const tile = (cx, cy, fill, rot = 0, s = 206) =>
-  `<rect x="${cx - s / 2}" y="${cy - s / 2}" width="${s}" height="${s}" rx="46"
-     fill="${fill}" transform="rotate(${rot} ${cx} ${cy})"/>`;
+const backdrop = `
+  <rect width="1024" height="1024" fill="url(#ground)"/>
+  <rect width="1024" height="1024" fill="url(#light)"/>`;
 
-// Overlapping tiles, distinguished by tone rather than by gaps: the crown
-// stays one solid silhouette at 48dp but resolves into cards when large.
-const canopyCrown = `
-  ${tile(352, 396, 'url(#aLeaf2)', -6, 224)}
-  ${tile(672, 396, 'url(#aLeaf2)', 6, 224)}
-  ${tile(512, 286, 'url(#aLeaf)', 0, 246)}
-  ${tile(412, 536, '#F3FBEF', -4, 214)}
-  ${tile(614, 536, '#FFC46B', 4, 214)}
-  ${tile(512, 430, 'url(#aLeaf)', 0, 236)}`;
+// Standing cover cards — the collection that lives inside the place.
+const covers = (cx, baseY, scale = 1, gold = 'url(#gold)') => {
+  const w = 118 * scale, gap = 20 * scale;
+  const h = [178 * scale, 250 * scale, 178 * scale];
+  const xs = [cx - w - gap, cx, cx + w + gap];
+  return xs
+    .map((x, i) => {
+      const fill = i === 1 ? gold : i === 0 ? '#F2EFE6' : '#C9C6BC';
+      const rot = i === 0 ? -5 : i === 2 ? 5 : 0;
+      return `<rect x="${x - w / 2}" y="${baseY - h[i]}" width="${w}" height="${h[i]}"
+        rx="${26 * scale}" fill="${fill}" transform="rotate(${rot} ${x} ${baseY})"/>`;
+    })
+    .join('');
+};
 
-const canopyTrunk = `
-  <path d="M462 604 L562 604 L590 872 a30 30 0 0 1 -30 34 L464 906 a30 30 0 0 1 -30 -34 Z"
-    fill="url(#aTrunk)"/>`;
+// ------------------------------------------------------------- A: Die Lichtung
+// A clearing: the boundary is the grove, and it opens at the bottom — that
+// gap is the way in. Doubles as a G without ever being a letter exercise.
+const arcGap = (r, w, stroke, gapDeg, centerDeg = 90) => {
+  const a0 = ((centerDeg + gapDeg) * Math.PI) / 180;
+  const a1 = ((centerDeg - gapDeg + 360) * Math.PI) / 180;
+  const p = (a) => `${(512 + r * Math.cos(a)).toFixed(1)} ${(512 + r * Math.sin(a)).toFixed(1)}`;
+  return `<path d="M ${p(a0)} A ${r} ${r} 0 1 1 ${p(a1)}" fill="none"
+    stroke="${stroke}" stroke-width="${w}" stroke-linecap="round"/>`;
+};
 
 const conceptA = `
-  <rect width="1024" height="1024" fill="url(#aBg)"/>
-  <rect width="1024" height="1024" fill="url(#aGlow)"/>
-  ${canopyTrunk}${canopyCrown}`;
+  ${backdrop}
+  <circle cx="512" cy="512" r="300" fill="#0E1F1A"/>
+  ${arcGap(332, 58, 'url(#gold)', 30)}
+  ${covers(512, 704, 1.14)}`;
 
-// ------------------------------------------------------------- B: Heartwood
-// Growth rings of a cut trunk, opened into a G. One green shoot at the core:
-// the collection is still alive, not an archive.
-const heartDefs = `
-  <linearGradient id="bBg" x1="0" y1="0" x2="0.5" y2="1">
-    <stop offset="0" stop-color="#2A1C0E"/><stop offset="1" stop-color="#150E06"/></linearGradient>
-  <radialGradient id="bGlow" cx="50%" cy="50%" r="58%">
-    <stop offset="0" stop-color="#F2B45C" stop-opacity=".20"/>
-    <stop offset="100%" stop-color="#F2B45C" stop-opacity="0"/></radialGradient>
-  <linearGradient id="bRing" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#FFD79A"/><stop offset="1" stop-color="#E08A3C"/></linearGradient>`;
-
-// Arc with a wedge cut on the right — the counter of the G.
-const ring = (r, w, stroke, gapDeg) => {
-  const a = (gapDeg * Math.PI) / 180;
-  const x1 = 512 + r * Math.cos(a), y1 = 512 + r * Math.sin(a);
-  const x2 = 512 + r * Math.cos(-a), y2 = 512 + r * Math.sin(-a);
-  return `<path d="M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 1 1 ${x2.toFixed(1)} ${y2.toFixed(1)}"
-    fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round"/>`;
-};
+// ------------------------------------------------------------------ B: Das Tor
+// A threshold. You step into your grove; following someone means stepping
+// into theirs. The strongest silhouette of the three at launcher size.
+// A filled doorway reads as a threshold; a stroked one reads as a horseshoe.
+const arch = (x0, x1, bottom, top, r) =>
+  `M${x0} ${bottom} L${x0} ${top} a${r} ${r} 0 0 1 ${x1 - x0} 0 L${x1} ${bottom} Z`;
 
 const conceptB = `
-  <rect width="1024" height="1024" fill="url(#bBg)"/>
-  <rect width="1024" height="1024" fill="url(#bGlow)"/>
-  ${ring(352, 64, 'url(#bRing)', 32)}
-  ${ring(246, 56, '#C9762F', 32)}
-  <rect x="470" y="482" width="336" height="60" rx="30" fill="url(#bRing)"/>
-  <g transform="translate(470 512) scale(1.9)">
-    <path d="M0 66 C -9 8 -9 -24 0 -68 C 9 -24 9 8 0 66 Z" fill="#7FD168"/>
-    <path d="M0 -6 C -36 -18 -55 -46 -57 -80 C -21 -74 -4 -46 0 -6 Z" fill="#5FB84E"/>
-    <path d="M0 22 C 32 12 48 -12 50 -42 C 18 -36 4 -14 0 22 Z" fill="#9BE04F"/>
-  </g>`;
+  ${backdrop}
+  <path d="${arch(266, 758, 872, 512, 246)}" fill="url(#gold)"/>
+  <path d="${arch(342, 682, 872, 512, 170)}" fill="#0E1F1A"/>
+  ${covers(512, 848, 0.72)}`;
 
-// ---------------------------------------------------------- C: Standing Three
-// Three covers stood upright on open ground like a small stand of trees —
-// the Top 3 as the literal shape of the mark.
-const standDefs = `
-  <linearGradient id="cBg" x1="0" y1="0" x2="0.4" y2="1">
-    <stop offset="0" stop-color="#123240"/><stop offset="1" stop-color="#08191F"/></linearGradient>
-  <radialGradient id="cGlow" cx="50%" cy="30%" r="62%">
-    <stop offset="0" stop-color="#5FD3C2" stop-opacity=".22"/>
-    <stop offset="100%" stop-color="#5FD3C2" stop-opacity="0"/></radialGradient>
-  <linearGradient id="cGold" x1="0" y1="0" x2="0.3" y2="1">
-    <stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#F0A244"/></linearGradient>`;
-
-const card = (cx, top, h, fill, rot, w = 214) =>
-  `<rect x="${cx - w / 2}" y="${top}" width="${w}" height="${h}" rx="40"
-     fill="${fill}" transform="rotate(${rot} ${cx} ${top + h})"/>`;
-
+// ----------------------------------------------------------------- C: Der Claim
+// A place marker whose head holds the collection: the most literal reading of
+// "somewhere that is yours", and the easiest to read at 48dp.
 const conceptC = `
-  <rect width="1024" height="1024" fill="url(#cBg)"/>
-  <rect width="1024" height="1024" fill="url(#cGlow)"/>
-  <path d="M104 802 Q512 736 920 802 L920 834 Q512 768 104 834 Z" fill="#2C6B70" opacity=".85"/>
-  ${card(258, 452, 350, '#E9F2EE', -11)}
-  ${card(766, 452, 350, '#C9DBD6', 11)}
-  ${card(512, 300, 502, 'url(#cGold)', 0, 226)}
-  <g transform="translate(512 262) scale(1.75)">
-    <path d="M0 44 C -7 12 -7 -16 0 -48 C 7 -16 7 12 0 44 Z" fill="#7FD168"/>
-    <path d="M0 -4 C -32 -14 -47 -38 -49 -66 C -17 -60 -4 -34 0 -4 Z" fill="#5FB84E"/>
-    <path d="M0 16 C 28 8 41 -12 43 -38 C 15 -32 3 -12 0 16 Z" fill="#9BE04F"/>
-  </g>`;
+  ${backdrop}
+  <path d="M512 916 C 512 916 236 640 236 452 a276 276 0 1 1 552 0 C 788 640 512 916 512 916 Z"
+    fill="url(#gold)"/>
+  <circle cx="512" cy="446" r="192" fill="#0E1F1A"/>
+  ${covers(512, 556, 0.66)}`;
 
 const concepts = {
-  a_canopy: { defs: canopyDefs, body: conceptA },
-  b_heartwood: { defs: heartDefs, body: conceptB },
-  c_standing_three: { defs: standDefs, body: conceptC },
+  a_lichtung: { title: 'A — Die Lichtung', svg: conceptA },
+  b_tor: { title: 'B — Das Tor', svg: conceptB },
+  c_claim: { title: 'C — Der Claim', svg: conceptC },
 };
 
-const wrap = (c) =>
+const wrap = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-     <defs>${c.defs}</defs>${c.body}</svg>`;
+     <defs>${palette}</defs>${body}</svg>`;
 
 // Launcher-masked variant: approximates the squircle Android crops icons to.
-const wrapMasked = (c) =>
+const wrapMasked = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-     <defs>${c.defs}<clipPath id="mask"><rect width="1024" height="1024" rx="232"/></clipPath></defs>
-     <g clip-path="url(#mask)">${c.body}</g></svg>`;
+     <defs>${palette}<clipPath id="mask"><rect width="1024" height="1024" rx="232"/></clipPath></defs>
+     <g clip-path="url(#mask)">${body}</g></svg>`;
 
 const SIZES = [1024, 192, 96, 72, 48];
 
-for (const [name, c] of Object.entries(concepts)) {
-  fs.writeFileSync(path.join(OUT, `${name}.svg`), wrap(c));
+for (const [name, { svg: body }] of Object.entries(concepts)) {
+  fs.writeFileSync(path.join(OUT, `${name}.svg`), wrap(body));
   for (const size of SIZES) {
-    const svg = size === 1024 ? wrap(c) : wrapMasked(c);
+    const svg = size === 1024 ? wrap(body) : wrapMasked(body);
     const r = new Resvg(svg, { fitTo: { mode: 'width', value: size } });
     fs.writeFileSync(path.join(OUT, `${name}_${size}.png`), r.render().asPng());
   }
   console.log('rendered', name);
 }
+
+// Manifest so the contact sheet always matches the current concept set.
+const manifest = Object.entries(concepts).map(([name, { title }]) => ({ name, title }));
+fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify({ sizes: SIZES.slice(1), concepts: manifest }, null, 2));
 console.log('done ->', OUT);

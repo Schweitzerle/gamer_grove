@@ -1,0 +1,22 @@
+{
+  "sizes": [
+    192,
+    96,
+    72,
+    48
+  ],
+  "concepts": [
+    {
+      "name": "a_lichtung",
+      "title": "A — Die Lichtung"
+    },
+    {
+      "name": "b_tor",
+      "title": "B — Das Tor"
+    },
+    {
+      "name": "c_claim",
+      "title": "C — Der Claim"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="ground" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#12241F"/><stop offset="1" stop-color="#070F0D"/></linearGradient>
+  <radialGradient id="light" cx="50%" cy="34%" r="60%">
+    <stop offset="0" stop-color="#FFC46B" stop-opacity=".26"/>
+    <stop offset="100%" stop-color="#FFC46B" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient></defs>
+  
+  <rect width="1024" height="1024" fill="url(#ground)"/>
+  <rect width="1024" height="1024" fill="url(#light)"/>
+  <path d="M512 916 C 512 916 236 640 236 452 a276 276 0 1 1 552 0 C 788 640 512 916 512 916 Z"
+    fill="url(#gold)"/>
+  <circle cx="512" cy="446" r="192" fill="#0E1F1A"/>
+  <rect x="381.98" y="438.52" width="77.88000000000001" height="117.48"
+        rx="17.16" fill="#F2EFE6" transform="rotate(-5 420.92 556)"/><rect x="473.06" y="391" width="77.88000000000001" height="165"
+        rx="17.16" fill="url(#gold)" transform="rotate(0 512 556)"/><rect x="564.14" y="438.52" width="77.88000000000001" height="117.48"
+        rx="17.16" fill="#C9C6BC" transform="rotate(5 603.08 556)"/></svg>

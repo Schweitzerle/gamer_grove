@@ -4,17 +4,16 @@ The magnified row is nearest-neighbour on purpose — it shows the actual pixels
 Android will draw, which is where hairline artwork falls apart.
 """
 
+import json
 import sys
 from PIL import Image, ImageDraw
 
 SRC = sys.argv[1]
 DST = sys.argv[2]
-CONCEPTS = [
-    ("a_canopy", "A — Canopy"),
-    ("b_heartwood", "B — Heartwood"),
-    ("c_standing_three", "C — Standing Three"),
-]
-SIZES = [192, 96, 72, 48]
+with open(f"{SRC}/manifest.json") as fh:
+    manifest = json.load(fh)
+CONCEPTS = [(c["name"], c["title"]) for c in manifest["concepts"]]
+SIZES = manifest["sizes"]
 CELL, PAD, LABEL_W, MAG = 210, 26, 200, 5
 
 rows = len(CONCEPTS)
