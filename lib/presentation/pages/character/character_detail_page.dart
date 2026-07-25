@@ -14,9 +14,8 @@ import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
 import 'package:gamer_grove/presentation/pages/character/character_detail_screen.dart';
-import 'package:gamer_grove/presentation/widgets/character_laoding_steps.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart'
-    hide CharacterLoadingSteps;
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
 
 class CharacterDetailPage extends StatelessWidget {
   // Optional pre-loaded character

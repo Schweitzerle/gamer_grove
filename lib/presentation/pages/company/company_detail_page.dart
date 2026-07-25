@@ -11,7 +11,8 @@ import 'package:gamer_grove/presentation/blocs/company/company_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_event.dart';
 import 'package:gamer_grove/presentation/blocs/company/company_state.dart';
 import 'package:gamer_grove/presentation/pages/company/company_details_screen.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
 
 class CompanyDetailPage extends StatefulWidget {
   const CompanyDetailPage({

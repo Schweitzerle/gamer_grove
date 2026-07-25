@@ -11,7 +11,8 @@ import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
 import 'package:gamer_grove/presentation/pages/event/event_details_screen.dart';
-import 'package:gamer_grove/presentation/widgets/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
 // ==================================================
 // ENHANCED EVENT DETAIL PAGE WITH LIVE LOADING
 // ==================================================

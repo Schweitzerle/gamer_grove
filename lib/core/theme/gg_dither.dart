@@ -129,18 +129,31 @@ class SpotlightPainter extends CustomPainter {
 ///
 /// [progress] runs 0 → 1 across one pass; outside that range nothing is drawn.
 class LightSweepPainter extends CustomPainter {
-  const LightSweepPainter({required this.colour, required this.progress});
+  const LightSweepPainter({
+    required this.colour,
+    required this.progress,
+    this.band = 0.42,
+    this.strength = 0.75,
+  });
 
   final Color colour;
   final double progress;
+
+  /// Half-width of the band, as a fraction of the painted width. A wide band on
+  /// a small placeholder stops reading as a sweep and starts reading as
+  /// texture.
+  final double band;
+
+  /// Peak opacity at the centre of the band.
+  final double strength;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (progress <= 0 || progress >= 1) return;
     // Travels from just off one edge to just off the other.
     final centre = size.width * (progress * 2.2 - 0.6);
-    final band = size.width * 0.42;
-    final rect = Rect.fromLTWH(centre - band, 0, band * 2, size.height);
+    final half = size.width * band;
+    final rect = Rect.fromLTWH(centre - half, 0, half * 2, size.height);
     if (!rect.overlaps(Offset.zero & size)) return;
 
     // Fades in and out so neither end of the pass pops.
@@ -156,7 +169,7 @@ class LightSweepPainter extends CustomPainter {
       LinearGradient(
         colors: [
           colour.withValues(alpha: 0),
-          colour.withValues(alpha: 0.75 * fade.clamp(0, 1)),
+          colour.withValues(alpha: strength * fade.clamp(0, 1)),
           colour.withValues(alpha: 0),
         ],
       ),
@@ -165,5 +178,8 @@ class LightSweepPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(LightSweepPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.colour != colour;
+      oldDelegate.progress != progress ||
+      oldDelegate.colour != colour ||
+      oldDelegate.band != band ||
+      oldDelegate.strength != strength;
 }
