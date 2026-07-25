@@ -51,7 +51,51 @@ Controller-Motiv veraltet mit der Hardware, eine Technik nicht.
 > nie als Loch. Vergleichsseite: `tool/icon/review_page.js` → Artefakt.
 > **Offen für den User:** Icon auf dem Gerät ansehen (heller + dunkler Homescreen), Themed Icons
 > einschalten (Android 13+) und den Splash beim Kaltstart prüfen.
-> **Ausdrücklich NICHT gemacht:** kein AAB, kein Store-Upload. versionCode bleibt 15.
+
+**PR #126 (Etappe 2): Marken-Farbschema, Typografie, Design-Tokens.** Löst `FlexScheme.material` als
+Default ab — die App hatte **gar keine Markenfarbe**, jede Oberfläche erbte Materials Standard-Lila.
+- `lib/core/theme/`: `GGColorSchemes` (volle M3-Schemes, beide Themes), `GGTypography`
+  (Bricolage Grotesque Display + IBM Plex Sans Text, feste Skala, Tabellenziffern), `GGTokens`
+  (Spacing/Radius/Motion/Tap-Target als ThemeExtension), `GGTheme`, `GGContrastX`.
+- **Schriften liegen in `assets/fonts/`** (OFL/IBM-Lizenz mit dabei), werden NICHT zur Laufzeit
+  geholt — ein Font-CDN wäre ein neuer Empfänger in der Datenschutzerklärung.
+- Pro-Theme-Picker funktioniert weiter: `ThemeState.flexScheme` ist **nullable** (`null` = Marke),
+  Speicher-Marker `-1`. Wer ein Schema gewählt hat, behält es.
+- **3 Defekte gefunden** (2 Bestand, 1 selbst verursacht): (a) mehrere FlexColorScheme-Paletten
+  paaren `onPrimary`/`primary` bei nur ~3:1 → Kachelnamen unlesbar, jetzt `readableForeground`;
+  (b) Picker-Raster ohne Höhenbegrenzung → malte **über den Close-Button**, jetzt `Dialog` +
+  `Flexible`; (c) meine neue `ThemeCard` nutzte `Ink` → siehe Gotcha unten.
+- **21 neue Tests**, analyze 0/0 (1249 infos), **165 grün**.
+> **Gotcha (`Ink` in Scroll-Listen):** `Ink` malt seine Dekoration auf das nächste **`Material`
+> darüber**, nicht auf sich selbst. In einer Scroll-Liste werden Elemente dadurch außerhalb des
+> Viewports gezeichnet und **entkommen dem Clipping** — die Theme-Kacheln lagen über dem
+> Dialog-Button. Fix: `DecoratedBox` für die Optik + transparentes `Material` für den InkWell.
+> Kostete mich mehrere Fehlversuche, weil ich zuerst die Höhenbegrenzung verdächtigt habe; ein
+> gerenderter Abzug hat es gezeigt. **Bei so etwas früher rendern statt weiter zu vermuten.**
+> **Gotcha (Kontrast-Tests):** anti-aliaste Randpixel kommen aus `toByteData` **vormultipliziert**
+> zurück → beim Prüfen nur `alpha == 255` auf die Zielfarbe testen, sonst nur Farbfreiheit.
+> `textContrastGuideline` misst pro Semantics-Knoten die dominanten Farben im Rechteck — bei
+> zweifarbigen Kacheln erzeugt das Fehlalarme, solange etwas über den Knoten hinausragt.
+> **Gotcha (Goldens):** brauchen `FontLoader` (siehe `test/support/load_app_fonts.dart`), sonst
+> rendert die Platzhalter-Schrift und der Golden beweist nichts. CI-Linux rendert identisch zu
+> lokal — die Goldens liefen im ersten Anlauf grün durch.
+> **Offen (bewusst):** **599 hartkodierte Farbwerte in 52 von 168 Dateien** (459 × `Colors.*`,
+> 140 × `Color(0x…)`). Dort geht das neue Schema wirkungslos vorbei. Werden pro Screen in den
+> Etappen erledigt, die den Screen ohnehin anfassen — Start: `game_card` (38) in Etappe 3.
+> Dickste Brocken danach: `external_links_section` (64), `company_details_screen` (61),
+> `content_dlc_section` (33).
+
+**✅ versionCode 16 im Internal Track (2026-07-25, auf Ansage des Users).** `2.0.2+16` mit Icon +
+Theme gebaut und hochgeladen; per API zurückgelesen: `internal: ['16'] completed`.
+Vor dem Upload geprüft: Signatur-SHA1 `C9:75:98:52:2B:2C:3C:58…` (gamergrove-Key), `goog_`-Key im
+`libapp.so`, `ic_launcher_monochrome` + `android12splash` im Bundle. AAB liegt unter
+`~/Documents/Stuff/StudioProjects/aab_out/app-release-16.aab`.
+> **Erwartung beim Testen:** Icon, Splash und Schrift sind neu, viele Screens tragen aber noch ihre
+> alten hartkodierten Farben (s.o.) — der sichtbare Sprung kommt erst mit Etappe 3.
+> **Setup-Notiz:** Play-API-Client war auf dieser Maschine nicht installiert; venv + Upload-Skript
+> liegen im Session-Scratchpad (`playenv/`, `play_upload.py`). Bei Bedarf neu anlegen:
+> `python3 -m venv playenv && ./playenv/bin/pip install google-api-python-client google-auth`.
+> Package-Name ist **`com.schweizerle.gamergrove`** (nicht `com.example.…`).
 
 ### Session 8 (2026-07-25) — Test-Feedback, Grove-Section, Account-Löschung, Server-Limit, Legal
 Alles vom User auf Gerät getestet und bestätigt (versionCode 14 im Internal Track).
