@@ -5,12 +5,12 @@
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
 **Last updated:** 2026-07-25 (Session 9)
-**Current branch:** `design/app-icon`
+**Current branch:** `master`
 **Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 Phase 2 ~95% · 🎨 **Session 9: Gestaltung (Icon + UI/UX-Overhaul)**
 
 ### Session 9 (2026-07-25) — Eigenes App-Icon „Pixel Portal" (Etappe 1 von 4)
-Reine Gestaltungs-Session, **keine neuen Features**. Etappen: (1) Icon ✅, (2) Tokens + Theme,
-(3) Grove-Home, (4) Detailseiten — je ein PR, User schaut zwischendurch.
+Reine Gestaltungs-Session, **keine neuen Features**. Etappen: (1) Icon ✅, (2) Tokens + Theme ✅,
+(3) Grove-Home ✅, (4) Detailseiten — je ein PR, User schaut zwischendurch.
 
 **Markenkern (User-Entscheidung, gilt für alles Weitere):** Ein Hain ist ein *Ort*, keine Pflanze.
 GamerGroves Ort ist die **Höhle des Gamers** — nicht abwertend, sondern der sichere eigene Raum,
@@ -84,6 +84,39 @@ Default ab — die App hatte **gar keine Markenfarbe**, jede Oberfläche erbte M
 > Etappen erledigt, die den Screen ohnehin anfassen — Start: `game_card` (38) in Etappe 3.
 > Dickste Brocken danach: `external_links_section` (64), `company_details_screen` (61),
 > `content_dlc_section` (33).
+
+**Etappe 3 (PRs #128–#131) — Top 3, Ladezustände, Licht, Karte.**
+- **#128 Top 3:** Tiefenstapel, läuft einmal durch und ruht dann auf Platz 1, wischbar, **nur die
+  vordere Karte öffnet**. `GGDither` als gemeinsames Material (Shader-Kachel, ein Draw-Call).
+- **#129 Ladezustände:** `DitherSkeleton` (Inhalt an Ort und Stelle) vs. `PortalLoader` +
+  Schrittanzeige (Warten, das den Bildschirm besitzt).
+- **#130 Licht statt Kästen:** `LitSection` ersetzt `SectionFrame`; Hierarchie über Helligkeit.
+- **#131 game_card:** 19× veraltetes `withOpacity` ersetzt, Radius/Schatten aus Tokens, Schleier
+  benannt, Goldens ergänzt.
+- **analyze 0/0, infos 1249 → 1222, 196 Tests grün.**
+> **Entscheidung (User, 2026-07-25): UI-Sprache ist ENGLISCH.** Legal-Dokumente bleiben deutsch
+> (DE verbindlich). Meine deutschen Strings waren in #128 durchgerutscht → in #130 zurückgedreht.
+> Vor neuen Texten die Sprache des umliegenden Screens prüfen; es gibt keine Lokalisierungsschicht.
+> **Gotcha (`AnimatedRotation`):** zählt **Umdrehungen, nicht Radiant** — 0,1 sind 36°.
+> **Gotcha (`Ink` in Scroll-Listen):** malt auf das nächste `Material` **darüber**, nicht auf sich
+> selbst → Elemente werden außerhalb des Viewports gezeichnet und **entkommen dem Clipping**.
+> `DecoratedBox` + transparentes `Material` verwenden.
+> **Gotcha (Scroll-Listener):** beim Feuern ist das Layout noch nicht aktualisiert, `localToGlobal`
+> liefert die alte Position → nach dem Frame neu rechnen (`addPostFrameCallback`).
+> **Gotcha (Kontrast begrenzt Gestaltung):** Sektionen abdunkeln geht nur bis **0,25 Schleier**,
+> danach fällt `onSurfaceVariant` unter 4,5:1. Der Effekt ist dadurch subtiler als jeder HTML-Entwurf
+> — Entwürfe sind nicht an Kontrast gebunden, die App schon.
+> **Gotcha (Goldens):** `loadAppFonts` muss auch **MaterialIcons** laden, sonst rendern Icons als
+> leere Kästchen. Über den SDK-Pfad suchen, nicht hartkodieren.
+> **Gotcha (Farben über Artwork):** Weiß/Schwarz auf Cover-Bildern **nicht** auf `onSurface`
+> umstellen — im hellen Theme stünde dann dunkler Text auf dunklem Cover.
+> **Offen:** 39 nackte `CircularProgressIndicator`; `game_card.dart` mit 893 Zeilen (>800);
+> Detailseiten mit den dicksten Farb-Brocken (`external_links_section` 64, `company_details` 61).
+
+**✅ versionCode 17 im Internal Track (2026-07-25).** Icon + Theme + neu gestalteter Grove.
+Vor dem Upload geprüft: Signatur `C9:75:98:…`, `goog_`-Key im `libapp.so`, 4 Schriftdateien und
+15 Icon-/Splash-Ressourcen im Bundle. Per API zurückgelesen: `internal: ['17'] completed`.
+AAB: `~/Documents/Stuff/StudioProjects/aab_out/app-release-17.aab`.
 
 **✅ versionCode 16 im Internal Track (2026-07-25, auf Ansage des Users).** `2.0.2+16` mit Icon +
 Theme gebaut und hochgeladen; per API zurückgelesen: `internal: ['16'] completed`.
