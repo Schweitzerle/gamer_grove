@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="cBg" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#123240"/><stop offset="1" stop-color="#08191F"/></linearGradient>
+  <radialGradient id="cGlow" cx="50%" cy="30%" r="62%">
+    <stop offset="0" stop-color="#5FD3C2" stop-opacity=".22"/>
+    <stop offset="100%" stop-color="#5FD3C2" stop-opacity="0"/></radialGradient>
+  <linearGradient id="cGold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#F0A244"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#cBg)"/>
+  <rect width="1024" height="1024" fill="url(#cGlow)"/>
+  <path d="M104 802 Q512 736 920 802 L920 834 Q512 768 104 834 Z" fill="#2C6B70" opacity=".85"/>
+  <rect x="151" y="452" width="214" height="350" rx="40"
+     fill="#E9F2EE" transform="rotate(-11 258 802)"/>
+  <rect x="659" y="452" width="214" height="350" rx="40"
+     fill="#C9DBD6" transform="rotate(11 766 802)"/>
+  <rect x="399" y="300" width="226" height="502" rx="40"
+     fill="url(#cGold)" transform="rotate(0 512 802)"/>
+  <g transform="translate(512 262) scale(1.75)">
+    <path d="M0 44 C -7 12 -7 -16 0 -48 C 7 -16 7 12 0 44 Z" fill="#7FD168"/>
+    <path d="M0 -4 C -32 -14 -47 -38 -49 -66 C -17 -60 -4 -34 0 -4 Z" fill="#5FB84E"/>
+    <path d="M0 16 C 28 8 41 -12 43 -38 C 15 -32 3 -12 0 16 Z" fill="#9BE04F"/>
+  </g></svg>

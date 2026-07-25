@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="aBg" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#0F3A2B"/><stop offset="1" stop-color="#06201A"/></linearGradient>
+  <radialGradient id="aGlow" cx="50%" cy="38%" r="60%">
+    <stop offset="0" stop-color="#6EE7A8" stop-opacity=".22"/>
+    <stop offset="100%" stop-color="#6EE7A8" stop-opacity="0"/></radialGradient>
+  <linearGradient id="aLeaf" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#5BE49B"/><stop offset="1" stop-color="#9BE04F"/></linearGradient>
+  <linearGradient id="aLeaf2" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#34C77F"/><stop offset="1" stop-color="#6FCB52"/></linearGradient>
+  <linearGradient id="aTrunk" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#C98A4E"/><stop offset="1" stop-color="#9A6234"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#aBg)"/>
+  <rect width="1024" height="1024" fill="url(#aGlow)"/>
+  
+  <path d="M462 604 L562 604 L590 872 a30 30 0 0 1 -30 34 L464 906 a30 30 0 0 1 -30 -34 Z"
+    fill="url(#aTrunk)"/>
+  <rect x="240" y="284" width="224" height="224" rx="46"
+     fill="url(#aLeaf2)" transform="rotate(-6 352 396)"/>
+  <rect x="560" y="284" width="224" height="224" rx="46"
+     fill="url(#aLeaf2)" transform="rotate(6 672 396)"/>
+  <rect x="389" y="163" width="246" height="246" rx="46"
+     fill="url(#aLeaf)" transform="rotate(0 512 286)"/>
+  <rect x="305" y="429" width="214" height="214" rx="46"
+     fill="#F3FBEF" transform="rotate(-4 412 536)"/>
+  <rect x="507" y="429" width="214" height="214" rx="46"
+     fill="#FFC46B" transform="rotate(4 614 536)"/>
+  <rect x="394" y="312" width="236" height="236" rx="46"
+     fill="url(#aLeaf)" transform="rotate(0 512 430)"/></svg>
