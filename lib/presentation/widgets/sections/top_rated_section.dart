@@ -1,6 +1,7 @@
 // lib/presentation/widgets/top_rated_games_section.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
@@ -17,6 +18,9 @@ class TopRatedGamesSection extends BaseGameSection {
 
   @override
   String get subtitle => 'Top games everyone loves';
+
+  @override
+  ChamberLightMode get lightMode => ChamberLightMode.brightest;
 
   @override
   IconData get icon => FontAwesomeIcons.trophy;

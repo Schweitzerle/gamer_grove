@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -25,6 +26,12 @@ abstract class BaseGameSection extends StatelessWidget {
   String get subtitle;
   IconData get icon;
   bool get showViewAll => true;
+
+  /// How this section is lit. `steady` is the honest default: light in this app
+  /// means something, so a section only claims a mode when its content
+  /// actually carries that meaning. Lighting the first entry of a wishlist
+  /// would assert an importance that the position does not have.
+  ChamberLightMode get lightMode => ChamberLightMode.steady;
 
   // Abstract method for navigation
   void onViewAllPressed(BuildContext context);
@@ -69,6 +76,7 @@ abstract class BaseGameSection extends StatelessWidget {
     // the title ("Rated Games" / "Games you rated").
     return LitSection(
       title: title,
+      lightMode: lightMode,
       onViewAll: showViewAll ? onViewAll : null,
       child: child,
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
 
 /// A section of the Grove, lit by how close it is to the middle of the screen.
@@ -18,6 +19,8 @@ class LitSection extends StatefulWidget {
     required this.child,
     this.onViewAll,
     this.eyebrow,
+    this.lightMode = ChamberLightMode.steady,
+    this.tint,
     super.key,
   });
 
@@ -30,9 +33,22 @@ class LitSection extends StatefulWidget {
   /// Small label above the title.
   final String? eyebrow;
 
+  /// How this chamber is lit — the thing that tells one section from the next
+  /// without giving each its own colour scheme.
+  final ChamberLightMode lightMode;
+
+  /// Colour of the light. Defaults to the brand accent; later derived from the
+  /// covers standing in the section.
+  final Color? tint;
+
   /// Identifies the dimming layer, so tests can assert on how far a section
   /// has faded instead of guessing at widget order.
   static const veilKey = ValueKey<String>('lit-section-veil');
+
+  /// The light a chamber keeps even when it is far from the middle of the
+  /// screen. Without it the sections read as unlit boxes that only come alive
+  /// under the cursor, which is not what the metaphor says.
+  static const restingLight = 0.62;
 
   /// How far a section may fade when it is out of the light.
   ///
@@ -137,11 +153,19 @@ class _LitSectionState extends State<LitSection> {
       ),
     );
 
+    final tint = widget.tint ?? theme.colorScheme.primary;
+
     final content = Padding(
-      padding: EdgeInsets.symmetric(vertical: tokens.spaceLg),
+      padding: EdgeInsets.only(top: tokens.spaceLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [header, widget.child],
+        children: [
+          header,
+          widget.child,
+          // Chambers meet in grain rather than at an edge, so one light fades
+          // into the next.
+          ChamberSeam(tint: tint),
+        ],
       ),
     );
 
@@ -160,29 +184,31 @@ class _LitSectionState extends State<LitSection> {
         return Stack(
           children: [
             Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      radius: 0.9,
-                      colors: [
-                        theme.colorScheme.primary
-                            .withValues(alpha: 0.11 * light),
-                        theme.colorScheme.primary.withValues(alpha: 0),
-                      ],
+              child: ChamberLight(
+                tint: tint,
+                // A chamber is lit by the games standing in it, so it keeps a
+                // floor of its own light wherever the page is scrolled to;
+                // scrolling only decides how much is added on top.
+                intensity: LitSection.restingLight +
+                    (1 - LitSection.restingLight) * light,
+                mode: widget.lightMode,
+              ),
+            ),
+            // The veil dims the content, not the chamber's light — the light
+            // already answers to scroll through its own intensity, and dimming
+            // it twice left the wash invisible.
+            Stack(
+              children: [
+                child!,
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: ColoredBox(
+                      key: LitSection.veilKey,
+                      color: theme.colorScheme.surface.withValues(alpha: veil),
                     ),
                   ),
                 ),
-              ),
-            ),
-            child!,
-            Positioned.fill(
-              child: IgnorePointer(
-                child: ColoredBox(
-                  key: LitSection.veilKey,
-                  color: theme.colorScheme.surface.withValues(alpha: veil),
-                ),
-              ),
+              ],
             ),
           ],
         );
