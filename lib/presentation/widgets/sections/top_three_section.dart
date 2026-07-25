@@ -1,58 +1,109 @@
-// lib/presentation/widgets/top_three_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
+import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
-import 'package:gamer_grove/presentation/widgets/lists/top_three_game_list.dart';
-import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
-import 'package:gamer_grove/presentation/widgets/sections/empty_top_three_section.dart';
+import 'package:gamer_grove/presentation/widgets/top_three/top_three_stack.dart';
 
-class TopThreeSection extends BaseGameSection {
+/// The Top 3 as the stage of the Grove, rather than one card among five.
+///
+/// This deliberately no longer extends `BaseGameSection`: that base wraps every
+/// section in the same `SectionFrame` card, which is what flattened the home
+/// screen — the app's signature statement carrying the same weight as the
+/// wishlist. Here the section owns its layout.
+class TopThreeSection extends StatelessWidget {
   const TopThreeSection({
     super.key,
-    super.currentUserId,
-    super.gameBloc,
+    this.currentUserId,
+    this.gameBloc,
     this.username,
   });
+
+  final String? currentUserId;
+  final GameBloc? gameBloc;
+
+  /// Set when viewing somebody else's grove.
   final String? username;
 
-  @override
-  String get title => username != null ? "$username's Top 3" : 'My Top 3';
+  bool get _isOwn => username == null;
 
   @override
-  String get subtitle => username != null
-      ? "$username's personal favorites"
-      : 'Your personal favorites';
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.ggTokens;
 
-  @override
-  IconData get icon => Icons.star;
+    return BlocBuilder<GameBloc, GameState>(
+      builder: (context, state) {
+        final games = switch (state) {
+          GrovePageLoaded(:final userTopThree) => userTopThree,
+          _ => const <Game>[],
+        };
+        final isLoading = state is GrovePageLoading;
 
-  @override
-  bool get showViewAll =>
-      false; // Da es nur 3 Games sind, kein "View All" nötig
-
-  @override
-  void onViewAllPressed(BuildContext context) {
-    // Nicht verwendet, da showViewAll = false
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceMd,
+            tokens.spaceSm,
+            tokens.spaceMd,
+            tokens.spaceLg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _isOwn ? 'DEINE TOP 3' : 'TOP 3 VON ${username!.toUpperCase()}',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                  letterSpacing: 1.6,
+                ),
+              ),
+              SizedBox(height: tokens.spaceXs),
+              Text(
+                _isOwn
+                    ? 'Das Beste, was du gespielt hast'
+                    : 'Was $username am meisten mag',
+                style: theme.textTheme.headlineMedium,
+              ),
+              SizedBox(height: tokens.spaceMd),
+              if (isLoading)
+                const _StackFootprint()
+              else
+                TopThreeStack(
+                  games: games.take(TopThreeStack.slots).toList(),
+                  onOpenGame: (game) =>
+                      Navigations.navigateToGameDetail(game.id, context),
+                ),
+              if (!isLoading && _isOwn && games.length < TopThreeStack.slots)
+                Padding(
+                  padding: EdgeInsets.only(top: tokens.spaceMd),
+                  child: Text(
+                    // There is no picker to send people to yet: the Top 3 is
+                    // set from a game's page. Say where, rather than offering a
+                    // tap that goes nowhere.
+                    'Freie Plätze besetzt du über den Stern auf einer Spielseite.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
+}
+
+/// Holds the stack's footprint while it loads, so the headline above does not
+/// jump once the covers arrive.
+class _StackFootprint extends StatelessWidget {
+  const _StackFootprint();
 
   @override
-  Widget buildSectionContent(BuildContext context, GameState state) {
-    if (state is GrovePageLoading) {
-      return buildHorizontalGameListSkeleton();
-    } else if (state is GrovePageLoaded) {
-      if (state.userTopThree.isEmpty) {
-        return const EmptyTopThreeSection();
-      }
-      return TopThreeGameList(games: state.userTopThree);
-    } else if (state is GameError) {
-      return buildErrorSection('Failed to load top games', context);
-    }
-    return buildHorizontalGameListSkeleton();
-  }
-
-  @override
-  void onRetryAction() {
-    if (currentUserId != null && gameBloc != null) {
-      gameBloc!.add(LoadGrovePageDataEvent(userId: currentUserId));
-    }
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SizedBox(
+        height: constraints.maxWidth * 0.46 * 4 / 3 + context.ggTokens.spaceXl,
+      ),
+    );
   }
 }
