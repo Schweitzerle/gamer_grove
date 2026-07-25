@@ -4,9 +4,54 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-25 (Session 8)
-**Current branch:** `master`
-**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~95% (Custom Collections gebaut)**
+**Last updated:** 2026-07-25 (Session 9)
+**Current branch:** `design/app-icon`
+**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 Phase 2 ~95% · 🎨 **Session 9: Gestaltung (Icon + UI/UX-Overhaul)**
+
+### Session 9 (2026-07-25) — Eigenes App-Icon „Pixel Portal" (Etappe 1 von 4)
+Reine Gestaltungs-Session, **keine neuen Features**. Etappen: (1) Icon ✅, (2) Tokens + Theme,
+(3) Grove-Home, (4) Detailseiten — je ein PR, User schaut zwischendurch.
+
+**Markenkern (User-Entscheidung, gilt für alles Weitere):** Ein Hain ist ein *Ort*, keine Pflanze.
+GamerGroves Ort ist die **Höhle des Gamers** — nicht abwertend, sondern der sichere eigene Raum,
+aus dem man in neue Welten aufbricht. Daraus folgt: die App ist dunkel, **weil das Dunkel der Raum
+ist**, und die eine warme Farbe ist das Licht, auf das man zugeht. Tonalität: dunkel + ein warmer
+Akzent (Cover-Art soll das Bunteste im Bild bleiben — Muster von Letterboxd/Trakt).
+Das Spiele-Signal steckt in der **Machart** (8-Bit-Pixel-Art), nicht in einem Gegenstand — ein
+Controller-Motiv veraltet mit der Hardware, eine Technik nicht.
+
+- **PR #125: „Pixel Portal" über alle Layer.** `tool/icon/render.js` ist Single Source of Truth
+  (handgeschriebener Vektor, resvg → PNG; Muster von LifeLoop). Ein gemeinsames **32×32-Raster**,
+  flache Flächen, geordnetes Dithering für den Schein. Palette in `tool/icon/README.md`.
+  **Markenfarbe `#F2A63C` auf Grund `#0B1614`** → Seed für Etappe 2.
+  Behebt zwei echte Defekte: (a) `image_path` und `adaptive_icon_foreground` zeigten auf dasselbe
+  randlose PNG → Motiv wurde von der Maske angeschnitten + dunkler PNG-Hintergrund lag doppelt
+  über der Hintergrundfarbe; (b) **kein Monochrome-Layer** → Android 13 riet. Beides gefixt,
+  `flutter_native_splash` erstmals eingerichtet (inkl. 1152-px-Leinwand für Android 12+).
+- **analyze 0/0** (1249 infos, Bestand war 1440), **flutter test 144 grün** (139 + 5 neue).
+> **Gotcha (Adaptive Icons):** Android garantiert nur die inneren 72/108 dp, und Masken reichen von
+> Squircle bis **Vollkreis (Pixel)**. Motiv deshalb über die **Diagonale** einpassen, nicht über die
+> Bounding-Box — sonst beißt die Kreismaske die Bogenfüße ab. `render.js` nutzt 66/108 (Googles
+> Empfehlung für Schlüsselinhalte); exakt 0.66 ließ nur 6 px Reserve auf 1024 px.
+> **Gotcha (flutter_launcher_icons):** rückt Foreground **und** Monochrome per Default um weitere
+> **16 %** ein (`adaptive_icon_foreground_inset`, ein Wert für beide). Da der Vektor die Safe-Zone
+> schon anwendet → auf **0** gesetzt, sonst wird das Zeichen doppelt geschrumpft.
+> **Gotcha (Tests):** Goldens greifen bei Launcher-Grafik nicht — das sind native Ressourcen, die nie
+> als Widget gerendert werden. Äquivalent ist `test/icon/launcher_assets_test.dart` (dekodiert die
+> Layer, prüft Safe-Kreis, Farbfreiheit des Monochrome-Layers, Inset). Beim Prüfen der Pixelfarben
+> beachten: anti-aliaste Randpixel kommen **vormultipliziert** zurück, also nur `alpha == 255`
+> auf Weiß prüfen und sonst nur Farbfreiheit (r == g == b).
+> **Verifikation:** `tool/icon/verify.py` legt die Layer so übereinander wie Android, beschneidet mit
+> Kreis-/Squircle-/Rundeck-Maske und rendert bei 48/72/96/192 dp — **inklusive der Ressourcen, die
+> tatsächlich in `android/app/src/main/res` gelandet sind** (das Einzige, was der Launcher liest).
+> Info.plist hat das Splash-Tool unbeschadet überstanden (kein Schlüssel weg, ein Schlüssel dazu).
+> **Verworfene Richtungen** (mit Begründung in `tool/icon/concepts.js` + Git-History): botanische
+> Lesarten (Baum/Jahresringe/Karten-Hain) sagen nichts über eine Spiele-App; „Höhle von innen"
+> wird bei jeder Ausführung zur Lampe, weil eine helle Fläche im Dunkeln immer als *Objekt* liest,
+> nie als Loch. Vergleichsseite: `tool/icon/review_page.js` → Artefakt.
+> **Offen für den User:** Icon auf dem Gerät ansehen (heller + dunkler Homescreen), Themed Icons
+> einschalten (Android 13+) und den Splash beim Kaltstart prüfen.
+> **Ausdrücklich NICHT gemacht:** kein AAB, kein Store-Upload. versionCode bleibt 15.
 
 ### Session 8 (2026-07-25) — Test-Feedback, Grove-Section, Account-Löschung, Server-Limit, Legal
 Alles vom User auf Gerät getestet und bestätigt (versionCode 14 im Internal Track).

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="cave" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#13231F"/><stop offset="1" stop-color="#060C0B"/></linearGradient>
+  <radialGradient id="spill" cx="50%" cy="56%" r="52%">
+    <stop offset="0" stop-color="#FFB65A" stop-opacity=".34"/>
+    <stop offset="100%" stop-color="#FFB65A" stop-opacity="0"/></radialGradient>
+  <linearGradient id="world" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFE9BE"/><stop offset="1" stop-color="#F2A63C"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#cave)"/><rect width="1024" height="1024" fill="url(#spill)"/><path d="M252 892 L252 512 a260 260 0 0 1 520 0 L772 892 Z" fill="url(#gold)"/><path d="M322 892 L322 552 a190 190 0 0 1 380 0 L702 892 Z" fill="#2A1A0A"/><path d="M360 892 L360 582 a152 152 0 0 1 304 0 L664 892 Z" fill="#7A4A18"/><path d="M400 892 L400 626 a112 112 0 0 1 224 0 L624 892 Z" fill="#C9781F"/><path d="M436 892 L436 668 a76 76 0 0 1 152 0 L588 892 Z" fill="#F2A63C"/><path d="M468 892 L468 710 a44 44 0 0 1 88 0 L556 892 Z" fill="#FFF1D2"/><g fill="#100A03">
+    <rect x="470" y="676" width="84" height="72"/>
+    <rect x="464" y="748" width="96" height="96"/>
+    <rect x="440" y="760" width="24" height="60"/>
+    <rect x="560" y="760" width="24" height="60"/>
+    <rect x="470" y="844" width="36" height="48"/>
+    <rect x="518" y="844" width="36" height="48"/>
+  </g><path d="M300 892 L724 892 L806 962 L218 962 Z" fill="url(#gold)" opacity=".2"/></svg>

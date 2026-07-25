@@ -1,0 +1,40 @@
+{
+  "sizes": [
+    192,
+    96,
+    72,
+    48
+  ],
+  "concepts": [
+    {
+      "name": "v0_basis",
+      "title": "Basis — Portal",
+      "cue": "Kein Spiele-Signal (Kontrollgruppe)"
+    },
+    {
+      "name": "v1_pixel",
+      "title": "V1 — Pixel-Portal (alt)",
+      "cue": "Erster Wurf: Stufung pro Bogen gerundet, Verläufe und weicher Schein darunter"
+    },
+    {
+      "name": "v1b_pixel_fein",
+      "title": "V1b — Pixel-Portal, sauber",
+      "cue": "Ein gemeinsames 32×32-Raster, flache Flächen, gedithertes Licht, Stufen zur Schwelle"
+    },
+    {
+      "name": "v2_held",
+      "title": "V2 — Der Spieler",
+      "cue": "Pixel-Figur an der Schwelle: du gehst hindurch"
+    },
+    {
+      "name": "v3_controller",
+      "title": "V3 — Der Controller",
+      "cue": "Gamepad im Licht: das eindeutigste Signal, aber auch das erwartbarste"
+    },
+    {
+      "name": "v4_sammlung",
+      "title": "V4 — Die Sammlung",
+      "cue": "Cover als Silhouetten: sagt „Spielesammlung“, nicht nur „Spiel“"
+    }
+  ]
+}

@@ -74,6 +74,7 @@ dev_dependencies:
   dart_code_metrics_presets: ^2.26.1
   very_good_analysis: ^10.0.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 flutter:
   uses-material-design: true
@@ -90,9 +91,31 @@ flutter:
   #       - asset: fonts/Montserrat-Bold.ttf
   #         weight: 700
 
+# All layers are generated from tool/icon/render.js — see tool/icon/README.md.
+# The adaptive layers are deliberately separate files: pointing foreground at
+# the full-bleed icon (as this config did before) lets Android's mask cut into
+# the mark, because only the inner 66% of an adaptive layer is guaranteed.
 flutter_launcher_icons:
   android: true
   ios: true
+  min_sdk_android: 24
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#1A1A1A"
-  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  adaptive_icon_background: "assets/icon/app_icon_background.png"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon/app_icon_monochrome.png"
+  # The tool otherwise insets foreground and monochrome by a further 16%, on
+  # top of the safe zone the vector already applies. render.js fits the mark by
+  # its diagonal so circular masks (Pixel) cannot bite the arch legs off; a flat
+  # percentage inset does not guarantee that and would only shrink the mark.
+  adaptive_icon_foreground_inset: 0
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#0B1614"
+  image: assets/splash/splash_logo.png
+  android: true
+  ios: true
+  web: false
+  android_12:
+    color: "#0B1614"
+    image: assets/splash/splash_logo_android12.png

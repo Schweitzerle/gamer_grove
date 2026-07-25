@@ -7,10 +7,10 @@ purpose and on what legal basis. The German version is the legally binding one.
 
 ## 1. Controller
 
-[PLACEHOLDER: full name]
-[PLACEHOLDER: street and number]
-[PLACEHOLDER: postal code and city], Germany
-Email: [PLACEHOLDER: contact email]
+SchweizerleLab — Julian Schweizer
+Schabringerstraße 2
+89407 Dillingen an der Donau, Germany
+Email: schweizerlemail@gmail.com
 
 ## 2. What we process
 
@@ -44,16 +44,16 @@ technically necessary data, in particular your IP address.
 ## 4. Recipients and services
 
 - Supabase (database, authentication, file storage). Holds your account and
-  content. Server location: [PLACEHOLDER: Supabase project region].
+  content. Server location: Frankfurt, Germany (EU).
 - IGDB / Twitch (Internet Games Database) for game data. Fetching game
   information transmits your IP address to that service. No account data is
   sent. Provider: Twitch Interactive, Inc., USA.
 - Sentry (crash and error reports). Transmission of personal data is disabled
   (no IP, no user identifier); we receive technical data such as stack trace,
-  app version and device type. Server location: [PLACEHOLDER: Sentry region].
+  app version and device type. Server location: Germany (Sentry's EU region).
 - Umami (usage measurement, self-hosted by us). Records event names only, with
   no user identifier and no cookies. No cross-device recognition takes place.
-  Server location: [PLACEHOLDER: Umami server location].
+  Server location: Nuremberg, Germany (Hetzner Cloud).
 - RevenueCat (subscription management). Receives an identifier of your account
   so a purchased subscription can be attributed to you. Provider: RevenueCat,
   Inc., USA.
@@ -61,9 +61,12 @@ technically necessary data, in particular your IP address.
   Google; we never receive payment details such as card numbers. Provider:
   Google Ireland Limited.
 
-Transfers to the USA are based on the EU Commission's Standard Contractual
-Clauses or the recipient's certification under the EU-US Data Privacy
-Framework.
+Our own infrastructure — database, error reports and usage measurement — is
+entirely in the EU. Data goes to the USA only for IGDB / Twitch (your IP address
+when game data is fetched) and RevenueCat (an account identifier so a
+subscription can be attributed). Those transfers are based on the EU
+Commission's Standard Contractual Clauses or the recipient's certification under
+the EU-US Data Privacy Framework.
 
 ## 5. Retention
 

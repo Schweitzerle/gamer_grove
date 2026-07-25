@@ -25,7 +25,15 @@ class _FakeEntitlementService implements EntitlementService {
   bool has(ProFeature feature) => _entitlements.has(feature);
 
   @override
-  Future<void> refresh() async {}
+  Future<void> refresh() async => refreshCalls++;
+
+  /// Counts refreshes so a state-mismatch path can assert it re-checked.
+  int refreshCalls = 0;
+
+  @override
+  Future<void> identify(String? userId) async => identifiedAs = userId;
+
+  String? identifiedAs;
 
   @override
   Future<void> dispose() async => _controller.close();
