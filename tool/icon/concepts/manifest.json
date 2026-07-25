@@ -7,24 +7,29 @@
   ],
   "concepts": [
     {
-      "name": "b1_portal",
-      "title": "B1 — Portal, Tunnel"
+      "name": "v0_basis",
+      "title": "Basis — Portal",
+      "cue": "Kein Spiele-Signal (Kontrollgruppe)"
     },
     {
-      "name": "b2_portal_sammlung",
-      "title": "B2 — Portal + Sammlung"
+      "name": "v1_pixel",
+      "title": "V1 — Pixel-Portal",
+      "cue": "8-Bit-Stufung: liest sich als Retro-Spiel, ohne ein Motiv zu brauchen"
     },
     {
-      "name": "b3_portal_klar",
-      "title": "B3 — Portal, reduziert"
+      "name": "v2_held",
+      "title": "V2 — Der Spieler",
+      "cue": "Pixel-Figur an der Schwelle: du gehst hindurch"
     },
     {
-      "name": "a_hoehle",
-      "title": "A — Höhle (verworfen)"
+      "name": "v3_controller",
+      "title": "V3 — Der Controller",
+      "cue": "Gamepad im Licht: das eindeutigste Signal, aber auch das erwartbarste"
     },
     {
-      "name": "c_sammlung",
-      "title": "C — Sammlung (verworfen)"
+      "name": "v4_sammlung",
+      "title": "V4 — Die Sammlung",
+      "cue": "Cover als Silhouetten: sagt „Spielesammlung“, nicht nur „Spiel“"
     }
   ]
 }
