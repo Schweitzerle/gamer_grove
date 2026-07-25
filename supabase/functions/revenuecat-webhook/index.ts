@@ -101,7 +101,9 @@ Deno.serve(async (req) => {
   if (error) {
     console.error('profile update failed', { type, userId, error });
     // 5xx makes RevenueCat retry, which is what we want for a transient fault.
-    return new Response('Update failed', { status: 500 });
+    // The message goes back to the caller — only reachable with the shared
+    // secret, and without it a failing webhook is near-impossible to diagnose.
+    return new Response(`Update failed: ${error.message}`, { status: 500 });
   }
 
   console.log('pro status updated', { type, userId, isPro, expiresAt });
