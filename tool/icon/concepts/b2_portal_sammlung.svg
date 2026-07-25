@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="cave" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#13231F"/><stop offset="1" stop-color="#060C0B"/></linearGradient>
+  <radialGradient id="spill" cx="50%" cy="52%" r="52%">
+    <stop offset="0" stop-color="#FFB65A" stop-opacity=".34"/>
+    <stop offset="100%" stop-color="#FFB65A" stop-opacity="0"/></radialGradient>
+  <linearGradient id="world" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFE3A8"/><stop offset="0.55" stop-color="#FFB65A"/>
+    <stop offset="1" stop-color="#EE8A3C"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0" stop-color="#FFE7B4"/><stop offset="1" stop-color="#F5A94B"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#cave)"/>
+  <rect width="1024" height="1024" fill="url(#spill)"/>
+  <path d="M252 892 L252 512 a260 260 0 0 1 520 0 L772 892 Z" fill="url(#gold)"/><path d="M320 892 L320 548 a192 192 0 0 1 384 0 L704 892 Z" fill="#3A2A16"/><path d="M356 892 L356 578 a156 156 0 0 1 312 0 L668 892 Z" fill="#8A5F2A"/><path d="M396 892 L396 622 a116 116 0 0 1 232 0 L628 892 Z" fill="#D89544"/><path d="M434 892 L434 664 a78 78 0 0 1 156 0 L590 892 Z" fill="url(#world)"/>
+  <g fill="#120A04">
+    <rect x="404" y="716" width="66" height="176" rx="16" transform="rotate(-6 437 892)"/>
+    <rect x="479" y="668" width="66" height="224" rx="16"/>
+    <rect x="554" y="716" width="66" height="176" rx="16" transform="rotate(6 587 892)"/>
+  </g>
+  <path d="M300 892 L724 892 L806 962 L218 962 Z" fill="url(#gold)" opacity=".2"/></svg>

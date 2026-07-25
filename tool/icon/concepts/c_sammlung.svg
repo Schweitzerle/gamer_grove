@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="cave" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#13231F"/><stop offset="1" stop-color="#060C0B"/></linearGradient>
+  <radialGradient id="spill" cx="50%" cy="52%" r="52%">
+    <stop offset="0" stop-color="#FFB65A" stop-opacity=".34"/>
+    <stop offset="100%" stop-color="#FFB65A" stop-opacity="0"/></radialGradient>
+  <linearGradient id="world" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFE3A8"/><stop offset="0.55" stop-color="#FFB65A"/>
+    <stop offset="1" stop-color="#EE8A3C"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0" stop-color="#FFE7B4"/><stop offset="1" stop-color="#F5A94B"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#cave)"/>
+  <ellipse cx="512" cy="612" rx="330" ry="290" fill="#FFB65A" opacity=".16"/>
+  <rect x="281.16" y="534.64" width="136.88" height="227.35999999999999"
+        rx="30.159999999999997" fill="#F4EFE2" transform="rotate(-6 349.6 762)"/><rect x="443.56" y="446.48" width="136.88" height="315.52"
+        rx="30.159999999999997" fill="url(#world)" transform="rotate(0 512 762)"/><rect x="605.96" y="534.64" width="136.88" height="227.35999999999999"
+        rx="30.159999999999997" fill="#CFC7B4" transform="rotate(6 674.4 762)"/>
+  <path d="M0 0 L1024 0 L1024 316 C 860 168 660 96 512 96 C 364 96 164 168 0 316 Z" fill="#060C0B"/>
+  <path d="M0 316 C 164 168 364 96 512 96 C 660 96 860 168 1024 316"
+    fill="none" stroke="#24443C" stroke-width="18"/>
+  <path d="M188 764 L836 764 L906 856 L118 856 Z" fill="url(#gold)" opacity=".14"/></svg>

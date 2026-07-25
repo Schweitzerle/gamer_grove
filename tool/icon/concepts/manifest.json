@@ -7,16 +7,24 @@
   ],
   "concepts": [
     {
-      "name": "a_lichtung",
-      "title": "A — Die Lichtung"
+      "name": "b1_portal",
+      "title": "B1 — Portal, Tunnel"
     },
     {
-      "name": "b_tor",
-      "title": "B — Das Tor"
+      "name": "b2_portal_sammlung",
+      "title": "B2 — Portal + Sammlung"
     },
     {
-      "name": "c_claim",
-      "title": "C — Der Claim"
+      "name": "b3_portal_klar",
+      "title": "B3 — Portal, reduziert"
+    },
+    {
+      "name": "a_hoehle",
+      "title": "A — Höhle (verworfen)"
+    },
+    {
+      "name": "c_sammlung",
+      "title": "C — Sammlung (verworfen)"
     }
   ]
 }

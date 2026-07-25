@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+     <defs>
+  <linearGradient id="cave" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#13231F"/><stop offset="1" stop-color="#060C0B"/></linearGradient>
+  <radialGradient id="spill" cx="50%" cy="52%" r="52%">
+    <stop offset="0" stop-color="#FFB65A" stop-opacity=".34"/>
+    <stop offset="100%" stop-color="#FFB65A" stop-opacity="0"/></radialGradient>
+  <linearGradient id="world" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFE3A8"/><stop offset="0.55" stop-color="#FFB65A"/>
+    <stop offset="1" stop-color="#EE8A3C"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0" stop-color="#FFD68F"/><stop offset="1" stop-color="#EE9A3C"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0" stop-color="#FFE7B4"/><stop offset="1" stop-color="#F5A94B"/></linearGradient></defs>
+  <rect width="1024" height="1024" fill="url(#cave)"/>
+  <defs><clipPath id="mouthClip"><path d="M262 786
+  C 258 640 286 512 344 424
+  C 402 336 470 286 528 288
+  C 596 290 664 340 712 430
+  C 758 516 776 646 772 786 Z"/></clipPath></defs>
+  <g clip-path="url(#mouthClip)">
+    <rect width="1024" height="1024" fill="url(#world)"/>
+    <circle cx="530" cy="470" r="88" fill="#FFF6DE" opacity=".95"/>
+    <path d="M240 700 L360 618 L470 690 L580 606 L700 686 L790 640 L790 800 L240 800 Z"
+      fill="#1C4038" opacity=".7"/>
+  </g>
+  <path d="M262 786
+  C 258 640 286 512 344 424
+  C 402 336 470 286 528 288
+  C 596 290 664 340 712 430
+  C 758 516 776 646 772 786 Z" fill="none" stroke="#24443C" stroke-width="16" opacity=".8"/>
+  <rect width="1024" height="1024" fill="url(#spill)"/>
+  <path d="M200 786 L836 786 L906 872 L128 872 Z" fill="url(#gold)" opacity=".14"/></svg>
