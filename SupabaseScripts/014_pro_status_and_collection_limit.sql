@@ -41,6 +41,12 @@ AS $$
   );
 $$;
 
+-- Only the triggers below call this, and they run as SECURITY DEFINER. Leaving
+-- it callable would let anyone probe whether a given user id is Pro.
+REVOKE ALL ON FUNCTION public.is_pro_user(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.is_pro_user(uuid) FROM anon;
+REVOKE ALL ON FUNCTION public.is_pro_user(uuid) FROM authenticated;
+
 -- ============================================================
 -- 2. USERS MUST NOT BE ABLE TO GRANT THEMSELVES PRO
 -- ============================================================
