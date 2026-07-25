@@ -32,11 +32,17 @@ const NOTES = {
       'Ohne Spiele-Signal: auf einem fremden Homescreen liest das genauso gut als Meditations- oder Reise-App.',
   },
   v1_pixel: {
-    verdict: 'Signal ohne Motiv',
-    keeps:
-      '8-Bit-Stufung sagt „Spiel“, ohne ein Gegenstand zu sein — kein Controller, keine Figur, trotzdem sofort einsortiert. Bleibt eine reine Form, altert deshalb besser als ein Geräte-Motiv.',
+    verdict: 'Überholt',
+    keeps: 'Die Idee stimmte: 8-Bit-Stufung sagt „Spiel“, ohne ein Gegenstand zu sein.',
     costs:
-      'Retro-Pixel ist eine Behauptung über Geschmack: die App ist keine Retro-App. Und bei 48 px fällt die Stufung mit dem echten Pixelraster zusammen, der Effekt verpufft dort.',
+      'Handwerklich falsch gebaut. Jeder Bogen wurde auf sein eigenes Raster gerundet, statt auf ein gemeinsames — die Stufen der Ringe sitzen nicht übereinander. Dazu glatte Verläufe und ein weicher Lichtkegel, also genau das, was Pixel-Grafik nie hat. Ergebnis: „verpixelt“, nicht „Pixel-Art“. Ersetzt durch V1b.',
+  },
+  v1b_pixel_fein: {
+    verdict: 'Empfehlung',
+    keeps:
+      'Komplett auf einem 32×32-Raster neu gebaut: alle Kanten sitzen auf denselben Zellen, flache Farbflächen statt Verläufe, und das Licht ist gedithert — die Technik, mit der 8-Bit-Grafik einen Schein erzeugt hat. Das Signal „Spiel“ steckt in der Machart, nicht in einem Gegenstand, und altert deshalb nicht mit der Hardware.',
+    costs:
+      'Retro-Pixel bleibt eine Behauptung über Geschmack, obwohl die App keine Retro-App ist. Bei 48 px wird der Dither zu einem feinen Flaum um den Bogen — als Schein noch stimmig, als Detail aber verloren.',
   },
   v2_held: {
     verdict: 'Erzählend',

@@ -75,6 +75,101 @@ const steppedArch = (x0, x1, bottom, top, q) => {
   return pts.join(' ');
 };
 
+// ---------------------------------------------------------------------------
+// Proper pixel build. The first stepped attempt quantised every arch against
+// its own width, so the rings never shared a grid and the stepping read as an
+// accident. Here the whole icon is authored on one 32x32 cell grid, filled
+// flat (8-bit art has no smooth gradients) and lit with ordered dithering.
+const GRID = 32;
+const CELL = 1024 / GRID;
+
+const cell = (x, y, w, h, fill) =>
+  `<rect x="${x * CELL}" y="${y * CELL}" width="${w * CELL}" height="${h * CELL}" fill="${fill}"/>`;
+
+// One rect per column, so every edge lands on the shared grid by construction.
+const archColumns = (left, right, springY, floorY) => {
+  const r = (right - left) / 2;
+  const cx = (left + right) / 2;
+  const cols = [];
+  for (let x = left; x < right; x++) {
+    const dx = x + 0.5 - cx;
+    const dy = Math.sqrt(Math.max(0, r * r - dx * dx));
+    cols.push({ x, top: Math.round(springY - dy) });
+  }
+  return cols;
+};
+
+const archCells = (left, right, springY, floorY, fill) =>
+  archColumns(left, right, springY, floorY)
+    .map(({ x, top }) => cell(x, top, 1, floorY - top, fill))
+    .join('');
+
+// Cells covered by an arch — used to keep the halo outside the portal itself.
+const archMask = (left, right, springY, floorY) => {
+  const set = new Set();
+  for (const { x, top } of archColumns(left, right, springY, floorY)) {
+    for (let y = top; y < floorY; y++) set.add(`${x},${y}`);
+  }
+  return set;
+};
+
+const FLOOR = 28;
+const PORTAL = [
+  { left: 8, right: 24, spring: 17, fill: '#F0C179' },
+  { left: 10, right: 22, spring: 18, fill: '#2A1A0A' },
+  { left: 11, right: 21, spring: 19, fill: '#7A4A18' },
+  { left: 13, right: 19, spring: 20, fill: '#C9781F' },
+  { left: 14, right: 18, spring: 21, fill: '#F2A63C' },
+  { left: 15, right: 17, spring: 22, fill: '#FFF1D2' },
+];
+
+// Ordered dithering: how 8-bit art faked a glow, and it keeps the light on the
+// grid. Warm, because it is gold bouncing off rock. Two earlier attempts show
+// why the bands are grown outward from the silhouette: an arch-shaped halo
+// spread over the canvas read as wallpaper, and one radiating from a point put
+// the checker into vertical curtains, since the portal masks the middle.
+const grow = (mask) => {
+  const next = new Set(mask);
+  for (const k of mask) {
+    const [x, y] = k.split(',').map(Number);
+    next.add(`${x + 1},${y}`);
+    next.add(`${x - 1},${y}`);
+    next.add(`${x},${y + 1}`);
+    next.add(`${x},${y - 1}`);
+  }
+  return next;
+};
+
+const dither = () => {
+  const solid = archMask(8, 24, 17, FLOOR);
+  const bands = [solid];
+  for (let i = 0; i < 4; i++) bands.push(grow(bands[bands.length - 1]));
+  const shade = ['#3A331C', '#282311', '#1B1D11', '#13180F'];
+  const out = [];
+  for (let b = 1; b < bands.length; b++) {
+    for (const k of bands[b]) {
+      if (bands[b - 1].has(k)) continue;
+      const [x, y] = k.split(',').map(Number);
+      if (x < 0 || y < 0 || x >= GRID || y >= GRID) continue;
+      const lit = b <= 2 ? (x + y) % 2 === 0 : x % 2 === 0 && y % 2 === 0;
+      if (lit) out.push(cell(x, y, 1, 1, shade[b - 1]));
+    }
+  }
+  return out.join('');
+};
+
+// Light pooling out of the doorway, in steps rather than a soft cone.
+const threshold = [
+  cell(9, FLOOR, 14, 1, '#8A5F2A'),
+  cell(7, FLOOR + 1, 18, 1, '#4A3418'),
+].join('');
+
+const pixelPortal = `
+  <rect width="1024" height="1024" fill="#0B1614"/>
+  ${dither()}
+  ${threshold}
+  ${PORTAL.map((p) => archCells(p.left, p.right, p.spring, FLOOR, p.fill)).join('')}`;
+
 const SILHOUETTE = '#100A03';
 
 // Blocky avatar on the threshold: you, about to step through. Drawn on a
@@ -124,9 +219,14 @@ const concepts = {
     svg: scene(`${tunnel()}${floorSpill}`),
   },
   v1_pixel: {
-    title: 'V1 — Pixel-Portal',
-    cue: '8-Bit-Stufung: liest sich als Retro-Spiel, ohne ein Motiv zu brauchen',
+    title: 'V1 — Pixel-Portal (alt)',
+    cue: 'Erster Wurf: Stufung pro Bogen gerundet, Verläufe und weicher Schein darunter',
     svg: scene(`${tunnel(RINGS, 32)}${floorSpill}`),
+  },
+  v1b_pixel_fein: {
+    title: 'V1b — Pixel-Portal, sauber',
+    cue: 'Ein gemeinsames 32×32-Raster, flache Flächen, gedithertes Licht, Stufen zur Schwelle',
+    svg: pixelPortal,
   },
   v2_held: {
     title: 'V2 — Der Spieler',

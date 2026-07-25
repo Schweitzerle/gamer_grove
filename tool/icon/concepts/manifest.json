@@ -13,8 +13,13 @@
     },
     {
       "name": "v1_pixel",
-      "title": "V1 — Pixel-Portal",
-      "cue": "8-Bit-Stufung: liest sich als Retro-Spiel, ohne ein Motiv zu brauchen"
+      "title": "V1 — Pixel-Portal (alt)",
+      "cue": "Erster Wurf: Stufung pro Bogen gerundet, Verläufe und weicher Schein darunter"
+    },
+    {
+      "name": "v1b_pixel_fein",
+      "title": "V1b — Pixel-Portal, sauber",
+      "cue": "Ein gemeinsames 32×32-Raster, flache Flächen, gedithertes Licht, Stufen zur Schwelle"
     },
     {
       "name": "v2_held",
