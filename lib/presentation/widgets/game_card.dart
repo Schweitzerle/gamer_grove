@@ -2,6 +2,7 @@
 import 'dart:ui'; // Für BackdropFilter
 
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
@@ -14,6 +15,17 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
+
+/// Colours for everything painted **on top of cover artwork**.
+///
+/// These deliberately do not come from the colour scheme. The backdrop here is
+/// the artwork, not an app surface, so a title has to be light on a dark scrim
+/// in both themes — swapping in `onSurface` would put dark text on a dark cover
+/// the moment the light theme is on.
+abstract final class _Scrim {
+  static const ink = Colors.black;
+  static const paper = Colors.white;
+}
 
 class GameCard extends StatelessWidget {
   const GameCard({
@@ -69,17 +81,18 @@ class GameCard extends StatelessWidget {
         width: width ?? 160,
         height: height ?? 240,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.ggTokens.radiusLg),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color:
+                  Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.ggTokens.radiusLg),
           child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
             buildWhen: (previous, current) {
               // 🐛 DEBUG: Log buildWhen checks
@@ -228,7 +241,7 @@ class GameCard extends StatelessWidget {
         child: Icon(
           Icons.videogame_asset,
           size: 48,
-          color: Colors.white.withAlpha(204),
+          color: _Scrim.paper.withAlpha(204),
         ),
       ),
     );
@@ -237,12 +250,12 @@ class GameCard extends StatelessWidget {
   Widget _buildBlurOverlay() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(51),
+        color: _Scrim.paper.withAlpha(51),
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
         child: Container(
-          color: Colors.black.withOpacity(0.1),
+          color: _Scrim.ink.withValues(alpha: 0.1),
         ),
       ),
     );
@@ -257,8 +270,8 @@ class GameCard extends StatelessWidget {
           colors: [
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withAlpha(179),
-            Colors.black.withAlpha(230),
+            _Scrim.ink.withAlpha(179),
+            _Scrim.ink.withAlpha(230),
           ],
           stops: const [0.0, 0.6, 0.8, 1.0],
         ),
@@ -294,9 +307,9 @@ class GameCard extends StatelessWidget {
             center: isLeft ? const Alignment(-1, -1) : const Alignment(1, -1),
             radius: 2.8,
             colors: [
-              Colors.black.withAlpha(179),
-              Colors.black.withAlpha(102),
-              Colors.black.withAlpha(26),
+              _Scrim.ink.withAlpha(179),
+              _Scrim.ink.withAlpha(102),
+              _Scrim.ink.withAlpha(26),
               Colors.transparent,
             ],
             stops: const [0.0, 0.4, 0.7, 1.0],
@@ -320,13 +333,13 @@ class GameCard extends StatelessWidget {
             game.name,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: _Scrim.paper,
               fontSize: 14,
               shadows: [
                 Shadow(
                   offset: const Offset(0, 1),
                   blurRadius: 2,
-                  color: Colors.black.withOpacity(0.7),
+                  color: _Scrim.ink.withValues(alpha: 0.7),
                 ),
               ],
             ),
@@ -344,13 +357,13 @@ class GameCard extends StatelessWidget {
                 Icon(
                   Icons.calendar_today,
                   size: 10,
-                  color: Colors.white.withAlpha(230),
+                  color: _Scrim.paper.withAlpha(230),
                 ),
                 const SizedBox(width: 2),
                 Text(
                   DateFormatter.formatYearOnly(game.firstReleaseDate!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withAlpha(230),
+                        color: _Scrim.paper.withAlpha(230),
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
@@ -359,7 +372,7 @@ class GameCard extends StatelessWidget {
                   Text(
                     ' • ',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.7),
+                          color: _Scrim.paper.withValues(alpha: 0.7),
                           fontSize: 10,
                         ),
                   ),
@@ -372,7 +385,7 @@ class GameCard extends StatelessWidget {
                   child: Text(
                     game.genres.take(2).map((g) => g.name).join(', '),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withAlpha(204),
+                          color: _Scrim.paper.withAlpha(204),
                           fontSize: 10,
                         ),
                     maxLines: 1,
@@ -435,9 +448,9 @@ class GameCard extends StatelessWidget {
       height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.75),
+        color: _Scrim.ink.withValues(alpha: 0.75),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: _Scrim.paper.withValues(alpha: 0.3),
         ),
       ),
       child: Stack(
@@ -447,7 +460,7 @@ class GameCard extends StatelessWidget {
             child: CircularProgressIndicator(
               value: rating,
               strokeWidth: 2.0,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: _Scrim.paper.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -460,19 +473,19 @@ class GameCard extends StatelessWidget {
                 const Icon(
                   Icons.person,
                   size: 10,
-                  color: Colors.white,
+                  color: _Scrim.paper,
                 ),
                 Text(
                   displayRating.toStringAsFixed(0),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: _Scrim.paper,
                     fontSize: 8,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
                         offset: const Offset(0, 1),
                         blurRadius: 2,
-                        color: Colors.black.withOpacity(0.7),
+                        color: _Scrim.ink.withValues(alpha: 0.7),
                       ),
                     ],
                   ),
@@ -493,9 +506,9 @@ class GameCard extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.75),
+        color: _Scrim.ink.withValues(alpha: 0.75),
         border: Border.all(
-          color: color.withOpacity(0.8),
+          color: color.withValues(alpha: 0.8),
         ),
       ),
       child: Center(
@@ -528,9 +541,9 @@ class GameCard extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.75),
+        color: _Scrim.ink.withValues(alpha: 0.75),
         border: Border.all(
-          color: Colors.red.withOpacity(0.8),
+          color: Colors.red.withValues(alpha: 0.8),
         ),
       ),
       child: const Icon(
@@ -547,9 +560,9 @@ class GameCard extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.75),
+        color: _Scrim.ink.withValues(alpha: 0.75),
         border: Border.all(
-          color: Colors.green.withOpacity(0.8),
+          color: Colors.green.withValues(alpha: 0.8),
         ),
       ),
       child: const Icon(
@@ -569,9 +582,9 @@ class GameCard extends StatelessWidget {
       height: 44,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.75),
+        color: _Scrim.ink.withValues(alpha: 0.75),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: _Scrim.paper.withValues(alpha: 0.3),
         ),
       ),
       child: Stack(
@@ -581,7 +594,7 @@ class GameCard extends StatelessWidget {
             child: CircularProgressIndicator(
               value: rating,
               strokeWidth: 3.0,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: _Scrim.paper.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
@@ -594,20 +607,20 @@ class GameCard extends StatelessWidget {
                 const Icon(
                   Icons.public, // Globe icon für IGDB/externe Quelle
                   size: 12,
-                  color: Colors.white,
+                  color: _Scrim.paper,
                 ),
                 const SizedBox(height: 1),
                 Text(
                   game.totalRating!.toStringAsFixed(0),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: _Scrim.paper,
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
                         offset: const Offset(0, 1),
                         blurRadius: 2,
-                        color: Colors.black.withOpacity(0.7),
+                        color: _Scrim.ink.withValues(alpha: 0.7),
                       ),
                     ],
                   ),
@@ -787,7 +800,7 @@ class GameCardShimmer extends StatelessWidget {
                     Theme.of(context)
                         .colorScheme
                         .surfaceContainerHighest
-                        .withOpacity(0.5),
+                        .withValues(alpha: 0.5),
                   ],
                 ),
               ),
