@@ -24,6 +24,14 @@ abstract interface class EntitlementService {
   /// purchase). No-op for backends without a remote source.
   Future<void> refresh();
 
+  /// Links purchases to [userId], or detaches them when null (sign-out).
+  ///
+  /// Must be called whenever the signed-in user changes. Without it the billing
+  /// backend attributes purchases to an anonymous id, and anything server-side
+  /// that keys off the user id (e.g. mirroring Pro into the database) never
+  /// matches the buyer.
+  Future<void> identify(String? userId);
+
   /// Releases any resources (stream controllers, listeners).
   Future<void> dispose();
 }
@@ -47,6 +55,9 @@ class FreeEntitlementService implements EntitlementService {
 
   @override
   Future<void> refresh() async {}
+
+  @override
+  Future<void> identify(String? userId) async {}
 
   @override
   Future<void> dispose() async {}

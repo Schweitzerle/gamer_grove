@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/domain/entities/collection/user_collection.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
@@ -26,7 +27,27 @@ class CollectionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserCollectionsBloc, UserCollectionsState>(
+    return BlocConsumer<UserCollectionsBloc, UserCollectionsState>(
+      // Creating from here can fail (offline, server-side limit); without a
+      // listener the tap would simply do nothing.
+      listenWhen: (prev, curr) =>
+          curr is UserCollectionsLoaded &&
+          (curr.actionError != null || curr.actionNeedsPro),
+      listener: (context, state) {
+        if (state is! UserCollectionsLoaded) return;
+        if (state.actionNeedsPro) {
+          unawaited(handleServerCollectionLimit(context));
+          return;
+        }
+        final error = state.actionError;
+        if (error != null) {
+          GamerGroveToastService.showError(
+            context,
+            title: 'Something went wrong',
+            message: error,
+          );
+        }
+      },
       builder: (context, state) {
         return SectionFrame(
           title: 'My Collections',

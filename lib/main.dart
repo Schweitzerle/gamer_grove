@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
+import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
 import 'package:gamer_grove/core/env/env.dart';
 import 'package:gamer_grove/injection_container.dart' as di;
 import 'package:gamer_grove/injection_container.dart';
@@ -129,9 +130,14 @@ class _UserGameDataListener extends StatelessWidget {
         if (authState is app_auth.AuthAuthenticated) {
           // User logged in - load their game data
           userGameDataBloc.add(LoadUserGameDataEvent(authState.user.id));
+          // Attribute purchases to this account. Without it RevenueCat uses an
+          // anonymous id, and the webhook that mirrors Pro into the database
+          // never finds the buyer's profile row.
+          unawaited(sl<EntitlementService>().identify(authState.user.id));
         } else if (authState is app_auth.AuthUnauthenticated) {
           // User logged out - clear game data
           userGameDataBloc.add(const ClearUserGameDataEvent());
+          unawaited(sl<EntitlementService>().identify(null));
         }
       },
       child: child,

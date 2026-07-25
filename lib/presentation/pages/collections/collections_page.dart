@@ -59,7 +59,7 @@ class CollectionsPage extends StatelessWidget {
           // The server rejected this for exceeding the free limit — offer the
           // upgrade rather than an error the user cannot act on.
           if (state.actionNeedsPro) {
-            unawaited(showCollectionLimitPaywall(context));
+            unawaited(handleServerCollectionLimit(context));
             return;
           }
           final error = state.actionError;

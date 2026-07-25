@@ -43,6 +43,20 @@ class RevenueCatEntitlementService implements EntitlementService {
     return service;
   }
 
+  @override
+  Future<void> identify(String? userId) async {
+    if (userId == null || userId.isEmpty) {
+      // logOut throws when the SDK is already on an anonymous id.
+      if (!await Purchases.isAnonymous) {
+        await Purchases.logOut();
+      }
+    } else {
+      if (await Purchases.appUserID == userId) return;
+      await Purchases.logIn(userId);
+    }
+    await refresh();
+  }
+
   void _onCustomerInfo(CustomerInfo info) {
     final next = Entitlements(
       isPro: info.entitlements.active.containsKey(proEntitlementId),
