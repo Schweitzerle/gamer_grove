@@ -4,9 +4,45 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-24 (Session 7)
+**Last updated:** 2026-07-25 (Session 8)
 **Current branch:** `master`
 **Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 **Phase 2 Monetarisierung ~95% (Custom Collections gebaut)**
+
+### Session 8 (2026-07-25) — Test-Feedback, Grove-Section, Account-Löschung, Server-Limit, Legal
+Alles vom User auf Gerät getestet und bestätigt (versionCode 14 im Internal Track).
+- **PR #120 (GEMERGT): Collections-UX aus dem Gerätetest.** Sheet lädt Mitgliedschaft
+  (`getCollectionIdsContainingGame`, eine Query mit `user_collections!inner(user_id)` → fremde
+  öffentliche Collections können nicht auftauchen) und zeigt „Already in this collection", nicht
+  antippbar; Lookup ist *advisory* (Fehler sperrt das Sheet nicht). Detailseite bekommt sichtbaren
+  **„Remove games"-Modus** (AppBar-Toggle, Hinweisstreifen, 48dp-Minus-Badge mit Semantics-Label),
+  Long-Press bleibt. **Grove-Section „My Collections"** unter Top 3, teilt sich den Bloc (Counts
+  bleiben synchron, `CollectionsPage.routeWith`); Card-Rahmen aus `BaseGameSection` als
+  `SectionFrame` extrahiert.
+- **PR #121 (GEMERGT): echte Account-Löschung.** Die alte `deleteAccount()` löschte nur `profiles`
+  und meldete ab — **`auth.users` blieb stehen** (E-Mail belegt, Login ohne Profil, Art. 17 nicht
+  erfüllt). Jetzt `013_delete_own_account.sql`: SECURITY DEFINER auf `auth.uid()`, räumt
+  user_games/user_top_three explizit, dann profiles (Cascade) und die Identität. **Migration ist
+  eingespielt und live verifiziert** (anon → `42501 permission denied`). Dialog nennt Konsequenzen,
+  warnt dass Play-Abo NICHT gekündigt wird, Button gesperrt bis Username getippt.
+- **PR #122 (GEMERGT): serverseitiges Collection-Limit.** Brauchte Pro-Status in Postgres
+  (`profiles.is_pro`/`pro_expires_at` + Guard-Trigger, sonst könnte man sich über die Owner-UPDATE-
+  Policy selbst Pro setzen) + Limit-Trigger (SQLSTATE **P0100**) + Edge Function
+  `supabase/functions/revenuecat-webhook`. Client mappt P0100 → `FreeLimitReachedFailure` →
+  `actionNeedsPro` → Paywall.
+- **PR #123 (GEMERGT): Legal.** `assets/legal/` mit Datenschutz (DE, verbindlich), Privacy Policy
+  (EN), Impressum; alle Empfänger genannt (Supabase, IGDB/Twitch, Sentry, Umami, RevenueCat, Play
+  Billing). Settings-Legal-Bereich, `LegalDocumentPage` mit Mini-Renderer (kein Package —
+  flutter_markdown ist discontinued). Test schlägt fehl, wenn ein Prozessor fehlt.
+> **BLOCKER vor dem nächsten Release-Build:** 014 einspielen UND den RevenueCat-Webhook
+> konfigurieren. Solange `is_pro` für alle false ist, laufen **bestehende Pro-Nutzer ins Limit**.
+> Schritte stehen in PR #122.
+> **Offen (User):** PLATZHALTER in den Legal-Dokumenten (Name/Anschrift/E-Mail, USt bzw. § 19 UStG,
+> Hosting-Regionen Supabase/Sentry/Umami). AGB fehlen noch (brauchen Geschäftsbedingungen).
+> **Offen (technisch):** Release-Builds sind NICHT obfuskiert (`--obfuscate --split-debug-info`
+> fehlt) — IGDB_CLIENT_SECRET liegt via envied im Client. Braucht zusätzlich Symbol-Upload zu
+> Sentry, sonst sind Crashes unlesbar.
+> **Platte:** war zu 100% voll; `~/.cache/codex-update-manager/workspaces` hatte 35 Build-Workspaces
+> (47 G freigeräumt, 2 neueste behalten). Papierkorb (36 G) fasst der User selbst an.
 
 ### Session 7 (2026-07-24) — Add-to-Collection-Lifecycle-Fix + versionCode 13 im Internal Track
 - **PR #119 (GEMERGT): `AddToCollectionSheet` Lifecycle-Bug.** `_addTo` schickte `AddGameToCollection`
