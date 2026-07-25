@@ -7,9 +7,9 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
-import 'package:gamer_grove/presentation/widgets/custom_shimmer.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
-import 'package:gamer_grove/presentation/widgets/sections/section_frame.dart';
+import 'package:gamer_grove/presentation/widgets/loading/dither_skeleton.dart';
+import 'package:gamer_grove/presentation/widgets/sections/lit_section.dart';
 
 abstract class BaseGameSection extends StatelessWidget {
   const BaseGameSection({
@@ -62,10 +62,13 @@ abstract class BaseGameSection extends StatelessWidget {
     bool showViewAll = false,
     VoidCallback? onViewAll,
   }) {
-    return SectionFrame(
+    // The card frame is gone: five identical boxes gave every section the same
+    // weight. Hierarchy now comes from light — see LitSection. `subtitle` and
+    // `icon` stay in the signature because the subclasses still declare them,
+    // but the design no longer shows either; both were filler that repeated
+    // the title ("Rated Games" / "Games you rated").
+    return LitSection(
       title: title,
-      subtitle: subtitle,
-      icon: icon,
       onViewAll: showViewAll ? onViewAll : null,
       child: child,
     );
@@ -114,79 +117,13 @@ abstract class BaseGameSection extends StatelessWidget {
     );
   }
 
-  Widget buildHorizontalGameListSkeleton() {
-    return SizedBox(
-      height: 280,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingMedium,
-        ),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return Container(
-            width: 160,
-            margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
-            child: Card(
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: CustomShimmer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(AppConstants.borderRadius),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppConstants.paddingSmall),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomShimmer(
-                            child: Container(
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          CustomShimmer(
-                            child: Container(
-                              height: 12,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  /// One shared skeleton in the shape of the rail it stands in for, so the
+  /// layout does not jump when the covers arrive. The old one hand-rolled a
+  /// card with a grey shimmer per section.
+  Widget buildHorizontalGameListSkeleton() => const DitherRailSkeleton(
+        coverWidth: 160,
+        count: 5,
+      );
 
   Widget buildEmptySection(
     String message,

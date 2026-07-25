@@ -54,7 +54,7 @@ class _PortalLoaderState extends State<PortalLoader>
     final label = widget.label;
 
     return Semantics(
-      label: label ?? 'Wird geladen',
+      label: label ?? 'Loading',
       liveRegion: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,

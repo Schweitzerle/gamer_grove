@@ -10,7 +10,7 @@ import 'package:gamer_grove/presentation/pages/collections/collection_create_gat
 import 'package:gamer_grove/presentation/pages/collections/collection_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/collections/collections_page.dart';
 import 'package:gamer_grove/presentation/pages/collections/widgets/collection_form_sheet.dart';
-import 'package:gamer_grove/presentation/widgets/sections/section_frame.dart';
+import 'package:gamer_grove/presentation/widgets/sections/lit_section.dart';
 
 /// Height of the horizontal collection strip.
 const double _stripHeight = 116;
@@ -49,10 +49,8 @@ class CollectionsSection extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return SectionFrame(
+        return LitSection(
           title: 'My Collections',
-          subtitle: 'Your own lists, your own rules',
-          icon: Icons.collections_bookmark_rounded,
           onViewAll: switch (state) {
             UserCollectionsLoaded(:final collections)
                 when collections.isNotEmpty =>
