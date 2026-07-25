@@ -33,9 +33,20 @@ Alles vom User auf Gerät getestet und bestätigt (versionCode 14 im Internal Tr
   (EN), Impressum; alle Empfänger genannt (Supabase, IGDB/Twitch, Sentry, Umami, RevenueCat, Play
   Billing). Settings-Legal-Bereich, `LegalDocumentPage` mit Mini-Renderer (kein Package —
   flutter_markdown ist discontinued). Test schlägt fehl, wenn ein Prozessor fehlt.
-> **BLOCKER vor dem nächsten Release-Build:** 014 einspielen UND den RevenueCat-Webhook
-> konfigurieren. Solange `is_pro` für alle false ist, laufen **bestehende Pro-Nutzer ins Limit**.
-> Schritte stehen in PR #122.
+> **✅ BLOCKER ERLEDIGT (2026-07-25):** 014 + `REVOKE is_pro_user` + `015` (GRANT für service_role)
+> eingespielt; Edge Function deployed; Webhook in RevenueCat eingetragen, Test-Event grün.
+> **End-to-end verifiziert:** ohne/falsches Secret → 401, GET → 405, fehlende app_user_id → 400,
+> TEST + fremdes Entitlement → 200 ignoriert, **Kauf-Event auf echte profiles-Zeile → 200**
+> (beweist, dass der Guard-Trigger die Service Role durchlässt), EXPIRATION → zurück auf false.
+> **Fund dabei:** Service Role umgeht RLS-Policies, aber NICHT Tabellen-GRANTs — `profiles` hatte
+> keinen → Webhook scheiterte mit `permission denied for table profiles`. Wäre erst beim ersten
+> echten Kauf aufgefallen (Käufer ohne Pro). Deshalb `015`. Ebenso nachgezogen: `is_pro_user` war
+> für PUBLIC ausführbar (jeder konnte den Pro-Status einer bekannten User-ID abfragen).
+> **Gotcha:** `openssl rand -hex 32 > datei` schreibt ein Newline mit — beim Kopieren in den
+> RevenueCat-Authorization-Header führt das zu „must be a valid HTTP header value".
+> Secret-Dateien: `~/.gg-revenuecat-webhook-secret`, fertiger Header in `~/gg-revenuecat-header.txt`.
+> Supabase-CLI liegt in `~/.local/bin/supabase` (v2.109.1); `supabase login` braucht im
+> Non-TTY-Kanal `--token` bzw. `SUPABASE_ACCESS_TOKEN`.
 > **Offen (User):** PLATZHALTER in den Legal-Dokumenten (Name/Anschrift/E-Mail, USt bzw. § 19 UStG,
 > Hosting-Regionen Supabase/Sentry/Umami). AGB fehlen noch (brauchen Geschäftsbedingungen).
 > **Offen (technisch):** Release-Builds sind NICHT obfuskiert (`--obfuscate --split-debug-info`
