@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
 import 'package:gamer_grove/core/entitlements/entitlements.dart';
 import 'package:gamer_grove/core/entitlements/pro_access.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
@@ -12,7 +13,6 @@ import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
 import 'package:gamer_grove/presentation/pages/legal/legal_document_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/theme_selection_dialog.dart';
-import 'package:gamer_grove/presentation/pages/settings/widgets/theme_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsBottomSheet extends StatelessWidget {
@@ -58,15 +58,11 @@ class SettingsBottomSheet extends StatelessWidget {
               ),
               ListTile(
                 title: const Text('Theme'),
-                trailing: SizedBox(
-                  width: 100,
-                  height: 60,
-                  child: ThemeCard(
-                    scheme: state.flexScheme,
-                    isSelected: false, // not selectable here
-                    onSelect: (_) {},
-                  ),
-                ),
+                // A preview, not a control: the ListTile is the tap target.
+                // This used to be a ThemeCard with an empty callback, i.e. a
+                // button that announced itself to screen readers and did
+                // nothing.
+                trailing: const _ThemePreview(),
                 onTap: () async {
                   // Theme customization is a Pro feature; free users get the
                   // paywall, Pro users get the theme picker.
@@ -110,6 +106,42 @@ class SettingsBottomSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Three dots of the theme that is currently applied — primary, secondary,
+/// tertiary. Decorative, so it stays out of the semantics tree; the row it
+/// sits in already describes and handles the action.
+class _ThemePreview extends StatelessWidget {
+  const _ThemePreview();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tokens = context.ggTokens;
+
+    return ExcludeSemantics(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: tokens.spaceXs,
+        children: [
+          for (final color in <Color>[
+            scheme.primary,
+            scheme.secondary,
+            scheme.tertiary,
+          ])
+            Container(
+              width: tokens.spaceLg,
+              height: tokens.spaceLg,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(color: scheme.outlineVariant),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

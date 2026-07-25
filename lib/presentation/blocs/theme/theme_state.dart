@@ -8,20 +8,30 @@ class ThemeState extends Equatable {
     required this.flexScheme,
   });
 
+  /// Dark by default, and on the brand theme rather than a FlexColorScheme.
+  /// The default used to be `FlexScheme.material`, so every screen inherited
+  /// Material's stock purple instead of GamerGrove's own colour.
   factory ThemeState.initial() => const ThemeState(
         themeMode: ThemeMode.dark,
-        flexScheme: FlexScheme.material,
+        flexScheme: null,
       );
+
   final ThemeMode themeMode;
-  final FlexScheme flexScheme;
+
+  /// `null` means the GamerGrove brand theme. A value means the user picked one
+  /// of FlexColorScheme's schemes in the Pro theme picker.
+  final FlexScheme? flexScheme;
+
+  bool get usesBrandTheme => flexScheme == null;
 
   ThemeState copyWith({
     ThemeMode? themeMode,
     FlexScheme? flexScheme,
+    bool resetToBrandTheme = false,
   }) {
     return ThemeState(
       themeMode: themeMode ?? this.themeMode,
-      flexScheme: flexScheme ?? this.flexScheme,
+      flexScheme: resetToBrandTheme ? null : (flexScheme ?? this.flexScheme),
     );
   }
 

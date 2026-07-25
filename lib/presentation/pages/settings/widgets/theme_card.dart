@@ -1,97 +1,125 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_contrast.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
 
+/// A single swatch in the theme picker.
+///
+/// Takes a resolved [ColorScheme] rather than a `FlexScheme` so the GamerGrove
+/// brand theme — which is not one of FlexColorScheme's schemes — can sit in the
+/// same grid as the rest.
 class ThemeCard extends StatelessWidget {
   const ThemeCard({
-    required this.scheme,
+    required this.colorScheme,
+    required this.label,
     required this.isSelected,
     required this.onSelect,
     super.key,
   });
-  final FlexScheme scheme;
+
+  final ColorScheme colorScheme;
+  final String label;
   final bool isSelected;
-  final ValueChanged<FlexScheme> onSelect;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlexThemeData.light(scheme: scheme);
-    final colorScheme = theme.colorScheme;
+    final theme = Theme.of(context);
+    final tokens = context.ggTokens;
+    final radius = BorderRadius.circular(tokens.radiusMd);
 
-    return GestureDetector(
-      onTap: () => onSelect(scheme),
-      child: Card(
-        elevation: isSelected ? 8 : 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: isSelected
-              ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
-              : BorderSide.none,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      // Deliberately not `Ink`: Ink paints its decoration onto the nearest
+      // ancestor Material rather than itself, so inside a scrolling grid the
+      // tiles are drawn outside the viewport and escape its clip — they ended
+      // up painted over the dialog's Close button. A DecoratedBox paints
+      // normally and clips with the viewport; the transparent Material below
+      // gives the InkWell its own ink layer.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: radius,
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : colorScheme.outlineVariant,
+            width: isSelected ? 2 : 1,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: FittedBox(
-                    child: Text(
-                      scheme.name.substring(0, 1).toUpperCase() +
-                          scheme.name.substring(1),
-                      style: TextStyle(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onSelect,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.vertical(top: radius.topLeft),
                     ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: EdgeInsets.all(tokens.spaceSm),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: FittedBox(
+                          // The name is already the button's semantic label.
+                          child: ExcludeSemantics(
+                            child: Text(
+                              label,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                // Several FlexColorScheme palettes pair their own
+                                // onPrimary with primary at ~3:1, which is not
+                                // enough for a caption this size.
+                                color: colorScheme.primary
+                                    .readableForeground(colorScheme.onPrimary),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.tertiary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: EdgeInsets.all(tokens.spaceSm),
+                    child: Row(
+                      spacing: tokens.spaceSm,
+                      children: [
+                        Expanded(child: _Swatch(colorScheme.secondary)),
+                        Expanded(child: _Swatch(colorScheme.tertiary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _Swatch extends StatelessWidget {
+  const _Swatch(this.color);
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(context.ggTokens.radiusSm),
       ),
     );
   }

@@ -84,12 +84,21 @@ flutter:
     - assets/legal/
     #- .env
 
-  # fonts:
-  #   - family: Montserrat
-  #     fonts:
-  #       - asset: fonts/Montserrat-Regular.ttf
-  #       - asset: fonts/Montserrat-Bold.ttf
-  #         weight: 700
+  # Bundled, not fetched at runtime: a font CDN would be a new recipient in the
+  # privacy policy. Licences ship alongside the files (both OFL/Apache-style).
+  fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Bold.ttf
+          weight: 700
+    - family: IBMPlexSans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSans-SemiBold.ttf
+          weight: 600
 
 # All layers are generated from tool/icon/render.js — see tool/icon/README.md.
 # The adaptive layers are deliberately separate files: pointing foreground at

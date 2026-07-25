@@ -10,6 +10,7 @@ import 'package:gamer_grove/core/analytics/analytics_events.dart';
 import 'package:gamer_grove/core/analytics/analytics_service.dart';
 import 'package:gamer_grove/core/entitlements/entitlement_service.dart';
 import 'package:gamer_grove/core/env/env.dart';
+import 'package:gamer_grove/core/theme/gg_theme.dart';
 import 'package:gamer_grove/injection_container.dart' as di;
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
@@ -95,16 +96,22 @@ class GamerGroveApp extends StatelessWidget {
             return MaterialApp(
               title: 'GamerGrove',
               debugShowCheckedModeBanner: false,
-              theme: FlexThemeData.light(
-                scheme: state.flexScheme,
-                surfaceMode: FlexSurfaceMode.level,
-                blendLevel: 30,
-              ),
-              darkTheme: FlexThemeData.dark(
-                scheme: state.flexScheme,
-                surfaceMode: FlexSurfaceMode.level,
-                blendLevel: 30,
-              ),
+              // The brand theme is the default; a FlexScheme only appears when
+              // a Pro user picked one in the theme picker.
+              theme: state.usesBrandTheme
+                  ? GGTheme.light()
+                  : FlexThemeData.light(
+                      scheme: state.flexScheme,
+                      surfaceMode: FlexSurfaceMode.level,
+                      blendLevel: 30,
+                    ),
+              darkTheme: state.usesBrandTheme
+                  ? GGTheme.dark()
+                  : FlexThemeData.dark(
+                      scheme: state.flexScheme,
+                      surfaceMode: FlexSurfaceMode.level,
+                      blendLevel: 30,
+                    ),
               themeMode: state.themeMode,
               home: const SplashPage(),
             );
