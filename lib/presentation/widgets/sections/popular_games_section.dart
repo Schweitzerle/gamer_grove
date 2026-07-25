@@ -1,5 +1,6 @@
 // lib/presentation/widgets/popular_games_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
@@ -16,6 +17,9 @@ class PopularGamesSection extends BaseGameSection {
 
   @override
   String get subtitle => 'Trending games everyone is playing';
+
+  @override
+  ChamberLightMode get lightMode => ChamberLightMode.breathing;
 
   @override
   IconData get icon => Icons.trending_up;

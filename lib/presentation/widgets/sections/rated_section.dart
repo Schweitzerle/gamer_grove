@@ -1,5 +1,6 @@
 // lib/presentation/widgets/rated_section.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
@@ -19,6 +20,9 @@ class RatedSection extends BaseGameSection {
   @override
   String get subtitle =>
       username != null ? 'Games $username has rated' : 'Games you have rated';
+
+  @override
+  ChamberLightMode get lightMode => ChamberLightMode.afterglow;
 
   @override
   IconData get icon => Icons.numbers;
