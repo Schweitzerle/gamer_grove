@@ -175,9 +175,18 @@ class UserCollectionsBloc
   ) async {
     await result.fold(
       (failure) async {
+        // A free-tier rejection is not an error to apologise for — the UI
+        // turns it into the upgrade prompt.
+        final needsPro = failure is FreeLimitReachedFailure;
         final s = state;
         if (s is UserCollectionsLoaded) {
-          emit(s.copyWith(isMutating: false, actionError: _message(failure)));
+          emit(
+            s.copyWith(
+              isMutating: false,
+              actionError: needsPro ? null : _message(failure),
+              actionNeedsPro: needsPro,
+            ),
+          );
         } else {
           emit(UserCollectionsError(_message(failure)));
         }

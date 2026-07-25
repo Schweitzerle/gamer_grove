@@ -181,6 +181,27 @@ void main() {
             .having((s) => s.count, 'count', 1),
       ],
     );
+
+    blocTest<UserCollectionsBloc, UserCollectionsState>(
+      'flags a server-side free-limit rejection for the paywall, not an error',
+      build: () {
+        repo.createResult = const Left(FreeLimitReachedFailure());
+        return build();
+      },
+      seed: () => UserCollectionsLoaded(userId: 'u1', collections: [cozy]),
+      act: (b) => b.add(const CreateCollection(userId: 'u1', name: 'Fourth')),
+      expect: () => [
+        UserCollectionsLoaded(
+          userId: 'u1',
+          collections: [cozy],
+          isMutating: true,
+        ),
+        isA<UserCollectionsLoaded>()
+            .having((s) => s.actionNeedsPro, 'actionNeedsPro', isTrue)
+            .having((s) => s.actionError, 'actionError', isNull)
+            .having((s) => s.count, 'count', 1),
+      ],
+    );
   });
 
   group('DeleteCollection', () {

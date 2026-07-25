@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
@@ -50,13 +52,22 @@ class CollectionsPage extends StatelessWidget {
       ),
       body: BlocConsumer<UserCollectionsBloc, UserCollectionsState>(
         listenWhen: (prev, curr) =>
-            curr is UserCollectionsLoaded && curr.actionError != null,
+            curr is UserCollectionsLoaded &&
+            (curr.actionError != null || curr.actionNeedsPro),
         listener: (context, state) {
-          if (state is UserCollectionsLoaded && state.actionError != null) {
+          if (state is! UserCollectionsLoaded) return;
+          // The server rejected this for exceeding the free limit — offer the
+          // upgrade rather than an error the user cannot act on.
+          if (state.actionNeedsPro) {
+            unawaited(showCollectionLimitPaywall(context));
+            return;
+          }
+          final error = state.actionError;
+          if (error != null) {
             GamerGroveToastService.showError(
               context,
               title: 'Something went wrong',
-              message: state.actionError!,
+              message: error,
             );
           }
         },

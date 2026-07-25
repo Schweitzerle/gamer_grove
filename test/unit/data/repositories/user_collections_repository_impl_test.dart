@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamer_grove/core/errors/failures.dart';
 import 'package:gamer_grove/core/network/network_info.dart';
+import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_user_exceptions.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_collections_datasource.dart';
 import 'package:gamer_grove/data/repositories/user_collections_repository_impl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -189,6 +190,22 @@ void main() {
       expect(
           result.getOrElse(() => throw StateError('x')).name, 'Backlog 2026');
       expect(dataSource.lastArgs['name'], 'Backlog 2026');
+    });
+
+    test('surfaces the server-side free limit as its own failure', () async {
+      // The limit trigger rejects the insert; the UI needs to tell this apart
+      // from a generic server error to open the paywall instead.
+      dataSource.error = const FreeLimitReachedException();
+
+      final result = await repository.createCollection(
+        userId: 'u1',
+        name: 'Fourth',
+      );
+
+      expect(
+        result.fold((f) => f, (_) => null),
+        isA<FreeLimitReachedFailure>(),
+      );
     });
   });
 
