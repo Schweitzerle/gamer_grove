@@ -4,24 +4,23 @@ Angaben gemäß § 5 DDG (ehemals § 5 TMG).
 
 ## Diensteanbieter
 
-[PLATZHALTER: Vor- und Nachname]
-[PLATZHALTER: Straße und Hausnummer]
-[PLATZHALTER: PLZ und Ort]
+SchweizerleLab — Julian Schweizer
+Schabringerstraße 2
+89407 Dillingen an der Donau
 Deutschland
 
 ## Kontakt
 
-E-Mail: [PLATZHALTER: Kontakt-E-Mail]
+E-Mail: schweizerlemail@gmail.com
 
 ## Umsatzsteuer
 
-[PLATZHALTER: Entweder die Umsatzsteuer-Identifikationsnummer nach § 27a UStG
-angeben, oder — bei Kleinunternehmerregelung — diesen Abschnitt durch folgenden
-Satz ersetzen: "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet."]
+Gemäß § 19 UStG (Kleinunternehmerregelung) wird keine Umsatzsteuer berechnet
+und daher auch nicht ausgewiesen.
 
 ## Verantwortlich für den Inhalt
 
-[PLATZHALTER: Vor- und Nachname, Anschrift wie oben]
+Julian Schweizer, Anschrift wie oben
 
 ## Streitbeilegung
 

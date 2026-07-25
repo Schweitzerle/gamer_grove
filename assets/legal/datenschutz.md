@@ -7,10 +7,11 @@ verarbeitet, zu welchem Zweck und auf welcher Rechtsgrundlage.
 
 ## 1. Verantwortlicher
 
-[PLATZHALTER: Vor- und Nachname]
-[PLATZHALTER: Straße und Hausnummer]
-[PLATZHALTER: PLZ und Ort]
-E-Mail: [PLATZHALTER: Kontakt-E-Mail]
+SchweizerleLab — Julian Schweizer
+Schabringerstraße 2
+89407 Dillingen an der Donau
+Deutschland
+E-Mail: schweizerlemail@gmail.com
 
 ## 2. Welche Daten wir verarbeiten
 
@@ -51,19 +52,20 @@ werden technisch notwendige Daten übertragen, insbesondere deine IP-Adresse.
 Wir setzen folgende Auftragsverarbeiter beziehungsweise Dienste ein:
 
 - Supabase (Datenbank, Authentifizierung, Dateispeicher). Hier liegen dein
-  Konto und deine Inhalte. Serverstandort: [PLATZHALTER: Region des
-  Supabase-Projekts, z. B. EU (Frankfurt)].
+  Konto und deine Inhalte. Serverstandort: Frankfurt am Main,
+  Deutschland (EU).
 - IGDB / Twitch (Internet Games Database) für Spieldaten. Beim Abruf von
   Spielinformationen wird deine IP-Adresse an diesen Dienst übertragen. Wir
   übermitteln dabei keine Kontodaten. Anbieter: Twitch Interactive, Inc., USA.
 - Sentry (Absturz- und Fehlerberichte). Wir haben die Übermittlung
   personenbezogener Daten deaktiviert (kein IP-Versand, keine Nutzerkennung);
   übertragen werden technische Fehlerdaten wie Stacktrace, App-Version und
-  Gerätetyp. Serverstandort: [PLATZHALTER: Sentry-Region].
+  Gerätetyp. Serverstandort: Deutschland (EU-Region von
+  Sentry).
 - Umami (Reichweitenmessung, von uns selbst gehostet). Erfasst werden
   ausschließlich Ereignisnamen ohne Nutzerkennung und ohne Cookies. Es findet
-  keine geräteübergreifende Wiedererkennung statt. Serverstandort:
-  [PLATZHALTER: Standort des Umami-Servers].
+  keine geräteübergreifende Wiedererkennung statt. Serverstandort: Nürnberg,
+  Deutschland (Hetzner Cloud).
 - RevenueCat (Verwaltung von Abonnements). Übertragen wird eine Kennung deines
   Kontos, damit ein gekauftes Abonnement dir zugeordnet werden kann. Anbieter:
   RevenueCat, Inc., USA.
@@ -71,9 +73,12 @@ Wir setzen folgende Auftragsverarbeiter beziehungsweise Dienste ein:
   vollständig über Google; wir erhalten keine Zahlungsdaten wie Kartennummern.
   Anbieter: Google Ireland Limited.
 
-Bei Übermittlungen in die USA stützen wir uns auf die Standardvertragsklauseln
-der EU-Kommission beziehungsweise auf die Zertifizierung des Empfängers nach
-dem EU-US Data Privacy Framework.
+Unsere eigene Infrastruktur — Datenbank, Fehlerberichte und Reichweitenmessung —
+liegt vollständig in der EU. In die USA übermittelt werden Daten nur an IGDB /
+Twitch (deine IP-Adresse beim Abruf von Spieldaten) und an RevenueCat (eine
+Kontokennung zur Zuordnung eines Abonnements). Dafür stützen wir uns auf die
+Standardvertragsklauseln der EU-Kommission beziehungsweise auf die
+Zertifizierung des Empfängers nach dem EU-US Data Privacy Framework.
 
 ## 5. Speicherdauer
 
