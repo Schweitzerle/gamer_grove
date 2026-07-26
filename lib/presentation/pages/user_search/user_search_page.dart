@@ -14,6 +14,7 @@ import 'package:gamer_grove/presentation/blocs/user_search/user_search_event.dar
 import 'package:gamer_grove/presentation/blocs/user_search/user_search_state.dart';
 import 'package:gamer_grove/presentation/pages/user_detail/user_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/widgets/user_search_item.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 /// User search page with paginated results
 class UserSearchPage extends StatelessWidget {
@@ -219,9 +220,7 @@ class _UserSearchContentState extends State<_UserSearchContent> {
               if (index >= state.users.length) {
                 return const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: Center(child: PortalLoader()),
                 );
               }
 

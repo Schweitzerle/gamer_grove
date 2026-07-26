@@ -759,7 +759,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         final index = currentTopThree.indexOf(gameId);
         if (index != -1) {
           currentTopThree[index] = 0;
-        } else {}
+        }
 
         // Use unified update method
         await userDataSource.updateTopThree(userId, currentTopThree);
@@ -1087,7 +1087,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
         // Set the game at the new position
         if (position >= 1 && position <= 3) {
           currentTopThree[position - 1] = gameId;
-        } else {}
+        }
 
         await userDataSource.updateTopThree(userId, currentTopThree);
       },

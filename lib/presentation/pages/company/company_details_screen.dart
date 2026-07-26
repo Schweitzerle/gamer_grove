@@ -1433,7 +1433,5 @@ class _CompanyDetailScreenState extends State<CompanyDetailScreen> {
     }
   }
 
-  void _logCompanyData() {
-    if (widget.company.hasParent) {}
-  }
+  void _logCompanyData() {}
 }

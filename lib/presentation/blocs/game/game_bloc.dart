@@ -500,6 +500,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
     if (refreshedState != currentState) {
       emit(refreshedState);
-    } else {}
+    }
   }
 }

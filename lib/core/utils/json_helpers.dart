@@ -210,24 +210,6 @@ class JsonHelpers {
   // TYPE CHECKING & VALIDATION
   // ==========================================
 
-  /// Check if value is an expanded object (has 'id' field)
-  static bool isExpandedObject(dynamic value) {
-    return value is Map<String, dynamic> && value.containsKey('id');
-  }
-
-  /// Check if value is a simple reference (just an ID)
-  static bool isSimpleReference(dynamic value) {
-    return value is int;
-  }
-
-  /// Check if list contains expanded objects
-  static bool hasExpandedObjects(dynamic value) {
-    if (value is List && value.isNotEmpty) {
-      return isExpandedObject(value.first);
-    }
-    return false;
-  }
-
   // ==========================================
   // DATA TRANSFORMATION
   // ==========================================
@@ -256,52 +238,6 @@ class JsonHelpers {
     });
 
     return simplified;
-  }
-
-  // ==========================================
-  // DEBUGGING UTILITIES
-  // ==========================================
-
-  /// Debug helper to analyze JSON structure
-  /// Very useful for understanding what IGDB API returns
-  static void analyzeJsonStructure(
-    Map<String, dynamic> json, {
-    String prefix = '',
-    int maxDepth = 2,
-    int currentDepth = 0,
-  }) {
-    if (currentDepth >= maxDepth) return;
-
-    json.forEach((key, value) {
-      if (value is Map<String, dynamic>) {
-        if (value.containsKey('id')) {}
-
-        // Recurse into nested objects
-        if (currentDepth < maxDepth - 1) {
-          analyzeJsonStructure(
-            value,
-            prefix: '$prefix  ',
-            maxDepth: maxDepth,
-            currentDepth: currentDepth + 1,
-          );
-        }
-      } else if (value is List) {
-        if (value.isNotEmpty) {
-          final first = value.first;
-          if (first is Map<String, dynamic>) {
-          } else {}
-        } else {}
-      } else {}
-    });
-  }
-
-  /// Quick check to see what type of API response you're dealing with
-  static void analyzeApiResponseType(Map<String, dynamic> json) {
-    json.forEach((key, value) {
-      if (isExpandedObject(value)) {
-      } else if (isSimpleReference(value)) {
-      } else if (value is List && hasExpandedObjects(value)) {}
-    });
   }
 
   // ==========================================

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 /// The legal texts shipped with the app.
 ///
@@ -66,7 +67,7 @@ class _LegalDocumentPageState extends State<LegalDocumentPage> {
           }
           final text = snapshot.data;
           if (text == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: PortalLoader());
           }
           return SafeArea(
             child: ListView(

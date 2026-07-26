@@ -176,7 +176,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         (gameIds) {
           if (gameIds is List<int>) {
             wishlistedGameIds.addAll(gameIds);
-          } else {}
+          }
         },
       );
 
@@ -190,7 +190,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
               final rating = (game['rating'] as num).toDouble();
               ratedGames[gameId] = rating;
             }
-          } else {}
+          }
         },
       );
 
@@ -200,7 +200,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
         (gameIds) {
           if (gameIds is List<int>) {
             recommendedGameIds.addAll(gameIds);
-          } else {}
+          }
         },
       );
 
@@ -213,7 +213,7 @@ class UserGameDataBloc extends Bloc<UserGameDataEvent, UserGameDataState> {
               final gameId = game['game_id'] as int;
               topThreeGameIds.add(gameId);
             }
-          } else {}
+          }
         },
       );
 

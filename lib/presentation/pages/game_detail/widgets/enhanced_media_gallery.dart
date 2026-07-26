@@ -15,6 +15,7 @@ import 'package:gamer_grove/presentation/pages/allVideosGrid/all_videos_grid.dar
 import 'package:gamer_grove/presentation/pages/all_images_grid/all_images_grid.dart';
 import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_screen_image_viewer.dart';
 import 'package:gamer_grove/presentation/pages/videoPlayer/video_player_screen.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 class EnhancedMediaGallery extends StatefulWidget {
   const EnhancedMediaGallery({
@@ -244,7 +245,7 @@ class _EnhancedMediaGalleryState extends State<EnhancedMediaGallery>
                   placeholder: ColoredBox(
                     color:
                         Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: const Center(child: CircularProgressIndicator()),
+                    child: const Center(child: PortalLoader()),
                   ),
                   errorWidget: ColoredBox(
                     color: Theme.of(context).colorScheme.errorContainer,

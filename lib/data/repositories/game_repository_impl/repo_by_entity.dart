@@ -375,8 +375,6 @@ mixin _RepoByEntity on GameRepositoryBase implements GameRepository {
         final whereClause =
             igdbFilters.isNotEmpty ? CombinedFilter(igdbFilters) : null;
 
-        if (whereClause != null) {}
-
         // Build sort string from filters
         // Note: 'relevance' sort only works with text search
         String sortString;

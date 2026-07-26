@@ -47,7 +47,7 @@ class UserStatesContent extends StatelessWidget {
           userRating = userDataState.getRating(game.id);
           isInTopThree = userDataState.isInTopThree(game.id);
           topThreePosition = userDataState.getTopThreePosition(game.id);
-        } else {}
+        }
 
         return Column(
           children: [

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/presentation/pages/full_screen_image_viewer/full_screen_image_viewer.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 class AllImagesGrid extends StatelessWidget {
   const AllImagesGrid({
@@ -111,7 +112,7 @@ class AllImagesGrid extends StatelessWidget {
                     placeholder: ColoredBox(
                       color:
                           Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: const Center(child: PortalLoader()),
                     ),
                   ),
                 ),

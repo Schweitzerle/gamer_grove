@@ -9,6 +9,7 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
 import 'package:gamer_grove/presentation/pages/collections/widgets/collection_form_sheet.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 /// Result of the add-to-collection sheet.
 ///
@@ -161,7 +162,7 @@ class _AddToCollectionSheetState extends State<_AddToCollectionSheet> {
                       _hint(theme, message),
                     _ => const Padding(
                         padding: EdgeInsets.all(24),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: PortalLoader()),
                       ),
                   };
                 },

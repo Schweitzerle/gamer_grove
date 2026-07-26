@@ -63,7 +63,7 @@ class _GameDetailPageState extends State<GameDetailPage>
 
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-    } else {}
+    }
   }
 
   void _loadGameDetails() {
@@ -123,7 +123,6 @@ class _GameDetailPageState extends State<GameDetailPage>
             if (state is GameDetailsLoaded) {
               final game = state.game;
               _initializeMediaTabs(game);
-              _logGameDetailsData(game);
               return Scaffold(
                 body: CustomScrollView(
                   controller: _scrollController,
@@ -204,25 +203,6 @@ class _GameDetailPageState extends State<GameDetailPage>
               onRetry: _loadGameDetails,
             ),
     );
-  }
-
-  // 🔄 UPDATE your existing _logGameDetailsData method in game_detail_page.dart:
-  void _logGameDetailsData(Game game) {
-    // 🆕 UPDATED: Characters data with detailed image info
-    if (game.characters.isNotEmpty) {
-      for (var i = 0; i < game.characters.length && i < 5; i++) {
-        final char = game.characters[i];
-
-        // 🆕 NEW: Log image information
-        if (char.hasImage) {
-        } else if (char.hasMugShot) {
-        } else {}
-
-        if (char.description != null) {}
-      }
-
-      if (game.characters.length > 5) {}
-    } else {}
   }
 
   Widget _buildSliverAppBar(Game game) {

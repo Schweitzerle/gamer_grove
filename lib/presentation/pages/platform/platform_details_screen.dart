@@ -951,6 +951,6 @@ class _PlatformDetailScreenState extends State<PlatformDetailScreen> {
   void _logPlatformData() {
     if (widget.games.isNotEmpty) {
       for (var i = 0; i < widget.games.length && i < 3; i++) {}
-    } else {}
+    }
   }
 }

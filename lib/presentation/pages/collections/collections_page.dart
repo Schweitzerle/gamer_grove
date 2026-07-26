@@ -9,6 +9,7 @@ import 'package:gamer_grove/presentation/blocs/user_collections/user_collections
 import 'package:gamer_grove/presentation/pages/collections/collection_create_gate.dart';
 import 'package:gamer_grove/presentation/pages/collections/collection_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/collections/widgets/collection_form_sheet.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 /// Lists the signed-in user's custom collections and lets them create, rename,
 /// delete and open collections.
@@ -75,7 +76,7 @@ class CollectionsPage extends StatelessWidget {
           return switch (state) {
             UserCollectionsInitial() ||
             UserCollectionsLoading() =>
-              const Center(child: CircularProgressIndicator()),
+              const Center(child: PortalLoader()),
             UserCollectionsError(:final message) =>
               _ErrorView(message: message, userId: userId),
             UserCollectionsLoaded(:final collections) => collections.isEmpty

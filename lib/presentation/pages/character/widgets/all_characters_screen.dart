@@ -15,6 +15,7 @@ import 'package:gamer_grove/presentation/blocs/character/character_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_event.dart';
 import 'package:gamer_grove/presentation/blocs/character/character_state.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 
 enum CharacterSortOption {
   defaultSort, // No sorting, IGDB default order
@@ -458,7 +459,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
     return BlocBuilder<CharacterBloc, CharacterState>(
       builder: (context, state) {
         if (state is CharacterLoading || state is CharacterSearchLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: PortalLoader());
         }
 
         if (state is CharacterError) {
@@ -511,7 +512,7 @@ class _AllCharactersScreenState extends State<AllCharactersScreen> {
       itemCount: characters.length + (isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= characters.length) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: PortalLoader());
         }
         final character = characters[index];
         return CharacterCard(character: character);

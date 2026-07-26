@@ -48,14 +48,14 @@ class _GrovePageState extends State<GrovePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUserId = authState.user.id;
-    } else {}
+    }
 
     // Load all data at once
     final userId = _currentUserId;
     if (userId != null) {
       _gameBloc.add(LoadGrovePageDataEvent(userId: userId));
       _collectionsBloc.add(LoadCollections(userId));
-    } else {}
+    }
   }
 
   @override

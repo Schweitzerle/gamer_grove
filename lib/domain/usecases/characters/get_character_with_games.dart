@@ -59,7 +59,7 @@ class GetCharacterWithGames
               return gamesList;
             },
           );
-        } else {}
+        }
       }
 
       final result = CharacterWithGames(

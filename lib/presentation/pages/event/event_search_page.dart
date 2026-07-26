@@ -11,8 +11,6 @@ import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
 import 'package:gamer_grove/domain/entities/search/event_search_filters.dart';
 import 'package:gamer_grove/injection_container.dart';
-import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
-import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_event.dart';
 import 'package:gamer_grove/presentation/blocs/event/event_state.dart';
@@ -55,10 +53,6 @@ class _EventSearchPageState extends State<EventSearchPage> {
     _eventBloc = sl<EventBloc>();
     _scrollController.addListener(_onScroll);
     _loadRecentSearches();
-
-    // Get current user ID from AuthBloc
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {}
 
     // Load filter options first, then trigger search if we have initial filters
     _loadFilterOptions();
