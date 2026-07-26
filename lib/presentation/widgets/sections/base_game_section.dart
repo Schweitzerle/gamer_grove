@@ -10,6 +10,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import 'package:gamer_grove/presentation/widgets/loading/dither_skeleton.dart';
+import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/lit_section.dart';
 
 abstract class BaseGameSection extends StatelessWidget {
@@ -26,6 +27,11 @@ abstract class BaseGameSection extends StatelessWidget {
   String get subtitle;
   IconData get icon;
   bool get showViewAll => true;
+
+  /// The games this section is showing, so its light can be taken from their
+  /// covers. Defaults to none, which keeps the brand accent — a section only
+  /// gets its own colour once it can say which games it is made of.
+  List<Game> gamesOf(GameState state) => const [];
 
   /// How this section is lit. `steady` is the honest default: light in this app
   /// means something, so a section only claims a mode when its content
@@ -53,6 +59,7 @@ abstract class BaseGameSection extends StatelessWidget {
           icon: icon,
           showViewAll: showViewAll,
           onViewAll: showViewAll ? () => onViewAllPressed(context) : null,
+          coverUrls: [for (final game in gamesOf(state)) game.coverUrl],
           child: buildSectionContent(context, state),
         );
       },
@@ -66,6 +73,7 @@ abstract class BaseGameSection extends StatelessWidget {
     required String subtitle,
     required IconData icon,
     required Widget child,
+    List<String?> coverUrls = const [],
     bool showViewAll = false,
     VoidCallback? onViewAll,
   }) {
@@ -74,11 +82,18 @@ abstract class BaseGameSection extends StatelessWidget {
     // `icon` stay in the signature because the subclasses still declare them,
     // but the design no longer shows either; both were filler that repeated
     // the title ("Rated Games" / "Games you rated").
-    return LitSection(
-      title: title,
-      lightMode: lightMode,
-      onViewAll: showViewAll ? onViewAll : null,
-      child: child,
+    // The chamber's light is taken from the covers standing in it, so two
+    // people's Groves do not look alike. Falls back to the brand accent while
+    // the covers are still loading, or when they have no usable hue.
+    return ChamberTint(
+      coverUrls: coverUrls,
+      builder: (context, tint) => LitSection(
+        title: title,
+        lightMode: lightMode,
+        tint: tint,
+        onViewAll: showViewAll ? onViewAll : null,
+        child: child,
+      ),
     );
   }
 

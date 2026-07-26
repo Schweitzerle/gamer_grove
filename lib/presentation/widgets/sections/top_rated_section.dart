@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
@@ -18,6 +19,13 @@ class TopRatedGamesSection extends BaseGameSection {
 
   @override
   String get subtitle => 'Top games everyone loves';
+
+  @override
+  List<Game> gamesOf(GameState state) => switch (state) {
+        TopRatedGamesLoaded(:final games) => games,
+        HomePageLoaded(:final topRatedGames) => topRatedGames,
+        _ => const [],
+      };
 
   @override
   ChamberLightMode get lightMode => ChamberLightMode.brightest;

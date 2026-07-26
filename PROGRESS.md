@@ -113,6 +113,39 @@ Default ab — die App hatte **gar keine Markenfarbe**, jede Oberfläche erbte M
 > **Offen:** 39 nackte `CircularProgressIndicator`; `game_card.dart` mit 893 Zeilen (>800);
 > Detailseiten mit den dicksten Farb-Brocken (`external_links_section` 64, `company_details` 61).
 
+**Etappe 3b — Das Lichtsystem (PRs #133, #134).** Nach dem Gerätetest: dem User waren die
+Bereiche zu ähnlich, und meine ersten drei Gegenvorschläge (Farbwechsel, Formvariation, Rhythmus)
+fand er langweilig. **Der Denkfehler:** ich habe Cover-Reihen *umsortiert* — Reihen sind aber das
+Grundmaterial jeder Katalog-App (Nutzer werfen Backloggd genau deshalb „Letterboxd-Abklatsch" vor).
+Wer sich abheben will, muss das **Material** wechseln.
+- **#133 Kammern mit Bedeutung:** jeder Bereich leuchtet so, wie es zu seinem Inhalt passt.
+  `brightest` (Rang = Helligkeit), `breathing` (viele Leute da), `cold` (Wunschliste wartet im
+  Dunkeln), `afterglow` (frisch bewertet glüht nach). Bereiche ohne Aussage bleiben `steady` —
+  **Licht bedeutet hier etwas**, deshalb bekommt es nur, wer es verdient.
+- **#134 Ton aus den Covern:** nur der **Farbton** kommt vom Cover, Sättigung/Helligkeit sind fest.
+  Damit sieht der Grove von zwei Leuten unterschiedlich aus. Eigene Extraktion (60 Zeilen) statt
+  Paket.
+> **Gotcha (Performance, der Grund für die ganze Bauweise):** Ein Verlauf mit Dither-Maske braucht
+> **`saveLayer` pro Sektion pro Frame**. Deshalb wird der Schein **einmal gebacken** (`_GlowCache`)
+> und danach als eine Textur mit modulierter Deckkraft gezeichnet. Cache auf 12 Einträge begrenzt,
+> Größen in 32-px-Schritten gerastert — unbegrenzt wäre es ein Leck nach langer Sitzung.
+> **Gotcha (Farbton mitteln):** Farbton ist **zirkulär**. Der einfache Mittelwert aus 350° und 10°
+> ist 180° — die Gegenfarbe. Als Vektor mitteln. Und Fast-Schwarz/Fast-Weiß/Grau **überspringen**,
+> sonst wird jedes Cover zum selben matschigen Braun.
+> **Gotcha (Goldens fanden 3 Fehler, die Nachdenken nicht fand):** (a) Schein hing komplett an der
+> Scrollposition → Kammern wirkten unbeleuchtet, jetzt Grundlicht `restingLight`; (b) `brightest`
+> und `afterglow` nutzten dieselbe Abfall-Formel und sahen identisch aus; (c) der Schleier dimmte
+> auch das Licht, und der Schein klebte an der Unterkante → landete auf der Naht statt hinter der
+> Reihe.
+> **Security-Fund:** `palette_generator_master` lag im pubspec — **deklariert, nie importiert**, und
+> ein Fremd-Fork unter einem Namen, der offiziell aussieht. Entfernt.
+> **Offen (User-Entscheidung):** „das Vorderste rutscht beim Scrollen ins Rampenlicht" — abgeraten,
+> weil es gleichzeitig zum vertikalen Scroll-Licht liefe und in Reihen mit willkürlicher Reihenfolge
+> eine Wichtigkeit behauptet, die es nicht gibt. Ruhige Fassung (Licht springt einmal, wenn die
+> Reihe zur Ruhe kommt) wäre baubar, falls es fehlt.
+> **Noch nicht angewandt:** Sammlungs-Detailseite und Spiel-Detailseite (dort würde die ganze Seite
+> vom Cover des Spiels beleuchtet). Bewusst NICHT in Suche/Einstellungen — Werkzeug-Oberflächen.
+
 **✅ versionCode 17 im Internal Track (2026-07-25).** Icon + Theme + neu gestalteter Grove.
 Vor dem Upload geprüft: Signatur `C9:75:98:…`, `goog_`-Key im `libapp.so`, 4 Schriftdateien und
 15 Icon-/Splash-Ressourcen im Bundle. Per API zurückgelesen: `internal: ['17'] completed`.

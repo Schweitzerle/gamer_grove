@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/sections/base_game_section.dart';
 
@@ -17,6 +18,13 @@ class PopularGamesSection extends BaseGameSection {
 
   @override
   String get subtitle => 'Trending games everyone is playing';
+
+  @override
+  List<Game> gamesOf(GameState state) => switch (state) {
+        PopularGamesLoaded(:final games) => games,
+        HomePageLoaded(:final popularGames) => popularGames,
+        _ => const [],
+      };
 
   @override
   ChamberLightMode get lightMode => ChamberLightMode.breathing;
