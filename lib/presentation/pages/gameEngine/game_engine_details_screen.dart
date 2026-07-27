@@ -12,7 +12,8 @@ import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/company_section.dart';
 import 'package:gamer_grove/presentation/widgets/accordion_tile.dart';
-import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_games_row.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/platform_section.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -122,7 +123,7 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
             // Hero Image
             _buildHeroImage(),
             // Gradient Overlays
-            _buildGradientOverlays(),
+            const EntityHeroOverlays(),
             // Floating Game Engine Card
             _buildFloatingGameEngineCard(),
           ],
@@ -164,43 +165,6 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildGradientOverlays() {
-    return Stack(
-      children: [
-        // Horizontal Gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              stops: const [0.0, 0.05, 0.95, 1.0],
-              colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface,
-              ],
-            ),
-          ),
-        ),
-        // Vertical Gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0.0, 0.05, 0.8, 1.0],
-              colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .8),
-                Theme.of(context).colorScheme.surface,
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -847,8 +811,8 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
             SizedBox(
               height: 280,
               child: item.games.isNotEmpty
-                  ? _buildGamesList(item.games)
-                  : _buildNoGamesPlaceholder(context),
+                  ? EntityGamesRow(games: item.games)
+                  : const EntityGamesEmpty(subject: 'game engine'),
             ),
           ],
         ),
@@ -861,65 +825,6 @@ class _GameEngineDetailScreenState extends State<GameEngineDetailScreen> {
       context,
       gameEngineId: widget.gameEngine.id,
       gameEngineName: widget.gameEngine.name,
-    );
-  }
-
-  Widget _buildGamesList(List<Game> games) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppConstants.paddingSmall),
-      itemCount: games.length,
-      itemBuilder: (context, index) {
-        final game = games[index];
-        return Container(
-          width: 160,
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
-          child: GameCard(
-            game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNoGamesPlaceholder(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.videogame_asset_off,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: 32,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'No games found',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'This platform has no games in our database',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
