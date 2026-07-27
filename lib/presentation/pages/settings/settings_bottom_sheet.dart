@@ -13,6 +13,7 @@ import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
 import 'package:gamer_grove/presentation/pages/legal/legal_document_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/theme_selection_dialog.dart';
+import 'package:gamer_grove/presentation/widgets/app_version_line.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsBottomSheet extends StatelessWidget {
@@ -97,10 +98,7 @@ class SettingsBottomSheet extends StatelessWidget {
                 style: TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 16),
-              Text(
-                'GamerGrove v2.0.0',
-                style: theme.textTheme.bodySmall,
-              ),
+              const AppVersionLine(),
               const SizedBox(height: 16),
             ],
           ),
