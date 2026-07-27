@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamer_grove/core/theme/gg_chamber_light.dart';
+import 'package:gamer_grove/core/theme/gg_dither.dart';
 
 /// The light is drawn from a baked image rather than a masked gradient, because
 /// masking needs a `saveLayer` per section per frame. That trade only pays off
@@ -20,18 +21,18 @@ void main() {
         ),
       );
 
-  setUp(ChamberLightCacheProbe.clear);
+  setUp(DitheredWashCache.clear);
 
   testWidgets('the same section painted twice reuses one baked wash',
       (tester) async {
     await tester.pumpWidget(lit(const Size(320, 180), const Color(0xFF4E86A8)));
     await tester.pump();
-    expect(ChamberLightCacheProbe.entryCount, 1);
+    expect(DitheredWashCache.entryCount, 1);
 
     await tester.pumpWidget(lit(const Size(320, 180), const Color(0xFF4E86A8)));
     await tester.pump();
     expect(
-      ChamberLightCacheProbe.entryCount,
+      DitheredWashCache.entryCount,
       1,
       reason: 'a repaint must not bake a second image',
     );
@@ -45,7 +46,7 @@ void main() {
     await tester.pumpWidget(lit(const Size(318, 178), const Color(0xFF4E86A8)));
     await tester.pump();
 
-    expect(ChamberLightCacheProbe.entryCount, 1);
+    expect(DitheredWashCache.entryCount, 1);
   });
 
   testWidgets('a different tint gets its own wash', (tester) async {
@@ -54,7 +55,7 @@ void main() {
     await tester.pumpWidget(lit(const Size(320, 180), const Color(0xFFB4633C)));
     await tester.pump();
 
-    expect(ChamberLightCacheProbe.entryCount, 2);
+    expect(DitheredWashCache.entryCount, 2);
   });
 
   testWidgets('the cache stays bounded over a long scroll', (tester) async {
@@ -68,8 +69,8 @@ void main() {
     // Unbounded caching of full-width images is a leak waiting for a long
     // session, so the cache evicts rather than grows.
     expect(
-      ChamberLightCacheProbe.entryCount,
-      lessThanOrEqualTo(ChamberLightCacheProbe.maxEntries),
+      DitheredWashCache.entryCount,
+      lessThanOrEqualTo(DitheredWashCache.maxEntries),
     );
   });
 

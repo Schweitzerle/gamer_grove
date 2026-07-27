@@ -57,6 +57,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('asked for less motion, the tint is handed over without an ease',
+      (tester) async {
+    // The ease exists so a section does not appear and then change colour under
+    // the reader. Cutting straight to the answer serves that too, and the
+    // system asking for less motion is asking for exactly that.
+    late Color seen;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GGTheme.dark(),
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: ChamberTint(
+              coverUrls: const [],
+              builder: (context, tint) {
+                seen = tint;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(seen, GGTheme.dark().colorScheme.primary);
+    expect(find.byType(TweenAnimationBuilder<Color?>), findsNothing);
+  });
+
   testWidgets('only the leading covers are read', (tester) async {
     // Every extra cover is another fetch and decode, and a row's light should
     // come from what is actually on screen.

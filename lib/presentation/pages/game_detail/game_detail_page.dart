@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/theme/gg_detail_light.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
@@ -15,6 +16,7 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_medi
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
+import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/content_dlc_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/events_section.dart';
@@ -123,12 +125,16 @@ class _GameDetailPageState extends State<GameDetailPage>
             if (state is GameDetailsLoaded) {
               final game = state.game;
               _initializeMediaTabs(game);
-              return Scaffold(
-                body: CustomScrollView(
+              // The page takes its light from the cover it is about, the same
+              // way a chamber of the Grove takes its light from the covers
+              // standing in it.
+              return ChamberTint(
+                coverUrls: [game.coverUrl],
+                builder: (context, tint) => CustomScrollView(
                   controller: _scrollController,
                   slivers: [
-                    _buildSliverAppBar(game),
-                    _buildGameContent(game),
+                    _buildSliverAppBar(game, tint),
+                    _buildGameContent(game, tint),
                   ],
                 ),
               );
@@ -205,7 +211,7 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildSliverAppBar(Game game) {
+  Widget _buildSliverAppBar(Game game, Color tint) {
     return SliverAppBar(
       expandedHeight: 350,
       pinned: true,
@@ -215,7 +221,7 @@ class _GameDetailPageState extends State<GameDetailPage>
           fit: StackFit.expand,
           children: [
             _buildHeroImage(game),
-            _buildGradientOverlays(),
+            _buildGradientOverlays(tint),
             _buildFloatingGameCard(game),
           ],
         ),
@@ -252,38 +258,45 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildGradientOverlays() {
+  Widget _buildGradientOverlays(Color tint) {
+    final surface = Theme.of(context).colorScheme.surface;
+    // The artwork has to fade out into the same colour the content below it
+    // starts in, otherwise the hand-off shows up as a line across the page.
+    final lit = litSurface(surface, tint);
+
     return Stack(
       children: [
-        // Horizontaler Gradient (links-rechts)
-        Container(
+        // Horizontal, so the artwork does not run into the screen edges.
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               stops: const [0.0, 0.05, 0.95, 1.0],
               colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface,
+                surface,
+                surface.withValues(alpha: .2),
+                surface.withValues(alpha: .2),
+                surface,
               ],
             ),
           ),
+          child: const SizedBox.expand(),
         ),
-        // Vertikaler Gradient (oben-unten)
-        Container(
+        // Vertical, ending in the lit surface the content picks up.
+        DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               stops: const [0.0, 0.05, 0.8, 1.0],
               colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .8),
-                Theme.of(context).colorScheme.surface,
+                surface,
+                surface.withValues(alpha: .2),
+                lit.withValues(alpha: .8),
+                lit,
               ],
             ),
           ),
+          child: const SizedBox.expand(),
         ),
       ],
     );
@@ -301,50 +314,68 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
   //Game Content
-  Widget _buildGameContent(Game game) {
+  Widget _buildGameContent(Game game, Color tint) {
     return SliverToBoxAdapter(
       child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            const SizedBox(height: AppConstants.paddingLarge),
-
-            // Game Details Accordion
-            _buildGameDetailsAccordion(game),
-
-            CharactersSection(game: game),
-
-            // 🆕 EVENTS SECTION (NEW!)
-            if (game.events.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.paddingMedium,
-                  vertical: AppConstants.paddingMedium,
-                ),
-                child: Card(
-                  elevation: 2,
-                  child: EventsSection(
-                    game: game,
-                    currentUserId: _currentUserId,
-                  ),
-                ),
-              ),
-
-            FranchiseCollectionsSection(game: game), // Franchises&Collections
-            ContentDLCSection(game: game), // 🟢 DLCs & Content
-            VersionsRemakesSection(game: game), // 🔵 Versions & Remakes
-            SimilarRelatedSection(game: game), // 🟣 Similar & Related
-
-            // Media Gallery with Tabs
-            if (game.screenshots.isNotEmpty ||
-                game.videos.isNotEmpty ||
-                game.artworks.isNotEmpty)
-              _buildEnhancedMediaGallery(game),
-            const SizedBox(height: 20), // Space for bottom navigation
+            // Over the page's own surface and under its content: behind the
+            // opaque surface the light would not show at all, in front of the
+            // content it would tint the text along with the background.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: DetailLight.reach,
+              child: DetailLight(tint: tint),
+            ),
+            _buildContentColumn(game),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildContentColumn(Game game) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppConstants.paddingLarge),
+
+        // Game Details Accordion
+        _buildGameDetailsAccordion(game),
+
+        CharactersSection(game: game),
+
+        // 🆕 EVENTS SECTION (NEW!)
+        if (game.events.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppConstants.paddingMedium,
+              vertical: AppConstants.paddingMedium,
+            ),
+            child: Card(
+              elevation: 2,
+              child: EventsSection(
+                game: game,
+                currentUserId: _currentUserId,
+              ),
+            ),
+          ),
+
+        FranchiseCollectionsSection(game: game), // Franchises&Collections
+        ContentDLCSection(game: game), // 🟢 DLCs & Content
+        VersionsRemakesSection(game: game), // 🔵 Versions & Remakes
+        SimilarRelatedSection(game: game), // 🟣 Similar & Related
+
+        // Media Gallery with Tabs
+        if (game.screenshots.isNotEmpty ||
+            game.videos.isNotEmpty ||
+            game.artworks.isNotEmpty)
+          _buildEnhancedMediaGallery(game),
+        const SizedBox(height: 20), // Space for bottom navigation
+      ],
     );
   }
 

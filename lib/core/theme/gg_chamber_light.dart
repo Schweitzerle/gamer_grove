@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_dither.dart';
 
@@ -30,14 +28,8 @@ enum ChamberLightMode {
 
 /// Draws a chamber's light: a dithered wash rising from behind the content.
 ///
-/// **Why this is a baked image rather than a painter.** The obvious
-/// implementation — a radial gradient masked by the dither grid — needs a
-/// `saveLayer` per section per frame, because masking is a compositing
-/// operation. During a scroll that is one offscreen buffer per section per
-/// frame, which is exactly the kind of thing that costs frames on mid-range
-/// Android. The wash only changes when the tint or the size changes, so it is
-/// rasterised once and then drawn as a single textured quad with its alpha
-/// modulated. Scrolling then costs one image draw per section.
+/// Baked once and redrawn as an image rather than masked every frame — see
+/// [DitheredWashCache] for why.
 class ChamberLight extends StatelessWidget {
   const ChamberLight({
     required this.tint,
@@ -92,67 +84,14 @@ class _ChamberLightPainter extends CustomPainter {
     final alpha = (intensity * _ceiling).clamp(0.0, 1.0);
     if (alpha <= 0.01) return;
 
-    final image = _GlowCache.forSize(size, tint);
-    canvas.drawImageRect(
-      image,
-      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      Offset.zero & size,
-      // Alpha on the paint modulates the image; the colour itself is ignored.
-      Paint()..color = Color.fromRGBO(0, 0, 0, alpha),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ChamberLightPainter oldDelegate) =>
-      oldDelegate.intensity != intensity ||
-      oldDelegate.tint != tint ||
-      oldDelegate.mode != mode;
-}
-
-/// Rasterised washes, keyed by the size and colour they were baked for.
-///
-/// Bounded on purpose: a handful of sections at a handful of widths is all the
-/// app ever needs, and an unbounded cache of full-width images is a memory leak
-/// waiting for a long scroll session.
-abstract final class _GlowCache {
-  static const _maxEntries = 12;
-
-  /// Baked at a coarse step so a few pixels of layout difference do not each
-  /// get their own image.
-  static const _quantum = 32.0;
-
-  static final _entries = <String, ui.Image>{};
-  static final _order = <String>[];
-
-  static ui.Image forSize(Size size, Color tint) {
-    final w = (size.width / _quantum).ceil() * _quantum;
-    final h = (size.height / _quantum).ceil() * _quantum;
-    final key = '${w}x$h/${tint.toARGB32()}';
-
-    final cached = _entries[key];
-    if (cached != null) return cached;
-
-    final image = _bake(Size(w, h), tint);
-    _entries[key] = image;
-    _order.add(key);
-    if (_order.length > _maxEntries) {
-      final evicted = _order.removeAt(0);
-      _entries.remove(evicted)?.dispose();
-    }
-    return image;
-  }
-
-  static ui.Image _bake(Size size, Color tint) {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    final rect = Offset.zero & size;
-
-    GGDither.paintGradient(
-      canvas,
-      rect,
-      // Centred low but not at the very edge: anchored at the bottom the whole
-      // wash lands on the seam instead of behind the row it is meant to light.
-      RadialGradient(
+    final image = DitheredWashCache.forSize(
+      'chamber',
+      size,
+      tint,
+      () => RadialGradient(
+        // Centred low but not at the very edge: anchored at the bottom the
+        // whole wash lands on the seam instead of behind the row it is meant
+        // to light.
         center: const Alignment(0, 0.7),
         radius: 1.25,
         colors: [
@@ -163,33 +102,14 @@ abstract final class _GlowCache {
         stops: const [0, 0.5, 1],
       ),
     );
-
-    return recorder
-        .endRecording()
-        .toImageSync(size.width.round(), size.height.round());
+    DitheredWashCache.draw(canvas, image, Offset.zero & size, alpha);
   }
 
-  static void _clear() {
-    for (final image in _entries.values) {
-      image.dispose();
-    }
-    _entries.clear();
-    _order.clear();
-  }
-}
-
-/// Test-only window onto the wash cache.
-///
-/// The cache is the whole reason this is drawn as a baked image, so its
-/// behaviour — hits, size quantisation, eviction — is worth asserting on
-/// directly rather than inferring from frame timings.
-@visibleForTesting
-abstract final class ChamberLightCacheProbe {
-  static void clear() => _GlowCache._clear();
-
-  static int get entryCount => _GlowCache._entries.length;
-
-  static int get maxEntries => _GlowCache._maxEntries;
+  @override
+  bool shouldRepaint(_ChamberLightPainter oldDelegate) =>
+      oldDelegate.intensity != intensity ||
+      oldDelegate.tint != tint ||
+      oldDelegate.mode != mode;
 }
 
 /// The seam between two chambers: grain rather than a line, so one light fades

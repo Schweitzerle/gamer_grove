@@ -69,6 +69,90 @@ abstract final class GGDither {
   }
 }
 
+/// Rasterised dithered washes, keyed by what they were baked for.
+///
+/// **Why the app's big lights are images rather than painters.** The obvious
+/// implementation — a gradient masked by the dither grid — needs a `saveLayer`
+/// per light per frame, because masking is a compositing operation. During a
+/// scroll that is one offscreen buffer per light per frame, which is exactly
+/// the kind of thing that costs frames on mid-range Android. A wash only
+/// changes when its tint or its size changes, so it is rasterised once and then
+/// drawn as a single textured quad. Scrolling costs one image draw per light.
+///
+/// Bounded on purpose: a handful of lights at a handful of widths is all the
+/// app ever needs, and an unbounded cache of full-width images is a memory leak
+/// waiting for a long scroll session.
+abstract final class DitheredWashCache {
+  /// How many baked washes are kept before the oldest is dropped.
+  static const maxEntries = 12;
+
+  /// Baked at a coarse step so a few pixels of layout difference do not each
+  /// get their own image.
+  static const _quantum = 32.0;
+
+  static final _entries = <String, ui.Image>{};
+  static final _order = <String>[];
+
+  /// The wash of [kind] baked for [size] in [tint].
+  ///
+  /// [gradient] is only called on a miss, and describes the light for the
+  /// quantised rect the image is baked at.
+  static ui.Image forSize(
+    String kind,
+    Size size,
+    Color tint,
+    Gradient Function() gradient,
+  ) {
+    final w = (size.width / _quantum).ceil() * _quantum;
+    final h = (size.height / _quantum).ceil() * _quantum;
+    final key = '$kind/${w}x$h/${tint.toARGB32()}';
+
+    final cached = _entries[key];
+    if (cached != null) return cached;
+
+    final image = _bake(Size(w, h), gradient());
+    _entries[key] = image;
+    _order.add(key);
+    if (_order.length > maxEntries) {
+      final evicted = _order.removeAt(0);
+      _entries.remove(evicted)?.dispose();
+    }
+    return image;
+  }
+
+  static ui.Image _bake(Size size, Gradient gradient) {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    GGDither.paintGradient(canvas, Offset.zero & size, gradient);
+    return recorder
+        .endRecording()
+        .toImageSync(size.width.round(), size.height.round());
+  }
+
+  /// Draws [image] across [rect] with its own alpha scaled by [alpha].
+  static void draw(Canvas canvas, ui.Image image, Rect rect, double alpha) {
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      rect,
+      // Alpha on the paint modulates the image; the colour itself is ignored.
+      Paint()..color = Color.fromRGBO(0, 0, 0, alpha),
+    );
+  }
+
+  @visibleForTesting
+  static void clear() {
+    for (final image in _entries.values) {
+      image.dispose();
+    }
+    _entries.clear();
+    _order.clear();
+  }
+
+  @visibleForTesting
+  static int get entryCount => _entries.length;
+}
+
 /// A shaft of light aimed at whatever is currently in front.
 ///
 /// Narrow at the top, widening downward, fading out — and stepped through the

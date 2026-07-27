@@ -85,6 +85,13 @@ class _ChamberTintState extends State<ChamberTint> {
     final fallback = Theme.of(context).colorScheme.primary;
     final target = _resolved ?? fallback;
 
+    // Asked for less motion, the light simply is what it is: the ease exists so
+    // a section does not appear and then change colour under you, and cutting
+    // straight to the answer serves that just as well.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return widget.builder(context, target);
+    }
+
     return TweenAnimationBuilder<Color?>(
       tween: ColorTween(end: target),
       duration: context.ggTokens.durationNormal * 3,

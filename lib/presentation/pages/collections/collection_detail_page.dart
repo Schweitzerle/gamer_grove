@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
+import 'package:gamer_grove/core/theme/gg_detail_light.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/domain/entities/collection/user_collection.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
@@ -12,6 +13,7 @@ import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/user_collections/user_collections_bloc.dart';
 import 'package:gamer_grove/presentation/widgets/game_card.dart';
 import 'package:gamer_grove/presentation/widgets/game_list_shimmer.dart';
+import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 
 /// Shows the games inside a single custom collection as a grid, with an empty
 /// state and two ways to remove a game: an explicit edit mode with a remove
@@ -61,10 +63,21 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
   /// long-press only — which testers did not discover.
   bool _editing = false;
 
+  /// How far the grid has been scrolled, so the light can travel with it
+  /// instead of sitting fixed in the viewport. Capped at the light's own reach:
+  /// past that it is off-screen and further translation buys nothing.
+  final _scrolled = ValueNotifier<double>(0);
+
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _scrolled.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -190,12 +203,54 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     if (_games.isEmpty) {
       return const _CollectionDetailEmpty();
     }
-    if (!_editing) return _buildGrid();
-    return Column(
-      children: [
-        const _EditModeHint(),
-        Expanded(child: _buildGrid()),
-      ],
+    if (!_editing) return _lit(_buildGrid());
+    return _lit(
+      Column(
+        children: [
+          const _EditModeHint(),
+          Expanded(child: _buildGrid()),
+        ],
+      ),
+    );
+  }
+
+  /// Puts [child] in the light of the covers it holds.
+  ///
+  /// Same reach and same decay as a game's own page: a collection is lit by
+  /// what is in it, and you scroll out of that light rather than carrying it
+  /// with you down the grid.
+  Widget _lit(Widget child) {
+    return ChamberTint(
+      coverUrls: [for (final game in _games) game.coverUrl],
+      builder: (context, tint) => Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: DetailLight.reach,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrolled,
+              // Built once; only the offset changes as the grid moves.
+              child: DetailLight(tint: tint),
+              builder: (context, offset, light) => Transform.translate(
+                offset: Offset(0, -offset),
+                child: light,
+              ),
+            ),
+          ),
+          NotificationListener<ScrollUpdateNotification>(
+            onNotification: (notification) {
+              if (notification.depth == 0) {
+                _scrolled.value =
+                    notification.metrics.pixels.clamp(0.0, DetailLight.reach);
+              }
+              return false;
+            },
+            child: child,
+          ),
+        ],
+      ),
     );
   }
 
