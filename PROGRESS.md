@@ -4,7 +4,7 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-26 (Session 9)
+**Last updated:** 2026-07-27 (Session 9)
 **Current branch:** `master`
 **Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 Phase 2 ~95% · 🎨 **Session 9: Gestaltung (Icon + UI/UX-Overhaul)**
 
@@ -153,6 +153,34 @@ Wer sich abheben will, muss das **Material** wechseln.
 > Reihe zur Ruhe kommt) wäre baubar, falls es fehlt.
 > **Noch nicht angewandt:** Sammlungs-Detailseite und Spiel-Detailseite (dort würde die ganze Seite
 > vom Cover des Spiels beleuchtet). Bewusst NICHT in Suche/Einstellungen — Werkzeug-Oberflächen.
+
+**Etappe 4 — Detailseiten (2026-07-27, läuft).** Zwei Blöcke gemergt, der Gestaltungsteil wartet
+auf eine User-Entscheidung.
+- **`chore: remove code that runs and does nothing` (gemergt).** 122 Zeilen raus:
+  `JsonHelpers.analyzeJsonStructure` lief rekursiv durch JSON-Bäume und tat an jedem Knoten nichts;
+  `_logGameDetailsData` lief bei **jedem Build** der Spiel-Detailseite und wertete leere Bedingungen
+  über fünf Charaktere aus. Dazu 14 leere `else` und 4 tote `if`.
+  **Nur 7 von 40 `CircularProgressIndicator` ersetzt** — der Portal-Bogen hat 13 % Strichstärke, bei
+  16–24 px in Buttons wird das Matsch. Inline-Spinner sind ein anderes Gerät als Seiten-Loader.
+- **`fix(a11y): brand marks that could not be seen` (gemergt).** Drei Farbtabellen für dieselben
+  Marken, auseinandergedriftet (Steam `#00adee` als Icon, `#1B2838` als Label direkt darunter).
+  Gemessen: **15 von 23 Marken fallen im dunklen Theme unter 4,5:1, 12 von 23 im hellen** — Steam
+  1,24:1, Apple 1,14:1, Oculus 1,10:1. Jetzt eine Tabelle (`BrandColors`) + `legibleOn`:
+  Farbton behalten, nur Helligkeit anheben, gegen die **aktuelle** Fläche gerechnet, deshalb trägt
+  eine Tabelle beide Themes.
+> **Gotcha (Kontrast lässt sich nicht immer erreichen):** Auf mittlerem Grau sind 7:1 physikalisch
+> unmöglich (Weiß 3,9 / Schwarz 5,3). Ein erster Test forderte genau das — der Test war falsch,
+> nicht der Code. Fallback gibt das beste Erreichbare zurück.
+> **Gotcha (totes `if` löschen kann Fehler erzeugen):** `if (authState is AuthAuthenticated) {}` zu
+> entfernen machte die gelesene Variable und zwei Imports verwaist → Analyze auf 2 **Fehler**.
+> Deshalb ist das Gate wichtiger als der aufmerksame Blick.
+> **Korrektur an meiner eigenen Einschätzung:** Ich hatte „eine Handvoll Marken" gesagt. Es war die
+> Mehrheit.
+> **Offen (wartet auf User):** Reichweite des Lichts auf der Detailseite. Drei Entwürfe als Artefakt
+> (Schwelle / Abklingend / Durchgehend), Empfehlung **Abklingend** — die Detailseite ist die einzige
+> Fläche, die fremde Markenfarben tragen muss, und ein durchgehend eingefärbter Grund macht sie zu
+> Fremdkörpern. Dazu: animierter Übergang ja/nein, Firmen-/Charakterseiten mit oder ohne (ohne
+> empfohlen, dort gibt es kein Cover als Farbquelle).
 
 **✅ versionCode 18 im Internal Track (2026-07-26).** Erste Fassung mit dem **Lichtsystem** (#133)
 und dem **Ton aus den Covern** (#134). Vor dem Upload geprüft: Signatur `C9:75:98:52:2B:2C:3C:58…`
