@@ -245,6 +245,28 @@ Spieldetailseite: **fünf Kopien**. Jetzt drei geteilte Widgets unter `widgets/e
 > über dem Limit und stecken weiter voller `_build`-Methoden — das ist ein eigener Schnitt
 > (Hero/AppBar/FloatingCard/Accordion sind ebenfalls je vierfach vorhanden).
 
+**Etappe 5 — Der Übergang (2026-07-27, PR #138 gemergt, bd6f77e).** User hat beide Fragen aus dem
+Entscheidungsartefakt beantwortet: **Variante 3 (Cover geht voran) fürs Spiel, Bogen für den
+fremden Grove.** `GGRevealRoute.game()` / `.grove()` ersetzen `MaterialPageRoute`. 250 ms hin,
+150 ms zurück (beides schon in `GGTokens`). Bei `disableAnimations` **gar keine** Enthüllung.
+Der Teil, der es von der Konvention unterscheidet: `_ArrivingLight` liest die Animation der Route
+und lässt `DetailLight.intensity` erst ab 45 % steigen — das Licht kommt *mit* dem Cover an.
+> **Gegen meinen eigenen Vorschlag gebaut:** Im Artefakt hatte ich „macht den toten `Hero` endlich
+> echt" geschrieben. Beim Bauen belegt, dass das nicht geht: `heroes.dart:278` wirft
+> „There are multiple heroes that share the same tag within a subtree" beim Flugaufbau, und der
+> Grove zeigt **zwölf Reihen gleichzeitig** — ein Spiel auf der Wunschliste, das auch beliebt ist,
+> steht in zweien. Der Flug würde bei genau den beliebtesten Spielen werfen. Die Route trägt jetzt
+> das Quell-Rechteck; der tote `Hero` ist gelöscht.
+> **Gotcha (Reichweite raten kostet die Form):** Erster Wurf für den Bogen war
+> `longestSide * 2.3`. Das füllte den Schirm nach einem Drittel der Zeit — im Golden war der Bogen
+> in **keinem** der drei Bilder zu erkennen. Jetzt aus den vier Randbedingungen gerechnet.
+> **Gestaltungskorrektur beim Bauen:** Die Tür steht mittig auf dem Boden, wie im Icon, nicht dort
+> wo der Finger landete. Damit wurde `origin` für `.grove()` bedeutungslos und ist aus der Signatur
+> raus statt ignoriert zu werden.
+> **Offen:** Auf einem echten Gerät noch nicht von Hand gesehen. Sechs Goldens halten 60/130/220 ms
+> fest, aber das Gefühl der Dauer entscheidet sich am Gerät. Änderung wäre ein Einzeiler in
+> `GGTokens`.
+
 **Noch über dem 800-Zeilen-Limit** (absteigend, Stand nach #137): `company_details_screen.dart`
 1339, `user_repository_impl.dart` 1156, `event_details_screen.dart` 991, `search_page.dart` 962,
 `navigations.dart` 939, `supabase_user_datasource_impl.dart` 891, `local_all_games_screen.dart`
