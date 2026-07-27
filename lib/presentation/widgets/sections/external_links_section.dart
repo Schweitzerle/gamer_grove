@@ -6,6 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/theme/brand_colors.dart';
+import 'package:gamer_grove/core/theme/gg_contrast.dart';
 import 'package:gamer_grove/domain/entities/externalGame/external_game.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/entities/website/website.dart';
@@ -286,9 +288,22 @@ class ExternalLinksSection extends StatelessWidget {
     );
   }
 
+  /// A service's mark, lifted until it reads on the current surface.
+  ///
+  /// The lift is what stops Apple's black and Epic's near-black from vanishing
+  /// in the cave, and because it is computed against the live surface the same
+  /// table also works in the light theme. The bar is 4.5:1 rather than the 3:1
+  /// for icons, because this colour carries the label text too.
+  Color _brandColor(BuildContext context, String? brand) {
+    final scheme = Theme.of(context).colorScheme;
+    final mark = BrandColors.of(brand) ?? scheme.primary;
+    return mark.legibleOn(scheme.surface, minimum: 4.5);
+  }
+
   // ✅ WEBSITE CARD WIDGET
   Widget _buildWebsiteCard(BuildContext context, Website website) {
-    final websiteColor = _getWebsiteColor(website.type.type);
+    final websiteColor =
+        _brandColor(context, _brandOfWebsite(website.type.type));
     final websiteName = _getWebsiteName(website.type.type);
 
     return Container(
@@ -318,7 +333,11 @@ class ExternalLinksSection extends StatelessWidget {
                     color: websiteColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _getWebsiteIcon(website),
+                  child: Icon(
+                    _getWebsiteIcon(website),
+                    color: websiteColor,
+                    size: 20,
+                  ),
                 ),
 
                 const SizedBox(height: 6),
@@ -469,146 +488,103 @@ class ExternalLinksSection extends StatelessWidget {
     }
   }
 
-  Widget _getWebsiteIcon(Website website) {
-    final typeStr = website.type.type.toLowerCase();
-    IconData iconData;
-    Color iconColor;
-
-    switch (typeStr) {
-      // Official API type names
-      case 'official website':
-      case 'official':
-        iconData = Icons.public;
-        iconColor = const Color(0xFF07355A);
+  IconData _getWebsiteIcon(Website website) {
+    switch (website.type.type.toLowerCase()) {
       case 'community wiki':
       case 'wikia':
-        iconData = FontAwesomeIcons.wikipediaW;
-        iconColor = const Color(0xFF939598);
       case 'wikipedia':
-        iconData = FontAwesomeIcons.wikipediaW;
-        iconColor = const Color(0xFFc7c8ca);
+        return FontAwesomeIcons.wikipediaW;
       case 'facebook':
-        iconData = FontAwesomeIcons.facebook;
-        iconColor = const Color(0xFF1877f2);
+        return FontAwesomeIcons.facebook;
       case 'twitter':
-        iconData = FontAwesomeIcons.twitter;
-        iconColor = const Color(0xFF1da1f2);
+        return FontAwesomeIcons.twitter;
       case 'twitch':
-        iconData = FontAwesomeIcons.twitch;
-        iconColor = const Color(0xFF9146ff);
+        return FontAwesomeIcons.twitch;
       case 'instagram':
-        iconData = FontAwesomeIcons.instagram;
-        iconColor = const Color(0xFFc13584);
+        return FontAwesomeIcons.instagram;
       case 'youtube':
-        iconData = FontAwesomeIcons.youtube;
-        iconColor = const Color(0xFFff0000);
+        return FontAwesomeIcons.youtube;
       case 'app store (iphone)':
       case 'app store (ipad)':
       case 'iphone':
       case 'ipad':
-        iconData = FontAwesomeIcons.apple;
-        iconColor = const Color(0xFF000000);
+        return FontAwesomeIcons.apple;
       case 'google play':
       case 'android':
-        iconData = FontAwesomeIcons.android;
-        iconColor = const Color(0xFFa4c639);
+        return FontAwesomeIcons.android;
       case 'steam':
-        iconData = FontAwesomeIcons.steam;
-        iconColor = const Color(0xFF00adee);
+        return FontAwesomeIcons.steam;
       case 'subreddit':
       case 'reddit':
-        iconData = FontAwesomeIcons.reddit;
-        iconColor = const Color(0xFFff4500);
+        return FontAwesomeIcons.reddit;
       case 'itch':
-        iconData = FontAwesomeIcons.itchIo;
-        iconColor = const Color(0xFFfa5c5c);
+        return FontAwesomeIcons.itchIo;
       case 'epic':
       case 'epicgames':
-        iconData = FontAwesomeIcons.earlybirds;
-        iconColor = const Color(0xFF242424);
+        return FontAwesomeIcons.earlybirds;
       case 'gog':
-        iconData = FontAwesomeIcons.galacticRepublic;
-        iconColor = const Color(0xFF7cb4dc);
+        return FontAwesomeIcons.galacticRepublic;
       case 'discord':
-        iconData = FontAwesomeIcons.discord;
-        iconColor = const Color(0xFF5865f2);
+        return FontAwesomeIcons.discord;
       case 'bluesky':
-        iconData = FontAwesomeIcons.cloud;
-        iconColor = const Color(0xFF0085FF);
+        return FontAwesomeIcons.cloud;
       case 'xbox':
-        iconData = FontAwesomeIcons.xbox;
-        iconColor = const Color(0xFF107C10);
+        return FontAwesomeIcons.xbox;
       case 'playstation':
-        iconData = FontAwesomeIcons.playstation;
-        iconColor = const Color(0xFF0070D1);
+        return FontAwesomeIcons.playstation;
       case 'nintendo':
-        iconData = FontAwesomeIcons.gamepad;
-        iconColor = const Color(0xFFE60012);
+        return FontAwesomeIcons.gamepad;
       case 'meta':
-        iconData = FontAwesomeIcons.meta;
-        iconColor = const Color(0xFF0668E1);
+        return FontAwesomeIcons.meta;
+      case 'official website':
+      case 'official':
+        return Icons.public;
       default:
-        iconData = Icons.link;
-        iconColor = const Color(0xFF07355A);
+        return Icons.link;
     }
-
-    return Icon(iconData, color: iconColor, size: 20);
   }
 
-  Color _getWebsiteColor(String type) {
+  /// The IGDB website type mapped onto a service in [BrandColors].
+  ///
+  /// Null for an official site or an unrecognised type: there is no brand to
+  /// borrow, so those take the app's own accent.
+  String? _brandOfWebsite(String type) {
     switch (type.toLowerCase()) {
-      // Official API type names
-      case 'official website':
-      case 'official':
-        return Colors.blue;
       case 'community wiki':
       case 'wikia':
       case 'wikipedia':
-        return Colors.orange;
-      case 'facebook':
-        return const Color(0xFF1877F2);
-      case 'twitter':
-        return Colors.black;
-      case 'instagram':
-        return const Color(0xFFE4405F);
-      case 'youtube':
-        return const Color(0xFFFF0000);
-      case 'twitch':
-        return const Color(0xFF9146FF);
-      case 'subreddit':
-      case 'reddit':
-        return const Color(0xFFFF4500);
-      case 'discord':
-        return const Color(0xFF5865F2);
-      case 'steam':
-        return const Color(0xFF1B2838);
-      case 'epic':
-      case 'epicgames':
-        return const Color(0xFF0078F2);
-      case 'gog':
-        return const Color(0xFF8A2BE2);
-      case 'itch':
-        return const Color(0xFFFA5C5C);
+        return 'wikipedia';
       case 'app store (iphone)':
       case 'app store (ipad)':
       case 'iphone':
       case 'ipad':
-        return const Color(0xFF007AFF);
+        return 'apple';
       case 'google play':
       case 'android':
-        return const Color(0xFF3DDC84);
+        return 'android';
+      case 'subreddit':
+      case 'reddit':
+        return 'reddit';
+      case 'epic':
+      case 'epicgames':
+        return 'epic';
+      case 'facebook':
+      case 'twitter':
+      case 'twitch':
+      case 'instagram':
+      case 'youtube':
+      case 'steam':
+      case 'itch':
+      case 'gog':
+      case 'discord':
       case 'bluesky':
-        return const Color(0xFF0085FF);
       case 'xbox':
-        return const Color(0xFF107C10);
       case 'playstation':
-        return const Color(0xFF0070D1);
       case 'nintendo':
-        return const Color(0xFFE60012);
       case 'meta':
-        return const Color(0xFF0668E1);
+        return type.toLowerCase();
       default:
-        return Colors.blue;
+        return null;
     }
   }
 
@@ -668,50 +644,43 @@ class ExternalLinksSection extends StatelessWidget {
   Color _getStoreColor(
     BuildContext context,
     ExternalGameCategoryEnum? category,
-  ) {
-    if (category == null) return Theme.of(context).colorScheme.primary;
+  ) =>
+      _brandColor(context, _brandOfStore(category));
 
-    // Use enum's name property for string-based mapping
+  /// The IGDB store category mapped onto a service in [BrandColors].
+  ///
+  /// Stores without a published mark of their own (Utomik, Kartridge, Focus)
+  /// return null and take the app's accent, rather than carrying a colour
+  /// somebody once picked for them.
+  String? _brandOfStore(ExternalGameCategoryEnum? category) {
+    if (category == null) return null;
     switch (category.name.toLowerCase()) {
-      case 'steam':
-        return const Color(0xFF1B2838);
-      case 'gog':
-        return const Color(0xFF8A2BE2);
       case 'epicgamestore':
-        return const Color(0xFF0078F2);
+        return 'epic';
       case 'playstationstoreus':
-        return const Color(0xFF0070D1);
+        return 'playstation';
       case 'xboxmarketplace':
-        return const Color(0xFF107C10);
+        return 'xbox';
       case 'microsoft':
       case 'xboxgamepassultimatecloud':
-        return const Color(0xFF00BCF2);
-      case 'apple':
-        return const Color(0xFF007AFF);
-      case 'android':
-        return const Color(0xFF3DDC84);
+        return 'microsoft';
       case 'itchio':
-        return const Color(0xFFFA5C5C);
+        return 'itch';
       case 'amazonluna':
       case 'amazonadg':
       case 'amazonasin':
-        return const Color(0xFFFF9900);
+        return 'amazon';
+      case 'steam':
+      case 'gog':
+      case 'apple':
+      case 'android':
       case 'oculus':
-        return const Color(0xFF1C1E20);
       case 'twitch':
-        return const Color(0xFF9146FF);
       case 'youtube':
-        return const Color(0xFFFF0000);
-      case 'utomik':
-        return const Color(0xFF6B46C1);
-      case 'kartridge':
-        return const Color(0xFFE53E3E);
-      case 'focusentertainment':
-        return const Color(0xFF2D3748);
       case 'gamejolt':
-        return const Color(0xFF2F7D32);
+        return category.name.toLowerCase();
       default:
-        return Theme.of(context).colorScheme.primary;
+        return null;
     }
   }
 

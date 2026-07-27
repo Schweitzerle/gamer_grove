@@ -36,4 +36,34 @@ extension GGContrastX on Color {
         ? Colors.white
         : Colors.black;
   }
+
+  /// This colour, lightened or darkened just enough to read on [background].
+  ///
+  /// Hue and saturation are kept, so a brand stays recognisably itself instead
+  /// of collapsing to plain white — the same principle the cover tint uses.
+  /// Because the lift is computed against whatever background it is given, one
+  /// table of brand colours works on both the dark and the light theme: Apple's
+  /// black stays black on paper and rises to near-white in the cave.
+  ///
+  /// [minimum] defaults to 3:1, the WCAG bar for icons and other non-text
+  /// components. Pass 4.5 when the colour is used for text.
+  Color legibleOn(Color background, {double minimum = 3}) {
+    if (background.contrastAgainst(this) >= minimum) return this;
+
+    final hsl = HSLColor.fromColor(this);
+    final towardsLight = background.relativeLuminance < 0.5;
+    var lightness = hsl.lightness;
+
+    // Walking the ramp beats solving for it: relative luminance is piecewise
+    // and the conversion back through HSL is not analytically invertible.
+    while (towardsLight ? lightness < 1 : lightness > 0) {
+      lightness =
+          (towardsLight ? lightness + 0.02 : lightness - 0.02).clamp(0.0, 1.0);
+      final candidate = hsl.withLightness(lightness).toColor();
+      if (background.contrastAgainst(candidate) >= minimum) return candidate;
+    }
+
+    // A mid-tone background can be out of reach for this hue at any lightness.
+    return background.readableForeground(this, minimum: minimum);
+  }
 }
