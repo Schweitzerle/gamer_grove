@@ -1,3 +1,4 @@
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,8 +37,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
+    // Measured before the push, while the tapped card is still on screen: the
+    // reveal grows out of the cover you touched.
+    final origin = revealOriginOf(context);
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
+      GGRevealRoute<void>.game(
+        origin: origin,
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(

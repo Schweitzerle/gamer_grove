@@ -18,10 +18,18 @@ import 'package:gamer_grove/core/theme/gg_dither.dart';
 /// Baked once and redrawn as an image rather than masked every frame — see
 /// [DitheredWashCache].
 class DetailLight extends StatelessWidget {
-  const DetailLight({required this.tint, super.key});
+  const DetailLight({required this.tint, this.intensity = 1, super.key});
 
   /// Colour of the light, derived from the artwork by `CoverTint`.
   final Color tint;
+
+  /// How far up the light has come, 0 to 1.
+  ///
+  /// Driven by the opening transition so the light rises *while* the cover
+  /// lands, rather than standing there finished when the page arrives. That
+  /// timing is the whole reason the page's colour reads as coming from the
+  /// artwork instead of being a decision someone made.
+  final double intensity;
 
   /// How far the light reaches below the artwork, in logical pixels.
   ///
@@ -54,20 +62,23 @@ class DetailLight extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: RepaintBoundary(
-        child: CustomPaint(painter: _DetailLightPainter(tint)),
+        child: CustomPaint(
+          painter: _DetailLightPainter(tint, intensity),
+        ),
       ),
     );
   }
 }
 
 class _DetailLightPainter extends CustomPainter {
-  const _DetailLightPainter(this.tint);
+  const _DetailLightPainter(this.tint, this.intensity);
 
   final Color tint;
+  final double intensity;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
+    if (size.isEmpty || intensity <= 0.01) return;
 
     final image = DitheredWashCache.forSize(
       'detail',
@@ -86,12 +97,17 @@ class _DetailLightPainter extends CustomPainter {
         stops: const [0, 0.45, 1],
       ),
     );
-    DitheredWashCache.draw(canvas, image, Offset.zero & size, 1);
+    DitheredWashCache.draw(
+      canvas,
+      image,
+      Offset.zero & size,
+      intensity.clamp(0.0, 1.0),
+    );
   }
 
   @override
   bool shouldRepaint(_DetailLightPainter oldDelegate) =>
-      oldDelegate.tint != tint;
+      oldDelegate.tint != tint || oldDelegate.intensity != intensity;
 }
 
 /// The surface of a page standing in [tint]'s light at its strongest.
