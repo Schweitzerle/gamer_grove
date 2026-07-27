@@ -231,14 +231,30 @@ Dateien** unter `sections/related_games/`, größte 458.
 > Aufbau nicht. Jede eingeklappte Gruppe baute bis zu zwanzig Cover — bis zu **sechzig auf einer
 > Detailseite**, keines sichtbar. Körper wird jetzt beim ersten Öffnen eingehängt.
 
-**Noch über dem 800-Zeilen-Limit** (absteigend): `company_details_screen.dart` 1437,
-`user_repository_impl.dart` 1156, `event_details_screen.dart` 1080, `search_page.dart` 962,
-`platform_details_screen.dart` 956, `game_engine_details_screen.dart` 942, `navigations.dart` 939,
-`supabase_user_datasource_impl.dart` 891, `local_all_games_screen.dart` 871,
+**Aufräumen — die vier Entity-Detailseiten (2026-07-27, PR #137 gemergt, 46f8ca4).** Verdacht
+belegt statt angenommen: neun Methodennamen wiederholen sich über Firma/Plattform/Engine/Event,
+sieben davon in allen vier. `_buildGradientOverlays` ist in **3 von 4 byte-identisch**, die vierte
+unterscheidet sich *nur im Kommentar* — der lautet `// … genau wie GameDetailScreen`. Mit der
+Spieldetailseite: **fünf Kopien**. Jetzt drei geteilte Widgets unter `widgets/entity_detail/`
+(131 Zeilen): `EntityHeroOverlays` (optionaler Tint, damit die Spielseite weiter ins beleuchtete
+`litSurface` ausblendet), `EntityGamesRow`, `EntityGamesEmpty`. **4415 → 4038 Zeilen.**
+> **Inhaltliche Korrektur:** Der Leerzustand der Event-Seite sagte „Games loading…" über einem
+> Controller-Icon — er behauptete einen Ladevorgang, der nicht lief. Sagt jetzt dasselbe wie die
+> anderen drei.
+> **Bewusst offen gelassen:** An den vier Screens wurde sonst nichts umgebaut. Sie liegen weiter
+> über dem Limit und stecken weiter voller `_build`-Methoden — das ist ein eigener Schnitt
+> (Hero/AppBar/FloatingCard/Accordion sind ebenfalls je vierfach vorhanden).
+
+**Noch über dem 800-Zeilen-Limit** (absteigend, Stand nach #137): `company_details_screen.dart`
+1339, `user_repository_impl.dart` 1156, `event_details_screen.dart` 991, `search_page.dart` 962,
+`navigations.dart` 939, `supabase_user_datasource_impl.dart` 891, `local_all_games_screen.dart`
+871, `platform_details_screen.dart` 861, `game_engine_details_screen.dart` 847,
 `game_details_accordion.dart` 833.
-> **Verdacht für den nächsten Griff:** `company_/platform_/game_engine_/event_details_screen.dart`
-> sind zusammen 4415 Zeilen und sehen nach demselben Muster aus wie oben — vier Detailseiten, die
-> vermutlich eine gemeinsame Form haben. Vor dem Umbau erst belegen, nicht annehmen.
+
+**Fremde Branches, nicht von mir, mit echten unmergten Commits:** `collections-ui` (2 Commits,
+vermutlich die frühe Fassung der in Session 6 ausgelieferten Custom Collections) und
+`refactor/filter-bottom-sheet` (1 Commit). Nicht angefasst. Alle Branches aus meiner Arbeit sind
+gelöscht.
 
 **✅ versionCode 18 im Internal Track (2026-07-26).** Erste Fassung mit dem **Lichtsystem** (#133)
 und dem **Ton aus den Covern** (#134). Vor dem Upload geprüft: Signatur `C9:75:98:52:2B:2C:3C:58…`
