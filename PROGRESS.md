@@ -217,11 +217,28 @@ Pfad (17 Importe) und hält nur noch die Komposition.
 > **Prozess-Korrektur:** Ab #135 wieder echte PRs statt Squash-Push auf master. Der Squash-Push
 > war die Ursache dafür, dass #134 offen mit „no changes" stehenblieb.
 
-**Noch über dem 800-Zeilen-Limit** (absteigend): `content_dlc_section.dart` 1487,
-`company_details_screen.dart` 1437, `user_repository_impl.dart` 1156, `event_details_screen.dart`
-1080, `search_page.dart` 962, `platform_details_screen.dart` 956, `game_engine_details_screen.dart`
-942, `navigations.dart` 939, `supabase_user_datasource_impl.dart` 891,
-`local_all_games_screen.dart` 871, `game_details_accordion.dart` 833.
+**Aufräumen — `content_dlc_section.dart` (2026-07-27, PR #136 gemergt, 758e221).** 1487 Zeilen, und
+es waren **nicht drei Sections in einer Datei, sondern dieselbe Section dreimal**. Identischer
+Rahmen, Vorschau, Tab-Leiste, Tab-Ansicht, Cover-Reihe. Unterschied: Titel, Icon, Akzent, Reiter.
+Dazu drei parallele Reiter-Typen mit denselben fünf Feldern und denselben zwei Fragen
+(`displayTitle`/`subtitle`) über drei Enums und sechs `switch`-Blöcke. Jetzt **717 Zeilen auf fünf
+Dateien** unter `sections/related_games/`, größte 458.
+> **Gefundener a11y-Fehler:** Jeder Akzent fiel auf einem der Themes durch, weil er direkt als
+> kleiner Text gezeichnet wurde — grün 2,60 / orange 2,01 / blau 2,92 auf hell, indigo 2,68 und
+> lila 2,92 auf dunkel. Gleiche Klasse wie die Markenfarben, gleiches Werkzeug (`legibleOn`).
+> Zwölf Reiter werden jetzt gegen beide Flächen geprüft.
+> **Gefundener Leistungsfehler:** `AnimatedAlign` *schneidet* sein Kind ab, es überspringt den
+> Aufbau nicht. Jede eingeklappte Gruppe baute bis zu zwanzig Cover — bis zu **sechzig auf einer
+> Detailseite**, keines sichtbar. Körper wird jetzt beim ersten Öffnen eingehängt.
+
+**Noch über dem 800-Zeilen-Limit** (absteigend): `company_details_screen.dart` 1437,
+`user_repository_impl.dart` 1156, `event_details_screen.dart` 1080, `search_page.dart` 962,
+`platform_details_screen.dart` 956, `game_engine_details_screen.dart` 942, `navigations.dart` 939,
+`supabase_user_datasource_impl.dart` 891, `local_all_games_screen.dart` 871,
+`game_details_accordion.dart` 833.
+> **Verdacht für den nächsten Griff:** `company_/platform_/game_engine_/event_details_screen.dart`
+> sind zusammen 4415 Zeilen und sehen nach demselben Muster aus wie oben — vier Detailseiten, die
+> vermutlich eine gemeinsame Form haben. Vor dem Umbau erst belegen, nicht annehmen.
 
 **✅ versionCode 18 im Internal Track (2026-07-26).** Erste Fassung mit dem **Lichtsystem** (#133)
 und dem **Ton aus den Covern** (#134). Vor dem Upload geprüft: Signatur `C9:75:98:52:2B:2C:3C:58…`
