@@ -1,5 +1,6 @@
 // lib/presentation/pages/user_search/user_search_page.dart
 
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/analytics/activation_tracker.dart';
@@ -236,8 +237,10 @@ class _UserSearchContentState extends State<_UserSearchContent> {
                     isFollowing: isFollowing,
                     isLoadingFollow: isLoading,
                     onTap: () {
+                      // A person, not a game: no cover to lead the way, so
+                      // the doorway opens instead.
                       Navigator.of(context).push<void>(
-                        MaterialPageRoute(
+                        GGRevealRoute<void>.grove(
                           builder: (context) => UserDetailPage(user: user),
                         ),
                       );

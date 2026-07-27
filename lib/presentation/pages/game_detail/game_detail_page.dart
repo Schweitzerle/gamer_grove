@@ -241,22 +241,25 @@ class _GameDetailPageState extends State<GameDetailPage>
   }
 
   Widget _buildHeroImage(Game game) {
-    return Hero(
-      tag: 'game_cover_${game.id}',
-      child: CachedImageWidget(
-        imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-        placeholder: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                Theme.of(context).colorScheme.secondary.withOpacity(0.8),
-              ],
-            ),
+    // No `Hero` here any more. It carried the tag `game_cover_<id>` with no
+    // partner anywhere in the app, so it never flew; and giving it one would
+    // throw the moment a game stood in two of the Grove's rows at once.
+    // `GGRevealRoute` does the flight without needing unique tags.
+    final scheme = Theme.of(context).colorScheme;
+    return CachedImageWidget(
+      imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
+      placeholder: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              scheme.primary.withValues(alpha: 0.8),
+              scheme.secondary.withValues(alpha: 0.8),
+            ],
           ),
         ),
+        child: const SizedBox.expand(),
       ),
     );
   }
@@ -287,7 +290,7 @@ class _GameDetailPageState extends State<GameDetailPage>
               left: 0,
               right: 0,
               height: DetailLight.reach,
-              child: DetailLight(tint: tint),
+              child: _ArrivingLight(tint: tint),
             ),
             _buildContentColumn(game),
           ],
@@ -344,5 +347,44 @@ class _GameDetailPageState extends State<GameDetailPage>
 
   Widget _buildGameDetailsAccordion(Game game) {
     return GameDetailsAccordion(game: game);
+  }
+}
+
+/// The page's light, rising as the page arrives.
+///
+/// This is the half of the opening that makes it ours. A container transform on
+/// its own is the Material convention — the cover grows, the page is there. The
+/// light coming up *behind* the cover while it lands is what turns the
+/// transition into the explanation for why this page is that colour.
+///
+/// It reads the route's own animation rather than running a controller of its
+/// own, so the two cannot drift apart, and it costs nothing on a page that was
+/// not pushed with a reveal.
+class _ArrivingLight extends StatelessWidget {
+  const _ArrivingLight({required this.tint});
+
+  final Color tint;
+
+  /// The light starts once the cover is most of the way home.
+  static const _startsAt = 0.45;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null || MediaQuery.disableAnimationsOf(context)) {
+      return DetailLight(tint: tint);
+    }
+
+    return AnimatedBuilder(
+      animation: route.animation ?? kAlwaysCompleteAnimation,
+      builder: (context, _) {
+        final t = route.animation?.value ?? 1;
+        final rise = ((t - _startsAt) / (1 - _startsAt)).clamp(0.0, 1.0);
+        return DetailLight(
+          tint: tint,
+          intensity: Curves.easeOut.transform(rise),
+        );
+      },
+    );
   }
 }
