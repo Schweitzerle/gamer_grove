@@ -154,8 +154,7 @@ Wer sich abheben will, muss das **Material** wechseln.
 > **Noch nicht angewandt:** Sammlungs-Detailseite und Spiel-Detailseite (dort würde die ganze Seite
 > vom Cover des Spiels beleuchtet). Bewusst NICHT in Suche/Einstellungen — Werkzeug-Oberflächen.
 
-**Etappe 4 — Detailseiten (2026-07-27, läuft).** Zwei Blöcke gemergt, der Gestaltungsteil wartet
-auf eine User-Entscheidung.
+**Etappe 4 — Detailseiten (2026-07-27, fertig).** Drei Blöcke gemergt.
 - **`chore: remove code that runs and does nothing` (gemergt).** 122 Zeilen raus:
   `JsonHelpers.analyzeJsonStructure` lief rekursiv durch JSON-Bäume und tat an jedem Knoten nichts;
   `_logGameDetailsData` lief bei **jedem Build** der Spiel-Detailseite und wertete leere Bedingungen
@@ -176,11 +175,26 @@ auf eine User-Entscheidung.
 > Deshalb ist das Gate wichtiger als der aufmerksame Blick.
 > **Korrektur an meiner eigenen Einschätzung:** Ich hatte „eine Handvoll Marken" gesagt. Es war die
 > Mehrheit.
-> **Offen (wartet auf User):** Reichweite des Lichts auf der Detailseite. Drei Entwürfe als Artefakt
-> (Schwelle / Abklingend / Durchgehend), Empfehlung **Abklingend** — die Detailseite ist die einzige
-> Fläche, die fremde Markenfarben tragen muss, und ein durchgehend eingefärbter Grund macht sie zu
-> Fremdkörpern. Dazu: animierter Übergang ja/nein, Firmen-/Charakterseiten mit oder ohne (ohne
-> empfohlen, dort gibt es kein Cover als Farbquelle).
+- **`feat(detail): a page lit by the game it is about` (gemergt, 8ee1694).** User hat
+  **Abklingend** gewählt: das Cover beleuchtet den Kopf der Seite, das Licht klingt darunter ab.
+  Reichweite 560 px, Radialwash aus der Oberkante, durch dasselbe Dither-Raster wie alles andere.
+  Das Licht **scrollt mit dem Inhalt**, nicht mit dem Viewport — auf der Sammlungsseite über einen
+  `ScrollUpdateNotification` + `Transform.translate`, weil ein Grid kein Sliver-Header hat.
+> **Die Stärke ist gerechnet, nicht gewählt.** Alle 180 Tints, die `CoverTint` erzeugen kann, über
+> beide Flächen komponiert und gegen die Vordergründe geprüft, die im Licht stehen:
+> dunkel 0,39 (Sekundärtext) / 0,47 (Gold), hell 0,26 / **0,17**. Gold auf Papier bindet, also
+> `DetailLight.peak = 0.16` für beide Themes. Das ist leiser, als ein Mockup verspricht. Die
+> Alternative war Text, der auf einem gelben Cover unter AA fällt — und nur dort, also genau der
+> Fehler, den niemand reproduziert. `gg_detail_light_test.dart` lässt das nicht mehr steigen.
+> **Gotcha (Naht zwischen Held und Inhalt):** Die Hero-Gradienten endeten in `surface`, der Inhalt
+> darunter begann im beleuchteten `surface` — die Kante war als Linie sichtbar. `litSurface()` gibt
+> beiden dieselbe Farbe.
+> **Gotcha (Golden-Aufbau, nicht Produkt):** Eine `Column` mit `crossAxisAlignment.start` in einem
+> `Stack` schrumpft auf ihre Textbreite, und der Wash mit ihr. Auf der echten Seite gibt der Sliver
+> die Breite vor. Der erste Golden zeigte deshalb einen schmalen Streifen — `stretch` behebt es.
+> **Nicht gebaut:** Firmen-/Charakterseiten bleiben ohne Licht (kein Cover als Farbquelle). Der
+> Farbübergang beim Öffnen bleibt die bestehende `ChamberTint`-Blende, jetzt aber mit Rücksicht auf
+> `disableAnimations`.
 
 **✅ versionCode 18 im Internal Track (2026-07-26).** Erste Fassung mit dem **Lichtsystem** (#133)
 und dem **Ton aus den Covern** (#134). Vor dem Upload geprüft: Signatur `C9:75:98:52:2B:2C:3C:58…`
