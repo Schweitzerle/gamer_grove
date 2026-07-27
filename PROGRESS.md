@@ -196,6 +196,33 @@ Wer sich abheben will, muss das **Material** wechseln.
 > Farbübergang beim Öffnen bleibt die bestehende `ChamberTint`-Blende, jetzt aber mit Rücksicht auf
 > `disableAnimations`.
 
+**Aufräumen — `game_card.dart` (2026-07-27, PR #135 gemergt, 240b911).** 906 Zeilen und zwölf
+`_buildX()`-Methoden in einer Klasse. Die Zeilenzahl war das Symptom, die Methoden das Problem:
+eine Bau-Methode baut mit der ganzen Karte neu, kann nicht `const` sein und taucht im Inspector
+als nichts auf. Jetzt sieben Dateien unter `widgets/game_card/`; `game_card.dart` behält seinen
+Pfad (17 Importe) und hält nur noch die Komposition.
+- Die **Badge-Spalte gab es zweimal** (eigene States rechts, fremde links) — unterschieden haben
+  sich nur Kante und Datenquelle. Jetzt ein `CardBadgeColumn` mit `alignment`.
+- Die **fünf `otherUser*`-Parameter** sind ein `CardUserStates` geworden, an jeder Aufrufstelle aus
+  denselben fünf `Game`-Feldern gebaut. Top-Three-Zugehörigkeit steckt jetzt allein in der Position:
+  Flag und nullable Position nebeneinander konnten sich widersprechen, und die Karte löste das mit
+  einem `!` auf, das geworfen hätte.
+> **Gotcha (Wert-Gleichheit ist hier keine Deko):** `buildWhen` fragt, ob sich *dieses* Spiel
+> geändert hat. Ohne `operator ==` auf `CardUserStates` ist die Antwort immer ja — jedes
+> Bloc-Update hätte jede sichtbare Karte neu gezeichnet. Drei Tests halten das fest.
+> **Gefundener Fehler:** Der Scrim hinter den Badges war ein Badge zu hoch, sobald eine Bewertung
+> da war (`height += count * 24`, nachdem das Rating schon mit 32 verbucht und aus `localCount`
+> herausgerechnet war). Der Golden-Diff ist genau dieses Rechteck, 24 px unten rechts, sonst kein
+> Pixel. `card_user_states_test.dart` nagelt die Arithmetik fest.
+> **Prozess-Korrektur:** Ab #135 wieder echte PRs statt Squash-Push auf master. Der Squash-Push
+> war die Ursache dafür, dass #134 offen mit „no changes" stehenblieb.
+
+**Noch über dem 800-Zeilen-Limit** (absteigend): `content_dlc_section.dart` 1487,
+`company_details_screen.dart` 1437, `user_repository_impl.dart` 1156, `event_details_screen.dart`
+1080, `search_page.dart` 962, `platform_details_screen.dart` 956, `game_engine_details_screen.dart`
+942, `navigations.dart` 939, `supabase_user_datasource_impl.dart` 891,
+`local_all_games_screen.dart` 871, `game_details_accordion.dart` 833.
+
 **✅ versionCode 18 im Internal Track (2026-07-26).** Erste Fassung mit dem **Lichtsystem** (#133)
 und dem **Ton aus den Covern** (#134). Vor dem Upload geprüft: Signatur `C9:75:98:52:2B:2C:3C:58…`
 (gamergrove-Key), `goog_`-Key im `libapp.so`, 4 Schriftdateien, 7 Icon-/Splash-Ressourcen.
