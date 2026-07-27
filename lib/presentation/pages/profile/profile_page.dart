@@ -53,8 +53,12 @@ class ProfilePage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.settings),
                       onPressed: () {
+                        // Scroll-controlled, otherwise Material caps the
+                        // sheet at 9/16 of the screen and its footer — legal
+                        // notice and version — is unreachable.
                         showModalBottomSheet<void>(
                           context: context,
+                          isScrollControlled: true,
                           builder: (context) => const SettingsBottomSheet(),
                         );
                       },
