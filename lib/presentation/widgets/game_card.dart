@@ -1,32 +1,28 @@
 // presentation/widgets/game_card.dart
-import 'dart:ui'; // Für BackdropFilter
-
 import 'package:flutter/material.dart';
-import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
-import 'package:gamer_grove/core/utils/colorSchemes.dart';
-import 'package:gamer_grove/core/utils/date_formatter.dart';
-import 'package:gamer_grove/core/utils/image_utils.dart';
-import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/user_states_section.dart';
+import 'package:gamer_grove/presentation/widgets/game_card/card_badge_column.dart';
+import 'package:gamer_grove/presentation/widgets/game_card/card_badges.dart';
+import 'package:gamer_grove/presentation/widgets/game_card/card_caption.dart';
+import 'package:gamer_grove/presentation/widgets/game_card/card_layers.dart';
+import 'package:gamer_grove/presentation/widgets/game_card/card_user_states.dart';
 
-/// Colours for everything painted **on top of cover artwork**.
+export 'package:gamer_grove/presentation/widgets/game_card/card_user_states.dart';
+export 'package:gamer_grove/presentation/widgets/game_card/game_card_shimmer.dart';
+
+/// A game as a cover with everything the reader knows about it layered on top.
 ///
-/// These deliberately do not come from the colour scheme. The backdrop here is
-/// the artwork, not an app surface, so a title has to be light on a dark scrim
-/// in both themes — swapping in `onSurface` would put dark text on a dark cover
-/// the moment the light theme is on.
-abstract final class _Scrim {
-  static const ink = Colors.black;
-  static const paper = Colors.white;
-}
-
+/// The pieces live in `game_card/`: the artwork and scrims, the badges, the
+/// caption. This file is the composition and the one thing that needs a
+/// `BuildContext` with blocs in it.
 class GameCard extends StatelessWidget {
   const GameCard({
     required this.game,
@@ -36,23 +32,21 @@ class GameCard extends StatelessWidget {
     this.width,
     this.height,
     this.otherUserId,
-    this.otherUserRating,
-    this.otherUserIsWishlisted,
-    this.otherUserIsRecommended,
-    this.otherUserIsInTopThree,
-    this.otherUserTopThreePosition,
+    this.otherUserStates = CardUserStates.none,
   });
+
   final Game game;
   final VoidCallback onTap;
+
+  /// Frosts the cover once the reader has rated the game.
   final bool blurRated;
   final double? width;
   final double? height;
+
+  /// Set when the card is standing in someone else's grove; their states are
+  /// then shown down the left edge alongside the reader's own on the right.
   final String? otherUserId;
-  final double? otherUserRating;
-  final bool? otherUserIsWishlisted;
-  final bool? otherUserIsRecommended;
-  final bool? otherUserIsInTopThree;
-  final int? otherUserTopThreePosition;
+  final CardUserStates otherUserStates;
 
   @override
   Widget build(BuildContext context) {
@@ -62,578 +56,101 @@ class GameCard extends StatelessWidget {
     return MergeSemantics(
       child: Semantics(
         button: true,
-        child: _buildCard(context),
+        child: GestureDetector(
+          onTap: () async {
+            await HapticFeedback.lightImpact();
+            onTap.call();
+          },
+          onLongPress: () async {
+            await HapticFeedback.vibrate();
+            if (context.mounted) await _showUserStatesSheet(context);
+          },
+          child: _frame(context),
+        ),
       ),
     );
   }
 
-  Widget _buildCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        await HapticFeedback.lightImpact();
-        onTap.call();
-      },
-      onLongPress: () async {
-        HapticFeedback.vibrate();
-        _showUserStatesDialog(context);
-      },
-      child: Container(
-        width: width ?? 160,
-        height: height ?? 240,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(context.ggTokens.radiusLg),
-          boxShadow: [
-            BoxShadow(
-              color:
-                  Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(context.ggTokens.radiusLg),
-          child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
-            buildWhen: (previous, current) {
-              // 🐛 DEBUG: Log buildWhen checks
+  Widget _frame(BuildContext context) {
+    final radius = BorderRadius.circular(context.ggTokens.radiusLg);
 
-              // Rebuild if state type changes OR if it's UserGameDataLoaded with different data
-              if (previous.runtimeType != current.runtimeType) {
-                return true;
-              }
-
-              // Always rebuild when UserGameDataLoaded state changes
-              if (current is UserGameDataLoaded &&
-                  previous is UserGameDataLoaded) {
-                // Check if THIS game's data has changed
-                final prevWishlisted = previous.isWishlisted(game.id);
-                final currWishlisted = current.isWishlisted(game.id);
-                final prevRecommended = previous.isRecommended(game.id);
-                final currRecommended = current.isRecommended(game.id);
-                final prevRating = previous.getRating(game.id);
-                final currRating = current.getRating(game.id);
-                final prevTopThree = previous.isInTopThree(game.id);
-                final currTopThree = current.isInTopThree(game.id);
-
-                final hasChanges = prevWishlisted != currWishlisted ||
-                    prevRecommended != currRecommended ||
-                    prevRating != currRating ||
-                    prevTopThree != currTopThree;
-
-                return hasChanges;
-              }
-
-              return true; // Rebuild for other state changes
-            },
-            builder: (context, userDataState) {
-              // ✅ ALWAYS read from UserGameDataBloc as single source of truth
-              // Default to false/null if not loaded yet
-              var isWishlisted = false;
-              var isRecommended = false;
-              double? userRating;
-              var isInTopThree = false;
-              int? topThreePosition;
-
-              // 🐛 DEBUG: Log builder state
-
-              // Read from UserGameDataBloc if loaded
-              if (userDataState is UserGameDataLoaded) {
-                isWishlisted = userDataState.isWishlisted(game.id);
-                isRecommended = userDataState.isRecommended(game.id);
-                userRating = userDataState.getRating(game.id);
-                isInTopThree = userDataState.isInTopThree(game.id);
-                topThreePosition = userDataState.getTopThreePosition(game.id);
-              }
-
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Background Cover Image (full card)
-                  _buildBackgroundImage(context),
-
-                  // Blur Filter für rated games
-                  if (blurRated && userRating != null) _buildBlurOverlay(),
-
-                  // Gradient Overlay
-                  _buildGradientOverlay(),
-
-                  // User Elements Background Gradient (logged-in user - right)
-                  if (_hasUserElements(
-                    userRating,
-                    isWishlisted,
-                    isRecommended,
-                    isInTopThree,
-                  ))
-                    _buildUserElementsBackground(
-                      userRating,
-                      isWishlisted,
-                      isRecommended,
-                      isInTopThree,
-                      isLeft: false,
-                    ),
-
-                  // Other User Elements Background Gradient (left)
-                  if (_hasOtherUserElements())
-                    _buildUserElementsBackground(
-                      otherUserRating,
-                      otherUserIsWishlisted ?? false,
-                      otherUserIsRecommended ?? false,
-                      otherUserIsInTopThree ?? false,
-                      isLeft: true,
-                    ),
-
-                  // Content Overlay (unten)
-                  _buildContentOverlay(context),
-
-                  // Other User States Overlay (left)
-                  if (otherUserId != null)
-                    _buildOtherUserStatesOverlay(context),
-
-                  // Ratings und States Overlay (rechts) - NOW WITH BLOC DATA!
-                  _buildRatingsOverlay(
-                    context,
-                    userRating,
-                    isWishlisted,
-                    isRecommended,
-                    isInTopThree,
-                    topThreePosition,
-                  ),
-
-                  // IGDB Rating (unten rechts)
-                  if (game.totalRating != null)
-                    Positioned(
-                      bottom: 6,
-                      right: 6,
-                      child: _buildIGDBRatingCircle(context),
-                    ),
-                ],
-              );
-            },
+    return Container(
+      width: width ?? 160,
+      height: height ?? 240,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: BlocBuilder<UserGameDataBloc, UserGameDataState>(
+          buildWhen: _thisGameChanged,
+          builder: (context, state) => _layers(context, _statesFrom(state)),
         ),
       ),
     );
   }
 
-  Widget _buildBackgroundImage(BuildContext context) {
-    if (game.coverUrl != null && game.coverUrl!.isNotEmpty) {
-      return CachedImageWidget(
-        imageUrl: ImageUtils.getLargeImageUrl(game.coverUrl),
-      );
-    } else {
-      return _buildFallbackBackground(context);
+  /// The bloc holds every game's states, so most of its updates say nothing
+  /// about this card.
+  bool _thisGameChanged(UserGameDataState previous, UserGameDataState current) {
+    if (previous.runtimeType != current.runtimeType) return true;
+    if (previous is! UserGameDataLoaded || current is! UserGameDataLoaded) {
+      return true;
     }
+    return _statesFrom(previous) != _statesFrom(current);
   }
 
-  Widget _buildFallbackBackground(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primary.withAlpha(77),
-            Theme.of(context).colorScheme.primary.withAlpha(153),
-          ],
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.videogame_asset,
-          size: 48,
-          color: _Scrim.paper.withAlpha(204),
-        ),
-      ),
+  CardUserStates _statesFrom(UserGameDataState state) {
+    if (state is! UserGameDataLoaded) return CardUserStates.none;
+    return CardUserStates(
+      rating: state.getRating(game.id),
+      isWishlisted: state.isWishlisted(game.id),
+      isRecommended: state.isRecommended(game.id),
+      topThreePosition: state.isInTopThree(game.id)
+          ? state.getTopThreePosition(game.id)
+          : null,
     );
   }
 
-  Widget _buildBlurOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        color: _Scrim.paper.withAlpha(51),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-        child: Container(
-          color: _Scrim.ink.withValues(alpha: 0.1),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGradientOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Colors.transparent,
-            _Scrim.ink.withAlpha(179),
-            _Scrim.ink.withAlpha(230),
-          ],
-          stops: const [0.0, 0.6, 0.8, 1.0],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserElementsBackground(
-    double? userRating,
-    bool isWishlisted,
-    bool isRecommended,
-    bool isInTopThree, {
-    required bool isLeft,
-  }) {
-    final elementCount = _getUserElementsCount(
-      userRating,
-      isWishlisted,
-      isRecommended,
-      isInTopThree,
-    );
-    final height = _calculateUserElementsHeight(elementCount, userRating);
-
-    return Positioned(
-      top: 0,
-      left: isLeft ? 0 : null,
-      right: isLeft ? null : 0,
-      width: 44,
-      height: height,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: RadialGradient(
-            center: isLeft ? const Alignment(-1, -1) : const Alignment(1, -1),
-            radius: 2.8,
-            colors: [
-              _Scrim.ink.withAlpha(179),
-              _Scrim.ink.withAlpha(102),
-              _Scrim.ink.withAlpha(26),
-              Colors.transparent,
-            ],
-            stops: const [0.0, 0.4, 0.7, 1.0],
+  Widget _layers(BuildContext context, CardUserStates states) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CardArtwork(coverUrl: game.coverUrl),
+        if (blurRated && states.rating != null) const CardBlur(),
+        const CardCaptionScrim(),
+        if (states.isNotEmpty)
+          CardBadgeScrim(states: states, alignment: Alignment.centerRight),
+        if (otherUserStates.isNotEmpty)
+          CardBadgeScrim(
+            states: otherUserStates,
+            alignment: Alignment.centerLeft,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContentOverlay(BuildContext context) {
-    return Positioned(
-      left: 6,
-      right: 50, // Platz für rechte Elemente
-      bottom: 6,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Game Title
-          Text(
-            game.name,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: _Scrim.paper,
-              fontSize: 14,
-              shadows: [
-                Shadow(
-                  offset: const Offset(0, 1),
-                  blurRadius: 2,
-                  color: _Scrim.ink.withValues(alpha: 0.7),
-                ),
-              ],
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        CardCaption(game: game),
+        if (otherUserId != null)
+          CardBadgeColumn(
+            states: otherUserStates,
+            alignment: Alignment.centerLeft,
           ),
-
-          const SizedBox(height: 4),
-
-          // Date + Genres in einer Row
-          Row(
-            children: [
-              // Release Date
-              if (game.firstReleaseDate != null) ...[
-                Icon(
-                  Icons.calendar_today,
-                  size: 10,
-                  color: _Scrim.paper.withAlpha(230),
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  DateFormatter.formatYearOnly(game.firstReleaseDate!),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: _Scrim.paper.withAlpha(230),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                if (game.genres.isNotEmpty) ...[
-                  Text(
-                    ' • ',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _Scrim.paper.withValues(alpha: 0.7),
-                          fontSize: 10,
-                        ),
-                  ),
-                ],
-              ],
-
-              // Genres
-              if (game.genres.isNotEmpty)
-                Expanded(
-                  child: Text(
-                    game.genres.take(2).map((g) => g.name).join(', '),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _Scrim.paper.withAlpha(204),
-                          fontSize: 10,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
+        CardBadgeColumn(states: states, alignment: Alignment.centerRight),
+        if (game.totalRating != null)
+          Positioned(
+            bottom: 6,
+            right: 6,
+            child: RatingBadge.igdb(game.totalRating!),
           ),
-        ],
-      ),
+      ],
     );
   }
 
-  Widget _buildRatingsOverlay(
-    BuildContext context,
-    double? userRating,
-    bool isWishlisted,
-    bool isRecommended,
-    bool isInTopThree,
-    int? topThreePosition,
-  ) {
-    return Positioned(
-      top: 4,
-      right: 4,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // User Rating
-          if (userRating != null) ...[
-            _buildUserRatingCircle(context, userRating),
-            const SizedBox(height: 4),
-          ],
-
-          // Top Three
-          if (isInTopThree && topThreePosition != null) ...[
-            _buildTopThreeCircle(context, topThreePosition),
-            const SizedBox(height: 4),
-          ],
-
-          // Wishlist
-          if (isWishlisted) ...[
-            _buildWishlistCircle(context),
-            const SizedBox(height: 4),
-          ],
-
-          // Recommend
-          if (isRecommended) _buildRecommendCircle(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserRatingCircle(BuildContext context, double userRating) {
-    final rating = userRating / 10; // 0-1 range
-    final displayRating = userRating * 10;
-    final color = ColorScales.getRatingColor(displayRating);
-
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _Scrim.ink.withValues(alpha: 0.75),
-        border: Border.all(
-          color: _Scrim.paper.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Circular Progress
-          Positioned.fill(
-            child: CircularProgressIndicator(
-              value: rating,
-              strokeWidth: 2.0,
-              backgroundColor: _Scrim.paper.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-
-          // Center Content
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.person,
-                  size: 10,
-                  color: _Scrim.paper,
-                ),
-                Text(
-                  displayRating.toStringAsFixed(0),
-                  style: TextStyle(
-                    color: _Scrim.paper,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
-                        color: _Scrim.ink.withValues(alpha: 0.7),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopThreeCircle(BuildContext context, int position) {
-    final color = ColorScales.getTopThreeColor(position);
-
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _Scrim.ink.withValues(alpha: 0.75),
-        border: Border.all(
-          color: color.withValues(alpha: 0.8),
-        ),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.emoji_events,
-              size: 10,
-              color: color,
-            ),
-            Text(
-              '#$position',
-              style: TextStyle(
-                color: color,
-                fontSize: 6,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWishlistCircle(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _Scrim.ink.withValues(alpha: 0.75),
-        border: Border.all(
-          color: Colors.red.withValues(alpha: 0.8),
-        ),
-      ),
-      child: const Icon(
-        Icons.favorite,
-        size: 12,
-        color: Colors.red,
-      ),
-    );
-  }
-
-  Widget _buildRecommendCircle(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _Scrim.ink.withValues(alpha: 0.75),
-        border: Border.all(
-          color: Colors.green.withValues(alpha: 0.8),
-        ),
-      ),
-      child: const Icon(
-        Icons.thumb_up,
-        size: 12,
-        color: Colors.green,
-      ),
-    );
-  }
-
-  Widget _buildIGDBRatingCircle(BuildContext context) {
-    final rating = game.totalRating! / 100; // 0-1 range für Progress
-    final color = ColorScales.getRatingColor(game.totalRating!);
-
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _Scrim.ink.withValues(alpha: 0.75),
-        border: Border.all(
-          color: _Scrim.paper.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Circular Progress
-          Positioned.fill(
-            child: CircularProgressIndicator(
-              value: rating,
-              strokeWidth: 3.0,
-              backgroundColor: _Scrim.paper.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-
-          // Center Content
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.public, // Globe icon für IGDB/externe Quelle
-                  size: 12,
-                  color: _Scrim.paper,
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  game.totalRating!.toStringAsFixed(0),
-                  style: TextStyle(
-                    color: _Scrim.paper,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
-                        color: _Scrim.ink.withValues(alpha: 0.7),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showUserStatesDialog(BuildContext context) async {
+  Future<void> _showUserStatesSheet(BuildContext context) async {
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
       GamerGroveToastService.showWarning(
@@ -644,28 +161,27 @@ class GameCard extends StatelessWidget {
       return;
     }
 
+    final bloc = BlocProvider.of<UserGameDataBloc>(context);
+    final theme = Theme.of(context);
+
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (dialogContext) {
-        return BlocProvider.value(
-          value: BlocProvider.of<UserGameDataBloc>(context),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
+      builder: (_) => BlocProvider.value(
+        value: bloc,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
                 Text(
                   game.name,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -673,232 +189,10 @@ class GameCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 8),
-                // User States Content
                 UserStatesContent(game: game),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildOtherUserStatesOverlay(BuildContext context) {
-    return Positioned(
-      top: 4,
-      left: 4,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Other User Rating
-          if (otherUserRating != null) ...[
-            _buildUserRatingCircle(context, otherUserRating!),
-            const SizedBox(height: 4),
-          ],
-
-          // Other User Top Three
-          if (otherUserIsInTopThree ?? false) ...[
-            _buildTopThreeCircle(context, otherUserTopThreePosition!),
-            const SizedBox(height: 4),
-          ],
-
-          // Other User Wishlist
-          if (otherUserIsWishlisted ?? false) ...[
-            _buildWishlistCircle(context),
-            const SizedBox(height: 4),
-          ],
-
-          // Other User Recommend
-          if (otherUserIsRecommended ?? false) _buildRecommendCircle(context),
-        ],
-      ),
-    );
-  }
-
-  // Helper methods
-  bool _hasUserElements(
-    double? userRating,
-    bool isWishlisted,
-    bool isRecommended,
-    bool isInTopThree,
-  ) {
-    return userRating != null || isWishlisted || isRecommended || isInTopThree;
-  }
-
-  bool _hasOtherUserElements() {
-    return otherUserRating != null ||
-        (otherUserIsWishlisted ?? false) ||
-        (otherUserIsRecommended ?? false) ||
-        (otherUserIsInTopThree ?? false);
-  }
-
-  int _getUserElementsCount(
-    double? userRating,
-    bool isWishlisted,
-    bool isRecommended,
-    bool isInTopThree,
-  ) {
-    var elementCount = 0;
-    if (userRating != null) elementCount++;
-    if (isInTopThree) elementCount++;
-    if (isWishlisted) elementCount++;
-    if (isRecommended) elementCount++;
-    return elementCount;
-  }
-
-  double _calculateUserElementsHeight(int count, double? userRating) {
-    if (count == 0) return 0;
-
-    double height = 16; // Base padding (oben und unten)
-    var localCount = count;
-
-    if (userRating != null) {
-      height += 32; // User rating ist größer
-      localCount--;
-      if (localCount > 0) height += 4; // Spacing nach User Rating
-    }
-
-    height += count * 24; // Andere Elemente sind 24px
-    height +=
-        (count > 0 ? count - 1 : 0) * 4; // Spacing zwischen anderen Elementen
-
-    return height;
-  }
-}
-
-// Shimmer Loading Version
-class GameCardShimmer extends StatelessWidget {
-  const GameCardShimmer({
-    super.key,
-    this.width,
-    this.height,
-  });
-  final double? width;
-  final double? height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width ?? 160,
-      height: height ?? 240,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            // Background shimmer
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-                    Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withValues(alpha: 0.5),
-                  ],
-                ),
-              ),
-            ),
-
-            // User Elements shimmer (rechts oben)
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Column(
-                children: [
-                  // User Rating shimmer
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.surface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // States shimmer
-                  ...List.generate(
-                    2,
-                    (index) => Container(
-                      width: 32,
-                      height: 32,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // IGDB Rating shimmer (unten rechts)
-            Positioned(
-              bottom: 12,
-              right: 12,
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-              ),
-            ),
-
-            // Content area shimmer (unten links)
-            Positioned(
-              left: 12,
-              right: 70,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title shimmer
-                  Container(
-                    width: double.infinity,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Date + Genres shimmer
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 60,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
