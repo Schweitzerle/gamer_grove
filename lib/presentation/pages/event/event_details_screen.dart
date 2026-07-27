@@ -13,7 +13,8 @@ import 'package:gamer_grove/domain/entities/event/event.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/widgets/accordion_tile.dart';
-import 'package:gamer_grove/presentation/widgets/game_card.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_games_row.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -111,7 +112,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             // 1. Hero Image (genau wie GameDetailScreen)
             _buildHeroImage(),
             // 2. Gradient Overlays (genau wie GameDetailScreen)
-            _buildGradientOverlays(),
+            const EntityHeroOverlays(),
             // 3. Floating Info Card (genau wie GameDetailScreen)
             _buildFloatingEventCard(),
           ],
@@ -163,43 +164,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               )
             : null,
       ),
-    );
-  }
-
-  Widget _buildGradientOverlays() {
-    return Stack(
-      children: [
-        // Horizontaler Gradient (links-rechts) - genau wie GameDetailScreen
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              stops: const [0.0, 0.05, 0.95, 1.0],
-              colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface,
-              ],
-            ),
-          ),
-        ),
-        // Vertikaler Gradient (oben-unten) - genau wie GameDetailScreen
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0.0, 0.05, 0.8, 1.0],
-              colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface.withValues(alpha: .2),
-                Theme.of(context).colorScheme.surface.withValues(alpha: .8),
-                Theme.of(context).colorScheme.surface,
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1013,8 +977,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           SizedBox(
             height: 280,
             child: item.games.isNotEmpty
-                ? _buildGamesList(item.games)
-                : _buildNoGamesPlaceholder(context),
+                ? EntityGamesRow(games: item.games)
+                : const EntityGamesEmpty(subject: 'event'),
           ),
         ],
       ),
@@ -1023,58 +987,5 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   void _navigateToSeries(BuildContext context, SeriesItem item) {
     Navigations.navigateToEventGames(context, item, widget.event);
-  }
-
-  Widget _buildGamesList(List<Game> games) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.only(
-        left: AppConstants.paddingSmall,
-        bottom: AppConstants.paddingSmall,
-      ),
-      itemCount: games.length,
-      itemBuilder: (context, index) {
-        final game = games[index];
-        return Container(
-          width: 160,
-          margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
-          child: GameCard(
-            game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNoGamesPlaceholder(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.games,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: 32,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Games loading...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

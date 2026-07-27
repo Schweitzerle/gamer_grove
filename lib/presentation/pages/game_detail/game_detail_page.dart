@@ -14,6 +14,7 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_media_gallery.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
 import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
@@ -223,7 +224,7 @@ class _GameDetailPageState extends State<GameDetailPage>
           fit: StackFit.expand,
           children: [
             _buildHeroImage(game),
-            _buildGradientOverlays(tint),
+            EntityHeroOverlays(tint: tint),
             _buildFloatingGameCard(game),
           ],
         ),
@@ -257,50 +258,6 @@ class _GameDetailPageState extends State<GameDetailPage>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildGradientOverlays(Color tint) {
-    final surface = Theme.of(context).colorScheme.surface;
-    // The artwork has to fade out into the same colour the content below it
-    // starts in, otherwise the hand-off shows up as a line across the page.
-    final lit = litSurface(surface, tint);
-
-    return Stack(
-      children: [
-        // Horizontal, so the artwork does not run into the screen edges.
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              stops: const [0.0, 0.05, 0.95, 1.0],
-              colors: [
-                surface,
-                surface.withValues(alpha: .2),
-                surface.withValues(alpha: .2),
-                surface,
-              ],
-            ),
-          ),
-          child: const SizedBox.expand(),
-        ),
-        // Vertical, ending in the lit surface the content picks up.
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0.0, 0.05, 0.8, 1.0],
-              colors: [
-                surface,
-                surface.withValues(alpha: .2),
-                lit.withValues(alpha: .8),
-                lit,
-              ],
-            ),
-          ),
-          child: const SizedBox.expand(),
-        ),
-      ],
     );
   }
 
