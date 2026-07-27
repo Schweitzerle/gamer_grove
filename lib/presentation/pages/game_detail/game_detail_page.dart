@@ -18,10 +18,12 @@ import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.d
 import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
 import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
-import 'package:gamer_grove/presentation/widgets/sections/content_dlc_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/events_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/game_details_accordion.dart';
+import 'package:gamer_grove/presentation/widgets/sections/related_games/content_dlc_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/related_games/similar_related_section.dart';
+import 'package:gamer_grove/presentation/widgets/sections/related_games/versions_remakes_section.dart';
 
 class GameDetailPage extends StatefulWidget {
   const GameDetailPage({required this.gameId, super.key});
