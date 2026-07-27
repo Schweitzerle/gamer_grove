@@ -24,83 +24,90 @@ class SettingsBottomSheet extends StatelessWidget {
     final theme = Theme.of(context);
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Settings',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const _UpgradeProTile(),
-              const SizedBox(height: 8),
-              ListTile(
-                title: const Text('Mode'),
-                trailing: SegmentedButton<ThemeMode>(
-                  segments: const [
-                    ButtonSegment(
-                      value: ThemeMode.light,
-                      icon: Icon(Icons.light_mode),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.dark,
-                      icon: Icon(Icons.dark_mode),
-                    ),
-                  ],
-                  selected: {state.themeMode},
-                  onSelectionChanged: (newSelection) {
-                    context
-                        .read<ThemeBloc>()
-                        .add(ThemeModeChanged(newSelection.first));
-                  },
+        // Scrollable, and sized to its content. Without this the sheet is
+        // capped at 9/16 of the screen and the last 166dp — the IGDB notice
+        // and the version line — sit below the bottom edge with no way to
+        // reach them. That is why the line saying "v2.0.0" went three releases
+        // without anyone noticing it was wrong: nobody could see it.
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Settings',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-              ),
-              ListTile(
-                title: const Text('Theme'),
-                // A preview, not a control: the ListTile is the tap target.
-                // This used to be a ThemeCard with an empty callback, i.e. a
-                // button that announced itself to screen readers and did
-                // nothing.
-                trailing: const _ThemePreview(),
-                onTap: () async {
-                  // Theme customization is a Pro feature; free users get the
-                  // paywall, Pro users get the theme picker.
-                  if (!await requirePro(context, source: 'settings_theme')) {
-                    return;
-                  }
-                  if (!context.mounted) return;
-                  await showDialog<void>(
-                    context: context,
-                    builder: (context) => const ThemeSelectionDialog(),
-                  );
-                },
-              ),
-              const _LegalLinks(),
-              const Spacer(),
-              const Divider(),
-              const SizedBox(height: 8),
-              Card(
-                color: theme.colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: SizedBox(
-                    height: 40,
-                    child: Image.asset('assets/images/igdb_logo.png'),
+                const SizedBox(height: 16),
+                const _UpgradeProTile(),
+                const SizedBox(height: 8),
+                ListTile(
+                  title: const Text('Mode'),
+                  trailing: SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: Icon(Icons.light_mode),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: Icon(Icons.dark_mode),
+                      ),
+                    ],
+                    selected: {state.themeMode},
+                    onSelectionChanged: (newSelection) {
+                      context
+                          .read<ThemeBloc>()
+                          .add(ThemeModeChanged(newSelection.first));
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'This app uses the IGDB API but is not endorsed or certified by IGDB.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-              const AppVersionLine(),
-              const SizedBox(height: 16),
-            ],
+                ListTile(
+                  title: const Text('Theme'),
+                  // A preview, not a control: the ListTile is the tap target.
+                  // This used to be a ThemeCard with an empty callback, i.e. a
+                  // button that announced itself to screen readers and did
+                  // nothing.
+                  trailing: const _ThemePreview(),
+                  onTap: () async {
+                    // Theme customization is a Pro feature; free users get the
+                    // paywall, Pro users get the theme picker.
+                    if (!await requirePro(context, source: 'settings_theme')) {
+                      return;
+                    }
+                    if (!context.mounted) return;
+                    await showDialog<void>(
+                      context: context,
+                      builder: (context) => const ThemeSelectionDialog(),
+                    );
+                  },
+                ),
+                const _LegalLinks(),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                Card(
+                  color: theme.colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: SizedBox(
+                      height: 40,
+                      child: Image.asset('assets/images/igdb_logo.png'),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'This app uses the IGDB API but is not endorsed or certified by IGDB.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 16),
+                const AppVersionLine(),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
