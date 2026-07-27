@@ -126,13 +126,9 @@ abstract class BaseGameSection extends StatelessWidget {
               onTap: () => Navigations.navigateToGameDetail(game.id, context),
               // Pass other user's states only if viewing different user
               otherUserId: isDifferentUser ? currentUserId : null,
-              otherUserRating: isDifferentUser ? game.userRating : null,
-              otherUserIsWishlisted: isDifferentUser ? game.isWishlisted : null,
-              otherUserIsRecommended:
-                  isDifferentUser ? game.isRecommended : null,
-              otherUserIsInTopThree: isDifferentUser ? game.isInTopThree : null,
-              otherUserTopThreePosition:
-                  isDifferentUser ? game.topThreePosition : null,
+              otherUserStates: isDifferentUser
+                  ? CardUserStates.fromGame(game)
+                  : CardUserStates.none,
             ),
           );
         },
