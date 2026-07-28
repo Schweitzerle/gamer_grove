@@ -107,6 +107,19 @@ class _Reveal extends StatelessWidget {
   /// Where a reveal starts when the tap had no measurable box.
   static const _fallbackSize = Size(160, 240);
 
+  /// How far back the arriving page starts, before it comes forward.
+  ///
+  /// Walking into a room is not only a change of colour, it is a change of
+  /// distance: what is beyond the doorway grows as you approach it. So the page
+  /// arrives slightly away from you and closes that gap as the shape opens.
+  ///
+  /// Scaled about the point that was tapped, not about the middle of the
+  /// screen. Around the middle, a shape opening near an edge would show a gap
+  /// where the page has not reached yet — the clip would be wider there than
+  /// the content behind it. Anchored at the tap, both grow from the same place
+  /// and there is nothing to expose.
+  static const _startsAt = 0.88;
+
   /// How much of the screen an origin may already cover and still be worth
   /// growing from.
   ///
@@ -126,6 +139,16 @@ class _Reveal extends StatelessWidget {
       center: candidate.center,
       width: _fallbackSize.width,
       height: _fallbackSize.height,
+    );
+  }
+
+  /// [point] as an [Alignment] within a box of [size], so a transform can be
+  /// anchored where the finger was.
+  static Alignment _anchor(Offset point, Size size) {
+    if (size.isEmpty) return Alignment.center;
+    return Alignment(
+      (point.dx / size.width * 2 - 1).clamp(-1.0, 1.0),
+      (point.dy / size.height * 2 - 1).clamp(-1.0, 1.0),
     );
   }
 
@@ -167,11 +190,15 @@ class _Reveal extends StatelessWidget {
             to: full,
             t: t,
           ),
-          child: Opacity(
-            // Fades in over the first stretch, so the page does not appear
-            // fully formed inside a shape that is still growing.
-            opacity: Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
-            child: child,
+          child: Transform.scale(
+            scale: lerpDouble(_startsAt, 1, t),
+            alignment: _anchor(from.center, size),
+            child: Opacity(
+              // Fades in over the first stretch, so the page does not appear
+              // fully formed inside a shape that is still growing.
+              opacity: Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
+              child: child,
+            ),
           ),
         );
       },
