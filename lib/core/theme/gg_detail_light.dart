@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_dither.dart';
 
@@ -123,12 +124,12 @@ class _DetailLightPainter extends CustomPainter {
 
 /// The surface of a page standing in [tint]'s light at its strongest.
 ///
-/// The hero's gradients have to end in this rather than in plain `surface`,
-/// otherwise the artwork fades out into one colour and the content below starts
-/// in another, and the seam between them is visible as a line.
-///
-/// Takes the whole scheme rather than just the surface, because how strong the
-/// light may be depends on which theme it is standing in.
+/// This is the worst case a foreground has to survive: the brightest point of
+/// the wash, before the dither takes half of it away. Nothing draws with it —
+/// the seam between artwork and page is carried by the shared grain instead —
+/// but every contrast check is made against it, because assuming the dither's
+/// average would be assuming the glyph never lands on a lit pixel.
+@visibleForTesting
 Color litSurface(ColorScheme scheme, Color tint) => Color.alphaBlend(
       tint.withValues(alpha: DetailLight.peakOn(scheme.brightness)),
       scheme.surface,

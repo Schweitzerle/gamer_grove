@@ -438,6 +438,9 @@ class UserRepositoryImpl extends SupabaseBaseRepository
           query,
           limit: limit,
           offset: offset,
+          // Was accepted here and then dropped: the parameter existed all
+          // along, so the search returned you to yourself.
+          excludeUserId: currentUserId,
         );
         return usersData
             .map((data) => UserModel.fromJson(data).toEntity())

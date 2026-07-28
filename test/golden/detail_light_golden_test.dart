@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
 import 'package:gamer_grove/core/theme/gg_theme.dart';
+import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 
 import '../support/load_app_fonts.dart';
 
@@ -27,20 +28,16 @@ void main() {
           // stand-in column would shrink to its text and the wash with it.
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Stand-in for the cover: a real network image would make this
-            // golden depend on the network.
             SizedBox(
               height: 240,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0, 0.6, 1],
-                    colors: [tint, Color.lerp(tint, lit, 0.6)!, lit],
-                  ),
-                ),
-                child: const SizedBox.expand(),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Stand-in for the cover: a real network image would make
+                  // this golden depend on the network.
+                  ColoredBox(color: Color.lerp(tint, lit, 0.15)!),
+                  EntityHeroOverlays(tint: tint),
+                ],
               ),
             ),
             ColoredBox(
