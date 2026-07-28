@@ -64,6 +64,44 @@ class DetailLight extends StatelessWidget {
   /// Alpha at the halfway point, where the light is already mostly spent.
   static double _midOf(double peak) => peak * 0.34;
 
+  /// How far the light carries, as a multiple of the width it is drawn across.
+  ///
+  /// Expressed against the width rather than the shorter side, so the same
+  /// light drawn into two boxes of different heights still falls off over the
+  /// same number of pixels. That is what lets the artwork's grain and the
+  /// page's wash agree along the edge where they meet.
+  static const _spread = 1.3;
+
+  /// The light itself, for a box of [size], falling away from [from].
+  ///
+  /// One definition, used twice: the page's wash falls from its top edge, and
+  /// the artwork's grain rises to its bottom edge. Mirrored like that, the two
+  /// carry the same value at every x along the seam, so there is no line to
+  /// see. Two separately-tuned gradients cannot manage that — the first attempt
+  /// paired a radial wash with a flat ramp, which matched in the middle and
+  /// drifted apart towards the edges.
+  static Gradient wash({
+    required Size size,
+    required Alignment from,
+    required Color tint,
+    required double peak,
+  }) {
+    final shortest = size.shortestSide;
+    return RadialGradient(
+      center: from,
+      // Flutter measures a radial radius against the shortest side; rewriting
+      // it against the width keeps the falloff the same number of pixels
+      // whatever the box's height.
+      radius: shortest == 0 ? _spread : _spread * size.width / shortest,
+      colors: [
+        tint.withValues(alpha: peak),
+        tint.withValues(alpha: _midOf(peak)),
+        tint.withValues(alpha: 0),
+      ],
+      stops: const [0, 0.45, 1],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final peak = peakOn(Theme.of(context).brightness);
@@ -94,17 +132,13 @@ class _DetailLightPainter extends CustomPainter {
       'detail/$peak',
       size,
       tint,
-      () => RadialGradient(
-        // Anchored where the artwork ends, so the page reads as lit by the
-        // cover above it rather than by a band floating in the content.
-        center: Alignment.topCenter,
-        radius: 1.3,
-        colors: [
-          tint.withValues(alpha: peak),
-          tint.withValues(alpha: DetailLight._midOf(peak)),
-          tint.withValues(alpha: 0),
-        ],
-        stops: const [0, 0.45, 1],
+      // Anchored where the artwork ends, so the page reads as lit by the cover
+      // above it rather than by a band floating in the content.
+      () => DetailLight.wash(
+        size: size,
+        from: Alignment.topCenter,
+        tint: tint,
+        peak: peak,
       ),
     );
     DitheredWashCache.draw(

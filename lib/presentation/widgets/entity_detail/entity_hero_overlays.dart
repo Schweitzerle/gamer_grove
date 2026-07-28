@@ -101,6 +101,9 @@ class _HeroGrain extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
+    // The grain occupies as much of the artwork as the page's wash reaches
+    // below it, so the two are the same light seen from either side of the
+    // seam — mirrored, not merely similar.
     final top = size.height * _starts;
     final rect = Rect.fromLTRB(0, top, size.width, size.height);
     if (rect.isEmpty) return;
@@ -108,13 +111,11 @@ class _HeroGrain extends CustomPainter {
     GGDither.paintGradient(
       canvas,
       rect,
-      LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          tint.withValues(alpha: 0),
-          tint.withValues(alpha: DetailLight.peakOn(brightness)),
-        ],
+      DetailLight.wash(
+        size: rect.size,
+        from: Alignment.bottomCenter,
+        tint: tint,
+        peak: DetailLight.peakOn(brightness),
       ),
     );
   }
