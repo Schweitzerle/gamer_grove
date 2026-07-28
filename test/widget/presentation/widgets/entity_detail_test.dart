@@ -2,7 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamer_grove/core/theme/gg_detail_light.dart';
 import 'package:gamer_grove/core/theme/gg_theme.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
@@ -89,26 +88,38 @@ void main() {
   });
 
   group('EntityHeroOverlays', () {
-    testWidgets('without a tint it ends in the plain surface', (tester) async {
+    testWidgets('the artwork always fades out into the plain surface',
+        (tester) async {
+      // Both with and without a tint. The seam used to be handled by ending the
+      // artwork in a solid tinted surface while the page below showed the same
+      // tint through the dither — half the pixels. Opaque meeting half-opaque
+      // is a line however well the colours match, so the tint now arrives on
+      // both sides the same way and this gradient stays plain.
       final theme = GGTheme.dark();
-      await tester.pumpWidget(wrap(const EntityHeroOverlays(), theme: theme));
 
+      await tester.pumpWidget(wrap(const EntityHeroOverlays(), theme: theme));
+      expect(_footColour(tester), theme.colorScheme.surface);
+
+      await tester.pumpWidget(
+        wrap(const EntityHeroOverlays(tint: Color(0xFF6B5285)), theme: theme),
+      );
       expect(_footColour(tester), theme.colorScheme.surface);
     });
 
-    testWidgets('with a tint it ends in the lit surface', (tester) async {
-      // A game's page hands off to content standing in its cover's light, so
-      // the artwork has to fade out into the same colour. Ending in the plain
-      // surface is what put a visible line across the page.
-      final theme = GGTheme.dark();
-      const tint = Color(0xFF6B5285);
+    testWidgets('a tint brings grain to the foot of the artwork',
+        (tester) async {
+      // The grain is what makes the two surfaces the same material, so its
+      // presence is the thing worth asserting; how it looks is a golden.
+      await tester.pumpWidget(wrap(const EntityHeroOverlays()));
+      final withoutTint = find.byType(CustomPaint).evaluate().length;
 
       await tester.pumpWidget(
-        wrap(const EntityHeroOverlays(tint: tint), theme: theme),
+        wrap(const EntityHeroOverlays(tint: Color(0xFF6B5285))),
       );
-
-      expect(_footColour(tester), litSurface(theme.colorScheme, tint));
-      expect(_footColour(tester), isNot(theme.colorScheme.surface));
+      expect(
+        find.byType(CustomPaint).evaluate().length,
+        greaterThan(withoutTint),
+      );
     });
   });
 }
