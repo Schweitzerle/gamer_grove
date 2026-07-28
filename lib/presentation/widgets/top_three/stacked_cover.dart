@@ -1,3 +1,4 @@
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_dither.dart';
@@ -64,7 +65,16 @@ class StackedCover extends StatelessWidget {
       button: onTap != null,
       label: label,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                // The Grove's headline is these stacked covers, not a
+                // `GameCard`, so without this the reveal fell back to measuring
+                // the whole section — a near-full-screen rectangle growing to
+                // full screen, which looks like no transition at all.
+                RevealOrigin.record(context);
+                onTap!.call();
+              },
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: radius,
