@@ -117,6 +117,13 @@ class _HeroGrain extends CustomPainter {
         tint: tint,
         peak: DetailLight.peakOn(brightness),
       ),
+      // The page below starts its grid at its own first row. For the two to be
+      // one continuous checkerboard rather than two that merely share a pitch,
+      // the artwork's grid has to end exactly where the page's begins — so it
+      // is shifted to land a whole number of periods on the seam. Without this
+      // the light and dark squares sit under each other instead of
+      // interlocking, and the join reads as a band.
+      phase: Offset(0, -(size.height % GGDither.period)),
     );
   }
 

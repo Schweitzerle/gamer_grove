@@ -34,26 +34,40 @@ abstract final class GGDither {
         .toImageSync((cell * 2).round(), (cell * 2).round());
   }
 
+  /// One period of the grid: two cells across, two down.
+  static const period = cell * 2;
+
   /// Punches the dither grid out of whatever was drawn into the current layer.
   ///
   /// Must be used inside a `saveLayer`, otherwise `dstIn` would eat the rest of
   /// the canvas along with it.
-  static Paint maskPaint() => Paint()
+  ///
+  /// [phase] shifts the grid. Two surfaces that meet — artwork above, page
+  /// below — have to be squares of one continuous checkerboard, not two grids
+  /// that happen to have the same pitch. Half a period out and the light and
+  /// dark squares sit under each other instead of interlocking, and the join
+  /// shows as a band.
+  static Paint maskPaint({Offset phase = Offset.zero}) => Paint()
     ..blendMode = BlendMode.dstIn
     ..shader = ImageShader(
       tile,
       TileMode.repeated,
       TileMode.repeated,
-      Matrix4.identity().storage,
+      Matrix4.translationValues(phase.dx, phase.dy, 0).storage,
       filterQuality: FilterQuality.none,
     );
 
   /// Fills [rect] with [gradient], seen through the dither grid.
-  static void paintGradient(Canvas canvas, Rect rect, Gradient gradient) {
+  static void paintGradient(
+    Canvas canvas,
+    Rect rect,
+    Gradient gradient, {
+    Offset phase = Offset.zero,
+  }) {
     canvas
       ..saveLayer(rect, Paint())
       ..drawRect(rect, Paint()..shader = gradient.createShader(rect))
-      ..drawRect(rect, maskPaint())
+      ..drawRect(rect, maskPaint(phase: phase))
       ..restore();
   }
 
@@ -86,31 +100,34 @@ abstract final class DitheredWashCache {
   /// How many baked washes are kept before the oldest is dropped.
   static const maxEntries = 12;
 
-  /// Baked at a coarse step so a few pixels of layout difference do not each
-  /// get their own image.
-  static const _quantum = 32.0;
-
   static final _entries = <String, ui.Image>{};
   static final _order = <String>[];
 
   /// The wash of [kind] baked for [size] in [tint].
   ///
-  /// [gradient] is only called on a miss, and describes the light for the
-  /// quantised rect the image is baked at.
+  /// [gradient] is only called on a miss, and describes the light for exactly
+  /// the rect the image is baked at.
+  ///
+  /// Baked at the size asked for, not rounded to a grid. Rounding up meant the
+  /// image had to be either stretched into place — which changes the dither's
+  /// pitch and stops it interlocking with any grain beside it — or cropped,
+  /// which moves the gradient's centre by up to the rounding. Neither is worth
+  /// the bakes it saves: a section's width does not wander, so the cache hits
+  /// just as often on exact sizes.
   static ui.Image forSize(
     String kind,
     Size size,
     Color tint,
     Gradient Function() gradient,
   ) {
-    final w = (size.width / _quantum).ceil() * _quantum;
-    final h = (size.height / _quantum).ceil() * _quantum;
+    final w = size.width.round();
+    final h = size.height.round();
     final key = '$kind/${w}x$h/${tint.toARGB32()}';
 
     final cached = _entries[key];
     if (cached != null) return cached;
 
-    final image = _bake(Size(w, h), gradient());
+    final image = _bake(Size(w.toDouble(), h.toDouble()), gradient());
     _entries[key] = image;
     _order.add(key);
     if (_order.length > maxEntries) {
@@ -130,11 +147,22 @@ abstract final class DitheredWashCache {
   }
 
   /// Draws [image] across [rect] with its own alpha scaled by [alpha].
+  ///
+  /// Taken one pixel to one pixel, never stretched: the bake is the size it is
+  /// drawn at, and scaling would change the dither's pitch — enough that the
+  /// page's checkerboard would stop interlocking with the artwork's above it
+  /// and the join would reappear as a band.
   static void draw(Canvas canvas, ui.Image image, Rect rect, double alpha) {
+    final src = Rect.fromLTWH(
+      0,
+      0,
+      rect.width.clamp(0, image.width.toDouble()),
+      rect.height.clamp(0, image.height.toDouble()),
+    );
     canvas.drawImageRect(
       image,
-      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      rect,
+      src,
+      Rect.fromLTWH(rect.left, rect.top, src.width, src.height),
       // Alpha on the paint modulates the image; the colour itself is ignored.
       Paint()..color = Color.fromRGBO(0, 0, 0, alpha),
     );
