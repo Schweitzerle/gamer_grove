@@ -224,10 +224,40 @@ class _RevealClipper extends CustomClipper<Path> {
 
 /// The global rectangle [context] occupies, for a reveal to grow from.
 ///
-/// Returns null rather than guessing when the context has no box yet — the
-/// route then falls back to the middle of the screen.
+/// Returns null rather than guessing when the context has no box — the route
+/// then falls back to the middle of the screen.
 Rect? revealOriginOf(BuildContext context) {
   final box = context.findRenderObject();
   if (box is! RenderBox || !box.hasSize) return null;
   return box.localToGlobal(Offset.zero) & box.size;
+}
+
+/// Where the tap that is about to navigate came from.
+///
+/// Navigation helpers take whatever `BuildContext` the caller has, and inside a
+/// `ListView.builder` that is the **sliver's** context, not the item's: its
+/// render object is a `RenderSliver`, so measuring it yields nothing and every
+/// reveal fell back to growing out of the middle of the screen. Only the tapped
+/// widget knows its own box, so it puts it here on the way into the callback.
+abstract final class RevealOrigin {
+  static Rect? _pending;
+
+  /// Records the box [context] occupies, for the navigation this tap triggers.
+  static void record(BuildContext context) {
+    _pending = revealOriginOf(context);
+  }
+
+  /// The recorded rectangle, cleared as it is read.
+  ///
+  /// Clearing matters: without it a later navigation from somewhere that cannot
+  /// be measured would inherit a stale rectangle and open out of whatever was
+  /// tapped last, which looks worse than growing from the middle.
+  static Rect? take() {
+    final rect = _pending;
+    _pending = null;
+    return rect;
+  }
+
+  @visibleForTesting
+  static void clear() => _pending = null;
 }

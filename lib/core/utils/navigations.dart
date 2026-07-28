@@ -37,9 +37,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 class Navigations {
   static void navigateToGameDetail(int gameId, BuildContext context) {
-    // Measured before the push, while the tapped card is still on screen: the
-    // reveal grows out of the cover you touched.
-    final origin = revealOriginOf(context);
+    // What the tapped card recorded, if it was a card; otherwise whatever the
+    // caller's own context can offer. `context` here is often a sliver's, which
+    // measures to nothing — that is why the card records for itself.
+    final origin = RevealOrigin.take() ?? revealOriginOf(context);
     Navigator.of(context).push(
       GGRevealRoute<void>.game(
         origin: origin,
