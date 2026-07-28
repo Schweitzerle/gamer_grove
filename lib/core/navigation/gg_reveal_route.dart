@@ -120,6 +120,19 @@ class _Reveal extends StatelessWidget {
   /// and there is nothing to expose.
   static const _startsAt = 0.88;
 
+  /// How deep in the shadow the arriving page starts.
+  ///
+  /// Of the three ways offered to give the reveal colour, this is the one that
+  /// does not add a second idea. Depth and light are not two effects in a cave,
+  /// they are one: what is further away is darker, and it brightens as you
+  /// reach it. So the page arrives in shadow and comes into the light at the
+  /// same rate it comes forward.
+  ///
+  /// A veil in the scrim colour rather than an `Opacity`, for the same reason
+  /// `LitSection` uses one: opacity forces an offscreen layer every frame, and
+  /// "still in the dark" is the truer description anyway.
+  static const _shadow = 0.45;
+
   /// How much of the screen an origin may already cover and still be worth
   /// growing from.
   ///
@@ -193,11 +206,24 @@ class _Reveal extends StatelessWidget {
           child: Transform.scale(
             scale: lerpDouble(_startsAt, 1, t),
             alignment: _anchor(from.center, size),
-            child: Opacity(
-              // Fades in over the first stretch, so the page does not appear
-              // fully formed inside a shape that is still growing.
-              opacity: Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
-              child: child,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Opacity(
+                  // Fades in over the first stretch, so the page does not
+                  // appear fully formed inside a shape that is still growing.
+                  opacity: Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
+                  child: child,
+                ),
+                IgnorePointer(
+                  child: ColoredBox(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .scrim
+                        .withValues(alpha: _shadow * (1 - t)),
+                  ),
+                ),
+              ],
             ),
           ),
         );
