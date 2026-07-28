@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
@@ -58,6 +59,9 @@ class GameCard extends StatelessWidget {
         button: true,
         child: GestureDetector(
           onTap: () async {
+            // Measured here, from the card's own context, because the caller
+            // usually hands the navigation helper a sliver's context instead.
+            RevealOrigin.record(context);
             await HapticFeedback.lightImpact();
             onTap.call();
           },
