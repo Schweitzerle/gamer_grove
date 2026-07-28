@@ -104,6 +104,47 @@ void main() {
     await tester.pump(at);
   }
 
+  testWidgets('the depth scale exposes no edge, even from a corner',
+      (tester) async {
+    // The page comes forward as the shape opens, and a transform scaled about
+    // the middle of the screen would leave the content short of a clip opening
+    // near an edge. Anchoring the scale at the tap is what prevents that, and
+    // this is the check: the outgoing page is red, so any gap between the clip
+    // and the content behind it shows up as red and cannot be missed.
+    tester.view.physicalSize = const Size(360, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        navigatorKey: navigator,
+        home: const ColoredBox(color: Color(0xFFFF0000)),
+      ),
+    );
+
+    unawaited(
+      navigator.currentState!.push(
+        GGRevealRoute<void>.game(
+          // Hard against the top-left corner: the worst case for a scale.
+          origin: const Rect.fromLTWH(6, 8, 150, 225),
+          builder: (_) => const ColoredBox(color: Color(0xFF1E352E)),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 90));
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/reveal_corner_no_gap.png'),
+    );
+
+    await tester.pumpAndSettle();
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+  });
+
   for (final shape in ['game', 'grove']) {
     for (final at in [60, 130, 220]) {
       testWidgets('$shape reveal at ${at}ms', (tester) async {
