@@ -48,11 +48,20 @@ class GGRevealRoute<T> extends PageRouteBuilder<T> {
   })  : _shape = shape,
         super(
           pageBuilder: (context, _, __) => builder(context),
-          // Both already exist as tokens: unhurried on the way in, brisk on the
-          // way back, because returning is not news.
-          transitionDuration: GGTokens.standard.durationNormal,
-          reverseTransitionDuration: GGTokens.standard.durationFast,
+          transitionDuration: forward,
+          reverseTransitionDuration: back,
         );
+
+  /// How long the reveal takes on the way in.
+  ///
+  /// Not `durationNormal`. That token is 250ms and it is right for the small
+  /// moves it was made for, but a shape crossing the whole screen needs longer
+  /// to be seen at all — measured against the curve below, 250ms put 91% of the
+  /// motion into the first 100ms, and it was reported as "no animation".
+  static const forward = Duration(milliseconds: 350);
+
+  /// And on the way back, because returning is not news.
+  static const back = Duration(milliseconds: 200);
 
   /// Where on screen the tap came from, in global coordinates.
   ///
@@ -98,21 +107,50 @@ class _Reveal extends StatelessWidget {
   /// Where a reveal starts when the tap had no measurable box.
   static const _fallbackSize = Size(160, 240);
 
+  /// How much of the screen an origin may already cover and still be worth
+  /// growing from.
+  ///
+  /// A measurement that returns most of the screen — a whole section rather
+  /// than the card inside it — leaves nothing to grow: the reveal starts at
+  /// almost full size and ends at full size, which reads as no transition at
+  /// all. Where the tap was is still worth keeping; how big it claimed to be
+  /// is not.
+  static const _maxOriginArea = 0.5;
+
+  /// [candidate] if it is small enough to open out of, otherwise a card-sized
+  /// rectangle in the same place.
+  static Rect _usable(Rect candidate, Rect full) {
+    final area = candidate.width * candidate.height;
+    if (area <= full.width * full.height * _maxOriginArea) return candidate;
+    return Rect.fromCenter(
+      center: candidate.center,
+      width: _fallbackSize.width,
+      height: _fallbackSize.height,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final full = Offset.zero & size;
-    final from = origin ??
-        Rect.fromCenter(
-          center: full.center,
-          width: _fallbackSize.width,
-          height: _fallbackSize.height,
-        );
+    final measured = origin;
+    final from = measured == null
+        ? Rect.fromCenter(
+            center: full.center,
+            width: _fallbackSize.width,
+            height: _fallbackSize.height,
+          )
+        : _usable(measured, full);
 
     final curved = CurvedAnimation(
       parent: animation,
-      // Material's emphasised curve: quick to commit, unhurried to settle.
-      curve: Curves.easeInOutCubicEmphasized,
+      // Decelerating, not emphasised. Material's emphasised curve reaches 63%
+      // of its motion in the first 50ms and 91% in 100ms — the reveal was
+      // effectively over before it could be perceived, whatever the duration
+      // said. This one answers the tap immediately and then spends the rest of
+      // the time somewhere you can watch it: 38% at 50ms, 66% at 100ms, 82% at
+      // 150ms.
+      curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
 

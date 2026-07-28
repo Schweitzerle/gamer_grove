@@ -37,33 +37,39 @@ class DetailLight extends StatelessWidget {
   /// it, and the page is unmistakably dark again well before the media gallery.
   static const reach = 560.0;
 
-  /// Alpha where the light is strongest, directly under the artwork.
+  /// Alpha where the light is strongest, directly under the artwork — per
+  /// theme, because the two have very different room.
   ///
-  /// Measured against the palette rather than chosen by eye, the same way
-  /// `LitSection.maxVeil` was. Every tint the cover extractor can produce was
-  /// composited over both surfaces and checked against the foregrounds that sit
-  /// in the light:
+  /// Measured by compositing every tint `CoverTint` can produce over each
+  /// surface and checking the foregrounds that stand in the light:
   ///
   /// | | secondary text | gold accent |
   /// |---|---|---|
   /// | dark | 0.39 | 0.47 |
   /// | light | 0.26 | **0.17** |
   ///
-  /// The gold accent on paper binds, and one constant serves both themes, so
-  /// the light stops just under it. The consequence is honest: this is a
-  /// quieter light than a mock-up would promise, and it has to be — the
-  /// alternative is text that fails AA on a yellow cover.
-  static const peak = 0.16;
+  /// The first version used one constant for both and took 0.16, which meant
+  /// the light theme's ceiling decided what the dark theme — the default — was
+  /// allowed to do. At 0.16 on `#0B1614` the lit pixel reaches a relative
+  /// luminance of 0.014, barely one surface elevation step, and the dither
+  /// leaves half the pixels untouched on top of that. It was reported as "no
+  /// difference I can see", and that was correct.
+  ///
+  /// This is not a relaxation of the contrast rule. It is the same rule applied
+  /// to each surface instead of to the stricter of the two.
+  static double peakOn(Brightness brightness) =>
+      brightness == Brightness.dark ? 0.34 : 0.16;
 
   /// Alpha at the halfway point, where the light is already mostly spent.
-  static const double _mid = peak * 0.34;
+  static double _midOf(double peak) => peak * 0.34;
 
   @override
   Widget build(BuildContext context) {
+    final peak = peakOn(Theme.of(context).brightness);
     return IgnorePointer(
       child: RepaintBoundary(
         child: CustomPaint(
-          painter: _DetailLightPainter(tint, intensity),
+          painter: _DetailLightPainter(tint, intensity, peak),
         ),
       ),
     );
@@ -71,17 +77,20 @@ class DetailLight extends StatelessWidget {
 }
 
 class _DetailLightPainter extends CustomPainter {
-  const _DetailLightPainter(this.tint, this.intensity);
+  const _DetailLightPainter(this.tint, this.intensity, this.peak);
 
   final Color tint;
   final double intensity;
+  final double peak;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty || intensity <= 0.01) return;
 
     final image = DitheredWashCache.forSize(
-      'detail',
+      // The peak belongs in the key: the two themes bake different washes for
+      // the same tint, and sharing one would give whichever drew first.
+      'detail/$peak',
       size,
       tint,
       () => RadialGradient(
@@ -90,8 +99,8 @@ class _DetailLightPainter extends CustomPainter {
         center: Alignment.topCenter,
         radius: 1.3,
         colors: [
-          tint.withValues(alpha: DetailLight.peak),
-          tint.withValues(alpha: DetailLight._mid),
+          tint.withValues(alpha: peak),
+          tint.withValues(alpha: DetailLight._midOf(peak)),
           tint.withValues(alpha: 0),
         ],
         stops: const [0, 0.45, 1],
@@ -107,7 +116,9 @@ class _DetailLightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DetailLightPainter oldDelegate) =>
-      oldDelegate.tint != tint || oldDelegate.intensity != intensity;
+      oldDelegate.tint != tint ||
+      oldDelegate.intensity != intensity ||
+      oldDelegate.peak != peak;
 }
 
 /// The surface of a page standing in [tint]'s light at its strongest.
@@ -115,5 +126,10 @@ class _DetailLightPainter extends CustomPainter {
 /// The hero's gradients have to end in this rather than in plain `surface`,
 /// otherwise the artwork fades out into one colour and the content below starts
 /// in another, and the seam between them is visible as a line.
-Color litSurface(Color surface, Color tint) =>
-    Color.alphaBlend(tint.withValues(alpha: DetailLight.peak), surface);
+///
+/// Takes the whole scheme rather than just the surface, because how strong the
+/// light may be depends on which theme it is standing in.
+Color litSurface(ColorScheme scheme, Color tint) => Color.alphaBlend(
+      tint.withValues(alpha: DetailLight.peakOn(scheme.brightness)),
+      scheme.surface,
+    );

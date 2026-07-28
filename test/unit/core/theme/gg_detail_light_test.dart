@@ -38,7 +38,7 @@ void main() {
       for (final fg in foregrounds.entries) {
         test('${fg.key} still reads on ${entry.key} under any cover', () {
           for (final tint in everyTint) {
-            final lit = litSurface(scheme.surface, tint);
+            final lit = litSurface(scheme, tint);
             expect(
               lit.contrastAgainst(fg.value),
               greaterThanOrEqualTo(4.5),
@@ -50,9 +50,17 @@ void main() {
       }
     }
 
-    test('peak sits below the measured ceiling with room to spare', () {
-      // The binding case is the gold accent on paper, which gives out at 0.17.
-      expect(DetailLight.peak, lessThan(0.17));
+    test('each theme stops below its own measured ceiling', () {
+      // Gold on paper gives out at 0.17; on the dark surface secondary text
+      // holds to 0.39 and gold to 0.47. One constant for both is what made the
+      // dark theme — the default — invisible.
+      expect(DetailLight.peakOn(Brightness.light), lessThan(0.17));
+      expect(DetailLight.peakOn(Brightness.dark), lessThan(0.39));
+      expect(
+        DetailLight.peakOn(Brightness.dark),
+        greaterThan(DetailLight.peakOn(Brightness.light)),
+        reason: 'the dark surface has far more room and should use it',
+      );
     });
   });
 

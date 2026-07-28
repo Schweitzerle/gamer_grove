@@ -107,7 +107,7 @@ void main() {
         wrap(const EntityHeroOverlays(tint: tint), theme: theme),
       );
 
-      expect(_footColour(tester), litSurface(theme.colorScheme.surface, tint));
+      expect(_footColour(tester), litSurface(theme.colorScheme, tint));
       expect(_footColour(tester), isNot(theme.colorScheme.surface));
     });
   });

@@ -23,8 +23,9 @@ class EntityHeroOverlays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = Theme.of(context).colorScheme.surface;
-    final foot = tint == null ? surface : litSurface(surface, tint!);
+    final scheme = Theme.of(context).colorScheme;
+    final surface = scheme.surface;
+    final foot = tint == null ? surface : litSurface(scheme, tint!);
 
     return Stack(
       children: [

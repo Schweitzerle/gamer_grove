@@ -18,7 +18,7 @@ void main() {
   /// surface, then rows of content standing in what is left of the light.
   Widget page(Color tint, ThemeData theme) {
     final scheme = theme.colorScheme;
-    final lit = litSurface(scheme.surface, tint);
+    final lit = litSurface(scheme, tint);
 
     return Scaffold(
       body: SingleChildScrollView(

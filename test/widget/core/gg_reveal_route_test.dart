@@ -24,7 +24,7 @@ void main() {
   Future<void> pushHalfway(WidgetTester tester, Route<void> route) async {
     unawaited(navigator.currentState!.push(route));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 120));
+    await tester.pump(const Duration(milliseconds: 60));
   }
 
   Path clipNow(WidgetTester tester, Size size) {
@@ -32,13 +32,19 @@ void main() {
     return clip.clipper!.getClip(size);
   }
 
-  test('the reveal runs on tokens the app already had', () {
+  test('the reveal is long enough to be seen', () {
     final route = GGRevealRoute<void>.game(builder: (_) => destination);
 
-    expect(route.transitionDuration, GGTokens.standard.durationNormal);
-    expect(route.reverseTransitionDuration, GGTokens.standard.durationFast);
+    expect(route.transitionDuration, GGRevealRoute.forward);
+    expect(route.reverseTransitionDuration, GGRevealRoute.back);
     // Returning is not news, so it is the brisker of the two.
     expect(route.reverseTransitionDuration, lessThan(route.transitionDuration));
+    // Longer than durationNormal on purpose: a shape crossing the whole screen
+    // in 250ms was reported as no animation at all.
+    expect(
+      route.transitionDuration,
+      greaterThan(GGTokens.standard.durationNormal),
+    );
   });
 
   testWidgets('a game opens out of the cover you tapped', (tester) async {
@@ -72,6 +78,33 @@ void main() {
 
     expect(find.text('Detail'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an origin covering the screen is not grown from',
+      (tester) async {
+    // The Grove's headline is a stack of covers, not a GameCard, so the reveal
+    // fell back to measuring the whole section — most of the screen. Growing
+    // from almost-full-size to full-size is indistinguishable from no
+    // transition, which is exactly how it was reported.
+    const screen = Size(800, 600);
+    await tester.pumpWidget(app());
+
+    await pushHalfway(
+      tester,
+      GGRevealRoute<void>.game(
+        origin: const Rect.fromLTWH(0, 0, 780, 560),
+        builder: (_) => destination,
+      ),
+    );
+
+    final early = clipNow(tester, screen).getBounds();
+    expect(
+      early.width,
+      lessThan(screen.width * 0.9),
+      reason: 'a reveal that starts at full width has nothing to show',
+    );
+
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a person opens through a different shape than a game',
