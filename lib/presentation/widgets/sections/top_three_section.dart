@@ -71,8 +71,9 @@ class TopThreeSection extends StatelessWidget {
               else
                 TopThreeStack(
                   games: games.take(TopThreeStack.slots).toList(),
-                  onOpenGame: (game) =>
-                      Navigations.navigateToGameDetail(game.id, context),
+                  onOpenGame: (game) => Navigations.navigateToGameDetail(
+                      game.id, context,
+                      known: game),
                 ),
               if (!isLoading && _isOwn && games.length < TopThreeStack.slots)
                 Padding(

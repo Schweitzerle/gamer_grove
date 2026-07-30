@@ -36,7 +36,17 @@ import 'package:gamer_grove/presentation/widgets/sections/franchise_collection_s
 import 'package:url_launcher/url_launcher.dart';
 
 class Navigations {
-  static void navigateToGameDetail(int gameId, BuildContext context) {
+  /// Opens a game.
+  ///
+  /// Pass [known] whenever the caller has the game in hand — nearly every
+  /// caller does, since it just drew a card from it. The detail page then draws
+  /// its head on the first frame instead of opening onto a spinner, and only
+  /// what the card could not know is waited for.
+  static void navigateToGameDetail(
+    int gameId,
+    BuildContext context, {
+    Game? known,
+  }) {
     // What the tapped card recorded, if it was a card; otherwise whatever the
     // caller's own context can offer. `context` here is often a sliver's, which
     // measures to nothing — that is why the card records for itself.
@@ -53,7 +63,7 @@ class Navigations {
               value: context.read<AuthBloc>(),
             ),
           ],
-          child: GameDetailPage(gameId: gameId),
+          child: GameDetailPage(gameId: gameId, knownGame: known),
         ),
       ),
     );

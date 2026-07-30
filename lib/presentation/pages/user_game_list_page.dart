@@ -308,7 +308,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
 
         return GameCard(
           game: game,
-          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          onTap: () =>
+              Navigations.navigateToGameDetail(game.id, context, known: game),
           // Pass other user's states only if viewing different user
           otherUserId: isDifferentUser ? widget.userId : null,
           otherUserStates: isDifferentUser
@@ -343,7 +344,8 @@ class _UserGameListPageState extends State<UserGameListPage> {
 
         return GameCard(
           game: game,
-          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          onTap: () =>
+              Navigations.navigateToGameDetail(game.id, context, known: game),
           // Pass other user's states only if viewing different user
           otherUserId: isDifferentUser ? widget.userId : null,
           otherUserStates: isDifferentUser

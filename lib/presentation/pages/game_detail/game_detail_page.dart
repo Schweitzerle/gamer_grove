@@ -27,8 +27,21 @@ import 'package:gamer_grove/presentation/widgets/sections/related_games/similar_
 import 'package:gamer_grove/presentation/widgets/sections/related_games/versions_remakes_section.dart';
 
 class GameDetailPage extends StatefulWidget {
-  const GameDetailPage({required this.gameId, super.key});
+  const GameDetailPage({required this.gameId, this.knownGame, super.key});
+
   final int gameId;
+
+  /// What the card that was tapped already knew — cover, name, rating, genres.
+  ///
+  /// The page used to throw this away and load from nothing, so the reveal
+  /// opened onto a spinner: a transition that by construction could not reveal
+  /// anything. With it the head of the page is drawn on the first frame and
+  /// only the rest waits, which is also what makes the arriving colour the
+  /// colour of the cover you touched.
+  ///
+  /// Null when there was nothing to hand over — a deep link, or a caller that
+  /// only has an id. The page then loads as it always did.
+  final Game? knownGame;
 
   @override
   State<GameDetailPage> createState() => _GameDetailPageState();
@@ -38,7 +51,14 @@ class _GameDetailPageState extends State<GameDetailPage>
     with TickerProviderStateMixin {
   String? _currentUserId;
   late GameBloc _gameBloc;
-  late TabController _mediaTabController;
+
+  /// Only exists once a game with media has arrived.
+  ///
+  /// It was `late` and disposed unconditionally, so leaving the page for a game
+  /// with no screenshots, videos or artworks threw a
+  /// `LateInitializationError` — and so did leaving it before the request came
+  /// back, which the preview state made easy to reach.
+  TabController? _mediaTabController;
   late ScrollController _scrollController;
   bool _isHeaderCollapsed = false;
 
@@ -62,8 +82,16 @@ class _GameDetailPageState extends State<GameDetailPage>
     }
   }
 
+  /// The Grove's own bloc, held so the cache can be refreshed on the way out.
+  ///
+  /// Captured here rather than read in `dispose`: looking up an ancestor from a
+  /// deactivated element is unsafe and throws once the page is torn down at the
+  /// wrong moment — leaving before the request returned was enough.
+  GameBloc? _callerBloc;
+
   void _setupBloc() {
     _gameBloc = sl<GameBloc>();
+    _callerBloc = context.read<GameBloc>();
     final authState = context.read<AuthBloc>().state;
 
     if (authState is AuthAuthenticated) {
@@ -86,19 +114,19 @@ class _GameDetailPageState extends State<GameDetailPage>
     if (game.videos.isNotEmpty) tabCount++;
     if (game.artworks.isNotEmpty) tabCount++;
 
-    if (tabCount > 0) {
-      _mediaTabController = TabController(length: tabCount, vsync: this);
-    }
+    if (tabCount == 0) return;
+    if (_mediaTabController?.length == tabCount) return;
+    _mediaTabController?.dispose();
+    _mediaTabController = TabController(length: tabCount, vsync: this);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _mediaTabController.dispose();
+    _mediaTabController?.dispose();
 
-    // 🎯 REFRESH CACHE - Ensure home screen shows updated game data
-    // This triggers a cache refresh when navigating back from detail screen
-    context.read<GameBloc>().add(RefreshCacheEvent());
+    // Refresh the cache so the Grove shows updated game data on the way back.
+    _callerBloc?.add(RefreshCacheEvent());
 
     super.dispose();
   }
@@ -118,7 +146,11 @@ class _GameDetailPageState extends State<GameDetailPage>
         body: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
             if (state is GameDetailsLoading) {
-              return _buildLiveLoadingState(); // ✅ NEW: Live Loading
+              // Everything the tapped card knew is already on screen; only what
+              // it could not know is still coming.
+              final known = widget.knownGame;
+              if (known != null) return _buildPreview(known);
+              return _buildLiveLoadingState();
             }
 
             if (state is GameError) {
@@ -143,9 +175,54 @@ class _GameDetailPageState extends State<GameDetailPage>
               );
             }
 
-            return _buildLiveLoadingState(); // ✅ Default to Live Loading
+            final known = widget.knownGame;
+            if (known != null) return _buildPreview(known);
+            return _buildLiveLoadingState();
           },
         ),
+      ),
+    );
+  }
+
+  /// The page as far as the tapped card could describe it.
+  ///
+  /// The same hero and the same light as the finished page — it is the same
+  /// page, with the parts that need a request still on their way. Under it a
+  /// row of placeholders, so the arriving sections push nothing around.
+  Widget _buildPreview(Game game) {
+    return ChamberTint(
+      coverUrls: [game.coverUrl],
+      builder: (context, tint) => CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          _buildSliverAppBar(game, tint),
+          SliverToBoxAdapter(
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.surface,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: DetailLight.reach,
+                    child: _ArrivingLight(tint: tint),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: AppConstants.paddingLarge,
+                    ),
+                    child: Semantics(
+                      label: 'Loading the rest of ${game.name}',
+                      liveRegion: true,
+                      child: const _PendingSections(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -385,6 +462,68 @@ class _ArrivingLight extends StatelessWidget {
           intensity: Curves.easeOut.transform(rise),
         );
       },
+    );
+  }
+}
+
+/// Placeholders for the sections that are still on their way.
+///
+/// Shaped like what replaces them, so nothing jumps when the request lands.
+class _PendingSections extends StatelessWidget {
+  const _PendingSections();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return ExcludeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final width in const [0.45, 0.6, 0.35])
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppConstants.paddingMedium,
+                0,
+                AppConstants.paddingMedium,
+                AppConstants.paddingLarge,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FractionallySizedBox(
+                    widthFactor: width,
+                    child: Container(
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppConstants.paddingMedium),
+                  SizedBox(
+                    height: 180,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 3,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppConstants.paddingMedium),
+                      itemBuilder: (context, _) => Container(
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

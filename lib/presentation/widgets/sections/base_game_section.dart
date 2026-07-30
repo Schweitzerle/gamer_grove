@@ -123,7 +123,8 @@ abstract class BaseGameSection extends StatelessWidget {
             margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
             child: GameCard(
               game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                  known: game),
               // Pass other user's states only if viewing different user
               otherUserId: isDifferentUser ? currentUserId : null,
               otherUserStates: isDifferentUser
