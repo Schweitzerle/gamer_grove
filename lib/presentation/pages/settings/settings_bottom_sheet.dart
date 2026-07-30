@@ -173,6 +173,16 @@ class _LegalLinks extends StatelessWidget {
           ),
         ),
         ListTile(
+          leading: const Icon(Icons.description_outlined),
+          title: const Text('AGB'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => unawaited(
+            Navigator.of(context).push(
+              LegalDocumentPage.route(LegalDocument.agb),
+            ),
+          ),
+        ),
+        ListTile(
           leading: const Icon(Icons.gavel_outlined),
           title: const Text('Datenschutz & Impressum'),
           subtitle: const Text('Deutsche Fassung'),
