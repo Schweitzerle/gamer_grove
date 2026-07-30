@@ -116,6 +116,21 @@ void main() {
     );
   });
 
+  testWidgets('the hero is out of focus until the game arrives',
+      (tester) async {
+    // The chamber below read as a section of the page rather than as a state of
+    // it. A blurred hero says "not yet" in a way a sharp one with a list under
+    // it cannot.
+    await pump(tester, knownGame: known);
+    expect(find.byType(ImageFiltered), findsOneWidget);
+  });
+
+  testWidgets('the steps name the game rather than the database',
+      (tester) async {
+    await pump(tester, knownGame: known);
+    expect(find.text('Opening Horizon Zero Dawn'), findsOneWidget);
+  });
+
   testWidgets('the wait is announced rather than only drawn', (tester) async {
     final handle = tester.ensureSemantics();
     await pump(tester, knownGame: known);
