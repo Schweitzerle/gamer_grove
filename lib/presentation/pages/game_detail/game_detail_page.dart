@@ -169,7 +169,7 @@ class _GameDetailPageState extends State<GameDetailPage>
                   controller: _scrollController,
                   slivers: [
                     _buildSliverAppBar(game, tint),
-                    _ArrivesLast(sliver: _buildGameContent(game, tint)),
+                    _buildGameContent(game, tint),
                   ],
                 ),
               );
@@ -541,12 +541,15 @@ class _ArrivesLast extends StatelessWidget {
 
   final Widget sliver;
 
-  /// The reveal is this far along before the page's body starts to show.
+  /// The reveal is this far along before the placeholders show at all.
   ///
-  /// Late, because the aperture is deliberately slow: at 0.55 the shape is
-  /// barely half open and the body would be arriving while the point of the
-  /// transition is still being made.
-  static const _startsAt = 0.72;
+  /// Almost the end, and that is the point: if the request comes back while
+  /// the shape is still opening — which is the normal case — the page goes
+  /// straight from cover to content and the shimmer is never seen. The
+  /// placeholders are what a slow network gets, not a stage everyone passes
+  /// through. Real content is never gated on the route: if it is ready, it is
+  /// shown.
+  static const _startsAt = 0.92;
 
   @override
   Widget build(BuildContext context) {

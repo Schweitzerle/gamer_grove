@@ -234,59 +234,122 @@ class _Reveal extends StatelessWidget {
       child: child,
       builder: (context, child) {
         final t = curved.value;
-        return ClipPath(
-          clipper: _RevealClipper(
-            shape: shape,
-            from: from,
-            to: full,
-            t: aperture.value,
-          ),
-          // The aperture opens where the finger was; the cover sits at the top
-          // of the page. Without this the small opening shows whatever happens
-          // to be in the middle of the arriving page — placeholders — and the
-          // reveal has nothing to reveal. So the page arrives shifted, with its
-          // cover standing behind the aperture, and slides into place as the
-          // shape opens.
-          child: Transform.translate(
-            // Tracks the aperture, not the content curve. The cover has to be
-            // *behind the opening* the whole way, and the two curves differ by
-            // design — driving this from the faster one moved the cover up and
-            // out of the shape while the shape was still small, leaving an
-            // aperture with nothing but dark page in it.
-            offset: Offset(
-                  from.center.dx - size.width / 2,
-                  from.center.dy - focus,
-                ) *
-                (1 - aperture.value),
-            child: Transform.scale(
-              scale: lerpDouble(_startsAt, 1, t),
-              alignment: _anchor(from.center, size),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Opacity(
-                    // Fades in over the first stretch, so the page does not
-                    // appear fully formed inside a shape that is still growing.
-                    opacity:
-                        Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
-                    child: child,
+        final clipper = _RevealClipper(
+          shape: shape,
+          from: from,
+          to: full,
+          t: aperture.value,
+        );
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipPath(
+              clipper: clipper,
+              // The aperture opens where the finger was; the cover sits at the top
+              // of the page. Without this the small opening shows whatever happens
+              // to be in the middle of the arriving page — placeholders — and the
+              // reveal has nothing to reveal. So the page arrives shifted, with its
+              // cover standing behind the aperture, and slides into place as the
+              // shape opens.
+              child: Transform.translate(
+                // Tracks the aperture, not the content curve. The cover has to be
+                // *behind the opening* the whole way, and the two curves differ by
+                // design — driving this from the faster one moved the cover up and
+                // out of the shape while the shape was still small, leaving an
+                // aperture with nothing but dark page in it.
+                offset: Offset(
+                      from.center.dx - size.width / 2,
+                      from.center.dy - focus,
+                    ) *
+                    (1 - aperture.value),
+                child: Transform.scale(
+                  scale: lerpDouble(_startsAt, 1, t),
+                  alignment: _anchor(from.center, size),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Opacity(
+                        // Fades in over the first stretch, so the page does not
+                        // appear fully formed inside a shape that is still growing.
+                        opacity:
+                            Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
+                        child: child,
+                      ),
+                      IgnorePointer(
+                        child: ColoredBox(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .scrim
+                              .withValues(alpha: _shadow * (1 - t)),
+                        ),
+                      ),
+                    ],
                   ),
-                  IgnorePointer(
-                    child: ColoredBox(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .scrim
-                          .withValues(alpha: _shadow * (1 - t)),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            // The opening needs an edge, or it is not an opening.
+            //
+            // Measured rather than assumed: the page is shifted so the cover
+            // stands behind the aperture, which means the window and its
+            // content are the same rectangle — outside it the Grove is
+            // near-black, and inside it, beyond the cover, so is the arriving
+            // page. The only visible boundary was the cover's own, so what a
+            // tester saw was a cover growing, never a window opening. A rim of
+            // the app's own light gives the shape a border it can be seen by:
+            // 5.5:1 against the cave, 3.5:1 on paper.
+            IgnorePointer(
+              child: CustomPaint(
+                painter: _ApertureRim(
+                  clipper: clipper,
+                  colour: Theme.of(context).colorScheme.primary,
+                  // Brightest while the opening is small, gone once it has
+                  // reached the edges — a rim around the whole screen would
+                  // just be a frame.
+                  strength: 1 - Curves.easeIn.transform(aperture.value),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
+}
+
+/// The lit edge of the opening.
+class _ApertureRim extends CustomPainter {
+  const _ApertureRim({
+    required this.clipper,
+    required this.colour,
+    required this.strength,
+  });
+
+  final CustomClipper<Path> clipper;
+  final Color colour;
+  final double strength;
+
+  /// Thickness at full strength, in logical pixels.
+  static const _width = 2.5;
+
+  /// Peak opacity, from the contrast measurement.
+  static const _peak = 0.8;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (strength <= 0.02 || size.isEmpty) return;
+    canvas.drawPath(
+      clipper.getClip(size),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _width
+        ..color = colour.withValues(alpha: _peak * strength),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ApertureRim oldDelegate) =>
+      oldDelegate.strength != strength || oldDelegate.colour != colour;
 }
 
 class _RevealClipper extends CustomClipper<Path> {
