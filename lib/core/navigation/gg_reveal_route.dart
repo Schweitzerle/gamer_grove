@@ -31,8 +31,19 @@ enum _RevealShape {
 /// nothing to be unique.
 class GGRevealRoute<T> extends PageRouteBuilder<T> {
   /// Opening a game.
-  GGRevealRoute.game({required WidgetBuilder builder, Rect? origin})
-      : this._(builder: builder, origin: origin, shape: _RevealShape.card);
+  ///
+  /// [focus] is the point of the arriving page that should be standing behind
+  /// the aperture when it opens — for a game, the middle of its cover.
+  GGRevealRoute.game({
+    required WidgetBuilder builder,
+    Rect? origin,
+    double focus = _Reveal.heroFocus,
+  }) : this._(
+          builder: builder,
+          origin: origin,
+          shape: _RevealShape.card,
+          focus: focus,
+        );
 
   /// Entering someone else's grove.
   ///
@@ -45,7 +56,9 @@ class GGRevealRoute<T> extends PageRouteBuilder<T> {
     required WidgetBuilder builder,
     required this.origin,
     required _RevealShape shape,
+    double focus = _Reveal.heroFocus,
   })  : _shape = shape,
+        _focus = focus,
         super(
           pageBuilder: (context, _, __) => builder(context),
           transitionDuration: forward,
@@ -70,6 +83,7 @@ class GGRevealRoute<T> extends PageRouteBuilder<T> {
   final Rect? origin;
 
   final _RevealShape _shape;
+  final double _focus;
 
   @override
   Widget buildTransitions(
@@ -86,6 +100,7 @@ class GGRevealRoute<T> extends PageRouteBuilder<T> {
       animation: animation,
       origin: origin,
       shape: _shape,
+      focus: _focus,
       child: child,
     );
   }
@@ -96,13 +111,23 @@ class _Reveal extends StatelessWidget {
     required this.animation,
     required this.origin,
     required this.shape,
+    required this.focus,
     required this.child,
   });
 
   final Animation<double> animation;
   final Rect? origin;
   final _RevealShape shape;
+
+  /// How far down the arriving page the thing worth seeing sits.
+  final double focus;
+
   final Widget child;
+
+  /// The middle of a game page's cover, measured from the top of the page.
+  ///
+  /// Half of the detail hero's expanded height.
+  static const heroFocus = 175.0;
 
   /// Where a reveal starts when the tap had no measurable box.
   static const _fallbackSize = Size(160, 240);
@@ -203,27 +228,41 @@ class _Reveal extends StatelessWidget {
             to: full,
             t: t,
           ),
-          child: Transform.scale(
-            scale: lerpDouble(_startsAt, 1, t),
-            alignment: _anchor(from.center, size),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Opacity(
-                  // Fades in over the first stretch, so the page does not
-                  // appear fully formed inside a shape that is still growing.
-                  opacity: Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
-                  child: child,
-                ),
-                IgnorePointer(
-                  child: ColoredBox(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .scrim
-                        .withValues(alpha: _shadow * (1 - t)),
+          // The aperture opens where the finger was; the cover sits at the top
+          // of the page. Without this the small opening shows whatever happens
+          // to be in the middle of the arriving page — placeholders — and the
+          // reveal has nothing to reveal. So the page arrives shifted, with its
+          // cover standing behind the aperture, and slides into place as the
+          // shape opens.
+          child: Transform.translate(
+            offset: Offset(
+                  from.center.dx - size.width / 2,
+                  from.center.dy - focus,
+                ) *
+                (1 - t),
+            child: Transform.scale(
+              scale: lerpDouble(_startsAt, 1, t),
+              alignment: _anchor(from.center, size),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Opacity(
+                    // Fades in over the first stretch, so the page does not
+                    // appear fully formed inside a shape that is still growing.
+                    opacity:
+                        Curves.easeOut.transform((t * 1.7).clamp(0.0, 1.0)),
+                    child: child,
                   ),
-                ),
-              ],
+                  IgnorePointer(
+                    child: ColoredBox(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .scrim
+                          .withValues(alpha: _shadow * (1 - t)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -169,7 +169,7 @@ class _GameDetailPageState extends State<GameDetailPage>
                   controller: _scrollController,
                   slivers: [
                     _buildSliverAppBar(game, tint),
-                    _buildGameContent(game, tint),
+                    _ArrivesLast(sliver: _buildGameContent(game, tint)),
                   ],
                 ),
               );
@@ -196,29 +196,31 @@ class _GameDetailPageState extends State<GameDetailPage>
         controller: _scrollController,
         slivers: [
           _buildSliverAppBar(game, tint),
-          SliverToBoxAdapter(
-            child: ColoredBox(
-              color: Theme.of(context).colorScheme.surface,
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: DetailLight.reach,
-                    child: _ArrivingLight(tint: tint),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: AppConstants.paddingLarge,
+          _ArrivesLast(
+            sliver: SliverToBoxAdapter(
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surface,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: DetailLight.reach,
+                      child: _ArrivingLight(tint: tint),
                     ),
-                    child: Semantics(
-                      label: 'Loading the rest of ${game.name}',
-                      liveRegion: true,
-                      child: const _PendingSections(),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppConstants.paddingLarge,
+                      ),
+                      child: Semantics(
+                        label: 'Loading the rest of ${game.name}',
+                        liveRegion: true,
+                        child: const _PendingSections(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -523,6 +525,42 @@ class _PendingSections extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Content that waits for the reveal to finish before it appears.
+///
+/// While the aperture is small it stands in front of the cover, and the whole
+/// point of the transition is that the cover is what you see through it. So
+/// everything below the hero holds back until the shape is most of the way
+/// open, then rises the last few pixels into place.
+class _ArrivesLast extends StatelessWidget {
+  const _ArrivesLast({required this.sliver});
+
+  final Widget sliver;
+
+  /// The reveal is this far along before the page's body starts to show.
+  static const _startsAt = 0.55;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    final animation = route?.animation;
+    if (animation == null || MediaQuery.disableAnimationsOf(context)) {
+      return sliver;
+    }
+
+    // Listening to the route's own animation rather than running a controller:
+    // the body and the aperture are one movement and must not drift.
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) => SliverOpacity(
+        opacity: Curves.easeOut.transform(
+          ((animation.value - _startsAt) / (1 - _startsAt)).clamp(0.0, 1.0),
+        ),
+        sliver: sliver,
       ),
     );
   }
