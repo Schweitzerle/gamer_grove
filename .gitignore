@@ -55,3 +55,6 @@ key.properties
 
 # Generated Envied file
 lib/core/env/env.g.dart
+# Debug symbols for a release build. Kept out of git — they are per-build and
+# large; Sentry is where they belong.
+build/symbols/
