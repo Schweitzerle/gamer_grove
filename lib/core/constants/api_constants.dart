@@ -1,10 +1,9 @@
 import 'package:gamer_grove/core/env/env.dart';
 
 class ApiConstants {
-  // IGDB API
-  static const String igdbBaseUrl = 'https://api.igdb.com/v4';
-  static final String igdbClientId = Env.igdbClientId;
-  static final String igdbClientSecret = Env.igdbClientSecret;
+  // No IGDB base URL here any more: the app reaches IGDB only through the
+  // `igdb` edge function, which is the only place that knows the address and
+  // the only place that holds the credentials.
 
   // Supabase
   static final String supabaseUrl = Env.supabaseUrl;
