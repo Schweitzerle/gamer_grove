@@ -1,7 +1,7 @@
 // lib/data/datasources/remote/igdb/igdb_datasource_impl.dart
 
+import 'package:gamer_grove/core/env/env.dart';
 import 'package:dio/dio.dart';
-import 'package:gamer_grove/core/constants/api_constants.dart';
 import 'package:gamer_grove/core/errors/exceptions.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
@@ -39,17 +39,26 @@ import 'package:gamer_grove/data/models/theme_model.dart';
 /// 3. Make POST request to appropriate endpoint
 /// 4. Parse JSON response to typed models
 /// 5. Handle errors appropriately
+/// Talks to IGDB through our own proxy rather than to IGDB directly.
+///
+/// Calling IGDB from the app meant carrying IGDB_CLIENT_SECRET on every device
+/// in order to mint Twitch tokens. `envied` masks that constant with XOR, which
+/// raises the effort of pulling it out and nothing more — the mask ships beside
+/// the masked bytes. The only honest statement about a secret in a client is
+/// that it is not one.
+///
+/// The credentials now live in the `igdb` edge function, which mints and caches
+/// the token and forwards the query. What travels from here is the query the
+/// app wanted to run.
 class IgdbDataSourceImpl implements IgdbDataSource {
-  IgdbDataSourceImpl({
-    required this.dio,
-    this.baseUrl = 'https://api.igdb.com/v4',
-  });
-  final Dio dio;
-  final String baseUrl;
+  IgdbDataSourceImpl({required this.dio, String? proxyUrl})
+      : proxyUrl = proxyUrl ?? '${Env.supabaseUrl}/functions/v1/igdb';
 
-  // Cache for auth tokens (in a real app, use a proper token manager)
-  String? _cachedAccessToken;
-  DateTime? _tokenExpiryTime;
+  final Dio dio;
+
+  /// Where the proxy lives. Derived from the Supabase project rather than
+  /// configured separately, because it is always the same project.
+  final String proxyUrl;
 
   // ============================================================
   // GAME QUERIES IMPLEMENTATION
@@ -279,30 +288,17 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     required T Function(Map<String, dynamic>) parser,
   }) async {
     try {
-      // Ensure we have a valid access token
-      await _ensureValidToken();
-
-      // Build the query string
-      final queryString = query.buildQuery();
-
-      // Prepare request details
-      final clientId = _getClientId();
-      final fullUrl = '$baseUrl/$endpoint';
-      final headers = {
-        'Client-ID': clientId,
-        'Authorization': 'Bearer $_cachedAccessToken',
-        'Content-Type': 'text/plain',
-      };
-
-      // LOG COMPLETE REQUEST DETAILS
-      headers.forEach((key, value) {});
-
-      // Make the API request
+      // The Supabase key is what the proxy checks; the IGDB credentials it
+      // uses are its own and never leave the server.
       final response = await dio.post<dynamic>(
-        fullUrl,
-        data: queryString,
+        proxyUrl,
+        data: {'endpoint': endpoint, 'query': query.buildQuery()},
         options: Options(
-          headers: headers,
+          headers: {
+            'Authorization': 'Bearer ${Env.supabaseAnonKey}',
+            'apikey': Env.supabaseAnonKey,
+            'Content-Type': 'application/json',
+          },
         ),
       );
 
@@ -339,57 +335,7 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     }
   }
 
-  // ============================================================
-  // AUTHENTICATION
-  // ============================================================
-
-  /// Ensures we have a valid access token for IGDB API.
-  ///
-  /// Tokens are cached and only refreshed when expired.
-  Future<void> _ensureValidToken() async {
-    // Check if we have a cached token that's still valid
-    if (_cachedAccessToken != null &&
-        _tokenExpiryTime != null &&
-        DateTime.now().isBefore(_tokenExpiryTime!)) {
-      return; // Token is still valid
-    }
-
-    // Need to get a new token
-    await _refreshAccessToken();
-  }
-
-  /// Fetches a new access token from Twitch OAuth.
-  Future<void> _refreshAccessToken() async {
-    try {
-      final response = await dio.post<dynamic>(
-        'https://id.twitch.tv/oauth2/token',
-        queryParameters: {
-          'client_id': _getClientId(),
-          'client_secret': _getClientSecret(),
-          'grant_type': 'client_credentials',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        _cachedAccessToken = data['access_token'];
-        final expiresIn = data['expires_in'] as int;
-        _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
-      } else {
-        throw ServerException(
-          message: 'Failed to get access token: ${response.statusCode}',
-        );
-      }
-    } on DioException catch (e) {
-      throw _handleDioException(e);
-    }
-  }
-
-  // ============================================================
-  // ERROR HANDLING
-  // ============================================================
-
-  /// Converts Dio exceptions to domain exceptions.
+  /// Maps transport failures onto the app's own exception types.
   Exception _handleDioException(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
@@ -428,19 +374,5 @@ class IgdbDataSourceImpl implements IgdbDataSource {
           message: 'Unexpected error: ${e.message}',
         );
     }
-  }
-
-  // ============================================================
-  // CONFIGURATION
-  // ============================================================
-
-  /// Gets the IGDB client ID from API constants.
-  String _getClientId() {
-    return ApiConstants.igdbClientId;
-  }
-
-  /// Gets the IGDB client secret from API constants.
-  String _getClientSecret() {
-    return ApiConstants.igdbClientSecret;
   }
 }
