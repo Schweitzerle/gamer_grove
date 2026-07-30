@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
+import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
@@ -16,7 +18,6 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_medi
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
-import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
 import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
@@ -198,31 +199,13 @@ class _GameDetailPageState extends State<GameDetailPage>
         slivers: [
           _buildSliverAppBar(game, tint),
           _ArrivesLast(
-            sliver: SliverToBoxAdapter(
-              child: ColoredBox(
-                color: Theme.of(context).colorScheme.surface,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: DetailLight.reach,
-                      child: _ArrivingLight(tint: tint),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: AppConstants.paddingLarge,
-                      ),
-                      child: Semantics(
-                        label: 'Loading the rest of ${game.name}',
-                        liveRegion: true,
-                        child: const _PendingSections(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // Fills what is left of the viewport rather than only its content.
+            // A box adapter is as tall as what is in it, so the page's surface
+            // — and with it the grain — stopped under the loader and bare
+            // scaffold showed below.
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: _PreviewBody(tint: tint, gameName: game.name),
             ),
           ),
         ],
@@ -469,34 +452,135 @@ class _ArrivingLight extends StatelessWidget {
   }
 }
 
-/// What stands below the cover while the rest of the game is on its way.
+/// The page below the cover while the rest of the game is on its way.
 ///
-/// Grey placeholder blocks were the obvious choice and the wrong one. The
-/// request behind this page fetches a game and all its relations, so it is
-/// always slower than the 350ms reveal — the shimmer was never the slow-network
-/// case it was meant to be, it was what everyone saw, every time. And a tester
-/// put it plainly: the loading animation that used to be here was more
-/// interesting than what replaced it.
-///
-/// So the app's own mark does the waiting. The portal is already what loading
-/// looks like everywhere else in the Grove, it says something ("the way is
-/// opening") where a grey rectangle says only "wait", and it cannot be mistaken
-/// for content that failed to arrive.
-class _PendingSections extends StatelessWidget {
-  const _PendingSections();
+/// Fills the viewport so the surface — and the grain drawn into it — reaches
+/// the bottom of the screen. A box adapter sized to its content left bare
+/// scaffold under the loader, which is where the pattern appeared to stop.
+class _PreviewBody extends StatelessWidget {
+  const _PreviewBody({required this.tint, required this.gameName});
+
+  final Color tint;
+  final String gameName;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingLarge),
-      child: Center(
-        child: PortalLoader(
-          size: 64,
-          label: 'Opening the way',
-        ),
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: DetailLight.reach,
+            child: _ArrivingLight(tint: tint),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: Semantics(
+              label: 'Loading the rest of $gameName',
+              liveRegion: true,
+              child: _PendingSections(tint: tint),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// What is happening while the game is fetched, said out loud.
+///
+/// Grey placeholder blocks were the obvious choice and the wrong one twice
+/// over. The request behind this page fetches a game and all its relations, so
+/// it is always slower than the 350ms reveal — the shimmer was never the
+/// slow-network case it was written as, it was what everyone saw. And it says
+/// only "wait", where the checklist this replaces said what the app was
+/// actually doing, which a tester found more interesting than what replaced it.
+///
+/// So the checklist comes back, in a chamber of its own: the app's own surface,
+/// its own grain, and the cover's light spilling into it from the page above.
+class _PendingSections extends StatelessWidget {
+  const _PendingSections({required this.tint});
+
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tokens = context.ggTokens;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMd,
+        vertical: tokens.spaceLg,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(tokens.radiusLg),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // The same light the page above is standing in, carried into the
+          // chamber so the two read as one surface rather than a card dropped
+          // onto it.
+          Positioned.fill(child: _ChamberGrain(tint: tint)),
+          LiveLoadingProgress(
+            title: 'Opening the way',
+            steps: EventLoadingSteps.gameDetails(context),
+            stepDuration: const Duration(milliseconds: 900),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The cover's light, dithered, rising into the loading chamber.
+class _ChamberGrain extends StatelessWidget {
+  const _ChamberGrain({required this.tint});
+
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(painter: _ChamberGrainPainter(tint, brightness)),
+      ),
+    );
+  }
+}
+
+class _ChamberGrainPainter extends CustomPainter {
+  const _ChamberGrainPainter(this.tint, this.brightness);
+
+  final Color tint;
+  final Brightness brightness;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    GGDither.paintGradient(
+      canvas,
+      Offset.zero & size,
+      DetailLight.wash(
+        size: size,
+        from: Alignment.topCenter,
+        tint: tint,
+        peak: DetailLight.peakOn(brightness),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChamberGrainPainter oldDelegate) =>
+      oldDelegate.tint != tint || oldDelegate.brightness != brightness;
 }
 
 /// Content that waits for the aperture to be most of the way open.
