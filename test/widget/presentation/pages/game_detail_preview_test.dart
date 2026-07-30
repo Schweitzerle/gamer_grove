@@ -95,12 +95,11 @@ void main() {
     await pump(tester, knownGame: known);
 
     expect(find.text('Horizon Zero Dawn'), findsWidgets);
-    expect(
-      find.byType(LiveLoadingProgress),
-      findsNothing,
-      reason: 'a page that can already show its subject must not show a '
-          'loading screen instead',
-    );
+    // The checklist is welcome — inside the page, under the cover. What must
+    // not happen is a loading screen standing *instead of* the page, which is
+    // what a scrollable page and a hero being present rules out.
+    expect(find.byType(CustomScrollView), findsOneWidget);
+    expect(find.byType(LiveLoadingProgress), findsOneWidget);
   });
 
   testWidgets('with nothing handed over it loads as it always did',
@@ -110,6 +109,11 @@ void main() {
     await pump(tester);
 
     expect(find.byType(LiveLoadingProgress), findsOneWidget);
+    expect(
+      find.byType(CustomScrollView),
+      findsNothing,
+      reason: 'with nothing to show, there is no page to show it in',
+    );
   });
 
   testWidgets('the wait is announced rather than only drawn', (tester) async {
