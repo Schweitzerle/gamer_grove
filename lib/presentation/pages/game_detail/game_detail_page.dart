@@ -1,4 +1,6 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
@@ -197,7 +199,7 @@ class _GameDetailPageState extends State<GameDetailPage>
       builder: (context, tint) => CustomScrollView(
         controller: _scrollController,
         slivers: [
-          _buildSliverAppBar(game, tint),
+          _buildSliverAppBar(game, tint, pending: true),
           _ArrivesLast(
             // Fills what is left of the viewport rather than only its content.
             // A box adapter is as tall as what is in it, so the page's surface
@@ -205,7 +207,7 @@ class _GameDetailPageState extends State<GameDetailPage>
             // scaffold showed below.
             sliver: SliverFillRemaining(
               hasScrollBody: false,
-              child: _PreviewBody(tint: tint, gameName: game.name),
+              child: _PreviewBody(tint: tint, game: game),
             ),
           ),
         ],
@@ -277,7 +279,7 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildSliverAppBar(Game game, Color tint) {
+  Widget _buildSliverAppBar(Game game, Color tint, {bool pending = false}) {
     return SliverAppBar(
       expandedHeight: 350,
       pinned: true,
@@ -286,7 +288,20 @@ class _GameDetailPageState extends State<GameDetailPage>
         background: Stack(
           fit: StackFit.expand,
           children: [
-            _buildHeroImage(game),
+            // Out of focus until the game has actually arrived.
+            //
+            // The loading chamber below read as a section of the page rather
+            // than as a state of it — a tester said so plainly. Blurring what
+            // is above it says the same thing the cave does: you are inside,
+            // and your eyes have not adjusted yet. It also cannot be mistaken
+            // for content, which a sharp hero with a list under it could.
+            if (pending)
+              ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                child: _buildHeroImage(game),
+              )
+            else
+              _buildHeroImage(game),
             EntityHeroOverlays(tint: tint),
             _buildFloatingGameCard(game),
           ],
@@ -458,10 +473,10 @@ class _ArrivingLight extends StatelessWidget {
 /// the bottom of the screen. A box adapter sized to its content left bare
 /// scaffold under the loader, which is where the pattern appeared to stop.
 class _PreviewBody extends StatelessWidget {
-  const _PreviewBody({required this.tint, required this.gameName});
+  const _PreviewBody({required this.tint, required this.game});
 
   final Color tint;
-  final String gameName;
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
@@ -479,9 +494,9 @@ class _PreviewBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(AppConstants.paddingMedium),
             child: Semantics(
-              label: 'Loading the rest of $gameName',
+              label: 'Loading the rest of ${game.name}',
               liveRegion: true,
-              child: _PendingSections(tint: tint),
+              child: _PendingSections(game: game, tint: tint),
             ),
           ),
         ],
@@ -502,36 +517,27 @@ class _PreviewBody extends StatelessWidget {
 /// So the checklist comes back, in a chamber of its own: the app's own surface,
 /// its own grain, and the cover's light spilling into it from the page above.
 class _PendingSections extends StatelessWidget {
-  const _PendingSections({required this.tint});
+  const _PendingSections({required this.game, required this.tint});
 
+  final Game game;
   final Color tint;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final tokens = context.ggTokens;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMd,
-        vertical: tokens.spaceLg,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(tokens.radiusLg),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
+    // One chamber, not two. `LiveLoadingProgress` already draws its own
+    // surface; wrapping it in a second decorated box put a container inside a
+    // container. What is added here is only the grain, so the light of the page
+    // above carries into it instead of stopping at its edge.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusLg),
       child: Stack(
         children: [
-          // The same light the page above is standing in, carried into the
-          // chamber so the two read as one surface rather than a card dropped
-          // onto it.
           Positioned.fill(child: _ChamberGrain(tint: tint)),
           LiveLoadingProgress(
-            title: 'Opening the way',
-            steps: EventLoadingSteps.gameDetails(context),
+            title: 'Entering the Grove',
+            steps: EventLoadingSteps.forGame(context, game),
             stepDuration: const Duration(milliseconds: 900),
           ),
         ],
