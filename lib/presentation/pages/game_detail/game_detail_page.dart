@@ -542,7 +542,11 @@ class _ArrivesLast extends StatelessWidget {
   final Widget sliver;
 
   /// The reveal is this far along before the page's body starts to show.
-  static const _startsAt = 0.55;
+  ///
+  /// Late, because the aperture is deliberately slow: at 0.55 the shape is
+  /// barely half open and the body would be arriving while the point of the
+  /// transition is still being made.
+  static const _startsAt = 0.72;
 
   @override
   Widget build(BuildContext context) {

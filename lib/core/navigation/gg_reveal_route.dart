@@ -203,6 +203,19 @@ class _Reveal extends StatelessWidget {
           )
         : _usable(measured, full);
 
+    // Two curves, because the aperture and what is behind it are not doing the
+    // same job. Run together they open at the same rate, and the opening is
+    // already 38% of the way across the screen after 50ms — never small enough
+    // to be an aperture at all, which is why it read as "the whole screen gets
+    // bigger". The shape now holds nearly shut while the cover moves and
+    // grows behind it, then opens out at the end.
+    final aperture = CurvedAnimation(
+      parent: animation,
+      // 9% open at 100ms, 60% at 200ms, 97% at 300ms.
+      curve: Curves.easeInOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
     final curved = CurvedAnimation(
       parent: animation,
       // Decelerating, not emphasised. Material's emphasised curve reaches 63%
@@ -216,7 +229,7 @@ class _Reveal extends StatelessWidget {
     );
 
     return AnimatedBuilder(
-      animation: curved,
+      animation: animation,
       // The page is built once and handed through; only the clip changes.
       child: child,
       builder: (context, child) {
@@ -226,7 +239,7 @@ class _Reveal extends StatelessWidget {
             shape: shape,
             from: from,
             to: full,
-            t: t,
+            t: aperture.value,
           ),
           // The aperture opens where the finger was; the cover sits at the top
           // of the page. Without this the small opening shows whatever happens
@@ -235,11 +248,16 @@ class _Reveal extends StatelessWidget {
           // cover standing behind the aperture, and slides into place as the
           // shape opens.
           child: Transform.translate(
+            // Tracks the aperture, not the content curve. The cover has to be
+            // *behind the opening* the whole way, and the two curves differ by
+            // design — driving this from the faster one moved the cover up and
+            // out of the shape while the shape was still small, leaving an
+            // aperture with nothing but dark page in it.
             offset: Offset(
                   from.center.dx - size.width / 2,
                   from.center.dy - focus,
                 ) *
-                (1 - t),
+                (1 - aperture.value),
             child: Transform.scale(
               scale: lerpDouble(_startsAt, 1, t),
               alignment: _anchor(from.center, size),
