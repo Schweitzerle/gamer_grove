@@ -47,15 +47,28 @@ done
 echo "==> Symbols kept in $SYMBOLS"
 ls -1 "$SYMBOLS" | sed 's/^/    /'
 
-if command -v sentry-cli >/dev/null 2>&1 && [ -n "${SENTRY_AUTH_TOKEN:-}" ]; then
+# The token is an organization auth token, kept outside the repo. It is read
+# from a file rather than baked in for the obvious reason, and the org is on
+# Sentry's German region, whose API lives on its own hostname — the default
+# sentry.io host accepts the token and then cannot find the project.
+export PATH="$HOME/.local/bin:$PATH"
+TOKEN_FILE="$HOME/.gg-sentry-token"
+
+if command -v sentry-cli >/dev/null 2>&1 && [ -r "$TOKEN_FILE" ]; then
   echo "==> Uploading symbols to Sentry"
-  sentry-cli debug-files upload --include-sources "$SYMBOLS"
+  SENTRY_AUTH_TOKEN="$(cat "$TOKEN_FILE")" \
+  SENTRY_URL="https://de.sentry.io" \
+  SENTRY_ORG="schweizerlelab" \
+  SENTRY_PROJECT="gamergrove" \
+    sentry-cli debug-files upload --include-sources "$SYMBOLS"
 else
-  cat <<'MSG'
-==> Sentry upload skipped
-    Crashes from this build will arrive obfuscated and unreadable until the
-    symbols in build/symbols are uploaded. Install sentry-cli and set
-    SENTRY_AUTH_TOKEN, then re-run, or upload that directory by hand.
+  cat <<MSG
+==> Sentry upload SKIPPED — crashes from this build will be unreadable
+    Obfuscation without symbols is a worse trade than no obfuscation: the
+    binary is harder to read and so is every crash report. Missing:
+      sentry-cli   $(command -v sentry-cli >/dev/null 2>&1 && echo present || echo "not installed")
+      token file   $([ -r "$TOKEN_FILE" ] && echo present || echo "$TOKEN_FILE")
+    Fix that and re-run, or upload $SYMBOLS by hand before releasing.
 MSG
 fi
 
