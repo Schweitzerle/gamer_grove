@@ -28,7 +28,8 @@ class EntityGamesRow extends StatelessWidget {
           margin: const EdgeInsets.only(right: AppConstants.paddingSmall),
           child: GameCard(
             game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
+            onTap: () =>
+                Navigations.navigateToGameDetail(game.id, context, known: game),
           ),
         );
       },

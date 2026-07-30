@@ -463,7 +463,8 @@ class _GameRow extends StatelessWidget {
           margin: const EdgeInsets.only(right: AppConstants.paddingMedium),
           child: GameCard(
             game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
+            onTap: () =>
+                Navigations.navigateToGameDetail(game.id, context, known: game),
           ),
         );
       },
