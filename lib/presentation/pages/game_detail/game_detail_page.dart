@@ -16,6 +16,7 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_medi
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
 import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
@@ -468,93 +469,52 @@ class _ArrivingLight extends StatelessWidget {
   }
 }
 
-/// Placeholders for the sections that are still on their way.
+/// What stands below the cover while the rest of the game is on its way.
 ///
-/// Shaped like what replaces them, so nothing jumps when the request lands.
+/// Grey placeholder blocks were the obvious choice and the wrong one. The
+/// request behind this page fetches a game and all its relations, so it is
+/// always slower than the 350ms reveal — the shimmer was never the slow-network
+/// case it was meant to be, it was what everyone saw, every time. And a tester
+/// put it plainly: the loading animation that used to be here was more
+/// interesting than what replaced it.
+///
+/// So the app's own mark does the waiting. The portal is already what loading
+/// looks like everywhere else in the Grove, it says something ("the way is
+/// opening") where a grey rectangle says only "wait", and it cannot be mistaken
+/// for content that failed to arrive.
 class _PendingSections extends StatelessWidget {
   const _PendingSections();
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return ExcludeSemantics(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final width in const [0.45, 0.6, 0.35])
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppConstants.paddingMedium,
-                0,
-                AppConstants.paddingMedium,
-                AppConstants.paddingLarge,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FractionallySizedBox(
-                    widthFactor: width,
-                    child: Container(
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.paddingMedium),
-                  SizedBox(
-                    height: 180,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 3,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(width: AppConstants.paddingMedium),
-                      itemBuilder: (context, _) => Container(
-                        width: 120,
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.paddingLarge),
+      child: Center(
+        child: PortalLoader(
+          size: 64,
+          label: 'Opening the way',
+        ),
       ),
     );
   }
 }
 
-/// Content that waits for the reveal to finish before it appears.
+/// Content that waits for the aperture to be most of the way open.
 ///
-/// While the aperture is small it stands in front of the cover, and the whole
-/// point of the transition is that the cover is what you see through it. So
-/// everything below the hero holds back until the shape is most of the way
-/// open, then rises the last few pixels into place.
+/// While the opening is small it stands in front of the cover, and the cover is
+/// what the transition exists to show. Held back to the very end rather than
+/// merely delayed: the request is slower than the reveal either way, so there
+/// is nothing to gain by starting earlier and something to lose.
 class _ArrivesLast extends StatelessWidget {
   const _ArrivesLast({required this.sliver});
 
   final Widget sliver;
 
-  /// The reveal is this far along before the placeholders show at all.
-  ///
-  /// Almost the end, and that is the point: if the request comes back while
-  /// the shape is still opening — which is the normal case — the page goes
-  /// straight from cover to content and the shimmer is never seen. The
-  /// placeholders are what a slow network gets, not a stage everyone passes
-  /// through. Real content is never gated on the route: if it is ready, it is
-  /// shown.
   static const _startsAt = 0.92;
 
   @override
   Widget build(BuildContext context) {
-    final route = ModalRoute.of(context);
-    final animation = route?.animation;
+    final animation = ModalRoute.of(context)?.animation;
     if (animation == null || MediaQuery.disableAnimationsOf(context)) {
       return sliver;
     }
