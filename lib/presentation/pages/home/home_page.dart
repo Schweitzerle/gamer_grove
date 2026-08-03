@@ -1,5 +1,6 @@
 // presentation/pages/home/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/widgets/gg_portal_mark.dart';
 import 'package:gamer_grove/presentation/pages/grove/grove_page.dart';
 import 'package:gamer_grove/presentation/pages/home/home_content.dart';
 import 'package:gamer_grove/presentation/pages/profile/profile_page.dart';
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
           if (_visitedPages.contains(0))
             const GrovePage()
           else
-            _buildPlaceholder('Grove', Icons.gamepad_rounded),
+            _buildPlaceholder('Grove', Icons.forest_rounded),
 
           // Index 1 - Social
           if (_visitedPages.contains(1))
@@ -69,8 +70,8 @@ class _HomePageState extends State<HomePage> {
         destinations: const [
           // Index 0 - Grove
           NavigationDestination(
-            icon: Icon(Icons.gamepad_outlined),
-            selectedIcon: Icon(Icons.gamepad_rounded),
+            icon: GGPortalMark(),
+            selectedIcon: GGPortalMark(lit: 0.62),
             label: 'Grove',
           ),
           // Index 1 - Social

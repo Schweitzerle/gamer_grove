@@ -1,5 +1,6 @@
 // presentation/pages/home/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/widgets/gg_portal_mark.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/injection_container.dart';
@@ -65,10 +66,7 @@ class _HomeContentState extends State<HomeContent> {
                 floating: true,
                 title: Row(
                   children: [
-                    Icon(
-                      Icons.gamepad_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    const GGPortalMark(size: 22),
                     const SizedBox(width: 8),
                     const Text('GamerGrove'),
                   ],

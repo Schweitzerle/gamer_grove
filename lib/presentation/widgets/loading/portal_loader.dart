@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
+import 'package:gamer_grove/presentation/widgets/gg_portal_mark.dart';
 
-/// The app's spinner: the icon's doorway, with light rising through it.
+/// The app's spinner: [GGPortalMark] with the light actually rising.
 ///
 /// A gamepad or a console would have been the obvious animated mark, and it is
 /// the same trap the app icon avoided — device motifs age with the hardware and
@@ -66,7 +66,7 @@ class _PortalLoaderState extends State<PortalLoader>
               child: AnimatedBuilder(
                 animation: _rise,
                 builder: (context, _) => CustomPaint(
-                  painter: _PortalPainter(
+                  painter: PortalMarkPainter(
                     frame: theme.colorScheme.primary,
                     opening: theme.colorScheme.surface,
                     light: theme.colorScheme.primary,
@@ -86,77 +86,4 @@ class _PortalLoaderState extends State<PortalLoader>
       ),
     );
   }
-}
-
-class _PortalPainter extends CustomPainter {
-  const _PortalPainter({
-    required this.frame,
-    required this.opening,
-    required this.light,
-    required this.progress,
-  });
-
-  final Color frame;
-  final Color opening;
-  final Color light;
-  final double progress;
-
-  Path _arch(Rect r) {
-    final radius = r.width / 2;
-    return Path()
-      ..moveTo(r.left, r.bottom)
-      ..lineTo(r.left, r.top + radius)
-      ..arcToPoint(
-        Offset(r.right, r.top + radius),
-        radius: Radius.circular(radius),
-      )
-      ..lineTo(r.right, r.bottom)
-      ..close();
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final outer = Offset.zero & size;
-    final thickness = size.width * 0.13;
-    final inner = Rect.fromLTRB(
-      outer.left + thickness,
-      outer.top + thickness,
-      outer.right - thickness,
-      outer.bottom,
-    );
-
-    canvas
-      ..drawPath(_arch(outer), Paint()..color = frame)
-      ..drawPath(_arch(inner), Paint()..color = opening)
-      ..save()
-      ..clipPath(_arch(inner));
-
-    // A band of light travelling up through the opening, stepped through the
-    // icon's grain rather than smoothly blended.
-    final travel = inner.height * 1.6;
-    final top = inner.bottom - travel * progress;
-    GGDither.paintGradient(
-      canvas,
-      Rect.fromLTRB(inner.left, top, inner.right, top + inner.height),
-      LinearGradient(
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-        colors: [
-          light.withValues(alpha: 0),
-          light.withValues(alpha: 0.85),
-          light.withValues(alpha: 0),
-        ],
-        stops: const [0, 0.5, 1],
-      ),
-    );
-
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_PortalPainter oldDelegate) =>
-      oldDelegate.progress != progress ||
-      oldDelegate.frame != frame ||
-      oldDelegate.opening != opening ||
-      oldDelegate.light != light;
 }

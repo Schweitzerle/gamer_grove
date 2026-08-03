@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/widgets/gg_portal_mark.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
@@ -79,10 +80,7 @@ class _GrovePageState extends State<GrovePage> {
                     floating: true,
                     title: Row(
                       children: [
-                        Icon(
-                          Icons.gamepad_rounded,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        const GGPortalMark(size: 22),
                         const SizedBox(width: 8),
                         const Text('GamerGrove'),
                       ],
