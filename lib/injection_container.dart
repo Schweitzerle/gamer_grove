@@ -370,6 +370,11 @@ Future<void> initDependencies() async {
         searchUsers: sl(),
         getFollowers: sl(),
         getFollowing: sl(),
+        // Read at construction, and this is a factory, so a bloc made after a
+        // login gets the right id. It was simply never passed, which is why the
+        // search kept returning you to yourself even after the repository
+        // stopped dropping it.
+        currentUserId: Supabase.instance.client.auth.currentUser?.id,
       ),
     )
 

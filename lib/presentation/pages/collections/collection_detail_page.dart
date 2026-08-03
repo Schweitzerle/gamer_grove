@@ -272,7 +272,8 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
             children: [
               GameCard(
                 game: game,
-                onTap: () => Navigations.navigateToGameDetail(game.id, context),
+                onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                    known: game),
               ),
               if (_editing)
                 Positioned(

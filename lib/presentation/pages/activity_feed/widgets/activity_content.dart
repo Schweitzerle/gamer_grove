@@ -46,7 +46,8 @@ class ActivityContent extends StatelessWidget {
             aspectRatio: 2 / 3,
             child: GameCard(
               game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                  known: game),
             ),
           ),
         ),
@@ -72,7 +73,8 @@ class ActivityContent extends StatelessWidget {
             aspectRatio: 2 / 3,
             child: GameCard(
               game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                  known: game),
             ),
           ),
         ),
@@ -104,7 +106,8 @@ class ActivityContent extends StatelessWidget {
             aspectRatio: 2 / 3,
             child: GameCard(
               game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                  known: game),
             ),
           ),
         ),
@@ -157,7 +160,8 @@ class ActivityContent extends StatelessWidget {
             aspectRatio: 2 / 3,
             child: GameCard(
               game: game,
-              onTap: () => Navigations.navigateToGameDetail(game.id, context),
+              onTap: () => Navigations.navigateToGameDetail(game.id, context,
+                  known: game),
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
+import 'package:gamer_grove/core/theme/gg_dither.dart';
 
 /// The two gradients that let artwork meet the page.
 ///
@@ -15,16 +16,14 @@ class EntityHeroOverlays extends StatelessWidget {
 
   /// The light the page below is standing in, when it has one.
   ///
-  /// A game's page takes a tint from its cover, so its artwork has to fade out
-  /// into the lit surface rather than the plain one — otherwise the hand-off
-  /// shows as a line. The other detail screens have no cover to derive a colour
-  /// from and leave this null.
+  /// A game's page takes a tint from its cover; the other detail screens have
+  /// no cover to derive a colour from and leave this null.
   final Color? tint;
 
   @override
   Widget build(BuildContext context) {
-    final surface = Theme.of(context).colorScheme.surface;
-    final foot = tint == null ? surface : litSurface(surface, tint!);
+    final scheme = Theme.of(context).colorScheme;
+    final surface = scheme.surface;
 
     return Stack(
       children: [
@@ -51,14 +50,86 @@ class EntityHeroOverlays extends StatelessWidget {
               colors: [
                 surface,
                 surface.withValues(alpha: .2),
-                foot.withValues(alpha: .8),
-                foot,
+                surface.withValues(alpha: .8),
+                surface,
               ],
             ),
           ),
           child: const SizedBox.expand(),
         ),
+        // Both sides of the hand-off are made of the same material.
+        //
+        // The first attempt at this seam ended the artwork in a solid tinted
+        // surface while the page below showed the same tint through the dither
+        // — half the pixels. Opaque meeting half-opaque is a line however well
+        // the colours are matched. So the artwork now fades to the plain
+        // surface and the tint arrives on both sides the same way: dithered,
+        // ramped in across the foot of the image and continuing straight into
+        // the page's own wash.
+        if (tint != null)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: _HeroGrain(tint!, scheme.brightness),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
+}
+
+/// The dither of the page below, ramped in across the bottom of the artwork.
+class _HeroGrain extends CustomPainter {
+  const _HeroGrain(this.tint, this.brightness);
+
+  final Color tint;
+
+  /// Which theme the artwork is fading into — the grain borrows that theme's
+  /// ceiling so it never out-shouts the wash it hands over to.
+  final Brightness brightness;
+
+  /// Where the grain begins, as a fraction of the hero's height.
+  ///
+  /// High enough that it reads as the page rising into the image rather than
+  /// as texture laid over the artwork.
+  static const _starts = 0.55;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    // The grain occupies as much of the artwork as the page's wash reaches
+    // below it, so the two are the same light seen from either side of the
+    // seam — mirrored, not merely similar.
+    final top = size.height * _starts;
+    final rect = Rect.fromLTRB(0, top, size.width, size.height);
+    if (rect.isEmpty) return;
+
+    GGDither.paintGradient(
+      canvas,
+      rect,
+      DetailLight.wash(
+        size: rect.size,
+        from: Alignment.bottomCenter,
+        tint: tint,
+        peak: DetailLight.peakOn(brightness),
+      ),
+      // Interlocked with the page below, not merely aligned to it.
+      //
+      // Vertically the grid is shifted to land a whole number of periods on the
+      // seam, so the rows continue. Horizontally it is offset by one cell, so a
+      // dark square of the artwork meets a light square of the page instead of
+      // sitting on top of its twin. Aligned in both axes the two grids stack —
+      // black over black, white over white — and the join reads as a band even
+      // though the pitch is identical. Offset, they read as one checkerboard.
+      phase: Offset(GGDither.cell, -(size.height % GGDither.period)),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HeroGrain oldDelegate) =>
+      oldDelegate.tint != tint || oldDelegate.brightness != brightness;
 }

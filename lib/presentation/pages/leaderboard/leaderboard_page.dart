@@ -1,3 +1,4 @@
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -256,7 +257,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                   },
                                   onTap: () {
                                     Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
+                                      GGRevealRoute<void>.grove(
                                         builder: (context) => UserDetailPage(
                                           user: user,
                                         ),

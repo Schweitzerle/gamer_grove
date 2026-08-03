@@ -1,3 +1,4 @@
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_step.dart';
 
@@ -32,6 +33,44 @@ class EventLoadingSteps {
           color: Theme.of(context).colorScheme.primary,
         ),
       ];
+
+  /// The steps for a game the app already knows something about.
+  ///
+  /// The generic list said "Connecting to game database…" — true of every game
+  /// and therefore about none of them. The card that was tapped already carries
+  /// the name, the genres and often the studio, so the wait can name what it is
+  /// waiting for. It is the same information the page is about to show, said
+  /// while it is still on its way.
+  static List<LoadingStep> forGame(BuildContext context, Game game) {
+    final scheme = Theme.of(context).colorScheme;
+    final genre = game.genres.isEmpty ? null : game.genres.first.name;
+    final studio =
+        game.developers.isEmpty ? null : game.developers.first.company.name;
+
+    return [
+      LoadingStep(
+        text: 'Opening ${game.name}',
+        substep: genre == null ? null : 'A $genre game',
+        color: scheme.primary,
+      ),
+      LoadingStep(
+        text: studio == null ? 'Finding who made it' : 'Made by $studio',
+        substep: 'Studios, platforms, release',
+        color: scheme.secondary,
+      ),
+      LoadingStep(
+        text: 'Gathering screenshots and video',
+        color: scheme.tertiary,
+      ),
+      LoadingStep(
+        text: genre == null
+            ? 'Looking for related games'
+            : 'Looking for more $genre',
+        substep: 'DLC, versions, similar games',
+        color: scheme.primary,
+      ),
+    ];
+  }
 
   static List<LoadingStep> gameDetails(BuildContext context) => [
         LoadingStep(

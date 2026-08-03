@@ -826,7 +826,8 @@ class _SearchPageState extends State<SearchPage> {
           final game = state.games[index];
           return GameCard(
             game: game,
-            onTap: () => Navigations.navigateToGameDetail(game.id, context),
+            onTap: () =>
+                Navigations.navigateToGameDetail(game.id, context, known: game),
           );
         },
       ),

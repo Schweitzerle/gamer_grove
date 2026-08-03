@@ -434,10 +434,19 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
+        // Falls back to the session rather than trusting the caller to say who
+        // is asking. The parameter existed all along and was dropped here, so
+        // the first fix was to stop dropping it — and it still returned you to
+        // yourself, because the bloc that fills it is constructed without an id
+        // (injection_container.dart) and had been passing null the whole time.
+        // Two breaks in one chain. Not being a result for yourself is a
+        // property of the search, not something every caller has to remember.
+        final excluded = currentUserId ?? await getCurrentUserId();
         final usersData = await userDataSource.searchUsers(
           query,
           limit: limit,
           offset: offset,
+          excludeUserId: excluded,
         );
         return usersData
             .map((data) => UserModel.fromJson(data).toEntity())

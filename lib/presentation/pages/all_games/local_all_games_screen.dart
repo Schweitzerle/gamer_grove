@@ -606,7 +606,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         return GameCard(
           game: game,
           blurRated: _blurRatedGames && game.userRating != null,
-          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          onTap: () =>
+              Navigations.navigateToGameDetail(game.id, context, known: game),
         );
       },
     );
@@ -624,7 +625,8 @@ class _EnrichedAllGamesScreenState extends State<EnrichedAllGamesScreen> {
         return GameCard(
           game: game,
           blurRated: _blurRatedGames && game.userRating != null,
-          onTap: () => Navigations.navigateToGameDetail(game.id, context),
+          onTap: () =>
+              Navigations.navigateToGameDetail(game.id, context, known: game),
         );
       },
     );

@@ -654,6 +654,7 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
     String query, {
     int? limit,
     int? offset,
+    String? excludeUserId,
   }) async {
     try {
       // Use ilike for case-insensitive search on username and display_name.
@@ -662,11 +663,19 @@ class SupabaseUserDataSourceImpl implements SupabaseUserDataSource {
       // cannot inject additional filter logic. See escapePostgrestFilterValue.
       final searchPattern = escapePostgrestFilterValue('%$query%');
 
-      final result = await _supabase
+      var request = _supabase
           .from('profiles')
           .select()
           .or('username.ilike.$searchPattern,display_name.ilike.$searchPattern')
-          .eq('is_profile_public', true)
+          .eq('is_profile_public', true);
+
+      // Excluded in the query rather than after it, so a page of twenty stays
+      // a page of twenty instead of quietly becoming nineteen.
+      if (excludeUserId != null) {
+        request = request.neq('id', excludeUserId);
+      }
+
+      final result = await request
           .order('followers_count', ascending: false)
           .range(offset ?? 0, (offset ?? 0) + (limit ?? 20) - 1);
 

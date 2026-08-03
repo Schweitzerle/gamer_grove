@@ -1,8 +1,12 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
+import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
@@ -27,8 +31,21 @@ import 'package:gamer_grove/presentation/widgets/sections/related_games/similar_
 import 'package:gamer_grove/presentation/widgets/sections/related_games/versions_remakes_section.dart';
 
 class GameDetailPage extends StatefulWidget {
-  const GameDetailPage({required this.gameId, super.key});
+  const GameDetailPage({required this.gameId, this.knownGame, super.key});
+
   final int gameId;
+
+  /// What the card that was tapped already knew — cover, name, rating, genres.
+  ///
+  /// The page used to throw this away and load from nothing, so the reveal
+  /// opened onto a spinner: a transition that by construction could not reveal
+  /// anything. With it the head of the page is drawn on the first frame and
+  /// only the rest waits, which is also what makes the arriving colour the
+  /// colour of the cover you touched.
+  ///
+  /// Null when there was nothing to hand over — a deep link, or a caller that
+  /// only has an id. The page then loads as it always did.
+  final Game? knownGame;
 
   @override
   State<GameDetailPage> createState() => _GameDetailPageState();
@@ -38,7 +55,14 @@ class _GameDetailPageState extends State<GameDetailPage>
     with TickerProviderStateMixin {
   String? _currentUserId;
   late GameBloc _gameBloc;
-  late TabController _mediaTabController;
+
+  /// Only exists once a game with media has arrived.
+  ///
+  /// It was `late` and disposed unconditionally, so leaving the page for a game
+  /// with no screenshots, videos or artworks threw a
+  /// `LateInitializationError` — and so did leaving it before the request came
+  /// back, which the preview state made easy to reach.
+  TabController? _mediaTabController;
   late ScrollController _scrollController;
   bool _isHeaderCollapsed = false;
 
@@ -62,8 +86,16 @@ class _GameDetailPageState extends State<GameDetailPage>
     }
   }
 
+  /// The Grove's own bloc, held so the cache can be refreshed on the way out.
+  ///
+  /// Captured here rather than read in `dispose`: looking up an ancestor from a
+  /// deactivated element is unsafe and throws once the page is torn down at the
+  /// wrong moment — leaving before the request returned was enough.
+  GameBloc? _callerBloc;
+
   void _setupBloc() {
     _gameBloc = sl<GameBloc>();
+    _callerBloc = context.read<GameBloc>();
     final authState = context.read<AuthBloc>().state;
 
     if (authState is AuthAuthenticated) {
@@ -86,19 +118,19 @@ class _GameDetailPageState extends State<GameDetailPage>
     if (game.videos.isNotEmpty) tabCount++;
     if (game.artworks.isNotEmpty) tabCount++;
 
-    if (tabCount > 0) {
-      _mediaTabController = TabController(length: tabCount, vsync: this);
-    }
+    if (tabCount == 0) return;
+    if (_mediaTabController?.length == tabCount) return;
+    _mediaTabController?.dispose();
+    _mediaTabController = TabController(length: tabCount, vsync: this);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _mediaTabController.dispose();
+    _mediaTabController?.dispose();
 
-    // 🎯 REFRESH CACHE - Ensure home screen shows updated game data
-    // This triggers a cache refresh when navigating back from detail screen
-    context.read<GameBloc>().add(RefreshCacheEvent());
+    // Refresh the cache so the Grove shows updated game data on the way back.
+    _callerBloc?.add(RefreshCacheEvent());
 
     super.dispose();
   }
@@ -118,7 +150,11 @@ class _GameDetailPageState extends State<GameDetailPage>
         body: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
             if (state is GameDetailsLoading) {
-              return _buildLiveLoadingState(); // ✅ NEW: Live Loading
+              // Everything the tapped card knew is already on screen; only what
+              // it could not know is still coming.
+              final known = widget.knownGame;
+              if (known != null) return _buildPreview(known);
+              return _buildLiveLoadingState();
             }
 
             if (state is GameError) {
@@ -143,9 +179,38 @@ class _GameDetailPageState extends State<GameDetailPage>
               );
             }
 
-            return _buildLiveLoadingState(); // ✅ Default to Live Loading
+            final known = widget.knownGame;
+            if (known != null) return _buildPreview(known);
+            return _buildLiveLoadingState();
           },
         ),
+      ),
+    );
+  }
+
+  /// The page as far as the tapped card could describe it.
+  ///
+  /// The same hero and the same light as the finished page — it is the same
+  /// page, with the parts that need a request still on their way. Under it a
+  /// row of placeholders, so the arriving sections push nothing around.
+  Widget _buildPreview(Game game) {
+    return ChamberTint(
+      coverUrls: [game.coverUrl],
+      builder: (context, tint) => CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          _buildSliverAppBar(game, tint, pending: true),
+          _ArrivesLast(
+            // Fills what is left of the viewport rather than only its content.
+            // A box adapter is as tall as what is in it, so the page's surface
+            // — and with it the grain — stopped under the loader and bare
+            // scaffold showed below.
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: _PreviewBody(tint: tint, game: game),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -214,7 +279,7 @@ class _GameDetailPageState extends State<GameDetailPage>
     );
   }
 
-  Widget _buildSliverAppBar(Game game, Color tint) {
+  Widget _buildSliverAppBar(Game game, Color tint, {bool pending = false}) {
     return SliverAppBar(
       expandedHeight: 350,
       pinned: true,
@@ -223,7 +288,20 @@ class _GameDetailPageState extends State<GameDetailPage>
         background: Stack(
           fit: StackFit.expand,
           children: [
-            _buildHeroImage(game),
+            // Out of focus until the game has actually arrived.
+            //
+            // The loading chamber below read as a section of the page rather
+            // than as a state of it — a tester said so plainly. Blurring what
+            // is above it says the same thing the cave does: you are inside,
+            // and your eyes have not adjusted yet. It also cannot be mistaken
+            // for content, which a sharp hero with a list under it could.
+            if (pending)
+              ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                child: _buildHeroImage(game),
+              )
+            else
+              _buildHeroImage(game),
             EntityHeroOverlays(tint: tint),
             _buildFloatingGameCard(game),
           ],
@@ -385,6 +463,162 @@ class _ArrivingLight extends StatelessWidget {
           intensity: Curves.easeOut.transform(rise),
         );
       },
+    );
+  }
+}
+
+/// The page below the cover while the rest of the game is on its way.
+///
+/// Fills the viewport so the surface — and the grain drawn into it — reaches
+/// the bottom of the screen. A box adapter sized to its content left bare
+/// scaffold under the loader, which is where the pattern appeared to stop.
+class _PreviewBody extends StatelessWidget {
+  const _PreviewBody({required this.tint, required this.game});
+
+  final Color tint;
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: DetailLight.reach,
+            child: _ArrivingLight(tint: tint),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: Semantics(
+              label: 'Loading the rest of ${game.name}',
+              liveRegion: true,
+              child: _PendingSections(game: game, tint: tint),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What is happening while the game is fetched, said out loud.
+///
+/// Grey placeholder blocks were the obvious choice and the wrong one twice
+/// over. The request behind this page fetches a game and all its relations, so
+/// it is always slower than the 350ms reveal — the shimmer was never the
+/// slow-network case it was written as, it was what everyone saw. And it says
+/// only "wait", where the checklist this replaces said what the app was
+/// actually doing, which a tester found more interesting than what replaced it.
+///
+/// So the checklist comes back, in a chamber of its own: the app's own surface,
+/// its own grain, and the cover's light spilling into it from the page above.
+class _PendingSections extends StatelessWidget {
+  const _PendingSections({required this.game, required this.tint});
+
+  final Game game;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.ggTokens;
+
+    // One chamber, not two. `LiveLoadingProgress` already draws its own
+    // surface; wrapping it in a second decorated box put a container inside a
+    // container. What is added here is only the grain, so the light of the page
+    // above carries into it instead of stopping at its edge.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusLg),
+      child: Stack(
+        children: [
+          Positioned.fill(child: _ChamberGrain(tint: tint)),
+          LiveLoadingProgress(
+            title: 'Entering the Grove',
+            steps: EventLoadingSteps.forGame(context, game),
+            stepDuration: const Duration(milliseconds: 900),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The cover's light, dithered, rising into the loading chamber.
+class _ChamberGrain extends StatelessWidget {
+  const _ChamberGrain({required this.tint});
+
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(painter: _ChamberGrainPainter(tint, brightness)),
+      ),
+    );
+  }
+}
+
+class _ChamberGrainPainter extends CustomPainter {
+  const _ChamberGrainPainter(this.tint, this.brightness);
+
+  final Color tint;
+  final Brightness brightness;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    GGDither.paintGradient(
+      canvas,
+      Offset.zero & size,
+      DetailLight.wash(
+        size: size,
+        from: Alignment.topCenter,
+        tint: tint,
+        peak: DetailLight.peakOn(brightness),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChamberGrainPainter oldDelegate) =>
+      oldDelegate.tint != tint || oldDelegate.brightness != brightness;
+}
+
+/// Content that waits for the aperture to be most of the way open.
+///
+/// While the opening is small it stands in front of the cover, and the cover is
+/// what the transition exists to show. Held back to the very end rather than
+/// merely delayed: the request is slower than the reveal either way, so there
+/// is nothing to gain by starting earlier and something to lose.
+class _ArrivesLast extends StatelessWidget {
+  const _ArrivesLast({required this.sliver});
+
+  final Widget sliver;
+
+  static const _startsAt = 0.92;
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = ModalRoute.of(context)?.animation;
+    if (animation == null || MediaQuery.disableAnimationsOf(context)) {
+      return sliver;
+    }
+
+    // Listening to the route's own animation rather than running a controller:
+    // the body and the aperture are one movement and must not drift.
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) => SliverOpacity(
+        opacity: Curves.easeOut.transform(
+          ((animation.value - _startsAt) / (1 - _startsAt)).clamp(0.0, 1.0),
+        ),
+        sliver: sliver,
+      ),
     );
   }
 }

@@ -38,15 +38,18 @@ void main() {
     );
   });
 
-  testWidgets('sizes inside one bucket share a wash', (tester) async {
-    // 300 and 318 both round up to the same 32px bucket; 320 would already sit
-    // on the next boundary, which is the point of quantising at all.
+  testWidgets('a different size gets its own wash', (tester) async {
+    // Sizes used to be rounded into 32px buckets to save bakes. That forced the
+    // image to be stretched or cropped into place, and a stretched dither has
+    // the wrong pitch — it stops interlocking with the grain beside it and the
+    // join between two lit surfaces reappears as a band. Exact bakes cost
+    // nothing in practice: a section's width does not wander.
     await tester.pumpWidget(lit(const Size(300, 170), const Color(0xFF4E86A8)));
     await tester.pump();
     await tester.pumpWidget(lit(const Size(318, 178), const Color(0xFF4E86A8)));
     await tester.pump();
 
-    expect(DitheredWashCache.entryCount, 1);
+    expect(DitheredWashCache.entryCount, 2);
   });
 
   testWidgets('a different tint gets its own wash', (tester) async {

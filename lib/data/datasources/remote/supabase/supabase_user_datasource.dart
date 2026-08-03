@@ -334,10 +334,13 @@ abstract class SupabaseUserDataSource {
   /// ```dart
   /// final users = await userDataSource.searchUsers('john', limit: 20);
   /// ```
+  /// [excludeUserId] is left out of the results — you are not a search result
+  /// for yourself.
   Future<List<Map<String, dynamic>>> searchUsers(
     String query, {
     int? limit,
     int? offset,
+    String? excludeUserId,
   });
 
   /// Gets popular users (most followers).
