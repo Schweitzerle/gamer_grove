@@ -1,6 +1,6 @@
 # Datenschutzerklärung
 
-Stand: 25. Juli 2026
+Stand: 3. August 2026
 
 Diese Erklärung beschreibt, welche personenbezogenen Daten die App GamerGrove
 verarbeitet, zu welchem Zweck und auf welcher Rechtsgrundlage.
@@ -54,9 +54,10 @@ Wir setzen folgende Auftragsverarbeiter beziehungsweise Dienste ein:
 - Supabase (Datenbank, Authentifizierung, Dateispeicher). Hier liegen dein
   Konto und deine Inhalte. Serverstandort: Frankfurt am Main,
   Deutschland (EU).
-- IGDB / Twitch (Internet Games Database) für Spieldaten. Beim Abruf von
-  Spielinformationen wird deine IP-Adresse an diesen Dienst übertragen. Wir
-  übermitteln dabei keine Kontodaten. Anbieter: Twitch Interactive, Inc., USA.
+- IGDB / Twitch (Internet Games Database) für Spieldaten. Die App fragt diese
+  Daten **nicht selbst** ab, sondern über unseren eigenen Server in Frankfurt.
+  IGDB sieht deshalb nur dessen IP-Adresse, nicht deine, und keine Kontodaten.
+  Anbieter: Twitch Interactive, Inc., USA.
 - Sentry (Absturz- und Fehlerberichte). Wir haben die Übermittlung
   personenbezogener Daten deaktiviert (kein IP-Versand, keine Nutzerkennung);
   übertragen werden technische Fehlerdaten wie Stacktrace, App-Version und
@@ -74,9 +75,9 @@ Wir setzen folgende Auftragsverarbeiter beziehungsweise Dienste ein:
   Anbieter: Google Ireland Limited.
 
 Unsere eigene Infrastruktur — Datenbank, Fehlerberichte und Reichweitenmessung —
-liegt vollständig in der EU. In die USA übermittelt werden Daten nur an IGDB /
-Twitch (deine IP-Adresse beim Abruf von Spieldaten) und an RevenueCat (eine
-Kontokennung zur Zuordnung eines Abonnements). Dafür stützen wir uns auf die
+liegt vollständig in der EU. In die USA übermittelt wird nur eine Kontokennung
+an RevenueCat, damit ein Abonnement dem Konto zugeordnet werden kann. Dafür
+stützen wir uns auf die
 Standardvertragsklauseln der EU-Kommission beziehungsweise auf die
 Zertifizierung des Empfängers nach dem EU-US Data Privacy Framework.
 
