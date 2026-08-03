@@ -35,6 +35,33 @@ void main() {
 
     await pump(tester, LegalDocument.impressum);
     expect(find.text('Diensteanbieter'), findsOneWidget);
+
+    await pump(tester, LegalDocument.agb);
+    expect(find.text('1. Geltungsbereich und Anbieter'), findsOneWidget);
+  });
+
+  test('the terms say the things that make them binding', () {
+    // Each of these is a clause whose absence would be a real defect, not a
+    // stylistic one: a subscription sold through Play must say who the contract
+    // is with and where it is cancelled, digital content needs the withdrawal
+    // clause, a Kleinunternehmer must state why no VAT is shown, and an app
+    // with accounts needs a minimum age.
+    final terms = _read(LegalDocument.agb);
+    for (final required in [
+      'Google Play', // seller of record for Pro
+      'Google-Play-Konto', // where cancellation actually happens
+      'Widerrufsrecht',
+      '§ 19 UStG', // why no VAT appears
+      '16 Jahre', // minimum age
+      'Kardinalpflicht', // the liability carve-out German law requires
+      'Schabringerstraße 2', // the imprint details must agree
+    ]) {
+      expect(
+        terms,
+        contains(required),
+        reason: 'the terms must state: $required',
+      );
+    }
   });
 
   group('document content', () {

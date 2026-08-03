@@ -9,7 +9,8 @@ import 'package:gamer_grove/presentation/widgets/loading/portal_loader.dart';
 enum LegalDocument {
   privacyPolicy('Privacy Policy', 'assets/legal/privacy-policy.md'),
   datenschutz('Datenschutzerklärung', 'assets/legal/datenschutz.md'),
-  impressum('Impressum', 'assets/legal/impressum.md');
+  impressum('Impressum', 'assets/legal/impressum.md'),
+  agb('AGB', 'assets/legal/agb.md');
 
   const LegalDocument(this.title, this.assetPath);
 
