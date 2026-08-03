@@ -70,6 +70,29 @@ jobs:
           path: coverage/lcov.info
           if-no-files-found: ignore
 
+  # The edge functions are the only code outside the Flutter app, and the one
+  # place where getting a rule wrong costs money rather than pixels: they decide
+  # who has a paid entitlement. `flutter test` cannot see them.
+  edge-functions:
+    name: Edge functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Check formatting
+        run: deno fmt --check supabase/functions
+
+      - name: Lint
+        run: deno lint supabase/functions
+
+      - name: Test
+        run: deno test supabase/functions
+
   build-android:
     name: Build debug APK
     runs-on: ubuntu-latest
