@@ -14,7 +14,6 @@ import 'package:gamer_grove/presentation/blocs/leaderboard/leaderboard_state.dar
 import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_event.dart';
 import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_state.dart';
-import 'package:gamer_grove/presentation/pages/leaderboard/widgets/leaderboard_rank.dart';
 import 'package:gamer_grove/presentation/pages/user_detail/user_detail_page.dart';
 import 'package:gamer_grove/presentation/pages/user_search/widgets/user_search_item.dart';
 
@@ -230,45 +229,34 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     itemBuilder: (context, index) {
                       final user = _filteredUsers[index];
                       final rank = index + 1;
-                      return Row(
-                        children: [
-                          LeaderboardRank(rank: rank),
-                          Expanded(
-                            child: BlocBuilder<SocialInteractionsBloc,
-                                SocialInteractionsState>(
-                              builder: (context, socialState) {
-                                final isFollowing =
-                                    socialState.isFollowing(user.id);
-                                final isLoadingFollow =
-                                    socialState.isLoading(user.id);
+                      return BlocBuilder<SocialInteractionsBloc,
+                          SocialInteractionsState>(
+                        builder: (context, socialState) {
+                          final isFollowing = socialState.isFollowing(user.id);
+                          final isLoadingFollow =
+                              socialState.isLoading(user.id);
 
-                                return UserSearchItem(
-                                  user: user,
-                                  showFollowButton: user.id != _currentUserId,
-                                  isFollowing: isFollowing,
-                                  isLoadingFollow: isLoadingFollow,
-                                  onFollowPressed: () {
-                                    context.read<SocialInteractionsBloc>().add(
-                                          ToggleFollowRequested(
-                                            user.id,
-                                            isFollowing,
-                                          ),
-                                        );
-                                  },
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      GGRevealRoute<void>.grove(
-                                        builder: (context) => UserDetailPage(
-                                          user: user,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                          return UserSearchItem(
+                            user: user,
+                            rank: rank,
+                            showFollowButton: user.id != _currentUserId,
+                            isFollowing: isFollowing,
+                            isLoadingFollow: isLoadingFollow,
+                            onFollowPressed: () {
+                              context.read<SocialInteractionsBloc>().add(
+                                    ToggleFollowRequested(user.id, isFollowing),
+                                  );
+                            },
+                            onTap: () {
+                              Navigator.of(context).push(
+                                GGRevealRoute<void>.grove(
+                                  builder: (context) =>
+                                      UserDetailPage(user: user),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       );
                     },
                   );

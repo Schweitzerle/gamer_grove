@@ -2,9 +2,22 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/presentation/pages/leaderboard/widgets/leaderboard_rank.dart';
 
-/// A visually appealing user item widget that displays user info and stats
+/// One person, in a list of people — search, leaderboard, followers.
+///
+/// The widths used not to add up. On a 320-dp screen the list's own padding
+/// (32), this card's margin (32), a rank column (50), the card's padding (32)
+/// and a 64-px avatar left **nothing** for the name — it rendered at width
+/// zero — and pushed the follow button 30 px past the right edge. Reported from
+/// the device as "the follow button sometimes overlaps"; the "sometimes" was
+/// only how long the name happened to be.
+///
+/// Three of those five are gone: the margin belongs to the list that owns the
+/// spacing, the rank is worn on the avatar, and the button sits at the trailing
+/// edge of the row instead of competing with the name inside it.
 class UserSearchItem extends StatelessWidget {
   const UserSearchItem({
     required this.user,
@@ -14,6 +27,7 @@ class UserSearchItem extends StatelessWidget {
     this.isFollowing = false,
     this.isLoadingFollow = false,
     this.onFollowPressed,
+    this.rank,
   });
   final User user;
   final VoidCallback? onTap;
@@ -22,67 +36,96 @@ class UserSearchItem extends StatelessWidget {
   final bool isLoadingFollow;
   final VoidCallback? onFollowPressed;
 
+  /// Position on the leaderboard, worn as a badge on the avatar. Null
+  /// everywhere the list is not a ranking.
+  final int? rank;
+
+  /// Smaller than the 64 it was. At 320 dp those extra pixels were the
+  /// difference between a readable name and none.
+  static const _avatar = 52.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final tokens = context.ggTokens;
+
+    // No margin. Every list that shows this already pads itself and puts a
+    // separator between rows; carrying its own on top doubled both.
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLg),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLg),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar
-              _buildAvatar(colorScheme),
-              const SizedBox(width: 16),
-              // User info and stats
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+          padding: EdgeInsets.all(tokens.spaceMd),
+          // The row decides from its own width, not from the screen's: the same
+          // item sits in three lists, and one of them used to stand a column
+          // beside it.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Scaled with the reader's type size: at 200 % the same label
+              // needs twice the room, and a threshold that ignored that would
+              // put the row back over its edge for exactly the people who can
+              // least afford it.
+              final labelled = constraints.maxWidth >=
+                  _roomForLabel * MediaQuery.textScalerOf(context).scale(1);
+              return Row(
+                children: [
+                  _buildAvatar(colorScheme),
+                  SizedBox(width: tokens.spaceMd),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: _buildUserName(theme),
-                        ),
-                        if (showFollowButton) ...[
-                          const SizedBox(width: 12),
-                          _buildFollowButton(colorScheme),
+                        _buildUserName(theme),
+                        if (user.bio?.isNotEmpty ?? false) ...[
+                          SizedBox(height: tokens.spaceXs),
+                          _buildBio(theme),
                         ],
+                        SizedBox(height: tokens.spaceSm),
+                        _buildStats(theme),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    if (user.bio?.isNotEmpty ?? false) ...[
-                      _buildBio(theme),
-                      const SizedBox(height: 8),
-                    ],
-                    _buildStats(theme),
+                  ),
+                  if (showFollowButton) ...[
+                    SizedBox(width: tokens.spaceSm),
+                    _buildFollowButton(context, colorScheme,
+                        labelled: labelled),
                   ],
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
+  /// Below this the button drops its label and keeps only the mark.
+  ///
+  /// Measured, not guessed: the labelled button is 104 px wide, the avatar 52,
+  /// the gaps 24 and the card's padding 32. Leaving the name a hundred px to
+  /// read in puts the turn at a little over three hundred — which a 320-dp
+  /// screen is under and a 360-dp one is over.
+  static const _roomForLabel = 312.0;
+
+  /// What the longer of the two labels needs. Measured at 104 px; both states
+  /// are held to it so rows do not change height as you follow people.
+  static const _labelledWidth = 104.0;
+
   Widget _buildAvatar(ColorScheme colorScheme) {
-    return Hero(
+    final portrait = Hero(
       tag: 'user_avatar_${user.id}',
       child: Container(
-        width: 64,
-        height: 64,
+        width: _avatar,
+        height: _avatar,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
@@ -114,7 +157,30 @@ class UserSearchItem extends StatelessWidget {
         ),
       ),
     );
+
+    final place = rank;
+    if (place == null) return portrait;
+
+    // The badge hangs off the bottom edge, so it costs the row no width at all
+    // — which was the whole reason the rank column had to go.
+    return SizedBox(
+      width: _avatar,
+      height: _avatar,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          portrait,
+          Positioned(
+            left: -_badgeOverhang,
+            bottom: -_badgeOverhang,
+            child: LeaderboardRank(rank: place),
+          ),
+        ],
+      ),
+    );
   }
+
+  static const _badgeOverhang = 4.0;
 
   Widget _buildAvatarPlaceholder() {
     return Center(
@@ -144,13 +210,17 @@ class UserSearchItem extends StatelessWidget {
         ),
         if (user.hasDisplayName) ...[
           const SizedBox(width: 4),
-          Text(
-            '@${user.username}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+          // Flexible as well: a handle is user-supplied and can be as long as
+          // the name it sits beside, and a fixed one pushed the row open.
+          Flexible(
+            child: Text(
+              '@${user.username}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ],
@@ -233,9 +303,16 @@ class UserSearchItem extends StatelessWidget {
     );
   }
 
-  Widget _buildFollowButton(ColorScheme colorScheme) {
-    return SizedBox(
-      height: 36,
+  Widget _buildFollowButton(
+    BuildContext context,
+    ColorScheme colorScheme, {
+    required bool labelled,
+  }) {
+    final action = isFollowing ? 'Unfollow' : 'Follow';
+    // 36 was below the 48-dp minimum for a tap target, and the semantics test
+    // said so the moment one existed.
+    final button = SizedBox(
+      height: context.ggTokens.minTapTarget,
       child: ElevatedButton(
         onPressed: isLoadingFollow ? null : onFollowPressed,
         style: ElevatedButton.styleFrom(
@@ -253,7 +330,15 @@ class UserSearchItem extends StatelessWidget {
                   )
                 : BorderSide.none,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          visualDensity: VisualDensity.compact,
+          // A floor, not a cap: "Follow" and "Following" then take the same
+          // width, so a list of people has one rhythm instead of a ragged
+          // right edge that moves with who you happen to follow.
+          minimumSize: Size(
+            labelled ? _labelledWidth : 0,
+            context.ggTokens.minTapTarget,
+          ),
           disabledBackgroundColor: isFollowing
               ? colorScheme.surfaceContainerHighest
               : colorScheme.primary.withValues(alpha: 0.5),
@@ -269,13 +354,32 @@ class UserSearchItem extends StatelessWidget {
                   ),
                 ),
               )
-            : Text(
-                isFollowing ? 'Following' : 'Follow',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            : labelled
+                ? Text(
+                    isFollowing ? 'Following' : 'Follow',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                // The mark alone, never a shortened word. `Tooltip` and the
+                // semantic label carry what the text did, so nothing is lost
+                // to a screen reader or a long press.
+                : Icon(
+                    isFollowing ? Icons.check_rounded : Icons.person_add_alt_1,
+                    size: 20,
+                  ),
+      ),
+    );
+
+    return Semantics(
+      button: true,
+      label: '$action ${user.effectiveDisplayName}',
+      child: ExcludeSemantics(
+        child: labelled
+            ? button
+            : Tooltip(
+                message: '$action ${user.effectiveDisplayName}', child: button),
       ),
     );
   }

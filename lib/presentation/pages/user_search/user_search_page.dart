@@ -211,9 +211,15 @@ class _UserSearchContentState extends State<_UserSearchContent> {
           onRefresh: () async {
             context.read<UserSearchBloc>().add(const RefreshSearchRequested());
           },
-          child: ListView.builder(
+          // Padding and separators live here now. They used to come from the
+          // item's own card margin, which meant every list that already padded
+          // itself paid twice — and on a narrow screen that was the difference
+          // between a readable name and none.
+          child: ListView.separated(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemCount: state.hasReachedMax
                 ? state.users.length
                 : state.users.length + 1,
