@@ -12,6 +12,7 @@ import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_thumbnail.dart';
 
 class _MockGameBloc extends MockBloc<GameEvent, GameState>
     implements GameBloc {}
@@ -136,9 +137,46 @@ void main() {
     await pump(tester, knownGame: known);
 
     expect(
-      find.bySemanticsLabel('Loading the rest of Horizon Zero Dawn'),
+      find.bySemanticsLabel(RegExp(r'^Loading Horizon Zero Dawn\.')),
       findsOneWidget,
     );
     handle.dispose();
+  });
+
+  testWidgets('the wait is in front of the page, not a part of it',
+      (tester) async {
+    // Three attempts put this inside the page and all three read as one more
+    // element of it. What separates a step *before* the page from a piece *of*
+    // it is position: the card is over everything, with the page as backdrop.
+    await pump(tester, knownGame: known);
+
+    final card = find.byType(LiveLoadingProgress);
+    expect(card, findsOneWidget);
+    expect(
+      find.ancestor(of: card, matching: find.byType(CustomScrollView)),
+      findsNothing,
+      reason: 'the card scrolls with the page when it sits inside it',
+    );
+  });
+
+  testWidgets('the cover is named while it stands in for the page',
+      (tester) async {
+    await pump(tester, knownGame: known);
+    expect(find.byType(LoadingThumbnail), findsOneWidget);
+  });
+
+  testWidgets('leaving is still possible while it waits', (tester) async {
+    // A full-screen card that swallowed pointers would trap the reader behind
+    // a request that can outlast a bad connection: the app bar and its back
+    // button sit underneath it.
+    await pump(tester, knownGame: known);
+    expect(
+      find.ancestor(
+        of: find.byType(LiveLoadingProgress),
+        matching: find.byType(IgnorePointer),
+      ),
+      findsWidgets,
+      reason: 'the overlay must let taps through to the page behind it',
+    );
   });
 }

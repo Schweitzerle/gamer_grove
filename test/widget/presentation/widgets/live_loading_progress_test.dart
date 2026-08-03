@@ -72,7 +72,7 @@ void main() {
     await pump(tester);
 
     expect(
-      find.bySemanticsLabel('Spiel wird geladen. Verbinde mit IGDB'),
+      find.bySemanticsLabel('Loading Spiel wird geladen. Verbinde mit IGDB'),
       findsOneWidget,
     );
 
