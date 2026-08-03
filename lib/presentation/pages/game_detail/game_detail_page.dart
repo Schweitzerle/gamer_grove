@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
-import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/core/widgets/error_widget.dart';
@@ -203,7 +202,7 @@ class _GameDetailPageState extends State<GameDetailPage>
           // In front of the page, not inside it. Pointers pass through so the
           // back button in the app bar keeps working — a wait you cannot leave
           // is a trap, and this one can outlast a bad connection.
-          IgnorePointer(child: _WaitingCard(game: game, tint: tint)),
+          IgnorePointer(child: _WaitingCard(game: game)),
         ],
       ),
     );
@@ -316,7 +315,10 @@ class _GameDetailPageState extends State<GameDetailPage>
             else
               _buildHeroImage(game),
             EntityHeroOverlays(tint: tint),
-            _buildFloatingGameCard(game),
+            // Not while the card is up. The card already carries the name and
+            // the cover; drawn again underneath, at low contrast through a
+            // scrim, the pair stops being information and becomes texture.
+            if (!pending) _buildFloatingGameCard(game),
           ],
         ),
         title: _isHeaderCollapsed
@@ -522,13 +524,15 @@ class _PreviewBody extends StatelessWidget {
 /// through the scrim, out of focus, still colouring the light — so the wait
 /// says which game is coming without pretending the game is already here.
 class _WaitingCard extends StatelessWidget {
-  const _WaitingCard({required this.game, required this.tint});
+  const _WaitingCard({required this.game});
 
   final Game game;
-  final Color tint;
 
   /// Enough to push the page back, little enough to leave the cover legible.
-  static const _scrim = 0.72;
+  ///
+  /// Deeper than it was: with the name and the info card gone from behind, what
+  /// is left is atmosphere, and atmosphere does not need to be read.
+  static const _scrim = 0.82;
 
   @override
   Widget build(BuildContext context) {
@@ -538,10 +542,6 @@ class _WaitingCard extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         ColoredBox(color: scheme.surface.withValues(alpha: _scrim)),
-        // The backdrop is the app's own material — the cover's light through
-        // the same grain as everywhere else — rather than the soft colour
-        // blobs this kind of card usually floats on.
-        Positioned.fill(child: _ChamberGrain(tint: tint)),
         SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -561,49 +561,6 @@ class _WaitingCard extends StatelessWidget {
       ],
     );
   }
-}
-
-/// The cover's light, dithered, rising into the loading chamber.
-class _ChamberGrain extends StatelessWidget {
-  const _ChamberGrain({required this.tint});
-
-  final Color tint;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return IgnorePointer(
-      child: RepaintBoundary(
-        child: CustomPaint(painter: _ChamberGrainPainter(tint, brightness)),
-      ),
-    );
-  }
-}
-
-class _ChamberGrainPainter extends CustomPainter {
-  const _ChamberGrainPainter(this.tint, this.brightness);
-
-  final Color tint;
-  final Brightness brightness;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-    GGDither.paintGradient(
-      canvas,
-      Offset.zero & size,
-      DetailLight.wash(
-        size: size,
-        from: Alignment.topCenter,
-        tint: tint,
-        peak: DetailLight.peakOn(brightness),
-      ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ChamberGrainPainter oldDelegate) =>
-      oldDelegate.tint != tint || oldDelegate.brightness != brightness;
 }
 
 /// Content that waits for the aperture to be most of the way open.
