@@ -1,115 +1,257 @@
 # Data-Safety-Erklärung — Antwortbogen
 
-Play Console → **Richtlinien → App-Inhalte → Datensicherheit**. Nur dort zu
-pflegen; die Play-API kennt dieses Formular nicht.
+Play Console → **App-Inhalte → Datensicherheit**. Nur dort zu pflegen; die
+Play-API kennt dieses Formular nicht.
 
-Der Stand von versionCode 5 kennt weder RevenueCat noch Sentry noch Umami. Was
-hier steht, ist aus dem Code und der Datenschutzerklärung abgeleitet — beide
-müssen dasselbe sagen, sonst ist die Erklärung falsch und das ist ein
-Ablehnungsgrund.
+Der Stand von versionCode 5 kennt weder RevenueCat noch Sentry noch Umami.
 
-Zu jeder Angabe die Quelle, damit sie beim nächsten Mal nachprüfbar ist statt
+Aufgebaut in der Reihenfolge, in der das Formular fragt, mit den amtlichen
+Bezeichnungen der Kategorien und Datentypen. Zu jeder Angabe die Stelle im
+Code, aus der sie folgt — damit sie beim nächsten Mal nachprüfbar ist, statt
 erinnert werden zu müssen.
 
 ---
 
-## Vorab-Fragen
+## Die Fragefolge
 
-| Frage | Antwort | Warum |
-|---|---|---|
-| Erhebt oder teilt deine App die geforderten Nutzerdatentypen? | **Ja** | Konto, Inhalte, Absturzdaten |
-| Werden alle Nutzerdaten bei der Übertragung verschlüsselt? | **Ja** | Supabase, Sentry, Umami und IGDB laufen ausschließlich über HTTPS |
-| Können Nutzer die Löschung ihrer Daten beantragen? | **Ja — Löschung im Konto möglich** | „Delete account" im Profil; `013_delete_own_account.sql` löscht Profil, Bewertungen, Top 3 **und** die Identität in `auth.users` |
+Play fragt pro **Datentyp** immer dasselbe, in dieser Reihenfolge:
 
-> **Wichtig zur letzten Frage:** Play verlangt zusätzlich eine **Web-URL zur
-> Löschung**, wenn man „Konto löschen" anbietet. Die haben wir noch nicht. Ohne
-> sie reicht die In-App-Löschung formal nicht. Das ist der eine Punkt, an dem
-> ich noch etwas bauen muss — sag Bescheid, dann mache ich eine kleine Seite.
+1. **Erhoben, geteilt, oder beides?**
+2. **Wird ephemer verarbeitet?** — nur im Speicher, verlässt das Gerät nie. Ist
+   das der Fall, entfällt die Angabe als „erhoben".
+3. **Erforderlich oder optional?** — kann die Person die Erhebung abwählen?
+4. **Zweck**, mehrfach wählbar — und für *erhoben* und *geteilt* getrennt.
+
+**„Geteilt" ist enger, als es klingt:** Daten an einen Auftragsverarbeiter, der
+sie nur für uns verarbeitet, gelten **nicht** als geteilt. Nur eine Weitergabe
+an einen Dritten, der sie für eigene Zwecke nutzen darf, zählt.
+
+> **Korrektur zu meinem ersten Entwurf:** Ich hatte die Nutzer-ID als „geteilt"
+> geführt, weil sie an RevenueCat geht. Das ist falsch. RevenueCat verarbeitet
+> sie ausschließlich für uns, damit ein Abo dem Konto zugeordnet werden kann,
+> und wird in der Datenschutzerklärung genau so geführt. **Wir teilen nichts.**
 
 ---
 
-## Erhobene Datentypen
+## Personenbezogene Daten
 
-Für jeden Typ fragt Play dasselbe: **erhoben** oder **geteilt**, ob
-**verpflichtend**, und **wozu**. „Geteilt" heißt bei Play: an einen Dritten
-weitergegeben, der sie für eigene Zwecke nutzen darf — Auftragsverarbeiter
-zählen **nicht** als „geteilt".
+### Name
 
-### Personenbezogene Daten
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | App-Funktionalität · Kontoverwaltung |
 
-| Datentyp | Erhoben | Geteilt | Pflicht | Zweck |
-|---|---|---|---|---|
-| **E-Mail-Adresse** | Ja | Nein | Ja | Kontoverwaltung |
-| **Nutzer-IDs** | Ja | **Ja** | Ja | Kontoverwaltung, App-Funktionalität |
-| **Name** (Anzeigename) | Ja | Nein | Nein | Kontoverwaltung, App-Funktionalität |
+Der Benutzername ist bei der Registrierung Pflicht (`profiles.username`), der
+Anzeigename optional. Weil einer der beiden erforderlich ist, ist die Angabe
+insgesamt erforderlich.
 
-> **Warum Nutzer-IDs „geteilt" sind:** Die Konto-ID geht an RevenueCat, damit
-> ein gekauftes Abo dem Konto zugeordnet werden kann. RevenueCat ist ein
-> eigenständiger Anbieter in den USA, kein reiner Auftragsverarbeiter —
-> Quelle: `RevenueCatEntitlementService.configure(appUserId:)`.
+### E-Mail-Adresse
 
-### Fotos und Videos
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | Kontoverwaltung |
 
-| Datentyp | Erhoben | Geteilt | Pflicht | Zweck |
-|---|---|---|---|---|
-| **Fotos** (Profilbild) | Ja | Nein | Nein | App-Funktionalität |
+Registrierung über Supabase Auth. Das Passwort ist kein eigener Datentyp im
+Formular und wird ohnehin nur als Hash gespeichert.
 
-Quelle: `profiles.avatar_url`, Supabase Storage. Optional.
+### Nutzer-IDs
 
-### App-Aktivität
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | App-Funktionalität · Kontoverwaltung |
 
-| Datentyp | Erhoben | Geteilt | Pflicht | Zweck |
-|---|---|---|---|---|
-| **Sonstige nutzergenerierte Inhalte** | Ja | Nein | Nein | App-Funktionalität |
-| **Sonstige Aktionen** | Ja | Nein | Nein | Analysen |
+Die Supabase-Konto-ID. Sie geht an RevenueCat — als Auftragsverarbeiter, siehe
+oben, also nicht „geteilt". Quelle:
+`RevenueCatEntitlementService.configure(appUserId:)`.
 
-Nutzergenerierte Inhalte: Bewertungen, Wunschliste, Empfehlungen, Top 3,
-Sammlungsnamen, Biografie — alles in `user_games`, `user_collections`,
+---
+
+## Finanzielle Informationen
+
+### Kaufhistorie
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **optional** |
+| Zweck | App-Funktionalität · Kontoverwaltung |
+
+Nicht der Kauf selbst — den wickelt Google ab und wir sehen keine Zahlungsdaten
+—, aber sein Ergebnis: `profiles.is_pro` und `pro_expires_at`, gespiegelt vom
+`revenuecat-webhook`. Optional, weil das nur entsteht, wenn jemand ein Abo
+abschließt.
+
+**Nicht ankreuzen:** Zahlungsinformationen, Bonität, sonstige Finanzdaten.
+
+---
+
+## Fotos und Videos
+
+### Fotos
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **optional** |
+| Zweck | App-Funktionalität |
+
+Das Profilbild, in Supabase Storage. Rein freiwillig.
+
+---
+
+## App-Aktivität
+
+### App-Interaktionen
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | Analysen |
+
+Die elf Umami-Ereignisse aus `analytics_events.dart`. Der Rumpf enthält
+`website`, `hostname`, `language`, `url`, den Ereignisnamen und die
+Eigenschaften `game_id`, `rating`, `screen`, `plan`, `source` — **keine
+Nutzerkennung, keine Cookies, keine Geräte-ID**
+(`umami_analytics_service.dart`). Selbst gehostet in Nürnberg.
+
+> **„Erforderlich", weil es keinen Schalter gibt.** Die Frage lautet, ob die
+> Person die Erhebung abwählen kann, nicht ob die App ohne sie liefe. Es gibt
+> keine Abschaltung, also ist die ehrliche Antwort „erforderlich". Wenn dir das
+> nicht gefällt, ist die Lösung ein Schalter in den Einstellungen — dann wird
+> daraus „optional". Sag Bescheid, das ist eine überschaubare Änderung.
+
+### Sonstige nutzergenerierte Inhalte
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **optional** |
+| Zweck | App-Funktionalität |
+
+Bewertungen, Rezensionstexte, Wunschliste, Empfehlungen, Top 3,
+Sammlungsnamen, Biografie. Tabellen `user_games`, `user_collections`,
 `user_top_three`, `profiles`.
 
-Sonstige Aktionen: die elf Umami-Ereignisse aus `analytics_events.dart`
-(`app_open`, `signup`, `rate_game`, …). **Ohne Nutzerkennung und ohne Cookies**,
-selbst gehostet in Nürnberg.
-
-### App-Informationen und Leistung
-
-| Datentyp | Erhoben | Geteilt | Pflicht | Zweck |
-|---|---|---|---|---|
-| **Absturzprotokolle** | Ja | Nein | Nein | Analysen |
-| **Diagnosedaten** | Ja | Nein | Nein | Analysen |
-
-Quelle: Sentry, deutsche Region. `main.dart` setzt `sendDefaultPii = false` —
-also **keine** IP-Adresse und **keine** Nutzerkennung in den Fehlerberichten,
-nur Stacktrace, App-Version und Gerätetyp.
+**Nicht ankreuzen:** In-App-Suchverlauf (Suchanfragen werden nicht
+gespeichert), installierte Apps, sonstige Aktionen.
 
 ---
 
-## Was ausdrücklich **nicht** erhoben wird
+## App-Informationen und Leistung
 
-Diese Häkchen bleiben leer, und dafür gibt es jeweils einen Grund im Code:
+### Absturzprotokolle
 
-- **Standort** — die App fragt keine Ortungsberechtigung an
-- **Finanzdaten** — der Kauf läuft vollständig über Google Play Billing; wir
-  sehen keine Zahlungsdaten
-- **Kontakte, Kalender, SMS, Anrufe, Gesundheit, Musik, Dateien** — keine
-  Berechtigung, kein Code dafür
-- **Werbe-ID** — die App zeigt keine Werbung und bindet kein Werbe-SDK ein
-- **Suchverlauf** — Suchanfragen werden nicht gespeichert
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | Analysen |
+
+Sentry, deutsche Region. `main.dart` setzt `sendDefaultPii = false` — also
+weder IP-Adresse noch Nutzerkennung, nur Stacktrace, App-Version und Gerätetyp.
+
+### Diagnosedaten
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | Analysen |
+
+Sentry-Performance-Traces: `tracesSampleRate = 0.2` im Release, also jede
+fünfte Sitzung.
+
+---
+
+## Geräte- oder andere IDs
+
+### Geräte- oder andere IDs
+
+| Frage | Antwort |
+|---|---|
+| Erhoben / geteilt | **erhoben**, nicht geteilt |
+| Ephemer | nein |
+| Erforderlich / optional | **erforderlich** |
+| Zweck | Analysen |
+
+> **Hier bin ich mir nicht sicher, und das sage ich lieber, als es zu raten.**
+> Sentry führt „Release Health" standardmäßig mit und legt dafür eine stabile
+> Installations-Kennung an. `sendDefaultPii = false` schaltet IP und
+> Nutzername ab, diese Kennung aber nicht zwangsläufig.
+>
+> **Sicherer Weg:** ankreuzen. Zu viel erklären kostet nichts, zu wenig ist ein
+> Verstoß.
+> **Sauberer Weg:** `enableAutoSessionTracking = false` setzen, dann entfällt
+> die Kennung und das Häkchen mit ihr. Das kann ich machen — es kostet die
+> Absturzfreiheitsrate pro Release, sonst nichts.
+
+---
+
+## Was leer bleibt
+
+Für jedes davon gibt es einen Grund im Code, nicht nur eine Annahme:
+
+- **Standort** — keine Ortungsberechtigung im Manifest
+- **Zahlungsinformationen** — der Kauf läuft vollständig über Google Play Billing
+- **Gesundheit und Fitness, Nachrichten, Audio, Dateien, Kalender, Kontakte** —
+  keine Berechtigung, kein Code
+- **Web-Browserverlauf** — die App hat keinen Browser
+- **In-App-Suchverlauf** — Suchanfragen werden nicht gespeichert
 - **Installierte Apps** — nicht abgefragt
+- **Werbe-ID** — kein Werbe-SDK, keine Werbung
 
 ---
 
-## Verschlüsselung und Aufbewahrung
+## Die zwei allgemeinen Fragen
 
-- **Bei der Übertragung verschlüsselt:** ja, durchgehend HTTPS.
-- **Nutzer können Löschung beantragen:** ja, in der App.
-- Aufbewahrung: siehe § 5 der Datenschutzerklärung.
+| Frage | Antwort |
+|---|---|
+| Werden alle Nutzerdaten bei der Übertragung verschlüsselt? | **Ja** — Supabase, Sentry, Umami und der IGDB-Proxy laufen ausschließlich über HTTPS |
+| Können Nutzer die Löschung ihrer Daten beantragen? | **Ja** |
+
+> **Und hier fehlt noch etwas.** Play verlangt bei „Konto löschen" zusätzlich
+> eine **öffentlich erreichbare Web-URL**, über die eine Löschung beantragt
+> werden kann — ohne die App zu installieren. Unsere Löschung in der App ist
+> vollständig (Migration 013 räumt Profil, Bewertungen, Top 3 **und** die
+> Identität in `auth.users`), aber die URL gibt es nicht. Die muss gebaut
+> werden, bevor Produktion geht.
 
 ---
 
-## Nach dem Ausfüllen
+## Ein Fund beim Abgleich
 
-Die Erklärung muss zur **Datenschutzerklärung** passen, die im Store verlinkt
-ist. Beide sagen dasselbe — wenn du hier etwas anders anklickst, als in
-`assets/legal/datenschutz.md` steht, ändere zuerst die Datenschutzerklärung
-und sag mir Bescheid, damit die Fassung in der App mitkommt.
+Die Datenschutzerklärung sagt noch:
+
+> „IGDB / Twitch … Beim Abruf von Spielinformationen wird deine IP-Adresse an
+> diesen Dienst übertragen."
+
+**Das stimmt seit dem IGDB-Proxy (#142) nicht mehr.** Der Client spricht nur
+noch mit unserer Edge Function in Frankfurt; IGDB sieht deren IP, nicht die des
+Nutzers. Die Erklärung gibt also mehr an, als passiert — und die einzige
+verbliebene Übermittlung in die USA ist die Konto-ID an RevenueCat.
+
+Das gehört korrigiert, bevor die Data-Safety-Angabe daneben steht. Sag
+Bescheid, dann ziehe ich `datenschutz.md` und die englische Fassung nach.
+
+---
+
+## Quellen
+
+- [Provide information for Google Play's Data safety section](https://support.google.com/googleplay/android-developer/answer/10787469?hl=en) — Kategorien, Datentypen, Zwecke
+- [Google Play Data Safety Form: The Complete Walkthrough](https://applander.io/blog/google-play-data-safety-form-complete-guide) — Reihenfolge der Fragen je Datentyp
