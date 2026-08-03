@@ -68,6 +68,55 @@ Was `profiles.is_pro` absichert, ist das serverseitige Sammlungs-Limit; falsch
 > **Gefunden:** 36 PNGs unter `test/golden/failures/` lagen im Repo — Ausgabe
 > eines roten Golden-Laufs, von zwei Commits eingesammelt. Raus + `.gitignore`.
 
+**Nachtrag zu #143 — ich hatte eine Regression live (PR #145).** Nach dem Deploy
+antwortete der Webhook auf **jedes** echte Ereignis mit 500.
+> **Gotcha (`or` auf einem UPDATE):** PostgREST qualifiziert Spalten innerhalb
+> einer `or`-Gruppe als `profiles.<spalte>`. In der Anweisung, die es für ein
+> UPDATE baut, heißt die Relation nicht `profiles` → Postgres antwortet 42703
+> „column profiles.pro_event_at does not exist" über eine Spalte, die da ist.
+> **Dieselbe Gruppe auf einem SELECT läuft durch**, weshalb jede Leseprobe grün
+> war und der Fehler erst beim ersten Schreiben kam. Migration **017** gibt der
+> Spalte `NOT NULL DEFAULT '-infinity'`, damit ein einfacher `lt` reicht.
+> **Lehre:** Die 12 Deno-Tests prüfen die Regeln, nicht die Abfrage. Eine Regel
+> kann stimmen und die Anfrage trotzdem nicht durchgehen — dafür gibt es keinen
+> Ersatz für einen echten Schreibvorgang gegen das echte System.
+> **Am Wegwerf-Konto durchgespielt und danach gelöscht:** Kauf bei T2 → is_pro
+> true · Wiederholung → ignoriert · **ältere EXPIRATION bei T1 → ignoriert,
+> is_pro bleibt true** (der Fall, um den es ging) · neuere bei T3 → false ·
+> TRANSFER → true.
+> **Gotcha (Schema-Cache):** Nach dem Einspielen von 016 meldete PostgREST die
+> neue Spalte zunächst als nicht vorhanden. Über die Management-API
+> (`/v1/projects/<ref>/database/query`) lässt sich `information_schema` prüfen
+> und `notify pgrst, 'reload schema'` auslösen — beides ohne SQL-Editor.
+
+**Der Ladezustand, vierter Anlauf (PR #146) — die Position war das Problem.**
+Checkliste, Shimmer und Kammer bekamen dieselbe Rückmeldung: „sieht aus wie ein
+Element der Detailseite und nicht der Zwischen-Loading-Screen". Sie *waren* es
+auch. Der User hat auf CouchCinemas Loader verwiesen; der Unterschied ist nicht
+die Ausstattung, sondern dass der **den ganzen Bildschirm nimmt**. Jetzt steht
+die Karte über allem, das Cover bleibt unscharf dahinter und färbt weiter das
+Licht. Maskottchen ist eine **Münze über einem Schlitz** (User-Entscheidung aus
+vier Vorschlägen): ein Maskottchen ist ein Gegenstand, und die Icon-Regel sagt,
+das Spiele-Signal steckt in der Machart, weil Hardware veraltet — ein
+Münzschlitz ist Geschichte, keine Hardware. Dazu die Idee des Users: Cover als
+Thumbnail in der Kopfzeile, mit dem `LightSweepPainter` aus der Top 3 und dem
+Live-Punkt **auf** der Ecke.
+> **Übernommen von CouchCinema:** Bildschirmbesitz, Maskottchen, ankommende
+> Karte (auf, 16 px hoch, 3 % größer), Schrittzähler, Unterzeilen.
+> **Nicht übernommen:** driftende Verlaufsblasen (wir haben Cover-Licht durch
+> das Dither-Raster) und der nackte Spinner am aktiven Schritt.
+> **Gotcha (`AnimatedSize` schneidet ab):** Es clippt sein Kind, während es
+> aufholt. Jeder Frame direkt nach einem neuen Schritt zeigte diesen halbiert,
+> mit dem Fortschrittsbalken quer darüber. Im Golden sofort sichtbar. Raus.
+> **Gotcha (Goldens brauchen die echte Größe):** Der Sprite-Streifen lag bei
+> 64 px, wo alles liest. Bei den tatsächlichen 44 dp gemessen zeigte sich, dass
+> **drei Umdrehungen je Zyklus** die Münze sechsmal pro Sekunde hochkant stellen
+> — ein Flackern, keine Drehung. Jetzt zwei. Ebenso wertlos war die erste
+> Stichprobenreihe: auf Vielfachen einer halben Drehung zeigte sie sechsmal
+> denselben Frame.
+> **Karte trägt `IgnorePointer`** — ein Warten, das man nicht verlassen kann,
+> ist eine Falle, und dieses kann eine schlechte Verbindung überdauern.
+
 **Der Store zeigt eine andere App.** Über die Play-API ausgelesen: Icon ist das
 alte neon-lila „G", die 5 Screenshots zeigen den Material-Standard-Lila-Stand
 („Gamer Grove" mit lila Controller-Marke), Feature-Graphic ebenso, Beschreibung
@@ -79,12 +128,13 @@ Ladeanimation → Store-Auftritt neu → Rollout internal → alpha → beta →
 Produktion → **dann erst** IGDB-Secret bei Twitch rotieren. Früher rotieren
 schaltet jede Bestandsinstallation ab, auch versionCode 5 in Produktion.
 
-> **Offen (User):** Migration **016 einspielen, bevor der Webhook deployt wird**
-> (sie legt die Spalte an, die er schreibt) · Data-Safety-Erklärung in der Play
-> Console nachziehen (RevenueCat, Sentry, Umami sind seit versionCode 5 dazu­
-> gekommen) · Mail an `partner@igdb.com` (kommerzielle Nutzung, vor Paid-Launch)
-> · Richtung für die Ladeanimation wählen (Artefakt mit drei laufenden
-> Varianten: Licht als Fortschritt / Raster löst sich auf / Raum wird angezündet).
+> **Erledigt:** 016 eingespielt (User), 017 eingespielt (ich, additiv), Webhook
+> deployt und verifiziert. Ladeanimation entschieden und gebaut (#146).
+> **Offen (User):** Data-Safety-Erklärung in der Play Console nachziehen
+> (RevenueCat, Sentry, Umami sind seit versionCode 5 dazugekommen) · Mail an
+> `partner@igdb.com` (kommerzielle Nutzung, vor Paid-Launch) · Build 38 auf dem
+> Gerät ansehen: liest die Karte über dem unscharfen Cover als Zwischenschritt,
+> und ist der Lichtstreif auf dem Thumbnail sichtbar ohne zu nerven.
 
 ### Session 9 (2026-07-25) — Eigenes App-Icon „Pixel Portal" (Etappe 1 von 4)
 Reine Gestaltungs-Session, **keine neuen Features**. Etappen: (1) Icon ✅, (2) Tokens + Theme ✅,
