@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/theme/gg_detail_light.dart';
-import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
@@ -20,7 +19,8 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/enhanced_medi
 import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/widgets/entity_detail/entity_hero_overlays.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
-import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart'; // ✅ Import Live Loading
+import 'package:gamer_grove/presentation/widgets/loading/loading_steps.dart';
+import 'package:gamer_grove/presentation/widgets/loading/loading_thumbnail.dart';
 import 'package:gamer_grove/presentation/widgets/sections/chamber_tint.dart';
 import 'package:gamer_grove/presentation/widgets/sections/character_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/events_section.dart';
@@ -196,22 +196,35 @@ class _GameDetailPageState extends State<GameDetailPage>
   Widget _buildPreview(Game game) {
     return ChamberTint(
       coverUrls: [game.coverUrl],
-      builder: (context, tint) => CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          _buildSliverAppBar(game, tint, pending: true),
-          _ArrivesLast(
-            // Fills what is left of the viewport rather than only its content.
-            // A box adapter is as tall as what is in it, so the page's surface
-            // — and with it the grain — stopped under the loader and bare
-            // scaffold showed below.
-            sliver: SliverFillRemaining(
-              hasScrollBody: false,
-              child: _PreviewBody(tint: tint, game: game),
-            ),
-          ),
+      builder: (context, tint) => Stack(
+        fit: StackFit.expand,
+        children: [
+          _previewScroll(game, tint),
+          // In front of the page, not inside it. Pointers pass through so the
+          // back button in the app bar keeps working — a wait you cannot leave
+          // is a trap, and this one can outlast a bad connection.
+          IgnorePointer(child: _WaitingCard(game: game, tint: tint)),
         ],
       ),
+    );
+  }
+
+  Widget _previewScroll(Game game, Color tint) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        _buildSliverAppBar(game, tint, pending: true),
+        _ArrivesLast(
+          // Fills what is left of the viewport rather than only its content.
+          // A box adapter is as tall as what is in it, so the page's surface
+          // — and with it the grain — stopped under the loader and bare
+          // scaffold showed below.
+          sliver: SliverFillRemaining(
+            hasScrollBody: false,
+            child: _PreviewBody(tint: tint, game: game),
+          ),
+        ),
+      ],
     );
   }
 
@@ -491,57 +504,61 @@ class _PreviewBody extends StatelessWidget {
             height: DetailLight.reach,
             child: _ArrivingLight(tint: tint),
           ),
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingMedium),
-            child: Semantics(
-              label: 'Loading the rest of ${game.name}',
-              liveRegion: true,
-              child: _PendingSections(game: game, tint: tint),
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
-/// What is happening while the game is fetched, said out loud.
+/// The wait, in front of the page rather than inside it.
 ///
-/// Grey placeholder blocks were the obvious choice and the wrong one twice
-/// over. The request behind this page fetches a game and all its relations, so
-/// it is always slower than the 350ms reveal — the shimmer was never the
-/// slow-network case it was written as, it was what everyone saw. And it says
-/// only "wait", where the checklist this replaces said what the app was
-/// actually doing, which a tester found more interesting than what replaced it.
+/// Three attempts sat this in the page — a checklist, then a shimmer, then a
+/// chamber under the cover — and a tester's verdict was the same each time: it
+/// looked like one more element of the detail page, not like a step before it.
+/// It was, so it did.
 ///
-/// So the checklist comes back, in a chamber of its own: the app's own surface,
-/// its own grain, and the cover's light spilling into it from the page above.
-class _PendingSections extends StatelessWidget {
-  const _PendingSections({required this.game, required this.tint});
+/// What fixes that is not more decoration but position: the card is centred
+/// over everything, and the page behind it is backdrop. The cover stays visible
+/// through the scrim, out of focus, still colouring the light — so the wait
+/// says which game is coming without pretending the game is already here.
+class _WaitingCard extends StatelessWidget {
+  const _WaitingCard({required this.game, required this.tint});
 
   final Game game;
   final Color tint;
 
+  /// Enough to push the page back, little enough to leave the cover legible.
+  static const _scrim = 0.72;
+
   @override
   Widget build(BuildContext context) {
-    final tokens = context.ggTokens;
+    final scheme = Theme.of(context).colorScheme;
 
-    // One chamber, not two. `LiveLoadingProgress` already draws its own
-    // surface; wrapping it in a second decorated box put a container inside a
-    // container. What is added here is only the grain, so the light of the page
-    // above carries into it instead of stopping at its edge.
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(tokens.radiusLg),
-      child: Stack(
-        children: [
-          Positioned.fill(child: _ChamberGrain(tint: tint)),
-          LiveLoadingProgress(
-            title: 'Entering the Grove',
-            steps: EventLoadingSteps.forGame(context, game),
-            stepDuration: const Duration(milliseconds: 900),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: scheme.surface.withValues(alpha: _scrim)),
+        // The backdrop is the app's own material — the cover's light through
+        // the same grain as everywhere else — rather than the soft colour
+        // blobs this kind of card usually floats on.
+        Positioned.fill(child: _ChamberGrain(tint: tint)),
+        SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppConstants.paddingMedium),
+              child: LiveLoadingProgress(
+                title: game.name,
+                artwork: LoadingThumbnail(
+                  coverUrl: game.coverUrl,
+                  label: 'Cover of ${game.name}',
+                ),
+                steps: EventLoadingSteps.forGame(context, game),
+                stepDuration: const Duration(milliseconds: 900),
+              ),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

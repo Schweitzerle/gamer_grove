@@ -1,5 +1,5 @@
-import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_step.dart';
 
 // Predefined step sequences, one per kind of detail screen. Moved out of
