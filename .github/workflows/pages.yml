@@ -1,0 +1,49 @@
+name: Pages
+
+# Publishes `web/` — currently the account-deletion page Google Play requires
+# to be reachable without installing the app.
+#
+# It lives here rather than in a Supabase edge function because the edge
+# gateway forces `Content-Type: text/plain` and `CSP: default-src 'none';
+# sandbox` onto every function response, deliberately: nobody gets to host a
+# browsable page on supabase.co. The page rendered as source text.
+#
+# Only `web/` is published. `docs/` stays out of it — it holds working notes
+# and drafts that are not for the public.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'web/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and never cancel one that is running — a half
+# published legal page is worse than a stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

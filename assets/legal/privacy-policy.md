@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: 25 July 2026
+Last updated: 3 August 2026
 
 This policy explains which personal data the GamerGrove app processes, for what
 purpose and on what legal basis. The German version is the legally binding one.
@@ -45,9 +45,10 @@ technically necessary data, in particular your IP address.
 
 - Supabase (database, authentication, file storage). Holds your account and
   content. Server location: Frankfurt, Germany (EU).
-- IGDB / Twitch (Internet Games Database) for game data. Fetching game
-  information transmits your IP address to that service. No account data is
-  sent. Provider: Twitch Interactive, Inc., USA.
+- IGDB / Twitch (Internet Games Database) for game data. The app does **not**
+  query them directly; it goes through our own server in Frankfurt. IGDB
+  therefore sees that server's IP address, not yours, and no account data.
+  Provider: Twitch Interactive, Inc., USA.
 - Sentry (crash and error reports). Transmission of personal data is disabled
   (no IP, no user identifier); we receive technical data such as stack trace,
   app version and device type. Server location: Germany (Sentry's EU region).
@@ -62,9 +63,9 @@ technically necessary data, in particular your IP address.
   Google Ireland Limited.
 
 Our own infrastructure — database, error reports and usage measurement — is
-entirely in the EU. Data goes to the USA only for IGDB / Twitch (your IP address
-when game data is fetched) and RevenueCat (an account identifier so a
-subscription can be attributed). Those transfers are based on the EU
+entirely in the EU. The only data that goes to the USA is an account identifier
+sent to RevenueCat so a subscription can be attributed. That transfer is based
+on the EU
 Commission's Standard Contractual Clauses or the recipient's certification under
 the EU-US Data Privacy Framework.
 

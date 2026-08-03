@@ -225,12 +225,17 @@ Für jedes davon gibt es einen Grund im Code, nicht nur eine Annahme:
 | Werden alle Nutzerdaten bei der Übertragung verschlüsselt? | **Ja** — Supabase, Sentry, Umami und der IGDB-Proxy laufen ausschließlich über HTTPS |
 | Können Nutzer die Löschung ihrer Daten beantragen? | **Ja** |
 
-> **Und hier fehlt noch etwas.** Play verlangt bei „Konto löschen" zusätzlich
-> eine **öffentlich erreichbare Web-URL**, über die eine Löschung beantragt
-> werden kann — ohne die App zu installieren. Unsere Löschung in der App ist
-> vollständig (Migration 013 räumt Profil, Bewertungen, Top 3 **und** die
-> Identität in `auth.users`), aber die URL gibt es nicht. Die muss gebaut
-> werden, bevor Produktion geht.
+> **Die URL, die Play zusätzlich verlangt:**
+> `https://schweitzerle.github.io/gamer_grove/delete-account/`
+>
+> Sie gehört im Formular in das Feld für die Lösch-URL. Die Seite nennt, was
+> gelöscht wird, wie es in der App geht, und wie man es ohne die App beantragt
+> — für Leute, die die App schon deinstalliert haben.
+>
+> **Nicht auf Supabase gehostet, und das war eine Lehre:** das Edge-Gateway
+> erzwingt `Content-Type: text/plain` und `CSP: default-src 'none'; sandbox`
+> auf jede Function-Antwort, damit niemand browsbare Seiten auf `supabase.co`
+> stellt. Die Seite kam als Quelltext heraus. Jetzt GitHub Pages aus `web/`.
 
 ---
 
