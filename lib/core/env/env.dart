@@ -4,11 +4,11 @@ part 'env.g.dart';
 
 @Envied(path: '.env') // Hier wird auf deine lokale .env Datei verwiesen
 abstract class Env {
-  @EnviedField(varName: 'IGDB_CLIENT_ID', obfuscate: true)
-  static final String igdbClientId = _Env.igdbClientId;
-
-  @EnviedField(varName: 'IGDB_CLIENT_SECRET', obfuscate: true)
-  static final String igdbClientSecret = _Env.igdbClientSecret;
+  // The IGDB credentials used to live here. They do not any more: the app
+  // talks to the `igdb` edge function, which holds them server-side. `envied`
+  // masks a constant with XOR and ships the mask beside it, so this was never
+  // more than a speed bump — the only way for a client not to leak a secret is
+  // not to have one.
 
   @EnviedField(varName: 'SUPABASE_URL', obfuscate: true)
   static final String supabaseUrl = _Env.supabaseUrl;
