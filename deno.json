@@ -1,0 +1,16 @@
+{
+  "//": "Only the Supabase edge functions are Deno; everything else here is Dart. Single quotes match the style the rest of the repo is written in. no-import-prefix is off because edge functions are deployed as the files they are, without this config beside them — so their dependencies are pinned in the import itself rather than in a manifest the deploy would not carry.",
+  "fmt": {
+    "singleQuote": true,
+    "include": ["supabase/functions"]
+  },
+  "lint": {
+    "include": ["supabase/functions"],
+    "rules": {
+      "exclude": ["no-import-prefix"]
+    }
+  },
+  "test": {
+    "include": ["supabase/functions"]
+  }
+}

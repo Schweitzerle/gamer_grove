@@ -4,7 +4,9 @@
 // database can enforce paid limits (see SupabaseScripts/014). RevenueCat stays
 // the source of truth; this is a cache that the client never writes.
 //
-// Deploy:
+// What each event means lives in decide.ts; this file does the IO.
+//
+// Deploy (016 must be applied first — it adds the column this writes):
 //   supabase functions deploy revenuecat-webhook --no-verify-jwt
 //   supabase secrets set REVENUECAT_WEBHOOK_SECRET=<random string>
 //
@@ -16,38 +18,70 @@
 // JWT; the shared secret in the Authorization header is what authenticates it.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
+import { decide, type ProWrite } from './decide.ts';
 
-/// Entitlement identifier configured in RevenueCat, matching the Flutter client.
-const PRO_ENTITLEMENT = 'pro';
+function fail(status: number, message: string): Response {
+  return new Response(message, { status });
+}
 
-/// Event types that mean "Pro is active from now until expiration".
-const GRANTING = new Set([
-  'INITIAL_PURCHASE',
-  'RENEWAL',
-  'UNCANCELLATION',
-  'NON_RENEWING_PURCHASE',
-  'PRODUCT_CHANGE',
-  'SUBSCRIPTION_EXTENDED',
-]);
+/// Writes the Pro state for one user, unless a newer event already did.
+///
+/// The comparison against `pro_event_at` is what makes this safe against the
+/// two things RevenueCat does not promise: ordering and single delivery. A
+/// retry carries the same `event_timestamp_ms` as the original, so `lt` turns
+/// replays into no-ops, and a late EXPIRATION cannot revoke a subscription
+/// that a newer RENEWAL already extended.
+async function applyPro(
+  supabase: SupabaseClient,
+  write: ProWrite,
+  eventAt: string,
+): Promise<{ applied: boolean; error?: string }> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      is_pro: write.isPro,
+      pro_expires_at: write.expiresAt,
+      pro_event_at: eventAt,
+    })
+    .eq('id', write.userId)
+    // Quoted: the timestamp carries dots and colons, and an `or` filter is
+    // parsed before the value is.
+    .or(`pro_event_at.is.null,pro_event_at.lt."${eventAt}"`)
+    .select('id');
 
-/// Event types that revoke access immediately.
-const REVOKING = new Set(['EXPIRATION', 'REFUND', 'SUBSCRIPTION_PAUSED']);
+  if (error) return { applied: false, error: error.message };
+  return { applied: (data ?? []).length > 0 };
+}
 
-// CANCELLATION is deliberately in neither set: the user keeps access until the
-// period ends, and RevenueCat sends EXPIRATION when it actually lapses.
+/// Why nothing was written for a user that should exist.
+///
+/// Three ways to write nothing, and they need telling apart: a replay, an
+/// event older than the one on record, or an app_user_id that is not a
+/// Supabase user at all. The last is a misconfiguration that would otherwise
+/// look like a working webhook forever.
+async function explainNoWrite(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<'unknown-user' | 'stale'> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle();
+  return data == null ? 'unknown-user' : 'stale';
+}
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
+  if (req.method !== 'POST') return fail(405, 'Method not allowed');
 
   const secret = Deno.env.get('REVENUECAT_WEBHOOK_SECRET');
   if (!secret) {
     console.error('REVENUECAT_WEBHOOK_SECRET is not set');
-    return new Response('Not configured', { status: 500 });
+    return fail(500, 'Not configured');
   }
   if (req.headers.get('Authorization') !== `Bearer ${secret}`) {
-    return new Response('Unauthorized', { status: 401 });
+    return fail(401, 'Unauthorized');
   }
 
   let event: Record<string, unknown>;
@@ -55,57 +89,59 @@ Deno.serve(async (req) => {
     const body = await req.json();
     event = (body.event ?? {}) as Record<string, unknown>;
   } catch {
-    return new Response('Bad request', { status: 400 });
+    return fail(400, 'Bad request');
   }
 
-  const type = String(event.type ?? '');
-  const userId = String(event.app_user_id ?? '');
-  // The client sets appUserID to the Supabase user id, so this maps directly.
-  if (!userId) {
-    return new Response('Missing app_user_id', { status: 400 });
+  const decision = decide(event);
+  if (decision.kind === 'reject') return fail(400, decision.reason);
+  if (decision.kind === 'ignore') {
+    console.log('ignored', { type: event.type, reason: decision.reason });
+    return new Response(`Ignored: ${decision.reason}`, { status: 200 });
   }
 
-  const entitlements = (event.entitlement_ids as string[] | undefined) ??
-    (event.entitlement_id ? [String(event.entitlement_id)] : []);
-  // Events for other entitlements must not touch Pro.
-  if (entitlements.length > 0 && !entitlements.includes(PRO_ENTITLEMENT)) {
-    return new Response('Ignored: other entitlement', { status: 200 });
-  }
-
-  let isPro: boolean;
-  if (GRANTING.has(type)) {
-    isPro = true;
-  } else if (REVOKING.has(type)) {
-    isPro = false;
-  } else {
-    // TEST, CANCELLATION, BILLING_ISSUE, TRANSFER, … — nothing to change.
-    return new Response(`Ignored: ${type}`, { status: 200 });
-  }
-
-  const expiresMs = Number(event.expiration_at_ms ?? 0);
-  const expiresAt = isPro && expiresMs > 0
-    ? new Date(expiresMs).toISOString()
-    : null;
-
-  // Service role: the guard trigger rejects Pro writes from anyone else.
   const supabase = createClient(
+    // Service role: the guard trigger rejects Pro writes from anyone else.
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({ is_pro: isPro, pro_expires_at: expiresAt })
-    .eq('id', userId);
+  const failures: string[] = [];
+  const skipped: string[] = [];
+  for (const write of decision.writes) {
+    const result = await applyPro(supabase, write, decision.eventAt);
+    if (result.error) {
+      failures.push(`${write.userId}: ${result.error}`);
+    } else if (!result.applied) {
+      const why = await explainNoWrite(supabase, write.userId);
+      if (why === 'unknown-user') {
+        console.error('no profile for app_user_id', {
+          type: event.type,
+          userId: write.userId,
+        });
+      }
+      skipped.push(`${write.userId}: ${why}`);
+    }
+  }
 
-  if (error) {
-    console.error('profile update failed', { type, userId, error });
+  if (failures.length > 0) {
+    console.error('profile update failed', { type: event.type, failures });
     // 5xx makes RevenueCat retry, which is what we want for a transient fault.
     // The message goes back to the caller — only reachable with the shared
     // secret, and without it a failing webhook is near-impossible to diagnose.
-    return new Response(`Update failed: ${error.message}`, { status: 500 });
+    return fail(500, `Update failed: ${failures.join('; ')}`);
   }
 
-  console.log('pro status updated', { type, userId, isPro, expiresAt });
+  if (skipped.length === decision.writes.length) {
+    // Replays and out-of-order deliveries are correct outcomes, and must
+    // answer 2xx or RevenueCat keeps retrying them.
+    console.log('nothing written', { type: event.type, skipped });
+    return new Response(`Ignored: ${skipped.join('; ')}`, { status: 200 });
+  }
+
+  console.log('pro status updated', {
+    type: event.type,
+    writes: decision.writes,
+    skipped,
+  });
   return new Response('OK', { status: 200 });
 });
