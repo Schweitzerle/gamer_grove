@@ -4,9 +4,87 @@
 > unchecked item. Standing Authorization gilt (autonom committen/pushen/PR/merge
 > nach grünem CI). Fragen an den User werden gebündelt gesammelt (Abschnitt unten).
 
-**Last updated:** 2026-07-27 (Session 9)
+**Last updated:** 2026-08-03 (Session 10)
 **Current branch:** `master`
-**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 Phase 2 ~95% · 🎨 **Session 9: Gestaltung (Icon + UI/UX-Overhaul)**
+**Current phase:** ✅ Phase 0 · ✅ Phase 1 · 🟢 Phase 2 ~95% · 🚀 **Session 10: alles fertig machen, dann in Produktion**
+
+### Session 10 (2026-08-03) — Härtung, Legal, Proxy, Bezahlpfad; danach Rollout
+
+**Das Wichtigste zuerst: master stand auf versionCode 19**, während Build 37 schon
+im Internal Track lag. Die ganze Etappe-6-Arbeit (Blende, Wartezustand, Naht,
+Obfuskierung, AGB, IGDB-Proxy) lag als 19 Commits auf einem Branch, ohne CI. In
+vier PRs zerlegt und der Reihe nach gemergt: **#139** (Einstellungs-Sheet),
+**#140** (Blende + Warten), **#141** (Obfuskierung + AGB), **#142** (IGDB-Proxy +
+versionCode 37). Dazu **#143** aus dem Security-Review.
+
+- **#139 Einstellungs-Sheet.** `'GamerGrove v2.0.0'` stand fest im Code, während
+  die App bei 2.0.2+21 war. Der Grund, warum das drei Releases niemand gemerkt
+  hat, ist der zweite Defekt: `showModalBottomSheet` deckelt ohne
+  `isScrollControlled` bei **9/16 der Höhe**, und der Inhalt hatte keinen
+  Scroll-View. Gemessen auf 800 px: die Zeile lag bei y 917–934, „RenderFlex
+  overflowed by 166 pixels". IGDB-Notiz und Version lagen unter der Kante.
+- **#140 Blende und Warten.** Drei Runden Gerätetest, jedes Mal „sieht aus wie
+  davor", jedes Mal ein messbarer Grund: (a) `revealOriginOf` lieferte immer
+  `null`, weil `SliverChildBuilderDelegate` den Kontext des **Slivers**
+  durchreicht — Rechteck wird jetzt im Tap-Handler aufgezeichnet, und die
+  Grove-Kopfzeile ist ein `StackedCover`, kein `GameCard`; (b)
+  `easeInOutCubicEmphasized` steht nach 100 ms bei **91 %** — eigene 350 ms;
+  (c) Fenster und Cover waren dasselbe Rechteck auf Fast-Schwarz — Goldrand.
+- **#141 Obfuskierung + AGB.** Jeder Build davor trug Dart-Symbolnamen im
+  Binary. `tool/build_release.sh` prüft nach dem Bauen am `libapp.so` nach, ob
+  die Obfuskierung gegriffen hat — ein stiller Fehlschlag wäre schlimmer als
+  kein Versuch. Symbole gehen zu Sentry (deutsche Region, eigener Host).
+- **#142 IGDB-Proxy.** Zugangsdaten aus dem Client in eine Edge Function.
+  Allowlist der 18 Endpunkte **aus dem Datasource-Quelltext erzeugt** — der
+  handgeschriebene Entwurf hatte vier vergessen.
+
+**#143 Security-Review über den Bezahl-/Entitlement-Pfad — drei echte Defekte.**
+Was `profiles.is_pro` absichert, ist das serverseitige Sammlungs-Limit; falsch
+`true` heißt unbegrenzt umsonst, falsch `false` heißt gesperrt trotz Abo.
+1. **TRANSFER wurde mit 400 abgewiesen.** Es ist das einzige Ereignis **ohne
+   `app_user_id`** — es nennt `transferred_from`/`transferred_to`. Folge: das
+   Quellkonto blieb dauerhaft Pro (seine EXPIRATION geht ab dann ans Ziel), das
+   Zielkonto kam nie über das Limit, für das es zahlt.
+2. **REFUND_REVERSED wurde ignoriert** — die REFUND davor hatte schon entzogen.
+3. **Keine Reihenfolge.** RevenueCat garantiert weder Ordnung noch einmalige
+   Zustellung. `profiles.pro_event_at` (Migration **016**) hält jetzt
+   `event_timestamp_ms`; die Bedingung steht im selben Statement, also ohne
+   Rennen, und ein striktes `<` macht Wiederholungen zu No-Ops.
+> **Gotcha (RevenueCat-Ids):** `$RCAnonymousID:…` ist keine uuid. `profiles.id`
+> ist eine uuid-Spalte → Query-Fehler → 500 → Retry-Schleife auf etwas, das nie
+> gelingen kann. Käufe vor dem Anmelden erzeugen genau das. Jetzt 200 + ignoriert.
+> **Gotcha (CI sah diesen Code nie an):** Weder Proxy noch Webhook liegen im
+> Blick von `flutter test`. CI hat jetzt einen Job **Edge functions**
+> (deno fmt · lint · test), 12 Tests auf `decide.ts`. Die Regeln stehen dort ohne
+> Datenbank, damit sie prüfbar sind als das, was sie sind: eine Tabelle.
+> **Gotcha (gestapelte PRs):** CI läuft nur `on: pull_request: branches:
+> [master]` — ein PR gegen einen Branch bekommt **gar keine Prüfung**. Und
+> `gh pr merge --delete-branch` auf die Basis **schließt** den Kind-PR; die Basis
+> lässt sich dann nicht mehr ändern („Cannot change the base branch of a closed
+> pull request"). Rettung: Branch kurz neu pushen, PR über die REST-API
+> reopenen, Basis auf master, Branch wieder löschen. Danach close+reopen, damit
+> `reopened` bei richtiger Basis feuert. **Beim nächsten Mal: Basis-Branch erst
+> löschen, wenn die ganze Kette durch ist.**
+> **Gefunden:** 36 PNGs unter `test/golden/failures/` lagen im Repo — Ausgabe
+> eines roten Golden-Laufs, von zwei Commits eingesammelt. Raus + `.gitignore`.
+
+**Der Store zeigt eine andere App.** Über die Play-API ausgelesen: Icon ist das
+alte neon-lila „G", die 5 Screenshots zeigen den Material-Standard-Lila-Stand
+(„Gamer Grove" mit lila Controller-Marke), Feature-Graphic ebenso, Beschreibung
+ohne Pro/Sammlungen. Ist-Stand Tracks: **production=5, beta=3, alpha=3,
+internal=37**. Ein Rollout auf 37 ist damit kein Update, sondern ein Relaunch.
+
+**Reihenfolge bis Produktion (mit dem User abgestimmt):** PRs durch ✅ →
+Ladeanimation → Store-Auftritt neu → Rollout internal → alpha → beta →
+Produktion → **dann erst** IGDB-Secret bei Twitch rotieren. Früher rotieren
+schaltet jede Bestandsinstallation ab, auch versionCode 5 in Produktion.
+
+> **Offen (User):** Migration **016 einspielen, bevor der Webhook deployt wird**
+> (sie legt die Spalte an, die er schreibt) · Data-Safety-Erklärung in der Play
+> Console nachziehen (RevenueCat, Sentry, Umami sind seit versionCode 5 dazu­
+> gekommen) · Mail an `partner@igdb.com` (kommerzielle Nutzung, vor Paid-Launch)
+> · Richtung für die Ladeanimation wählen (Artefakt mit drei laufenden
+> Varianten: Licht als Fortschritt / Raster löst sich auf / Raum wird angezündet).
 
 ### Session 9 (2026-07-25) — Eigenes App-Icon „Pixel Portal" (Etappe 1 von 4)
 Reine Gestaltungs-Session, **keine neuen Features**. Etappen: (1) Icon ✅, (2) Tokens + Theme ✅,
@@ -490,15 +568,16 @@ den festen Listen (Wishlist/Rated/Recommended/Top 3). Free-Limit **3**, Pro unbe
 - [x] **Paywall ehrlich** (#108): nur real existierende Features beworben (Stats/Filters/Themes).
 - [x] **Custom Collections** als echtes Feature (User-Listen, Free-Limit 3, Pro unbegrenzt) — PRs #110/#112/
       #115/#116/#117, Migration live + RLS verifiziert. Wird jetzt auf der Paywall beworben (ehrlich).
-- [ ] Serverseitige Enforcement des Collection-Limits (RLS/Trigger) — heute nur clientseitig.
+- [x] Serverseitige Enforcement des Collection-Limits (RLS/Trigger) — Migration 014, Session 8.
 - [ ] Share-UI für öffentliche Collections (`is_public` + RLS sind schon da).
 - [ ] golden + `/design-review`-Pass für Paywall.
 - [ ] Supabase-Entitlements-Spiegel (RevenueCat-Webhook → Edge Function → `subscriptions`-Tabelle, RLS) —
       für serverseitigen Pro-Status (Anti-Tampering, Pro-only Social-Features). Für ersten Launch nicht zwingend.
-- [ ] IGDB-Edge-Function-Proxy (Client-Secret raus; Security + saubere kommerzielle Posture).
-- [ ] **Legal (BLOCKER vor Public-Launch):** Datenschutzerklärung muss RevenueCat + Google-Play-Billing +
-      Abo-Bedingungen nennen; Play verlangt das. Gehört zu Phase 4, aber vor Produktion nötig.
-- [ ] Security-Review über den gesamten Payment-/Entitlement-Pfad.
+- [x] IGDB-Edge-Function-Proxy (Client-Secret raus) — PR #142, deployt und an echten Daten geprüft.
+- [x] **Legal:** Datenschutz (DE) und Privacy Policy (EN) nennen RevenueCat und Google Play Billing;
+      AGB mit Abo-Bedingungen liegen seit PR #141 bei. Offen bleibt nur die Data-Safety-Erklärung
+      in der Play Console — die lebt dort, nicht im Repo.
+- [x] Security-Review über den gesamten Payment-/Entitlement-Pfad — PR #143, drei Defekte gefunden und behoben.
 
 ### Session 3 (2026-07-20) — merged to master (PRs #95–#97) → **Phase 1 DONE**
 - **PR #95 refactor: game_repository_impl → Mixin-Chain (Refactoring 3/3).** 2540 Z. →
