@@ -1,7 +1,7 @@
 name: gamer_grove
 description: Discover, rate and recommend videogames.
 publish_to: "none"
-version: 2.0.2+41
+version: 2.0.2+42
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -53,6 +53,10 @@ dependencies:
   connectivity_plus: ^6.0.1
   url_launcher: ^6.2.4
   image_picker: ^1.0.7
+  # Direct dependencies so the Android photo picker can be switched on
+  # explicitly — see lib/core/media/profile_photo_picker.dart.
+  image_picker_android: ^0.8.12
+  image_picker_platform_interface: ^2.10.0
   path_provider: ^2.1.2
   permission_handler: ^12.0.0+1
   gal: ^2.3.1

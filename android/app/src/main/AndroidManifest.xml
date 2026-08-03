@@ -7,8 +7,11 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
-    <!-- Media access for Android 13+ -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!-- No READ_MEDIA_IMAGES. The one place the app opens the gallery is the
+         profile picture, and it goes through the Android photo picker, which
+         hands back a single image the user chose without the app ever holding
+         a permission to read the whole library. Play rejects the broad
+         permission when a system picker would do, and here it does. -->
     <application
         android:label="GamerGrove"
         android:name="${applicationName}"
