@@ -31,6 +31,35 @@ void main() {
     }
   });
 
+  test('saving to the gallery keeps the write access it needs', () {
+    // The other half of the same story: the download saves through `gal`,
+    // which needs write access up to API 29 and nothing above it. Capped at 28
+    // — as it was — saving to a named album fails on exactly API 29.
+    final manifest = read('android/app/src/main/AndroidManifest.xml');
+    expect(
+      manifest,
+      contains('WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"'),
+    );
+    expect(manifest, contains('android:requestLegacyExternalStorage="true"'));
+  });
+
+  test('nothing asks for a read permission in order to write a file', () {
+    // The download used to request `Permission.photos` — read the whole
+    // library — to save one image. That is what put the rejected permission in
+    // the manifest in the first place.
+    final offenders = <String>[];
+    for (final file in Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      if (file.readAsStringSync().contains('permission_handler')) {
+        offenders.add(file.path);
+      }
+    }
+    expect(offenders, isEmpty,
+        reason: 'these reach for permissions directly: $offenders');
+  });
+
   test('the legacy storage permissions stay capped below Android 13', () {
     // These two are harmless only because they stop applying before the API
     // level the policy is about. Without the cap they are the same finding.

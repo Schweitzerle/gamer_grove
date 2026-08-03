@@ -10,7 +10,6 @@ import 'package:gal/gal.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
   const FullScreenImageViewer({
@@ -73,24 +72,18 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer>
         ),
       );
 
-      // ✅ Vereinfachte Permission-Logik
-      if (Platform.isAndroid) {
-        // Erst photos, dann storage als fallback
-        var hasPermission = false;
-
-        try {
-          final photosPermission = await Permission.photos.request();
-          hasPermission = photosPermission.isGranted;
-        } catch (e) {
-          // Fallback zu storage permission
-          final storagePermission = await Permission.storage.request();
-          hasPermission = storagePermission.isGranted;
-        }
-
-        if (!hasPermission) {
-          _showErrorSnackBar('Permission needed to save images to gallery');
-          return;
-        }
+      // Asked through `gal`, which knows what saving actually needs: nothing
+      // at all from Android 10 on, and only write access below that.
+      //
+      // This used to request `Permission.photos` — the permission to read the
+      // whole library — in order to *write* one file. That is what put
+      // READ_MEDIA_IMAGES in the manifest, and Play rejected the release over
+      // it. Removing the permission without this would have left the download
+      // refusing itself.
+      if (!await Gal.hasAccess(toAlbum: true) &&
+          !await Gal.requestAccess(toAlbum: true)) {
+        _showErrorSnackBar('Permission needed to save images to gallery');
+        return;
       }
 
       // Image downloaden
