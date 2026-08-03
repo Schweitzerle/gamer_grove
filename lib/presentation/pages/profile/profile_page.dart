@@ -188,6 +188,10 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildStats(BuildContext context, User user) {
     final theme = Theme.of(context);
+    // The four tiles used to be amber, blue, purple and green — a rainbow that
+    // sat wrong beside every theme but the one nobody picked. The scheme's own
+    // three accents are built to sit together and follow the reader's choice.
+    final scheme = theme.colorScheme;
 
     return SliverToBoxAdapter(
       child: Container(
@@ -205,14 +209,14 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.star_rounded,
               value: user.totalGamesRated.toString(),
               label: 'Rated',
-              color: Colors.amber,
+              color: scheme.primary,
             ),
             _buildStatItem(
               context,
               icon: Icons.people_rounded,
               value: user.followersCount.toString(),
               label: 'Followers',
-              color: Colors.blue,
+              color: scheme.secondary,
               onTap: () {
                 Navigator.of(context).push<void>(
                   MaterialPageRoute(
@@ -230,7 +234,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.person_add_rounded,
               value: user.followingCount.toString(),
               label: 'Following',
-              color: Colors.purple,
+              color: scheme.tertiary,
               onTap: () {
                 Navigator.of(context).push<void>(
                   MaterialPageRoute(
@@ -249,7 +253,7 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.analytics_rounded,
                 value: user.averageRating!.toStringAsFixed(1),
                 label: 'Avg Rating',
-                color: Colors.green,
+                color: scheme.primary,
               ),
           ],
         ),

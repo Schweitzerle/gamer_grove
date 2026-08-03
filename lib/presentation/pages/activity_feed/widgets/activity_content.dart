@@ -170,9 +170,11 @@ class ActivityContent extends StatelessWidget {
   }
 
   Widget _buildUserRatingCircle(BuildContext context, double userRating) {
-    final rating = userRating / 10; // 0-1 range
-    final displayRating = userRating * 10;
-    final color = ColorScales.getRatingColor(displayRating);
+    // Three scales meet in this one circle and only one of them is shown: the
+    // arc wants a fraction, the colour bands read 0-100, and the number is
+    // what somebody actually chose on a slider that runs to ten.
+    final arc = userRating / 10;
+    final color = ColorScales.getRatingColor(userRating * 10);
 
     return Container(
       width: 56,
@@ -188,7 +190,7 @@ class ActivityContent extends StatelessWidget {
         children: [
           Positioned.fill(
             child: CircularProgressIndicator(
-              value: rating,
+              value: arc,
               strokeWidth: 3,
               backgroundColor: Colors.white.withOpacity(0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
@@ -204,7 +206,7 @@ class ActivityContent extends StatelessWidget {
                   color: Colors.white,
                 ),
                 Text(
-                  displayRating.toStringAsFixed(0),
+                  userRating.toStringAsFixed(1),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,

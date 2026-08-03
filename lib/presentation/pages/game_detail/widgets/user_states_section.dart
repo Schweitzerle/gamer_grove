@@ -61,9 +61,12 @@ class UserStatesContent extends StatelessWidget {
                     icon: userRating != null ? Icons.star : Icons.star_outline,
                     label: 'Rate',
                     value: userRating != null
-                        ? '${(userRating * 10).toStringAsFixed(1)}/10'
+                        ? '${userRating.toStringAsFixed(1)}/10'
                         : 'Rate it',
                     color: userRating != null
+                        // Stays multiplied: the colour scale is banded at 90/80/60/40,
+                        // i.e. it reads 0-100. Only the label is on the 0-10
+                        // scale the rating was given on.
                         ? ColorScales.getRatingColor(userRating * 10)
                         : Colors.grey,
                     isActive: userRating != null,

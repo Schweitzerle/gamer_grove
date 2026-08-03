@@ -29,6 +29,7 @@ class GameDetailsAccordion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
@@ -48,7 +49,7 @@ class GameDetailsAccordion extends StatelessWidget {
                   return EnhancedAccordionTile(
                     title: 'Your Activity',
                     icon: Icons.person,
-                    iconColor: const Color(0xFF6366F1), // Indigo
+                    iconColor: scheme.primary,
                     preview:
                         _buildUserStatesPreview(context, game, userDataState),
                     child: UserStatesContent(
@@ -63,7 +64,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Community & Ratings',
                   icon: Icons.public,
-                  iconColor: const Color(0xFF8B5CF6), // Purple
+                  iconColor: scheme.secondary,
                   preview: _buildCommunityPreview(context, game),
                   noPadding: true,
                   child: CommunityInfoContent(game: game),
@@ -74,7 +75,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'About ${game.name}',
                   icon: Icons.description,
-                  iconColor: const Color(0xFFA855F7), // Light Purple
+                  iconColor: scheme.tertiary,
                   preview: _buildDescriptionPreview(context, game),
                   child: GameDescriptionContent(game: game),
                 ),
@@ -95,7 +96,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Development Tools',
                   icon: Icons.precision_manufacturing_rounded,
-                  iconColor: const Color(0xFF10B981), // Emerald
+                  iconColor: scheme.primary,
                   preview: _buildEnginesPreview(context, game),
                   noPadding: true,
                   child: GameEnginesSection(gameEngines: game.gameEngines),
@@ -106,7 +107,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Platforms & Release',
                   icon: Icons.devices,
-                  iconColor: const Color(0xFF3B82F6), // Blue
+                  iconColor: scheme.secondary,
                   preview: _buildPlatformsPreview(context, game),
                   noPadding: true,
                   child: GenericPlatformSection(
@@ -119,7 +120,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Genres & Categories',
                   icon: Icons.category,
-                  iconColor: const Color(0xFF06B6D4), // Cyan
+                  iconColor: scheme.primary,
                   preview: _buildGenresPreview(context, game),
                   child: GenreSection(game: game),
                 ),
@@ -140,7 +141,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Game Features',
                   icon: Icons.featured_play_list,
-                  iconColor: const Color(0xFFF59E0B), // Amber
+                  iconColor: scheme.secondary,
                   preview: _buildGameFeaturesPreview(context, game),
                   child: GameFeaturesSection(game: game),
                 ),
@@ -150,7 +151,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Age Ratings',
                   icon: Icons.verified_user,
-                  iconColor: const Color(0xFFEF4444), // Red
+                  iconColor: scheme.tertiary,
                   preview: _buildAgeRatingsPreview(context, game),
                   noPadding: true,
                   child: AgeRatingsSection(ageRatings: game.ageRatings),
@@ -161,7 +162,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'Companies',
                   icon: Icons.business,
-                  iconColor: const Color(0xFF8B5CF6), // Purple
+                  iconColor: scheme.primary,
                   preview: _buildCompaniesPreview(context, game),
                   noPadding: true,
                   child: GenericCompanySection(
@@ -175,7 +176,7 @@ class GameDetailsAccordion extends StatelessWidget {
                 EnhancedAccordionTile(
                   title: 'External Links & Stores',
                   icon: Icons.link,
-                  iconColor: const Color(0xFF14B8A6), // Teal
+                  iconColor: scheme.secondary,
                   preview: _buildExternalLinksPreview(context, game),
                   noPadding: true,
                   child: ExternalLinksSection(game: game),
@@ -357,7 +358,11 @@ class GameDetailsAccordion extends StatelessWidget {
 
     // Build preview string
     if (userRating != null) {
-      activeStates.add('⭐${(userRating * 10).toStringAsFixed(1)}');
+      // The slider that writes this runs 0.5 to 10, so the number is already
+      // on the scale it is read on. It used to be multiplied by ten here —
+      // the conversion `getRatingColor` needs, applied to the label as well,
+      // which turned a 9.5 into "95.0" beside a star.
+      activeStates.add('⭐${userRating.toStringAsFixed(1)}');
     }
 
     if (isWishlisted) {
