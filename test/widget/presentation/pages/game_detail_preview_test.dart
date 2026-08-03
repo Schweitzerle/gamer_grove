@@ -10,6 +10,7 @@ import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/game/game_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/user_game_data/user_game_data_bloc.dart';
+import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_card.dart';
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_thumbnail.dart';
@@ -163,6 +164,15 @@ void main() {
       (tester) async {
     await pump(tester, knownGame: known);
     expect(find.byType(LoadingThumbnail), findsOneWidget);
+  });
+
+  testWidgets('nothing behind the card repeats what is on it', (tester) async {
+    // The hero's info card carries the name and the rating, and so does the
+    // waiting card. Drawn together, at low contrast through a scrim, the pair
+    // stops being information and becomes texture — which is what a tester
+    // meant by "zu viel noise".
+    await pump(tester, knownGame: known);
+    expect(find.byType(GameInfoCard), findsNothing);
   });
 
   testWidgets('leaving is still possible while it waits', (tester) async {
