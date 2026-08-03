@@ -45,9 +45,16 @@ async function applyPro(
       pro_event_at: eventAt,
     })
     .eq('id', write.userId)
-    // Quoted: the timestamp carries dots and colons, and an `or` filter is
-    // parsed before the value is.
-    .or(`pro_event_at.is.null,pro_event_at.lt."${eventAt}"`)
+    // A plain comparison, and it has to stay one. The obvious spelling —
+    // `.or('pro_event_at.is.null,pro_event_at.lt.…')`, back when the column was
+    // nullable — reads fine and fails on an UPDATE: PostgREST qualifies columns
+    // inside an `or` group as `profiles.<col>`, and in the statement it builds
+    // for an UPDATE the relation is not called `profiles`, so Postgres answers
+    // 42703 "column profiles.pro_event_at does not exist" about a column that
+    // is plainly there. The same group on a SELECT works, which is what makes
+    // it worth a comment. Migration 017 gives the column a default of
+    // -infinity so no null case is left to handle.
+    .lt('pro_event_at', eventAt)
     .select('id');
 
   if (error) return { applied: false, error: error.message };
