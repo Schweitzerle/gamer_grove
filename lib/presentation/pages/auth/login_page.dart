@@ -1,5 +1,6 @@
 // presentation/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/presentation/widgets/gg_portal_mark.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/input_validator.dart';
@@ -84,10 +85,12 @@ class _LoginPageState extends State<LoginPage> {
                           color: colorScheme.primaryContainer,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.games_rounded,
+                        // The first thing anyone sees of the app, and it was
+                        // showing the motif the icon was rebuilt to avoid.
+                        child: GGPortalMark(
                           size: 80,
-                          color: colorScheme.onPrimaryContainer,
+                          colour: colorScheme.onPrimaryContainer,
+                          lit: 0.55,
                         ),
                       ),
 
