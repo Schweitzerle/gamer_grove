@@ -117,6 +117,49 @@ Live-Punkt **auf** der Ecke.
 > **Karte trägt `IgnorePointer`** — ein Warten, das man nicht verlassen kann,
 > ist eine Falle, und dieses kann eine schlechte Verbindung überdauern.
 
+**Was das Aufsetzen der Store-Screenshots gefunden hat.** Drei Fehler, die kein
+Test je gesehen hätte, weil keiner davon kaputt war — sie waren nur falsch. Alle
+drei sind erst aufgefallen, als die App auf einem Gerät stand und fotografiert
+werden sollte.
+- **PR #150 — das Steuerkreuz hatte den Markenwechsel überlebt.** Anmeldung,
+  App-Leiste und Grove-Tab zeigten weiter ein d-pad: genau das Motiv, gegen das
+  beim Icon entschieden wurde. `GGPortalMark` ist der Bogen aus dem Icon,
+  stehend; der Portal-Loader hatte den Maler privat, beide teilen ihn jetzt.
+  > **Gotcha (Korn braucht Größe):** Unter **32 px** ist die Dither-Körnung
+  > keine Machart mehr, sondern ein Schmierer — bei 24 px ist die Öffnung ein
+  > Dutzend Zellen breit. Darunter wird das Licht glatt gezeichnet.
+- **PR #152 — eine 9,5 stand als 95,0 da.** Der Schieber schreibt 0,5–10 direkt
+  in `user_games.rating`; `ColorScales.getRatingColor` bändert bei 90/80/60/40,
+  liest also 0–100. Drei Stellen haben die Umrechnung der **Farbe** auf die
+  **Beschriftung** mit angewendet — „95.0/10" ist der Fall, an dem man es sieht.
+  Der Test schlägt von beiden Seiten an: Label, Schieber-Skala, Farbbänder.
+- **PR #152 — zehn Farben ignorierten das Theme.** Zehn hartkodierte Töne im
+  Akkordeon, vier im Profil. Auf einem roten Theme lila Symbole auf rotem Grund.
+  Jetzt `primary`/`secondary`/`tertiary` aus dem Schema.
+
+> **Gotcha (Emulator auf dieser Maschine):** `-gpu swiftshader_indirect` ist
+> irreführend benannt — es rendert per Software, legt aber trotzdem einen
+> GL-Kontext auf der Host-GPU an, und das Kernel-Log zeigt dazu passend
+> `NVRM ... NV_ERR_NO_MEMORY`. **`-gpu guest` verwenden.** Half am Ende trotzdem
+> nicht: **langlaufende Hintergrundprozesse überleben hier die Werkzeugaufrufe
+> nicht** — der Emulator bootet sauber und ist beim nächsten Befehl weg, ohne
+> Absturzspur. Dieselben Abbruchcodes trafen Kommandos, die gar nicht abstürzen
+> können. **Screenshots kommen vom Gerät des Users, nicht aus dem Emulator.**
+> **Gotcha (Theme klebt am Gerät, nicht am Konto):** Die erste Runde Rohbilder
+> war komplett rot, weil die Theme-Wahl in SharedPreferences liegt und beim
+> Kontowechsel mitkommt. Der Picker ist Pro-gated, das Schaufenster-Konto hatte
+> kein Pro — es kam also nicht an die Rückstellung. Konto hat jetzt 14 Tage Pro.
+> Das Marken-Theme heißt im Picker **„GamerGrove"** und ist die erste Kachel.
+> **Gotcha (Seed über PostgREST):** Ein Sammel-Insert lehnt Zeilen ab, deren
+> Schlüssel sich unterscheiden (`All object keys must match`), und die Service
+> Role hat auf `user_top_three` **gar kein GRANT** — dieselbe Lücke, die 015 für
+> `profiles` geschlossen hat. Trifft nur Admin-Werkzeuge, nicht die App; nicht
+> stillschweigend geändert, die Daten gehen über die Management-API rein.
+
+**Schaufenster-Konto** (`~/.gg-showcase-account.json`, 600): 12 bewertet,
+5 Wunschliste, Top 3, **Profil nicht öffentlich**, 14 Tage Pro. Löschen, sobald
+die Bilder stehen — `id` steht in der Datei.
+
 **Der Store zeigt eine andere App.** Über die Play-API ausgelesen: Icon ist das
 alte neon-lila „G", die 5 Screenshots zeigen den Material-Standard-Lila-Stand
 („Gamer Grove" mit lila Controller-Marke), Feature-Graphic ebenso, Beschreibung
