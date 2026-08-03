@@ -119,9 +119,10 @@ class CoinPainter extends CustomPainter {
   /// The coin turns above the slot for this much of the cycle, then falls.
   static const _fallsAfter = 0.62;
 
-  /// Turns per cycle while it hovers. Three full turns is enough to read as
-  /// spinning without strobing.
-  static const _turns = 3;
+  /// Turns per cycle. Three read as a flicker rather than a spin: the coin
+  /// passes edge-on six times a second, which at this size is nearer a strobe
+  /// than a rotation. Two puts it at roughly one turn per second.
+  static const _turns = 2;
 
   static const _topOfSlot = 10.0;
   static const _coinRests = 2.0;

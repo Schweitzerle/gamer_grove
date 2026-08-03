@@ -207,6 +207,62 @@ void main() {
       );
     });
   }
+
+  /// The coin at the size it is actually drawn, across a quarter turn.
+  ///
+  /// The frame strip above is at 64 px, where anything reads. This one is at
+  /// the 44 dp the card uses, on the card's own surface, and it is the only
+  /// thing that answers whether the slot still reads as a slot at that size —
+  /// a sprite that works at twice the size and turns to mush at the real one is
+  /// a sprite that does not work.
+  testWidgets('the coin at the size it is actually used', (tester) async {
+    tester.view.physicalSize = const Size(360, 90);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: GGTheme.dark(),
+        home: Builder(
+          builder: (context) {
+            final scheme = Theme.of(context).colorScheme;
+            return ColoredBox(
+              color: scheme.surfaceContainer,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // A quarter turn is 1/(4 x turns) of the cycle. Sampled on
+                  // that spacing the strip shows the disc turning; sampled on
+                  // any multiple of a half turn it would show the same frame
+                  // six times and prove nothing.
+                  for (final at in const [0.0, 0.04, 0.08, 0.125, 0.62, 0.78])
+                    SizedBox.square(
+                      dimension: 44,
+                      child: CustomPaint(
+                        painter: CoinPainter(
+                          progress: at,
+                          gold: scheme.primary,
+                          highlight:
+                              Color.lerp(scheme.primary, Colors.white, 0.34)!,
+                          plinth: scheme.outlineVariant,
+                          shadow: scheme.surface,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/coin_at_size.png'),
+    );
+  });
 }
 
 class _StillApp extends StatelessWidget {
