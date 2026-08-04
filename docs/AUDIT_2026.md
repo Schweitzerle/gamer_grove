@@ -1050,23 +1050,42 @@ die ~1400 infos als Phase-1-Rückstand. Real sind es **1195**, davon **1150 in
 
 ## 1.9 Zwei offene Punkte, die ich nicht klären konnte
 
-**Die Versionsverteilung von versionCode 5.** Nicht erreichbar mit dem, was hier
-liegt. `tracks.py` belegt: Build 42 auf allen vier Spuren, 5 wird nirgends mehr
-ausgeliefert. Aber die **Installationsbasis** steht nicht in der Developer API —
-sie steht in den Massenberichten im GCS-Bucket, und das Deploy-Dienstkonto hat
-darauf keinen Zugriff (`storage.buckets.list` denied). Die Developer Reporting
-API ist im Projekt nicht aktiviert und liefert ohnehin keine Installationszahlen,
-sondern Vitals. Zwei Wege: in der Play Console unter Statistiken nach App-Version
-filtern, oder `amergrove-play-deployer@…` in der Play Console das Recht für
-Massenberichte geben. Bis dahin bleibt das Tor zur Rotation auf einer Unbekannten
-zu, und ich rate die Zahl nicht.
+**Die Versionsverteilung von versionCode 5 — nachgetragen am 2026-08-04.**
+Ursprünglich stand hier, die Zahl sei nicht erreichbar. Das war unvollständig:
+sie steht in den Massenberichten im Cloud-Storage-Bucket, und das Dienstkonto
+hatte die Berechtigung bereits — es fehlte nur der Bucketname, der die
+Entwickler-ID enthält. Nach einer Nachfrage beim User liegt er in
+`tool/play/versions.py`, samt Abfrage.
 
-Eine Einschätzung, die ich geben kann, ohne zu raten: die Bedingung ist an
-Adoption geknüpft, und Adoption nach einem 100-%-Produktionsrollout ist
-erfahrungsgemäß eine Sache von ein bis zwei Wochen für den Großteil und mehreren
-Wochen für den Rest. Wer nicht aktualisiert, hat oft Auto-Update aus — dieser
-Rest geht gegen einen kleinen, aber nicht gegen null. Die Zahl entscheidet, nicht
-das Datum.
+Aktive Geräteinstallationen von versionCode 5:
+
+```
+2025-12    9        (Produktionsrelease seit 2025-11-20)
+2026-01    5
+2026-02    8
+2026-03   10
+2026-04   11        ← Höchststand
+2026-05    7
+2026-06    5
+2026-07    4 → 2    (ab 21.07. konstant 2)
+```
+
+Letzter Datenpunkt: **2026-07-23**, also zwölf Tage **vor** dem
+Produktions-Rollout auf Build 42. Die Augustdatei wird von Play mit einigen
+Tagen Verzug geschrieben und lag zum Zeitpunkt des Audits noch nicht vor.
+
+**Einschätzung:** die Bedingung „nahezu null" ist mit 2 Geräten praktisch
+erfüllt. Bei 11 Geräten im April hätte ich abgeraten, bei zweien nicht mehr.
+Der schlechteste Fall sind zwei Installationen, die keine Spieldaten mehr laden,
+bis sie aktualisieren — und der 100-%-Rollout ist inzwischen erfolgt. Sauber
+wäre, die Augustdatei abzuwarten (`tool/play/versions.py 5`) und erst bei 0 zu
+rotieren; vertretbar ist beides.
+
+**Nebenbefund:** die gesamte aktive Installationsbasis waren am 23.07. **vier
+Geräte** (versionCode 5, 8 und 12 mit je ein bis zwei). Das ist die ehrliche
+Größenangabe zu Teil 2 — 25 Konten wurden angelegt, installiert ist die App auf
+einer Handvoll Geräte. Und: versionCode 8 und 12 stehen nicht in
+`bundles().list()`, sind also alte APK- statt AAB-Uploads.
 
 **Umami.** Die Instanz auf `umami.playrackd.com` antwortet (`/api/heartbeat` →
 200) und die Login-API funktioniert, aber auf dieser Maschine liegt keine
