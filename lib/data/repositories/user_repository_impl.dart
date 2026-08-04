@@ -341,6 +341,38 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     );
   }
 
+  /// Own follow lists go through `my_follow_profiles`, everyone else's through
+  /// the ordinary query.
+  ///
+  /// A private account that follows you is invisible to the ordinary query --
+  /// profiles filters it out, user_follows does not, and the join comes back
+  /// with a null profile. On your OWN lists that account has to stay reachable,
+  /// otherwise you can neither see nor block someone who chose to follow you.
+  /// On other people's lists it stays hidden, which is what "private" means.
+  Future<List<User>?> _ownFollowList(
+    String userId,
+    String direction,
+    int limit,
+    int offset,
+  ) async {
+    if (userId != await getCurrentUserId()) return null;
+
+    final rows = await supabase.rpc<dynamic>(
+      'my_follow_profiles',
+      params: {
+        'p_direction': direction,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
+
+    return (rows as List)
+        .map(
+          (row) => UserModel.fromJson(row as Map<String, dynamic>).toEntity(),
+        )
+        .toList();
+  }
+
   @override
   Future<Either<Failure, List<User>>> getUserFollowers({
     required String userId,
@@ -349,16 +381,26 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
+        final own = await _ownFollowList(userId, 'followers', limit, offset);
+        if (own != null) return own;
+
         final followersData = await userDataSource.getFollowers(
           userId,
           limit: limit,
           offset: offset,
         );
-        return followersData.map((data) {
-          // Extract nested user data from join
-          final userData = data['profiles'] as Map<String, dynamic>;
-          return UserModel.fromJson(userData).toEntity();
-        }).toList();
+        return followersData
+            // A private account's profile comes back null: user_follows is
+            // fully readable, profiles is not. Dropping the row keeps one
+            // private follower from failing the whole list — the own-list path
+            // above shows them properly.
+            .where((data) => data['profiles'] != null)
+            .map(
+              (data) => UserModel.fromJson(
+                data['profiles'] as Map<String, dynamic>,
+              ).toEntity(),
+            )
+            .toList();
       },
       errorMessage: 'Failed to get followers',
     );
@@ -372,16 +414,26 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
+        final own = await _ownFollowList(userId, 'following', limit, offset);
+        if (own != null) return own;
+
         final followingData = await userDataSource.getFollowing(
           userId,
           limit: limit,
           offset: offset,
         );
-        return followingData.map((data) {
-          // Extract nested user data from join
-          final userData = data['profiles'] as Map<String, dynamic>;
-          return UserModel.fromJson(userData).toEntity();
-        }).toList();
+        return followingData
+            // A private account's profile comes back null: user_follows is
+            // fully readable, profiles is not. Dropping the row keeps one
+            // private follower from failing the whole list — the own-list path
+            // above shows them properly.
+            .where((data) => data['profiles'] != null)
+            .map(
+              (data) => UserModel.fromJson(
+                data['profiles'] as Map<String, dynamic>,
+              ).toEntity(),
+            )
+            .toList();
       },
       errorMessage: 'Failed to get following',
     );
