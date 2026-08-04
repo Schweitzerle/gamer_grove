@@ -50,8 +50,12 @@ def main() -> int:
 
     edits.tracks().update(
         packageName=PACKAGE, editId=edit_id, track='production',
+        # No 'name': Play derives the release label from the bundle's
+        # versionName. It used to be hard-coded as "(2.0.2)", so every future
+        # release would have carried that string long after the app moved on —
+        # this project has already had a stale version label survive three
+        # releases unnoticed.
         body={'track': 'production', 'releases': [{
-            'name': f'{version} (2.0.2)',
             'versionCodes': [version],
             'status': 'completed',          # 100% — a staged rollout would
                                             # leave 5 serving the remainder,
