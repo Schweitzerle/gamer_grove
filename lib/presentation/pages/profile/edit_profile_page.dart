@@ -8,7 +8,7 @@ import 'package:gamer_grove/data/models/user_model.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_event.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:gamer_grove/core/media/profile_photo_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -54,8 +54,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ProfilePhotoPicker.pick();
     if (pickedFile != null) {
       setState(() {
         _selectedImageFile = File(pickedFile.path);

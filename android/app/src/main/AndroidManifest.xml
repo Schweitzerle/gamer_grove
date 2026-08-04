@@ -3,16 +3,23 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- Storage permissions for Android 9 and below -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
+    <!-- Saving a cover to the gallery goes through MediaStore, which needs no
+         permission from Android 10 on. Below that it does, and `gal` asks for
+         it up to API 29 — it was capped at 28 here, so saving to the album
+         failed on exactly the version in between. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
 
-    <!-- Media access for Android 13+ -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!-- No READ_MEDIA_IMAGES. The one place the app opens the gallery is the
+         profile picture, and it goes through the Android photo picker, which
+         hands back a single image the user chose without the app ever holding
+         a permission to read the whole library. Play rejects the broad
+         permission when a system picker would do, and here it does. -->
     <application
         android:label="GamerGrove"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
