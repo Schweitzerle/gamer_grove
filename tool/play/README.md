@@ -44,8 +44,15 @@ byteweise das getestete Artefakt.
 Console Änderungen in der Warteschlange, ist das Flag Pflicht („Changes cannot
 be sent for review automatically"). Ist die Warteschlange leer, ist es verboten
 („Changes are sent for review automatically. The query parameter must not be
-set."). Beides innerhalb von drei Tagen erlebt. `promote.py` probiert deshalb
-das eine und fällt auf das andere zurück, statt zu raten.
+set."). **Beide Skripte** probieren deshalb das eine und fallen auf das andere
+zurück, statt zu raten.
+
+`play.py` tat das zunächst nicht — es setzte das Flag fest, weil zur Zeit seiner
+Entstehung dauerhaft ein Stapel in der Warteschlange lag. Als der Stapel
+eingereicht war, schlug es fehl (2026-08-04, beim Upload von Build 43). Der
+Upload selbst war da schon durch; der Versionscode blieb trotzdem frei, weil
+Play den Edit beim fehlgeschlagenen Commit mitverwirft. Eine feste Annahme über
+den Zustand der Console hält nicht.
 
 **Ein Rollout unter 100 % löst keinen Richtlinien-Befund.** Bei einem
 stufenweisen Rollout liegen zwei Veröffentlichungen auf der Spur; die alte

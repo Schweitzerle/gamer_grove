@@ -10,6 +10,7 @@ import sys
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
 PACKAGE = 'com.schweizerle.gamergrove'
@@ -66,14 +67,25 @@ def main() -> int:
         ).execute()
         print(f'{track} <- {version}')
 
-    # Always. This app has changes waiting in the console's publishing queue,
-    # and Play then refuses to send anything for review from the API:
-    #   "Changes cannot be sent for review automatically."
-    # The build lands on its tracks either way; a person submits the whole
-    # batch from the console, which is the right place for that decision.
-    edits.commit(packageName=PACKAGE, editId=edit_id,
-                 changesNotSentForReview=True).execute()
-    print('committed (review is submitted from the console)')
+    # Play rejects the wrong choice in BOTH directions, and which one is wrong
+    # depends on whether the console currently has changes queued:
+    #   queued     -> the flag is required
+    #                 "Changes cannot be sent for review automatically."
+    #   nothing    -> the flag is forbidden
+    #                 "Changes are sent for review automatically. The query
+    #                  parameter must not be set."
+    # This used to pass the flag unconditionally, which was correct while a
+    # batch sat in the queue and started failing the moment that batch was
+    # submitted. Try the plain commit, fall back — same as promote.py.
+    try:
+        edits.commit(packageName=PACKAGE, editId=edit_id).execute()
+        print('committed and sent for review')
+    except HttpError as err:
+        if 'changesNotSentForReview' not in str(err):
+            raise
+        edits.commit(packageName=PACKAGE, editId=edit_id,
+                     changesNotSentForReview=True).execute()
+        print('committed (review is submitted from the console)')
 
     check = edits.insert(packageName=PACKAGE, body={}).execute()['id']
     try:
