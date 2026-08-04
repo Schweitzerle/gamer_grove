@@ -61,7 +61,9 @@ Jeder angemeldete Nutzer kann die Bewertungen, Wunschlisten und Empfehlungen
 **jedes anderen** lesen, ändern und löschen, fremde Top 3 überschreiben und
 Folgebeziehungen in beide Richtungen fälschen. Private Profile sind nur in der
 Oberfläche privat. 25 Profile und 1413 Bewertungszeilen sind echte Nutzerdaten —
-das ist ein DSGVO-Sachverhalt, nicht nur ein Codefehler.
+das ist ein DSGVO-Sachverhalt, nicht nur ein Codefehler. (Die Zahlen sind der
+Stand des Nachweises; wenige Stunden später waren es nach einer Kontolöschung
+24 und 218 — siehe 2.2. Am Befund ändert das nichts.)
 
 **Der Fix ist nicht „die zwei Politiken löschen".** `user_games` hat außer den
 drei SELECT-Politiken und den beiden Blanketts **gar keine** eigene
@@ -1118,7 +1120,7 @@ sie zu füllen. Letterboxd, das offensichtliche Vorbild, lebt genau davon: der
 Text ist der Grund wiederzukommen, die Zahl ist nur die Sortierung. Ein
 Bewertungsprodukt ohne Schreiben ist eine Datenbank mit Sternen.
 
-*„see what your people are playing"* — 25 Profile, **8 Folgebeziehungen**
+*„see what your people are playing"* — 17 externe Konten, **8 Folgebeziehungen**
 insgesamt. Das Soziale ist gebaut (Feed, Leaderboard, Nutzersuche, Follower) und
 wird nicht benutzt. Bei dieser Größe kann es auch nicht: ein sozialer Feed
 braucht eine Dichte, die eine App mit 25 Nutzern nicht hat. Das ist kein
@@ -1130,52 +1132,65 @@ einzige Pro-Auslöser mit serverseitiger Durchsetzung.
 
 ## 2.2 Was die Nutzer wirklich tun
 
-Aus der Live-Datenbank, nicht aus Annahmen. 25 Profile, Anmeldungen von
-2025-11-08 bis 2026-08-03.
+> **Korrigiert am 2026-08-04, nach dem ersten Durchgang.** Der User hat
+> mitgeteilt, dass `playtest@test.de` das in der Play Console hinterlegte
+> Prüfkonto ist. Das ist dieselbe ID, die ich zuvor als „den einen echten
+> Langzeit-Rückkehrer über acht Monate" beschrieben hatte — die Aussage war
+> falsch. Beim Nachrechnen mit sauber getrennten internen Konten fällt das Bild
+> deutlich schärfer aus als im ersten Durchgang. Die alten Zahlen (25 Profile,
+> 4 echte Bewerter, D1=D7=D30=12 %) sind durch die untenstehenden ersetzt.
+>
+> Zwischen den beiden Messungen wurde außerdem ein Konto gelöscht: Profile
+> 25 → 24, `user_games` 1413 → 218, `user_activity` 1641 → 346. Es war das
+> Konto mit den 1195 Wunschlisteneinträgen, das im ersten Durchgang 85 % aller
+> Zeilen stellte. Ob der User oder der Kontoinhaber es gelöscht hat, weiß ich
+> nicht.
 
-**Wie viele überhaupt irgendetwas getan haben:**
+Aus der Live-Datenbank, Stand 2026-08-04 nach der Löschung.
 
-| | Nutzer |
+**Interne Konten zuerst abziehen.** Von 24 Konten sind sieben nicht extern:
+das Entwicklerkonto (`julianschweizer9@`, 153 Bewertungen), das Play-Prüfkonto
+(`playtest@test.de`), das Vorführkonto (`grove.showcase.…@example.com`), ein
+Verifikationskonto (`ggverify…@example.com`) und drei weitere Konten auf
+`example.com`/`test.com` ohne Daten. Bleiben **17 externe Konten**.
+
+| | Konten |
 |---|---|
-| Profile insgesamt | **25** |
-| die je eine `user_games`-Zeile erzeugt haben | **9** |
-| die je ein Spiel **bewertet** haben | **6** |
-| davon: Entwicklerkonto und Vorführkonto | 2 |
-| **echte Nutzer, die je bewertet haben** | **4** |
-| die je eine Sammlung angelegt haben | 3 (davon 2 die obigen Konten) |
-| die je jemandem gefolgt sind | 4 |
+| Konten insgesamt | 24 |
+| davon intern (Entwickler, Prüfkonto, Vorführung, Tests) | 7 |
+| **extern** | **17** |
+| die je *irgendeine* `user_games`-Zeile erzeugt haben | **4** |
+| die je ein Spiel **bewertet** haben | **2** |
 | **Pro-Abonnenten** | **0** |
 
-Die Verteilung der Bewertungen: 153 (Entwickler), 12 (Vorführkonto), dann 7, 2,
-1, 1. Ein einziger Nutzer hat 1195 Spiele auf die Wunschliste gesetzt und **null**
-bewertet — über drei Tage im Dezember. Das sind 85 % aller Zeilen in `user_games`
-und mit ziemlicher Sicherheit kein menschliches Nutzungsmuster; ich würde da eine
-Massenaktion oder einen Fehler vermuten (Confidence niedrig, aber es verzerrt
-jede Kennzahl, die man aus Zeilenzahlen zieht).
+Und die zwei, die bewertet haben, sind 7 und 2 Bewertungen — wobei das Konto mit
+den 7 denselben Nachnamen trägt wie das Entwicklerkonto. Wer streng zählt, kommt
+auf **einen einzigen kalt gewonnenen Nutzer, der je ein Spiel bewertet hat, und
+er hat zwei bewertet.**
 
-**Retention, aus Zeilenstempeln gerechnet:**
+**Retention, aus Zeilenstempeln, nur externe Konten:**
 
 ```
-Kohorte 25 Nutzer
-D1  zurückgekehrt: 3   (12 %)
-D7  zurückgekehrt: 3   (12 %)
-D30 zurückgekehrt: 3   (12 %)
+Kohorte 17 externe Konten
+D1  zurückgekehrt: 1   (6 %)
+D7  zurückgekehrt: 1   (6 %)
+D30 zurückgekehrt: 0   (0 %)
 ```
 
-Es sind in allen drei Fenstern **dieselben drei**. Anders gesagt: wer nicht am
-ersten Tag wiederkam, kam nie wieder. Nach eigenen aktiven Tagen:
+**D30 ist null.** Niemand außerhalb des engeren Kreises war nach einer Woche
+noch da. Der „eine Langzeit-Rückkehrer über acht Monate" aus dem ersten
+Durchgang war das Play-Prüfkonto.
 
-| Nutzer | aktive Tage | Zeitraum |
-|---|---|---|
-| Entwickler | 7 | 2025-11-08 → 2025-12-18 |
-| ein echter Nutzer | **7** | **2025-11-21 → 2026-07-30** |
-| Massen-Wunschlister | 3 | 2025-12-03 → 2025-12-05 |
-| drei weitere | 1–2 | |
+Dazu die Zahl aus 1.9: die **aktive Installationsbasis waren vier Geräte**
+(23.07.2026). 24 Konten angelegt, die App auf einer Handvoll Geräte installiert.
 
-Einer ist bemerkenswert: `0f47f300` kam über **acht Monate** wieder — 1 Zeile im
-November, 3 im Dezember, 6 im Juli. Zehn Zeilen in acht Monaten sind keine
-Nutzung, mit der man ein Produkt baut, aber es ist der Beleg, dass die Sache
-jemanden halten kann.
+**Ein Nebenbefund, der etwas Gutes belegt:** die Kontolöschung zwischen den
+beiden Messungen ist über fünf Tabellen sauber durchgeschlagen — `user_games`,
+`user_activity`, `user_collections`, `user_follows`, `user_top_three` und
+`profiles` haben **null** verwaiste Zeilen. `delete_own_account` (Z-19) tut
+also nachweislich, was es soll, obwohl `DeleteAccountUseCase` ungetestet ist
+(Z-63). Ein Livebeleg ersetzt keinen Test, aber er ist mehr, als das Audit
+vorher hatte.
 
 **P-01 · Das Aktivierungsereignis ist gut definiert und wird von ~17 % erreicht — Confidence hoch.**
 `ActivationTracker` (`core/analytics/activation_tracker.dart:35-66`) feuert beim
@@ -1267,7 +1282,8 @@ kommen, nicht danach.
 
 ## 2.3 Warum jemand am siebten Tag wiederkommen sollte
 
-Heute: **er kommt nicht.** D7 = 12 %, und es sind dieselben drei wie an D1.
+Heute: **er kommt nicht.** Von 17 externen Konten ist genau eines nach dem
+Anmeldetag wiedergekommen, und nach einer Woche keines mehr (D30 = 0).
 
 Der Grund ist strukturell, nicht kosmetisch. Eine Katalog-App gibt beim ersten
 Besuch alles her: man sucht sein Lieblingsspiel, vergibt Sterne, fühlt sich kurz
@@ -1285,8 +1301,8 @@ als Werbung liest. Dazu unten als F-1.
 
 ## 2.4 Ist Pro 2,99 €/Monat wert, und sitzt der Auslöser richtig?
 
-**Null Abonnenten von 25 Nutzern.** Bei 4 aktivierten Nutzern ist das statistisch
-allerdings nichts — man kann daraus nicht schließen, dass der Preis falsch ist.
+**Null Abonnenten.** Bei zwei externen Nutzern, die je ein Spiel bewertet haben,
+ist das statistisch allerdings nichts — man kann daraus nicht schließen, dass der Preis falsch ist.
 Was man beurteilen kann, ist das Paket.
 
 Drin sind: mehr als 3 Sammlungen, erweiterte Statistiken, erweiterte Filter,
@@ -1297,9 +1313,8 @@ App hat. Erweiterte Statistiken über 2 bewertete Spiele sind kein Produkt.
 
 Der einzige Auslöser mit echter Kraft ist der, der serverseitig durchgesetzt ist:
 die vierte Sammlung. Der sitzt **richtig** — er trifft jemanden mitten in einer
-Handlung, die er gerade tun will. Nur erreicht ihn fast niemand: 3 Nutzer haben
-je eine Sammlung angelegt, und die zwei mit vier Sammlungen sind Entwickler- und
-Vorführkonto.
+Handlung, die er gerade tun will. Nur erreicht ihn niemand: die einzigen
+Konten mit vier Sammlungen sind Entwickler- und Vorführkonto.
 
 Die ehrliche Diagnose ist deshalb **nicht** „Pro ist zu teuer", sondern: **Pro
 verkauft Kapazität an Leute, die noch keine Daten haben.** Ein Preis lässt sich
@@ -1312,7 +1327,8 @@ Was ich ändern würde, ohne den Preis anzufassen:
 2. Das freie Sammlungslimit **nicht** senken. Die Versuchung ist groß und wäre
    falsch — bei 3 Nutzern mit Sammlungen ist das Problem die Nutzung, nicht die
    Großzügigkeit.
-3. Pro erst wieder anfassen, wenn es ~50 Nutzer mit ≥10 bewerteten Spielen gibt.
+3. Pro erst wieder anfassen, wenn es ~50 externe Nutzer mit ≥10 bewerteten
+   Spielen gibt. Bei zwei ist jede Preisdiskussion Zeitverschwendung.
 
 ## 2.5 Was ich bauen würde — wenige, begründet
 
@@ -1320,7 +1336,8 @@ Sortiert nach Wirkung gegen Aufwand.
 
 **F-1 · Erscheinungs-Benachrichtigung für die Wunschliste. Aufwand: mittel. Wirkung: hoch.**
 *Löst folgendes Problem:* Die App hat keinen einzigen Grund, an den sie erinnern
-kann, und D7 liegt bei 12 %. Das ist der einzige Anlass, den eine Katalog-App von
+kann, und von 17 externen Konten ist nach einer Woche keines mehr da (D30 = 0).
+Das ist der einzige Anlass, den eine Katalog-App von
 Natur aus besitzt: IGDB kennt Erscheinungsdaten, die Wunschliste kennt das
 Interesse, beides liegt schon da. Eine Nachricht, die ein Nutzer als Dienst liest.
 Nötig: ein geplanter Job (die Edge-Function-Infrastruktur steht), Push-Setup und
