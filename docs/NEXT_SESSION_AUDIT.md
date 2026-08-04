@@ -14,8 +14,8 @@ brüchig, und was fehlt dem Ding, um mehr als eine gut gebaute App zu sein.
 Flutter-App (Material 3, Clean Architecture, BLoC, Supabase, IGDB über eigenen
 Proxy, RevenueCat). Android only. `master` ist grün.
 
-- Build 42 liegt in internal, alpha und beta. **Produktion steht noch auf
-  versionCode 5** — die Freigabe kommt von mir, nicht von dir.
+- **Build 42 liegt auf allen vier Spuren, Produktion eingeschlossen** (seit
+  2026-08-04, 100 %). Jeder weitere Produktions-Rollout braucht mein Wort.
 - 462 Dart-Dateien, ~88k Zeilen, 59 Testdateien.
 - Live-Telemetrie existiert und läuft: Umami (selbst gehostet, elf Ereignisse
   aus `analytics_events.dart`) und Sentry. **Beide haben echte Daten.**
@@ -23,8 +23,28 @@ Proxy, RevenueCat). Android only. `master` ist grün.
   Historie, nicht als Zustandsbeschreibung.
 - Offene Punkte, die ich schon kenne — du musst sie nicht erst finden:
   sieben Dateien über 800 Zeilen, hartkodierte Farben statt Tokens, rund 40
-  nackte `CircularProgressIndicator`, Issue #157 (Profilbild entfernen),
-  IGDB-Secret-Rotation steht nach dem Produktions-Rollout aus.
+  nackte `CircularProgressIndicator`, Issue #157 (Profilbild entfernen).
+- Der Versionsname steht auf `2.0.2+42`. Der Sprung von versionCode 5 auf 42
+  hat den Namen nicht mitbewegt, Nutzer aktualisieren also von „2.0.2" auf
+  „2.0.2". Der nächste Build gehört auf 2.1.0.
+
+## Zwei Dinge, die scharf sind
+
+**Das IGDB-Secret muss rotiert werden — aber noch nicht.** Bis `14ad451`
+(2026-07-30, PR #142) lagen die Twitch-Zugangsdaten im Client-Binary; erst seit
+dem `igdb-proxy` liegen sie in einer Edge Function. **Jede Installation, die
+noch auf versionCode 5 steht, spricht direkt mit Twitch und trägt das Secret in
+sich.** Rotieren wir jetzt, verlieren genau diese Leute schlagartig alle
+Spieldaten. Bedingung: erst rotieren, wenn die Versionsverteilung in der Play
+Console versionCode 5 bei nahezu null zeigt — die **Zahl nachsehen**, nicht vom
+Rollout-Datum ableiten. Das Secret ist trotzdem als öffentlich zu behandeln,
+die Rotation ist überfällig, nicht optional. Wenn du beim Audit einschätzen
+kannst, wie lange das noch dauert, sag es mir.
+
+**Ein Vorführ-Konto lebt noch.** Zugangsdaten in `~/.gg-showcase-account.json`,
+privates Profil, 14 Tage Pro geschenkt, angelegt für die Store-Screenshots. Es
+gehört gelöscht, sobald du sicher bist, dass keine Store-Nachreichung mehr
+davon abhängt.
 
 ## Was ich am Ende haben will
 
