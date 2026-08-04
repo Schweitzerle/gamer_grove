@@ -8,10 +8,13 @@ import 'package:gamer_grove/core/entitlements/pro_access.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
 import 'package:gamer_grove/injection_container.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
+import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_event.dart';
 import 'package:gamer_grove/presentation/blocs/theme/theme_state.dart';
 import 'package:gamer_grove/presentation/pages/legal/legal_document_page.dart';
+import 'package:gamer_grove/presentation/pages/settings/blocked_users_page.dart';
 import 'package:gamer_grove/presentation/pages/settings/theme_selection_dialog.dart';
 import 'package:gamer_grove/presentation/widgets/app_version_line.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -83,6 +86,7 @@ class SettingsBottomSheet extends StatelessWidget {
                     );
                   },
                 ),
+                const _BlockedAccountsTile(),
                 const _LegalLinks(),
                 const SizedBox(height: 8),
                 const Divider(),
@@ -340,6 +344,34 @@ class _ProGradientTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Entry point to the blocked-accounts list.
+///
+/// Blocking happens on someone else's profile; unblocking cannot, because a
+/// blocked profile is the one you stop opening. Settings is where a user looks
+/// for "things I have done to other people".
+class _BlockedAccountsTile extends StatelessWidget {
+  const _BlockedAccountsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    // Resolved through the container rather than an ancestor provider: the
+    // sheet already reaches EntitlementService that way, and depending on a
+    // Provider above us turns "opened from an unusual place" into a red
+    // screen instead of a missing row.
+    final authState = sl.isRegistered<AuthBloc>() ? sl<AuthBloc>().state : null;
+    if (authState is! AuthAuthenticated) return const SizedBox.shrink();
+
+    return ListTile(
+      leading: const Icon(Icons.block),
+      title: const Text('Blocked accounts'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => unawaited(
+        Navigator.of(context).push(BlockedUsersPage.route(authState.user.id)),
       ),
     );
   }
