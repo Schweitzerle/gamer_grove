@@ -889,10 +889,14 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await supabase.from('user_blocks').insert({
-          'blocker_id': currentUserId,
-          'blocked_id': targetUserId,
-        });
+        // Goes through the RPC rather than inserting directly: blocking also
+        // has to dissolve the follow relationship in both directions, and RLS
+        // deliberately only lets a user delete their own follow. The function
+        // runs as owner and takes the actor from auth.uid(), never from here.
+        await supabase.rpc<void>(
+          'block_user',
+          params: {'target_id': targetUserId},
+        );
       },
       errorMessage: 'Failed to block user',
     );
