@@ -889,7 +889,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseVoidOperation(
       operation: () async {
-        await supabase.from('blocked_users').insert({
+        await supabase.from('user_blocks').insert({
           'blocker_id': currentUserId,
           'blocked_id': targetUserId,
         });
@@ -906,7 +906,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseVoidOperation(
       operation: () async {
         await supabase
-            .from('blocked_users')
+            .from('user_blocks')
             .delete()
             .eq('blocker_id', currentUserId)
             .eq('blocked_id', targetUserId);
@@ -922,8 +922,8 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response = await supabase
-            .from('blocked_users')
-            .select('blocked_id, profiles!blocked_users_blocked_id_fkey(*)')
+            .from('user_blocks')
+            .select('blocked_id, profiles!user_blocks_blocked_id_fkey(*)')
             .eq('blocker_id', userId);
 
         return (response as List)
@@ -942,7 +942,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
     return executeSupabaseOperation(
       operation: () async {
         final response = await supabase
-            .from('blocked_users')
+            .from('user_blocks')
             .select()
             .eq('blocker_id', currentUserId)
             .eq('blocked_id', targetUserId)
@@ -1007,7 +1007,7 @@ class UserRepositoryImpl extends SupabaseBaseRepository
       operation: () async {
         await supabase.from('user_reports').insert({
           'reporter_id': reporterId,
-          'reported_user_id': reportedUserId,
+          'reported_id': reportedUserId,
           'reason': reason,
           'description': description,
         });
