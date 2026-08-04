@@ -5,8 +5,9 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/core/analytics/activation_tracker.dart';
+import 'package:gamer_grove/domain/entities/user/user.dart';
+import 'package:gamer_grove/domain/repositories/user_repository.dart';
 import 'package:gamer_grove/injection_container.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_bloc.dart';
 import 'package:gamer_grove/presentation/blocs/auth/auth_state.dart';
@@ -15,6 +16,7 @@ import 'package:gamer_grove/presentation/blocs/social_interactions/social_intera
 import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_event.dart';
 import 'package:gamer_grove/presentation/blocs/social_interactions/social_interactions_state.dart';
 import 'package:gamer_grove/presentation/pages/followers_following/followers_following_page.dart';
+import 'package:gamer_grove/presentation/pages/user_detail/widgets/user_moderation_menu.dart';
 import 'package:gamer_grove/presentation/widgets/sections/rated_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/recommendations_section.dart';
 import 'package:gamer_grove/presentation/widgets/sections/top_three_section.dart';
@@ -74,6 +76,72 @@ class _UserDetailPageState extends State<UserDetailPage> {
     super.dispose();
   }
 
+  /// Reporting and blocking are only meaningful against somebody else, and
+  /// only while signed in — the menu is hidden otherwise rather than shown
+  /// disabled, because there is nothing the viewer could do to enable it.
+  bool get _canModerate =>
+      _currentUserId != null && _currentUserId != widget.user.id;
+
+  Future<void> _onModerationAction(ModerationAction action) async {
+    switch (action) {
+      case ModerationAction.report:
+        await _report();
+      case ModerationAction.block:
+        await _block();
+    }
+  }
+
+  Future<void> _report() async {
+    final result = await showReportSheet(
+      context,
+      displayName: widget.user.effectiveDisplayName,
+    );
+    if (result == null || !mounted) return;
+
+    final outcome = await sl<UserRepository>().reportUser(
+      reporterId: _currentUserId!,
+      reportedUserId: widget.user.id,
+      reason: result.reason.wireValue,
+      description: result.description,
+    );
+    if (!mounted) return;
+
+    outcome.fold(
+      (failure) => _say('Could not send the report. Please try again.'),
+      // Deliberately no promise of review: nothing processes this queue yet,
+      // and a commitment nobody honours is worse than none.
+      (_) => _say('Report received.'),
+    );
+  }
+
+  Future<void> _block() async {
+    final confirmed = await confirmBlock(
+      context,
+      displayName: widget.user.effectiveDisplayName,
+    );
+    if (!confirmed || !mounted) return;
+
+    final outcome = await sl<UserRepository>().blockUser(
+      currentUserId: _currentUserId!,
+      targetUserId: widget.user.id,
+    );
+    if (!mounted) return;
+
+    outcome.fold(
+      (failure) => _say('Could not block ${widget.user.effectiveDisplayName}.'),
+      (_) {
+        _say('${widget.user.effectiveDisplayName} is blocked.');
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  void _say(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     // Check if profile is private and current user is not the owner
@@ -81,6 +149,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.user.effectiveDisplayName),
+          // Not being able to see someone's shelf is no reason to be unable
+          // to report them.
+          actions: [
+            if (_canModerate)
+              UserModerationMenu(onSelected: _onModerationAction),
+          ],
         ),
         body: const Center(
           child: Column(
@@ -117,6 +191,10 @@ class _UserDetailPageState extends State<UserDetailPage> {
               SliverAppBar(
                 floating: true,
                 title: Text(widget.user.effectiveDisplayName),
+                actions: [
+                  if (_canModerate)
+                    UserModerationMenu(onSelected: _onModerationAction),
+                ],
               ),
               _buildProfileHeader(),
               _buildStats(),
