@@ -925,13 +925,18 @@ class UserRepositoryImpl extends SupabaseBaseRepository
   }) {
     return executeSupabaseOperation(
       operation: () async {
-        final response = await supabase
-            .from('user_blocks')
-            .select('blocked_id, profiles!user_blocks_blocked_id_fkey(*)')
-            .eq('blocker_id', userId);
+        // Not an embedded select on user_blocks: since 021 the profiles policy
+        // hides blocked accounts from the blocker too, so the join would come
+        // back with a row and a null profile. The RPC is scoped to exactly
+        // this question and runs as owner.
+        final response = await supabase.rpc<dynamic>('blocked_profiles');
 
         return (response as List)
-            .map((data) => UserModel.fromJson(data['profiles']).toEntity())
+            .map(
+              (data) => UserModel.fromJson(
+                data as Map<String, dynamic>,
+              ).toEntity(),
+            )
             .toList();
       },
       errorMessage: 'Failed to get blocked users',
