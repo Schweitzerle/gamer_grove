@@ -286,16 +286,23 @@ class UserStatesContent extends StatelessWidget {
       currentTopThreeIds = userDataState.topThreeGameIds;
     }
 
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => TopThreeDialog(
-        game: game,
-        gameBloc: gameBloc, // ✅ Pass GameBloc for dialog compatibility
-        onPositionSelected: (position) {
-          _updateTopThree(
-              context, userDataBloc, userId, position, currentTopThreeIds);
-        },
-      ),
+    // Closed when the dialog goes away. UserStatesContent sits inside every
+    // game card, so this ran on the Grove, in search and on the detail page —
+    // one abandoned GameBloc and its 26 dependencies per press. Reading an
+    // ancestor GameBloc instead is not an option here: a card is not
+    // guaranteed to have one in scope.
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => TopThreeDialog(
+          game: game,
+          gameBloc: gameBloc, // ✅ Pass GameBloc for dialog compatibility
+          onPositionSelected: (position) {
+            _updateTopThree(
+                context, userDataBloc, userId, position, currentTopThreeIds);
+          },
+        ),
+      ).whenComplete(gameBloc.close),
     );
   }
 

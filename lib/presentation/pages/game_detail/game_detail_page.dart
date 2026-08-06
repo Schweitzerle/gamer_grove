@@ -1,4 +1,5 @@
 // lib/presentation/pages/game_detail/enhanced_game_detail_page.dart
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -129,7 +130,18 @@ class _GameDetailPageState extends State<GameDetailPage>
     _mediaTabController?.dispose();
 
     // Refresh the cache so the Grove shows updated game data on the way back.
-    _callerBloc?.add(RefreshCacheEvent());
+    //
+    // Guarded: _callerBloc may be another detail page's own bloc when pages are
+    // stacked, and a multi-route pop does not guarantee that the child is torn
+    // down first. Adding to a closed bloc throws.
+    if (_callerBloc?.isClosed == false) {
+      _callerBloc?.add(RefreshCacheEvent());
+    }
+
+    // Factory registration: this page owns the instance it asked for. Closing
+    // it releases 26 injected dependencies — on the most-visited page in the
+    // app, which made this the larger of the two leaks.
+    unawaited(_gameBloc.close());
 
     super.dispose();
   }

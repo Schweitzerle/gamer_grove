@@ -14,6 +14,7 @@ import 'package:gamer_grove/presentation/pages/game_detail/widgets/game_info_car
 import 'package:gamer_grove/presentation/pages/game_detail/game_detail_page.dart';
 import 'package:gamer_grove/presentation/widgets/loading/live_loading_progress.dart';
 import 'package:gamer_grove/presentation/widgets/loading/loading_thumbnail.dart';
+import 'package:mocktail/mocktail.dart';
 
 class _MockGameBloc extends MockBloc<GameEvent, GameState>
     implements GameBloc {}
@@ -46,6 +47,11 @@ void main() {
       const Stream<GameState>.empty(),
       initialState: GameDetailsLoading(),
     );
+    // The page checks isClosed before firing the caller's refresh, and closes
+    // its own bloc on the way out (#171). MockBloc leaves isClosed unstubbed,
+    // which returns null and fails the non-nullable getter.
+    when(() => gameBloc.isClosed).thenReturn(false);
+
     userGameData = _MockUserGameDataBloc();
     whenListen(
       userGameData,
