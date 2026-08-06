@@ -62,10 +62,27 @@ void main() async {
           ..environment = kReleaseMode ? 'production' : 'debug'
           ..tracesSampleRate = kReleaseMode ? 0.2 : 1.0
           // Don't send user IP / PII by default (GDPR-friendly).
-          ..sendDefaultPii = false;
+          ..sendDefaultPii = false
+          // Turns on the SDK's own logging in a build that is otherwise
+          // silent. Between launch and the first crash there is no way to
+          // tell "nothing crashed" from "nothing is being reported", and the
+          // app shipped in exactly that state — 40 releases, no events, and
+          // no way to say which. Built with
+          // `--dart-define=GG_SENTRY_DEBUG=true`, a release build prints what
+          // it sends.
+          ..debug = const bool.fromEnvironment('GG_SENTRY_DEBUG');
       },
       appRunner: startApp,
     );
+
+    // A build made with `--dart-define=GG_SENTRY_SMOKE=true` announces itself
+    // once at startup. That is the only way to answer "does crash reporting
+    // work in a real release build" without waiting for a real crash — and
+    // waiting is what left 40 releases with no events and no way to tell
+    // whether that was good news. Off by default, so production sends nothing.
+    if (const bool.fromEnvironment('GG_SENTRY_SMOKE')) {
+      await Sentry.captureMessage('sentry smoke test');
+    }
   }
 }
 

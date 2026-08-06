@@ -54,22 +54,61 @@ ls -1 "$SYMBOLS" | sed 's/^/    /'
 export PATH="$HOME/.local/bin:$PATH"
 TOKEN_FILE="$HOME/.gg-sentry-token"
 
-if command -v sentry-cli >/dev/null 2>&1 && [ -r "$TOKEN_FILE" ]; then
+# Missing tooling used to print a warning and let the build finish. A warning
+# in the middle of several hundred lines of Gradle output is a warning nobody
+# reads, and what came out the other end looked like a finished bundle. It was
+# not: obfuscated without symbols means every crash report from that build is
+# unreadable, which is a worse trade than not obfuscating at all.
+#
+# So it fails instead. A release that cannot be diagnosed is not a release.
+# Set GG_ALLOW_MISSING_SYMBOLS=1 to build one anyway (a local smoke test, say).
+if ! command -v sentry-cli >/dev/null 2>&1 || [ ! -r "$TOKEN_FILE" ]; then
+  cat >&2 <<MSG
+
+!! Cannot upload debug symbols — refusing to finish this build.
+   Crashes from an obfuscated build without symbols are unreadable.
+     sentry-cli   $(command -v sentry-cli >/dev/null 2>&1 && echo present || echo "not installed — https://docs.sentry.io/cli/installation/")
+     token file   $([ -r "$TOKEN_FILE" ] && echo present || echo "missing: $TOKEN_FILE")
+   The bundle at $AAB is left in place; symbols are in $SYMBOLS.
+   Upload them by hand and re-run, or set GG_ALLOW_MISSING_SYMBOLS=1 if this
+   build is not going to a store.
+MSG
+  [ "${GG_ALLOW_MISSING_SYMBOLS:-0}" = "1" ] || exit 1
+  echo "   GG_ALLOW_MISSING_SYMBOLS=1 — continuing without symbols." >&2
+else
   echo "==> Uploading symbols to Sentry"
   SENTRY_AUTH_TOKEN="$(cat "$TOKEN_FILE")" \
   SENTRY_URL="https://de.sentry.io" \
   SENTRY_ORG="schweizerlelab" \
   SENTRY_PROJECT="gamergrove" \
     sentry-cli debug-files upload --include-sources "$SYMBOLS"
-else
-  cat <<MSG
-==> Sentry upload SKIPPED — crashes from this build will be unreadable
-    Obfuscation without symbols is a worse trade than no obfuscation: the
-    binary is harder to read and so is every crash report. Missing:
-      sentry-cli   $(command -v sentry-cli >/dev/null 2>&1 && echo present || echo "not installed")
-      token file   $([ -r "$TOKEN_FILE" ] && echo present || echo "$TOKEN_FILE")
-    Fix that and re-run, or upload $SYMBOLS by hand before releasing.
-MSG
+
+  # An upload that reports success but lands nothing is the failure mode this
+  # whole block exists to prevent, so the result is read back from the server.
+  #
+  # `sentry-cli debug-files check` only inspects the LOCAL file — it says
+  # nothing about what arrived. The debug id it prints is the join key, so the
+  # id goes to the API and the answer has to come back non-empty.
+  echo "==> Verifying the symbols arrived"
+  for SYM in "$SYMBOLS"/*.symbols; do
+    [ -e "$SYM" ] || continue
+
+    DEBUG_ID="$(sentry-cli debug-files check "$SYM" --json 2>/dev/null \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin)["variants"][0]["debug_id"])')"
+    [ -n "$DEBUG_ID" ] || {
+      echo "    !! no debug id in $(basename "$SYM")" >&2; exit 1; }
+
+    FOUND="$(curl -sf -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
+      "https://de.sentry.io/api/0/projects/schweizerlelab/gamergrove/files/dsyms/?query=$DEBUG_ID" \
+      | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)')"
+
+    if [ "${FOUND:-0}" -gt 0 ]; then
+      echo "    ok  $(basename "$SYM")  $DEBUG_ID"
+    else
+      echo "    !! $(basename "$SYM") ($DEBUG_ID) is not on the server" >&2
+      exit 1
+    fi
+  done
 fi
 
 echo
