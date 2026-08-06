@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/injection_container.dart';
@@ -32,6 +34,16 @@ class _ActivityFeedPageState extends State<ActivityFeedPage> {
     super.initState();
     _activityFeedBloc = sl<ActivityFeedBloc>();
     _activityFeedBloc.add(LoadActivityFeed());
+  }
+
+  @override
+  void dispose() {
+    // ActivityFeedBloc is a factory registration: every visit builds a new one,
+    // and nothing else holds it. `BlocProvider.value` below does not adopt
+    // ownership, so without this the bloc — and its GameRepository and AuthBloc
+    // subscriptions — outlives the page.
+    unawaited(_activityFeedBloc.close());
+    super.dispose();
   }
 
   @override

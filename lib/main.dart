@@ -76,9 +76,16 @@ class GamerGroveApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // Auth Bloc - manages authentication state
-        BlocProvider(
-          create: (_) => sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
+        // Auth Bloc - manages authentication state.
+        //
+        // `.value`, not `create`: AuthBloc is a lazy singleton, and `create`
+        // hands ownership to the provider, which closes the bloc on dispose.
+        // That would close the singleton for the whole app — get_it would keep
+        // handing out the same dead instance. Harmless only because this sits
+        // at the app root and is never disposed; the moment anything moves it,
+        // the bug is real. UserGameDataBloc below already does it this way.
+        BlocProvider.value(
+          value: sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
         ),
         // UserGameData Bloc - global state for user-game relations
         // Uses LazySingleton to persist across the app
