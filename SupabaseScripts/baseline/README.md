@@ -38,4 +38,4 @@ Kommentar in `storage_and_grants.sql`.
 
 ## Stand
 
-Erzeugt am **2026-08-06**, nach Migration 024.
+Erzeugt am **2026-08-06**, nach Migration 025.

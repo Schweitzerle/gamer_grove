@@ -5,7 +5,19 @@ library;
 
 import 'package:gamer_grove/data/datasources/remote/supabase/models/supabase_auth_exceptions.dart';
 import 'package:gamer_grove/data/datasources/remote/supabase/supabase_auth_datasource.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
+
+/// Builds the object paths to remove for one user's avatar folder.
+///
+/// Split out because this is the part that can quietly be wrong: the storage
+/// policy matches on the first path segment, so a stray leading slash would
+/// shift the user id to segment two and the delete would be refused — the
+/// file would stay in a public bucket and nobody would notice.
+List<String> avatarPathsFor(String userId, List<String> fileNames) => [
+      for (final name in fileNames)
+        if (name.isNotEmpty) '$userId/$name',
+    ];
 
 /// Concrete implementation of [SupabaseAuthDataSource].
 ///
@@ -140,9 +152,43 @@ class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
     }
   }
 
+  /// Removes the caller's avatar files.
+  ///
+  /// Has to happen while the session is still alive: the storage policy ties
+  /// the delete to `auth.uid()`, and after the account is gone there is no
+  /// longer anyone entitled to remove the file — it would stay in a public
+  /// bucket forever, which is the opposite of what Art. 17 asks for.
+  Future<void> _removeAvatarFiles(String userId) async {
+    final bucket = _supabase.storage.from('avatars');
+    final files = await bucket.list(path: userId);
+    final paths = avatarPathsFor(userId, [for (final f in files) f.name]);
+    if (paths.isEmpty) return;
+    await bucket.remove(paths);
+  }
+
   @override
   Future<void> deleteAccount() async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId != null) {
+        try {
+          await _removeAvatarFiles(userId);
+        } on Object catch (e, stack) {
+          // Deliberately not fatal. A storage hiccup must not leave someone
+          // unable to delete their account — that is the worse failure of the
+          // two. But the leftover file is invisible from here on, so it is
+          // reported rather than swallowed.
+          await Sentry.captureException(
+            e,
+            stackTrace: stack,
+            withScope: (scope) => scope.setContexts(
+              'account_deletion',
+              {'stage': 'avatar_cleanup', 'user_id': userId},
+            ),
+          );
+        }
+      }
+
       // The RPC scopes the deletion to auth.uid(); nothing is passed in.
       await _supabase.rpc<void>('delete_own_account');
       // The identity is gone — drop the now-dangling local session too.

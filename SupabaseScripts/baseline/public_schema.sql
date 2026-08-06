@@ -1,5 +1,5 @@
 -- Schema-Abzug der Produktionsdatenbank, erzeugt am 2026-08-06 nach
--- Migration 024 mit `supabase db dump --linked`.
+-- Migration 025 mit `supabase db dump --linked`.
 --
 -- Kein Skript zum Ausfuehren gegen die laufende Datenbank: es beschreibt
 -- den Zustand, es stellt ihn nicht her. Siehe README.md daneben.
@@ -1251,18 +1251,6 @@ CREATE TABLE IF NOT EXISTS "public"."user_reports" (
 ALTER TABLE "public"."user_reports" OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."user_search_history" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "query" "text" NOT NULL,
-    "searched_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "query_not_empty" CHECK (("length"(TRIM(BOTH FROM "query")) > 0))
-);
-
-
-ALTER TABLE "public"."user_search_history" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."user_search_queries" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "user_id" "uuid" NOT NULL,
@@ -1368,11 +1356,6 @@ ALTER TABLE ONLY "public"."user_reports"
 
 
 
-ALTER TABLE ONLY "public"."user_search_history"
-    ADD CONSTRAINT "user_search_history_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."user_search_queries"
     ADD CONSTRAINT "user_search_queries_pkey" PRIMARY KEY ("id");
 
@@ -1454,14 +1437,6 @@ CREATE INDEX "idx_relationships_follower" ON "public"."user_relationships" USING
 
 
 CREATE INDEX "idx_relationships_following" ON "public"."user_relationships" USING "btree" ("following_id");
-
-
-
-CREATE INDEX "idx_search_history_searched_at" ON "public"."user_search_history" USING "btree" ("searched_at" DESC);
-
-
-
-CREATE INDEX "idx_search_history_user_id" ON "public"."user_search_history" USING "btree" ("user_id");
 
 
 
@@ -1798,10 +1773,6 @@ CREATE POLICY "Users can delete own games" ON "public"."user_games" FOR DELETE T
 
 
 
-CREATE POLICY "Users can delete own search history" ON "public"."user_search_history" FOR DELETE TO "authenticated" USING (("auth"."uid"() = "user_id"));
-
-
-
 CREATE POLICY "Users can delete own search history" ON "public"."user_search_queries" FOR DELETE USING (("auth"."uid"() = "user_id"));
 
 
@@ -1819,10 +1790,6 @@ CREATE POLICY "Users can follow others" ON "public"."user_relationships" FOR INS
 
 
 CREATE POLICY "Users can insert own games" ON "public"."user_games" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Users can insert own search history" ON "public"."user_search_history" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
 
 
 
@@ -1871,10 +1838,6 @@ CREATE POLICY "Users can view own games" ON "public"."user_games" FOR SELECT TO 
 
 
 CREATE POLICY "Users can view own reports" ON "public"."user_reports" FOR SELECT TO "authenticated" USING (("auth"."uid"() = "reporter_id"));
-
-
-
-CREATE POLICY "Users can view own search history" ON "public"."user_search_history" FOR SELECT TO "authenticated" USING (("auth"."uid"() = "user_id"));
 
 
 
@@ -1969,9 +1932,6 @@ ALTER TABLE "public"."user_relationships" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."user_reports" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."user_search_history" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."user_search_queries" ENABLE ROW LEVEL SECURITY;
@@ -2149,7 +2109,7 @@ GRANT ALL ON FUNCTION "public"."block_user"("target_id" "uuid") TO "authenticate
 
 
 GRANT SELECT,INSERT,UPDATE ON TABLE "public"."profiles" TO "service_role";
-GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."profiles" TO "authenticated";
 GRANT INSERT ON TABLE "public"."profiles" TO "anon";
 
 
@@ -2226,7 +2186,7 @@ GRANT ALL ON FUNCTION "public"."search_users"("p_query" "text", "p_limit" intege
 
 
 
-GRANT ALL ON TABLE "public"."user_activity" TO "authenticated";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_activity" TO "authenticated";
 
 
 
@@ -2245,11 +2205,11 @@ GRANT SELECT ON TABLE "public"."user_collections" TO "anon";
 
 
 
-GRANT ALL ON TABLE "public"."user_follows" TO "authenticated";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_follows" TO "authenticated";
 
 
 
-GRANT ALL ON TABLE "public"."user_games" TO "authenticated";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_games" TO "authenticated";
 
 
 
@@ -2258,7 +2218,7 @@ GRANT SELECT,UPDATE ON TABLE "public"."user_reports" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."user_top_three" TO "authenticated";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "public"."user_top_three" TO "authenticated";
 
 
 
