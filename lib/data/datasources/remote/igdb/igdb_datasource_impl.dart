@@ -1,7 +1,7 @@
 // lib/data/datasources/remote/igdb/igdb_datasource_impl.dart
 
-import 'package:gamer_grove/core/env/env.dart';
 import 'package:dio/dio.dart';
+import 'package:gamer_grove/core/env/env.dart';
 import 'package:gamer_grove/core/errors/exceptions.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/igdb_datasource.dart';
 import 'package:gamer_grove/data/datasources/remote/igdb/models/igdb_query.dart';
@@ -51,10 +51,22 @@ import 'package:gamer_grove/data/models/theme_model.dart';
 /// the token and forwards the query. What travels from here is the query the
 /// app wanted to run.
 class IgdbDataSourceImpl implements IgdbDataSource {
-  IgdbDataSourceImpl({required this.dio, String? proxyUrl})
-      : proxyUrl = proxyUrl ?? '${Env.supabaseUrl}/functions/v1/igdb';
+  IgdbDataSourceImpl({
+    required this.dio,
+    required this.accessToken,
+    String? proxyUrl,
+  }) : proxyUrl = proxyUrl ?? '${Env.supabaseUrl}/functions/v1/igdb';
 
   final Dio dio;
+
+  /// The signed-in user's access token, read afresh for every request.
+  ///
+  /// A function rather than a value because the token is refreshed while the
+  /// app runs; a copy taken at construction would go stale within the hour.
+  ///
+  /// Injected rather than read from Supabase here so this class keeps knowing
+  /// nothing about where a session comes from — and so a test can hand it one.
+  final String? Function() accessToken;
 
   /// Where the proxy lives. Derived from the Supabase project rather than
   /// configured separately, because it is always the same project.
@@ -288,14 +300,26 @@ class IgdbDataSourceImpl implements IgdbDataSource {
     required T Function(Map<String, dynamic>) parser,
   }) async {
     try {
-      // The Supabase key is what the proxy checks; the IGDB credentials it
-      // uses are its own and never leave the server.
+      // The session token, not the anon key. Until #161 this sent the anon
+      // key, which is readable out of the APK and sits in the public git
+      // history — the proxy could not tell one caller from another and had no
+      // ceiling, so it was a free IGDB API on our Twitch credentials.
+      //
+      // `apikey` stays the anon key: that header is what the Supabase gateway
+      // routes on, and it is public by design.
+      final token = accessToken();
+      if (token == null || token.isEmpty) {
+        throw AuthException(
+          message: 'Please sign in to browse games.',
+        );
+      }
+
       final response = await dio.post<dynamic>(
         proxyUrl,
         data: {'endpoint': endpoint, 'query': query.buildQuery()},
         options: Options(
           headers: {
-            'Authorization': 'Bearer ${Env.supabaseAnonKey}',
+            'Authorization': 'Bearer $token',
             'apikey': Env.supabaseAnonKey,
             'Content-Type': 'application/json',
           },
@@ -353,10 +377,13 @@ class IgdbDataSourceImpl implements IgdbDataSource {
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         if (statusCode == 401) {
-          return AuthException(message: 'Authentication failed.');
+          // The proxy now answers 401 for "no session", not only for a bad
+          // key, so the message has to make sense to a reader who is simply
+          // signed out.
+          return AuthException(message: 'Please sign in to browse games.');
         } else if (statusCode == 429) {
           return ServerException(
-            message: 'Rate limit exceeded.',
+            message: 'Too many requests — try again in a minute.',
           );
         } else {
           return ServerException(

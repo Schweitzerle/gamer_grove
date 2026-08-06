@@ -59,13 +59,48 @@ void main() {
     // A passthrough proxy would forward any path to IGDB with our credentials
     // attached. The allowlist is the difference between a proxy and an open
     // relay, so its presence is worth asserting even from Dart.
-    final function = read('supabase/functions/igdb/index.ts');
-    expect(function, contains('const ALLOWED = new Set('));
-    expect(function, contains('!ALLOWED.has(endpoint)'));
+    //
+    // It lives in guard.ts since #161, together with the rest of the rules
+    // that decide whether a request is served. The Deno tests next to it check
+    // the behaviour; this one only checks that it still exists at all, from
+    // the side that would otherwise never notice it going.
+    final guard = read('supabase/functions/igdb/guard.ts');
+    expect(guard, contains('export const ALLOWED = new Set('));
+    expect(guard, contains('!ALLOWED.has(endpoint)'));
+
     expect(
-      function,
+      read('supabase/functions/igdb/index.ts'),
       contains("Deno.env.get('IGDB_CLIENT_SECRET')"),
       reason: 'the secret must be read from the environment, never inlined',
+    );
+  });
+
+  test('the app sends a session token, not the anon key', () {
+    // This is the whole of #161. The anon key is readable out of the APK and
+    // sits in the public git history; sending it as the Authorization header
+    // made the proxy a free IGDB API on our Twitch credentials.
+    final source = read(
+      'lib/data/datasources/remote/igdb/igdb_datasource_impl.dart',
+    );
+
+    expect(
+      source,
+      isNot(contains(r"'Authorization': 'Bearer ${Env.supabaseAnonKey}'")),
+      reason: 'the anon key is not an identity',
+    );
+    expect(source, contains(r"'Authorization': 'Bearer $token'"));
+    // apikey stays the anon key — that header is what the Supabase gateway
+    // routes on, and it is public by design.
+    expect(source, contains("'apikey': Env.supabaseAnonKey"));
+  });
+
+  test('the proxy asks the database who is calling', () {
+    // Without this the function has no caller and no ceiling. The RPC does
+    // both jobs in one round trip: PostgREST verifies the signature, the
+    // function refuses a null auth.uid(), and the same call counts the hit.
+    expect(
+      read('supabase/functions/igdb/index.ts'),
+      contains("rpc('igdb_rate_limit_hit')"),
     );
   });
 }

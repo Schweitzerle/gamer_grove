@@ -14,45 +14,28 @@
 //   supabase functions deploy igdb
 //   supabase secrets set IGDB_CLIENT_ID=<id> IGDB_CLIENT_SECRET=<secret>
 //
-// JWT verification stays ON (unlike the RevenueCat webhook): callers must
-// present a Supabase key, which every build of the app already has. That does
-// not make the endpoint private — the anon key is public by design — but it
-// keeps the IGDB credentials off every device, which is the point.
+// Who may call it: a signed-in user, and no more than 120 times a minute.
+//
+// That is newer than the rest of this file. Until #161 the only requirement
+// was "present a Supabase key", and the app sent the ANON key — which is
+// readable out of the APK and sits in this repository's public git history.
+// The function was therefore a free IGDB API on our Twitch credentials, with
+// no caller and no ceiling, against an upstream budget of 4 requests/second.
+//
+// The check is a single call to `igdb_rate_limit_hit()` with the caller's own
+// JWT (SupabaseScripts/026). PostgREST verifies the signature before the
+// function body runs, the function refuses a null `auth.uid()`, and the same
+// call counts the hit — identity and ceiling in one round trip.
 
-/// Endpoints the app actually asks for.
-///
-/// An allowlist rather than a passthrough: without it this function would
-/// forward any path to any IGDB endpoint on request, with our credentials
-/// attached — a proxy and an open relay differ by exactly this list.
-///
-/// Derived from `endpoint:` in `igdb_datasource_impl.dart`, not typed by hand.
-/// The hand-written first draft was missing four of them, which would have
-/// broken age ratings, game statuses, game types and languages while
-/// everything else kept working — the kind of failure that gets found by a
-/// user, not by a build.
-const ALLOWED = new Set([
-  'age_rating_categories',
-  'characters',
-  'collections',
-  'companies',
-  'events',
-  'franchises',
-  'game_engines',
-  'game_modes',
-  'game_statuses',
-  'game_types',
-  'games',
-  'genres',
-  'keywords',
-  'languages',
-  'multiplayer_modes',
-  'platforms',
-  'player_perspectives',
-  'themes',
-]);
-
-/// A query longer than this is not something the app sends.
-const MAX_QUERY = 4000;
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import {
+  anonStillAllowed,
+  bearerFrom,
+  isAnonKey,
+  isRejection,
+  rateLimitOutcome,
+  validate,
+} from './guard.ts';
 
 const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token';
 const IGDB_BASE = 'https://api.igdb.com/v4';
@@ -105,22 +88,61 @@ Deno.serve(async (request) => {
     return fail(500, 'The IGDB proxy is not configured');
   }
 
-  let endpoint: unknown;
-  let query: unknown;
+  let body: unknown;
   try {
-    ({ endpoint, query } = await request.json());
+    body = await request.json();
   } catch {
     return fail(400, 'Body must be JSON');
   }
 
-  if (typeof endpoint !== 'string' || !ALLOWED.has(endpoint)) {
-    return fail(400, `Unknown endpoint: ${endpoint}`);
+  const checked = validate(body);
+  if (isRejection(checked)) return fail(checked.status, checked.message);
+  const { endpoint, query } = checked;
+
+  // ------------------------------------------------ who is asking, and how often
+  // `callerToken`, not `token`: the module already has a `token` — the cached
+  // Twitch credential. Shadowing it here made the cache invalidation on line
+  // 149 assign to this constant instead, which the linter caught and a reader
+  // would not have.
+  const callerToken = bearerFrom(request.headers);
+  if (callerToken === null) return fail(401, 'Sign in to browse games');
+
+  // The case that used to be the whole of the app's traffic. Refused without a
+  // round trip — but only once the installed base has moved; see
+  // anonStillAllowed.
+  const anonCall = isAnonKey(callerToken, Deno.env.get('SUPABASE_ANON_KEY'));
+  if (anonCall) {
+    if (!anonStillAllowed(Deno.env.get('IGDB_ALLOW_ANON'))) {
+      return fail(401, 'Sign in to browse games');
+    }
+    // Counted so the tail of old installations is a number rather than a
+    // guess. When this stops appearing, IGDB_ALLOW_ANON can go to false.
+    console.warn('igdb: anon-key call served (pre-2.2 client)');
   }
-  if (typeof query !== 'string' || query.length === 0) {
-    return fail(400, 'A query is required');
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !anonKey) {
+    console.error('SUPABASE_URL or SUPABASE_ANON_KEY is not set');
+    return fail(500, 'The IGDB proxy is not configured');
   }
-  if (query.length > MAX_QUERY) {
-    return fail(413, 'Query too long');
+
+  // The caller's JWT, not the service role: the point is to act AS them, so
+  // that auth.uid() is theirs and the count lands on their row.
+  const caller = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: `Bearer ${callerToken}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { error: limitError } = anonCall
+    ? { error: null }
+    : await caller.rpc('igdb_rate_limit_hit');
+  if (limitError) {
+    const outcome = rateLimitOutcome(limitError.code);
+    if (outcome.status === 500) {
+      console.error('igdb_rate_limit_hit failed', limitError);
+    }
+    return fail(outcome.status, outcome.message);
   }
 
   try {
