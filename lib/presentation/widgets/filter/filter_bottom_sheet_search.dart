@@ -128,14 +128,11 @@ extension _FilterBottomSheetSearch on _FilterBottomSheetState {
                         // Show image with placeholder fallback
                         leadingWidget = ClipRRect(
                           borderRadius: BorderRadius.circular(4),
-                          child: Image.network(
-                            imageUrl,
+                          child: CachedImageWidget(
+                            imageUrl: imageUrl,
                             width: 40,
                             height: 40,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return buildPlaceholder();
-                            },
+                            errorWidget: buildPlaceholder(),
                           ),
                         );
                       } else {

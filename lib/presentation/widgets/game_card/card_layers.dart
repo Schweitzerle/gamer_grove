@@ -16,7 +16,7 @@ class CardArtwork extends StatelessWidget {
   Widget build(BuildContext context) {
     final url = coverUrl;
     if (url == null || url.isEmpty) return const _MissingArtwork();
-    return CachedImageWidget(imageUrl: ImageUtils.getLargeImageUrl(url));
+    return CachedImageWidget(imageUrl: ImageUtils.getCardCoverUrl(url));
   }
 }
 

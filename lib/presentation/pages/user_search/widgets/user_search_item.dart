@@ -1,8 +1,8 @@
 // lib/presentation/pages/user_search/widgets/user_search_item.dart
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/user/user.dart';
 import 'package:gamer_grove/presentation/pages/leaderboard/widgets/leaderboard_rank.dart';
 
@@ -146,12 +146,10 @@ class UserSearchItem extends StatelessWidget {
         ),
         child: ClipOval(
           child: user.hasAvatar
-              ? CachedNetworkImage(
-                  imageUrl: user.avatarUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => _buildAvatarPlaceholder(),
-                  errorWidget: (context, url, error) =>
-                      _buildAvatarPlaceholder(),
+              ? CachedImageWidget(
+                  imageUrl: user.avatarUrl,
+                  placeholder: _buildAvatarPlaceholder(),
+                  errorWidget: _buildAvatarPlaceholder(),
                 )
               : _buildAvatarPlaceholder(),
         ),

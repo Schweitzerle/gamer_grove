@@ -1,6 +1,7 @@
 // lib/presentation/pages/characters/characters_screen.dart
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_card.dart';
 import 'package:gamer_grove/presentation/pages/character/widgets/character_filter_bar.dart';
@@ -213,10 +214,9 @@ class _CharactersScreenState extends State<CharactersScreen> {
       child: character.imageUrl != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                character.imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Icon(
+              child: CachedImageWidget(
+                imageUrl: character.imageUrl,
+                errorWidget: Icon(
                   Icons.person,
                   color: Colors.purple.withOpacity(0.6),
                 ),

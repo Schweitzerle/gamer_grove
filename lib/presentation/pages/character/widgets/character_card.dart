@@ -1,9 +1,9 @@
 // lib/presentation/pages/characters/widgets/character_card.dart
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/character/character.dart';
 
 /// A card widget that displays character information with an image,
@@ -150,11 +150,10 @@ class _CharacterCardState extends State<CharacterCard>
 
   Widget _buildBackgroundImage(BuildContext context) {
     if (widget.character.hasImage) {
-      return CachedNetworkImage(
-        imageUrl: widget.character.largeUrl!,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => _buildImagePlaceholder(context),
-        errorWidget: (context, url, error) => _buildFallbackBackground(context),
+      return CachedImageWidget(
+        imageUrl: widget.character.largeUrl,
+        placeholder: _buildImagePlaceholder(context),
+        errorWidget: _buildFallbackBackground(context),
       );
     } else {
       return _buildFallbackBackground(context);

@@ -1,11 +1,12 @@
 // core/utils/image_utils.dart
 import 'package:gamer_grove/core/constants/app_constants.dart';
+import 'package:gamer_grove/core/utils/igdb_image_size.dart';
 
 class ImageUtils {
   // Build IGDB image URL with proper size
   static String buildIgdbImageUrl(
     String? baseUrl, {
-    String size = AppConstants.mediumImageSize,
+    IgdbImageSize size = IgdbImageSize.coverBig,
   }) {
     if (baseUrl == null || baseUrl.isEmpty) return '';
 
@@ -25,28 +26,31 @@ class ImageUtils {
     // Find and replace any existing size parameter
     final sizeRegex = RegExp('t_[a-zA-Z0-9_]+');
     if (sizeRegex.hasMatch(baseUrl)) {
-      baseUrl = baseUrl.replaceAll(sizeRegex, size);
+      baseUrl = baseUrl.replaceAll(sizeRegex, size.alias);
     }
 
     return baseUrl;
   }
 
-  // Get different image sizes
-  static String getSmallImageUrl(String? baseUrl) {
-    return buildIgdbImageUrl(baseUrl, size: AppConstants.smallImageSize);
-  }
+  /// A cover at the size a game card draws it (160×240 logical, so 480×720 on
+  /// a 3× screen). `t_720p` fits a portrait cover to 540×720 — above what any
+  /// phone card can show, and less than half the bytes of `t_1080p`.
+  static String getCardCoverUrl(String? baseUrl) =>
+      buildIgdbImageUrl(baseUrl, size: IgdbImageSize.hd);
 
-  static String getMediumImageUrl(String? baseUrl) {
-    return buildIgdbImageUrl(baseUrl);
-  }
+  /// A cover for small list rows and waiting thumbnails.
+  static String getSmallImageUrl(String? baseUrl) =>
+      buildIgdbImageUrl(baseUrl, size: IgdbImageSize.coverSmall);
 
-  static String getLargeImageUrl(String? baseUrl) {
-    return buildIgdbImageUrl(baseUrl, size: AppConstants.largeImageSize);
-  }
+  static String getMediumImageUrl(String? baseUrl) =>
+      buildIgdbImageUrl(baseUrl);
 
-  static String getScreenshotUrl(String? baseUrl) {
-    return buildIgdbImageUrl(baseUrl, size: AppConstants.screenshotSize);
-  }
+  /// Full-screen viewing. The only place `t_1080p` is the right answer.
+  static String getLargeImageUrl(String? baseUrl) =>
+      buildIgdbImageUrl(baseUrl, size: IgdbImageSize.fullHd);
+
+  static String getScreenshotUrl(String? baseUrl) =>
+      buildIgdbImageUrl(baseUrl, size: IgdbImageSize.screenshotMed);
 
   // Check if URL is valid image
   static bool isValidImageUrl(String? url) {
@@ -101,7 +105,7 @@ class ImageUtils {
         } else if (width <= 264 && height <= 352) {
           return getMediumImageUrl(originalUrl);
         } else {
-          return getLargeImageUrl(originalUrl);
+          return getCardCoverUrl(originalUrl);
         }
       }
       return getMediumImageUrl(originalUrl);

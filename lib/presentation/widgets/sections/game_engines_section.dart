@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/game/game_engine.dart';
 
 class GameEnginesSection extends StatelessWidget {
@@ -266,11 +267,10 @@ class GameEnginesSection extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(size * 0.25),
-          child: Image.network(
-            logoUrl,
+          child: CachedImageWidget(
+            imageUrl: logoUrl,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildDefaultEngineLogo(context, engine, size),
+            errorWidget: _buildDefaultEngineLogo(context, engine, size),
           ),
         ),
       );
