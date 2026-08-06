@@ -1,10 +1,10 @@
-import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/navigation/gg_reveal_route.dart';
 import 'package:gamer_grove/core/theme/gg_dither.dart';
 import 'package:gamer_grove/core/theme/gg_tokens.dart';
 import 'package:gamer_grove/core/theme/gg_typography.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 
 /// One cover in the Top 3 stack, or an empty place waiting to be filled.
@@ -94,13 +94,10 @@ class StackedCover extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 if (game?.coverUrl != null)
-                  CachedNetworkImage(
-                    imageUrl: ImageUtils.getLargeImageUrl(game!.coverUrl),
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        ColoredBox(color: scheme.surfaceContainerHigh),
-                    errorWidget: (_, __, ___) =>
-                        _Placeholder(rank: rank, isEmpty: false),
+                  CachedImageWidget(
+                    imageUrl: ImageUtils.getCardCoverUrl(game!.coverUrl),
+                    placeholder: ColoredBox(color: scheme.surfaceContainerHigh),
+                    errorWidget: _Placeholder(rank: rank, isEmpty: false),
                   )
                 else
                   _Placeholder(rank: rank, isEmpty: game == null),

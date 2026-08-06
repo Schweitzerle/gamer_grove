@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/entitlements/pro_feature.dart';
-import 'package:gamer_grove/presentation/widgets/pro/pro_gate.dart';
-import 'package:gamer_grove/presentation/widgets/pro/pro_locked_view.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating_category.dart';
 import 'package:gamer_grove/domain/entities/collection/collection.dart';
 import 'package:gamer_grove/domain/entities/company/company.dart';
@@ -29,6 +28,8 @@ import 'package:gamer_grove/domain/entities/player_perspective.dart';
 import 'package:gamer_grove/domain/entities/search/search_filters.dart';
 import 'package:gamer_grove/domain/entities/theme.dart' as gg_theme;
 import 'package:gamer_grove/presentation/widgets/filter/date_filter_dialog.dart';
+import 'package:gamer_grove/presentation/widgets/pro/pro_gate.dart';
+import 'package:gamer_grove/presentation/widgets/pro/pro_locked_view.dart';
 
 part 'filter/filter_bottom_sheet_tabs.dart';
 part 'filter/filter_bottom_sheet_sections.dart';

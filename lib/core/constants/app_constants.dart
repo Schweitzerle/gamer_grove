@@ -12,10 +12,9 @@ class AppConstants {
   static const int minSearchLength = 2;
 
   // Image Sizes
-  static const String smallImageSize = 't_thumb';
-  static const String mediumImageSize = 't_cover_big';
-  static const String largeImageSize = 't_1080p';
-  static const String screenshotSize = 't_screenshot_med';
+  // The IGDB size ladder lives in core/utils/igdb_image_size.dart, where each
+  // step carries the box it fits into. A bare string here invited callers to
+  // pick the largest one and stop thinking about it, which is what happened.
 
   // Rating Constraints
   static const double minRating = 0;

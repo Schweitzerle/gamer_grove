@@ -91,7 +91,7 @@ class _LoadingThumbnailState extends State<LoadingThumbnail>
                   children: [
                     if (url != null && url.isNotEmpty)
                       CachedImageWidget(
-                        imageUrl: ImageUtils.getLargeImageUrl(url),
+                        imageUrl: ImageUtils.getCardCoverUrl(url),
                       )
                     else
                       DecoratedBox(

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:gamer_grove/core/constants/app_constants.dart';
 import 'package:gamer_grove/core/utils/navigations.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/ageRating/age_rating.dart';
 
 class AgeRatingsSection extends StatelessWidget {
@@ -319,11 +320,11 @@ class AgeRatingDetailsDialog extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Image.network(
-                      rating.ratingCoverUrl!,
+                    child: CachedImageWidget(
+                      imageUrl: rating.ratingCoverUrl,
                       height: 120,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Container(
+                      errorWidget: Container(
                         height: 120,
                         width: 120,
                         decoration: BoxDecoration(

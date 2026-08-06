@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/user_activity.dart';
 import 'package:intl/intl.dart';
 
@@ -97,13 +97,10 @@ class ActivityCard extends StatelessWidget {
       ),
       child: ClipOval(
         child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: user.avatarUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    _buildAvatarPlaceholder(context, user),
-                errorWidget: (context, url, error) =>
-                    _buildAvatarPlaceholder(context, user),
+            ? CachedImageWidget(
+                imageUrl: user.avatarUrl,
+                placeholder: _buildAvatarPlaceholder(context, user),
+                errorWidget: _buildAvatarPlaceholder(context, user),
               )
             : _buildAvatarPlaceholder(context, user),
       ),

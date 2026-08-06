@@ -1,10 +1,10 @@
 // lib/presentation/widgets/top_three_dialog.dart
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gamer_grove/core/services/toast_service.dart';
 import 'package:gamer_grove/core/utils/colorSchemes.dart';
 import 'package:gamer_grove/core/utils/image_utils.dart';
+import 'package:gamer_grove/core/widgets/cached_image_widget.dart';
 import 'package:gamer_grove/domain/entities/game/game.dart';
 import 'package:gamer_grove/domain/usecases/game/get_user_top_three.dart';
 import 'package:gamer_grove/injection_container.dart';
@@ -424,11 +424,10 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: game.coverUrl != null
-                ? CachedNetworkImage(
+                ? CachedImageWidget(
                     imageUrl: ImageUtils.getMediumImageUrl(game.coverUrl),
-                    fit: BoxFit.cover,
                     width: double.infinity,
-                    placeholder: (context, url) => Container(
+                    placeholder: Container(
                       color: Colors.grey[300],
                       child: Center(
                         child: SizedBox(
@@ -441,16 +440,14 @@ class _TopThreeDialogState extends State<TopThreeDialog> {
                         ),
                       ),
                     ),
-                    errorWidget: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.videogame_asset,
-                          size: 32,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
+                    errorWidget: Container(
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.videogame_asset,
+                        size: 32,
+                        color: Colors.grey,
+                      ),
+                    ),
                   )
                 : Container(
                     color: Colors.grey[300],
