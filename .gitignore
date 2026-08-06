@@ -60,3 +60,10 @@ test/golden/failures/
 # Debug symbols for a release build. Kept out of git — they are per-build and
 # large; Sentry is where they belong.
 build/symbols/
+
+# Editor-Reste (eine .kate-swp lag versioniert in SupabaseScripts/)
+*.kate-swp
+
+# Von `supabase link` angelegt: Projekt-Ref und Versionsstaende, keine
+# Geheimnisse, aber auch nichts, was ins Repository gehoert.
+supabase/.temp/
