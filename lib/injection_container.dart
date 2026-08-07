@@ -580,7 +580,13 @@ Future<void> initDependencies() async {
 
     // IGDB Data Source
     ..registerLazySingleton<IgdbDataSource>(
-      () => IgdbDataSourceImpl(dio: sl()),
+      () => IgdbDataSourceImpl(
+        dio: sl(),
+        // Read at call time, not here: the token is refreshed while the app
+        // runs, and the data source must not hold a stale copy.
+        accessToken: () =>
+            Supabase.instance.client.auth.currentSession?.accessToken,
+      ),
     )
 
     // Dio HTTP client
