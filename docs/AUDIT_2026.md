@@ -27,6 +27,41 @@ daraus habe ich selbst nachgeprüft; wo ich das nicht konnte, steht es dabei.
 
 ---
 
+## Korrekturen (Stand 2026-08-07)
+
+Beim Abarbeiten hat sich sechsmal herausgestellt, dass etwas hier falsch stand.
+Das gehört nach vorn, nicht in eine Fußnote — ein Bericht, dessen Fehler man
+suchen muss, ist als Bericht weniger wert.
+
+| Wo | Was hier stand | Was stimmt |
+|---|---|---|
+| **1.9**, Anhang B | Die Versionsverteilung von versionCode 5 sei mit dem Dienstkonto nicht erreichbar | Sie war es die ganze Zeit. `buckets.list` scheitert, weil der Bucket einem Google-Projekt gehört; der gezielte Objektzugriff geht. `tool/play/versions.py` liest die Zahl. |
+| **2.2** | `playtest@test.de` sei „der eine echte Langzeit-Rückkehrer" | Es ist das Play-Prüfkonto. Nach Neuberechnung der Kohorte fällt D30 von 12 % auf **0**. |
+| **Z-42/43/62** | Ein Cover werde als 1920×1080 geladen, ~8,3 MB pro Karte | `t_1080p` heißt „passe in diese Box", und ein Cover ist hochkant: es kommt als **811×1080** zurück, **3421 KB**. Das Problem ist echt, die Zahl war mehr als doppelt zu hoch. |
+| **Z-42/43/62** | Es gebe „genau einen Wrapper, durch den jedes Bild geht" | Neun Dateien gingen daran vorbei, vier davon mit `Image.network` — also ohne jeden Plattencache. |
+| **Z-32** | Zwei BLoC-Lecks | Drei. Das dritte (`user_states_section.dart`) ist das breiteste, weil `UserStatesContent` in jeder Spielkarte steckt. |
+| **Z-09** | `SupabaseScripts/001–006` seien nie committet worden | `001.txt` bis `005.txt` liegen versioniert im Repository. Es fehlte 006 — und vor allem ein Abzug des tatsächlichen Zustands, der jetzt in `SupabaseScripts/baseline/` liegt. |
+
+Zwei Funde kamen dazu, die hier gar nicht standen, beide belegt statt
+hergeleitet:
+
+- **Der Avatar-Bucket nahm Uploads von jedem an.** `"Anyone can upload an
+  avatar"` galt für `public` (also `anon`), ohne Eigentümercheck, ohne Größen-
+  und MIME-Grenze, bei öffentlichem Bucket. Mit dem Anon-Key und ohne Sitzung
+  hochgeladen (HTTP 200) und ohne jeden Schlüssel zurückgelesen. Geschlossen in
+  #208. Dieselbe ODER-Mechanik wie Z-01, eine Schemaebene tiefer.
+- **`authenticated` durfte Tabellen leeren.** `TRUNCATE` umgeht RLS
+  vollständig; `truncate public.user_games` lief als `authenticated` durch und
+  nahm alle 201 Zeilen mit (zurückgerollt). Über PostgREST war es nicht
+  erreichbar. Entzogen in #209.
+
+Und eine Frage, die 1.0 offenließ, ist beantwortet: **Sentry meldet aus einem
+Release-Build.** Ein Rauchtest aus einem echten obfuskierten Release-APK kam am
+2026-08-06 an. „Build 28 bis 42 haben null Events" heißt also nicht, dass der
+Melder tot ist — es ist nichts abgestürzt. Offen bleibt nur Release Health.
+
+---
+
 # Teil 1 — Zustand
 
 ## 1.0 Die vier Dinge, die vor allem anderen kommen
