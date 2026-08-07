@@ -1,7 +1,7 @@
 name: gamer_grove
 description: Discover, rate and recommend videogames.
 publish_to: "none"
-version: 2.1.0+43
+version: 2.2.0+44
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
