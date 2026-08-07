@@ -98,14 +98,24 @@ else
     [ -n "$DEBUG_ID" ] || {
       echo "    !! no debug id in $(basename "$SYM")" >&2; exit 1; }
 
-    FOUND="$(curl -sf -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
-      "https://de.sentry.io/api/0/projects/schweizerlelab/gamergrove/files/dsyms/?query=$DEBUG_ID" \
-      | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)')"
+    # Retried, because the first version of this check failed on a build whose
+    # symbols were in fact uploaded: the API answers the query from an index
+    # that lags the upload by a few seconds. A gate that cries wolf gets
+    # switched off, so it waits before it accuses.
+    FOUND=0
+    for ATTEMPT in 1 2 3 4 5 6; do
+      FOUND="$(curl -sf -H "Authorization: Bearer $(cat "$TOKEN_FILE")" \
+        "https://de.sentry.io/api/0/projects/schweizerlelab/gamergrove/files/dsyms/?query=$DEBUG_ID" \
+        | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d) if isinstance(d,list) else 0)')"
+      [ "${FOUND:-0}" -gt 0 ] && break
+      sleep 5
+    done
 
     if [ "${FOUND:-0}" -gt 0 ]; then
       echo "    ok  $(basename "$SYM")  $DEBUG_ID"
     else
       echo "    !! $(basename "$SYM") ($DEBUG_ID) is not on the server" >&2
+      echo "       (checked 6 times over 30 s — this is not indexing lag)" >&2
       exit 1
     fi
   done
