@@ -4,7 +4,7 @@
 -- und die Tabellen-GRANTs pro Rolle. Beschreibung des Zustands, kein
 -- Ausfuehrskript.
 --
--- Stand: 2026-08-06, nach Migration 024.
+-- Stand: 2026-08-06, nach Migration 025.
 --
 -- Erzeugt aus:
 --   select * from storage.buckets;
@@ -37,17 +37,17 @@ create policy "Users replace their own avatar"
 --
 -- Eine Tabelle ohne Eintrag hier ist ueber PostgREST nicht erreichbar.
 -- profiles                 anon           INSERT
--- profiles                 authenticated  DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+-- profiles                 authenticated  DELETE,INSERT,SELECT,UPDATE
 -- profiles                 service_role   INSERT,SELECT,UPDATE
--- user_activity            authenticated  DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+-- user_activity            authenticated  DELETE,INSERT,SELECT,UPDATE
 -- user_blocks              authenticated  DELETE,INSERT,SELECT
 -- user_blocks              service_role   DELETE,SELECT
 -- user_collection_games    anon           SELECT
 -- user_collection_games    authenticated  DELETE,INSERT,SELECT,UPDATE
 -- user_collections         anon           SELECT
 -- user_collections         authenticated  DELETE,INSERT,SELECT,UPDATE
--- user_follows             authenticated  DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
--- user_games               authenticated  DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+-- user_follows             authenticated  DELETE,INSERT,SELECT,UPDATE
+-- user_games               authenticated  DELETE,INSERT,SELECT,UPDATE
 -- user_reports             authenticated  INSERT,SELECT
 -- user_reports             service_role   SELECT,UPDATE
--- user_top_three           authenticated  DELETE,INSERT,REFERENCES,SELECT,TRIGGER,TRUNCATE,UPDATE
+-- user_top_three           authenticated  DELETE,INSERT,SELECT,UPDATE
